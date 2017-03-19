@@ -16,12 +16,6 @@
   <properties>
     <packageVersion.dir>com/fasterxml/jackson/dataformat/yaml</packageVersion.dir>
     <packageVersion.package>${project.groupId}.yaml</packageVersion.package>
-    <!-- 18-May-2016, tatu: used to have to specify `osgi.private` to included shaded
-           package; but must NOT when included as regular dependency
-      -->
-    <pax.url.version>1.2.8</pax.url.version>
-    <pax.exam.version>4.3.0</pax.exam.version>
-    <felix.version>4.0.3</felix.version>
   </properties>
 
   <dependencies>
@@ -45,91 +39,10 @@
       <artifactId>jackson-annotations</artifactId>
       <scope>test</scope>
     </dependency>
-
-    <!-- And this for... integration tests? Or something. -->
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-container-native</artifactId>
-      <version>${pax.exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-junit4</artifactId>
-      <version>${pax.exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.exam</groupId>
-      <artifactId>pax-exam-link-mvn</artifactId>
-      <version>${pax.exam.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.ops4j.pax.url</groupId>
-      <artifactId>pax-url-aether</artifactId>
-      <version>2.2.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.framework</artifactId>
-      <version>${felix.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>1.6.6</version>
-        <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
     <plugins>
-<!-- 04-Jul-2016, tatu: Unfortunately this test fails during release, so disable for 2.8.0.
-   But test itself should not been necessary as SnakeYAML not shaded in any more
-   (which may cause test failure
-  -->
-<!--
-      <plugin>
-          <groupId>org.apache.servicemix.tooling</groupId>
-          <artifactId>depends-maven-plugin</artifactId>
-          <version>1.2</version>
-          <executions>
-              <execution>
-                  <id>generate-depends-file</id>
-                  <phase>generate-test-resources</phase>
-                  <goals>
-                      <goal>generate-depends-file</goal>
-                  </goals>
-              </execution>
-          </executions>
-      </plugin>
--->
-      <!-- pax-exam test for OSGi has to be an IT -->
-<!--
-
-      <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-failsafe-plugin</artifactId>
-          <version>2.18</version>
-          <executions>
-            <execution>
-             <goals>
-               <goal>integration-test</goal>
-               <goal>verify</goal>
-             </goals>
-            </execution>
-          </executions>
-          <configuration>
-              <systemPropertyVariables>
-                  <project.build.directory>${project.build.directory}</project.build.directory>
-                  <project.version>${project.version}</project.version>
-              </systemPropertyVariables>
-          </configuration>
-      </plugin>
--->
       <plugin>
         <!-- Inherited from oss-base. Generate PackageVersion.java.-->
         <groupId>com.google.code.maven-replacer-plugin</groupId>
