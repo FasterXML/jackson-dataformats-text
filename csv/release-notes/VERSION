@@ -1,0 +1,266 @@
+Project: jackson-dataformat-csv
+
+------------------------------------------------------------------------
+=== Releases ===
+------------------------------------------------------------------------
+
+2.9.0 (not yet released)
+
+#127: Add `CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS` to allow forced
+  quoting of empty Strings.
+ (contributed by georgewfraser@github)
+#130: Add fluent addColumns operation to CsvSchema.Builder
+ (contributed by Peter A)
+#137: Inject "missing" trailing columns as `null`s
+   (`JsonParser.Feature.INSERT_NULLS_FOR_MISSING_COLUMNS`)
+#139: Add `CsvParser.Feature.ALLOW_TRAILING_COMMA` to allow enforcing strict handling
+ (contributed by Nick B)
+#140: Fail for missing column values (`JsonParser.Feature.FAIL_ON_MISSING_COLUMNS`)
+ (suggested by jwilmoth@github)
+#142: Add methods for appending columns of a `CsvSchema` into another
+ (suggested by Austin S)
+- Add new exception type `CsvMappingException` to indicate CSV-mapping issues (and
+  give access to effective Schema)
+
+2.8.6 (12-Jan-2017)
+2.8.5 (14-Nov-2016)
+2.8.4 (14-Oct-2016)
+2.8.3 (17-Sep-2016)
+2.8.2 (30-Aug-2016)
+2.8.1 (20-Jul-2016)
+
+No changes since 2.8.0.
+
+2.8.0 (04-Jul-2016)
+
+- Removed unused `CsvEncoding` class.
+
+2.7.7 (not yet released)
+
+#128: Write out headers even if no data rows written
+ (contributed by Peter A)
+#132: Invalid UTF8-character in non-UTF8 file is detected too early,
+  so parsing can not be continued
+ (reported by flappingeagle@github)
+
+2.7.6 (23-Jul-2016)
+2.7.5 (11-Jun-2016)
+
+#124: jackson-annotations are not included as a dependency within jackson-dataformat-csv
+ (reported by zauberjoe@github)
+
+2.7.4 (29-Apr-2016)
+
+#??: Implement basic format detection
+- Minor fixes to `parser.getIntValue()` (and related) implementations
+
+2.7.3 (16-Mar-2016)
+
+No changes since 2.7.2
+
+2.7.2 (27-Feb-2016)
+
+- Change build to produce JDK6-compatible jar, to allow use on JDK6 runtime
+
+2.7.1 (02-Feb-2016)
+
+No changes since 2.7.0
+
+2.7.0 (10-Jan-2016)
+
+#81: Add alternative way to configure 'wrap-as-array', as `CsvParser` feature
+#89: Allow choice of using header-line declaration to reorder columns of explicit schema,
+  with `CsvSchema.setReorderColumns`
+ (contributed by Justo-Ruiz F)
+#92: Allow multi-character separator values
+ (contributed by dharaburda@github)
+#94: Change schema/mapping related `JsonParseException`s to proper `JsonMappingException`s
+#95: Add `CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE` to allow skipping of
+  all extra, unmappable columns
+#97: Verify CSV headers are in the order as expected (added `strictHeaders` property in `CsvSchema`)
+ (contributed by Nick B)
+#103: `JsonGenerator.Feature.IGNORE_UNKNOWN` does not prevent error when writing structured values
+#106: Null fields are always ignored when serializing list of objects
+ (reported, fix contributed by Brian M)
+#109: Allow specifying (via `CsvSchema`) a way to map "extra" columns into specific
+ key (to use via any setter)
+
+2.6.6 (05-Apr-2016)
+
+No changes since 2.6.5.
+
+2.6.5 (18-Jan-2016)
+
+#93: CSV mapper does not support Views or filtering correctly for serialization
+ (reported by triviski@github; fix contributed by Rob B)
+#96: SortedBy only apply to headers and actual data
+ (reported by ShijunK@github)
+
+2.6.4 (07-Dec-2015)
+
+#90: Unexpected output with arrays starting with a null/empty element
+ (reported by Jonathan C)
+#98: Escape char is not being escaped during serialization
+ (reported by Oliver R)
+
+2.6.3 (12-Oct-2015)
+
+#91: Ensure that "too many columns" is recoverable
+
+2.6.2 (15-Sep-2015)
+
+No changes since 2.6.1.
+
+2.6.1 (09-Aug-2015)
+
+#87: Serialization of single Float or Double value leads to incorrect CSV when schema is used
+ (reported by sothmann@github)
+
+2.6.0 (20-Jul-2015)
+
+#72: Recognize the configured "null value" (String) also in reader-infrastructure.
+ (requested by flappingeagle@github)
+#74: Problems with ordering, `@JsonPropertyOrder` losing alphabetic ordering
+#83: Serializing List with null values leads to corrupt CSV
+ (reported by sothmann@github)
+- Removed type `CsvObjectReader`, sub-classing not needed at this point,
+  just complicates handling (for now)
+
+2.5.4 (09-Jun-2015)
+
+- Fixes to potential ArrayIndexOutOfBoundsException on `CsvEncoder`, bounds check
+
+2.5.3 (24-Apr-2015)
+
+#75: Support escapes at beginning of the file
+ (contributed by David N)
+
+2.5.2 (29-Mar-2015)
+
+#66: Deserializing an empty string as an array field return a non-empty list of one empty String
+ (reported by aksh3ll@github)
+#69: SequenceWriter#write(null) writes a single null, not an entire row of nulls
+ (reported by georgewfraser@github)
+
+2.5.1 (06-Feb-2015)
+
+#65: Buffer recycling not always working
+
+2.5.0 (01-Jan-2015)
+
+#50: Support `JsonGenerator.Feature.IGNORE_KNOWN` for CSV, to ignoring extra columns
+#53: Add a way to specify "null value" (String) for `CsvGenerator` to use when writing `null`s
+ (part of `CsvSchema`; method `withNullValue()`)
+#56: Support comments (either via `CsvSchema`, or using std `JsonParser.Feature.ALLOW_YAML_COMMENTS.
+ (requested by nezda@github)
+#57: Support simple array types
+#61: Add a feature to always quote non-numeric values: `CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS`
+
+2.4.6 (23-Apr-2015)
+2.4.5 (13-Jan-2015)
+2.4.4 (24-Nov-2014)
+
+#54: Encounter ArrayIndexOutOfBoundsException in the corner case delimiter or end-of-line
+  happened to be the leading character of a segment buffer
+ (contributed by wli600@github)
+
+2.4.3 (04-Oct-2014)
+
+- Support JDK serializability of CsvMapper
+- Add `CsvMapper.copy()`
+
+2.4.2 (15-Aug-2014)
+
+* [#47](../../jackson-dataformat-csv/issues/47): UTF-8 BOM handling not working
+ (reported by andrealexandre@github)
+
+2.4.1 (17-Jun-2014)
+
+No changes since 2.4.0
+
+2.4.0 (02-Jun-2014)
+
+#26: Inconsistent quoting of headers, values; add
+  `CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING` to allow more optimal checks.
+#32: Allow disabling of quoteChar
+ (suggested by Jason D)
+#40: Allow (re)ordering of columns of Schema, using `CsvSchema.sortedBy(...)`
+#45: Change outputting behavior to include final commas even if values are
+ missing; also add `CsvGenerator.OMIT_MISSING_TAIL_COLUMNS`
+
+2.3.3 (10-Apr-2014)
+
+#33: CSV is written without column separators if first column is null
+ (reported by Paul M)
+#36 Fix a minor problem with `CsvSchema` defaults: was setting default
+  escape char to be same as default quote (i.e. double-quote)
+
+2.3.2 (01-Mar-2014)
+
+No functional changes
+
+2.3.1 (28-Dec-2013)
+
+#28: Missing override for `createGenerator()`
+
+2.3.0 (14-Nov-2013)
+
+#11: Default `CsvMapper` to use alphabetic sorting of properties (since
+ alternative is basically undefined; and with JDK 1.7+, unstable too)
+#12: Support coercion from String "null", in addition 
+#20: Support filtering (`@JsonView`, `@JsonFilter`) with CSV
+ (requested by mablaev@github)
+- Add support for `JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN`
+
+2.2.2 (27-May-2013)
+
+No functional changes
+
+2.2.1 (03-May-2013)
+
+- Fixed `CsvFactory.copy()`
+
+2.2.0 (22-Apr-2013)
+
+#15: Ensure that `@JsonUnwrapper` works, even with auto-schema
+
+2.1.4 (26-Feb-2013)
+
+No functional changes
+
+2.1.2 (04-Dec-2012)
+
+* [Issue#10]: Embedded linefeeds not properly handled
+
+2.1.1 (12-Nov-2012)
+
+No functional changes
+
+2.1.0 (08-Oct-2012)
+
+Changes:
+
+* Due to core changes, `readValues()` method of `CsvMapper` and `ObjectReader`
+  instances will work slightly differently, for specific case of "unwrapped"
+  Object[] binding: see unit tests for correct usage.
+
+2.0.4 (26-Jun-2012)
+
+No fixes or changes, released along with other core components
+
+2.0.2 (16-May-2012)
+
+Fixes:
+
+* Issue-5: Writing of double values failing
+* Issue-6: Generator not doubling up double-quotes as expected
+
+2.0.1 (23-Apr-2012)
+  Maintenance release to keep version numbers in sync with other components
+  (depend on 2.0.1 core etc)
+
+2.0.0 (25-Mar-2012)
+  The official 2.0 release of Jackson.
+  No new features; upgraded to work with core 2.0.0.
+
+[entries for versions 1.x and earlier not retained; refer to earlier releases)
