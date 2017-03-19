@@ -13,11 +13,16 @@ by default. This is done by sub-classing Jackson core abstractions of:
 
 ## Textual formats included
 
-Currently included are:
+Currently included backendsare:
 
 * [CSV](csv/)
-* [Propertoes](properties/)
+* [Properties](properties/)
 * [YAML](yaml/)
+
+Standard supported formats that are not yet included here (but are likely added
+in future)  are:
+
+* [XML](../../jackson-dataformt-xml)
 
 ## License
 
