@@ -1,0 +1,104 @@
+Project: jackson-dataformat-csv
+
+Here are people who have contributed to development of this project:
+(version numbers in parenthesis indicate release in which the problem was fixed)
+
+Tatu Saloranta, tatu.saloranta@iki.fi: author
+
+Lior Lipshitz (from zazma.com)
+
+* Reported #14: Incorrect quoting of double-quotes for long String values that
+  cross buffer boundary
+ (2.1.5 / 2.2.0)
+
+Paul Magrath (Magrath@github)
+
+* Reported #33: CSV is written without column separators if first column is null
+ (2.3.3)
+* Reported #38: Extra column delimiter added when column is escaped and follows empty column
+ (2.3.4)
+
+Jason Dunkelberger (dirkraft@github)
+
+* Suggested #32: Allow disabling of quoteChar
+ (2.4.0)
+
+Wei Li (wli600@github)
+
+* Contributed fix for 54: Encounter ArrayIndexOutOfBoundsException in the corner case delimiter
+  or end-of-line happened to be the leading character of a segment buffer
+ (2.4.4)
+
+Luke Nezda (nezda@github)
+
+* Suggested #56: Support comments (either via `CsvSchema`, or using std
+  `JsonParser.Feature.ALLOW_YAML_COMMENTS.
+ (requested by nezda@github)
+ (2.5.0)
+
+David Navas (davidnavas@github)
+
+* Contributed #75: Support escapes at beginning of the file
+ (2.5.3)
+
+sothmann@github)
+
+* Reported #83: Serializing List with null values leads to corrupt CSV
+ (2.6.0)
+
+Jonathan Cheseaux (cheseaux@github)
+
+* Reported #90: Unexpected output with arrays starting with a null/empty element
+ (2.6.4)
+
+Oliver Röss (cloudyday@github)
+
+* Reported #98: Escape char is not being escaped during serialization
+ (2.6.4)
+
+Justo Ruiz Ferrer (jrferrer@github)
+
+* Contributed #89: Allow choice of using header-line declaration to reorder columns
+  of explicit schema, with `CsvSchema.setReorderColumns`
+ (2.7.0)
+
+Rob Baily (rob-baily@github)
+
+* Contributed fix for #93: CSV mapper does not support Views or filtering correctly
+  for serialization
+ (2.6.5)
+
+dharaburda@github)
+
+* Contributed fix for #100: trim spaces: don't trim/strip separator character
+ (2.6.5)
+
+Nick Babcock (nickbabcock@github)
+
+* Contributed #97: Verify CSV headers are in the order as expected (added `strictHeaders`
+  property in `CsvSchema`)
+ (2.7.0)
+* Constributed #139: Add `CsvParser.Feature.ALLOW_TRAILING_COMMA` to allow enforcing
+  strict handling
+ (2.9.0)
+
+Brian Moriarty (morbrian@github)
+
+* Contributed #106: Null fields are always ignored when serializing list of objects
+ (2.7.0)
+
+Peter Ansell (ansell@github)
+
+* Contributed fix for #128: Write out headers even if no data rows written
+ (2.7.7)
+
+George Fraser (georgewfraser@github)
+
+* Contributed #127: Add `CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS` to allow forced
+  quoting of empty Strings.
+ (2.9.0)
+
+Austin Sharp (sharpau@github)
+
+* Suggested #142: Add methods for appending columns of a `CsvSchema` into another
+ (2.9.0)

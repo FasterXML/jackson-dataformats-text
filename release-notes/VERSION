@@ -1,0 +1,47 @@
+Project: jackson-datatypes-text
+Modules:
+  jackson-dataformat-csv
+  jackson-dataformat-properties
+  jackson-dataformat-yaml
+
+------------------------------------------------------------------------
+=== Releases ===
+------------------------------------------------------------------------
+
+2.9.0 (not yet released)
+
+Note: issue numbers point to old, separate repos of
+`jackson-dataformat-csv`, `jackson-dataformat-properties` and
+`jackson-dataformat-yaml`, respectively.
+
+CSV:
+
+#127: Add `CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS` to allow forced
+  quoting of empty Strings.
+ (contributed by georgewfraser@github)
+#130: Add fluent addColumns operation to CsvSchema.Builder
+ (contributed by Peter A)
+#137: Inject "missing" trailing columns as `null`s
+   (`JsonParser.Feature.INSERT_NULLS_FOR_MISSING_COLUMNS`)
+#139: Add `CsvParser.Feature.ALLOW_TRAILING_COMMA` to allow enforcing strict handling
+ (contributed by Nick B)
+#140: Fail for missing column values (`JsonParser.Feature.FAIL_ON_MISSING_COLUMNS`)
+ (suggested by jwilmoth@github)
+#142: Add methods for appending columns of a `CsvSchema` into another
+ (suggested by Austin S)
+- Add new exception type `CsvMappingException` to indicate CSV-mapping issues (and
+  give access to effective Schema)
+
+Properties:
+
+#1: Add convenience method(s) for reading System properties
+#3: Write into `Properties` instance (factory, mapper) using
+  `JavaPropsMapper.writeValue()` with `Properties` and
+  `JavaPropsMapper.writeValueAsProperties()`
+#4: Allow binding from `Properties` instance
+
+YAML:
+
+#67: Add `YAMLGenerator.Feature.INDENT_ARRAYS`
+#76: Add `YAMLGenerator.Feature.LITERAL_BLOCK_STYLE` for String output
+ (contributed by Roland H)

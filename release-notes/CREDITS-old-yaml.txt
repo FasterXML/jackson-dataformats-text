@@ -1,0 +1,66 @@
+Here are people who have contributed to development Jackson JSON process 
+databind core component, version 2.x
+(version numbers in brackets indicate release in which the problem was fixed)
+
+(note: for older credits, check out release notes for 1.x versions)
+
+Tatu Saloranta, tatu.saloranta@iki.fi: author
+
+Shawn Smith:
+
+- Contributed [Issue-14]: Fix parsing of longs near MIN/MAX_INT, parsing of BigIntegers.
+ (2.1.4)
+
+Łukasz Dywicki
+- Fixed #19: Change build to avoid OSGi	dep to SnakeYAML (which	is instead shaded in)
+ (2.5.0)
+- Contributed #14: Fix parsing of longs near MIN/MAX_INT, parsing of BigIntegers.
+ (2.1.4)
+
+Benson Margulies (benson-basis@github)
+
+- Fixed #27: OSGI bundle does not work due to shading
+ (2.4.4)
+- Reported #30: `YamlFactory.writeValue(File, Object)` busted
+ (2.4.5)
+- Contributed #50: Lack of SnakeYAML Resolver leaves some missing features
+ (2.7.0)
+
+Ville Koskela (vjkoskela@github)
+
+- Requested #35: Add `YAMLGenerator.Feature.SPLIT_LINES` to allow controlling whether
+  SnakeYAML splits longer text blocks with line	breaks or not.
+ (2.6.0)
+
+Geoff Bourne (itzg@github)
+
+- Contributed #38: Add MINIMIZE_QUOTES generator feature
+ (2.7.0)
+
+Sebastian Herold (heroldus@github)
+
+- Reported #69: Problem to parse time values as string
+ (2.7.7)
+
+James Baker (j-baker@github)
+
+- Reported, contributed fix for #70: UTF8Reader is unsafe if a
+  Jackson-annotated class itself deserialises a Jackson-annotated class
+ (2.7.8)
+
+Tanguy Leroux (tlrx@github)
+
+- Reported, contributed test, fix for #80: Fix UTF8Writer when used in same thread
+ (2.7.9)
+
+Preston Gilchrist (prestongilchrist@github)
+
+- Contributed #65: Feature.MINIMIZE_QUOTES needs to write numbers as strings with quotes
+ (2.8.2)
+
+Roland Huss (rhuss@github)
+
+- Reported #77, contributed fix: Boolean-like content of string must never be unquoted
+ (2.8.4)
+- Contributed #76: Add `YAMLGenerator.Feature.LITERAL_BLOCK_STYLE` for String output
+ (2.9.0)
