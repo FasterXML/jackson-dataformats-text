@@ -1,0 +1,36 @@
+Project: jackson-dataformat-properties
+
+------------------------------------------------------------------------
+=== Releases ===
+------------------------------------------------------------------------
+
+2.9.0 (not yet released)
+
+#1: Add convenience method(s) for reading System properties
+#3: Write into `Properties` instance (factory, mapper) using
+  `JavaPropsMapper.writeValue()` with `Properties` and
+  `JavaPropsMapper.writeValueAsProperties()`
+#4: Allow binding from `Properties` instance
+
+2.8.8 (not yet released)
+
+#6: Null-check for JPropNode byName map
+ (reported by Jordi S)
+
+2.8.7 (21-Feb-2017)
+2.8.6 (12-Jan-2017)
+2.8.5 (14-Nov-2016)
+2.8.4 (14-Oct-2016)
+2.8.3 (17-Sep-2016)
+2.8.2 (30-Aug-2016)
+2.8.1 (20-Jul-2016)
+
+No changes since 2.8.0.
+
+2.8.0 (04-Jul-2016)
+
+No changes since 2.7.
+
+2.7.x:
+
+First experimental/prototype versions.

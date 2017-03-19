@@ -1,0 +1,215 @@
+Project: jackson-dataformat-yaml
+
+------------------------------------------------------------------------
+= Releases
+------------------------------------------------------------------------
+
+2.9.0 (not yet released)
+
+#67: Add `YAMLGenerator.Feature.INDENT_ARRAYS`
+#76: Add `YAMLGenerator.Feature.LITERAL_BLOCK_STYLE` for String output
+ (contributed by Roland H)
+
+2.8.8 (not yet released)
+
+#72: Multiple documents in a stream
+ (requested by fabriziocucci@github, contributed by xiGUAwanOU@github)
+
+2.8.7 (21-Feb-2017)
+2.8.6 (12-Jan-2017)
+
+No changes since 2.8.5
+
+2.8.5 (14-Nov-2016)
+
+- Update SnakeYAML dependency to 1.17
+
+2.8.4 (14-Oct-2016)
+
+#77: Boolean-like content of string must never be unquoted
+ (reported, contributed fix by Roland H)
+
+2.8.3 (17-Sep-2016)
+
+No changes since 2.8.2
+
+2.8.2 (30-Aug-2016)
+
+#65: Feature.MINIMIZE_QUOTES needs to write numbers as strings with quotes
+ (contributed by Preston G)
+
+2.8.1 (20-Jul-2016)
+
+No changes since 2.8.0.
+
+2.8.0 (04-Jul-2016)
+
+#31: SnakeYAML is shaded and pulled in transitively
+#60: YAML serializer reports wrong exception
+ (suggested by pmogren@github)
+
+2.7.9 (not yet released)
+
+#80: Fix UTF8Writer when used in same thread
+ (contributed by Tanguy L)
+
+2.7.8 (26-Sep-2016)
+
+#70: `UTF8Reader` is unsafe if a Jackson-annotated class itself deserializes
+  a Jackson-annotated class
+ (reported by James B)
+
+2.7.7 (27-Aug-2016)
+
+#69: Problem to parse time values as string
+ (reported by Sebastian H)
+
+2.7.6 (23-Jul-2016)
+2.7.5 (11-Jun-2016)
+2.7.4 (29-Apr-2016)
+
+No changes since 2.7.3
+
+2.7.3 (16-Mar-2016)
+
+#59: Avoid exposing SnakeYAML exception types (wrap)
+
+2.7.2 (27-Feb-2016)
+
+- Change build to produce JDK6-compatible jar, to allow use on JDK6 runtime
+
+2.7.1 (02-Feb-2016)
+
+No changes since 2.7.0
+
+2.7.0 (10-Jan-2016)
+
+#38: Add MINIMIZE_QUOTES generator feature
+ (contributed by Geoff B, itzg@github)
+#48: null values aren't mapped to Jackson nulls
+ (reported, contributed by Benson M)
+#50: Lack of SnakeYAML Resolver leaves some missing features
+ (contributed by Benson M)
+
+2.6.6 (05-Apr-2016)
+2.6.5 (19-Jan-2016)
+2.6.4 (07-Dec-2015)
+2.6.3 (12-Oct-2015)
+2.6.2 (15-Sep-2015)
+2.6.1 (09-Aug-2015)
+
+No changes since 2.6.0.
+
+2.6.0 (20-Jul-2015)
+
+#35: Add `YAMLGenerator.Feature.SPLIT_LINES` to allow controlling whether
+  SnakeYAML splits longer text blocks with line breaks or not
+ (requested by Ville K, vjkoskela@github)
+- Upgrade to SnakeYAML 1.15
+
+2.5.3 (24-Apr-2015)
+2.5.2 (29-Mar-2015)
+2.5.1 (06-Feb-2015)
+
+No changes since 2.5.0
+
+2.5.0 (01-Jan-2015)
+
+#19: Change build to avoid OSGi dep to SnakeYAML (which is instead shaded in)
+ (Fixed by Łukasz D)
+#22: Add support for disabling use of YAML native Type Ids 
+#23: Add support for disabling use of YAML native Type Ids
+- Added `YAMLMapper` for convenience
+
+2.4.5 (13-Jan-2015)
+
+#30: `YamlFactory.writeValue(File, Object)` busted
+ (reported by Benson M)
+
+2.4.4 (24-Nov-2014)
+
+#27: OSGI bundle does not work due to shading
+ (fix contributed by Benson M)
+
+2.4.3 (04-Oct-2014)
+2.4.2 (15-Aug-2014)
+2.4.1 (17-Jun-2014)
+
+No changes since 2.4.0
+
+2.4.0 (02-Jun-2014)
+
+#21: Improve handling of polymorphic types, native type ids
+ (reported by Hal H)
+
+2.3.3 (10-Apr-2014)
+2.3.2 (01-Mar-2014)
+2.3.1 (28-Dec-2013)
+
+No changes since 2.3.0.
+
+2.3.0 (14-Nov-2013)
+
+#3: Support YAML-specific object ids ("anchors", "aliases").
+#17: Support YAML-specific type ids ("tags")
+ (requested by cemo@github)
+- Add support for `JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN`
+- Upgrade to SnakeYAML 1.12
+
+2.2.2 (27-May-2013)
+
+No functional changes.
+
+2.2.1 (03-May-2013)
+
+- Fixed problem with YamlFactory.copy()
+
+2.2.0 (22-Apr-2013)
+
+New minor version; no functional changes.
+
+2.1.3 (19-Jan-2013)
+
+- [Issue-10]: Avoid parsing scalars in non-plain flow styles
+ (contributed by nkvoll@github)
+- [Issue-12]: Problems with 'YAMLFactory.createJsonGenerator(File)'
+
+2.1.2 (04-Dec-2012)
+
+No functional changes.
+
+2.1.1 (12-Nov-2012)
+
+No functional changes.
+
+2.1.0 (08-Oct-2012)
+
+Another minor update on Jackson YAML format module
+
+Improvements:
+
+- [Issue-5]: Expose Aliases as JsonToken.STRING_VALUE tokens
+- [Issue-6]: Add a method in YAMLParser to detect Anchors: `getCurrentAnchor()`
+- [Issue-7]: Possible parsing problems with unquoted values with colons
+
+2.0.5 (27-Jul-2012)
+
+- [Issue-4]: Regexp for detecting floating point numbers too permissive with dots
+ (reported by Dan Sheehan)
+ 
+2.0.4: skipped release (no changes)
+
+2.0.3: skipped release (no changes)
+
+2.0.2 (14-May-2012)
+
+Improvements:
+
+- 10-20% performance improvements based on profiling (most overhead
+  in SnakeYaml, so limited possibilities)
+
+2.0.0 (03-May-2012)
+
+Fixes:
+
+* [Issue-2] UUIDs not properly deserialized.
