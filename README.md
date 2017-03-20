@@ -13,7 +13,7 @@ by default. This is done by sub-classing Jackson core abstractions of:
 
 ## Textual formats included
 
-Currently included backendsare:
+Currently included backends are:
 
 * [CSV](csv/)
 * [Properties](properties/)
