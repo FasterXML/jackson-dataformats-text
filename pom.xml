@@ -7,7 +7,7 @@
   </parent>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
-  <name>Jackson dataformats: Binary</name>
+  <name>Jackson dataformats: Text</name>
   <version>2.9.0.pr2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>Parent pom for Jackson text-based dataformats (as opposed to binary).
