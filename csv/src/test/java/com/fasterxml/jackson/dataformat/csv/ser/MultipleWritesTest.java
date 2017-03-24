@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 import java.io.*;
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -11,6 +12,17 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 public class MultipleWritesTest extends ModuleTestBase
 {
+    @JsonPropertyOrder({ "a", "b", "c" })
+    public static class Pojo {
+        public int a, b, c;
+
+        public Pojo(int a, int b, int c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+    }
+
     private final CsvMapper MAPPER = mapperForCsv();
 
     /**
@@ -52,5 +64,20 @@ public class MultipleWritesTest extends ModuleTestBase
         csv = csv.replaceAll("[\\r\\n]", "/");
 
         assertEquals("col1,col2/line1-val1,line1-val2/line2-val1,line2-val2", csv);
+    }
+
+    public void testWriteValuesWithPOJOs() throws Exception
+    {
+        CsvSchema schema = MAPPER.schemaFor(Pojo.class).withUseHeader(true);
+        ObjectWriter writer = MAPPER.writer(schema);
+        StringWriter sw = new StringWriter();
+        SequenceWriter seqw = writer.writeValues(sw);
+        seqw.write(new Pojo(1, 2, 3));
+        seqw.write(new Pojo(0, 15, 9));
+        seqw.write(new Pojo(7, 8, 9));
+        seqw.flush();
+        assertEquals("a,b,c\n1,2,3\n0,15,9\n7,8,9\n",
+                sw.toString());
+        seqw.close();
     }
 }
