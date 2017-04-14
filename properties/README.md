@@ -18,7 +18,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-properties</artifactId>
-  <version>2.8.1</version>
+  <version>2.8.8</version>
 </dependency>
 ```
 
@@ -35,6 +35,17 @@ String props = mapper.writeValueAsBytes(value);
 // or
 mapper.writeValue(new File("stuff.properties", value);
 SomeType otherValue = mapper.readValue(props, SomeType.class);
+```
+
+For reading and writing, you most commonly use `ObjectReader` and `ObjectWriter`,
+created using mapper object you have; for example:
+
+```java
+String props = mapper.writerFor(Pojo.class)
+    .writeValueAsString(pojo);
+Pojo result = mapper.readerFor(Pojo.class)
+    .with(schema) // if customization needed
+    .readValue(propsFile);
 ```
 
 ## Basics of conversion
@@ -176,6 +187,13 @@ Typical usage, then is:
 ```java
 JavaPropsSchema schema = JavaPropsSchema.emptySchema()
    .withPathSeparator("->");
+Pojo stuff = mapper.readerFor(Pojo.class)
+   .with(schema)
+   .readValue(source);
+// and writing
+mapper.writer(schema)
+   .writeValue(stuff, new File("stuff.properties");
+
 ```
 
 Currently existing configuration settings to use can be divide into three groups:
@@ -316,5 +334,16 @@ ZKConfig config = propsMapper.readValue(new File("zook.properties"), ZKConfig.cl
 
 after which access to properties would be done using simple field access (or, if we
 prefer, additional getters).
+
+Note: in this example, default schema configuration worked so we did not have to set it
+for reading. If we did, we would have used something like:
+
+```java
+JavaPropsSchema schema = JavaPropsSchema.emptySchema()
+   .withPathSeparator("->");
+propsMapper.writer(schema)
+   .writeValue(config, new File("zook-modified.properties");
+// and similarly when reading
+```
 
 
