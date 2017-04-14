@@ -28,8 +28,6 @@ public abstract class JPropReadContext
     /**
      * Java-level Object that corresponds to this level of input hierarchy,
      * if any; used by databinding functionality, opaque for parser.
-     *
-     * @since 2.5
      */
     protected java.lang.Object _currentValue;
 

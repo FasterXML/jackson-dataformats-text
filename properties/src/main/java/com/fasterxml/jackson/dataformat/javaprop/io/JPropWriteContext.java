@@ -66,6 +66,7 @@ public class JPropWriteContext
     private void reset(int type, int basePathLength) {
         _type = type;
         _basePathLength = basePathLength;
+        _currentValue = null;
         _index = -1;
     }
     
