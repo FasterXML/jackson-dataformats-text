@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  */
 public class CsvMappingException extends JsonMappingException
 {
+    private static final long serialVersionUID = 1L;
+
     protected final CsvSchema _schema;
 
     public CsvMappingException(CsvParser p, String msg, CsvSchema schema) {
