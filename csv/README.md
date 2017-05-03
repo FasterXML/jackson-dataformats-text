@@ -211,7 +211,7 @@ ObjectReader r = mapper.readerFor(Pojo.class).with(schema);
 Pojo value = r.readValue(csvInput);
 ```
 
-For full description of all configurability, please see [../wiki/CsvSchema].
+For full description of all configurability, please see [CsvSchema](../../../wiki/CsvSchema].
 
 # Documentation
 
