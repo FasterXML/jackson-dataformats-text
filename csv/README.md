@@ -9,7 +9,6 @@ Project is licensed under [Apache License 2.0](http://www.apache.org/licenses/LI
 Since version 2.3 this module is considered complete and production ready.
 All Jackson layers (streaming, databind, tree model) are supported.
 
-[![Build Status](https://travis-ci.org/FasterXML/jackson-dataformat-csv.svg?branch=master)](https://travis-ci.org/FasterXML/jackson-dataformat-csv)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/)
 [![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/badge.svg)](http://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-csv)
 
@@ -21,7 +20,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-csv</artifactId>
-  <version>2.7.0</version>
+  <version>2.8.8</version>
 </dependency>
 ```
 
@@ -212,12 +211,11 @@ ObjectReader r = mapper.readerFor(Pojo.class).with(schema);
 Pojo value = r.readValue(csvInput);
 ```
 
-
 For full description of all configurability, please see [../wiki/CsvSchema].
 
 # Documentation
 
-* [Wiki](../../wiki) (includes javadocs)
+* [Wiki](../../../wiki) (includes javadocs)
 * How-to
     * [CSV with Jackson 2.0](http://www.cowtowncoder.com/blog/archives/2012/03/entry_468.html)
     * [Writing CSV using Jackson CSVMapper & Mixin annotations](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/)
