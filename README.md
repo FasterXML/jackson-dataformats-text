@@ -9,7 +9,13 @@ by default. This is done by sub-classing Jackson core abstractions of:
 * All backends sub-class `JsonFactory`, which is factory for:
     * `JsonParser` for reading data (decoding data encoding in supported format)
     * `JsonGenerator` for writing data (encoding data using supported format)
-* Some backens sub-class `ObjectMapper` for additional support for databinding
+* Some backends sub-class `ObjectMapper` for additional support for databinding
+
+## Status
+
+[![Build Status](https://travis-ci.org/FasterXML/jackson-dataformat-csv.svg?branch=master)](https://travis-ci.org/FasterXML/ja\
+ckson-dataformat-csv)
+
 
 ## Textual formats included
 
@@ -31,6 +37,19 @@ All modules are licensed under [Apache License 2.0](http://www.apache.org/licens
 ## Status
 
 [![Build Status](https://travis-ci.org/FasterXML/jackson-dataformats-text.svg)](https://travis-ci.org/FasterXML/jackson-dataformats-text)
+
+## Maven dependencies
+
+To use these format backends Maven-based projects, use following dependency:
+
+```xml
+<dependency>
+  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <artifactId>jackson-dataformat-[FORMAT]</artifactId>
+  <version>2.8.8</version>
+</dependency>
+
+where `[FORMAT]` is one of supported modules (`csv`, `properties`, `yaml`)
 
 ## More
 

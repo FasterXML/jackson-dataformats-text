@@ -58,7 +58,7 @@ public class MultipleWritesTest extends ModuleTestBase
         csvWriter.writeValue(gen, line2);
 
         gen.close();
-        
+
         String csv = sw.toString().trim();
         // may get different linefeed on different OSes?
         csv = csv.replaceAll("[\\r\\n]", "/");
