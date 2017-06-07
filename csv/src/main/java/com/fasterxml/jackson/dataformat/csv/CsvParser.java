@@ -62,10 +62,23 @@ public class CsvParser
          * columns that appear after columns for which types are defined. When disabled,
          * an exception is thrown for such column values, but if enabled, they are
          * silently ignored.
+         *<p>
+         * Feature is disabled by default.
          *
          * @since 2.7
          */
         IGNORE_TRAILING_UNMAPPABLE(false),
+
+        /**
+         * Feature that allows skipping input lines that are completely empty, instead
+         * of being decoded as lines of just a single column with empty String value (or,
+         * depending on binding, `null`).
+         *<p>
+         * Feature is disabled by default.
+         *
+         * @since 2.9
+         */
+        SKIP_EMPTY_LINES(false),
 
         /**
          * Feature that allows there to be a trailing single extraneous data
