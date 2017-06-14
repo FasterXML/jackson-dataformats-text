@@ -49,4 +49,4 @@ while (parser.nextToken() != null) {
 
 # Documentation
 
-* [Wiki](../../wiki) contains links to Javadocs, external documentation
+* [Wiki](../../../wiki) contains links to Javadocs, external documentation
