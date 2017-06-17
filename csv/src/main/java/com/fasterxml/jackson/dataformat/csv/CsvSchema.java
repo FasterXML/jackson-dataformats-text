@@ -149,15 +149,6 @@ public class CsvSchema
 
     public final static char[] DEFAULT_LINEFEED = "\n".toCharArray();
 
-    /**
-     * By default we do NOT expect the first line to be header.
-     */
-    @Deprecated // since 2.7
-    public final static boolean DEFAULT_USE_HEADER = false;
-
-    @Deprecated // since 2.7
-    public final static boolean DEFAULT_SKIP_FIRST_DATA_ROW = false;
-
     /*
     /**********************************************************************
     /* Constants, other
@@ -659,8 +650,8 @@ public class CsvSchema
         }
 
         /**
-         * Use in combination with {@link #setUseHeader}. When use header flag is
-         * is set, this setting will ensure the headers are in the order
+         * Use in combination with {@link #setUseHeader}. When `strict-headers`
+         * is set, encoder will ensure the headers are in the order
          * of the schema; if order differs, an exception is thrown.
          *
          * @param b Enable / Disable this setting
