@@ -8,13 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.0 (not yet released)
-
-Note: issue numbers point to old, separate repos of
-`jackson-dataformat-csv`, `jackson-dataformat-properties` and
-`jackson-dataformat-yaml`, respectively.
+2.9.0 (30-Jul-2017)
 
 CSV:
+  (Note: issue numbers point to old, separate repos of `jackson-dataformat-csv`)
 
 #127: Add `CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS` to allow forced
   quoting of empty Strings.
@@ -41,6 +38,7 @@ Properties:
 #4: Allow binding from `Properties` instance
 
 YAML:
+  (Note: issue numbers point to old, separate repos of `jackson-dataformat-yaml`)
 
 #67: Add `YAMLGenerator.Feature.INDENT_ARRAYS`
 #76: Add `YAMLGenerator.Feature.LITERAL_BLOCK_STYLE` for String output
