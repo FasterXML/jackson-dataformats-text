@@ -10,6 +10,7 @@ Modules:
 
 2.9.1 (not yet released)
 
+#34: (yaml)  Problem with `YAMLGenerator.Feature.INDENT_ARRAYS`, nested Objects
 (yaml): Upgrade `SnakeYAML` dep 1.17 -> 1.18
 
 2.9.0 (30-Jul-2017)

@@ -252,11 +252,16 @@ public class YAMLGenerator extends GeneratorBase
             // if not, MUST specify flow styles
             opt.setDefaultFlowStyle(FlowStyle.BLOCK);
         }
-        // [dataformat-yaml#35]: split-lines for text blocks?
+        // split-lines for text blocks?
         opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatFeatures));
-        // [dataformat-yaml#67]: array indentation?
+        // array indentation?
         if (Feature.INDENT_ARRAYS.enabledIn(_formatFeatures)) {
-            opt.setIndicatorIndent(2);
+            // But, wrt [dataformats-text#34]: need to set both to diff values to work around bug
+            // (otherwise indentation level is "invisible". Note that this should NOT be necessary
+            // but is needed up to at least SnakeYAML 1.18.
+            // Also looks like all kinds of values do work, except for both being 2... weird.
+            opt.setIndicatorIndent(1);
+            opt.setIndent(2);
         }
         return opt;
     }

@@ -47,6 +47,13 @@ public class GeneratorFeatureTest extends ModuleTestBase
             yaml = yaml.substring(3);
         }
         yaml = yaml.trim();
-        assertEquals("words:\n  - \"first\"\n  - \"second\"\n  - \"third\"", yaml);
+        // Due to [dataformats-text#34], exact indentation amounts may vary
+//      assertEquals("words:\n  - \"first\"\n  - \"second\"\n  - \"third\"", yaml);
+        String[] parts = yaml.split("\n");
+        assertEquals(4, parts.length);
+        assertEquals("words:", parts[0].trim());
+        assertEquals("- \"first\"", parts[1].trim());
+        assertEquals("- \"second\"", parts[2].trim());
+        assertEquals("- \"third\"", parts[3].trim());
     }
 }

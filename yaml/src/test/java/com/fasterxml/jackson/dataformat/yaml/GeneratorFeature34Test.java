@@ -1,8 +1,8 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml;
 
-import com.fasterxml.jackson.dataformat.yaml.*;
+import java.util.Map;
 
-public class GeneratorFeature67Test extends ModuleTestBase
+public class GeneratorFeature34Test extends ModuleTestBase
 {
     /*
     /**********************************************************
@@ -10,7 +10,7 @@ public class GeneratorFeature67Test extends ModuleTestBase
     /**********************************************************
      */
 
-    // [dataformats-text#67]: busted indentation
+    // [dataformats-text#34]: busted indentation
     public void testArrayIndentation67() throws Exception
     {
         String yamlBefore = "---\n" +
@@ -22,10 +22,11 @@ public class GeneratorFeature67Test extends ModuleTestBase
                 "      name: \"Mathematics\"";
 
         YAMLMapper yamlMapper = new YAMLMapper().enable(YAMLGenerator.Feature.INDENT_ARRAYS);
-        Object stuff = yamlMapper.readValue(yamlBefore, Object.class);
+        Map<?,?> stuff = yamlMapper.readValue(yamlBefore, Map.class);
         String yamlAfter = yamlMapper.writeValueAsString(stuff);
         // and do it again to ensure it is parseable (no need to be identical)
-        Object stuff2 = yamlMapper.readValue(yamlAfter, Object.class);
+        Map<?,?> stuff2 = yamlMapper.readValue(yamlAfter, Map.class);
         assertNotNull(stuff2);
+        assertEquals(stuff, stuff2);
     }
 }
