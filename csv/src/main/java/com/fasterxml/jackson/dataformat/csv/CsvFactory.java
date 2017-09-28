@@ -4,8 +4,6 @@ import java.io.*;
 import java.net.URL;
 
 import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.format.InputAccessor;
-import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
@@ -149,13 +147,6 @@ public class CsvFactory extends JsonFactory
     @Override
     public String getFormatName() {
         return FORMAT_NAME_CSV;
-    }
-
-    @Override
-    public MatchStrength hasFormat(InputAccessor acc) throws IOException
-    {
-        return CsvParserBootstrapper.hasCSVFormat(acc, _schema.getQuoteChar(),
-                _schema.getColumnSeparator());
     }
 
     @Override

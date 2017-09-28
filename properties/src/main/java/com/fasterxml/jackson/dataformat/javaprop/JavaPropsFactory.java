@@ -5,8 +5,6 @@ import java.net.URL;
 import java.util.*;
 
 import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.format.InputAccessor;
-import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
@@ -65,16 +63,6 @@ public class JavaPropsFactory extends JsonFactory
     @Override
     public String getFormatName() {
         return FORMAT_NAME_JAVA_PROPERTIES;
-    }
-    
-    /**
-     * Sub-classes need to override this method
-     */
-    @Override
-    public MatchStrength hasFormat(InputAccessor acc) throws IOException
-    {
-        // TODO, if possible... probably isn't?
-        return MatchStrength.INCONCLUSIVE;
     }
 
     /*

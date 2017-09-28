@@ -7,8 +7,6 @@ import java.nio.charset.Charset;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.format.InputAccessor;
-import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 
 @SuppressWarnings("resource")
@@ -33,10 +31,6 @@ public class YAMLFactory extends JsonFactory
      * by default.
      */    
     protected final static int DEFAULT_YAML_GENERATOR_FEATURE_FLAGS = YAMLGenerator.Feature.collectDefaults();
-
-    private final static byte UTF8_BOM_1 = (byte) 0xEF;
-    private final static byte UTF8_BOM_2 = (byte) 0xBB;
-    private final static byte UTF8_BOM_3 = (byte) 0xBF;
 
     /*
     /**********************************************************************
@@ -159,47 +153,7 @@ public class YAMLFactory extends JsonFactory
     public String getFormatName() {
         return FORMAT_NAME_YAML;
     }
-    
-    /**
-     * Sub-classes need to override this method (as of 1.8)
-     */
-    @Override
-    public MatchStrength hasFormat(InputAccessor acc) throws IOException
-    {
-        /* Actually quite possible to do, thanks to (optional) "---"
-         * indicator we may be getting...
-         */
-        if (!acc.hasMoreBytes()) {
-            return MatchStrength.INCONCLUSIVE;
-        }
-        byte b = acc.nextByte();
-        // Very first thing, a UTF-8 BOM?
-        if (b == UTF8_BOM_1) { // yes, looks like UTF-8 BOM
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            if (acc.nextByte() != UTF8_BOM_2) {
-                return MatchStrength.NO_MATCH;
-            }
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            if (acc.nextByte() != UTF8_BOM_3) {
-                return MatchStrength.NO_MATCH;
-            }
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            b = acc.nextByte();
-        }
-        // as far as I know, leading space is NOT allowed before "---" marker?
-        if (b == '-' && (acc.hasMoreBytes() && acc.nextByte() == '-')
-                && (acc.hasMoreBytes() && acc.nextByte() == '-')) {
-            return MatchStrength.FULL_MATCH;
-        }
-        return MatchStrength.INCONCLUSIVE;
-    }
-    
+
     /*
     /**********************************************************
     /* Configuration, parser settings

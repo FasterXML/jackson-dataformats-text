@@ -3,8 +3,6 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 import java.io.*;
 
 import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.format.InputAccessor;
-import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.MergedStream;
 import com.fasterxml.jackson.core.io.UTF32Reader;
@@ -195,91 +193,7 @@ public final class CsvParserBootstrapper
             throw new RuntimeException();
         }
     }
-    
-    /*
-    /**********************************************************
-    /*  Encoding detection for data format auto-detection
-    /**********************************************************
-     */
 
-    /**
-     * Current implementation is not as thorough as one used by
-     * other data formats like JSON.
-     * But it should work, for now, and can
-     * be improved as necessary.
-     */
-    public static MatchStrength hasCSVFormat(InputAccessor acc,
-            int quoteChar, char separatorChar) throws IOException
-    {
-        // No really good heuristics for CSV, since value starts with either
-        // double-quote, or alpha-num, but can also be preceded by white space...
-        
-        if (!acc.hasMoreBytes()) {
-            return MatchStrength.INCONCLUSIVE;
-        }
-        byte b = acc.nextByte();
-        // Very first thing, a UTF-8 BOM?
-        if (b == UTF8_BOM_1) { // yes, looks like UTF-8 BOM
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            if (acc.nextByte() != UTF8_BOM_2) {
-                return MatchStrength.NO_MATCH;
-            }
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            if (acc.nextByte() != UTF8_BOM_3) {
-                return MatchStrength.NO_MATCH;
-            }
-            if (!acc.hasMoreBytes()) {
-                return MatchStrength.INCONCLUSIVE;
-            }
-            b = acc.nextByte();
-        }
-        // Then possible leading space
-        int ch = skipSpace(acc, b);
-        if (ch < 0) { // end of input? Unlikely but...
-            return MatchStrength.INCONCLUSIVE;
-        }
-        // Control character? Not very good either
-        if (ch < 32) {
-            return MatchStrength.NO_MATCH;
-        }
-        
-        // But seeing a quote char is actually reasonable match
-        if (ch == quoteChar) {
-            return MatchStrength.SOLID_MATCH;
-        }
-        // and separator at least weak
-        if (ch == separatorChar) {
-            return MatchStrength.WEAK_MATCH;
-        }
-        /* otherwise, well, almost anything could in theory do it; 
-         * let's trust other format detectors to find positive cases
-         */
-        // Let's consider letters, numbers to suggest a good match
-        if (Character.isDigit(ch) || Character.isAlphabetic(ch)) {
-            return MatchStrength.SOLID_MATCH;
-        }
-        return MatchStrength.INCONCLUSIVE;
-    }
-
-    private final static int skipSpace(InputAccessor acc, byte b) throws IOException
-    {
-        while (true) {
-            int ch = b & 0xFF;
-            if (!(ch == ' ' || ch == '\r' || ch == '\n' || ch == '\t')) {
-                return ch;
-            }
-            if (!acc.hasMoreBytes()) {
-                return -1;
-            }
-            b = acc.nextByte();
-            ch = b & 0xFF;
-        }
-    }
-    
     /*
     /**********************************************************
     /* Internal methods, parsing
