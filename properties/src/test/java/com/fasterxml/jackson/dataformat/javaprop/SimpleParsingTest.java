@@ -49,20 +49,6 @@ public class SimpleParsingTest extends ModuleTestBase
         FiveMinuteUser result = _mapFrom(MAPPER, INPUT, FiveMinuteUser.class, useBytes);
         assertEquals(Gender.MALE, result.getGender());
         assertEquals(4, result.getUserImage().length);
-
-        // and then with streaming parser
-        final String INPUT2 = "firstName=Bob\n"
-                +"verified=true\n";
-        JsonParser p = MAPPER.getFactory().createParser(INPUT2);
-        assertToken(JsonToken.START_OBJECT, p.nextToken());
-        assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        byte[] b = p.getBinaryValue(Base64Variants.MIME);
-        assertEquals(3, b.length);
-        // and verify it'll remain stable
-        byte[] b2 = p.getBinaryValue(Base64Variants.MIME);
-        Assert.assertArrayEquals(b, b2);
-        p.close();
     }
 
     private void _testSimpleNested(boolean useBytes) throws Exception
