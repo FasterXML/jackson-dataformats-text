@@ -1,8 +1,8 @@
 language: java
 
 jdk:
-  - openjdk7
   - openjdk8
+  - oraclejdk9
 
 # whitelist
 branches:
