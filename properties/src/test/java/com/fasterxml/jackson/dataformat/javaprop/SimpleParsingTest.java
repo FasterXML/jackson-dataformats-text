@@ -2,11 +2,6 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.util.Map;
 
-import org.junit.Assert;
-
-import com.fasterxml.jackson.core.Base64Variants;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class SimpleParsingTest extends ModuleTestBase

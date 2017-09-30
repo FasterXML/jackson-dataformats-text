@@ -127,7 +127,7 @@ public final class SerPerf
             return result.size(); // just to get some non-optimizable number
         }
     
-    protected int testObjectSer(JsonFactory jf, MediaItem value, int reps, ByteArrayOutputStream result)
+    protected int testObjectSer(TokenStreamFactory jf, MediaItem value, int reps, ByteArrayOutputStream result)
         throws Exception
     {
         for (int i = 0; i < reps; ++i) {

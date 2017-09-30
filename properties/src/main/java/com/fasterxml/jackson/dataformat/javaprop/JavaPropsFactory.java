@@ -39,7 +39,6 @@ public class JavaPropsFactory extends JsonFactory
     @Override
     public JavaPropsFactory copy()
     {
-        _checkInvalidCopy(JavaPropsFactory.class);
         return new JavaPropsFactory(this, null);
     }
 

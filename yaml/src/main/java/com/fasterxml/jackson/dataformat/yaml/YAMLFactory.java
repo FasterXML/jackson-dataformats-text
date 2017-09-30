@@ -88,7 +88,6 @@ public class YAMLFactory extends JsonFactory
     @Override
     public YAMLFactory copy()
     {
-        _checkInvalidCopy(YAMLFactory.class);
         return new YAMLFactory(this, null);
     }
 

@@ -91,7 +91,6 @@ public class CsvFactory extends JsonFactory
     @Override
     public CsvFactory copy()
     {
-        _checkInvalidCopy(CsvFactory.class);
         return new CsvFactory(this, null);
     }
 

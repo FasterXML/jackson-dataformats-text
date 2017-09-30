@@ -26,7 +26,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         JavaPropsFactory copy = f.copy();
         assertNotSame(f, copy);
         assertEquals(JavaPropsFactory.FORMAT_NAME_JAVA_PROPERTIES, f.getFormatName());
-        assertFalse(f.requiresCustomCodec());
         assertFalse(f.requiresPropertyOrdering());
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
