@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.*;
@@ -243,7 +244,7 @@ public class BasicParserTest extends ModuleTestBase {
 
         // Create a parser and ensure data is processed in the
         // right order, as per header
-        CsvParser parser = factory.createParser(CSV);
+        JsonParser parser = factory.createParser(CSV);
         parser.setSchema(schemaWithReordering);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
@@ -352,7 +353,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        CsvParser parser = factory.createParser(CSV);
+        JsonParser parser = factory.createParser(CSV);
         parser.setSchema(schema);
 
         try {
@@ -377,7 +378,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        CsvParser parser = factory.createParser(CSV);
+        JsonParser parser = factory.createParser(CSV);
         parser.setSchema(schema);
 
         try {
@@ -402,7 +403,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        CsvParser parser = factory.createParser(CSV);
+        JsonParser parser = factory.createParser(CSV);
         parser.setSchema(schema);
 
         try {

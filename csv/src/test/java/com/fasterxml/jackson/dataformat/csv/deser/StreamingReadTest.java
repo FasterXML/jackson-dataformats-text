@@ -156,13 +156,13 @@ public class StreamingReadTest extends ModuleTestBase
     private CsvParser _parser(String csv, boolean useBytes, CsvSchema schema)
         throws IOException
     {
-        CsvParser p;
+        JsonParser p;
         if (useBytes) {
             p = CSV_F.createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
         } else {
             p = CSV_F.createParser(csv);
         }
         p.setSchema(schema);
-        return p;
+        return (CsvParser) p;
     }
 }

@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.io.ByteArrayOutputStream;
 import java.io.CharConversionException;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.csv.*;
 
@@ -25,7 +26,7 @@ public class BrokenEncodingTest extends ModuleTestBase
                 .addColumn("b")
                 .build();
         // So: take Latin-1 bytes, but construct without specifying to lead to UTF-8 handling
-        CsvParser parser = factory.createParser(CSV.getBytes("ISO-8859-1"));
+        JsonParser parser = factory.createParser(CSV.getBytes("ISO-8859-1"));
         parser.setSchema(schema);
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
@@ -68,7 +69,7 @@ public class BrokenEncodingTest extends ModuleTestBase
                 .addColumn("b")
                 .build();
         // So: take Latin-1 bytes, but construct without specifying to lead to UTF-8 handling
-        CsvParser parser = factory.createParser(bytes.toByteArray());
+        JsonParser parser = factory.createParser(bytes.toByteArray());
         parser.setSchema(schema);
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());

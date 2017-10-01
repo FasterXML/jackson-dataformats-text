@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
 
@@ -30,9 +31,9 @@ public class TestParserNoSchema extends ModuleTestBase
          *   instead we must manually create the reader
          */
         final String CSV = "1,null\nfoobar\n7,true\n";
-        CsvParser cp = mapper.getFactory().createParser(CSV);
+        JsonParser p = mapper.getFactory().createParser(CSV);
 
-        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(cp);
+        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
 
         Object[] row;
         assertTrue(it.hasNext());
@@ -54,7 +55,7 @@ public class TestParserNoSchema extends ModuleTestBase
 
         assertFalse(it.hasNext());
 
-        cp.close();
+        p.close();
         it.close();
     }
 
@@ -170,9 +171,9 @@ public class TestParserNoSchema extends ModuleTestBase
          *   instead we must manually create the reader
          */
         final String CSV = "1,2\n1,2,3,4\n";
-        CsvParser cp = mapper.getFactory().createParser(CSV);
+        JsonParser p = mapper.getFactory().createParser(CSV);
 
-        MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(cp);
+        MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(p);
 
         Object[] row;
         assertTrue(it.hasNext());
@@ -191,7 +192,7 @@ public class TestParserNoSchema extends ModuleTestBase
 
         assertFalse(it.hasNext());
 
-        cp.close();
+        p.close();
         it.close();
     }
 
@@ -207,8 +208,8 @@ public class TestParserNoSchema extends ModuleTestBase
                             "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
         final String col2 = "H";
 
-        CsvParser cp = mapper.getFactory().createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
-        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(cp);
+        JsonParser p = mapper.getFactory().createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
+        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
 
         Object[] row;
 
@@ -224,7 +225,7 @@ public class TestParserNoSchema extends ModuleTestBase
         assertEquals(col2, row[0]);
         assertEquals(col1, row[1]);
 
-        cp.close();
+        p.close();
         it.close();
     }
 

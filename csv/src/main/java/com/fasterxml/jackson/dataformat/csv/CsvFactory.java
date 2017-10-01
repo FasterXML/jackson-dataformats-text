@@ -4,13 +4,16 @@ import java.io.*;
 import java.net.URL;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Writer;
 
-public class CsvFactory extends JsonFactory
+public class CsvFactory
+    extends TextualTSFactory
+    implements java.io.Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -105,20 +108,8 @@ public class CsvFactory extends JsonFactory
      * through constructors etc.
      * Also: must be overridden by sub-classes as well.
      */
-    @Override
     protected Object readResolve() {
         return new CsvFactory(this, _objectCodec);
-    }
-
-    /*                                                                                       
-    /**********************************************************                              
-    /* Versioned                                                                             
-    /**********************************************************                              
-     */
-
-    @Override
-    public Version version() {
-        return PackageVersion.VERSION;
     }
 
     /*
@@ -126,6 +117,11 @@ public class CsvFactory extends JsonFactory
     /* Capability introspection
     /**********************************************************
      */
+
+    @Override
+    public Version version() {
+        return PackageVersion.VERSION;
+    }
 
     // Yes; CSV is positional
     @Override
@@ -137,12 +133,28 @@ public class CsvFactory extends JsonFactory
     @Override
     public boolean canUseCharArrays() { return false; }
 
+    @Override
+    public boolean canParseAsync() {
+        // 31-May-2017, tatu: No async parsing yet
+        return true;
+    }
+
+    @Override
+    public Class<CsvParser.Feature> getFormatReadFeatureType() {
+        return CsvParser.Feature.class;
+    }
+
+    @Override
+    public Class<CsvGenerator.Feature> getFormatWriteFeatureType() {
+        return CsvGenerator.Feature.class;
+    }
+    
     /*
     /**********************************************************
-    /* Format detection functionality
+    /* Format support
     /**********************************************************
      */
-    
+
     @Override
     public String getFormatName() {
         return FORMAT_NAME_CSV;
@@ -217,7 +229,6 @@ public class CsvFactory extends JsonFactory
         return this;
     }
 
-
     /**
      * Method for enabling specified generator features
      * (check {@link CsvGenerator.Feature} for list of features)
@@ -242,111 +253,12 @@ public class CsvFactory extends JsonFactory
     public final boolean isEnabled(CsvGenerator.Feature f) {
         return (_csvGeneratorFeatures & f.getMask()) != 0;
     }
-    
-    /*
-    /**********************************************************
-    /* Overridden parser factory methods, 2.1
-    /**********************************************************
-     */
 
-    @Override
-    public CsvParser createParser(File f) throws IOException {
-        IOContext ctxt =  _createContext(f, true);
-        return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
-    }
-
-    @Override
-    public CsvParser createParser(URL url) throws IOException {
-        IOContext ctxt =  _createContext(url, true);
-        return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
-    }
-
-    @Override
-    public CsvParser createParser(InputStream in) throws IOException {
-        IOContext ctxt =  _createContext(in, false);
-        return _createParser(_decorate(in, ctxt), ctxt);
-    }
-
-    @Override
-    public CsvParser createParser(Reader r) throws IOException {
-        IOContext ctxt =  _createContext(r, false);
-        return _createParser(_decorate(r, ctxt), ctxt);
-    }
-
-    @Override
-    public CsvParser createParser(String doc) throws IOException {
-        return (CsvParser) super.createParser(doc);
-    }
-
-    @Override
-    public CsvParser createParser(byte[] data) throws IOException {
-        return (CsvParser) super.createParser(data);
-    }
-
-    @Override
-    public CsvParser createParser(byte[] data, int offset, int len) throws IOException {
-        return (CsvParser) super.createParser(data, offset, len);
-    }
-
-    @Override
-    public CsvParser createParser(char[] data) throws IOException {
-        return (CsvParser) super.createParser(data);
-    }
-
-    @Override
-    public CsvParser createParser(char[] data, int offset, int len) throws IOException {
-        return (CsvParser) super.createParser(data, offset, len);
-    }
-
-    /*
-    /**********************************************************
-    /* Overridden generator factory methods, 2.1+
-    /**********************************************************
-     */
-
-    @Override
-    public CsvGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException
-    {
-        // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
-        ctxt.setEncoding(enc);
-        return _createGenerator(ctxt, _createWriter(_decorate(out, ctxt), JsonEncoding.UTF8, ctxt));
-    }
-
-    /**
-     * This method assumes use of UTF-8 for encoding.
-     */
-    @Override
-    public CsvGenerator createGenerator(OutputStream out) throws IOException {
-        return createGenerator(out, JsonEncoding.UTF8);
-    }
-
-    @Override
-    public CsvGenerator createGenerator(Writer out) throws IOException {
-        IOContext ctxt = _createContext(out, false);
-        return _createGenerator(_decorate(out, ctxt), ctxt);
-    }
-
-    @Override
-    public CsvGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
-        OutputStream out = new FileOutputStream(f);
-        // Important: make sure that we always auto-close stream we create:
-        IOContext ctxt = _createContext(out, false);
-        ctxt.setEncoding(enc);
-        return _createGenerator(ctxt,
-                _createWriter(_decorate(out, ctxt), enc, ctxt));
-    }
-
-    // // // The rest are not (and should not need to) be overridden, defaults
-    // // // should properly delegate to _createXxx methods (which must be overridden)
-    
     /*
     /******************************************************
-    /* Overridden internal factory methods
+    /* Factory methods: parsers
     /******************************************************
      */
-
-    //protected IOContext _createContext(Object srcRef, boolean resourceManaged)
 
     /**
      * Overridable factory method that actually instantiates desired parser.
@@ -380,62 +292,33 @@ public class CsvFactory extends JsonFactory
     }
 
     @Override
-    protected CsvGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
-        return _createGenerator(ctxt, out);
+    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+        return _unsupported();
     }
 
+    /*
+    /******************************************************
+    /* Factory methods: generators
+    /******************************************************
+     */
+    
+    @Override
+    protected CsvGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
+        return new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
+                _objectCodec, out, _schema);
+    }
+
+    @SuppressWarnings("resource")
     @Override
     protected CsvGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return _createGenerator(ctxt, new UTF8Writer(ctxt, out));
+        return new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
+                _objectCodec, new UTF8Writer(ctxt, out), _schema);
     }
-
-    @Override
-    protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt) throws IOException
-    {
-        if (enc == JsonEncoding.UTF8) {
-            return new UTF8Writer(ctxt, out);
-        }
-        return new OutputStreamWriter(out, enc.getJavaName());
-    }
-
     /*
     /**********************************************************
     /* Internal methods
     /**********************************************************
      */
-
-    protected CsvGenerator _createGenerator(IOContext ctxt, Writer out) throws IOException
-    {
-        CsvGenerator gen = new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
-                _objectCodec, out, _schema);
-        // any other initializations? No?
-        return gen;
-    }
-
-//    protected final Charset UTF8 = Charset.forName("UTF-8");
-    
-    protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
-    {
-        // default to UTF-8 if encoding missing
-        if (enc == null || enc == JsonEncoding.UTF8) {
-            // 28-May-2012, tatu: Custom UTF8 reader should be faster, esp for small input:
-//            return new InputStreamReader(in, UTF8);
-            boolean autoClose = ctxt.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE);
-            return new UTF8Reader(ctxt, in, autoClose);
-        }
-        return new InputStreamReader(in, enc.getJavaName());
-    }
-
-    protected Reader _createReader(byte[] data, int offset, int len,
-            JsonEncoding enc, IOContext ctxt) throws IOException
-    {
-        // default to UTF-8 if encoding missing
-        if (enc == null || enc == JsonEncoding.UTF8) {
-            return new UTF8Reader(null, data, offset, len);
-        }
-        ByteArrayInputStream in = new ByteArrayInputStream(data, offset, len);
-        return new InputStreamReader(in, enc.getJavaName());
-    }
 
     @Override
     protected IOContext _createContext(Object srcRef, boolean resourceManaged) {

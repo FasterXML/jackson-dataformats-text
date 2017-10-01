@@ -2,8 +2,9 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.*;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
+
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
@@ -23,7 +24,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
     public void testUntypedAsSequenceStreaming() throws Exception
     {
         StringWriter sw = new StringWriter();
-        CsvGenerator gen = MAPPER.getFactory().createGenerator(sw);
+        JsonGenerator gen = MAPPER.getFactory().createGenerator(sw);
         gen.setSchema(SCHEMA);
 
         assertEquals(0, gen.getOutputBuffered());
