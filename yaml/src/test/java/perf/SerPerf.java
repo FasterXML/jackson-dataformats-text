@@ -5,7 +5,7 @@ import java.io.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public final class SerPerf
 {
@@ -47,8 +47,7 @@ public final class SerPerf
         return item;
     }
     
-    public void test()
-        throws Exception
+    public void test() throws Exception
     {
         int i = 0;
         int sum = 0;
@@ -56,9 +55,7 @@ public final class SerPerf
         ByteArrayOutputStream result = new ByteArrayOutputStream();
 
         final MediaItem item = buildItem();
-        final JsonFactory jsonF = new YAMLFactory();
-            
-        final ObjectMapper jsonMapper = new ObjectMapper(jsonF);
+        final ObjectMapper jsonMapper = new YAMLMapper();
 
         JsonNode root = jsonMapper.valueToTree(item);
         

@@ -1,16 +1,18 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
 
 @SuppressWarnings("resource")
-public class YAMLFactory extends JsonFactory
+public class YAMLFactory
+    extends TextualTSFactory
+    implements java.io.Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -74,9 +76,6 @@ public class YAMLFactory extends JsonFactory
         _version = null;
     }
 
-    /**
-     * @since 2.2.1
-     */
     public YAMLFactory(YAMLFactory src, ObjectCodec oc)
     {
         super(src, oc);
@@ -100,22 +99,9 @@ public class YAMLFactory extends JsonFactory
     /**
      * Method that we need to override to actually make restoration go
      * through constructors etc.
-     * Also: must be overridden by sub-classes as well.
      */
-    @Override
     protected Object readResolve() {
         return new YAMLFactory(this, _objectCodec);
-    }
-
-    /*                                                                                       
-    /**********************************************************                              
-    /* Versioned                                                                             
-    /**********************************************************                              
-     */
-
-    @Override
-    public Version version() {
-        return PackageVersion.VERSION;
     }
 
     /*
@@ -124,13 +110,21 @@ public class YAMLFactory extends JsonFactory
     /**********************************************************
      */
 
+    @Override
+    public Version version() {
+        return PackageVersion.VERSION;
+    }
+
     // No, we can't make use of char[] optimizations
     @Override
     public boolean canUseCharArrays() { return false; }
 
-    // Add these in 2.7:
+    @Override
+    public boolean canParseAsync() {
+        // 31-May-2017, tatu: No async parsing yet
+        return false;
+    }
 
-    /*
     @Override
     public Class<YAMLParser.Feature> getFormatReadFeatureType() {
         return YAMLParser.Feature.class;
@@ -140,17 +134,21 @@ public class YAMLFactory extends JsonFactory
     public Class<YAMLGenerator.Feature> getFormatWriteFeatureType() {
         return YAMLGenerator.Feature.class;
     }
-    */
-    
+
     /*
     /**********************************************************
-    /* Format detection functionality
+    /* Format support
     /**********************************************************
      */
-    
+
     @Override
     public String getFormatName() {
         return FORMAT_NAME_YAML;
+    }
+
+    @Override
+    public boolean canUseSchema(FormatSchema schema) {
+        return false;
     }
 
     /*
@@ -244,129 +242,10 @@ public class YAMLFactory extends JsonFactory
     }
 
     /*
-    /**********************************************************
-    /* Overridden parser factory methods (for 2.1)
-    /**********************************************************
-     */
-
-    @Override
-    public YAMLParser createParser(String content) throws IOException {
-        return createParser(new StringReader(content));
-    }
-
-    @Override
-    public YAMLParser createParser(File f) throws IOException {
-        IOContext ctxt = _createContext(f, true);
-        return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
-    }
-
-    @Override
-    public YAMLParser createParser(URL url) throws IOException
-    {
-        IOContext ctxt = _createContext(url, true);
-        return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
-    }
-
-    @Override
-    public YAMLParser createParser(InputStream in) throws IOException
-    {
-        IOContext ctxt = _createContext(in, false);
-        return _createParser(_decorate(in, ctxt), ctxt);
-    }
-
-    @Override
-    public YAMLParser createParser(Reader r) throws IOException
-    {
-        IOContext ctxt = _createContext(r, false);
-        return _createParser(_decorate(r, ctxt), ctxt);
-    }
-
-    @Override // since 2.4
-    public YAMLParser createParser(char[] data) throws IOException {
-        return createParser(new CharArrayReader(data, 0, data.length));
-    }
-    
-    @Override // since 2.4
-    public YAMLParser createParser(char[] data, int offset, int len) throws IOException {
-        return createParser(new CharArrayReader(data, offset, len));
-    }
-
-    @Override
-    public YAMLParser createParser(byte[] data) throws IOException
-    {
-        IOContext ctxt = _createContext(data, true);
-        // [JACKSON-512]: allow wrapping with InputDecorator
-        if (_inputDecorator != null) {
-            InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
-            if (in != null) {
-                return _createParser(in, ctxt);
-            }
-        }
-        return _createParser(data, 0, data.length, ctxt);
-    }
-
-    @Override
-    public YAMLParser createParser(byte[] data, int offset, int len) throws IOException
-    {
-        IOContext ctxt = _createContext(data, true);
-        // [JACKSON-512]: allow wrapping with InputDecorator
-        if (_inputDecorator != null) {
-            InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
-            if (in != null) {
-                return _createParser(in, ctxt);
-            }
-        }
-        return _createParser(data, offset, len, ctxt);
-    }
-    
-    /*
-    /**********************************************************
-    /* Overridden generator factory methods (2.1)
-    /**********************************************************
-     */
-
-    @Override
-    public YAMLGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException
-    {
-        // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
-        ctxt.setEncoding(enc);
-        return _createGenerator(_createWriter(_decorate(out, ctxt), enc, ctxt), ctxt);
-    }
-
-    @Override
-    public YAMLGenerator createGenerator(OutputStream out) throws IOException
-    {
-        // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
-        return _createGenerator(_createWriter(_decorate(out, ctxt),
-                JsonEncoding.UTF8, ctxt), ctxt);
-    }
-
-    @Override
-    public YAMLGenerator createGenerator(Writer out) throws IOException
-    {
-        IOContext ctxt = _createContext(out, false);
-        return _createGenerator(_decorate(out, ctxt), ctxt);
-    }
-
-    @Override
-    public JsonGenerator createGenerator(File f, JsonEncoding enc) throws IOException
-    {
-        OutputStream out = new FileOutputStream(f);
-        // true -> yes, we have to manage the stream since we created it
-        IOContext ctxt = _createContext(f, true);
-        ctxt.setEncoding(enc);
-        return _createGenerator(_createWriter(_decorate(out, ctxt), enc, ctxt), ctxt);
-    }    
-
-    /*
     /******************************************************
-    /* Overridden internal factory methods
+    /* Factory methods: parsers
     /******************************************************
      */
-
-    //protected IOContext _createContext(Object srcRef, boolean resourceManaged)
 
     @Override
     protected YAMLParser _createParser(InputStream in, IOContext ctxt) throws IOException {
@@ -380,7 +259,6 @@ public class YAMLFactory extends JsonFactory
                 _objectCodec, r);
     }
 
-    // since 2.4
     @Override
     protected YAMLParser _createParser(char[] data, int offset, int len, IOContext ctxt,
             boolean recyclable) throws IOException {
@@ -395,20 +273,27 @@ public class YAMLFactory extends JsonFactory
     }
 
     @Override
+    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+        return _unsupported();
+    }
+
+    /*
+    /******************************************************
+    /* Factory methods: generators
+    /******************************************************
+     */
+
+    @Override
     protected YAMLGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
-        int feats = _yamlGeneratorFeatures;
-        YAMLGenerator gen = new YAMLGenerator(ctxt, _generatorFeatures, feats,
+        return new YAMLGenerator(ctxt, _generatorFeatures, _yamlGeneratorFeatures,
                 _objectCodec, out, _version);
-        // any other initializations? No?
-        return gen;
     }
 
     @Override
     protected YAMLGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        // should never get called; ensure
-        throw new IllegalStateException();
+        return _createGenerator(_createWriter(out, JsonEncoding.UTF8, ctxt), ctxt);
     }
-    
+
     @Override
     protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt) throws IOException {
         if (enc == JsonEncoding.UTF8) {
@@ -416,7 +301,7 @@ public class YAMLFactory extends JsonFactory
         }
         return new OutputStreamWriter(out, enc.getJavaName());
     }
-    
+
     /*
     /**********************************************************
     /* Internal methods

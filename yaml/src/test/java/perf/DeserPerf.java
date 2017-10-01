@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Micro-benchmark for comparing performance of bean deserialization
@@ -47,16 +48,14 @@ public final class DeserPerf
         return item;
     }
     
-    public void test()
-        throws Exception
+    public void test() throws Exception
     {
         int sum = 0;
 
         final MediaItem item = buildItem();
 //        JsonFactory jsonF = new JsonFactory();
 //        final ObjectMapper jsonMapper = new ObjectMapper(jsonF);
-        JsonFactory yamlF = new com.fasterxml.jackson.dataformat.yaml.YAMLFactory();
-        final ObjectMapper yamlMapper = new ObjectMapper(yamlF);
+        final ObjectMapper yamlMapper = new YAMLMapper();
         
 //        final ObjectMapper jsonMapper = new ObjectMapper(jsonF);
 //        jsonMapper.configure(SerializationConfig.Feature.USE_STATIC_TYPING, true);

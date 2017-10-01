@@ -197,7 +197,7 @@ public class SimpleParseTest extends ModuleTestBase
                 +"    name: Bill\n"
                 +"    parentRef: *id1"
                 ;
-        YAMLParser yp = YAML_F.createParser(YAML);
+        YAMLParser yp = (YAMLParser)YAML_F.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, yp.nextToken());
         assertFalse(yp.isCurrentAlias());

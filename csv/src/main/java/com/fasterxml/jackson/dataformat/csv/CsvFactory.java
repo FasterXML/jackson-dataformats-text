@@ -1,14 +1,12 @@
 package com.fasterxml.jackson.dataformat.csv;
 
 import java.io.*;
-import java.net.URL;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
-import com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Writer;
 
 public class CsvFactory
@@ -80,9 +78,6 @@ public class CsvFactory
 
     public CsvFactory(ObjectCodec oc) { super(oc); }
 
-    /**
-     * @since 2.2.1
-     */
     protected CsvFactory(CsvFactory src, ObjectCodec oc)
     {
         super(src, oc);
@@ -136,7 +131,7 @@ public class CsvFactory
     @Override
     public boolean canParseAsync() {
         // 31-May-2017, tatu: No async parsing yet
-        return true;
+        return false;
     }
 
     @Override
@@ -148,7 +143,7 @@ public class CsvFactory
     public Class<CsvGenerator.Feature> getFormatWriteFeatureType() {
         return CsvGenerator.Feature.class;
     }
-    
+
     /*
     /**********************************************************
     /* Format support

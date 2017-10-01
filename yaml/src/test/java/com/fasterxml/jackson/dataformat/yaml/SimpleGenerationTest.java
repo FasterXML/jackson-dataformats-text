@@ -147,7 +147,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         // Ok, first, assume we do get the marker:
         StringWriter w = new StringWriter();
         assertTrue(f.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-        YAMLGenerator gen = f.createGenerator(w);
+        YAMLGenerator gen = (YAMLGenerator) f.createGenerator(w);
         assertTrue(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         String yaml = w.toString().trim();
@@ -157,7 +157,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         f.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
         assertFalse(f.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         w = new StringWriter();
-        gen = f.createGenerator(w);
+        gen = (YAMLGenerator)f.createGenerator(w);
         assertFalse(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         yaml = w.toString().trim();
