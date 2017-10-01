@@ -1,17 +1,19 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.io.Latin1Reader;
 
 @SuppressWarnings("resource")
-public class JavaPropsFactory extends JsonFactory
+public class JavaPropsFactory
+    extends TextualTSFactory
+    implements java.io.Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -42,26 +44,15 @@ public class JavaPropsFactory extends JsonFactory
         return new JavaPropsFactory(this, null);
     }
 
-    /*                                                                                       
-    /**********************************************************                              
-    /* Versioned                                                                             
-    /**********************************************************                              
+    /*
+    /**********************************************************
+    /* Capability introspection
+    /**********************************************************
      */
 
     @Override
     public Version version() {
         return PackageVersion.VERSION;
-    }
-    
-    /*
-    /**********************************************************
-    /* Format detection functionality
-    /**********************************************************
-     */
-    
-    @Override
-    public String getFormatName() {
-        return FORMAT_NAME_JAVA_PROPERTIES;
     }
 
     /*
@@ -76,18 +67,17 @@ public class JavaPropsFactory extends JsonFactory
         return false;
     }
 
-    // Can not handle raw binary data
-    @Override
-    public boolean canHandleBinaryNatively() {
-        return false;
-    }
-
     // Not using char[] internally
     @Override
     public boolean canUseCharArrays() { return false; }
 
+    @Override
+    public boolean canParseAsync() {
+        // 30-Sep-2017, tatu: No async parsing yet
+        return false;
+    }
+
     // No format-specific configuration, yet:
-/*    
     @Override
     public Class<? extends FormatFeature> getFormatReadFeatureType() {
         return null;
@@ -97,13 +87,23 @@ public class JavaPropsFactory extends JsonFactory
     public Class<? extends FormatFeature> getFormatWriteFeatureType() {
         return null;
     }
-*/
+
+    /*
+    /**********************************************************
+    /* Format support
+    /**********************************************************
+     */
+
+    @Override
+    public String getFormatName() {
+        return FORMAT_NAME_JAVA_PROPERTIES;
+    }
 
     @Override
     public boolean canUseSchema(FormatSchema schema) {
         return schema instanceof JavaPropsSchema;
     }
-
+    
     /*
     /**********************************************************
     /* Extended parser/generator factory methods
@@ -113,8 +113,6 @@ public class JavaPropsFactory extends JsonFactory
     /**
      * Convenience method to allow feeding a pre-parsed {@link Properties}
      * instance as input.
-     *
-     * @since 2.9
      */
     public JavaPropsParser createParser(Properties props) {
         return new JavaPropsParser(_createContext(props, true),
@@ -131,65 +129,6 @@ public class JavaPropsFactory extends JsonFactory
     public JavaPropsGenerator createGenerator(Properties props) {
         return new PropertiesBackedGenerator(_createContext(props, true),
                 props, _generatorFeatures, _objectCodec);
-    }
-
-    /*
-    /**********************************************************
-    /* Overridden parser factory methods
-    /**********************************************************
-     */
-
-    @Override
-    public JsonParser createParser(File f) throws IOException {
-        return _createParser(new FileInputStream(f), _createContext(f, true));
-    }
-
-    @Override
-    public JsonParser createParser(URL url) throws IOException {
-        return _createParser(_optimizedStreamFromURL(url), _createContext(url, true));
-    }
-
-    @Override
-    public JsonParser createParser(InputStream in) throws IOException {
-        return _createParser(in, _createContext(in, false));
-    }
-
-    @Override
-    public JsonParser createParser(byte[] data) throws IOException {
-        return _createParser(data, 0, data.length, _createContext(data, true));
-    }
-
-    @Override
-    public JsonParser createParser(byte[] data, int offset, int len) throws IOException {
-        return _createParser(data, offset, len, _createContext(data, true));
-    }
-
-    /*
-    /**********************************************************
-    /* Overridden generator factory methods
-    /**********************************************************
-     */
-
-    @Override
-    public JsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
-        IOContext ctxt = _createContext(out, false);
-        ctxt.setEncoding(enc);
-        out = _decorate(out, ctxt);
-        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec, out);
-    }
-
-    /**
-     * Method for constructing {@link JsonGenerator} for generating
-     * CBOR-encoded output.
-     *<p>
-     * Since CBOR format always uses UTF-8 internally, no encoding need
-     * to be passed to this method.
-     */
-    @Override
-    public JsonGenerator createGenerator(OutputStream out) throws IOException {
-        IOContext ctxt = _createContext(out, false);
-        out = _decorate(out, ctxt);
-        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec, out);
     }
 
     /*
@@ -231,6 +170,11 @@ public class JavaPropsFactory extends JsonFactory
         return _createParser(new Latin1Reader(data, offset, len), ctxt);
     }
 
+    @Override
+    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+        return _unsupported();
+    }
+
     /*
     /******************************************************
     /* Overridden internal factory methods, generator
@@ -270,8 +214,7 @@ public class JavaPropsFactory extends JsonFactory
         return _loadProperties(new Latin1Reader(ctxt, in), ctxt);
     }
 
-    protected Properties _loadProperties(Reader r0, IOContext ctxt)
-        throws IOException
+    protected Properties _loadProperties(Reader r0, IOContext ctxt) throws IOException
     {
         Properties props = new Properties();
         // May or may not want to close the reader, so...

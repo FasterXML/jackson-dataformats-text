@@ -130,7 +130,7 @@ public class CsvFactory
 
     @Override
     public boolean canParseAsync() {
-        // 31-May-2017, tatu: No async parsing yet
+        // 30-Sep-2017, tatu: No async parsing yet
         return false;
     }
 
