@@ -38,7 +38,7 @@ public class CsvGenerator extends GeneratorBase
          *<p>
          * Default value is <code>false</code> for "loose" (approximate, conservative)
          * checking.
-         * 
+         *
          * @since 2.4
          */
         STRICT_CHECK_FOR_QUOTING(false),
@@ -49,7 +49,7 @@ public class CsvGenerator extends GeneratorBase
          * If <code>true</code>, values and separators between values may be omitted, to slightly reduce
          * length of the row; if <code>false</code>, separators need to stay in place and values
          * are indicated by empty Strings.
-         * 
+         *
          * @since 2.4
          */
         OMIT_MISSING_TAIL_COLUMNS(false),
@@ -72,11 +72,19 @@ public class CsvGenerator extends GeneratorBase
          * @since 2.9
          */
         ALWAYS_QUOTE_EMPTY_STRINGS(false),
+
+        /**
+         * Feature that determines whether values written Strings (from <code>java.lang.String</code>
+         * valued POJO properties) which contains quotes be escaped using the Schema's configured escape character instead of "".
+         *
+         * @since 2.9
+         */
+        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
         ;
 
         protected final boolean _defaultState;
         protected final int _mask;
-        
+
         /**
          * Method that calculates bit set (flags) of all features that
          * are enabled by default.
@@ -107,7 +115,7 @@ public class CsvGenerator extends GeneratorBase
 
     protected final static long MIN_INT_AS_LONG = Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = Integer.MAX_VALUE;
-    
+
     /*
     /**********************************************************
     /* Configuration
@@ -118,7 +126,7 @@ public class CsvGenerator extends GeneratorBase
     static {
         EMPTY_SCHEMA = CsvSchema.emptySchema();
     }
-    
+
     final protected IOContext _ioContext;
 
     /**
@@ -148,7 +156,7 @@ public class CsvGenerator extends GeneratorBase
      * instance is constructed.
      */
     protected boolean _handleFirstLine = true;
-    
+
     /**
      * Index of column that we will be getting next, based on
      * field name call that was made.
@@ -220,11 +228,11 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         _writer = csvWriter;
     }
-    
-    /*                                                                                       
-    /**********************************************************                              
-    /* Versioned                                                                             
-    /**********************************************************                              
+
+    /*
+    /**********************************************************
+    /* Versioned
+    /**********************************************************
      */
 
     @Override
@@ -312,7 +320,7 @@ public class CsvGenerator extends GeneratorBase
     public boolean canUseSchema(FormatSchema schema) {
         return (schema instanceof CsvSchema);
     }
-    
+
     @Override
     public boolean canOmitFields() {
         // Nope: CSV requires at least a placeholder
@@ -327,7 +335,7 @@ public class CsvGenerator extends GeneratorBase
     /* Overridden methods; writing field names
     /**********************************************************************
      */
-    
+
     /* And then methods overridden to make final, streamline some
      * aspects...
      */
@@ -428,7 +436,7 @@ public class CsvGenerator extends GeneratorBase
     public final void flush() throws IOException {
         _writer.flush(isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
     }
-    
+
     @Override
     public void close() throws IOException
     {
@@ -436,7 +444,7 @@ public class CsvGenerator extends GeneratorBase
 
         // Let's mark row as closed, if we had any...
         finishRow();
-        
+
         // Write the header if necessary, occurs when no rows written
         if (_handleFirstLine) {
             _handleFirstLine();
@@ -464,7 +472,7 @@ public class CsvGenerator extends GeneratorBase
             } else if (!_skipValue) {
                 // First: column may have its own separator
                 String sep;
-                
+
                 if (_nextColumnByName >= 0) {
                     CsvSchema.Column col = _schema.column(_nextColumnByName);
                     sep = col.isArray() ? col.getArrayElementSeparator() : CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
@@ -795,7 +803,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
     }
-    
+
     @Override
     public void writeNumber(double v) throws IOException
     {
@@ -807,7 +815,7 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), v);
             }
         }
-    }    
+    }
 
     @Override
     public void writeNumber(float v) throws IOException
@@ -857,7 +865,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
     }
-    
+
     /*
     /**********************************************************
     /* Overrides for field methods
@@ -890,7 +898,7 @@ public class CsvGenerator extends GeneratorBase
     /* Implementations for methods from base class
     /**********************************************************
      */
-    
+
     @Override
     protected final void _verifyValueWrite(String typeMsg) throws IOException
     {
@@ -917,7 +925,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Method called when there is a problem related to mapping data
      * (compared to a low-level generation); if so, should be surfaced
-     * as 
+     * as
      *
      * @since 2.7
      */
@@ -957,7 +965,7 @@ public class CsvGenerator extends GeneratorBase
         _handleFirstLine = false;
         if (_schema.usesHeader()) {
             int count = _schema.size();
-            if (count == 0) { 
+            if (count == 0) {
                 _reportMappingError("Schema specified that header line is to be written; but contains no column names");
             }
             for (CsvSchema.Column column : _schema) {
@@ -974,7 +982,7 @@ public class CsvGenerator extends GeneratorBase
         ++_arrayElements;
         _arrayContents.append(value);
     }
-    
+
     protected void _addToArray(char[] value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
