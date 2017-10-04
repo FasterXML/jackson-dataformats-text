@@ -982,7 +982,7 @@ public class CsvEncoder
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
-                }
+                }    
             } else if (c == esc) {
                 return true;
             }

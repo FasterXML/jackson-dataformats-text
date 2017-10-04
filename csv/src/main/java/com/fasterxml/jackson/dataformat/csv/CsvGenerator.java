@@ -228,12 +228,12 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         _writer = csvWriter;
     }
-
+    
     /*                                                                                       
     /**********************************************************                              
     /* Versioned                                                                             
     /**********************************************************                              
-    */
+     */
 
     @Override
     public Version version() {
@@ -974,7 +974,7 @@ public class CsvGenerator extends GeneratorBase
             _writer.endRow();
         }
     }
-    
+
     protected void _addToArray(String value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
@@ -982,7 +982,7 @@ public class CsvGenerator extends GeneratorBase
         ++_arrayElements;
         _arrayContents.append(value);
     }
-
+    
     protected void _addToArray(char[] value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);

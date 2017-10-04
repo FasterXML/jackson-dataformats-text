@@ -74,7 +74,7 @@ public class TestGenerator extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(FiveMinuteUser.class).withHeader();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
-        String result = mapper.writer(schema).writeValueAsString(user);
+        String result = mapper.writer(schema).writeValueAsString(user);        
         assertEquals("firstName,lastName,gender,verified,userImage\n"
                 +"Barbie,Benton,FEMALE,false,\n", result);
         
