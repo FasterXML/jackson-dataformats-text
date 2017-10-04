@@ -56,7 +56,7 @@ public class TestGenerator extends ModuleTestBase
 
         // from base, default order differs:
         // @JsonPropertyOrder({"firstName", "lastName", "gender" ,"verified", "userImage"})
-
+        
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
         String csv = mapper.writer(schema).writeValueAsString(user);
@@ -77,7 +77,7 @@ public class TestGenerator extends ModuleTestBase
         String result = mapper.writer(schema).writeValueAsString(user);
         assertEquals("firstName,lastName,gender,verified,userImage\n"
                 +"Barbie,Benton,FEMALE,false,\n", result);
-
+        
     }
 
     /**
@@ -90,7 +90,7 @@ public class TestGenerator extends ModuleTestBase
         CsvSchema schema = CsvSchema.builder().setUseHeader(true).build();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
         try {
-            mapper.writer(schema).writeValueAsString(user);
+            mapper.writer(schema).writeValueAsString(user);        
             fail("Should fail without columns");
         } catch (JsonMappingException e) {
             verifyException(e, "contains no column names");
@@ -131,7 +131,7 @@ public class TestGenerator extends ModuleTestBase
             .addColumn("id")
             .addColumn("desc")
             .build();
-
+        
         String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", "Some \"stuff\""));
         // MUST use doubling for quotes!
         assertEquals("id,\"Some \"\"stuff\"\"\"\n", result);
@@ -148,7 +148,7 @@ public class TestGenerator extends ModuleTestBase
 
         String base = "Longer sequence with bunch of words to test quoting with needs to be at least one line "
                 +"long to allow for appropriate indexes and boundary crossing conditions as well";
-
+        
         StringBuilder sb = new StringBuilder();
         do {
             for (String word : base.split("\\s")) {
@@ -316,7 +316,7 @@ public class TestGenerator extends ModuleTestBase
         ObjectWriter writer = mapper.writer(schema);
         String csv = writer.writeValueAsString(value);
         assertEquals(expectedCsv, csv);
-    }
+    }    
 
     /*
     /**********************************************************************
@@ -333,9 +333,9 @@ public class TestGenerator extends ModuleTestBase
         String result;
         // having virtual root-level array should make no difference:
         if (wrapAsArray) {
-            result = mapper.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });
+            result = mapper.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });        
         } else {
-            result = mapper.writer(schema).writeValueAsString(user);
+            result = mapper.writer(schema).writeValueAsString(user);        
         }
         assertEquals("Veltto,Virtanen,MALE,true,AwE=\n", result);
     }
