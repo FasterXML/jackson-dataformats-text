@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectWriteContext;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -184,16 +185,15 @@ public class JavaPropsMapper extends ObjectMapper
     /**
      * Convenience method that "writes" given `value` as properties
      * in given {@link Properties} object.
-     *
-     * @since 2.9
      */
     public void writeValue(Properties targetProps, Object value) throws IOException
     {
         if (targetProps == null) {
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
+        // 04-Oct-2017, tatu: TODO!!! Proper `ObjectWriteContext`
         JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(targetProps);
+                .createGenerator(ObjectWriteContext.empty(), targetProps);
         writeValue(g, value);
         g.close();
     }
@@ -201,8 +201,6 @@ public class JavaPropsMapper extends ObjectMapper
     /**
      * Convenience method that "writes" given `value` as properties
      * in given {@link Properties} object.
-     *
-     * @since 2.9
      */
     public void writeValue(Properties targetProps, Object value, JavaPropsSchema schema)
             throws IOException
@@ -210,21 +208,20 @@ public class JavaPropsMapper extends ObjectMapper
         if (targetProps == null) {
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
+        // 04-Oct-2017, tatu: TODO!!! Proper `ObjectWriteContext`
         JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(targetProps);
+                .createGenerator(ObjectWriteContext.empty(), targetProps);
         if (schema != null) {
             g.setSchema(schema);
         }
         writeValue(g, value);
         g.close();
     }
-    
+
     /**
      * Convenience method that serializes given value but so that results are
      * stored in a newly constructed {@link Properties}. Functionally equivalent
      * to serializing in a File and reading contents into {@link Properties}.
-     *
-     * @since 2.9
      */
     public Properties writeValueAsProperties(Object value)
         throws IOException
@@ -237,8 +234,6 @@ public class JavaPropsMapper extends ObjectMapper
     /**
      * Convenience method that serializes given value but so that results are
      * stored in given {@link Properties} instance.
-     *
-     * @since 2.9
      */
     public Properties writeValueAsProperties(Object value, JavaPropsSchema schema)
         throws IOException

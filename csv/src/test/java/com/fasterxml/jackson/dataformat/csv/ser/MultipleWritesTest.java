@@ -42,8 +42,10 @@ public class MultipleWritesTest extends ModuleTestBase
         CsvSchema csvSchema = builder.build().withHeader();
 
         JsonGenerator gen = MAPPER.getFactory().createGenerator(sw);
+        // IMPORTANT! If passing generator, must directly configure it:
+        gen.setSchema(csvSchema);
 
-        ObjectWriter csvWriter = MAPPER.writer(csvSchema);
+        ObjectWriter csvWriter = MAPPER.writer();
 
         List<String> line1 = new ArrayList<String>();
         line1.add("line1-val1");
@@ -62,7 +64,6 @@ public class MultipleWritesTest extends ModuleTestBase
         String csv = sw.toString().trim();
         // may get different linefeed on different OSes?
         csv = csv.replaceAll("[\\r\\n]", "/");
-
         assertEquals("col1,col2/line1-val1,line1-val2/line2-val1,line2-val2", csv);
     }
 

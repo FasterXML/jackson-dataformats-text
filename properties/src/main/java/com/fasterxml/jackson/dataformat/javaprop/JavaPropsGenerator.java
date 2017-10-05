@@ -41,7 +41,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**
      * Definition of columns being written, if available.
      */
-    protected JavaPropsSchema _schema = EMPTY_SCHEMA;
+    protected JavaPropsSchema _schema;
 
     /*
     /**********************************************************
@@ -73,11 +73,16 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    public JavaPropsGenerator(IOContext ctxt, int stdFeatures, ObjectCodec codec)
+    public JavaPropsGenerator(IOContext ctxt, int stdFeatures, ObjectCodec codec,
+            FormatSchema schema)
     {
         super(stdFeatures, codec, BOGUS_WRITE_CONTEXT);
         _ioContext = ctxt;
         _jpropContext = JPropWriteContext.createRootContext();
+        if (schema == null) {
+            schema = EMPTY_SCHEMA;
+        }
+        setSchema(schema);
     }
 
     @Override

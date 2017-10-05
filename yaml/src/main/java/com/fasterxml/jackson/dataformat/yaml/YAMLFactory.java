@@ -284,14 +284,19 @@ public class YAMLFactory
      */
 
     @Override
-    protected YAMLGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
-        return new YAMLGenerator(ctxt, _generatorFeatures, _yamlGeneratorFeatures,
+    protected YAMLGenerator _createGenerator(ObjectWriteContext writeCtxt,
+            Writer out, IOContext ctxt) throws IOException {
+        return new YAMLGenerator(ctxt,
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                writeCtxt.getFormatWriteFeatures(_yamlGeneratorFeatures),
                 _objectCodec, out, _version);
     }
 
     @Override
-    protected YAMLGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return _createGenerator(_createWriter(out, JsonEncoding.UTF8, ctxt), ctxt);
+    protected YAMLGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
+            OutputStream out, IOContext ctxt) throws IOException {
+        return _createGenerator(writeCtxt,
+                _createWriter(out, JsonEncoding.UTF8, ctxt), ctxt);
     }
 
     @Override

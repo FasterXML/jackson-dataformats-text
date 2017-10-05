@@ -321,14 +321,6 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public JsonGenerator overrideFormatFeatures(int values, int mask) {
-        // 14-Mar-2016, tatu: Should re-configure, but unfortunately most
-        //    settings passed via options passed to constructor of Emitter
-        _formatFeatures = (_formatFeatures & ~mask) | (values & mask);
-        return this;
-    }
-
-    @Override
     public boolean canUseSchema(FormatSchema schema) {
         return false;
     }

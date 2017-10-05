@@ -50,9 +50,10 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     public WriterBackedGenerator(IOContext ctxt, Writer out,
-            int stdFeatures, ObjectCodec codec)
+            int stdFeatures, ObjectCodec codec,
+            FormatSchema schema)
     {
-        super(ctxt, stdFeatures, codec);
+        super(ctxt, stdFeatures, codec, schema);
         _out = out;
         _outputBuffer = ctxt.allocConcatBuffer();
         _outputEnd = _outputBuffer.length;

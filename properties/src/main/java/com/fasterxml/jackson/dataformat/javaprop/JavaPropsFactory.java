@@ -123,12 +123,15 @@ public class JavaPropsFactory
      * Convenience method to allow using a pre-constructed {@link Properties}
      * instance as output target, so that serialized property values
      * are added.
-     *
-     * @since 2.9
      */
-    public JavaPropsGenerator createGenerator(Properties props) {
+    public JavaPropsGenerator createGenerator(ObjectWriteContext writeCtxt,
+            Properties props)
+    {
         return new PropertiesBackedGenerator(_createContext(props, true),
-                props, _generatorFeatures, _objectCodec);
+                props,
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                _objectCodec,
+                writeCtxt.getSchema());
     }
 
     /*
@@ -182,14 +185,22 @@ public class JavaPropsFactory
      */
     
     @Override
-    protected JsonGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException
+    protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt,
+            Writer out, IOContext ctxt) throws IOException
     {
-        return new WriterBackedGenerator(ctxt, out, _generatorFeatures, _objectCodec);
+        return new WriterBackedGenerator(ctxt, out,
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                _objectCodec,
+                writeCtxt.getSchema());
     }
 
     @Override
-    protected JsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec, out);
+    protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
+            OutputStream out, IOContext ctxt) throws IOException {
+        return new WriterBackedGenerator(ctxt, _createWriter(out, null, ctxt),
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                _objectCodec,
+                writeCtxt.getSchema());
     }
 
     @Override
@@ -226,14 +237,6 @@ public class JavaPropsFactory
             props.load(r0);
         }
         return props;
-    }
-
-    private final JsonGenerator _createJavaPropsGenerator(IOContext ctxt,
-            int stdFeat, ObjectCodec codec, OutputStream out) throws IOException
-    {
-        return new WriterBackedGenerator(ctxt, _createWriter(out, null, ctxt),
-                stdFeat, _objectCodec);
-                
     }
 
     /*

@@ -44,8 +44,6 @@ public class CsvFactory
     /**********************************************************************
      */
 
-    protected CsvSchema _schema = DEFAULT_SCHEMA;
-    
     protected int _csvParserFeatures = DEFAULT_CSV_PARSER_FEATURE_FLAGS;
 
     protected int _csvGeneratorFeatures = DEFAULT_CSV_GENERATOR_FEATURE_FLAGS;
@@ -83,7 +81,6 @@ public class CsvFactory
         super(src, oc);
         _csvParserFeatures = src._csvParserFeatures;
         _csvGeneratorFeatures = src._csvGeneratorFeatures;
-        _schema = src._schema;
     }
     
     @Override
@@ -298,17 +295,34 @@ public class CsvFactory
      */
     
     @Override
-    protected CsvGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
-        return new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
-                _objectCodec, out, _schema);
+    protected CsvGenerator _createGenerator(ObjectWriteContext writeCtxt,
+            Writer out, IOContext ctxt) throws IOException
+    {
+        return new CsvGenerator(ctxt,
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
+                _objectCodec, out, _getSchema(writeCtxt));
     }
 
     @SuppressWarnings("resource")
     @Override
-    protected CsvGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
-                _objectCodec, new UTF8Writer(ctxt, out), _schema);
+    protected CsvGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
+            OutputStream out, IOContext ctxt) throws IOException
+    {
+        return new CsvGenerator(ctxt,
+                writeCtxt.getGeneratorFeatures(_generatorFeatures),
+                writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
+                _objectCodec, new UTF8Writer(ctxt, out), _getSchema(writeCtxt));
     }
+
+    private final CsvSchema _getSchema(ObjectWriteContext writeCtxt) {
+        FormatSchema sch = writeCtxt.getSchema();
+        if (sch == null) {
+            return DEFAULT_SCHEMA;
+        }
+        return (CsvSchema) sch;
+    }
+
     /*
     /**********************************************************
     /* Internal methods

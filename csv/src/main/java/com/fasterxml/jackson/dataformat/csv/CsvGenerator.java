@@ -289,19 +289,6 @@ public class CsvGenerator extends GeneratorBase
         return _formatFeatures;
     }
 
-    @Override
-    public JsonGenerator overrideFormatFeatures(int values, int mask)
-    {
-        int oldF = _formatFeatures;
-        int newF = (_formatFeatures & ~mask) | (values & mask);
-
-        if (oldF != newF) {
-            _formatFeatures = newF;
-            _writer.overrideFormatFeatures(newF);
-        }
-        return this;
-    }
-
     /*
     /**********************************************************
     /* Public API, capability introspection methods
