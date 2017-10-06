@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.*;
 //import com.fasterxml.jackson.core.json.JsonWriteContext;
 
 public class JPropWriteContext
-    extends JsonStreamContext
+    extends TokenStreamContext
 {
     /**
      * Parent context for this context; null for root context.

@@ -509,7 +509,7 @@ public class CsvParser
      */
     
     @Override
-    public JsonStreamContext getParsingContext() {
+    public TokenStreamContext getParsingContext() {
         return _parsingContext;
     }
 

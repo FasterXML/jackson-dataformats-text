@@ -202,7 +202,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
 //    public void flush() throws IOException
 
     @Override
-    public JsonStreamContext getOutputContext() {
+    public TokenStreamContext getOutputContext() {
         return _jpropContext;
     }
 

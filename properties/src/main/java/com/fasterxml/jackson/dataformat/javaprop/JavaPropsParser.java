@@ -177,7 +177,7 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public JsonStreamContext getParsingContext() {
+    public TokenStreamContext getParsingContext() {
         return _readContext;
     }
 

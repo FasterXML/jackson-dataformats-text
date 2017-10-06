@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.javaprop.util.JPropNode;
  * content tree expressed as {@link JPropNode}s.
  */
 public abstract class JPropReadContext
-    extends JsonStreamContext
+    extends TokenStreamContext
 {
     /**
      * Parent cursor of this cursor, if any; null for root
@@ -63,7 +63,7 @@ public abstract class JPropReadContext
 
     /*
     /**********************************************************
-    /* JsonStreamContext impl
+    /* TokenStreamContext impl
     /**********************************************************
      */
 
@@ -139,7 +139,7 @@ public abstract class JPropReadContext
         protected Iterator<JPropNode> _contents;
 
         public ArrayContext(JPropReadContext p, JPropNode arrayNode) {
-            super(JsonStreamContext.TYPE_ARRAY, p, arrayNode);
+            super(TokenStreamContext.TYPE_ARRAY, p, arrayNode);
             _contents = arrayNode.arrayContents();
             _state = STATE_START;
         }
@@ -196,7 +196,7 @@ public abstract class JPropReadContext
 
         public ObjectContext(JPropReadContext p, JPropNode objectNode)
         {
-            super(JsonStreamContext.TYPE_OBJECT, p, objectNode);
+            super(TokenStreamContext.TYPE_OBJECT, p, objectNode);
             _contents = objectNode.objectContents();
             _state = STATE_START;
         }
