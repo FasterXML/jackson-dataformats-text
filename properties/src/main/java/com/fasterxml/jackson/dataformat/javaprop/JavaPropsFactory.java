@@ -127,7 +127,8 @@ public class JavaPropsFactory
     public JavaPropsGenerator createGenerator(ObjectWriteContext writeCtxt,
             Properties props)
     {
-        return new PropertiesBackedGenerator(_createContext(props, true),
+        return new PropertiesBackedGenerator(writeCtxt,
+                _createContext(props, true),
                 props,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 _objectCodec,
@@ -186,9 +187,10 @@ public class JavaPropsFactory
     
     @Override
     protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            Writer out, IOContext ctxt) throws IOException
+            IOContext ioCtxt, Writer out) throws IOException
     {
-        return new WriterBackedGenerator(ctxt, out,
+        return new WriterBackedGenerator(writeCtxt, ioCtxt,
+                out,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 _objectCodec,
                 writeCtxt.getSchema());
@@ -196,15 +198,18 @@ public class JavaPropsFactory
 
     @Override
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            OutputStream out, IOContext ctxt) throws IOException {
-        return new WriterBackedGenerator(ctxt, _createWriter(out, null, ctxt),
+            IOContext ioCtxt, OutputStream out) throws IOException
+    {
+        return new WriterBackedGenerator(writeCtxt, ioCtxt,
+                _createWriter(ioCtxt, out, null),
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 _objectCodec,
                 writeCtxt.getSchema());
     }
 
     @Override
-    protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt) throws IOException {
+    protected Writer _createWriter(IOContext ctioCtxtxt, OutputStream out, JsonEncoding enc) throws IOException
+    {
         // 27-Jan-2016, tatu: Properties javadoc is quite clear on Latin-1 (ISO-8859-1) being
         //    the default, so let's actually override
         return new OutputStreamWriter(out, CHARSET_ID_LATIN1);

@@ -296,9 +296,9 @@ public class CsvFactory
     
     @Override
     protected CsvGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            Writer out, IOContext ctxt) throws IOException
+            IOContext ioCtxt, Writer out) throws IOException
     {
-        return new CsvGenerator(ctxt,
+        return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
                 _objectCodec, out, _getSchema(writeCtxt));
@@ -307,12 +307,12 @@ public class CsvFactory
     @SuppressWarnings("resource")
     @Override
     protected CsvGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            OutputStream out, IOContext ctxt) throws IOException
+            IOContext ioCtxt, OutputStream out) throws IOException
     {
-        return new CsvGenerator(ctxt,
+        return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
-                _objectCodec, new UTF8Writer(ctxt, out), _getSchema(writeCtxt));
+                _objectCodec, new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
     }
 
     private final CsvSchema _getSchema(ObjectWriteContext writeCtxt) {

@@ -27,11 +27,12 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     /**********************************************************
      */
 
-    public PropertiesBackedGenerator(IOContext ctxt, Properties props,
+    public PropertiesBackedGenerator(ObjectWriteContext writeCtxt, IOContext ctxt,
+            Properties props,
             int stdFeatures, ObjectCodec codec,
             FormatSchema schema)
     {
-        super(ctxt, stdFeatures, codec, schema);
+        super(writeCtxt, ctxt, stdFeatures, codec, schema);
         _props = props;
     }
 

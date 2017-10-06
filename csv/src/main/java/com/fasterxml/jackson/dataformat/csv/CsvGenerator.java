@@ -188,8 +188,6 @@ public class CsvGenerator extends GeneratorBase
     /**
      * When skipping output (for "unknown" output), outermost write context
      * where skipping should occur
-     *
-     * @since 2.7
      */
     protected JsonWriteContext _skipWithin;
 
@@ -199,28 +197,27 @@ public class CsvGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    /**
-     * @since 2.4
-     */
-    public CsvGenerator(IOContext ctxt, int jsonFeatures, int csvFeatures,
+    public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int generatorFeatures, int csvFeatures,
             ObjectCodec codec, Writer out, CsvSchema schema)
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(writeCtxt, generatorFeatures, codec);
+        _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         _schema = schema;
-        _writer = new CsvEncoder(ctxt, csvFeatures, out, schema);
+        _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema);
     }
 
-    public CsvGenerator(IOContext ctxt, int jsonFeatures, int csvFeatures,
+    public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int generatorFeatures, int csvFeatures,
             ObjectCodec codec, CsvEncoder csvWriter)
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(writeCtxt, generatorFeatures, codec);
+        _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         _writer = csvWriter;
     }
-    
+
     /*                                                                                       
     /**********************************************************                              
     /* Versioned                                                                             
@@ -322,7 +319,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeFieldName(String name) throws IOException
     {
-        if (_writeContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
@@ -332,7 +329,7 @@ public class CsvGenerator extends GeneratorBase
     public final void writeFieldName(SerializableString name) throws IOException
     {
         // Object is a value, need to verify it's allowed
-        if (_writeContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -341,7 +338,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeStringField(String fieldName, String value) throws IOException
     {
-        if (_writeContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(fieldName);
@@ -444,10 +441,10 @@ public class CsvGenerator extends GeneratorBase
         /* Ok to create root-level array to contain Objects/Arrays, but
          * can not nest arrays in objects
          */
-        if (_writeContext.inObject()) {
+        if (_outputContext.inObject()) {
             if ((_skipWithin == null)
                     && _skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
-                _skipWithin = _writeContext;
+                _skipWithin = _outputContext;
             } else if (!_skipValue) {
                 // First: column may have its own separator
                 String sep;
@@ -478,20 +475,20 @@ public class CsvGenerator extends GeneratorBase
                 _reportError("CSV generator does not support nested Array values");
             }
         }
-        _writeContext = _writeContext.createChildArrayContext();
+        _outputContext = _outputContext.createChildArrayContext();
         // and that's about it, really
     }
 
     @Override
     public final void writeEndArray() throws IOException
     {
-        if (!_writeContext.inArray()) {
-            _reportError("Current context not Array but "+_writeContext.typeDesc());
+        if (!_outputContext.inArray()) {
+            _reportError("Current context not Array but "+_outputContext.typeDesc());
         }
-        _writeContext = _writeContext.getParent();
+        _outputContext = _outputContext.getParent();
         // 14-Dec-2015, tatu: To complete skipping of ignored structured value, need this:
         if (_skipWithin != null) {
-            if (_writeContext == _skipWithin) {
+            if (_outputContext == _skipWithin) {
                 _skipWithin = null;
             }
             return;
@@ -503,7 +500,7 @@ public class CsvGenerator extends GeneratorBase
         /* 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
          *    is now done. But not if writing such an array field, so:
          */
-        if (!_writeContext.inObject()) {
+        if (!_outputContext.inObject()) {
             finishRow();
         }
     }
@@ -514,28 +511,28 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("start an object");
         // No nesting for objects; can write Objects inside logical root-level arrays.
         // 14-Dec-2015, tatu: ... except, should be fine if we are ignoring the property
-        if (_writeContext.inObject()) {
+        if (_outputContext.inObject()) {
             if (_skipWithin == null) { // new in 2.7
                 if (_skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
-                    _skipWithin = _writeContext;
+                    _skipWithin = _outputContext;
                 } else {
                     _reportMappingError("CSV generator does not support Object values for properties");
                 }
             }
         }
-        _writeContext = _writeContext.createChildObjectContext();
+        _outputContext = _outputContext.createChildObjectContext();
     }
 
     @Override
     public final void writeEndObject() throws IOException
     {
-        if (!_writeContext.inObject()) {
-            _reportError("Current context not Object but "+_writeContext.typeDesc());
+        if (!_outputContext.inObject()) {
+            _reportError("Current context not Object but "+_outputContext.typeDesc());
         }
-        _writeContext = _writeContext.getParent();
+        _outputContext = _outputContext.getParent();
         // 14-Dec-2015, tatu: To complete skipping of ignored structured value, need this:
         if (_skipWithin != null) {
-            if (_writeContext == _skipWithin) {
+            if (_outputContext == _skipWithin) {
                 _skipWithin = null;
             }
             return;
@@ -712,16 +709,16 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(_schema.getNullValueOrEmpty());
-            } else if (_writeContext.inObject()) {
+            } else if (_outputContext.inObject()) {
                 _writer.writeNull(_columnIndex());
-            } else if (_writeContext.inArray()) {
+            } else if (_outputContext.inArray()) {
                 // [dataformat-csv#106]: Need to make sure we don't swallow nulls in arrays either
                 // 04-Jan-2016, tatu: but check for case of array-wrapping, in which case null stands for absence
                 //   of Object. In this case, could either add an empty row, or skip -- for now, we'll
                 //   just skip; can change, if so desired, to expose "root null" as empty rows, possibly
                 //   based on either schema property, or CsvGenerator.Feature.
                 //  Note: if nulls are to be written that way, would need to call `finishRow()` right after `writeNull()`
-                if (!_writeContext.getParent().inRoot()) {
+                if (!_outputContext.getParent().inRoot()) {
                     _writer.writeNull(_columnIndex());
                 }
 
@@ -861,7 +858,7 @@ public class CsvGenerator extends GeneratorBase
             // assumed to have been removed from schema too
         } else {
             // basically combination of "writeFieldName()" and "writeNull()"
-            if (_writeContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+            if (_outputContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
                 _reportError("Can not skip a field, expecting a value");
             }
             // and all we do is just note index to use for following value write
@@ -881,7 +878,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     protected final void _verifyValueWrite(String typeMsg) throws IOException
     {
-        int status = _writeContext.writeValue();
+        int status = _outputContext.writeValue();
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }

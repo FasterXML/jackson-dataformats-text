@@ -216,17 +216,18 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
+    public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
+            int generatorFeatures, int yamlFeatures,
             ObjectCodec codec, Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(writeContext, generatorFeatures, codec);
+        _ioContext = ioCtxt;
         _formatFeatures = yamlFeatures;
         _writer = out;
 
-        _outputOptions = buildDumperOptions(jsonFeatures, yamlFeatures, version);
+        _outputOptions = buildDumperOptions(generatorFeatures, yamlFeatures, version);
 
         _emitter = new Emitter(_writer, _outputOptions);
         // should we start output now, or try to defer?
@@ -372,7 +373,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeFieldName(String name) throws IOException
     {
-        if (_writeContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
@@ -383,7 +384,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         // Object is a value, need to verify it's allowed
-        if (_writeContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -393,7 +394,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStringField(String fieldName, String value)
         throws IOException
     {
-        if (_writeContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_outputContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(fieldName);
@@ -439,7 +440,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartArray() throws IOException
     {
         _verifyValueWrite("start an array");
-        _writeContext = _writeContext.createChildArrayContext();
+        _outputContext = _outputContext.createChildArrayContext();
         Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -454,12 +455,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndArray() throws IOException
     {
-        if (!_writeContext.inArray()) {
-            _reportError("Current context not Array but "+_writeContext.typeDesc());
+        if (!_outputContext.inArray()) {
+            _reportError("Current context not Array but "+_outputContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _writeContext = _writeContext.getParent();
+        _outputContext = _outputContext.getParent();
         _emitter.emit(new SequenceEndEvent(null, null));
     }
 
@@ -467,7 +468,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartObject() throws IOException
     {
         _verifyValueWrite("start an object");
-        _writeContext = _writeContext.createChildObjectContext();
+        _outputContext = _outputContext.createChildObjectContext();
         Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -482,12 +483,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndObject() throws IOException
     {
-        if (!_writeContext.inObject()) {
-            _reportError("Current context not Object but "+_writeContext.typeDesc());
+        if (!_outputContext.inObject()) {
+            _reportError("Current context not Object but "+_outputContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _writeContext = _writeContext.getParent();
+        _outputContext = _outputContext.getParent();
         _emitter.emit(new MappingEndEvent(null, null));
     }
 
@@ -759,7 +760,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final void _verifyValueWrite(String typeMsg)
         throws IOException
     {
-        int status = _writeContext.writeValue();
+        int status = _outputContext.writeValue();
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }

@@ -73,11 +73,12 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    public JavaPropsGenerator(IOContext ctxt, int stdFeatures, ObjectCodec codec,
+    public JavaPropsGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int stdFeatures, ObjectCodec codec,
             FormatSchema schema)
     {
-        super(stdFeatures, codec, BOGUS_WRITE_CONTEXT);
-        _ioContext = ctxt;
+        super(writeCtxt, stdFeatures, codec, BOGUS_WRITE_CONTEXT);
+        _ioContext = ioCtxt;
         _jpropContext = JPropWriteContext.createRootContext();
         if (schema == null) {
             schema = EMPTY_SCHEMA;

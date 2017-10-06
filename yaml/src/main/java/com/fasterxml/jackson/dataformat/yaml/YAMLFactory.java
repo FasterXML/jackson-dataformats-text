@@ -285,8 +285,9 @@ public class YAMLFactory
 
     @Override
     protected YAMLGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            Writer out, IOContext ctxt) throws IOException {
-        return new YAMLGenerator(ctxt,
+            IOContext ioCtxt, Writer out) throws IOException
+    {
+        return new YAMLGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_yamlGeneratorFeatures),
                 _objectCodec, out, _version);
@@ -294,13 +295,14 @@ public class YAMLFactory
 
     @Override
     protected YAMLGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            OutputStream out, IOContext ctxt) throws IOException {
-        return _createGenerator(writeCtxt,
-                _createWriter(out, JsonEncoding.UTF8, ctxt), ctxt);
+            IOContext ioCtxt, OutputStream out) throws IOException
+    {
+        return _createGenerator(writeCtxt, ioCtxt,
+                _createWriter(ioCtxt, out, JsonEncoding.UTF8));
     }
 
     @Override
-    protected Writer _createWriter(OutputStream out, JsonEncoding enc, IOContext ctxt) throws IOException {
+    protected Writer _createWriter(IOContext ioCtxt, OutputStream out, JsonEncoding enc) throws IOException {
         if (enc == JsonEncoding.UTF8) {
             return new UTF8Writer(out);
         }
