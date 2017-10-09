@@ -148,14 +148,18 @@ public class JavaPropsFactory
             InputStream in) throws IOException
     {
         Properties props = _loadProperties(in, ioCtxt);
-        return new JavaPropsParser(readCtxt, ioCtxt, _parserFeatures, in, props);
+        return new JavaPropsParser(readCtxt, ioCtxt,
+                readCtxt.getParserFeatures(_parserFeatures),
+                in, props);
     }
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r) throws IOException {
         Properties props = _loadProperties(r, ioCtxt);
-        return new JavaPropsParser(readCtxt, ioCtxt, _parserFeatures, r, props);
+        return new JavaPropsParser(readCtxt, ioCtxt,
+                readCtxt.getParserFeatures(_parserFeatures),
+                r, props);
     }
 
     @Override
