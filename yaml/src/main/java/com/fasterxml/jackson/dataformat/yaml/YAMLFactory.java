@@ -248,7 +248,9 @@ public class YAMLFactory
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             InputStream in) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt,
-                _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
+                _getBufferRecycler(),
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
                 _createReader(in, null, ioCtxt));
     }
 
@@ -256,7 +258,9 @@ public class YAMLFactory
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt,
-                _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
+                _getBufferRecycler(), 
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
                 r);
     }
 
@@ -265,7 +269,8 @@ public class YAMLFactory
             char[] data, int offset, int len,
             boolean recyclable) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
-                _parserFeatures, _yamlParserFeatures,
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
                 new CharArrayReader(data, offset, len));
     }
 
@@ -273,7 +278,8 @@ public class YAMLFactory
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             byte[] data, int offset, int len) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
-                _parserFeatures, _yamlParserFeatures,
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
                 _createReader(data, offset, len, null, ioCtxt));
     }
 
