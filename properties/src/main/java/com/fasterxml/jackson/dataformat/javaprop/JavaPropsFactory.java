@@ -110,8 +110,8 @@ public class JavaPropsFactory
      * Convenience method to allow feeding a pre-parsed {@link Properties}
      * instance as input.
      */
-    public JavaPropsParser createParser(Properties props) {
-        return new JavaPropsParser(_createContext(props, true),
+    public JavaPropsParser createParser(ObjectReadContext readCtxt, Properties props) {
+        return new JavaPropsParser(readCtxt, _createContext(props, true),
                 _parserFeatures, props, props);
     }
 

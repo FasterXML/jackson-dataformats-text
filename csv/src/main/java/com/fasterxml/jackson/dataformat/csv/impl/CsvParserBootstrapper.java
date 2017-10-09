@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.MergedStream;
 import com.fasterxml.jackson.core.io.UTF32Reader;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * This class is used to determine the encoding of byte stream
@@ -105,7 +106,8 @@ public final class CsvParserBootstrapper
      */
 
     public CsvParser constructParser(ObjectReadContext readCtxt,
-            int parserFeatures, int csvFeatures) throws IOException
+            int parserFeatures, int csvFeatures,
+            CsvSchema schema) throws IOException
     {
         boolean foundEncoding = false;
 
@@ -151,7 +153,8 @@ public final class CsvParserBootstrapper
             throw new RuntimeException("Internal error"); // should never get here
         }
         _context.setEncoding(enc);
-        return new CsvParser(readCtxt, (CsvIOContext) _context, parserFeatures, csvFeatures,
+        return new CsvParser(readCtxt, (CsvIOContext) _context,
+                parserFeatures, csvFeatures, schema,
                 _createReader(enc));
     }
     

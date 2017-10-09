@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectWriteContext;
 import com.fasterxml.jackson.core.Version;
+
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 
 public class JavaPropsMapper extends ObjectMapper
 {
@@ -66,8 +68,10 @@ public class JavaPropsMapper extends ObjectMapper
      */
     @SuppressWarnings("resource")
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,
-            Class<T> valueType) throws IOException {
-        JsonParser p = getFactory().createParser(props);
+            Class<T> valueType) throws IOException
+    {
+        DeserializationContext ctxt = createDeserializationContext();
+        JsonParser p = getFactory().createParser(ctxt, props);
         p.setSchema(schema);
         return (T) readValue(p, valueType);
     }
@@ -84,8 +88,10 @@ public class JavaPropsMapper extends ObjectMapper
      */
     @SuppressWarnings({ "resource", "unchecked" })
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,
-            JavaType valueType) throws IOException {
-        JsonParser p = getFactory().createParser(props);
+            JavaType valueType) throws IOException
+    {
+        DeserializationContext ctxt = createDeserializationContext();
+        JsonParser p = getFactory().createParser(ctxt, props);
         p.setSchema(schema);
         return (T) readValue(p, valueType);
     }
@@ -95,8 +101,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readPropertiesAs(Properties props, Class<T> valueType) throws IOException {
         return readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
@@ -107,8 +111,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readPropertiesAs(Properties props, JavaType valueType) throws IOException {
         return readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
@@ -119,8 +121,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(System.getProperties(), schema, valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readSystemPropertiesAs(JavaPropsSchema schema, 
             Class<T> valueType) throws IOException {
@@ -132,8 +132,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(System.getProperties(), schema, valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readSystemPropertiesAs(JavaPropsSchema schema,
             JavaType valueType) throws IOException {
@@ -145,8 +143,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(convertMapToProperties(System.getenv()), schema, valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readEnvVariablesAs(JavaPropsSchema schema, 
             Class<T> valueType) throws IOException {
@@ -158,8 +154,6 @@ public class JavaPropsMapper extends ObjectMapper
      *<pre>
      *   readPropertiesAs(convertMapToProperties(System.getenv()), schema, valueType);
      *</pre>
-     *
-     * @since 2.9
      */
     public <T> T readEnvVariablesAs(JavaPropsSchema schema,
             JavaType valueType) throws IOException {
@@ -187,9 +181,9 @@ public class JavaPropsMapper extends ObjectMapper
         if (targetProps == null) {
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
-        // 04-Oct-2017, tatu: TODO!!! Proper `ObjectWriteContext`
-        JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(ObjectWriteContext.empty(), targetProps);
+        DefaultSerializerProvider prov = _serializerProvider();
+        JavaPropsGenerator g = getFactory()
+                .createGenerator(prov, targetProps);
         writeValue(g, value);
         g.close();
     }
@@ -204,9 +198,9 @@ public class JavaPropsMapper extends ObjectMapper
         if (targetProps == null) {
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
-        // 04-Oct-2017, tatu: TODO!!! Proper `ObjectWriteContext`
-        JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(ObjectWriteContext.empty(), targetProps);
+        DefaultSerializerProvider prov = _serializerProvider();
+        JavaPropsGenerator g = getFactory()
+                .createGenerator(prov, targetProps);
         if (schema != null) {
             g.setSchema(schema);
         }

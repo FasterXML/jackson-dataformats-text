@@ -286,13 +286,6 @@ public class CsvDecoder
         _maxSpecialChar = max;
     }
 
-    /**
-     * @since 2.7
-     */
-    public void overrideFormatFeatures(int csvFeatures) {
-        _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
-    }
-
     /*
     /**********************************************************************
     /* JsonParser implementations passed-through by CsvParser

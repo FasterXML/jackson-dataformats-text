@@ -257,14 +257,20 @@ public class CsvFactory
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             InputStream in) throws IOException {
         return new CsvParserBootstrapper(ioCtxt, in)
-            .constructParser(readCtxt, _parserFeatures, _csvParserFeatures);
+            .constructParser(readCtxt,
+                    readCtxt.getParserFeatures(_parserFeatures),
+                    readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                    _getSchema(readCtxt));
     }
 
     @Override
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             byte[] data, int offset, int len) throws IOException {
         return new CsvParserBootstrapper(ioCtxt, data, offset, len)
-               .constructParser(readCtxt, _parserFeatures, _csvParserFeatures);
+               .constructParser(readCtxt,
+                       readCtxt.getParserFeatures(_parserFeatures),
+                       readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                       _getSchema(readCtxt));
     }
 
     /**
@@ -274,7 +280,10 @@ public class CsvFactory
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r) throws IOException {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
-                _parserFeatures, _csvParserFeatures, r);
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                _getSchema(readCtxt),
+                r);
     }
 
     @Override
@@ -282,7 +291,10 @@ public class CsvFactory
             char[] data, int offset, int len,
             boolean recyclable) throws IOException
     {
-        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt, _parserFeatures, _csvParserFeatures,
+        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
+                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                _getSchema(readCtxt),
                 new CharArrayReader(data, offset, len));
     }
 
@@ -292,6 +304,14 @@ public class CsvFactory
         return _unsupported();
     }
 
+    private final CsvSchema _getSchema(ObjectReadContext readCtxt) {
+        FormatSchema sch = readCtxt.getSchema();
+        if (sch == null) {
+            return DEFAULT_SCHEMA;
+        }
+        return (CsvSchema) sch;
+    }
+    
     /*
     /******************************************************
     /* Factory methods: generators

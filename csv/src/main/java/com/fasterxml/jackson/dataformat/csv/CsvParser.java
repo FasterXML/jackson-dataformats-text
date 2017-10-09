@@ -64,8 +64,6 @@ public class CsvParser
          * silently ignored.
          *<p>
          * Feature is disabled by default.
-         *
-         * @since 2.7
          */
         IGNORE_TRAILING_UNMAPPABLE(false),
 
@@ -75,8 +73,6 @@ public class CsvParser
          * depending on binding, `null`).
          *<p>
          * Feature is disabled by default.
-         *
-         * @since 2.9
          */
         SKIP_EMPTY_LINES(false),
 
@@ -97,8 +93,6 @@ public class CsvParser
          * Note that this feature has precedence over {@link #INSERT_NULLS_FOR_MISSING_COLUMNS}
          *<p>
          * Feature is disabled by default.
-         *
-         * @since 2.9
          */
         FAIL_ON_MISSING_COLUMNS(false),
         
@@ -115,8 +109,6 @@ public class CsvParser
          * is disabled.
          *<p>
          * Feature is disabled by default.
-         *
-         * @since 2.9
          */
         INSERT_NULLS_FOR_MISSING_COLUMNS(false),
         ;
@@ -201,8 +193,6 @@ public class CsvParser
      * State in which a column value has been determined to be of
      * an array type, and will need to be split into multiple
      * values. This can currently only occur for named values.
-     * 
-     * @since 2.5
      */
     protected final static int STATE_IN_ARRAY = 5;
 
@@ -210,8 +200,6 @@ public class CsvParser
      * State in which we have encountered more column values than there should be,
      * and need to basically skip extra values if callers tries to advance parser
      * state.
-     *
-     * @since 2.6
      */
     protected final static int STATE_SKIP_EXTRA_COLUMNS = 6;
 
@@ -219,8 +207,6 @@ public class CsvParser
      * State in which we should expose name token for a "missing column"
      * (for which placeholder `null` value is to be added as well);
      * see {@link Feature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
-     *
-     * @since 2.9
      */
     protected final static int STATE_MISSING_NAME = 7;
 
@@ -228,8 +214,6 @@ public class CsvParser
      * State in which we should expose `null` value token as a value for
      * "missing" column;
      * see {@link Feature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
-     *
-     * @since 2.9
      */
     protected final static int STATE_MISSING_VALUE = 8;
 
@@ -251,10 +235,9 @@ public class CsvParser
     protected int _formatFeatures;
 
     /**
-     * Definition of columns being read. Initialized to "empty" instance, which
-     * has default configuration settings.
+     * Definition of columns being read.
      */
-    protected CsvSchema _schema = EMPTY_SCHEMA;
+    protected CsvSchema _schema;
 
     /**
      * Number of columns defined by schema.
@@ -344,15 +327,17 @@ public class CsvParser
      */
 
     public CsvParser(ObjectReadContext readCtxt, CsvIOContext ctxt,
-            int stdFeatures, int csvFeatures, Reader reader)
+            int stdFeatures, int csvFeatures, CsvSchema schema,
+            Reader reader)
     {
-        super(readCtxt, stdFeatures);    
+        super(readCtxt, stdFeatures);
         _textBuffer =  ctxt.csvTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;
+        _schema = schema;
         _parsingContext = JsonReadContext.createRootContext(dups);
-        _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
+        _reader = new CsvDecoder(this, ctxt, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
     }
 
