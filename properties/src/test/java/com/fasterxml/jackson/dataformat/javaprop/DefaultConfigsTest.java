@@ -57,7 +57,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(p.canReadTypeId());
         assertFalse(p.hasTextCharacters());
         assertTrue(p.canUseSchema(JavaPropsSchema.emptySchema()));
-        assertFalse(p.requiresCustomCodec());
 
         p.setSchema(JavaPropsSchema.emptySchema());
         assertSame(JavaPropsSchema.emptySchema(), p.getSchema());

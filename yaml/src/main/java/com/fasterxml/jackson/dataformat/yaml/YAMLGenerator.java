@@ -28,8 +28,6 @@ public class YAMLGenerator extends GeneratorBase
         /**
          * Whether we are to write an explicit document start marker ("---")
          * or not.
-         *
-         * @since 2.3
          */
         WRITE_DOC_START_MARKER(true),
 
@@ -38,8 +36,6 @@ public class YAMLGenerator extends GeneratorBase
          * or "generic" Object Id mechanism (false). Former works better for systems that
          * are YAML-centric; latter may be better choice for interoperability, when
          * converting between formats or accepting other formats.
-         *
-         * @since 2.5
          */
         USE_NATIVE_OBJECT_ID(true),
 
@@ -48,8 +44,6 @@ public class YAMLGenerator extends GeneratorBase
          * or "generic" type property (false). Former works better for systems that
          * are YAML-centric; latter may be better choice for interoperability, when
          * converting between formats or accepting other formats.
-         *
-         * @since 2.5
          */
         USE_NATIVE_TYPE_ID(true),
 
@@ -64,8 +58,6 @@ public class YAMLGenerator extends GeneratorBase
          *<p>
          * Feature is enabled by default to conform to SnakeYAML defaults as well as
          * backwards compatibility with 2.5 and earlier versions.
-         *
-         * @since 2.6
          */
         SPLIT_LINES(true),
 
@@ -76,8 +68,6 @@ public class YAMLGenerator extends GeneratorBase
          * Minimized quote usage makes for more human readable output; however, content is
          * limited to printable characters according to the rules of
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         *
-         * @since 2.7
          */
         MINIMIZE_QUOTES(false),
 
@@ -88,8 +78,6 @@ public class YAMLGenerator extends GeneratorBase
          * Minimized quote usage makes for more human readable output; however, content is
          * limited to printable characters according to the rules of
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         *
-         * @since 2.8.2
          */
         ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
 
@@ -99,8 +87,6 @@ public class YAMLGenerator extends GeneratorBase
          * <p>
          * The content of such strings is limited to printable characters according to the rules of
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         *
-         * @since 2.9
          */
         LITERAL_BLOCK_STYLE(false),
 
@@ -109,8 +95,6 @@ public class YAMLGenerator extends GeneratorBase
          * (default indentation being 2 spaces).
          *<p>
          * Default value is `false` for backwards compatibility
-         *
-         * @since 2.9
          */
         INDENT_ARRAYS(false)
         ;
@@ -218,11 +202,11 @@ public class YAMLGenerator extends GeneratorBase
 
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
             int generatorFeatures, int yamlFeatures,
-            ObjectCodec codec, Writer out,
+            Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
     {
-        super(writeContext, generatorFeatures, codec);
+        super(writeContext, generatorFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = yamlFeatures;
         _writer = out;

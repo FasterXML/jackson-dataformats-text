@@ -13,7 +13,8 @@ import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
-public abstract class JavaPropsGenerator extends GeneratorBase
+public abstract class JavaPropsGenerator
+    extends GeneratorBase
 {
     // As an optimization we try coalescing short writes into
     // buffer; but pass longer directly.
@@ -74,10 +75,9 @@ public abstract class JavaPropsGenerator extends GeneratorBase
      */
 
     public JavaPropsGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, ObjectCodec codec,
-            FormatSchema schema)
+            int stdFeatures, FormatSchema schema)
     {
-        super(writeCtxt, stdFeatures, codec, BOGUS_WRITE_CONTEXT);
+        super(writeCtxt, stdFeatures, BOGUS_WRITE_CONTEXT);
         _ioContext = ioCtxt;
         _jpropContext = JPropWriteContext.createRootContext();
         if (schema == null) {

@@ -27,21 +27,17 @@ public class JavaPropsFactory
     /**********************************************************
      */
     
-    public JavaPropsFactory() { }
+    public JavaPropsFactory() { super(); }
 
-    public JavaPropsFactory(ObjectCodec codec) {
-        super(codec);
-    }
-
-    protected JavaPropsFactory(JavaPropsFactory src, ObjectCodec oc)
+    protected JavaPropsFactory(JavaPropsFactory src)
     {
-        super(src, oc);
+        super(src);
     }
 
     @Override
     public JavaPropsFactory copy()
     {
-        return new JavaPropsFactory(this, null);
+        return new JavaPropsFactory(this);
     }
 
     /*
@@ -116,7 +112,7 @@ public class JavaPropsFactory
      */
     public JavaPropsParser createParser(Properties props) {
         return new JavaPropsParser(_createContext(props, true),
-                props, _parserFeatures, _objectCodec, props);
+                _parserFeatures, props, props);
     }
 
     /**
@@ -129,10 +125,9 @@ public class JavaPropsFactory
     {
         return new PropertiesBackedGenerator(writeCtxt,
                 _createContext(props, true),
-                props,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                _objectCodec,
-                writeCtxt.getSchema());
+                writeCtxt.getSchema(),
+                props);
     }
 
     /*
@@ -149,33 +144,38 @@ public class JavaPropsFactory
     */
 
     @Override
-    protected JsonParser _createParser(InputStream in, IOContext ctxt) throws IOException
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            InputStream in) throws IOException
     {
-        Properties props = _loadProperties(in, ctxt);
-        return new JavaPropsParser(ctxt, in, _parserFeatures, _objectCodec, props);
+        Properties props = _loadProperties(in, ioCtxt);
+        return new JavaPropsParser(readCtxt, ioCtxt, _parserFeatures, in, props);
     }
 
     @Override
-    protected JsonParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        Properties props = _loadProperties(r, ctxt);
-        return new JavaPropsParser(ctxt, r, _parserFeatures, _objectCodec, props);
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            Reader r) throws IOException {
+        Properties props = _loadProperties(r, ioCtxt);
+        return new JavaPropsParser(readCtxt, ioCtxt, _parserFeatures, r, props);
     }
 
     @Override
-    protected JsonParser _createParser(char[] data, int offset, int len, IOContext ctxt,
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            char[] data, int offset, int len,
             boolean recyclable) throws IOException
     {
-        return _createParser(new CharArrayReader(data, offset, len), ctxt);
+        return _createParser(readCtxt, ioCtxt, new CharArrayReader(data, offset, len));
     }
 
     @Override
-    protected JsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            byte[] data, int offset, int len) throws IOException
     {
-        return _createParser(new Latin1Reader(data, offset, len), ctxt);
+        return _createParser(readCtxt, ioCtxt, new Latin1Reader(data, offset, len));
     }
 
     @Override
-    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt,
+            DataInput input) throws IOException {
         return _unsupported();
     }
 
@@ -190,10 +190,9 @@ public class JavaPropsFactory
             IOContext ioCtxt, Writer out) throws IOException
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                out,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                _objectCodec,
-                writeCtxt.getSchema());
+                writeCtxt.getSchema(),
+                out);
     }
 
     @Override
@@ -201,10 +200,9 @@ public class JavaPropsFactory
             IOContext ioCtxt, OutputStream out) throws IOException
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                _createWriter(ioCtxt, out, null),
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                _objectCodec,
-                writeCtxt.getSchema());
+                writeCtxt.getSchema(),
+                _createWriter(ioCtxt, out, null));
     }
 
     @Override

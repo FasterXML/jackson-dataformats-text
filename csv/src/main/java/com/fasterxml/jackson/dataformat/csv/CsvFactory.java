@@ -72,13 +72,11 @@ public class CsvFactory
      * and this reuse only works within context of a single
      * factory instance.
      */
-    public CsvFactory() { this(null); }
+    public CsvFactory() { super(); }
 
-    public CsvFactory(ObjectCodec oc) { super(oc); }
-
-    protected CsvFactory(CsvFactory src, ObjectCodec oc)
+    protected CsvFactory(CsvFactory src)
     {
-        super(src, oc);
+        super(src);
         _csvParserFeatures = src._csvParserFeatures;
         _csvGeneratorFeatures = src._csvGeneratorFeatures;
     }
@@ -86,7 +84,7 @@ public class CsvFactory
     @Override
     public CsvFactory copy()
     {
-        return new CsvFactory(this, null);
+        return new CsvFactory(this);
     }
 
     /*
@@ -101,7 +99,7 @@ public class CsvFactory
      * Also: must be overridden by sub-classes as well.
      */
     protected Object readResolve() {
-        return new CsvFactory(this, _objectCodec);
+        return new CsvFactory(this);
     }
 
     /*
@@ -256,35 +254,41 @@ public class CsvFactory
      * Overridable factory method that actually instantiates desired parser.
      */
     @Override
-    protected CsvParser _createParser(InputStream in, IOContext ctxt) throws IOException {
-        return new CsvParserBootstrapper(ctxt, _objectCodec, in)
-            .constructParser(_parserFeatures, _csvParserFeatures);
+    protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            InputStream in) throws IOException {
+        return new CsvParserBootstrapper(ioCtxt, in)
+            .constructParser(readCtxt, _parserFeatures, _csvParserFeatures);
     }
 
     @Override
-    protected CsvParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return new CsvParserBootstrapper(ctxt, _objectCodec, data, offset, len)
-               .constructParser(_parserFeatures, _csvParserFeatures);
+    protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            byte[] data, int offset, int len) throws IOException {
+        return new CsvParserBootstrapper(ioCtxt, data, offset, len)
+               .constructParser(readCtxt, _parserFeatures, _csvParserFeatures);
     }
 
     /**
      * Overridable factory method that actually instantiates desired parser.
      */
     @Override
-    protected CsvParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new CsvParser((CsvIOContext) ctxt, _parserFeatures, _csvParserFeatures,
-                _objectCodec, r);
+    protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            Reader r) throws IOException {
+        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
+                _parserFeatures, _csvParserFeatures, r);
     }
 
     @Override
-    protected CsvParser _createParser(char[] data, int offset, int len, IOContext ctxt,
-            boolean recyclable) throws IOException {
-        return new CsvParser((CsvIOContext) ctxt, _parserFeatures, _csvParserFeatures,
-                _objectCodec, new CharArrayReader(data, offset, len));
+    protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            char[] data, int offset, int len,
+            boolean recyclable) throws IOException
+    {
+        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt, _parserFeatures, _csvParserFeatures,
+                new CharArrayReader(data, offset, len));
     }
 
     @Override
-    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            DataInput input) throws IOException {
         return _unsupported();
     }
 
@@ -301,7 +305,7 @@ public class CsvFactory
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
-                _objectCodec, out, _getSchema(writeCtxt));
+                out, _getSchema(writeCtxt));
     }
 
     @SuppressWarnings("resource")
@@ -312,7 +316,7 @@ public class CsvFactory
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
-                _objectCodec, new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
+                new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
     }
 
     private final CsvSchema _getSchema(ObjectWriteContext writeCtxt) {

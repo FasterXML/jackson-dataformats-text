@@ -63,8 +63,6 @@ public class JavaPropsMapper extends ObjectMapper
      * Note that this is NOT identical to calling {@link #convertValue(Object, Class)};
      * rather, it would be similar to writing `Properties` out into a File,
      * then calling `readValue()` on this mapper to bind contents.
-     *
-     * @since 2.9
      */
     @SuppressWarnings("resource")
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,
@@ -83,8 +81,6 @@ public class JavaPropsMapper extends ObjectMapper
      * Note that this is NOT identical to calling {@link #convertValue(Object, Class)};
      * rather, it would be similar to writing `Properties` out into a File,
      * then calling `readValue()` on this mapper to bind contents.
-     *
-     * @since 2.9
      */
     @SuppressWarnings({ "resource", "unchecked" })
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,

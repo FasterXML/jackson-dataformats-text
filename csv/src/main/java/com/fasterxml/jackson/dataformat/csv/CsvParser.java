@@ -28,7 +28,7 @@ public class CsvParser
      * Enumeration that defines all togglable features for CSV parsers
      */
     public enum Feature
-        implements FormatFeature // since 2.7
+        implements FormatFeature
     {
         /**
          * Feature determines whether spaces around separator characters
@@ -247,11 +247,6 @@ public class CsvParser
     /* Configuration
     /**********************************************************************
      */
-    
-    /**
-     * Codec used for data binding when (if) requested.
-     */
-    protected ObjectCodec _objectCodec;
 
     protected int _formatFeatures;
 
@@ -348,11 +343,10 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(CsvIOContext ctxt, int stdFeatures, int csvFeatures,
-            ObjectCodec codec, Reader reader)
+    public CsvParser(ObjectReadContext readCtxt, CsvIOContext ctxt,
+            int stdFeatures, int csvFeatures, Reader reader)
     {
-        super(stdFeatures);    
-        _objectCodec = codec;
+        super(readCtxt, stdFeatures);    
         _textBuffer =  ctxt.csvTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
@@ -378,16 +372,6 @@ public class CsvParser
     /* Overridden methods
     /**********************************************************                              
      */
-
-    @Override
-    public ObjectCodec getCodec() {
-        return _objectCodec;
-    }
-
-    @Override
-    public void setCodec(ObjectCodec c) {
-        _objectCodec = c;
-    }
 
     @Override
     public boolean canUseSchema(FormatSchema schema) {
@@ -430,18 +414,6 @@ public class CsvParser
     @Override
     public int getFormatFeatures() {
         return _formatFeatures;
-    }
-
-    @Override
-    public JsonParser overrideFormatFeatures(int values, int mask) {
-        int oldF = _formatFeatures;
-        int newF = (_formatFeatures & ~mask) | (values & mask);
-
-        if (oldF != newF) {
-            _formatFeatures = newF;
-            _reader.overrideFormatFeatures(newF);
-        }
-        return this;
     }
 
     /*

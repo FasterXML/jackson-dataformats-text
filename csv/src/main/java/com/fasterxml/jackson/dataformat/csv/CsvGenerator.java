@@ -38,8 +38,6 @@ public class CsvGenerator extends GeneratorBase
          *<p>
          * Default value is <code>false</code> for "loose" (approximate, conservative)
          * checking.
-         * 
-         * @since 2.4
          */
         STRICT_CHECK_FOR_QUOTING(false),
 
@@ -60,16 +58,12 @@ public class CsvGenerator extends GeneratorBase
          * actually need this.
          * Note that this feature has precedence over {@link #STRICT_CHECK_FOR_QUOTING}, when
          * both would be applicable.
-         *
-         * @since 2.5
          */
         ALWAYS_QUOTE_STRINGS(false),
 
         /**
          * Feature that determines whether values written as empty Strings (from <code>java.lang.String</code>
          * valued POJO properties) should be forced to be quoted.
-         *
-         * @since 2.9
          */
         ALWAYS_QUOTE_EMPTY_STRINGS(false),
         ;
@@ -199,9 +193,9 @@ public class CsvGenerator extends GeneratorBase
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int generatorFeatures, int csvFeatures,
-            ObjectCodec codec, Writer out, CsvSchema schema)
+            Writer out, CsvSchema schema)
     {
-        super(writeCtxt, generatorFeatures, codec);
+        super(writeCtxt, generatorFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         _schema = schema;
@@ -210,9 +204,9 @@ public class CsvGenerator extends GeneratorBase
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int generatorFeatures, int csvFeatures,
-            ObjectCodec codec, CsvEncoder csvWriter)
+            CsvEncoder csvWriter)
     {
-        super(writeCtxt, generatorFeatures, codec);
+        super(writeCtxt, generatorFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         _writer = csvWriter;

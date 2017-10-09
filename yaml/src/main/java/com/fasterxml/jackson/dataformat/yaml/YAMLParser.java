@@ -30,7 +30,7 @@ public class YAMLParser extends ParserBase
     /**
      * Enumeration that defines all togglable features for YAML parsers.
      */
-    public enum Feature implements FormatFeature // in 2.9
+    public enum Feature implements FormatFeature
     {
         ;
 
@@ -80,11 +80,6 @@ public class YAMLParser extends ParserBase
     /* Configuration
     /**********************************************************************
      */
-    
-    /**
-     * Codec used for data binding when (if) requested.
-     */
-    protected ObjectCodec _objectCodec;
 
     protected int _formatFeatures;
 
@@ -144,26 +139,15 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
     
-    public YAMLParser(IOContext ctxt, BufferRecycler br,
+    public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            BufferRecycler br,
             int parserFeatures, int formatFeatures,
-            ObjectCodec codec, Reader reader)
+            Reader reader)
     {
-        super(ctxt, parserFeatures);    
-        _objectCodec = codec;
+        super(readCtxt, ioCtxt, parserFeatures);    
         _formatFeatures = formatFeatures;
         _reader = reader;
         _yamlParser = new ParserImpl(new StreamReader(reader));
-    }
-
-
-    @Override
-    public ObjectCodec getCodec() {
-        return _objectCodec;
-    }
-
-    @Override
-    public void setCodec(ObjectCodec c) {
-        _objectCodec = c;
     }
 
     /*                                                                                       
@@ -224,12 +208,6 @@ public class YAMLParser extends ParserBase
     @Override
     public int getFormatFeatures() {
         return _formatFeatures;
-    }
-
-    @Override
-    public JsonParser overrideFormatFeatures(int values, int mask) {
-        _formatFeatures = (_formatFeatures & ~mask) | (values & mask);
-        return this;
     }
 
     /*

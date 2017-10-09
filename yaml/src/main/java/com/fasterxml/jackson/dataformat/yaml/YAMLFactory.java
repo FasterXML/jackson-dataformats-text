@@ -62,23 +62,20 @@ public class YAMLFactory
      * and this reuse only works within context of a single
      * factory instance.
      */
-    public YAMLFactory() { this(null); }
-
-    public YAMLFactory(ObjectCodec oc)
+    public YAMLFactory()
     {
-        super(oc);
+        super();
         _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
         _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
-        /* 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
-         *   that adds version declaration which looks ugly...
-         */
+        // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
+        //  that adds version declaration which looks ugly...
         //_version = DumperOptions.Version.V1_1;
         _version = null;
     }
 
-    public YAMLFactory(YAMLFactory src, ObjectCodec oc)
+    public YAMLFactory(YAMLFactory src)
     {
-        super(src, oc);
+        super(src);
         _version = src._version;
         _yamlParserFeatures = src._yamlParserFeatures;
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
@@ -87,7 +84,7 @@ public class YAMLFactory
     @Override
     public YAMLFactory copy()
     {
-        return new YAMLFactory(this, null);
+        return new YAMLFactory(this);
     }
 
     /*
@@ -101,7 +98,7 @@ public class YAMLFactory
      * through constructors etc.
      */
     protected Object readResolve() {
-        return new YAMLFactory(this, _objectCodec);
+        return new YAMLFactory(this);
     }
 
     /*
@@ -248,32 +245,41 @@ public class YAMLFactory
      */
 
     @Override
-    protected YAMLParser _createParser(InputStream in, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, _createReader(in, null, ctxt));
+    protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            InputStream in) throws IOException {
+        return new YAMLParser(readCtxt, ioCtxt,
+                _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
+                _createReader(in, null, ioCtxt));
     }
 
     @Override
-    protected YAMLParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, r);
+    protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            Reader r) throws IOException {
+        return new YAMLParser(readCtxt, ioCtxt,
+                _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
+                r);
     }
 
     @Override
-    protected YAMLParser _createParser(char[] data, int offset, int len, IOContext ctxt,
+    protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            char[] data, int offset, int len,
             boolean recyclable) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, new CharArrayReader(data, offset, len));
+        return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
+                _parserFeatures, _yamlParserFeatures,
+                new CharArrayReader(data, offset, len));
     }
 
     @Override
-    protected YAMLParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, _createReader(data, offset, len, null, ctxt));
+    protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            byte[] data, int offset, int len) throws IOException {
+        return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
+                _parserFeatures, _yamlParserFeatures,
+                _createReader(data, offset, len, null, ioCtxt));
     }
 
     @Override
-    protected JsonParser _createParser(DataInput input, IOContext ctxt) throws IOException {
+    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            DataInput input) throws IOException {
         return _unsupported();
     }
 
@@ -290,7 +296,7 @@ public class YAMLFactory
         return new YAMLGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
                 writeCtxt.getFormatWriteFeatures(_yamlGeneratorFeatures),
-                _objectCodec, out, _version);
+                out, _version);
     }
 
     @Override

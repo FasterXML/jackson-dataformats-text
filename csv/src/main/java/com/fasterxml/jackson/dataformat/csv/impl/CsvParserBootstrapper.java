@@ -32,8 +32,6 @@ public final class CsvParserBootstrapper
 
     protected final IOContext _context;
 
-    protected final ObjectCodec _codec;
-
     /*
     /**********************************************************
     /* Input buffering
@@ -79,21 +77,19 @@ public final class CsvParserBootstrapper
     /**********************************************************
      */
 
-    public CsvParserBootstrapper(IOContext ctxt, ObjectCodec codec, InputStream in)
+    public CsvParserBootstrapper(IOContext ctxt, InputStream in)
     {
         _context = ctxt;
-        _codec = codec;
         _in = in;
         _inputBuffer = ctxt.allocReadIOBuffer();
         _inputEnd = _inputPtr = 0;
         _inputProcessed = 0;
     }
 
-    public CsvParserBootstrapper(IOContext ctxt, ObjectCodec codec,
+    public CsvParserBootstrapper(IOContext ctxt,
             byte[] inputBuffer, int inputStart, int inputLen)
     {
         _context = ctxt;
-        _codec = codec;
         _in = null;
         _inputBuffer = inputBuffer;
         _inputPtr = inputStart;
@@ -108,7 +104,8 @@ public final class CsvParserBootstrapper
     /**********************************************************
      */
 
-    public CsvParser constructParser(int baseFeatures, int csvFeatures) throws IOException
+    public CsvParser constructParser(ObjectReadContext readCtxt,
+            int parserFeatures, int csvFeatures) throws IOException
     {
         boolean foundEncoding = false;
 
@@ -154,7 +151,7 @@ public final class CsvParserBootstrapper
             throw new RuntimeException("Internal error"); // should never get here
         }
         _context.setEncoding(enc);
-        return new CsvParser((CsvIOContext) _context, baseFeatures, csvFeatures, _codec,
+        return new CsvParser(readCtxt, (CsvIOContext) _context, parserFeatures, csvFeatures,
                 _createReader(enc));
     }
     

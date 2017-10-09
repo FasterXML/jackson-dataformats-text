@@ -24,11 +24,6 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     /**
-     * Codec used for data binding when (if) requested.
-     */
-    protected ObjectCodec _objectCodec;
-
-    /**
      * Although most massaging is done later, caller may be interested in the
      * ultimate source.
      */
@@ -71,14 +66,13 @@ public class JavaPropsParser extends ParserMinimalBase
     /**********************************************************
      */
 
-    public JavaPropsParser(IOContext ctxt, Object inputSource,
-            int parserFeatures, ObjectCodec codec, Properties sourceProps)
+    public JavaPropsParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            int parserFeatures,
+            Object inputSource, Properties sourceProps)
     {
-        super(parserFeatures);
-        _objectCodec = codec;
+        super(readCtxt, parserFeatures);
         _inputSource = inputSource;
         _sourceProperties = sourceProps;
-        
     }
 
     @Override
@@ -134,16 +128,6 @@ public class JavaPropsParser extends ParserMinimalBase
     /* Public API overrides
     /**********************************************************
      */
-    
-    @Override
-    public ObjectCodec getCodec() {
-        return _objectCodec;
-    }
-
-    @Override
-    public void setCodec(ObjectCodec c) {
-        _objectCodec = c;
-    }
 
     @Override
     public Object getInputSource() {
@@ -160,9 +144,6 @@ public class JavaPropsParser extends ParserMinimalBase
     public boolean canUseSchema(FormatSchema schema) {
         return schema instanceof JavaPropsSchema;
     }
-
-    @Override
-    public boolean requiresCustomCodec() { return false;}
 
     @Override
     public boolean canReadObjectId() { return false; }
