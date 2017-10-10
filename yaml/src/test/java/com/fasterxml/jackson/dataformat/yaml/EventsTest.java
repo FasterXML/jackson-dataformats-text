@@ -17,8 +17,8 @@ public class EventsTest extends ModuleTestBase
 +"i: 123\n"
 +"d: 1.25\n"
 ;
-        YAMLFactory f = new YAMLFactory();
-        JsonParser p = f.createParser(YAML);
+        YAMLMapper mapper = mapperForYAML();
+        JsonParser p = mapper.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());

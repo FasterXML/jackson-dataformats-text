@@ -226,7 +226,6 @@ public class BasicParserTest extends ModuleTestBase {
 
     // for [dataformat-csv#89]
     public void testColumnReordering() throws IOException {
-        CsvFactory factory = new CsvFactory();
         String CSV = "b,a,c\nvb,va,vc\n";
 
         /* Test first column reordering, by setting the
@@ -244,7 +243,7 @@ public class BasicParserTest extends ModuleTestBase {
 
         // Create a parser and ensure data is processed in the
         // right order, as per header
-        JsonParser parser = factory.createParser(CSV);
+        JsonParser parser = MAPPER.createParser(CSV);
         parser.setSchema(schemaWithReordering);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
@@ -268,7 +267,7 @@ public class BasicParserTest extends ModuleTestBase {
             reported as per the schema order, not the header.
          */
         CsvSchema schemaWithoutReordering = schemaWithReordering.withColumnReordering(false);
-        parser = factory.createParser(CSV);
+        parser = MAPPER.createParser(CSV);
         parser.setSchema(schemaWithoutReordering);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
@@ -294,7 +293,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .withUseHeader(false)
                 .withSkipFirstDataRow(true);
 
-        parser = factory.createParser(CSV);
+        parser = MAPPER.createParser(CSV);
         parser.setSchema(schemaWithoutHeader);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
@@ -321,7 +320,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setUseHeader(true)
                 .build();
 
-        parser = factory.createParser(CSV);
+        parser = MAPPER.createParser(CSV);
         parser.setSchema(emptySchema);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
@@ -341,7 +340,6 @@ public class BasicParserTest extends ModuleTestBase {
     }
 
     public void testColumnFailsOnOutOfOrder() throws IOException {
-        CsvFactory factory = new CsvFactory();
         String CSV = "b,a,c\nvb,va,vc\n";
 
         CsvSchema schema = CsvSchema.builder()
@@ -353,7 +351,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = factory.createParser(CSV);
+        JsonParser parser = MAPPER.createParser(CSV);
         parser.setSchema(schema);
 
         try {
@@ -366,7 +364,6 @@ public class BasicParserTest extends ModuleTestBase {
     }
 
     public void testColumnFailsOnTooFew() throws IOException {
-        CsvFactory factory = new CsvFactory();
         String CSV = "a,b\nvb,va,vc\n";
 
         CsvSchema schema = CsvSchema.builder()
@@ -378,7 +375,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = factory.createParser(CSV);
+        JsonParser parser = MAPPER.createParser(CSV);
         parser.setSchema(schema);
 
         try {
@@ -391,7 +388,6 @@ public class BasicParserTest extends ModuleTestBase {
     }
 
     public void testColumnFailsOnTooMany() throws IOException {
-        CsvFactory factory = new CsvFactory();
         String CSV = "a,b,c,d\nvb,va,vc\n";
 
         CsvSchema schema = CsvSchema.builder()
@@ -403,7 +399,7 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = factory.createParser(CSV);
+        JsonParser parser = MAPPER.createParser(CSV);
         parser.setSchema(schema);
 
         try {

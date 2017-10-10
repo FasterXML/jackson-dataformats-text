@@ -94,7 +94,7 @@ public final class DeserPerf
             /*
             case 0:
                 msg = "Deserialize, manual, YAML";
-                sum += testDeser(yamlMapper.getJsonFactory(), yaml, REPS);
+                sum += testDeserUsingParser(yamlMapper, yaml, REPS);
                 break;
                 */
 
@@ -122,14 +122,14 @@ public final class DeserPerf
         return item.hashCode(); // just to get some non-optimizable number
     }
 
-    protected int testDeser(JsonFactory jf, byte[] input, int reps)
+    protected int testDeserUsingParser(ObjectMapper mapper, byte[] input, int reps)
         throws Exception
     {
         MediaItem item = null;
         for (int i = 0; i < reps; ++i) {
-            JsonParser jp = jf.createParser(input);
-            item = MediaItem.deserialize(jp);
-            jp.close();
+            JsonParser p = mapper.createParser(input);
+            item = MediaItem.deserialize(p);
+            p.close();
         }
         return item.hashCode(); // just to get some non-optimizable number
     }

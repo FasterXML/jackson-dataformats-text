@@ -10,7 +10,7 @@ public class FeaturesTest extends ModuleTestBase
     public void testFactoryFeatures() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        CsvFactory f = mapper.getTokenStreamFactory();
+        CsvFactory f = mapper.tokenStreamFactory();
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
         assertTrue(f.canUseSchema(CsvSchema.emptySchema()));

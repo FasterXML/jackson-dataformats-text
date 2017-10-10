@@ -10,7 +10,7 @@ public class TestVersions extends ModuleTestBase
     public void testMapperVersions() throws IOException
     {
         ObjectMapper mapper = mapperForProps();
-        assertVersion(mapper.getTokenStreamFactory());
+        assertVersion(mapper.tokenStreamFactory());
         JavaPropsParser p = (JavaPropsParser) mapper.createParser("abc=foo");
         assertVersion(p);
         JsonGenerator gen = mapper.createGenerator(new ByteArrayOutputStream());

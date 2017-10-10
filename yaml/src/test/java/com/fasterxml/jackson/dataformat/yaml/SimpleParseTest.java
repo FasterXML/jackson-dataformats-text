@@ -12,7 +12,7 @@ import java.math.BigInteger;
  */
 public class SimpleParseTest extends ModuleTestBase
 {
-    final YAMLFactory YAML_F = new YAMLFactory();
+    final YAMLMapper MAPPER = mapperForYAML();
 
     // Parsing large numbers around the transition from int->long and long->BigInteger
     public void testIntParsing() throws Exception
@@ -22,7 +22,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test positive max-int
         YAML = "num: 2147483647";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -34,7 +34,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test negative max-int
         YAML = "num: -2147483648";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -46,7 +46,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test positive max-int + 1
         YAML = "num: 2147483648";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -58,7 +58,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test negative max-int - 1
         YAML = "num: -2147483649";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -70,7 +70,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test positive max-long
         YAML = "num: 9223372036854775807";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -82,7 +82,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test negative max-long
         YAML = "num: -9223372036854775808";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -94,7 +94,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test positive max-long + 1
         YAML = "num: 9223372036854775808";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -106,7 +106,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         // Test negative max-long - 1
         YAML = "num: -9223372036854775809";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());
@@ -124,7 +124,7 @@ public class SimpleParseTest extends ModuleTestBase
         String YAML;
 
         YAML = "num: +1_000.25"; // note underscores; legal in YAML apparently
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -145,7 +145,7 @@ public class SimpleParseTest extends ModuleTestBase
         
         final String IP = "10.12.45.127";
         YAML = "ip: "+IP+"\n";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("ip", p.getCurrentName());
@@ -167,7 +167,7 @@ public class SimpleParseTest extends ModuleTestBase
         // First, test out valid use case. NOTE: spaces matter!
         String YAML = "section:\n"
                     +"  text: foo:bar\n";
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -197,7 +197,7 @@ public class SimpleParseTest extends ModuleTestBase
                 +"    name: Bill\n"
                 +"    parentRef: *id1"
                 ;
-        YAMLParser yp = (YAMLParser)YAML_F.createParser(YAML);
+        YAMLParser yp = (YAMLParser)MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, yp.nextToken());
         assertFalse(yp.isCurrentAlias());
@@ -246,7 +246,7 @@ public class SimpleParseTest extends ModuleTestBase
     public void testQuotedStyles() throws Exception
     {
         String YAML = "strings: [\"true\", 'false']";
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -267,7 +267,7 @@ public class SimpleParseTest extends ModuleTestBase
     public void testUnquotedStyles() throws Exception
     {
         String YAML = "booleans: [true, false]";
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -295,7 +295,7 @@ public class SimpleParseTest extends ModuleTestBase
 +"  - \"Max Power\"\n"
 ;
 
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -340,7 +340,7 @@ public class SimpleParseTest extends ModuleTestBase
     public void testNulls() throws Exception
     {
         String YAML = "nulls: [!!null \"null\" ]";
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -357,7 +357,7 @@ public class SimpleParseTest extends ModuleTestBase
     public void testTildeNulls() throws Exception
     {
         String YAML = "nulls: [~ ]";
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -375,7 +375,7 @@ public class SimpleParseTest extends ModuleTestBase
     public void testTimeLikeValues() throws Exception
     {
           final String YAML = "value: 3:00\n";
-          JsonParser p = YAML_F.createParser(YAML);
+          JsonParser p = MAPPER.createParser(YAML);
 
           assertToken(JsonToken.START_OBJECT, p.nextToken());
           assertToken(JsonToken.FIELD_NAME, p.nextToken());

@@ -125,12 +125,13 @@ public class ObjectIdTest extends ModuleTestBase
     public void testNonNativeSerialization() throws Exception
     {
         YAMLMapper mapper = new YAMLMapper();
-        mapper.disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID);
         Node first = new Node("first");
         Node second = new Node("second");
         first.next = second;
         second.next = first;
-        String yaml = mapper.writeValueAsString(first);
+        String yaml = mapper.writer()
+                .without(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
+                .writeValueAsString(first);
         assertYAML(SIMPLE_YAML_NON_NATIVE, yaml);
     }
 

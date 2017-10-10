@@ -112,7 +112,9 @@ public class JavaPropsFactory
      */
     public JavaPropsParser createParser(ObjectReadContext readCtxt, Properties props) {
         return new JavaPropsParser(readCtxt, _createContext(props, true),
-                _parserFeatures, props, props);
+                readCtxt.getParserFeatures(_parserFeatures),
+                _getSchema(readCtxt),
+                props, props);
     }
 
     /**
@@ -126,10 +128,11 @@ public class JavaPropsFactory
         return new PropertiesBackedGenerator(writeCtxt,
                 _createContext(props, true),
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getSchema(),
+                _getSchema(writeCtxt),
                 props);
     }
 
+    
     /*
     /******************************************************
     /* Overridden internal factory methods, parser
@@ -150,6 +153,7 @@ public class JavaPropsFactory
         Properties props = _loadProperties(in, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
                 readCtxt.getParserFeatures(_parserFeatures),
+                _getSchema(readCtxt),
                 in, props);
     }
 
@@ -159,6 +163,7 @@ public class JavaPropsFactory
         Properties props = _loadProperties(r, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
                 readCtxt.getParserFeatures(_parserFeatures),
+                _getSchema(readCtxt),
                 r, props);
     }
 
@@ -183,6 +188,14 @@ public class JavaPropsFactory
         return _unsupported();
     }
 
+    private final JavaPropsSchema _getSchema(ObjectReadContext readCtxt) {
+        FormatSchema sch = readCtxt.getSchema();
+        if (sch == null) {
+            return JavaPropsParser.DEFAULT_SCHEMA;
+        }
+        return (JavaPropsSchema) sch;
+    }
+    
     /*
     /******************************************************
     /* Overridden internal factory methods, generator
@@ -195,7 +208,7 @@ public class JavaPropsFactory
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getSchema(),
+                _getSchema(writeCtxt),
                 out);
     }
 
@@ -205,7 +218,7 @@ public class JavaPropsFactory
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getSchema(),
+                _getSchema(writeCtxt),
                 _createWriter(ioCtxt, out, null));
     }
 
@@ -217,6 +230,14 @@ public class JavaPropsFactory
         return new OutputStreamWriter(out, CHARSET_ID_LATIN1);
     }
 
+    private final JavaPropsSchema _getSchema(ObjectWriteContext ctxt) {
+        FormatSchema sch = ctxt.getSchema();
+        if (sch == null) {
+            return JavaPropsParser.DEFAULT_SCHEMA;
+        }
+        return (JavaPropsSchema) sch;
+    }
+    
     /*
     /******************************************************
     /* Low-level methods for reading/writing Properties; currently

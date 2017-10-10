@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,38 +30,9 @@ public class YAMLMapper extends ObjectMapper
         return new YAMLMapper(this);
     }
 
-    /*
-    /**********************************************************************
-    /* Configuration
-    /**********************************************************************
-     */
-
-    public YAMLMapper configure(YAMLGenerator.Feature f, boolean state) {
-        return state ? enable(f) : disable(f);
-    }
-
-    public YAMLMapper configure(YAMLParser.Feature f, boolean state) {
-        return state ? enable(f) : disable(f);
-    }
-
-    public YAMLMapper enable(YAMLGenerator.Feature f) {
-        ((YAMLFactory)_jsonFactory).enable(f);
-        return this;
-    }
-
-    public YAMLMapper enable(YAMLParser.Feature f) {
-        ((YAMLFactory)_jsonFactory).enable(f);
-        return this;
-    }
-
-    public YAMLMapper disable(YAMLGenerator.Feature f) {
-        ((YAMLFactory)_jsonFactory).disable(f);
-        return this;
-    }
-
-    public YAMLMapper disable(YAMLParser.Feature f) {
-        ((YAMLFactory)_jsonFactory).disable(f);
-        return this;
+    @Override
+    public Version version() {
+        return PackageVersion.VERSION;
     }
 
     /*
@@ -74,7 +46,7 @@ public class YAMLMapper extends ObjectMapper
      * is always of type {@link YAMLFactory}
      */
     @Override
-    public final YAMLFactory getTokenStreamFactory() {
+    public final YAMLFactory tokenStreamFactory() {
         return (YAMLFactory) _jsonFactory;
     }
 }

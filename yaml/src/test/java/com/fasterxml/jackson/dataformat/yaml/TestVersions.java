@@ -8,21 +8,22 @@ public class TestVersions extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = mapperForYAML();
 
+    @SuppressWarnings("resource")
     public void testMapperVersions() throws IOException
     {
-        assertVersion(MAPPER);
-        assertVersion(MAPPER.getTokenStreamFactory());
+//        assertVersion(MAPPER);
+        assertVersion(MAPPER.tokenStreamFactory());
         JsonParser p = MAPPER.createParser("123");
         assertVersion(p);
         p.close();
         JsonGenerator gen = MAPPER.createGenerator(new ByteArrayOutputStream());
         assertVersion(gen);
-        gen.close();
     }
 
+    @SuppressWarnings("resource")
     public void testDefaults() throws Exception
     {
-        YAMLFactory f = MAPPER.getTokenStreamFactory();
+        YAMLFactory f = MAPPER.tokenStreamFactory();
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
 
@@ -37,7 +38,7 @@ public class TestVersions extends ModuleTestBase
         assertTrue(g.canWriteObjectId());
         assertTrue(g.canWriteTypeId());
         assertFalse(g.canWriteBinaryNatively());
-        g.close();
+        // note: do not try to close it, no content, exception
     }
     
     /*

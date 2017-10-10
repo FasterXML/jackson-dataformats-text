@@ -110,7 +110,7 @@ public class CsvMapper extends ObjectMapper
      * is always of type {@link CsvFactory}
      */
     @Override
-    public CsvFactory getTokenStreamFactory() {
+    public CsvFactory tokenStreamFactory() {
         return (CsvFactory) _jsonFactory;
     }
 

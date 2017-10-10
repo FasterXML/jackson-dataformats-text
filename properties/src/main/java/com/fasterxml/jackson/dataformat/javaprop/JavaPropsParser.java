@@ -67,12 +67,13 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     public JavaPropsParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            int parserFeatures,
+            int parserFeatures, JavaPropsSchema schema,
             Object inputSource, Properties sourceProps)
     {
         super(readCtxt, parserFeatures);
         _inputSource = inputSource;
         _sourceProperties = sourceProps;
+        setSchema(schema);
     }
 
     @Override

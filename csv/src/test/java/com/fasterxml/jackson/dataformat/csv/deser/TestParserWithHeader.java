@@ -24,10 +24,10 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSimpleHeader() throws Exception
     {
-        CsvParser parser = (CsvParser) new CsvFactory().createParser(
-                "name, age,  other\nfoo,2,xyz\n");
+        CsvMapper mapper = mapperForCsv();
+        CsvParser parser = (CsvParser) mapper.reader(CsvSchema.emptySchema().withHeader())
+                .createParser("name, age,  other\nfoo,2,xyz\n");
         // need to enable first-line-as-schema handling:
-        parser.setSchema(CsvSchema.emptySchema().withHeader());
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         CsvSchema schema = parser.getSchema();
         assertEquals(3, schema.size());

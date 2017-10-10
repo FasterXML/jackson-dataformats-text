@@ -10,7 +10,7 @@ public class TestVersions extends ModuleTestBase
     public void testMapperVersions() throws IOException
     {
         CsvMapper mapper = new CsvMapper();
-        assertVersion(mapper.getTokenStreamFactory());
+        assertVersion(mapper.tokenStreamFactory());
         JsonParser p = mapper.createParser("abc");
         assertVersion(p);
         p.close();

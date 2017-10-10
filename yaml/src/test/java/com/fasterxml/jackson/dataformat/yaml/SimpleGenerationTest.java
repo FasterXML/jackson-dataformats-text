@@ -146,7 +146,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         StringWriter w = new StringWriter();
         ObjectWriter ow = MAPPER.writer();
 
-        assertTrue(MAPPER.getTokenStreamFactory().isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         YAMLGenerator gen = (YAMLGenerator) MAPPER.createGenerator(w);
         assertTrue(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
@@ -157,7 +157,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         ow = ow.without(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
 //        assertFalse(ow.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         w = new StringWriter();
-        gen = (YAMLGenerator)MAPPER.createGenerator(w);
+        gen = (YAMLGenerator)ow.createGenerator(w);
         assertFalse(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         yaml = w.toString().trim();
