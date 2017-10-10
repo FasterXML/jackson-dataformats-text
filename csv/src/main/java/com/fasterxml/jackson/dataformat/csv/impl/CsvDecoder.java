@@ -254,7 +254,8 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema, TextBuffer textBuffer,
+    public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
+            CsvSchema schema, TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
     {
         _owner = owner;

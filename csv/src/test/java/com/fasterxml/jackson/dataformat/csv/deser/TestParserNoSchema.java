@@ -208,11 +208,11 @@ public class TestParserNoSchema extends ModuleTestBase
 
         // 10-Oct-2017, tatu: We do need to enable "wrap-as-array" because we
         //    are trying to read Array/Collection values.
-        JsonParser p = mapper.createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
+        String content = col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n";
         MappingIterator<Object[]> it = mapper.readerFor(Object[].class)
                 .with(CsvParser.Feature.WRAP_AS_ARRAY)
                 .with(CsvParser.Feature.TRIM_SPACES)
-                .readValues(p);
+                .readValues(content);
 
         Object[] row;
 
@@ -228,7 +228,6 @@ public class TestParserNoSchema extends ModuleTestBase
         assertEquals(col2, row[0]);
         assertEquals(col1, row[1]);
 
-        p.close();
         it.close();
     }
 

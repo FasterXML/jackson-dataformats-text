@@ -326,17 +326,17 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(ObjectReadContext readCtxt, CsvIOContext ctxt,
+    public CsvParser(ObjectReadContext readCtxt, CsvIOContext ioCtxt,
             int stdFeatures, int csvFeatures, CsvSchema schema,
             Reader reader)
     {
         super(readCtxt, stdFeatures);
-        _textBuffer =  ctxt.csvTextBuffer();
+        _textBuffer =  ioCtxt.csvTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;
         _parsingContext = JsonReadContext.createRootContext(dups);
-        _reader = new CsvDecoder(this, ctxt, reader, schema, _textBuffer,
+        _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         setSchema(schema);
     }
