@@ -24,16 +24,16 @@ public class TestParserNoSchema extends ModuleTestBase
     public void testUntypedAsSequence() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
 
-        /* 04-Oct-2012, tatu: Due to changes to 2.1, this is the one case
-         *   that does NOT work automatically via ObjectMapper/-Reader, but
-         *   instead we must manually create the reader
-         */
         final String CSV = "1,null\nfoobar\n7,true\n";
         JsonParser p = mapper.createParser(CSV);
 
-        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
+        // as usual, reading elements as arrays requires wrapping, due to
+        // how `MappingIterator` works
+        MappingIterator<Object[]> it = mapper
+                .readerFor(Object[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(CSV);
 
         Object[] row;
         assertTrue(it.hasNext());
@@ -62,9 +62,10 @@ public class TestParserNoSchema extends ModuleTestBase
     public void testUntypedAsObjectArray() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
         // when wrapped as an array, we'll get array of Lists:
-        Object[] rows = mapper.readerFor(Object[].class).readValue(
+        Object[] rows = mapper.readerFor(Object[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValue(
             "1,\"xyz\"\n\ntrue,\n"
                 );
         assertEquals(3, rows.length);
@@ -88,9 +89,11 @@ public class TestParserNoSchema extends ModuleTestBase
     public void testUntypedAsStringArray() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
         // when wrapped as an array, we'll get array of Lists:
-        String[][] rows = mapper.readValue("1,\"xyz\"\n\ntrue,\n", String[][].class);
+        String[][] rows = mapper
+                .readerFor(String[][].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValue("1,\"xyz\"\n\ntrue,\n");
         assertEquals(3, rows.length);
         String[] row;
 
@@ -112,8 +115,8 @@ public class TestParserNoSchema extends ModuleTestBase
     public void testUntypedViaReadValues() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
                 .readValues("1,\"xyz\"\n\ntrue,\n");
         assertTrue(it.hasNextValue());
         String[] row = it.nextValue();
@@ -164,16 +167,14 @@ public class TestParserNoSchema extends ModuleTestBase
     public void testUntypedAsSequenceVarLengths() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
-
-        /* 04-Oct-2012, tatu: Due to changes to 2.1, this is the one case
-         *   that does NOT work automatically via ObjectMapper/-Reader, but
-         *   instead we must manually create the reader
-         */
         final String CSV = "1,2\n1,2,3,4\n";
-        JsonParser p = mapper.createParser(CSV);
 
-        MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(p);
+        // 10-Oct-2017, tatu: We do need to enable "wrap-as-array" because we
+        //    are trying to read Array/Collection values.
+        MappingIterator<String[]> it = mapper
+                .readerFor(String[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(CSV);
 
         Object[] row;
         assertTrue(it.hasNext());
@@ -192,15 +193,12 @@ public class TestParserNoSchema extends ModuleTestBase
 
         assertFalse(it.hasNext());
 
-        p.close();
         it.close();
     }
 
-    // [Issue#54]
     public void testDelimiterAtBufferBoundary() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.TRIM_SPACES);
 
         final String col1 = "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" +
                             "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh" +
@@ -208,8 +206,13 @@ public class TestParserNoSchema extends ModuleTestBase
                             "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
         final String col2 = "H";
 
+        // 10-Oct-2017, tatu: We do need to enable "wrap-as-array" because we
+        //    are trying to read Array/Collection values.
         JsonParser p = mapper.createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
-        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
+        MappingIterator<Object[]> it = mapper.readerFor(Object[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvParser.Feature.TRIM_SPACES)
+                .readValues(p);
 
         Object[] row;
 

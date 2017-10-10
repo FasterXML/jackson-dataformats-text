@@ -9,8 +9,8 @@ public class MappingIteratorEnd119Test extends ModuleTestBase
     public void testDefaultSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
+                .without(CsvParser.Feature.WRAP_AS_ARRAY)
                 .readValues("\"te,st\"");
         assertTrue(it.hasNextValue());
         String[] row = it.nextValue();

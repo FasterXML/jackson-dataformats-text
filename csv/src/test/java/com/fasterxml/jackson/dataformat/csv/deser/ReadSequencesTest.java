@@ -41,12 +41,14 @@ public class ReadSequencesTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final CsvMapper MAPPER = new CsvMapper();
+    
     // Test using non-wrapped sequence of entries
     public void testAsSequence() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
-        MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class).readValues(
+        MappingIterator<Entry> it = MAPPER.readerWithSchemaFor(Entry.class)
+                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(
                 "1,2\n-3,0\n5,6\n");
         Entry entry;
         
@@ -69,9 +71,8 @@ public class ReadSequencesTest extends ModuleTestBase
     // Test using sequence of entries wrapped in a logical array.
     public void testAsWrappedArray() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-        Entry[] entries = mapper.readerWithSchemaFor(Entry.class).forType(Entry[].class)
+        Entry[] entries = MAPPER.readerWithSchemaFor(Entry.class).forType(Entry[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
                 .readValue("1,2\n0,0\n123,123456789\n");
         assertEquals(3, entries.length);
         assertEquals(1, entries[0].x);
@@ -87,10 +88,8 @@ public class ReadSequencesTest extends ModuleTestBase
     {
         // how many? about 10-20 bytes per entry, so try to get at ~100k -> about 10k entries
         List<Entry> entries = generateEntries(9999);
-        CsvMapper mapper = mapperForCsv();
-        CsvSchema schema = mapper.schemaFor(Entry.class);
-        ObjectWriter writer = mapper.writer(schema);
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
+        CsvSchema schema = MAPPER.schemaFor(Entry.class);
+        ObjectWriter writer = MAPPER.writer(schema);
 
         // First, using bytes; note
         byte[] bytes = writer.writeValueAsBytes(entries);
@@ -98,7 +97,9 @@ public class ReadSequencesTest extends ModuleTestBase
         final int EXPECTED_BYTES = 97640;
         assertEquals(EXPECTED_BYTES, bytes.length);
 
-        MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema).readValues(bytes, 0, bytes.length);
+        MappingIterator<Entry> it = MAPPER.readerFor(Entry.class).with(schema)
+                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(bytes, 0, bytes.length);
         verifySame(it, entries);
         bytes = null;
         
@@ -107,7 +108,9 @@ public class ReadSequencesTest extends ModuleTestBase
         assertEquals(EXPECTED_BYTES, text.length());
         it.close();
 
-        it = mapper.readerFor(Entry.class).with(schema).readValues(text);
+        it = MAPPER.readerFor(Entry.class).with(schema)
+                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(text);
         verifySame(it, entries);
         it.close();
     
@@ -116,10 +119,10 @@ public class ReadSequencesTest extends ModuleTestBase
     // Verify that code sample from the page works:
     public void testRawObjectArrays() throws Exception
     {
-        CsvMapper mapper = new CsvMapper();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
         final String CSV = "a,b\nc,d\ne,f\n";
-        MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(CSV);
+        MappingIterator<Object[]> it = MAPPER.readerFor(Object[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(CSV);
 
         assertTrue(it.hasNext());
         Object[] row = it.next();

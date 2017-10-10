@@ -67,40 +67,6 @@ public class CsvMapper extends ObjectMapper
 
     /*
     /**********************************************************************
-    /* Configuration
-    /**********************************************************************
-     */
-    
-    public CsvMapper configure(CsvGenerator.Feature f, boolean state) {
-        return state ? enable(f) : disable(f);
-    }
-
-    public CsvMapper configure(CsvParser.Feature f, boolean state) {
-        return state ? enable(f) : disable(f);
-    }
-
-    public CsvMapper enable(CsvGenerator.Feature f) {
-        ((CsvFactory)_jsonFactory).enable(f);
-        return this;
-    }
-
-    public CsvMapper enable(CsvParser.Feature f) {
-        ((CsvFactory)_jsonFactory).enable(f);
-        return this;
-    }
-
-    public CsvMapper disable(CsvGenerator.Feature f) {
-        ((CsvFactory)_jsonFactory).disable(f);
-        return this;
-    }
-
-    public CsvMapper disable(CsvParser.Feature f) {
-        ((CsvFactory)_jsonFactory).disable(f);
-        return this;
-    }
-
-    /*
-    /**********************************************************************
     /* Additional typed accessors
     /**********************************************************************
      */
@@ -231,8 +197,6 @@ public class CsvMapper extends ObjectMapper
      * and returns a {@link CsvSchema} instance that uses default configuration
      * with additional setting that the first content line contains intended
      * column names.
-     *
-     * @since 2.5
      */
     public CsvSchema schemaWithHeader() {
         return CsvSchema.emptySchema().withHeader();
@@ -245,8 +209,6 @@ public class CsvMapper extends ObjectMapper
      *</pre>
      * that is, returns an "empty" Schema; one with default values and no
      * column definitions.
-     *
-     * @since 2.5
      */
     public CsvSchema schema() {
         return CsvSchema.emptySchema();

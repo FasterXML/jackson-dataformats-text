@@ -256,7 +256,6 @@ public class CsvDecoder
 
     public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema, TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
-//            boolean autoCloseInput, boolean trimSpaces)
     {
         _owner = owner;
         _ioContext = ctxt;

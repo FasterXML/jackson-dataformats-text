@@ -41,8 +41,9 @@ public class TestParserStrictQuoting extends ModuleTestBase
 
         // should be possible to hot-swap
         // and with strict/optimal, no quoting
-        mapper.configure(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING, true);
-        csv = mapper.writer(schema).writeValueAsString(input);
+        csv = mapper.writer(schema)
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(input);
         assertEquals(aposToQuotes("x,"+LONG), csv.trim());
     }
 }

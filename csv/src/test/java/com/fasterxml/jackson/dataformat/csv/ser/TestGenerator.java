@@ -208,13 +208,13 @@ public class TestGenerator extends ModuleTestBase
     public void testForcedQuotingEmptyStrings() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS);
         CsvSchema schema = CsvSchema.builder()
                                     .addColumn("id")
                                     .addColumn("amount")
                                     .build();
         String result = mapper.writer(schema)
-                              .writeValueAsString(new Entry("", 1.25));
+                .with(CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS)
+                .writeValueAsString(new Entry("", 1.25));
         assertEquals("\"\",1.25\n", result);
 
         // Also, as per [dataformat-csv#81], should be possible to change dynamically
@@ -236,8 +236,8 @@ public class TestGenerator extends ModuleTestBase
 
         // then with strict/optimal
         mapper = mapperForCsv();
-        mapper.enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING);
         csv = mapper.writer(schema)
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("\"#123\",Foo\n", csv);
     }

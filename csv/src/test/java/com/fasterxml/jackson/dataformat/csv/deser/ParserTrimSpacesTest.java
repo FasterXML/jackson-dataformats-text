@@ -28,8 +28,9 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     public void testNonTrimming() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.TRIM_SPACES);
-        MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class).readValues(
+        MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class)
+                .without(CsvParser.Feature.TRIM_SPACES)
+                .readValues(
                 "a,  b,  c  \n 1,2,\"3 \"\n"
                 );
         Entry entry;
@@ -65,8 +66,9 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     public void testTrimming() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.TRIM_SPACES);
-        MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class).readValues(
+        MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class)
+                .with(CsvParser.Feature.TRIM_SPACES)
+                .readValues(
                 "a,  b,  c\t\n 1,2,\" 3\" \n\"ab\t\" ,\"c\",  \n"
                 );
         Entry entry;
@@ -97,11 +99,11 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     public void testTrimmingTabSeparated() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = mapper.schemaFor(Entry.class).withColumnSeparator('\t');
-        MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema).
-        readValues(
-            "a\t\t  c\n 1\t2\t\" 3\" \n\"ab\" \t\"c  \t\"\t  \n"
+        MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema)
+            .with(CsvParser.Feature.TRIM_SPACES)
+            .readValues(
+                    "a\t\t  c\n 1\t2\t\" 3\" \n\"ab\" \t\"c  \t\"\t  \n"
         );
         Entry entry;
 

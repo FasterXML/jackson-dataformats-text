@@ -15,16 +15,15 @@ public class CommentsTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
 
-        // to handle comments that follow leading spaces
-        mapper.enable(CsvParser.Feature.TRIM_SPACES);
-        // should not be needed but seems to be...
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-
         String[] row;
         
         // First, with comments disabled:
         
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
+                // to handle comments that follow leading spaces
+                .with(CsvParser.Feature.TRIM_SPACES)
+                // should not be needed but seems to be...
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
                 .with(mapper.schema().withoutComments()).readValues(CSV_WITH_COMMENTS);
 
         row = it.nextValue();
@@ -56,13 +55,12 @@ public class CommentsTest extends ModuleTestBase
     public void testSimpleComments() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        // to handle comments that follow leading spaces
-        mapper.enable(CsvParser.Feature.TRIM_SPACES);
-        // should not be needed but seems to be...
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .with(mapper.schema().withComments()).readValues(CSV_WITH_COMMENTS);
+                .with(mapper.schema().withComments())
+                .with(CsvParser.Feature.TRIM_SPACES)
+                // should not be needed but seems to be...
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues(CSV_WITH_COMMENTS);
 
         // first row the same
         String[] row = it.nextValue();
@@ -85,11 +83,11 @@ public class CommentsTest extends ModuleTestBase
     public void testLeadingComments() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
-        // should not be needed but seems to be...
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
-
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .with(mapper.schema().withComments()).readValues("# first\n#second\n1,2\n");
+                .with(mapper.schema().withComments())
+                // should not be needed but seems to be...
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValues("# first\n#second\n1,2\n");
 
         // first row the same
         String[] row = it.nextValue();
@@ -125,10 +123,10 @@ public class CommentsTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         mapper.enable(JsonParser.Feature.ALLOW_YAML_COMMENTS);
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
         final String CSV = "# comment!\na,b\n";
         
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
                 .readValues(CSV);
         String[] row = it.nextValue();
 //        assertEquals(2, row.length);

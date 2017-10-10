@@ -24,11 +24,12 @@ public class SkipEmptyLines15Test extends ModuleTestBase
         final String CSV = "1,\"xyz\"\n\ntrue,\n";
         
         CsvMapper mapper = mapperForCsv();
-        mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
 
         // First, verify default behavior:
 
-        String[][] rows = mapper.readValue(CSV, String[][].class);
+        String[][] rows = mapper.readerFor(String[][].class)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .readValue(CSV);
         assertEquals(3, rows.length);
         String[] row;
 
@@ -46,11 +47,10 @@ public class SkipEmptyLines15Test extends ModuleTestBase
         assertEquals("true", row[0]);
         assertEquals("", row[1]);
 
-        mapper.enable(CsvParser.Feature.SKIP_EMPTY_LINES);
-
         // when wrapped as an array, we'll get array of Lists:
         rows = mapper.readerFor(String[][].class)
                 .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV);
 
         assertEquals(2, rows.length);
