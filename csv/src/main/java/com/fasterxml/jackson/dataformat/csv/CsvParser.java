@@ -335,10 +335,10 @@ public class CsvParser
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;
-        _schema = schema;
         _parsingContext = JsonReadContext.createRootContext(dups);
         _reader = new CsvDecoder(this, ctxt, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
+        setSchema(schema);
     }
 
     /*

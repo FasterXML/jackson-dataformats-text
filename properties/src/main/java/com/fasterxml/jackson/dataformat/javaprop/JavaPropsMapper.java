@@ -46,7 +46,7 @@ public class JavaPropsMapper extends ObjectMapper
     }
 
     @Override
-    public JavaPropsFactory getFactory() {
+    public JavaPropsFactory getTokenStreamFactory() {
         return (JavaPropsFactory) _jsonFactory;
     }
 
@@ -71,7 +71,7 @@ public class JavaPropsMapper extends ObjectMapper
             Class<T> valueType) throws IOException
     {
         DeserializationContext ctxt = createDeserializationContext();
-        JsonParser p = getFactory().createParser(ctxt, props);
+        JsonParser p = getTokenStreamFactory().createParser(ctxt, props);
         p.setSchema(schema);
         return (T) readValue(p, valueType);
     }
@@ -91,7 +91,7 @@ public class JavaPropsMapper extends ObjectMapper
             JavaType valueType) throws IOException
     {
         DeserializationContext ctxt = createDeserializationContext();
-        JsonParser p = getFactory().createParser(ctxt, props);
+        JsonParser p = getTokenStreamFactory().createParser(ctxt, props);
         p.setSchema(schema);
         return (T) readValue(p, valueType);
     }
@@ -182,7 +182,7 @@ public class JavaPropsMapper extends ObjectMapper
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
         DefaultSerializerProvider prov = _serializerProvider();
-        JavaPropsGenerator g = getFactory()
+        JavaPropsGenerator g = getTokenStreamFactory()
                 .createGenerator(prov, targetProps);
         writeValue(g, value);
         g.close();
@@ -199,7 +199,7 @@ public class JavaPropsMapper extends ObjectMapper
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
         DefaultSerializerProvider prov = _serializerProvider();
-        JavaPropsGenerator g = getFactory()
+        JavaPropsGenerator g = getTokenStreamFactory()
                 .createGenerator(prov, targetProps);
         if (schema != null) {
             g.setSchema(schema);

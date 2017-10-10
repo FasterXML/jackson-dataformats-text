@@ -9,14 +9,14 @@ public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException
     {
-        CsvFactory f = new CsvFactory();
-        assertVersion(f);
-        JsonParser jp = f.createParser("abc");
-        assertVersion(jp);
-        JsonGenerator jgen = f.createGenerator(new ByteArrayOutputStream());
-        assertVersion(jgen);
-        jp.close();
-        jgen.close();
+        CsvMapper mapper = new CsvMapper();
+        assertVersion(mapper.getTokenStreamFactory());
+        JsonParser p = mapper.createParser("abc");
+        assertVersion(p);
+        p.close();
+        JsonGenerator g = mapper.createGenerator(new ByteArrayOutputStream());
+        assertVersion(g);
+        g.close();
     }
 
     // Mostly to verify #11

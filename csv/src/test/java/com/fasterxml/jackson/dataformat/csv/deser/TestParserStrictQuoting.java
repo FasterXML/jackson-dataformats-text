@@ -30,7 +30,7 @@ public class TestParserStrictQuoting extends ModuleTestBase
         
         CsvMapper mapper = mapperForCsv();
 
-        assertFalse(mapper.getFactory().isEnabled(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING));
+        assertFalse(mapper.getTokenStreamFactory().isEnabled(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING));
         CsvSchema schema = mapper.schemaFor(AB.class).withoutHeader();
 
         final AB input = new AB("x", LONG);

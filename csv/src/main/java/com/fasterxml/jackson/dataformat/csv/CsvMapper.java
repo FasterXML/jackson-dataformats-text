@@ -50,10 +50,6 @@ public class CsvMapper extends ObjectMapper
 
     /**
      * Copy-constructor, mostly used to support {@link #copy}.
-     *<p>
-     * NOTE: {@link ObjectMapper} had this method since 2.1.
-     * 
-     * @since 2.5
      */
     protected CsvMapper(CsvMapper src)
     {
@@ -62,9 +58,6 @@ public class CsvMapper extends ObjectMapper
         _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
     }
 
-    /**
-     * @since 2.5
-     */
     @Override
     public CsvMapper copy()
     {
@@ -117,7 +110,7 @@ public class CsvMapper extends ObjectMapper
      * is always of type {@link CsvFactory}
      */
     @Override
-    public CsvFactory getFactory() {
+    public CsvFactory getTokenStreamFactory() {
         return (CsvFactory) _jsonFactory;
     }
 

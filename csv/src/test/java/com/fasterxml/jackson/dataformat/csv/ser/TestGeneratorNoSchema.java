@@ -24,7 +24,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
     public void testUntypedAsSequenceStreaming() throws Exception
     {
         StringWriter sw = new StringWriter();
-        JsonGenerator gen = MAPPER.getFactory().createGenerator(sw);
+        JsonGenerator gen = MAPPER.createGenerator(sw);
         gen.setSchema(SCHEMA);
 
         assertEquals(0, gen.getOutputBuffered());

@@ -43,9 +43,10 @@ public class TestGenerator extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final ObjectMapper MAPPER = mapperForCsv();
+    
     public void testSimpleExplicit() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("firstName")
             .addColumn("lastName")
@@ -59,7 +60,7 @@ public class TestGenerator extends ModuleTestBase
         
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
-        String csv = mapper.writer(schema).writeValueAsString(user);
+        String csv = MAPPER.writer(schema).writeValueAsString(user);
         assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n", csv);
     }
 
@@ -257,7 +258,7 @@ public class TestGenerator extends ModuleTestBase
     public void testRawWrites() throws Exception
     {
         StringWriter w = new StringWriter();
-        JsonGenerator gen = new CsvFactory().createGenerator(w);
+        JsonGenerator gen = MAPPER.createGenerator(w);
         gen.writeStartArray();
         gen.writeString("a");
         // just to ensure no quoting goes on:
@@ -270,7 +271,7 @@ public class TestGenerator extends ModuleTestBase
         // also, verify use of other methods
 
         w = new StringWriter();
-        gen = new CsvFactory().createGenerator(w);
+        gen = MAPPER.createGenerator(w);
         gen.writeStartArray();
         gen.writeRawValue("a,b");
         gen.writeRaw(",foobar");

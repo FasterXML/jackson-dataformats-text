@@ -3,16 +3,17 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.io.*;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException
     {
-        JavaPropsFactory f = new JavaPropsFactory();
-        assertVersion(f);
-        JavaPropsParser p = (JavaPropsParser) f.createParser("abc=foo");
+        ObjectMapper mapper = mapperForProps();
+        assertVersion(mapper.getTokenStreamFactory());
+        JavaPropsParser p = (JavaPropsParser) mapper.createParser("abc=foo");
         assertVersion(p);
-        JsonGenerator gen = f.createGenerator(new ByteArrayOutputStream());
+        JsonGenerator gen = mapper.createGenerator(new ByteArrayOutputStream());
         assertVersion(gen);
         p.close();
         gen.close();

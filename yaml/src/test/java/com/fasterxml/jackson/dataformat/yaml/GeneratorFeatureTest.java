@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class GeneratorFeatureTest extends ModuleTestBase
 {
@@ -35,14 +36,9 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("words:\n- \"first\"\n- \"second\"\n- \"third\"", yaml);
 
         // and then with different config
-        
-        // 14-Mar-2017, tatu: Note that we can not, alas, dynamically change
-        //    features via ObjectWriter yet as they are bound at YAMLGenerator
-        //    construction time.
-        final YAMLMapper indentingMapper = mapperForYAML();
-        indentingMapper.getFactory().enable(YAMLGenerator.Feature.INDENT_ARRAYS);
+        ObjectWriter w = MAPPER.writer().with(YAMLGenerator.Feature.INDENT_ARRAYS);
 
-        yaml = indentingMapper.writeValueAsString(input);
+        yaml = w.writeValueAsString(input);
         if (yaml.startsWith("---")) {
             yaml = yaml.substring(3);
         }

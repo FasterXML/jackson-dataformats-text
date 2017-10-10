@@ -18,16 +18,10 @@ public class YAMLMapper extends ObjectMapper
         super(f);
     }
 
-    /**
-     * @since 2.5
-     */
     public YAMLMapper(YAMLMapper base) {
         super(base);
     }
 
-    /**
-     * @since 2.5
-     */
     @Override
     public YAMLMapper copy()
     {
@@ -80,7 +74,7 @@ public class YAMLMapper extends ObjectMapper
      * is always of type {@link YAMLFactory}
      */
     @Override
-    public final YAMLFactory getFactory() {
+    public final YAMLFactory getTokenStreamFactory() {
         return (YAMLFactory) _jsonFactory;
     }
 }

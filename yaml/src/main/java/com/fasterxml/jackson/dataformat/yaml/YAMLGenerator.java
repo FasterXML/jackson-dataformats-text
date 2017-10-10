@@ -23,7 +23,7 @@ public class YAMLGenerator extends GeneratorBase
     /**
      * Enumeration that defines all togglable features for YAML generators
      */
-    public enum Feature implements FormatFeature // since 2.9
+    public enum Feature implements FormatFeature
     {
         /**
          * Whether we are to write an explicit document start marker ("---")

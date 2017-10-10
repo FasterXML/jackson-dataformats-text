@@ -131,5 +131,6 @@ public class MissingColumnsTest extends ModuleTestBase
             verifyException(e, "expected 3, found 1");
         }
         assertFalse(it.hasNextValue());
+        it.close();
     }
 }

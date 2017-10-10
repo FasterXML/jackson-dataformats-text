@@ -4,6 +4,8 @@ import java.io.StringWriter;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectReadContext;
+import com.fasterxml.jackson.core.ObjectWriteContext;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.Versioned;
 
@@ -34,7 +36,7 @@ public class DefaultConfigsTest extends ModuleTestBase
     public void testGeneratorConfig() throws Exception
     {
         JavaPropsFactory f = new JavaPropsFactory();
-        JsonGenerator gen = f.createGenerator(new StringWriter());
+        JsonGenerator gen = f.createGenerator(ObjectWriteContext.empty(), new StringWriter());
         _verifyVersion(gen);
         assertTrue(gen.canOmitFields());
         assertFalse(gen.canWriteBinaryNatively());
@@ -51,7 +53,7 @@ public class DefaultConfigsTest extends ModuleTestBase
     public void testParserConfig() throws Exception
     {
         JavaPropsFactory f = new JavaPropsFactory();
-        JsonParser p = f.createParser("#foo".getBytes("UTF-8"));
+        JsonParser p = f.createParser(ObjectReadContext.empty(), "#foo");
         _verifyVersion(p);
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());

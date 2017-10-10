@@ -9,18 +9,19 @@ public class FeaturesTest extends ModuleTestBase
 {
     public void testFactoryFeatures() throws Exception
     {
-        CsvFactory f = new CsvFactory();
+        CsvMapper mapper = mapperForCsv();
+        CsvFactory f = mapper.getTokenStreamFactory();
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
         assertTrue(f.canUseSchema(CsvSchema.emptySchema()));
 
-        JsonParser p = f.createParser("");
+        JsonParser p = mapper.createParser("");
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());
         assertTrue(p.canUseSchema(CsvSchema.emptySchema()));
         p.close();
 
-        JsonGenerator g = f.createGenerator(new StringWriter());
+        JsonGenerator g = mapper.createGenerator(new StringWriter());
         assertFalse(g.canOmitFields());
         assertFalse(g.canWriteBinaryNatively());
         assertFalse(g.canWriteObjectId());

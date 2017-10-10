@@ -20,11 +20,9 @@ public class SimpleStreamingTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = mapperForProps();
 
-    private final JavaPropsFactory F = new JavaPropsFactory();
-
     public void testParsing() throws Exception
     {
-        JsonParser p = F.createParser("foo = bar");
+        JsonParser p = MAPPER.createParser("foo = bar");
         Object src = p.getInputSource();
         assertTrue(src instanceof Reader);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
@@ -41,7 +39,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertTrue(p.isClosed());
 
         // one more thing, verify handling of non-binary
-        p = F.createParser("foo = bar");
+        p = MAPPER.createParser("foo = bar");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         try {
@@ -62,7 +60,7 @@ public class SimpleStreamingTest extends ModuleTestBase
     public void testStreamingGeneration() throws Exception
     {
         StringWriter strw = new StringWriter();
-        JsonGenerator gen = F.createGenerator(strw);
+        JsonGenerator gen = MAPPER.createGenerator(strw);
 
         Object target = gen.getOutputTarget();
         assertTrue(target instanceof Writer);
@@ -110,7 +108,7 @@ public class SimpleStreamingTest extends ModuleTestBase
     public void testStreamingGenerationRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
-        JsonGenerator gen = F.createGenerator(strw);
+        JsonGenerator gen = MAPPER.createGenerator(strw);
 
         String COMMENT = "# comment!\n";
         gen.writeRaw(COMMENT);
@@ -137,7 +135,7 @@ public class SimpleStreamingTest extends ModuleTestBase
     public void testStreamingLongRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
-        JsonGenerator gen = F.createGenerator(strw);
+        JsonGenerator gen = MAPPER.createGenerator(strw);
 
         StringBuilder sb = new StringBuilder();
         sb.append("# ");

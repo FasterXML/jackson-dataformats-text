@@ -5,6 +5,7 @@ import java.io.CharConversionException;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 public class BrokenEncodingTest extends ModuleTestBase
@@ -15,10 +16,11 @@ public class BrokenEncodingTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final ObjectMapper MAPPER = mapperForCsv();
+
     // Simple test where a Latin-1 character is encountered; first byte wrong
     public void testLatin1AsUTF8() throws Exception
     {
-        CsvFactory factory = new CsvFactory();
         String CSV = "1,2\nabc,\u00A0\n";
 
         CsvSchema schema = CsvSchema.builder()
@@ -26,8 +28,8 @@ public class BrokenEncodingTest extends ModuleTestBase
                 .addColumn("b")
                 .build();
         // So: take Latin-1 bytes, but construct without specifying to lead to UTF-8 handling
-        JsonParser parser = factory.createParser(CSV.getBytes("ISO-8859-1"));
-        parser.setSchema(schema);
+        JsonParser parser = MAPPER.reader(schema)
+                .createParser(CSV.getBytes("ISO-8859-1"));
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
@@ -57,7 +59,6 @@ public class BrokenEncodingTest extends ModuleTestBase
     // Then a test with "middle" byte broken
     public void testBrokenUTF8MiddleByte() throws Exception
     {
-        CsvFactory factory = new CsvFactory();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         bytes.write('1');
         bytes.write(',');
@@ -69,8 +70,8 @@ public class BrokenEncodingTest extends ModuleTestBase
                 .addColumn("b")
                 .build();
         // So: take Latin-1 bytes, but construct without specifying to lead to UTF-8 handling
-        JsonParser parser = factory.createParser(bytes.toByteArray());
-        parser.setSchema(schema);
+        JsonParser parser = MAPPER.reader(schema)
+                .createParser(bytes.toByteArray());
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());

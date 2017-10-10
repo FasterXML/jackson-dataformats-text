@@ -5,15 +5,17 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class SimpleGenerationTest extends ModuleTestBase
 {
+    private final YAMLMapper MAPPER = mapperForYAML();
+
     public void testStreamingArray() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = MAPPER.createGenerator(w);
         gen.writeStartArray();
         gen.writeNumber(3);
         gen.writeString("foobar");
@@ -29,9 +31,8 @@ public class SimpleGenerationTest extends ModuleTestBase
 
     public void testStreamingObject() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = MAPPER.createGenerator(w);
         _writeBradDoc(gen);
         String yaml = w.toString();
 
@@ -43,9 +44,8 @@ public class SimpleGenerationTest extends ModuleTestBase
 
     public void testStreamingNested() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = MAPPER.createGenerator(w);
 
         gen.writeStartObject();
         gen.writeFieldName("ob");
@@ -142,22 +142,22 @@ public class SimpleGenerationTest extends ModuleTestBase
     @SuppressWarnings("resource")
     public void testStartMarker() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
-
         // Ok, first, assume we do get the marker:
         StringWriter w = new StringWriter();
-        assertTrue(f.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
-        YAMLGenerator gen = (YAMLGenerator) f.createGenerator(w);
+        ObjectWriter ow = MAPPER.writer();
+
+        assertTrue(MAPPER.getTokenStreamFactory().isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        YAMLGenerator gen = (YAMLGenerator) MAPPER.createGenerator(w);
         assertTrue(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         String yaml = w.toString().trim();
         assertEquals("---\nname: \"Brad\"\nage: 39", yaml);
 
         // and then, disabling, and not any more
-        f.disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        ow = ow.without(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+//        assertFalse(ow.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         w = new StringWriter();
-        gen = (YAMLGenerator)f.createGenerator(w);
+        gen = (YAMLGenerator)MAPPER.createGenerator(w);
         assertFalse(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         yaml = w.toString().trim();

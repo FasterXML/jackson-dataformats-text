@@ -11,15 +11,13 @@ public class MultipleRootValuesTest extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = new YAMLMapper();
 
-    private final YAMLFactory YAML_F = MAPPER.getFactory();
-
     public void testMultipleDocumentsViaParser() throws Exception
     {
         final String YAML = "num: 42\n"
                 +"---\n"
                 +"num: -42"
                 ;
-        JsonParser p = YAML_F.createParser(YAML);
+        JsonParser p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("num", p.getCurrentName());

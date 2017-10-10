@@ -31,7 +31,7 @@ public class TestParserNoSchema extends ModuleTestBase
          *   instead we must manually create the reader
          */
         final String CSV = "1,null\nfoobar\n7,true\n";
-        JsonParser p = mapper.getFactory().createParser(CSV);
+        JsonParser p = mapper.createParser(CSV);
 
         MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
 
@@ -171,7 +171,7 @@ public class TestParserNoSchema extends ModuleTestBase
          *   instead we must manually create the reader
          */
         final String CSV = "1,2\n1,2,3,4\n";
-        JsonParser p = mapper.getFactory().createParser(CSV);
+        JsonParser p = mapper.createParser(CSV);
 
         MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(p);
 
@@ -208,7 +208,7 @@ public class TestParserNoSchema extends ModuleTestBase
                             "hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
         final String col2 = "H";
 
-        JsonParser p = mapper.getFactory().createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
+        JsonParser p = mapper.createParser(col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n");
         MappingIterator<Object[]> it = mapper.readerFor(Object[].class).readValues(p);
 
         Object[] row;

@@ -6,36 +6,38 @@ import com.fasterxml.jackson.core.*;
 
 public class TestVersions extends ModuleTestBase
 {
-    @SuppressWarnings("resource")
+    private final YAMLMapper MAPPER = mapperForYAML();
+
     public void testMapperVersions() throws IOException
     {
-        YAMLFactory f = new YAMLFactory();
-        assertVersion(f);
-        YAMLParser jp = (YAMLParser) f.createParser("123");
-        assertVersion(jp);
-        jp.close();
-        YAMLGenerator jgen = (YAMLGenerator) f.createGenerator(new ByteArrayOutputStream());
-        assertVersion(jgen);
+        assertVersion(MAPPER);
+        assertVersion(MAPPER.getTokenStreamFactory());
+        JsonParser p = MAPPER.createParser("123");
+        assertVersion(p);
+        p.close();
+        JsonGenerator gen = MAPPER.createGenerator(new ByteArrayOutputStream());
+        assertVersion(gen);
+        gen.close();
     }
 
     public void testDefaults() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
+        YAMLFactory f = MAPPER.getTokenStreamFactory();
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
 
-        JsonParser p = f.createParser(new StringReader(""));
+        JsonParser p = MAPPER.createParser(new StringReader(""));
         assertTrue(p.canReadObjectId());
         assertTrue(p.canReadTypeId());
         p.close();
 
-        @SuppressWarnings("resource")
-        JsonGenerator g = f.createGenerator(new StringWriter());
+        JsonGenerator g = MAPPER.createGenerator(new StringWriter());
         assertTrue(g.canOmitFields());
         assertTrue(g.canWriteFormattedNumbers());
         assertTrue(g.canWriteObjectId());
         assertTrue(g.canWriteTypeId());
         assertFalse(g.canWriteBinaryNatively());
+        g.close();
     }
     
     /*

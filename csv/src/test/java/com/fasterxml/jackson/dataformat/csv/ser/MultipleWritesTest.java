@@ -41,7 +41,7 @@ public class MultipleWritesTest extends ModuleTestBase
 
         CsvSchema csvSchema = builder.build().withHeader();
 
-        JsonGenerator gen = MAPPER.getFactory().createGenerator(sw);
+        JsonGenerator gen = MAPPER.createGenerator(sw);
         // IMPORTANT! If passing generator, must directly configure it:
         gen.setSchema(csvSchema);
 

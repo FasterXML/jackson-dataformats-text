@@ -79,7 +79,7 @@ public final class SerPerf
 
             case 1:
                 msg = "Serialize, JSON/manual";
-                sum += testObjectSer(jsonMapper.getFactory(), item, REPS+REPS, result);
+                sum += testObjectSerViaStreaming(jsonMapper, item, REPS+REPS, result);
                 break;
 
             case 2:
@@ -124,12 +124,13 @@ public final class SerPerf
             return result.size(); // just to get some non-optimizable number
         }
     
-    protected int testObjectSer(TokenStreamFactory jf, MediaItem value, int reps, ByteArrayOutputStream result)
+    protected int testObjectSerViaStreaming(ObjectMapper mapper,
+            MediaItem value, int reps, ByteArrayOutputStream result)
         throws Exception
     {
         for (int i = 0; i < reps; ++i) {
             result.reset();
-            JsonGenerator jgen = jf.createGenerator(result, JsonEncoding.UTF8);
+            JsonGenerator jgen = mapper.createGenerator(result, JsonEncoding.UTF8);
             value.serialize(jgen);
             jgen.close();
         }
