@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Map;
 
 import com.fasterxml.jackson.databind.*;
 
