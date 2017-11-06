@@ -65,9 +65,8 @@ public class SimpleGenerationTest extends ModuleTestBase
         BufferedReader br = new BufferedReader(new StringReader(yaml));
         assertEquals("ob:", br.readLine());
 
-        /* 27-Jan-2015, tatu: Not 100% if those items ought to (or not) be indented.
-         *   SnakeYAML doesn't do that; yet some libs expect it. Strange.
-         */
+        // 27-Jan-2015, tatu: Not 100% if those items ought to (or not) be indented.
+        //   SnakeYAML doesn't do that; yet some libs expect it. Strange.
         assertEquals("- \"a\"", br.readLine());
         assertEquals("- \"b\"", br.readLine());
         assertNull(br.readLine());
@@ -164,173 +163,6 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("name: \"Brad\"\nage: 39", yaml);
     }
 
-    public void testSplitLines() throws Exception
-    {
-        final String TEXT = "1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890";
-        final String[] INPUT = new String[] { TEXT };
-        YAMLFactory f = new YAMLFactory();
-
-        // verify default settings
-        assertTrue(f.isEnabled(YAMLGenerator.Feature.SPLIT_LINES));
-
-        // and first write with splitting enabled
-        YAMLMapper mapper = new YAMLMapper(f);
-        String yaml = mapper.writeValueAsString(INPUT).trim();
-
-        assertEquals("---\n" +
-                "- \"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890\\\n" +
-                "  \\ 1234567890\"",
-                yaml);
-
-        // and then with splitting disabled
-        f.disable(YAMLGenerator.Feature.SPLIT_LINES);
-
-        yaml = mapper.writeValueAsString(INPUT).trim();
-        assertEquals("---\n" +
-                "- \"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890\"",
-                yaml);
-    }
-
-    public void testLiteralStringsSingleLine() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
-
-        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
-
-        YAMLMapper mapper = new YAMLMapper(f);
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "some value");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: some value", yaml);
-    }
-
-    public void testMinimizeQuotesWithBooleanContent() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
-
-        YAMLMapper mapper = new YAMLMapper(f);
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "true");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: \"true\"", yaml);
-
-        content.clear();
-        content.put("key", "false");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: \"false\"", yaml);
-
-        content.clear();
-        content.put("key", "something else");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: something else", yaml);
-
-        content.clear();
-        content.put("key", Boolean.TRUE);
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: true", yaml);
-
-    }
-
-    public void testLiteralStringsMultiLine() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
-
-        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
-
-        YAMLMapper mapper = new YAMLMapper(f);
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "first\nsecond\nthird");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: |-\n  first\n  second\n  third", yaml);
-    }
-
-    public void testQuoteNumberStoredAsString() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS));
-
-        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
-        f.configure(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS, true);
-
-        YAMLMapper mapper = new YAMLMapper(f);
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "20");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: \"20\"", yaml);
-
-        content.clear();
-        content.put("key", "2.0");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: \"2.0\"", yaml);
-
-        content.clear();
-        content.put("key", "2.0.1.2.3");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: 2.0.1.2.3", yaml);
-    }
-
-    public void testNonQuoteNumberStoredAsString() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS));
-
-        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
-
-        YAMLMapper mapper = new YAMLMapper(f);
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "20");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: 20", yaml);
-
-        content.clear();
-        content.put("key", "2.0");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: 2.0", yaml);
-
-        content.clear();
-        content.put("key", "2.0.1.2.3");
-        yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "key: 2.0.1.2.3", yaml);
-    }
-
     public void testLiteralBlockStyle() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -362,8 +194,7 @@ public class SimpleGenerationTest extends ModuleTestBase
     /**********************************************************************
      */
 
-
-    protected void _writeBradDoc(JsonGenerator gen) throws IOException
+    private void _writeBradDoc(JsonGenerator gen) throws IOException
     {
         gen.writeStartObject();
         gen.writeStringField("name", "Brad");
