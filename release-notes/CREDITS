@@ -6,3 +6,7 @@ text dataformats project, version 2.x
 
 Tatu Saloranta, tatu.saloranta@iki.fi: author
 
+Simone Locci (pimuzzo@github)
+
+* Reported #51 (csv): Set of custom objects with `IGNORE_UNKNOWN` brokes silently csv
+ (2.9.3)
