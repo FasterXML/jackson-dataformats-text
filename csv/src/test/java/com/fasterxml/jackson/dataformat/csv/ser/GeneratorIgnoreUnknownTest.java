@@ -3,10 +3,11 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.fasterxml.jackson.core.JsonGenerator;
+
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
 
 public class GeneratorIgnoreUnknownTest extends ModuleTestBase
 {
@@ -31,7 +32,6 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
         public PointAndStuff(Object s) { stuff = s; }
     }
 
-    // for [dataformat-csv#104]
     @JsonPropertyOrder({ "x", "points", "y" })
     public static class PointAndArray {
         public int x = 1, y = 2;
@@ -47,8 +47,8 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
             this.x = x;
             this.y = y;
         }
-    }    
-    
+    }
+
     /*
     /**********************************************************
     /* Test methods
@@ -108,7 +108,6 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
         assertEquals("1,2\n", csv);
     }
 
-    // for [dataformat-csv#104]
     public void testIgnoreNested() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
