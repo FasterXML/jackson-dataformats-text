@@ -1,16 +1,29 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.ser;
 
+import java.io.StringWriter;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
 {
     // [dataformats-text#51]
+    @JsonPropertyOrder({ "address", "people", "phoneNumber" })
+    protected static class MyClass
+    {
+        public String address;
+        public Set<Person> people;
+        public String phoneNumber;
+
+        public MyClass() { }
+    }
+
     @JsonPropertyOrder({ "name", "surname" })
     protected static class Person
     {
@@ -23,16 +36,13 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
             this.name = name;
             this.surname = surname;
         }
-    }
 
-    @JsonPropertyOrder({ "address", "people", "phoneNumber" })
-    protected static class MyClass
-    {
-        public String address;
-        public Set<Person> people;
-        public String phoneNumber;
 
-        public MyClass() { }
+        // 07-Nov-2017, tatu: This would be a work-around:
+        //@JsonValue
+        public String asString() {
+            return ""+name+" "+surname;
+        }
     }
 
     /*
@@ -47,8 +57,8 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         mapper.configure( JsonGenerator.Feature.IGNORE_UNKNOWN, true );
         CsvSchema schema = CsvSchema.builder()
-                .addColumn("people") // here I'm skipping phoneNumber so I need to use IGNORE_UNKNOWN feature
                 .addColumn("address")
+                .addColumn("people") // here I'm skipping phoneNumber so I need to use IGNORE_UNKNOWN feature
                 .build()
                 .withHeader();
 
@@ -62,9 +72,13 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
         myClass.address = "AAA";
         myClass.phoneNumber = "123";
 
-        String result = mapper.writer( schema ).writeValueAsString( myClass );
-//System.err.println("REsult: "+result);
-        int numberOfLines = result.split( "\n" ).length;
-        assertEquals( 2, numberOfLines ); // header and data (here fails with 3)
+        StringWriter sw = new StringWriter();
+        try {
+            mapper.writer(schema).writeValue(sw, myClass);
+            fail("Should not pass");
+        } catch (CsvMappingException e) {
+            verifyException(e, "CSV generator does not support");
+            verifyException(e, "nested Objects");
+        }
     }
 }

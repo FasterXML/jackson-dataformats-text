@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
 
 public class CsvGenerator extends GeneratorBase
@@ -454,9 +453,8 @@ public class CsvGenerator extends GeneratorBase
     public final void writeStartArray() throws IOException
     {
         _verifyValueWrite("start an array");
-        /* Ok to create root-level array to contain Objects/Arrays, but
-         * can not nest arrays in objects
-         */
+        // Ok to create root-level array to contain Objects/Arrays, but
+        // can not nest arrays in objects
         if (_writeContext.inObject()) {
             if ((_skipWithin == null)
                     && _skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
@@ -464,7 +462,6 @@ public class CsvGenerator extends GeneratorBase
             } else if (!_skipValue) {
                 // First: column may have its own separator
                 String sep;
-                
                 if (_nextColumnByName >= 0) {
                     CsvSchema.Column col = _schema.column(_nextColumnByName);
                     sep = col.isArray() ? col.getArrayElementSeparator() : CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
@@ -513,9 +510,8 @@ public class CsvGenerator extends GeneratorBase
             _arraySeparator = CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
             _writer.write(_columnIndex(), _arrayContents.toString());
         }
-        /* 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
-         *    is now done. But not if writing such an array field, so:
-         */
+        // 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
+        //    is now done. But not if writing such an array field, so:
         if (!_writeContext.inObject()) {
             finishRow();
         }
@@ -527,12 +523,14 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("start an object");
         // No nesting for objects; can write Objects inside logical root-level arrays.
         // 14-Dec-2015, tatu: ... except, should be fine if we are ignoring the property
-        if (_writeContext.inObject()) {
+        if (_writeContext.inObject() ||
+                // 07-Nov-2017, tatu: But we may actually be nested indirectly; so check
+                (_writeContext.inArray() && !_writeContext.getParent().inRoot())) {
             if (_skipWithin == null) { // new in 2.7
                 if (_skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
                     _skipWithin = _writeContext;
                 } else {
-                    _reportMappingError("CSV generator does not support Object values for properties");
+                    _reportMappingError("CSV generator does not support Object values for properties (nested Objects)");
                 }
             }
         }
@@ -922,7 +920,7 @@ public class CsvGenerator extends GeneratorBase
      * @since 2.7
      */
     protected void _reportMappingError(String msg) throws JsonProcessingException {
-        throw JsonMappingException.from(this, msg);
+        throw CsvMappingException.from(this, msg, _schema);
 //        throw new JsonGenerationException(msg, this);
     }
 

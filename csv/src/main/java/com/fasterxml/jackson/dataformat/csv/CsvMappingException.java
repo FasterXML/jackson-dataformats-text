@@ -19,8 +19,17 @@ public class CsvMappingException extends JsonMappingException
         _schema = schema;
     }
 
+    public CsvMappingException(CsvGenerator gen, String msg, CsvSchema schema) {
+        super(gen, msg);
+        _schema = schema;
+    }
+
     public static CsvMappingException from(CsvParser p, String msg, CsvSchema schema) {
         return new CsvMappingException(p, msg, schema);
+    }
+
+    public static CsvMappingException from(CsvGenerator gen, String msg, CsvSchema schema) {
+        return new CsvMappingException(gen, msg, schema);
     }
 
     public CsvSchema getSchema() {

@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.3 (not yet released)
+
+#51 (csv): Set of custom objects with `IGNORE_UNKNOWN` brokes silently csv
+ (reported by Simone L)
+
 2.9.2 (14-Oct-2017)
 
 No changes since 2.9.1

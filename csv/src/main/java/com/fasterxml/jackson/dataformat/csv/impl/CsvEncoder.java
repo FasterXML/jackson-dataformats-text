@@ -154,7 +154,7 @@ public class CsvEncoder
      * stream writer.
      */
     protected int _charsWritten;
-    
+
     /*
     /**********************************************************
     /* Construction, (re)configuration
