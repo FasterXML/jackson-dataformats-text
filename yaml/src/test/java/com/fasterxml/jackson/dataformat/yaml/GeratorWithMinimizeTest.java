@@ -5,11 +5,13 @@ import java.util.Map;
 
 public class GeratorWithMinimizeTest extends ModuleTestBase
 {
-    private final static YAMLMapper MINIM_MAPPER = new YAMLMapper();
+    private final static YAMLMapper MINIM_MAPPER;
     static {
-        MINIM_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        YAMLFactory f = new YAMLFactory();
+        f.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        MINIM_MAPPER = new YAMLMapper(f);
     }
-
+    
     public void testDefaultSetting() {
         YAMLFactory f = new YAMLFactory();
         assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));

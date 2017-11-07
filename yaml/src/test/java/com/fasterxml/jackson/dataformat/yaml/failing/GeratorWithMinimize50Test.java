@@ -4,14 +4,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public class GeratorWithMinimize50Test extends ModuleTestBase
 {
-    private final static YAMLMapper MINIM_MAPPER = new YAMLMapper();
+    private final static YAMLMapper MINIM_MAPPER;
     static {
-        MINIM_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        YAMLFactory f = new YAMLFactory();
+        f.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        MINIM_MAPPER = new YAMLMapper(f);
     }
 
     // [dataformats-test#50]
