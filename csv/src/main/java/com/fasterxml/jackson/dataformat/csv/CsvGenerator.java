@@ -71,6 +71,14 @@ public class CsvGenerator extends GeneratorBase
          * @since 2.9
          */
         ALWAYS_QUOTE_EMPTY_STRINGS(false),
+
+        /**
+         * Feature that determines whether values written Strings (from <code>java.lang.String</code>
+         * valued POJO properties) which contains quotes be escaped using the Schema's configured escape character instead of "".
+         *
+         * @since 2.9
+         */
+        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
         ;
 
         protected final boolean _defaultState;

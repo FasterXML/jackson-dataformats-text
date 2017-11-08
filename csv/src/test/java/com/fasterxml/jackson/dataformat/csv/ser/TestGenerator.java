@@ -204,6 +204,21 @@ public class TestGenerator extends ModuleTestBase
         assertEquals("xyz,2.5\n", result);
     }
 
+    public void testForcedQuotingWithQuoteEscapedWithBackslash() throws Exception
+    {
+        CsvMapper mapper = mapperForCsv();
+        CsvSchema schema = CsvSchema.builder()
+                                    .addColumn("id")
+                                    .addColumn("amount")
+                                    .setEscapeChar('\\')
+                                    .build();
+        String result = mapper.writer(schema)
+                .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                .with(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                .writeValueAsString(new Entry("\"abc\"", 1.25));
+        assertEquals("\"\\\"abc\\\"\",1.25\n", result);
+    }
+
     public void testForcedQuotingEmptyStrings() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
