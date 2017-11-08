@@ -65,6 +65,17 @@ public class CsvGenerator extends GeneratorBase
          * valued POJO properties) should be forced to be quoted.
          */
         ALWAYS_QUOTE_EMPTY_STRINGS(false),
+
+        /**
+         * Feature that determines whether quote characters within quoted String values are escaped
+	 * using configured escape character, instead of being "doubled up" (that is: a quote character
+	 * is written twice in a row).
+	 *<p>
+	 * Default value is false so that quotes are doubled as necessary, not escaped.
+         *
+         * @since 2.9.3
+         */
+        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
         ;
 
         protected final boolean _defaultState;

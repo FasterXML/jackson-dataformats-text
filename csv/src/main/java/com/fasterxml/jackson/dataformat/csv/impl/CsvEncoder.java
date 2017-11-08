@@ -90,7 +90,11 @@ public class CsvEncoder
     protected boolean _cfgAlwaysQuoteStrings;
 
     protected boolean _cfgAlwaysQuoteEmptyStrings;
-    
+
+    protected boolean _cfgEscapeQuoteCharWithEscapeChar;
+
+    protected final char _cfgQuoteCharEscapeChar;
+
     /*
     /**********************************************************
     /* Output state
@@ -169,6 +173,7 @@ public class CsvEncoder
         _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
+        _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
         _outputBuffer = ctxt.allocConcatBuffer();
         _bufferRecyclable = true;
@@ -187,6 +192,12 @@ public class CsvEncoder
         _cfgMinSafeChar = _calcSafeChar();
 
         _cfgMaxQuoteCheckChars = MAX_QUOTE_CHECK;
+
+        _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
+          _cfgEscapeQuoteCharWithEscapeChar,
+          _cfgQuoteCharacter,
+          _cfgEscapeCharacter
+        );
     }
 
     public CsvEncoder(CsvEncoder base, CsvSchema newSchema)
@@ -197,6 +208,7 @@ public class CsvEncoder
         _cfgIncludeMissingTail = base._cfgIncludeMissingTail;
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
         _cfgAlwaysQuoteEmptyStrings = base._cfgAlwaysQuoteEmptyStrings;
+        _cfgEscapeQuoteCharWithEscapeChar = base._cfgEscapeQuoteCharWithEscapeChar;
 
         _outputBuffer = base._outputBuffer;
         _bufferRecyclable = base._bufferRecyclable;
@@ -212,8 +224,33 @@ public class CsvEncoder
         _cfgNullValue = newSchema.getNullValueOrEmpty();
         _cfgMinSafeChar = _calcSafeChar();
         _columnCount = newSchema.size();
-    }  
-    
+        _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
+          base._cfgEscapeQuoteCharWithEscapeChar,
+          newSchema.getQuoteChar(),
+          newSchema.getEscapeChar()
+        );
+    }
+
+    private final char _getQuoteCharEscapeChar(
+        final boolean escapeQuoteCharWithEscapeChar,
+        final int quoteCharacter,
+        final int escapeCharacter) {
+
+      final char quoteEscapeChar;
+
+      if (_cfgEscapeQuoteCharWithEscapeChar && _cfgEscapeCharacter > 0) {
+        quoteEscapeChar = (char) _cfgEscapeCharacter;
+      }
+      else if (_cfgQuoteCharacter > 0) {
+        quoteEscapeChar = (char) _cfgQuoteCharacter;
+      }
+      else {
+        quoteEscapeChar = '\\';
+      }
+
+      return quoteEscapeChar;
+    }
+
     private final int _calcSafeChar()
     {
         // note: quote char may be -1 to signify "no quoting":
@@ -237,6 +274,7 @@ public class CsvEncoder
             _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(feat);
             _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(feat);
             _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(feat);
+            _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(feat);
         }
         return this;
     }
@@ -702,7 +740,7 @@ public class CsvEncoder
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
-                buf[_outputTail++] = q;
+                buf[_outputTail++] = _cfgQuoteCharEscapeChar;
             }
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
@@ -724,7 +762,7 @@ public class CsvEncoder
             }
             char c = text.charAt(i);
             if (c == q) { // double up
-                _outputBuffer[_outputTail++] = q;
+                _outputBuffer[_outputTail++] = _cfgQuoteCharEscapeChar;
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
@@ -782,7 +820,7 @@ public class CsvEncoder
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
-                buf[_outputTail++] = c;
+                buf[_outputTail++] = (c == q) ? _cfgQuoteCharEscapeChar : c;
             }
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
@@ -800,13 +838,14 @@ public class CsvEncoder
         final int len = text.length();
         // NOTE: caller should guarantee quote char is valid (not -1) at this point:
         final char q = (char) _cfgQuoteCharacter;
+        final char quoteEscape = _cfgEscapeQuoteCharWithEscapeChar ? esc : q;
         for (int i = 0; i < len; ++i) {
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
             }
             char c = text.charAt(i);
             if ((c == q) || (c == esc)) { // double up, either way
-                _outputBuffer[_outputTail++] = c;
+                _outputBuffer[_outputTail++] = (c == q) ? quoteEscape : c;
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
