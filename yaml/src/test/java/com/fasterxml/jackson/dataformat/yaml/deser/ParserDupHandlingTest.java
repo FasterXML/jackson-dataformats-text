@@ -36,16 +36,16 @@ public void testDupChecksDisabled() throws Exception
 
     private void _verifyDupsOk(ObjectMapper mapper, String doc, boolean useBytes) throws Exception
     {
-        JsonParser p = useBytes ? mapper.getFactory().createParser(new ByteArrayInputStream(doc.getBytes("UTF-8")))
-                : mapper.getFactory().createParser(new StringReader(doc));
+        JsonParser p = useBytes ? mapper.createParser(new ByteArrayInputStream(doc.getBytes("UTF-8")))
+                : mapper.createParser(new StringReader(doc));
         _stream(p);
         p.close();
     }
 
     private void _verifyDupsFail(ObjectMapper mapper, String doc, boolean useBytes) throws Exception
     {
-        JsonParser p = useBytes ? mapper.getFactory().createParser(new ByteArrayInputStream(doc.getBytes("UTF-8")))
-                : mapper.getFactory().createParser(new StringReader(doc));
+        JsonParser p = useBytes ? mapper.createParser(new ByteArrayInputStream(doc.getBytes("UTF-8")))
+                : mapper.createParser(new StringReader(doc));
         try {
             _stream(p);
         } catch (JsonProcessingException e) {
