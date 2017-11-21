@@ -22,7 +22,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-yaml</artifactId>
-  <version>2.8.3</version>
+  <version>2.9.2</version>
 </dependency>
 ```
 
