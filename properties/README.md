@@ -123,7 +123,7 @@ Given a String of `propStr`, we could easily read contents back as a POJO with:
 User result = mapper.readValue(props, User.class);
 ```
 
-and veirfy that contents are as expected.
+and verify that contents are as expected.
 
 
 ## Basic array handling
