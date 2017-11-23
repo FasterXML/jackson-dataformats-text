@@ -42,36 +42,36 @@ public class MediaItem
     public void setContent(Content c) { _content = c; }
 
     // Custom deser
-    public static MediaItem deserialize(JsonParser jp) throws IOException
+    public static MediaItem deserialize(JsonParser p) throws IOException
     {
-        if (jp.nextToken() != JsonToken.START_OBJECT) {
+        if (p.nextToken() != JsonToken.START_OBJECT) {
             throw new IOException("Need START_OBJECT for MediaItem");
         }
         MediaItem item = new MediaItem();
-        while (jp.nextToken() == JsonToken.FIELD_NAME) {
-            String name = jp.getCurrentName();
+        while (p.nextToken() == JsonToken.FIELD_NAME) {
+            String name = p.currentName();
             if (name == "images") {
-                item._photos = deserializeImages(jp);
+                item._photos = deserializeImages(p);
             } else if (name == "content") {
-                item._content = Content.deserialize(jp);
+                item._content = Content.deserialize(p);
             } else throw new IOException("Unknown field");
         }
-        if (jp.currentToken() != JsonToken.END_OBJECT) {
+        if (p.currentToken() != JsonToken.END_OBJECT) {
             throw new IOException("Need END_OBJECT to complete MediaItem");
         }
         return item;
     }
     
-    private static List<Photo> deserializeImages(JsonParser jp) throws IOException
+    private static List<Photo> deserializeImages(JsonParser p) throws IOException
     {
-        if (jp.nextToken() != JsonToken.START_ARRAY) {
+        if (p.nextToken() != JsonToken.START_ARRAY) {
             throw new IOException("Need START_ARRAY for List of Photos");
         }
         ArrayList<Photo> images = new ArrayList<Photo>(4);
-        while (jp.nextToken() == JsonToken.START_OBJECT) {
-            images.add(Photo.deserialize(jp));
+        while (p.nextToken() == JsonToken.START_OBJECT) {
+            images.add(Photo.deserialize(p));
         }
-        if (jp.currentToken() != JsonToken.END_ARRAY) {
+        if (p.currentToken() != JsonToken.END_ARRAY) {
             throw new IOException("Need END_ARRAY to complete List of Photos");
         }
         return images;
@@ -166,35 +166,35 @@ public class MediaItem
           throw new IllegalArgumentException();
       }
       
-      public static Photo deserialize(JsonParser jp) throws IOException
+      public static Photo deserialize(JsonParser p) throws IOException
       {
           Photo photo = new Photo();
-          while (jp.nextToken() == JsonToken.FIELD_NAME) {
-              String name = jp.getCurrentName();
-              jp.nextToken();
+          while (p.nextToken() == JsonToken.FIELD_NAME) {
+              String name = p.currentName();
+              p.nextToken();
               Integer I = sFields.get(name);
               if (I != null) {
                   switch (I.intValue()) {
                   case F_URI:
-                      photo.setUri(jp.getText());
+                      photo.setUri(p.getText());
                       continue;
                   case F_TITLE:
-                      photo.setTitle(jp.getText());
+                      photo.setTitle(p.getText());
                       continue;
                   case F_WIDTH:
-                      photo.setWidth(jp.getIntValue());
+                      photo.setWidth(p.getIntValue());
                       continue;
                   case F_HEIGHT:
-                      photo.setHeight(jp.getIntValue());
+                      photo.setHeight(p.getIntValue());
                       continue;
                   case F_SIZE:
-                      photo.setSize(findSize(jp.getText()));
+                      photo.setSize(findSize(p.getText()));
                       continue;
                   }
               }
               throw new IOException("Unknown field '"+name+"'");
           }
-          if (jp.currentToken() != JsonToken.END_OBJECT) {
+          if (p.currentToken() != JsonToken.END_OBJECT) {
               throw new IOException("Need END_OBJECT to complete Photo");
           }
           return photo;
@@ -298,71 +298,71 @@ public class MediaItem
             throw new IllegalArgumentException("Weird Player value of '"+id+"'");
         }
         
-        public static Content deserialize(JsonParser jp) throws IOException
+        public static Content deserialize(JsonParser p) throws IOException
         {
-            if (jp.nextToken() != JsonToken.START_OBJECT) {
+            if (p.nextToken() != JsonToken.START_OBJECT) {
                 throw new IOException("Need START_OBJECT for Content");
             }
             Content content = new Content();
 
-            while (jp.nextToken() == JsonToken.FIELD_NAME) {
-                String name = jp.getCurrentName();
-                jp.nextToken();
+            while (p.nextToken() == JsonToken.FIELD_NAME) {
+                String name = p.currentName();
+                p.nextToken();
                 Integer I = sFields.get(name);
                 if (I != null) {
                     switch (I.intValue()) {
                     case F_PLAYER:
-                        content.setPlayer(findPlayer(jp.getText()));
+                        content.setPlayer(findPlayer(p.getText()));
                     case F_URI:
-                        content.setUri(jp.getText());
+                        content.setUri(p.getText());
                         continue;
                     case F_TITLE:
-                        content.setTitle(jp.getText());
+                        content.setTitle(p.getText());
                         continue;
                     case F_WIDTH:
-                        content.setWidth(jp.getIntValue());
+                        content.setWidth(p.getIntValue());
                         continue;
                     case F_HEIGHT:
-                        content.setHeight(jp.getIntValue());
+                        content.setHeight(p.getIntValue());
                         continue;
                     case F_FORMAT:
-                        content.setCopyright(jp.getText());
+                        content.setCopyright(p.getText());
                         continue;
                     case F_DURATION:
-                        content.setDuration(jp.getLongValue());
+                        content.setDuration(p.getLongValue());
                         continue;
                     case F_SIZE:
-                        content.setSize(jp.getLongValue());
+                        content.setSize(p.getLongValue());
                         continue;
                     case F_BITRATE:
-                        content.setBitrate(jp.getIntValue());
+                        content.setBitrate(p.getIntValue());
                         continue;
                     case F_PERSONS:
-                        content.setPersons(deserializePersons(jp));
+                        content.setPersons(deserializePersons(p));
                         continue;
                     case F_COPYRIGHT:
-                        content.setCopyright(jp.getText());
+                        content.setCopyright(p.getText());
                         continue;
                     }
                 }
                 throw new IOException("Unknown field '"+name+"'");
             }
-            if (jp.currentToken() != JsonToken.END_OBJECT) {
+            if (p.currentToken() != JsonToken.END_OBJECT) {
                 throw new IOException("Need END_OBJECT to complete Content");
             }
             return content;
         }
         
-        private static List<String> deserializePersons(JsonParser jp) throws IOException
+        private static List<String> deserializePersons(JsonParser p) throws IOException
         {
-            if (jp.currentToken() != JsonToken.START_ARRAY) {
-                throw new IOException("Need START_ARRAY for List of Persons (got "+jp.currentToken()+")");
+            if (p.currentToken() != JsonToken.START_ARRAY) {
+                throw new IOException("Need START_ARRAY for List of Persons (got "+p.currentToken()+")");
             }
             ArrayList<String> persons = new ArrayList<String>(4);
-            while (jp.nextToken() == JsonToken.VALUE_STRING) {
-                persons.add(jp.getText());
+            while (p.nextToken() == JsonToken.VALUE_STRING) {
+                persons.add(p.getText());
             }
-            if (jp.currentToken() != JsonToken.END_ARRAY) {
+            if (p.currentToken() != JsonToken.END_ARRAY) {
                 throw new IOException("Need END_ARRAY to complete List of Persons");
             }
             return persons;

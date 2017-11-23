@@ -528,7 +528,7 @@ public class CsvParser
     }
 
     @Override
-    public String getCurrentName() throws IOException {
+    public String currentName() throws IOException {
         return _currentName;
     }
 
@@ -594,7 +594,7 @@ public class CsvParser
             return false;
         }
         // unlikely, but verify just in case
-        return (nextToken() == JsonToken.FIELD_NAME) && str.getValue().equals(getCurrentName());
+        return (nextToken() == JsonToken.FIELD_NAME) && str.getValue().equals(currentName());
     }
 
     @Override
@@ -611,7 +611,7 @@ public class CsvParser
             return null;
         }
         // unlikely, but verify just in case
-        return (nextToken() == JsonToken.FIELD_NAME) ? getCurrentName() : null;
+        return (nextToken() == JsonToken.FIELD_NAME) ? currentName() : null;
     }
 
     @Override

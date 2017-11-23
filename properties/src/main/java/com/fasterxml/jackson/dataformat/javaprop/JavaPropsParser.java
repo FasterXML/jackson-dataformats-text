@@ -175,7 +175,7 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public String getCurrentName() throws IOException {
+    public String currentName() throws IOException {
         if (_readContext == null) {
             return null;
         }
@@ -183,10 +183,10 @@ public class JavaPropsParser extends ParserMinimalBase
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
             JPropReadContext parent = _readContext.getParent();
             if (parent != null) {
-                return parent.getCurrentName();
+                return parent.currentName();
             }
         }
-        return _readContext.getCurrentName();
+        return _readContext.currentName();
     }
 
     @Override
@@ -224,7 +224,7 @@ System.err.println("\n>>");
             return _readContext.getCurrentText();
         }
         if (t == JsonToken.FIELD_NAME) {
-            return _readContext.getCurrentName();
+            return _readContext.currentName();
         }
         // shouldn't have non-String scalar values so:
         return (t == null) ? null : t.asString();

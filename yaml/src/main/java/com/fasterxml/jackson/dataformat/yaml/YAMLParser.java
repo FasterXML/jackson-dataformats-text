@@ -579,12 +579,12 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public String getCurrentName() throws IOException
+    public String currentName() throws IOException
     {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentFieldName;
         }
-        return super.getCurrentName();
+        return super.currentName();
     }
 
     @Override
