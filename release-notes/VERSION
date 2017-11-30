@@ -10,12 +10,14 @@ Modules:
 
 2.9.3 (not yet released)
 
+#39 (yamk): Binary data not recognized by YAML parser
+ (repoted by tmoschou@github)
 #42 (csv): Add support for escaping double quotes with the configured escape character
  (contributed by frankgrimes97@github)
 #51 (csv): Set of custom objects with `IGNORE_UNKNOWN` brokes silently csv
  (reported by Simone L)
-#39 (yamk): Binary data not recognized by YAML parser
- (repoted by tmoschou@github)
+#53: (yaml) Binary values written without type tag
+ (reported by arulrajnet@github)
 
 2.9.2 (14-Oct-2017)
 

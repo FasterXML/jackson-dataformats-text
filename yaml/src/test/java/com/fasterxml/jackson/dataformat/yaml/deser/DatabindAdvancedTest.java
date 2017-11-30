@@ -1,9 +1,10 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class DatabindAdvancedTest extends ModuleTestBase
 {
@@ -135,7 +136,7 @@ public class DatabindAdvancedTest extends ModuleTestBase
     /**********************************************************
      */
 
-    public void testBasic() throws Exception
+    public void testReadComplexPojo() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
         String YAML =

@@ -39,7 +39,6 @@ public class TypeIdTest extends ModuleTestBase
         assertEquals("--- !<impl>\na: 13", yaml);
     }
 
-    // [Issue#22]
     public void testNonNativeSerialization() throws Exception
     {
         YAMLMapper mapper = new YAMLMapper();
