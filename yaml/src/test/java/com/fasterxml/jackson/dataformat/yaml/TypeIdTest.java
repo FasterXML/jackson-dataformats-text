@@ -33,7 +33,7 @@ public class TypeIdTest extends ModuleTestBase
 
     public void testNativeSerialization() throws Exception
     {
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         String yaml = mapper.writeValueAsString(new Impl(13));
         yaml = yaml.trim();
         assertEquals("--- !<impl>\na: 13", yaml);
@@ -59,7 +59,7 @@ public class TypeIdTest extends ModuleTestBase
         /* Looks like there are couple of alternative ways to indicate
          * type ids... so let's verify variations we know of.
          */
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         
         for (String typeId : new String[] {
                 "--- !<impl>",
@@ -77,7 +77,7 @@ public class TypeIdTest extends ModuleTestBase
 
     public void testRoundtripWithBuffer() throws Exception
     {
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         TokenBuffer tbuf = mapper.readValue("--- !impl\na: 13\n", TokenBuffer.class);
         assertNotNull(tbuf);
         Base result = mapper.readValue(tbuf.asParser(), Base.class);

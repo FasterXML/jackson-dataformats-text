@@ -14,9 +14,8 @@ public class ParserDupHandlingTest extends ModuleTestBase
 +"  first: Bob\n"
 +"  first: Dup\n";
 
-public void testDupChecksDisabled() throws Exception
+    public void testDupChecksDisabled() throws Exception
     {
-;
         YAMLFactory f = new YAMLFactory();
         assertFalse(f.isEnabled(JsonParser.Feature.STRICT_DUPLICATE_DETECTION));
 

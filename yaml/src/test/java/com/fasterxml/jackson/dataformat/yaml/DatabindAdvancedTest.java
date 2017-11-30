@@ -137,7 +137,7 @@ public class DatabindAdvancedTest extends ModuleTestBase
 
     public void testBasic() throws Exception
     {
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         String YAML =
 "---\n"
 +"content:\n"

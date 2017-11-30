@@ -75,7 +75,7 @@ public class SimpleGenerationTest extends ModuleTestBase
 
     public void testBasicPOJO() throws Exception
     {
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         FiveMinuteUser user = new FiveMinuteUser("Bob", "Dabolito", false,
                 FiveMinuteUser.Gender.MALE, new byte[] { 1, 3, 13, 79 });
         String yaml = mapper.writeValueAsString(user).trim();
@@ -105,7 +105,7 @@ public class SimpleGenerationTest extends ModuleTestBase
     {
         File f = File.createTempFile("test", ".yml");
         f.deleteOnExit();
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         Map<String,Integer> map = new HashMap<String,Integer>();
         map.put("a", 3);
         mapper.writeValue(f, map);
@@ -127,7 +127,7 @@ public class SimpleGenerationTest extends ModuleTestBase
     {
         File f = File.createTempFile("test", ".yml");
         f.deleteOnExit();
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         ObjectNode root = mapper.createObjectNode();
         root.put("name", "Foobar");
         mapper.writeValue(f, root);

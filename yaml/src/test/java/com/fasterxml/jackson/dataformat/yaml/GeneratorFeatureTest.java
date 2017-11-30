@@ -21,7 +21,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     public void testArrayIndentation() throws Exception
     {
@@ -39,7 +39,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
         // 14-Mar-2017, tatu: Note that we can not, alas, dynamically change
         //    features via ObjectWriter yet as they are bound at YAMLGenerator
         //    construction time.
-        final YAMLMapper indentingMapper = mapperForYAML();
+        final YAMLMapper indentingMapper = newObjectMapper();
         indentingMapper.getFactory().enable(YAMLGenerator.Feature.INDENT_ARRAYS);
 
         yaml = indentingMapper.writeValueAsString(input);

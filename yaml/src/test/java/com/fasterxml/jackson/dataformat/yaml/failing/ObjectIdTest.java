@@ -42,7 +42,7 @@ public class ObjectIdTest extends ModuleTestBase
     // For issue [#24]
     public void testRoundtripViaTree() throws Exception
     {
-        ObjectMapper mapper = mapperForYAML();
+        ObjectMapper mapper = newObjectMapper();
         JsonNode root = mapper.readTree(SIMPLE_YAML);
         assertNotNull(root);
         Node first = mapper.treeToValue(root, Node.class);

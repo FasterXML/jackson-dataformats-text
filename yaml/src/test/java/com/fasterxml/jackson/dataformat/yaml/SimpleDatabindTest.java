@@ -33,7 +33,7 @@ public class SimpleDatabindTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     public void testSimpleNested() throws Exception
     {
