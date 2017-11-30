@@ -1,19 +1,23 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.io.*;
 import java.util.*;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public class SimpleGenerationTest extends ModuleTestBase
 {
+    private final YAMLFactory YAML_F = new YAMLFactory();
+
     public void testStreamingArray() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = YAML_F.createGenerator(w);
         gen.writeStartArray();
         gen.writeNumber(3);
         gen.writeString("foobar");
@@ -29,9 +33,8 @@ public class SimpleGenerationTest extends ModuleTestBase
 
     public void testStreamingObject() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = YAML_F.createGenerator(w);
         _writeBradDoc(gen);
         String yaml = w.toString();
 
@@ -43,9 +46,8 @@ public class SimpleGenerationTest extends ModuleTestBase
 
     public void testStreamingNested() throws Exception
     {
-        YAMLFactory f = new YAMLFactory();
         StringWriter w = new StringWriter();
-        JsonGenerator gen = f.createGenerator(w);
+        JsonGenerator gen = YAML_F.createGenerator(w);
 
         gen.writeStartObject();
         gen.writeFieldName("ob");
@@ -71,71 +73,6 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("- \"b\"", br.readLine());
         assertNull(br.readLine());
         br.close();
-    }
-
-    public void testBasicPOJO() throws Exception
-    {
-        ObjectMapper mapper = newObjectMapper();
-        FiveMinuteUser user = new FiveMinuteUser("Bob", "Dabolito", false,
-                FiveMinuteUser.Gender.MALE, new byte[] { 1, 3, 13, 79 });
-        String yaml = mapper.writeValueAsString(user).trim();
-        String[] parts = yaml.split("\n");
-        boolean gotHeader = (parts.length == 6);
-        if (!gotHeader) {
-            // 1.10 has 6 as it has header
-            assertEquals(5, parts.length);
-        }
-        // unify ordering, need to use TreeSets
-        TreeSet<String> exp = new TreeSet<String>();
-        for (String part : parts) {
-            exp.add(part.trim());
-        }
-        Iterator<String> it = exp.iterator();
-        if (gotHeader) {
-            assertEquals("---", it.next());
-        }
-        assertEquals("firstName: \"Bob\"", it.next());
-        assertEquals("gender: \"MALE\"", it.next());
-        assertEquals("lastName: \"Dabolito\"", it.next());
-        assertEquals("userImage: \"AQMNTw==\"", it.next());
-        assertEquals("verified: false", it.next());
-    }
-
-    public void testWithFile() throws Exception
-    {
-        File f = File.createTempFile("test", ".yml");
-        f.deleteOnExit();
-        ObjectMapper mapper = newObjectMapper();
-        Map<String,Integer> map = new HashMap<String,Integer>();
-        map.put("a", 3);
-        mapper.writeValue(f, map);
-        assertTrue(f.canRead());
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(
-                f), "UTF-8"));
-        String doc = br.readLine();
-        String str = br.readLine();
-        if (str != null) {
-            doc += "\n" + str;
-        }
-        doc = trimDocMarker(doc);
-        assertEquals("a: 3", doc);
-        br.close();
-        f.delete();
-    }
-
-    public void testWithFile2() throws Exception
-    {
-        File f = File.createTempFile("test", ".yml");
-        f.deleteOnExit();
-        ObjectMapper mapper = newObjectMapper();
-        ObjectNode root = mapper.createObjectNode();
-        root.put("name", "Foobar");
-        mapper.writeValue(f, root);
-
-        // and get it back
-        Map<?,?> result = mapper.readValue(f, Map.class);
-        assertEquals(1, result.size());
-        assertEquals("Foobar", result.get("name"));
     }
 
     @SuppressWarnings("resource")
