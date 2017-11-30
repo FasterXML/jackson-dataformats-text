@@ -17,7 +17,7 @@ public class EventsTest extends ModuleTestBase
 +"i: 123\n"
 +"d: 1.25\n"
 ;
-        YAMLMapper mapper = mapperForYAML();
+        YAMLMapper mapper = newObjectMapper();
         JsonParser p = mapper.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
 

@@ -12,7 +12,7 @@ import java.math.BigInteger;
  */
 public class SimpleParseTest extends ModuleTestBase
 {
-    final YAMLMapper MAPPER = mapperForYAML();
+    final YAMLMapper MAPPER = newObjectMapper();
 
     // Parsing large numbers around the transition from int->long and long->BigInteger
     public void testIntParsing() throws Exception

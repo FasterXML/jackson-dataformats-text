@@ -10,7 +10,7 @@ public class ExceptionConversionTest extends ModuleTestBase
 {
     public void testSimpleParsingLeakage() throws Exception
     {
-        YAMLMapper mapper = mapperForYAML();
+        YAMLMapper mapper = newObjectMapper();
         try {
              mapper.readTree("foo:\nbar: true\n  baz: false");
              fail("Should not pass with invalid YAML");

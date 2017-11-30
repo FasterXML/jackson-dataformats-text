@@ -22,7 +22,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     public void testArrayIndentation() throws Exception
     {
