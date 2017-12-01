@@ -31,7 +31,7 @@ All modules are licensed under [Apache License 2.0](http://www.apache.org/licens
 
 ## Status
 
-[![Build Status](https://travis-ci.org/FasterXML/jackson-dataformat-csv.svg?branch=master)](https://travis-ci.org/FasterXML/jackson-dataformat-csv)
+[![Build Status](https://travis-ci.org/FasterXML/jackson-dataformats-text.svg?branch=master)](https://travis-ci.org/FasterXML/jackson-dataformats-text)
 
 ## Maven dependencies
 
