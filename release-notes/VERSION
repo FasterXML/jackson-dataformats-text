@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.3 (not yet released)
+2.9.3 (09-Dec-2017)
 
 #39 (yamk): Binary data not recognized by YAML parser
  (repoted by tmoschou@github)
