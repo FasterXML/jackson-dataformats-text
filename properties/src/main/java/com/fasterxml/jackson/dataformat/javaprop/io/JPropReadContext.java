@@ -72,7 +72,7 @@ public abstract class JPropReadContext
     public final JPropReadContext getParent() { return _parent; }
 
     @Override
-    public final String getCurrentName() {
+    public final String currentName() {
         return _currentName;
     }
 

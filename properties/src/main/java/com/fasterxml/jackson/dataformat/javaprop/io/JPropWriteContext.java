@@ -150,7 +150,7 @@ public class JPropWriteContext
     public final JPropWriteContext getParent() { return _parent; }
     
     @Override
-    public String getCurrentName() {
+    public String currentName() {
         return _currentName;
     }
 

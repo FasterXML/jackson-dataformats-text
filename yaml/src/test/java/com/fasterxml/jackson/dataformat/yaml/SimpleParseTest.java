@@ -25,7 +25,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -37,7 +37,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -49,7 +49,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE + 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -61,7 +61,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE - 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -73,7 +73,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MAX_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -85,7 +85,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MIN_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -97,7 +97,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
@@ -109,7 +109,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
@@ -128,7 +128,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
 
         StringWriter w = new StringWriter();
         assertEquals(3, p.getText(w));
@@ -148,7 +148,7 @@ public class SimpleParseTest extends ModuleTestBase
         p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("ip", p.getCurrentName());
+        assertEquals("ip", p.currentName());
         // should be considered a String...
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
 
@@ -171,10 +171,10 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("section", p.getCurrentName());
+        assertEquals("section", p.currentName());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("text", p.getCurrentName());
+        assertEquals("text", p.currentName());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("foo:bar", p.getText());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -204,7 +204,7 @@ public class SimpleParseTest extends ModuleTestBase
         assertNull(yp.getObjectId());
 
         assertToken(JsonToken.FIELD_NAME, yp.nextToken());
-        assertEquals("parent", yp.getCurrentName());
+        assertEquals("parent", yp.currentName());
         assertFalse(yp.isCurrentAlias());
         assertNull(yp.getObjectId());
 
@@ -212,24 +212,24 @@ public class SimpleParseTest extends ModuleTestBase
         assertFalse(yp.isCurrentAlias());
         assertEquals("id1", yp.getObjectId());
         assertToken(JsonToken.FIELD_NAME, yp.nextToken());
-        assertEquals("name", yp.getCurrentName());
+        assertEquals("name", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
         assertEquals("Bob", yp.getText());
         assertFalse(yp.isCurrentAlias());
         assertToken(JsonToken.END_OBJECT, yp.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, yp.nextToken());
-        assertEquals("child", yp.getCurrentName());
+        assertEquals("child", yp.currentName());
         assertFalse(yp.isCurrentAlias());
         assertToken(JsonToken.START_OBJECT, yp.nextToken());
         assertFalse(yp.isCurrentAlias());
         assertEquals("id2", yp.getObjectId());
         assertToken(JsonToken.FIELD_NAME, yp.nextToken());
-        assertEquals("name", yp.getCurrentName());
+        assertEquals("name", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
         assertEquals("Bill", yp.getText());
         assertToken(JsonToken.FIELD_NAME, yp.nextToken());
-        assertEquals("parentRef", yp.getCurrentName());
+        assertEquals("parentRef", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
         assertEquals("id1", yp.getText());
         assertTrue(yp.isCurrentAlias());
@@ -250,7 +250,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("strings", p.getCurrentName());
+        assertEquals("strings", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("true", p.getText());
@@ -271,7 +271,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("booleans", p.getCurrentName());
+        assertEquals("booleans", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
         assertToken(JsonToken.VALUE_FALSE, p.nextToken());
@@ -299,29 +299,29 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("content", p.getCurrentName());
+        assertEquals("content", p.currentName());
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("uri", p.getCurrentName());
+        assertEquals("uri", p.currentName());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("title", p.getCurrentName());
+        assertEquals("title", p.currentName());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("width", p.getCurrentName());
+        assertEquals("width", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(640, p.getIntValue());
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("height", p.getCurrentName());
+        assertEquals("height", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(480, p.getIntValue());
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("persons", p.getCurrentName());
+        assertEquals("persons", p.currentName());
 
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
@@ -344,7 +344,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("nulls", p.getCurrentName());
+        assertEquals("nulls", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_NULL, p.nextToken());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
@@ -361,7 +361,7 @@ public class SimpleParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("nulls", p.getCurrentName());
+        assertEquals("nulls", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_NULL, p.nextToken());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
@@ -379,7 +379,7 @@ public class SimpleParseTest extends ModuleTestBase
 
           assertToken(JsonToken.START_OBJECT, p.nextToken());
           assertToken(JsonToken.FIELD_NAME, p.nextToken());
-          assertEquals("value", p.getCurrentName());
+          assertEquals("value", p.currentName());
           assertToken(JsonToken.VALUE_STRING, p.nextToken());
           assertEquals("3:00", p.getText());
           assertToken(JsonToken.END_OBJECT, p.nextToken());
