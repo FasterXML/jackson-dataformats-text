@@ -10,7 +10,7 @@ Project is licensed under [Apache License 2.0](http://www.apache.org/licenses/LI
 
 [![Build Status](https://travis-ci.org/FasterXML/jackson-dataformat-yaml.svg?branch=master)](https://travis-ci.org/FasterXML/jackson-dataformat-yaml)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/badge.svg)](http://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml)
+[![Javadoc](https://javadoc.io/badge/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml.svg)](http://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml)
 
 Module has been production ready since version 2.5.
 

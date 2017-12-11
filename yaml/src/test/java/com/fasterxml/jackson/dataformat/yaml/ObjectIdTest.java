@@ -109,7 +109,7 @@ public class ObjectIdTest extends ModuleTestBase
             +"  next: 1"
             ;
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
 
     public void testNativeSerialization() throws Exception
     {

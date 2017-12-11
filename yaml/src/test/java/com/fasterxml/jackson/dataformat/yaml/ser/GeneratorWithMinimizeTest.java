@@ -1,9 +1,15 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class GeratorWithMinimizeTest extends ModuleTestBase
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+
+public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
     private final static YAMLMapper MINIM_MAPPER;
     static {

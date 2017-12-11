@@ -1,6 +1,8 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import org.junit.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.UTF8Reader;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

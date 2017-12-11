@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.*;
 
 public class TestVersions extends ModuleTestBase
 {
-    private final YAMLMapper MAPPER = mapperForYAML();
+    private final YAMLMapper MAPPER = newObjectMapper();
 
     @SuppressWarnings("resource")
     public void testMapperVersions() throws IOException

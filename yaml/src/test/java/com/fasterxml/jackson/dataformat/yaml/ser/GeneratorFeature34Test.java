@@ -1,6 +1,11 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Map;
+
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 
 public class GeneratorFeature34Test extends ModuleTestBase
 {

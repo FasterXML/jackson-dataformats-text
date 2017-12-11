@@ -12,6 +12,8 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
+import org.yaml.snakeyaml.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -139,6 +141,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = (long) Integer.MAX_VALUE;
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[0-9]*(\\.[0-9]*)?");
+    protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /*
     /**********************************************************
@@ -170,7 +173,8 @@ public class YAMLGenerator extends GeneratorBase
     private final static Character STYLE_LITERAL = Character.valueOf('|');
 
     // Which flow style to use for Base64? Maybe basic quoted?
-    private final static Character STYLE_BASE64 = Character.valueOf('"');
+    // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
+    private final static Character STYLE_BASE64 = STYLE_LITERAL;
 
     private final static Character STYLE_PLAIN = null;
 
@@ -593,12 +597,10 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write Binary value");
-        // ok, better just Base64 encode as a String...
         if (offset > 0 || (offset+len) != data.length) {
             data = Arrays.copyOfRange(data, offset, offset+len);
         }
-        String encoded = b64variant.encode(data);
-        _writeScalar(encoded, "byte[]", STYLE_BASE64);
+        _writeScalarBinary(data);
     }
 
     /*
@@ -762,11 +764,22 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     // Implicit means that (type) tags won't be shown, right?
-    private final static ImplicitTuple DEFAULT_IMPLICIT = new ImplicitTuple(true, true);
+    private final static ImplicitTuple NO_TAGS = new ImplicitTuple(true, true);
+
+    // ... and sometimes we specifically DO want explicit tag:
+    private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
     protected void _writeScalar(String value, String type, Character style) throws IOException
     {
         _emitter.emit(_scalarEvent(value, style));
+    }
+
+    private void _writeScalarBinary(byte[] data) throws IOException
+    {
+        // 29-Nov-2017, tatu: Use SnakeYAML encoder instead of Jackson's
+        String encoded = Base64Coder.encodeLines(data);
+        _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
+                null, null, STYLE_BASE64));
     }
 
     protected ScalarEvent _scalarEvent(String value, Character style)
@@ -779,7 +792,9 @@ public class YAMLGenerator extends GeneratorBase
         if (anchor != null) {
             _objectId = null;
         }
-        return new ScalarEvent(anchor, yamlTag, DEFAULT_IMPLICIT, value,
+        // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
+        //    type id, but trying to do so seems to double up tag output...
+        return new ScalarEvent(anchor, yamlTag, NO_TAGS, value,
                 null, null, style);
     }
 }

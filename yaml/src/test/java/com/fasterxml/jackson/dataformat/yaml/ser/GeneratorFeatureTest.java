@@ -1,10 +1,12 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 
 public class GeneratorFeatureTest extends ModuleTestBase
 {
@@ -22,7 +24,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     public void testArrayIndentation() throws Exception
     {

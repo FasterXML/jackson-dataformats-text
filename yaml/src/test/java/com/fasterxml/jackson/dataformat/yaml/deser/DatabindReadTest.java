@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.io.ByteArrayInputStream;
 import java.util.Map;
@@ -8,12 +8,13 @@ import org.junit.Assert;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 /**
  * Unit tests for checking functioning of the databinding
  * on top of YAML layer.
  */
-public class SimpleDatabindTest extends ModuleTestBase
+public class DatabindReadTest extends ModuleTestBase
 {
     static class EmptyBean {
     }
@@ -33,7 +34,7 @@ public class SimpleDatabindTest extends ModuleTestBase
     /**********************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForYAML();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     public void testSimpleNested() throws Exception
     {

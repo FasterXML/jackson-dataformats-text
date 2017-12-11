@@ -7,18 +7,17 @@ import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
+import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.parser.ParserImpl;
 import org.yaml.snakeyaml.reader.StreamReader;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
-import com.fasterxml.jackson.core.util.ByteArrayBuilder;
-
-import org.yaml.snakeyaml.resolver.Resolver;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
@@ -419,7 +418,7 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    protected JsonToken _decodeScalar(ScalarEvent scalar)
+    protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
     {
         String value = scalar.getValue();
         _textValue = value;
@@ -429,7 +428,6 @@ public class YAMLParser extends ParserBase
 
         if (typeTag == null || typeTag.equals("!")) { // no, implicit
             Tag nodeTag = _yamlResolver.resolve(NodeId.scalar, value, scalar.getImplicit().canOmitTagInPlainScalar());
-
             if (nodeTag == Tag.STR) {
                 return JsonToken.VALUE_STRING;
             }
@@ -457,6 +455,14 @@ public class YAMLParser extends ParserBase
                 if (typeTag.contains(",")) {
                     typeTag = typeTag.split(",")[0];
                 }
+            }
+            // [dataformats-text#39]: support binary type
+            if ("binary".equals(typeTag)) {
+                // 29-Nov-2017, tatu: two choices for base64 codecs (or 3 with Java 8):
+                //   Jackson's own or SnakeYAML. Former is faster, but maybe makes sense
+                //   to use latter for sake of consistency.
+                _binaryValue = Base64Coder.decodeLines(value);
+                return JsonToken.VALUE_EMBEDDED_OBJECT;
             }
             // canonical values by YAML are actually 'y' and 'n'; but plenty more unofficial:
             if ("bool".equals(typeTag)) { // must be "true" or "false"
@@ -623,23 +629,21 @@ public class YAMLParser extends ParserBase
 
     @Override
     public Object getEmbeddedObject() throws IOException {
+        if (_currToken == JsonToken.VALUE_EMBEDDED_OBJECT ) {
+            return _binaryValue;
+        }
         return null;
     }
 
-    // TODO: can remove from 2.9 or so (base impl added in 2.8)
-    @SuppressWarnings("resource")
+    // Base impl from `ParserBase` works fine here:
+//    public byte[] getBinaryValue(Base64Variant variant) throws IOException
+
     @Override
-    public byte[] getBinaryValue(Base64Variant variant) throws IOException
+    public int readBinaryValue(Base64Variant b64variant, OutputStream out) throws IOException
     {
-        if (_binaryValue == null) {
-            if (_currToken != JsonToken.VALUE_STRING) {
-                _reportError("Current token ("+_currToken+") not VALUE_STRING, can not access as binary");
-            }
-            ByteArrayBuilder builder = _getByteArrayBuilder();
-            _decodeBase64(getText(), builder, variant);
-            _binaryValue = builder.toByteArray();
-        }
-        return _binaryValue;
+        byte[] b = getBinaryValue(b64variant);
+        out.write(b);
+        return b.length;
     }
 
     /*

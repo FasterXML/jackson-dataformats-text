@@ -23,7 +23,7 @@ Currently included backends are:
 Standard supported formats that are not yet included here (but are likely added
 in future)  are:
 
-* [XML](../../jackson-dataformt-xml)
+* [XML](../../../jackson-dataformat-xml)
 
 ## License
 
