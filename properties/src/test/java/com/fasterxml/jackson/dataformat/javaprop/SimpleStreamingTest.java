@@ -38,6 +38,14 @@ public class SimpleStreamingTest extends ModuleTestBase
         p.close();
         assertTrue(p.isClosed());
 
+        // and then some other accessors
+        p = MAPPER.createParser("foo = bar");
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertEquals("foo", p.nextFieldName());
+        assertEquals("bar", p.nextTextValue());
+        assertNull(p.nextFieldName());
+        p.close();
+
         // one more thing, verify handling of non-binary
         p = MAPPER.createParser("foo = bar");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
