@@ -12,7 +12,6 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import org.yaml.snakeyaml.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
@@ -600,7 +599,7 @@ public class YAMLGenerator extends GeneratorBase
         if (offset > 0 || (offset+len) != data.length) {
             data = Arrays.copyOfRange(data, offset, offset+len);
         }
-        _writeScalarBinary(data);
+        _writeScalarBinary(b64variant, data);
     }
 
     /*
@@ -774,10 +773,15 @@ public class YAMLGenerator extends GeneratorBase
         _emitter.emit(_scalarEvent(value, style));
     }
 
-    private void _writeScalarBinary(byte[] data) throws IOException
+    private void _writeScalarBinary(Base64Variant b64variant,
+            byte[] data) throws IOException
     {
-        // 29-Nov-2017, tatu: Use SnakeYAML encoder instead of Jackson's
-        String encoded = Base64Coder.encodeLines(data);
+        // 15-Dec-2017, tatu: as per [dataformats-text#62], can not use SnakeYAML's internal
+        //    codec. Also: force use of linefeed variant if using default
+        if (b64variant == Base64Variants.getDefaultVariant()) {
+            b64variant = Base64Variants.MIME;
+        }
+        String encoded = b64variant.encode(data);
         _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
                 null, null, STYLE_BASE64));
     }

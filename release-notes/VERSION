@@ -8,9 +8,14 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.4 (not yet released)
+
+#62: SnakeYAML base64Coder is not OSGI exported
+ (reported by mbechler@github)
+
 2.9.3 (09-Dec-2017)
 
-#39 (yamk): Binary data not recognized by YAML parser
+#39 (yaml): Binary data not recognized by YAML parser
  (repoted by tmoschou@github)
 #42 (csv): Add support for escaping double quotes with the configured escape character
  (contributed by frankgrimes97@github)

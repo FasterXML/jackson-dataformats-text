@@ -33,7 +33,14 @@ public class DatabindWriteTest extends ModuleTestBase
         assertEquals("firstName: \"Bob\"", it.next());
         assertEquals("gender: \"MALE\"", it.next());
         assertEquals("lastName: \"Dabolito\"", it.next());
-        assertEquals("userImage: !!binary |", it.next());
+        // 15-Dec-2017, tatu: different linefeed modes, see f.ex:
+        //    https://stackoverflow.com/questions/3790454/in-yaml-how-do-i-break-a-string-over-multiple-lines
+        String line = it.next();
+        String expLine = "userImage: !!binary |";
+        if (line.endsWith("|-")) {
+            expLine += "-";
+        }
+        assertEquals(expLine, line);
         assertEquals("verified: false", it.next());
         assertFalse(it.hasNext());
     }
