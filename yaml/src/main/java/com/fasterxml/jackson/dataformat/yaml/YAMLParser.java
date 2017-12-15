@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 import org.yaml.snakeyaml.nodes.NodeId;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.parser.ParserImpl;
@@ -480,10 +479,16 @@ public class YAMLParser extends ParserBase
             }
             // [dataformats-text#39]: support binary type
             if ("binary".equals(typeTag)) {
-                // 29-Nov-2017, tatu: two choices for base64 codecs (or 3 with Java 8):
-                //   Jackson's own or SnakeYAML. Former is faster, but maybe makes sense
-                //   to use latter for sake of consistency.
-                _binaryValue = Base64Coder.decodeLines(value);
+                // 15-Dec-2017, tatu: 2.9.4 uses Jackson's codec because SnakeYAML does
+                //    not export its codec via OSGi (breaking 2.9.3). Note that trailing
+                //    whitespace is ok with core 2.9.4, but not earlier, so we'll trim
+                //    on purpose here
+                value = value.trim();
+                try {
+                    _binaryValue = Base64Variants.MIME.decode(value);
+                } catch (IllegalArgumentException e) {
+                    _reportError(e.getMessage());
+                }
                 return JsonToken.VALUE_EMBEDDED_OBJECT;
             }
             // canonical values by YAML are actually 'y' and 'n'; but plenty more unofficial:

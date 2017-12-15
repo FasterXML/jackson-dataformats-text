@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -14,16 +15,21 @@ public class BinaryReadTest extends ModuleTestBase
 
     public void testBinaryViaTree() throws Exception
     {
-        final String BASE64 = " R0lGODlhDAAMAIQAAP//9/X\n"
-+" 17unp5WZmZgAAAOfn515eXv\n"
-+" Pz7Y6OjuDg4J+fn5OTk6enp\n"
-+" 56enmleECcgggoBADs=";
+        final String BASE64 = " R0lGODlhDAAMAIQAAP//9/X1\n"
++" 7unp5WZmZgAAAOfn515eXvPz\n"
++" 7Y6OjuDg4J+fn5OTk6enp56e\n"
++" nmleECcgggoBADs=";
         final String DOC = String.format(
 "---\n"
 +"picture: !!binary |\n"
 +"%s\n", BASE64);
-        
-        final JsonNode bean = MAPPER.readTree(DOC);
+
+        JsonNode bean = null;
+        try {
+            bean = MAPPER.readTree(DOC);
+        } catch (IOException e) {
+            fail("Should have decoded properly, instead got "+e);
+        }
         final JsonNode picture = bean.get("picture");
         assertNotNull(picture);
 
