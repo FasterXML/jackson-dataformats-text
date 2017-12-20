@@ -1,10 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+import com.fasterxml.jackson.dataformat.yaml.*;
 
 public class GeneratorWithSplitLinesTest extends ModuleTestBase
 {

@@ -3,7 +3,6 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 

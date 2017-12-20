@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 
 public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
