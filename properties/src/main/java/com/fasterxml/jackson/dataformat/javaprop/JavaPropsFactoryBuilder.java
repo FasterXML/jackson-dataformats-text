@@ -20,7 +20,7 @@ public class JavaPropsFactoryBuilder extends DecorableTSFBuilder<JavaPropsFactor
     }
 
     @Override
-    protected JavaPropsFactory build() {
+    public JavaPropsFactory build() {
         // 28-Dec-2017, tatu: No special settings beyond base class ones, so:
         return new JavaPropsFactory(this);
     }

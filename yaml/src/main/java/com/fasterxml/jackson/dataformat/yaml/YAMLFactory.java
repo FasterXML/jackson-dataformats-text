@@ -82,7 +82,7 @@ public class YAMLFactory
     }
 
     /**
-     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     * Constructors used by {@link YAMLFactoryBuilder} for instantiation.
      *
      * @since 3.0
      */

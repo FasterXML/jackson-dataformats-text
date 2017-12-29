@@ -20,7 +20,7 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
     }
 
     @Override
-    protected CsvFactory build() {
+    public CsvFactory build() {
         // 28-Dec-2017, tatu: No special settings beyond base class ones, so:
         return new CsvFactory(this);
     }

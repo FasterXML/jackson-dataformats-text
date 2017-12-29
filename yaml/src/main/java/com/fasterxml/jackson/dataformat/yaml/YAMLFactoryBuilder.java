@@ -20,7 +20,7 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
     }
 
     @Override
-    protected YAMLFactory build() {
+    public YAMLFactory build() {
         // 28-Dec-2017, tatu: No special settings beyond base class ones, so:
         return new YAMLFactory(this);
     }
