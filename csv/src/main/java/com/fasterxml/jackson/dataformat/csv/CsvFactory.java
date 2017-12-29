@@ -5,6 +5,7 @@ import java.io.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
+
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Writer;
@@ -80,7 +81,30 @@ public class CsvFactory
         _csvParserFeatures = src._csvParserFeatures;
         _csvGeneratorFeatures = src._csvGeneratorFeatures;
     }
-    
+
+    /**
+     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     *
+     * @since 3.0
+     */
+    protected CsvFactory(CsvFactoryBuilder b)
+    {
+        super(b);
+    }
+
+    @Override
+    public CsvFactoryBuilder rebuild() {
+        return new CsvFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link CsvFactory} instances with
+     * different configuration.
+     */
+    public static CsvFactoryBuilder builder() {
+        return new CsvFactoryBuilder();
+    }
+
     @Override
     public CsvFactory copy()
     {

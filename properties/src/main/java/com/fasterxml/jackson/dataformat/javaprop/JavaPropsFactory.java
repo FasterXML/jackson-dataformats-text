@@ -6,6 +6,7 @@ import java.util.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
+
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.io.Latin1Reader;
@@ -32,6 +33,29 @@ public class JavaPropsFactory
     protected JavaPropsFactory(JavaPropsFactory src)
     {
         super(src);
+    }
+
+    /**
+     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     *
+     * @since 3.0
+     */
+    protected JavaPropsFactory(JavaPropsFactoryBuilder b)
+    {
+        super(b);
+    }
+
+    @Override
+    public JavaPropsFactoryBuilder rebuild() {
+        return new JavaPropsFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link JavaPropsFactory} instances with
+     * different configuration.
+     */
+    public static JavaPropsFactoryBuilder builder() {
+        return new JavaPropsFactoryBuilder();
     }
 
     @Override

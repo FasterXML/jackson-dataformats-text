@@ -81,6 +81,29 @@ public class YAMLFactory
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
     }
 
+    /**
+     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     *
+     * @since 3.0
+     */
+    protected YAMLFactory(YAMLFactoryBuilder b)
+    {
+        super(b);
+    }
+
+    @Override
+    public YAMLFactoryBuilder rebuild() {
+        return new YAMLFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link YAMLFactory} instances with
+     * different configuration.
+     */
+    public static YAMLFactoryBuilder builder() {
+        return new YAMLFactoryBuilder();
+    }
+
     @Override
     public YAMLFactory copy()
     {
