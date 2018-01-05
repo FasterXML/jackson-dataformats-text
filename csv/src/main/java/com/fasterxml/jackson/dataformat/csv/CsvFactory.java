@@ -45,9 +45,8 @@ public class CsvFactory
     /**********************************************************************
      */
 
-    protected int _csvParserFeatures = DEFAULT_CSV_PARSER_FEATURE_FLAGS;
-
-    protected int _csvGeneratorFeatures = DEFAULT_CSV_GENERATOR_FEATURE_FLAGS;
+    protected final int _formatParserFeatures;
+    protected final int _formatGeneratorFeatures;
 
     /*
     protected char _cfgColumnSeparator = ',';
@@ -73,13 +72,17 @@ public class CsvFactory
      * and this reuse only works within context of a single
      * factory instance.
      */
-    public CsvFactory() { super(); }
+    public CsvFactory() {
+        super();
+        _formatParserFeatures = DEFAULT_CSV_PARSER_FEATURE_FLAGS;
+        _formatGeneratorFeatures = DEFAULT_CSV_GENERATOR_FEATURE_FLAGS;
+    }
 
     protected CsvFactory(CsvFactory src)
     {
         super(src);
-        _csvParserFeatures = src._csvParserFeatures;
-        _csvGeneratorFeatures = src._csvGeneratorFeatures;
+        _formatParserFeatures = src._formatParserFeatures;
+        _formatGeneratorFeatures = src._formatGeneratorFeatures;
     }
 
     /**
@@ -90,6 +93,8 @@ public class CsvFactory
     protected CsvFactory(CsvFactoryBuilder b)
     {
         super(b);
+        _formatParserFeatures = b.formatParserFeaturesMask();
+        _formatGeneratorFeatures = b.formatGeneratorFeaturesMask();
     }
 
     @Override
@@ -153,16 +158,6 @@ public class CsvFactory
         return false;
     }
 
-    @Override
-    public Class<CsvParser.Feature> getFormatReadFeatureType() {
-        return CsvParser.Feature.class;
-    }
-
-    @Override
-    public Class<CsvGenerator.Feature> getFormatWriteFeatureType() {
-        return CsvGenerator.Feature.class;
-    }
-
     /*
     /**********************************************************
     /* Format support
@@ -179,93 +174,28 @@ public class CsvFactory
         return (schema instanceof CsvSchema);
     }
 
-    /*
-    /**********************************************************
-    /* Configuration, parser settings
-    /**********************************************************
-     */
-
-    /**
-     * Method for enabling or disabling specified parser feature
-     * (check {@link CsvParser.Feature} for list of features)
-     */
-    public final CsvFactory configure(CsvParser.Feature f, boolean state)
-    {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
+    @Override
+    public Class<CsvParser.Feature> getFormatReadFeatureType() {
+        return CsvParser.Feature.class;
     }
 
-    /**
-     * Method for enabling specified parser feature
-     * (check {@link CsvParser.Feature} for list of features)
-     */
-    public CsvFactory enable(CsvParser.Feature f) {
-        _csvParserFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified parser features
-     * (check {@link CsvParser.Feature} for list of features)
-     */
-    public CsvFactory disable(CsvParser.Feature f) {
-        _csvParserFeatures &= ~f.getMask();
-        return this;
+    @Override
+    public Class<CsvGenerator.Feature> getFormatWriteFeatureType() {
+        return CsvGenerator.Feature.class;
     }
 
     /**
      * Checked whether specified parser feature is enabled.
      */
     public final boolean isEnabled(CsvParser.Feature f) {
-        return (_csvParserFeatures & f.getMask()) != 0;
-    }
-
-    /*
-    /**********************************************************
-    /* Configuration, generator settings
-    /**********************************************************
-     */
-
-    /**
-     * Method for enabling or disabling specified generator feature
-     * (check {@link CsvGenerator.Feature} for list of features)
-     */
-    public final CsvFactory configure(CsvGenerator.Feature f, boolean state) {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-
-    /**
-     * Method for enabling specified generator features
-     * (check {@link CsvGenerator.Feature} for list of features)
-     */
-    public CsvFactory enable(CsvGenerator.Feature f) {
-        _csvGeneratorFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified generator feature
-     * (check {@link CsvGenerator.Feature} for list of features)
-     */
-    public CsvFactory disable(CsvGenerator.Feature f) {
-        _csvGeneratorFeatures &= ~f.getMask();
-        return this;
+        return (_formatParserFeatures & f.getMask()) != 0;
     }
 
     /**
      * Check whether specified generator feature is enabled.
      */
-    public final boolean isEnabled(CsvGenerator.Feature f) {
-        return (_csvGeneratorFeatures & f.getMask()) != 0;
+    public boolean isEnabled(CsvGenerator.Feature f) {
+        return (_formatGeneratorFeatures & f.getMask()) != 0;
     }
 
     /*
@@ -283,7 +213,7 @@ public class CsvFactory
         return new CsvParserBootstrapper(ioCtxt, in)
             .constructParser(readCtxt,
                     readCtxt.getParserFeatures(_parserFeatures),
-                    readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                    readCtxt.getFormatReadFeatures(_formatParserFeatures),
                     _getSchema(readCtxt));
     }
 
@@ -293,7 +223,7 @@ public class CsvFactory
         return new CsvParserBootstrapper(ioCtxt, data, offset, len)
                .constructParser(readCtxt,
                        readCtxt.getParserFeatures(_parserFeatures),
-                       readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                       readCtxt.getFormatReadFeatures(_formatParserFeatures),
                        _getSchema(readCtxt));
     }
 
@@ -305,7 +235,7 @@ public class CsvFactory
             Reader r) throws IOException {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 _getSchema(readCtxt),
                 r);
     }
@@ -317,7 +247,7 @@ public class CsvFactory
     {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_csvParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 _getSchema(readCtxt),
                 new CharArrayReader(data, offset, len));
     }
@@ -348,7 +278,7 @@ public class CsvFactory
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
                 out, _getSchema(writeCtxt));
     }
 
@@ -359,7 +289,7 @@ public class CsvFactory
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_csvGeneratorFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
                 new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
     }
 

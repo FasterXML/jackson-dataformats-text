@@ -65,21 +65,15 @@ public class JavaPropsFactory
     }
 
     /*
-    /**********************************************************
-    /* Capability introspection
-    /**********************************************************
+    /**********************************************************************
+    /* Introspection
+    /**********************************************************************
      */
 
     @Override
     public Version version() {
         return PackageVersion.VERSION;
     }
-
-    /*
-    /**********************************************************
-    /* Capability introspection
-    /**********************************************************
-     */
 
     // Not positional
     @Override
@@ -97,6 +91,22 @@ public class JavaPropsFactory
         return false;
     }
 
+    /*
+    /**********************************************************************
+    /* Format support
+    /**********************************************************************
+     */
+
+    @Override
+    public String getFormatName() {
+        return FORMAT_NAME_JAVA_PROPERTIES;
+    }
+
+    @Override
+    public boolean canUseSchema(FormatSchema schema) {
+        return schema instanceof JavaPropsSchema;
+    }
+
     // No format-specific configuration, yet:
     @Override
     public Class<? extends FormatFeature> getFormatReadFeatureType() {
@@ -109,25 +119,9 @@ public class JavaPropsFactory
     }
 
     /*
-    /**********************************************************
-    /* Format support
-    /**********************************************************
-     */
-
-    @Override
-    public String getFormatName() {
-        return FORMAT_NAME_JAVA_PROPERTIES;
-    }
-
-    @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return schema instanceof JavaPropsSchema;
-    }
-    
-    /*
-    /**********************************************************
+    /**********************************************************************
     /* Extended parser/generator factory methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -156,11 +150,10 @@ public class JavaPropsFactory
                 props);
     }
 
-    
     /*
-    /******************************************************
+    /**********************************************************************
     /* Overridden internal factory methods, parser
-    /******************************************************
+    /**********************************************************************
      */
 
     /* // fine as-is: 
@@ -221,9 +214,9 @@ public class JavaPropsFactory
     }
     
     /*
-    /******************************************************
+    /**********************************************************************
     /* Overridden internal factory methods, generator
-    /******************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -263,10 +256,10 @@ public class JavaPropsFactory
     }
     
     /*
-    /******************************************************
+    /**********************************************************************
     /* Low-level methods for reading/writing Properties; currently
     /* we simply delegate to `java.util.Properties`
-    /******************************************************
+    /**********************************************************************
      */
 
     protected Properties _loadProperties(InputStream in, IOContext ctxt)
@@ -290,18 +283,4 @@ public class JavaPropsFactory
         }
         return props;
     }
-
-    /*
-    public static void main(String[] args) throws Exception
-    {
-        args = new String[] { "test.properties" };
-        Properties props = new Properties();
-//        props.load(new FileInputStream(args[0]));
-        props.load(new ByteArrayInputStream(new byte[0]));
-        System.out.printf("%d entries:\n", props.size());
-        int i = 1;
-        for (Map.Entry<?,?> entry : props.entrySet()) {
-            System.out.printf("#%d: %s -> %s\n", i++, entry.getKey(), entry.getValue());
-        }
-    }*/
 }
