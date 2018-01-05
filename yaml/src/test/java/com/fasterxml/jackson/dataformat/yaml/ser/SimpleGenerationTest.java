@@ -104,7 +104,8 @@ public class SimpleGenerationTest extends ModuleTestBase
         // verify default settings
         assertFalse(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
 
-        f.configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true);
+        f = f.rebuild().with(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+                .build();
 
         YAMLMapper mapper = new YAMLMapper(f);
 

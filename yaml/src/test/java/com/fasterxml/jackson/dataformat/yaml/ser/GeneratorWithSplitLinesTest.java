@@ -23,9 +23,9 @@ public class GeneratorWithSplitLinesTest extends ModuleTestBase
                 yaml);
 
         // and then with splitting disabled
-        f.disable(YAMLGenerator.Feature.SPLIT_LINES);
-
-        yaml = mapper.writeValueAsString(INPUT).trim();
+        yaml = mapper.writer()
+                .without(YAMLGenerator.Feature.SPLIT_LINES)
+                .writeValueAsString(INPUT).trim();
         assertEquals("---\n" +
                 "- \"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890\"",
                 yaml);

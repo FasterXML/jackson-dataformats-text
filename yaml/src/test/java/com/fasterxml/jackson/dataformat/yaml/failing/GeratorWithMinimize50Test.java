@@ -12,8 +12,9 @@ public class GeratorWithMinimize50Test extends ModuleTestBase
 {
     private final static YAMLMapper MINIM_MAPPER;
     static {
-        YAMLFactory f = new YAMLFactory();
-        f.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
+        YAMLFactory f = YAMLFactory.builder()
+                .with(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .build();
         MINIM_MAPPER = new YAMLMapper(f);
     }
 

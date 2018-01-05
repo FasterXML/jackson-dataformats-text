@@ -40,10 +40,9 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-    protected int _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
+    protected final int _formatParserFeatures;
+    protected final int _formatGeneratorFeatures;
 
-    protected int _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
-    
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -65,8 +64,8 @@ public class YAMLFactory
     public YAMLFactory()
     {
         super();
-        _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
-        _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
+        _formatParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
+        _formatGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         //_version = DumperOptions.Version.V1_1;
@@ -77,8 +76,8 @@ public class YAMLFactory
     {
         super(src);
         _version = src._version;
-        _yamlParserFeatures = src._yamlParserFeatures;
-        _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
+        _formatParserFeatures = src._formatParserFeatures;
+        _formatGeneratorFeatures = src._formatGeneratorFeatures;
     }
 
     /**
@@ -89,6 +88,8 @@ public class YAMLFactory
     protected YAMLFactory(YAMLFactoryBuilder b)
     {
         super(b);
+        _formatParserFeatures = b.formatParserFeaturesMask();
+        _formatGeneratorFeatures = b.formatGeneratorFeaturesMask();
     }
 
     @Override
@@ -171,94 +172,18 @@ public class YAMLFactory
         return false;
     }
 
-    /*
-    /**********************************************************
-    /* Configuration, parser settings
-    /**********************************************************
-     */
-
-    /**
-     * Method for enabling or disabling specified parser feature
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public final YAMLFactory configure(YAMLParser.Feature f, boolean state)
-    {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-
-    /**
-     * Method for enabling specified parser feature
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public YAMLFactory enable(YAMLParser.Feature f) {
-        _yamlParserFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified parser features
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public YAMLFactory disable(YAMLParser.Feature f) {
-        _yamlParserFeatures &= ~f.getMask();
-        return this;
-    }
-
     /**
      * Checked whether specified parser feature is enabled.
      */
     public final boolean isEnabled(YAMLParser.Feature f) {
-        return (_yamlParserFeatures & f.getMask()) != 0;
-    }
-
-    /*
-    /**********************************************************
-    /* Configuration, generator settings
-    /**********************************************************
-     */
-
-    /**
-     * Method for enabling or disabling specified generator feature
-     * (check {@link YAMLGenerator.Feature} for list of features)
-     */
-    public final YAMLFactory configure(YAMLGenerator.Feature f, boolean state) {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-
-
-    /**
-     * Method for enabling specified generator features
-     * (check {@link YAMLGenerator.Feature} for list of features)
-     */
-    public YAMLFactory enable(YAMLGenerator.Feature f) {
-        _yamlGeneratorFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified generator feature
-     * (check {@link YAMLGenerator.Feature} for list of features)
-     */
-    public YAMLFactory disable(YAMLGenerator.Feature f) {
-        _yamlGeneratorFeatures &= ~f.getMask();
-        return this;
+        return (_formatParserFeatures & f.getMask()) != 0;
     }
 
     /**
      * Check whether specified generator feature is enabled.
      */
     public final boolean isEnabled(YAMLGenerator.Feature f) {
-        return (_yamlGeneratorFeatures & f.getMask()) != 0;
+        return (_formatGeneratorFeatures & f.getMask()) != 0;
     }
 
     /*
@@ -273,7 +198,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 _createReader(in, null, ioCtxt));
     }
 
@@ -283,7 +208,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(), 
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 r);
     }
 
@@ -293,7 +218,7 @@ public class YAMLFactory
             boolean recyclable) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 new CharArrayReader(data, offset, len));
     }
 
@@ -302,7 +227,7 @@ public class YAMLFactory
             byte[] data, int offset, int len) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_yamlParserFeatures),
+                readCtxt.getFormatReadFeatures(_formatParserFeatures),
                 _createReader(data, offset, len, null, ioCtxt));
     }
 
@@ -324,7 +249,7 @@ public class YAMLFactory
     {
         return new YAMLGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_yamlGeneratorFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
                 out, _version);
     }
 
