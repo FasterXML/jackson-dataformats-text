@@ -121,8 +121,9 @@ public class CommentsTest extends ModuleTestBase
     // Alternate test to ensure comments may be enabled
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.enable(JsonParser.Feature.ALLOW_YAML_COMMENTS);
+        CsvMapper mapper = new CsvMapper(CsvFactory.builder()
+                .with(JsonParser.Feature.ALLOW_YAML_COMMENTS)
+                .build());
         final String CSV = "# comment!\na,b\n";
         
         MappingIterator<String[]> it = mapper.readerFor(String[].class)

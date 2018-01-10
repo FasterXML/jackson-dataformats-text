@@ -5,6 +5,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.dataformat.csv.CsvFactory;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -53,8 +54,9 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
     // for [dataformats-text#51]
     public void testIgnoreEmbeddedObject() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.configure( JsonGenerator.Feature.IGNORE_UNKNOWN, true );
+        CsvMapper mapper = new CsvMapper(CsvFactory.builder()
+                .with( JsonGenerator.Feature.IGNORE_UNKNOWN)
+                .build());
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("address")
                 .addColumn("people") // here I'm skipping phoneNumber so I need to use IGNORE_UNKNOWN feature
