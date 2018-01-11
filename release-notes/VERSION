@@ -10,8 +10,10 @@ Modules:
 
 2.9.4 (not yet released)
 
-#62: SnakeYAML base64Coder is not OSGI exported
+#62 (yaml): SnakeYAML base64Coder is not OSGI exported
  (reported by mbechler@github)
+#65 (yaml): `YAMLParser` incorrectly handles numbers with underscores in them
+ (reported by Mike K)
 
 2.9.3 (09-Dec-2017)
 

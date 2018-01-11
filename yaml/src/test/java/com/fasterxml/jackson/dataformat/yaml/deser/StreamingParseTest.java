@@ -13,7 +13,7 @@ import java.math.BigInteger;
  * Unit tests for checking functioning of the underlying
  * parser implementation.
  */
-public class SimpleParseTest extends ModuleTestBase
+public class StreamingParseTest extends ModuleTestBase
 {
     final YAMLMapper MAPPER = newObjectMapper();
 
@@ -57,9 +57,10 @@ public class SimpleParseTest extends ModuleTestBase
         assertNull(p.nextToken());
         assertNull(p.nextToken());
         p.close();
-    }    
+    }
+
     // Parsing large numbers around the transition from int->long and long->BigInteger
-    public void testIntParsing() throws Exception
+    public void testIntParsingWithLimits() throws Exception
     {
         String YAML;
         JsonParser p;
@@ -158,6 +159,143 @@ public class SimpleParseTest extends ModuleTestBase
         assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
         assertEquals("-9223372036854775809", p.getText());
+        p.close();
+    }
+
+    // Testing addition of underscores
+    public void testIntParsingUnderscoresSm() throws Exception
+    {
+        // First, couple of simple small values
+        try (JsonParser p = YAML_F.createParser("num: 10_345")) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("num", p.getCurrentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(10345, p.getIntValue());
+            assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+            assertEquals("10_345", p.getText());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+        }
+
+        try (JsonParser p = YAML_F.createParser("num: -11_222")) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("num", p.getCurrentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(-11222, p.getIntValue());
+            assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+            assertEquals("-11_222", p.getText());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+        }
+
+        try (JsonParser p = YAML_F.createParser("num: +8_192")) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("num", p.getCurrentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(8192, p.getIntValue());
+            assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+            assertEquals("+8_192", p.getText());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+        }
+
+        String YAML;
+        JsonParser p;
+
+        // Test positive max-int
+        YAML = "num: 2_147_483_647";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Integer.MAX_VALUE, p.getIntValue());
+        assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+        assertEquals("2_147_483_647", p.getText());
+        p.close();
+
+        // Test negative max-int
+        YAML = "num: -2_147_483_648";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Integer.MIN_VALUE, p.getIntValue());
+        assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+        assertEquals("-2_147_483_648", p.getText());
+        p.close();
+
+        // Test positive max-int + 1
+        YAML = "num: 2_147_483_648";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Integer.MAX_VALUE + 1L, p.getLongValue());
+        assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
+        assertEquals("2_147_483_648", p.getText());
+        p.close();
+
+        // Test negative max-int - 1
+        YAML = "num: -2_147_483_649";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Integer.MIN_VALUE - 1L, p.getLongValue());
+        assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
+        assertEquals("-2_147_483_649", p.getText());
+        p.close();
+
+        // Test positive max-long
+        YAML = "num: 9_223_372_036_854_775_807";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Long.MAX_VALUE, p.getLongValue());
+        assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
+        assertEquals("9_223_372_036_854_775_807", p.getText());
+        p.close();
+
+        // Test negative max-long
+        YAML = "num: -9_223_372_036_854_775_808";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(Long.MIN_VALUE, p.getLongValue());
+        assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
+        assertEquals("-9_223_372_036_854_775_808", p.getText());
+        p.close();
+
+        // Test positive max-long + 1
+        YAML = "num: 9_223372036854775_808";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), p.getBigIntegerValue());
+        assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
+        assertEquals("9_223372036854775_808", p.getText());
+        p.close();
+
+        // Test negative max-long - 1
+        YAML = "num: -92233_72036_85477_5809";
+        p = YAML_F.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertEquals("num", p.getCurrentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+        assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
+        assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
+        assertEquals("-92233_72036_85477_5809", p.getText());
         p.close();
     }
 

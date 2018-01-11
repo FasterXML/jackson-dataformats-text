@@ -10,3 +10,8 @@ Simone Locci (pimuzzo@github)
 
 * Reported #51 (csv): Set of custom objects with `IGNORE_UNKNOWN` brokes silently csv
  (2.9.3)
+
+Mike Kobit (mkobit@github.com)
+
+* Reported #65 (yaml): `YAMLParser` incorrectly handles numbers with underscores in them
+ (2.9.4)

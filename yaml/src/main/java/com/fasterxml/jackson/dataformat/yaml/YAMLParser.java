@@ -113,6 +113,12 @@ public class YAMLParser extends ParserBase
     protected String _textValue;
 
     /**
+     * For some tokens (specifically, numbers), we'll have cleaned up version,
+     * mostly free of underscores
+     */
+    protected String _cleanedTextValue;
+    
+    /**
      * Let's also have a local copy of the current field name
      */
     protected String _currentFieldName;
@@ -404,6 +410,7 @@ public class YAMLParser extends ParserBase
                 AliasEvent alias = (AliasEvent) evt;
                 _currentIsAlias = true;
                 _textValue = alias.getAnchor();
+                _cleanedTextValue = null;
                 // for now, nothing to do: in future, maybe try to expose as ObjectIds?
                 return (_currToken = JsonToken.VALUE_STRING);
             }
@@ -421,6 +428,7 @@ public class YAMLParser extends ParserBase
     {
         String value = scalar.getValue();
         _textValue = value;
+        _cleanedTextValue = null;
         // we may get an explicit tag, if so, use for corroborating...
         String typeTag = scalar.getTag();
         final int len = value.length();
@@ -435,7 +443,7 @@ public class YAMLParser extends ParserBase
             }
             if (nodeTag == Tag.FLOAT) {
                 _numTypesValid = 0;
-                return JsonToken.VALUE_NUMBER_FLOAT;
+                return _cleanYamlFloat(value);
             }
             if (nodeTag == Tag.BOOL) {
                 Boolean B = _matchYAMLBoolean(value, len);
@@ -475,13 +483,17 @@ public class YAMLParser extends ParserBase
                 if (B != null) {
                     return B ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE;
                 }
-            } else if ("int".equals(typeTag)) {
-                return _decodeNumberScalar(value, len);
-            } else if ("float".equals(typeTag)) {
-                _numTypesValid = 0;
-                return JsonToken.VALUE_NUMBER_FLOAT;
-            } else if ("null".equals(typeTag)) {
-                return JsonToken.VALUE_NULL;
+            } else {
+                if ("int".equals(typeTag)) {
+                    return _decodeNumberScalar(value, len);
+                }
+                if ("float".equals(typeTag)) {
+                    _numTypesValid = 0;
+                    return _cleanYamlFloat(value);
+                }
+                if ("null".equals(typeTag)) {
+                    return JsonToken.VALUE_NULL;
+                }
             }
         }
         
@@ -529,29 +541,47 @@ public class YAMLParser extends ParserBase
          */
         //if (PATTERN_INT.matcher(value).matches()) {
         int i;
-        if (value.charAt(0) == '-') {
+        char sign = value.charAt(0);
+        if (sign == '-') {
             _numberNegative = true;
-            i = 1;
             if (len == 1) {
                 return null;
             }
+            i = 1;
+        } else if (sign == '+') {
+            _numberNegative = false;
+            if (len == 1) {
+                return null;
+            }
+            i = 1;
         } else {
             _numberNegative = false;
             i = 0;
         }
+        // !!! 11-Jan-2018, tatu: Should check for binary/octal/hex/sexagesimal
+        //    as per http://yaml.org/type/int.html
+
+        int underscores = 0;
         while (true) {
             int c = value.charAt(i);
             if (c > '9' || c < '0') {
-                break;
+                if (c != '_') {
+                    break;
+                }
+                ++underscores;
             }
             if (++i == len) {
                 _numTypesValid = 0;
+                if (underscores > 0) {
+                    return _cleanYamlInt(_textValue);
+                }
+                _cleanedTextValue = _textValue;
                 return JsonToken.VALUE_NUMBER_INT;
             }
         }
         if (PATTERN_FLOAT.matcher(value).matches()) {
             _numTypesValid = 0;
-            return JsonToken.VALUE_NUMBER_FLOAT;
+            return _cleanYamlFloat(_textValue);
         }
         
         // 25-Aug-2016, tatu: If we can't actually match it to valid number,
@@ -559,6 +589,11 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_STRING;
     }   
 
+    protected JsonToken _decodeIntWithUnderscores(String value, final int len)
+    {
+        return JsonToken.VALUE_NUMBER_INT;
+    }
+    
     /*
     /**********************************************************
     /* String value handling
@@ -672,7 +707,7 @@ public class YAMLParser extends ParserBase
                 return;
             }
             if (len <= 18) { // definitely fits AND is easy to parse using 2 int parse calls
-                long l = Long.parseLong(_textValue);
+                long l = Long.parseLong(_cleanedTextValue);
                 // [JACKSON-230] Could still fit in int, need to check
                 if (len == 10) {
                     if (_numberNegative) {
@@ -695,7 +730,7 @@ public class YAMLParser extends ParserBase
             }
             // !!! TODO: implement proper bounds checks; now we'll just use BigInteger for convenience
             try {
-                BigInteger n = new BigInteger(_textValue);
+                BigInteger n = new BigInteger(_cleanedTextValue);
                 // Could still fit in a long, need to check
                 if (len == 19 && n.bitLength() <= 63) {
                     _numberLong = n.longValue();
@@ -706,13 +741,14 @@ public class YAMLParser extends ParserBase
                 _numTypesValid = NR_BIGINT;
                 return;
             } catch (NumberFormatException nex) {
+                // NOTE: pass non-cleaned variant for error message
                 // Can this ever occur? Due to overflow, maybe?
                 _wrapError("Malformed numeric value '"+_textValue+"'", nex);
             }
         }
         if (_currToken == JsonToken.VALUE_NUMBER_FLOAT) {
-            // related to [Issue-4]: strip out optional underscores, if any:
-            String str = _cleanYamlDouble(_textValue);
+            // strip out optional underscores, if any:
+            final String str = _cleanedTextValue;
             try {
                 if (expType == NR_BIGDECIMAL) {
                     _numberBigDecimal = new BigDecimal(str);
@@ -724,7 +760,8 @@ public class YAMLParser extends ParserBase
                 }
             } catch (NumberFormatException nex) {
                 // Can this ever occur? Due to overflow, maybe?
-                _wrapError("Malformed numeric value '"+str+"'", nex);
+                // NOTE: pass non-cleaned variant for error message
+                _wrapError("Malformed numeric value '"+_textValue+"'", nex);
             }
             return;
         }
@@ -735,13 +772,13 @@ public class YAMLParser extends ParserBase
     protected int _parseIntValue() throws IOException
     {
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            int len = _textValue.length();
+            int len = _cleanedTextValue.length();
             if (_numberNegative) {
                 len--;
             }
             if (len <= 9) { // definitely fits in int
                 _numTypesValid = NR_INT;
-                return (_numberInt = Integer.parseInt(_textValue));
+                return (_numberInt = Integer.parseInt(_cleanedTextValue));
             }
         }
         _parseNumericValue(NR_INT);
@@ -808,12 +845,31 @@ public class YAMLParser extends ParserBase
      * using standard JDK classes.
      * Currently this just means stripping out optional underscores.
      */
-    private String _cleanYamlDouble(String str)
+    private JsonToken _cleanYamlInt(String str)
     {
+        // Here we already know there is either plus sign, or underscore (or both) so
+        final int len = str.length();
+        StringBuilder sb = new StringBuilder(len);
+        // first: do we have a leading plus sign to skip?
+        int i = (str.charAt(0) == '+') ? 1 : 0;
+        for (; i < len; ++i) {
+            char c = str.charAt(i);
+            if (c != '_') {
+                sb.append(c);
+            }
+        }
+        _cleanedTextValue = sb.toString();
+        return JsonToken.VALUE_NUMBER_INT;
+    }
+
+    private JsonToken _cleanYamlFloat(String str)
+    {
+        // Here we do NOT yet know whether we might have underscores so check
         final int len = str.length();
         int ix = str.indexOf('_');
         if (ix < 0 || len == 0) {
-            return str;
+            _cleanedTextValue = str;
+            return JsonToken.VALUE_NUMBER_FLOAT;
         }
         StringBuilder sb = new StringBuilder(len);
         // first: do we have a leading plus sign to skip?
@@ -824,6 +880,7 @@ public class YAMLParser extends ParserBase
                 sb.append(c);
             }
         }
-        return sb.toString();
+        _cleanedTextValue = sb.toString();
+        return JsonToken.VALUE_NUMBER_FLOAT;
     }
 }
