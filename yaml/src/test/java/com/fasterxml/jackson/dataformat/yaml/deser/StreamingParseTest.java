@@ -166,10 +166,10 @@ public class StreamingParseTest extends ModuleTestBase
     public void testIntParsingUnderscoresSm() throws Exception
     {
         // First, couple of simple small values
-        try (JsonParser p = YAML_F.createParser("num: 10_345")) {
+        try (JsonParser p = MAPPER.createParser("num: 10_345")) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
             assertToken(JsonToken.FIELD_NAME, p.nextToken());
-            assertEquals("num", p.getCurrentName());
+            assertEquals("num", p.currentName());
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(10345, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -177,10 +177,10 @@ public class StreamingParseTest extends ModuleTestBase
             assertToken(JsonToken.END_OBJECT, p.nextToken());
         }
 
-        try (JsonParser p = YAML_F.createParser("num: -11_222")) {
+        try (JsonParser p = MAPPER.createParser("num: -11_222")) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
             assertToken(JsonToken.FIELD_NAME, p.nextToken());
-            assertEquals("num", p.getCurrentName());
+            assertEquals("num", p.currentName());
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(-11222, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -188,10 +188,10 @@ public class StreamingParseTest extends ModuleTestBase
             assertToken(JsonToken.END_OBJECT, p.nextToken());
         }
 
-        try (JsonParser p = YAML_F.createParser("num: +8_192")) {
+        try (JsonParser p = MAPPER.createParser("num: +8_192")) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
             assertToken(JsonToken.FIELD_NAME, p.nextToken());
-            assertEquals("num", p.getCurrentName());
+            assertEquals("num", p.currentName());
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(8192, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -204,10 +204,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test positive max-int
         YAML = "num: 2_147_483_647";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -216,10 +216,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test negative max-int
         YAML = "num: -2_147_483_648";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -228,10 +228,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test positive max-int + 1
         YAML = "num: 2_147_483_648";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE + 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -240,10 +240,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test negative max-int - 1
         YAML = "num: -2_147_483_649";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE - 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -252,10 +252,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test positive max-long
         YAML = "num: 9_223_372_036_854_775_807";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MAX_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -264,10 +264,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test negative max-long
         YAML = "num: -9_223_372_036_854_775_808";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MIN_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
@@ -276,10 +276,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test positive max-long + 1
         YAML = "num: 9_223372036854775_808";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
@@ -288,10 +288,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         // Test negative max-long - 1
         YAML = "num: -92233_72036_85477_5809";
-        p = YAML_F.createParser(YAML);
+        p = MAPPER.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
