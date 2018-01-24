@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.4 (not yet released)
+2.9.4 (24-Jan-2018)
 
 #62 (yaml): SnakeYAML base64Coder is not OSGI exported
  (reported by mbechler@github)
