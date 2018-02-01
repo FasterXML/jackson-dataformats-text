@@ -77,7 +77,7 @@ public class CsvMapper extends ObjectMapper
      */
     @Override
     public CsvFactory tokenStreamFactory() {
-        return (CsvFactory) _jsonFactory;
+        return (CsvFactory) _streamFactory;
     }
 
     /*

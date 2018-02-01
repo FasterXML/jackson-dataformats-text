@@ -47,6 +47,6 @@ public class YAMLMapper extends ObjectMapper
      */
     @Override
     public final YAMLFactory tokenStreamFactory() {
-        return (YAMLFactory) _jsonFactory;
+        return (YAMLFactory) _streamFactory;
     }
 }

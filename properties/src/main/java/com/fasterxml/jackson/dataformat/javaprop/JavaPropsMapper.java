@@ -47,7 +47,7 @@ public class JavaPropsMapper extends ObjectMapper
 
     @Override
     public JavaPropsFactory tokenStreamFactory() {
-        return (JavaPropsFactory) _jsonFactory;
+        return (JavaPropsFactory) _streamFactory;
     }
 
     /*
