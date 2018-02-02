@@ -44,8 +44,9 @@ public class FilteringTest extends ModuleTestBase
                     new SimpleBeanPropertyFilter.FilterExceptFilter(columnNames);
             FilterProvider filterProvider = new SimpleFilterProvider().addFilter( CSV_FILTER_NAME, csvReponseFilter );
 
-            CsvMapper csvMapper = new CsvMapper();
-            csvMapper.setFilterProvider( filterProvider );
+            CsvMapper csvMapper = CsvMapper.builder()
+                    .filterProvider(filterProvider)
+                    .build();
             csvMapper.setAnnotationIntrospector(new CsvAnnotationIntrospector());
 
             ObjectWriter objectWriter = csvMapper.writer(csvSchema);

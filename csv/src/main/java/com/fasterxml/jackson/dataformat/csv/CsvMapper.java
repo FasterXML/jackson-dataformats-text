@@ -2,8 +2,15 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.core.TokenStreamFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.MapperBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
@@ -16,6 +23,30 @@ import com.fasterxml.jackson.dataformat.csv.impl.LRUMap;
 public class CsvMapper extends ObjectMapper
 {
     private static final long serialVersionUID = 1;
+
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with JSON backend
+     * as well as for some of simpler formats that do not require mapper level overrides.
+     *
+     * @since 3.0
+     */
+    public static class CsvBuilder extends MapperBuilder<CsvMapper, CsvBuilder>
+    {
+        public CsvBuilder(TokenStreamFactory tsf) {
+            super(tsf);
+        }
+
+        @Override
+        public CsvMapper build() {
+            return new CsvMapper(this);
+        }
+    }
+
+    /*
+    /**********************************************************************
+    /* Caching of schemas
+    /**********************************************************************
+     */
 
     /**
      * Simple caching for schema instances, given that they are relatively expensive
@@ -42,8 +73,6 @@ public class CsvMapper extends ObjectMapper
     public CsvMapper(CsvFactory f)
     {
         super(f);
-        // As per #11: default to alphabetic ordering
-        enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
         _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
         _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
     }
@@ -56,6 +85,33 @@ public class CsvMapper extends ObjectMapper
         super(src);
         _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
         _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+    }
+
+    public CsvMapper(CsvBuilder b) {
+        super(b);
+        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+    }
+
+    /**
+     * Short-cut for:
+     *<pre>
+     *   return builder(new CsvFactory());
+     *</pre>
+     *
+     * @since 3.0
+     */
+    public static CsvBuilder csvBuilder() {
+        return new CsvBuilder(new CsvFactory());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static CsvBuilder builder() {
+        return new CsvBuilder(new CsvFactory());
+    }
+
+    public static CsvBuilder builder(CsvFactory streamFactory) {
+        return new CsvBuilder(streamFactory);
     }
 
     @Override
@@ -313,7 +369,6 @@ public class CsvMapper extends ObjectMapper
         if (_nonPojoType(pojoType)) {
             return;
         }
-        
         BeanDescription beanDesc = getSerializationConfig().introspect(pojoType);
         for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
             // ignore setter-only properties:
