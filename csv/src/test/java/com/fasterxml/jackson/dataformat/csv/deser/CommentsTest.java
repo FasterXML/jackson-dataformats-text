@@ -122,7 +122,7 @@ public class CommentsTest extends ModuleTestBase
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
         CsvMapper mapper = new CsvMapper(CsvFactory.builder()
-                .with(JsonParser.Feature.ALLOW_YAML_COMMENTS)
+                .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
                 .build());
         final String CSV = "# comment!\na,b\n";
         

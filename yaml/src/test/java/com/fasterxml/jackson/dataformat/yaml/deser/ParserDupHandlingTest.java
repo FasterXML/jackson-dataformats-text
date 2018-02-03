@@ -27,7 +27,7 @@ public class ParserDupHandlingTest extends ModuleTestBase
     public void testDupChecksEnabled() throws Exception
     {
         YAMLFactory f = YAMLFactory.builder()
-                .with(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
+                .enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION)
                 .build();
         ObjectMapper mapper = new ObjectMapper(f);
         _verifyDupsFail(mapper, YAML_WITH_DUPS, false);

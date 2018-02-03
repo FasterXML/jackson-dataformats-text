@@ -13,7 +13,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     private final static YAMLMapper MINIM_MAPPER;
     static {
         YAMLFactory f = YAMLFactory.builder()
-                .with(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .build();
         MINIM_MAPPER = new YAMLMapper(f);
     }
@@ -23,7 +23,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
 
         f = YAMLFactory.builder()
-                .with(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
                 .build();
         assertTrue(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
     }
@@ -87,8 +87,8 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertFalse(f.isEnabled(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS));
 
         f = YAMLFactory.builder()
-                .with(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-                .with(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
+                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES,
+                        YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
                 .build();
         YAMLMapper mapper = new YAMLMapper(f);
 

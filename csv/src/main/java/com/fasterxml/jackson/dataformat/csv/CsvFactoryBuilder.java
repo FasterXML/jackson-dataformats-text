@@ -46,12 +46,12 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
 
     // // // Parser features
 
-    public CsvFactoryBuilder with(CsvParser.Feature f) {
+    public CsvFactoryBuilder enable(CsvParser.Feature f) {
         _formatParserFeatures |= f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder with(CsvParser.Feature first, CsvParser.Feature... other) {
+    public CsvFactoryBuilder enable(CsvParser.Feature first, CsvParser.Feature... other) {
         _formatParserFeatures |= first.getMask();
         for (CsvParser.Feature f : other) {
             _formatParserFeatures |= f.getMask();
@@ -59,12 +59,12 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
         return _this();
     }
 
-    public CsvFactoryBuilder without(CsvParser.Feature f) {
+    public CsvFactoryBuilder disable(CsvParser.Feature f) {
         _formatParserFeatures &= ~f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder without(CsvParser.Feature first, CsvParser.Feature... other) {
+    public CsvFactoryBuilder disable(CsvParser.Feature first, CsvParser.Feature... other) {
         _formatParserFeatures &= ~first.getMask();
         for (CsvParser.Feature f : other) {
             _formatParserFeatures &= ~f.getMask();
@@ -72,18 +72,18 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
         return _this();
     }
 
-    public CsvFactoryBuilder set(CsvParser.Feature f, boolean state) {
-        return state ? with(f) : without(f);
+    public CsvFactoryBuilder configure(CsvParser.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
 
     // // // Generator features
 
-    public CsvFactoryBuilder with(CsvGenerator.Feature f) {
+    public CsvFactoryBuilder enable(CsvGenerator.Feature f) {
         _formatGeneratorFeatures |= f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder with(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
+    public CsvFactoryBuilder enable(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
         _formatGeneratorFeatures |= first.getMask();
         for (CsvGenerator.Feature f : other) {
             _formatGeneratorFeatures |= f.getMask();
@@ -91,12 +91,12 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
         return _this();
     }
 
-    public CsvFactoryBuilder without(CsvGenerator.Feature f) {
+    public CsvFactoryBuilder disable(CsvGenerator.Feature f) {
         _formatGeneratorFeatures &= ~f.getMask();
         return _this();
     }
     
-    public CsvFactoryBuilder without(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
+    public CsvFactoryBuilder disable(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
         _formatGeneratorFeatures &= ~first.getMask();
         for (CsvGenerator.Feature f : other) {
             _formatGeneratorFeatures &= ~f.getMask();
@@ -104,10 +104,10 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
         return _this();
     }
 
-    public CsvFactoryBuilder set(CsvGenerator.Feature f, boolean state) {
-        return state ? with(f) : without(f);
+    public CsvFactoryBuilder configure(CsvGenerator.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
-    
+
     // // // Accessors
 
     public int formatParserFeaturesMask() { return _formatParserFeatures; }

@@ -46,12 +46,12 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
 
     // // // Parser features
 
-    public YAMLFactoryBuilder with(YAMLParser.Feature f) {
+    public YAMLFactoryBuilder enable(YAMLParser.Feature f) {
         _formatParserFeatures |= f.getMask();
         return _this();
     }
 
-    public YAMLFactoryBuilder with(YAMLParser.Feature first, YAMLParser.Feature... other) {
+    public YAMLFactoryBuilder enable(YAMLParser.Feature first, YAMLParser.Feature... other) {
         _formatParserFeatures |= first.getMask();
         for (YAMLParser.Feature f : other) {
             _formatParserFeatures |= f.getMask();
@@ -59,12 +59,12 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
         return _this();
     }
 
-    public YAMLFactoryBuilder without(YAMLParser.Feature f) {
+    public YAMLFactoryBuilder disable(YAMLParser.Feature f) {
         _formatParserFeatures &= ~f.getMask();
         return _this();
     }
 
-    public YAMLFactoryBuilder without(YAMLParser.Feature first, YAMLParser.Feature... other) {
+    public YAMLFactoryBuilder disable(YAMLParser.Feature first, YAMLParser.Feature... other) {
         _formatParserFeatures &= ~first.getMask();
         for (YAMLParser.Feature f : other) {
             _formatParserFeatures &= ~f.getMask();
@@ -72,18 +72,18 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
         return _this();
     }
 
-    public YAMLFactoryBuilder set(YAMLParser.Feature f, boolean state) {
-        return state ? with(f) : without(f);
+    public YAMLFactoryBuilder configure(YAMLParser.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
 
     // // // Generator features
 
-    public YAMLFactoryBuilder with(YAMLGenerator.Feature f) {
+    public YAMLFactoryBuilder enable(YAMLGenerator.Feature f) {
         _formatGeneratorFeatures |= f.getMask();
         return _this();
     }
 
-    public YAMLFactoryBuilder with(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
+    public YAMLFactoryBuilder enable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
         _formatGeneratorFeatures |= first.getMask();
         for (YAMLGenerator.Feature f : other) {
             _formatGeneratorFeatures |= f.getMask();
@@ -91,12 +91,12 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
         return _this();
     }
 
-    public YAMLFactoryBuilder without(YAMLGenerator.Feature f) {
+    public YAMLFactoryBuilder disable(YAMLGenerator.Feature f) {
         _formatGeneratorFeatures &= ~f.getMask();
         return _this();
     }
     
-    public YAMLFactoryBuilder without(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
+    public YAMLFactoryBuilder disable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
         _formatGeneratorFeatures &= ~first.getMask();
         for (YAMLGenerator.Feature f : other) {
             _formatGeneratorFeatures &= ~f.getMask();
@@ -104,8 +104,8 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
         return _this();
     }
 
-    public YAMLFactoryBuilder set(YAMLGenerator.Feature f, boolean state) {
-        return state ? with(f) : without(f);
+    public YAMLFactoryBuilder configure(YAMLGenerator.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
     
     // // // Accessors

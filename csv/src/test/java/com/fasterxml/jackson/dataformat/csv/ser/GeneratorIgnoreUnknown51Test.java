@@ -55,7 +55,7 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
     public void testIgnoreEmbeddedObject() throws Exception
     {
         CsvMapper mapper = new CsvMapper(CsvFactory.builder()
-                .with( JsonGenerator.Feature.IGNORE_UNKNOWN)
+                .enable( JsonGenerator.Feature.IGNORE_UNKNOWN)
                 .build());
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("address")
