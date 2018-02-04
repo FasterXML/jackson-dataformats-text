@@ -1,9 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-//import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.MapperBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Convenience version of {@link ObjectMapper} which is configured
@@ -11,35 +11,61 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class YAMLMapper extends ObjectMapper
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3L;
 
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * YAML backend.
+     *
+     * @since 3.0
+     */
+    public static class Builder extends MapperBuilder<YAMLMapper, Builder>
+    {
+        public Builder(YAMLFactory f) {
+            super(f);
+        }
+
+        @Override
+        public YAMLMapper build() {
+            return new YAMLMapper(this);
+        }
+    }
+    
+    /*
+    /**********************************************************
+    /* Life-cycle
+    /**********************************************************
+     */
+    
     public YAMLMapper() { this(new YAMLFactory()); }
 
     public YAMLMapper(YAMLFactory f) {
-        super(f);
+        this(new Builder(f));
     }
 
-    public YAMLMapper(YAMLMapper base) {
-        super(base);
+    public YAMLMapper(Builder b) {
+        super(b);
     }
 
-    @Override
-    public YAMLMapper copy()
-    {
-        _checkInvalidCopy(YAMLMapper.class);
-        return new YAMLMapper(this);
+    @SuppressWarnings("unchecked")
+    public static Builder builder() {
+        return new Builder(new YAMLFactory());
     }
+
+    public static Builder builder(YAMLFactory streamFactory) {
+        return new Builder(streamFactory);
+    }
+
+    /*
+    /**********************************************************
+    /* Basic accessor overrides
+    /**********************************************************
+     */
 
     @Override
     public Version version() {
         return PackageVersion.VERSION;
     }
-
-    /*
-    /**********************************************************************
-    /* Additional typed accessors
-    /**********************************************************************
-     */
 
     /**
      * Overridden with more specific type, since factory we have

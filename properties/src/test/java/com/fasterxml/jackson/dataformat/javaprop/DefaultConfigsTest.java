@@ -12,14 +12,6 @@ import com.fasterxml.jackson.core.Versioned;
 public class DefaultConfigsTest extends ModuleTestBase
 {
     private final String ARTIFACT_ID = "jackson-dataformat-properties";
-    
-    public void testMapperBaseConfig()
-    {
-        JavaPropsMapper mapper = new JavaPropsMapper();
-        _verifyVersion(mapper);
-        JavaPropsMapper copy = mapper.copy();
-        assertNotSame(mapper, copy);
-    }
 
     public void testFactoryBaseConfig()
     {
@@ -69,5 +61,4 @@ public class DefaultConfigsTest extends ModuleTestBase
         Version v2 = v.version();
         assertEquals(ARTIFACT_ID, v2.getArtifactId());
     }
-
 }

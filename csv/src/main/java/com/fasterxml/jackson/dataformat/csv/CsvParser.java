@@ -898,8 +898,6 @@ public class CsvParser
      * What happens then depends on configuration, but there are three
      * main choices: ignore value (and rest of line); expose extra value
      * as "any property" using configured name, or throw an exception.
-     *
-     * @since 2.7
      */
     protected JsonToken _handleExtraColumn(String value) throws IOException
     {
@@ -945,8 +943,6 @@ public class CsvParser
     /**
      * Helper method called when end of row occurs before finding values for
      * all schema-specified columns.
-     *
-     * @since 2.9
      */
     protected JsonToken _handleMissingColumns() throws IOException
     {
@@ -992,8 +988,6 @@ public class CsvParser
     /**
      * Helper method called to handle details of state update when end of logical
      * record occurs.
-     *
-     * @since 2.9
      */
     protected final JsonToken _handleObjectRowEnd() throws IOException
     {
@@ -1064,7 +1058,7 @@ public class CsvParser
         return 0;
     }
 
-    @Override // since 2.8
+    @Override
     public int getText(Writer w) throws IOException {
         String value = (_currToken == JsonToken.FIELD_NAME) ?
                 _currentName : _currentValue;
@@ -1168,10 +1162,8 @@ public class CsvParser
 
     /**
      * Method called when there is a problem related to mapping data
-     * (compared to a low-level generation); if so, should be surfaced
-     * as 
-     *
-     * @since 2.9
+     * (compared to a low-level generation); if so, should be surfaced as
+     * {@link CsvMappingException}
      */
     public <T> T _reportCsvMappingError(String msg, Object... args) throws JsonProcessingException {
         if (args.length > 0) {

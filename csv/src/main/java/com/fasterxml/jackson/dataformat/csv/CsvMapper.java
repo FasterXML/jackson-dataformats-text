@@ -2,15 +2,9 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.Collection;
 
-import com.fasterxml.jackson.core.TokenStreamFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.MapperBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
+
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
@@ -25,15 +19,15 @@ public class CsvMapper extends ObjectMapper
     private static final long serialVersionUID = 1;
 
     /**
-     * Base implementation for "Vanilla" {@link ObjectMapper}, used with JSON backend
-     * as well as for some of simpler formats that do not require mapper level overrides.
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * CSV backend.
      *
      * @since 3.0
      */
-    public static class CsvBuilder extends MapperBuilder<CsvMapper, CsvBuilder>
+    public static class Builder extends MapperBuilder<CsvMapper, Builder>
     {
-        public CsvBuilder(TokenStreamFactory tsf) {
-            super(tsf);
+        public Builder(CsvFactory f) {
+            super(f);
         }
 
         @Override
@@ -78,16 +72,9 @@ public class CsvMapper extends ObjectMapper
     }
 
     /**
-     * Copy-constructor, mostly used to support {@link #copy}.
+     * @since 3.0
      */
-    protected CsvMapper(CsvMapper src)
-    {
-        super(src);
-        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-    }
-
-    public CsvMapper(CsvBuilder b) {
+    public CsvMapper(CsvMapper.Builder b) {
         super(b);
         _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
         _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
@@ -101,24 +88,17 @@ public class CsvMapper extends ObjectMapper
      *
      * @since 3.0
      */
-    public static CsvBuilder csvBuilder() {
-        return new CsvBuilder(new CsvFactory());
+    public static CsvMapper.Builder csvBuilder() {
+        return new CsvMapper.Builder(new CsvFactory());
     }
 
     @SuppressWarnings("unchecked")
-    public static CsvBuilder builder() {
-        return new CsvBuilder(new CsvFactory());
+    public static CsvMapper.Builder builder() {
+        return new CsvMapper.Builder(new CsvFactory());
     }
 
-    public static CsvBuilder builder(CsvFactory streamFactory) {
-        return new CsvBuilder(streamFactory);
-    }
-
-    @Override
-    public CsvMapper copy()
-    {
-        _checkInvalidCopy(CsvMapper.class);
-        return new CsvMapper(this);
+    public static CsvMapper.Builder builder(CsvFactory streamFactory) {
+        return new CsvMapper.Builder(streamFactory);
     }
 
     /*

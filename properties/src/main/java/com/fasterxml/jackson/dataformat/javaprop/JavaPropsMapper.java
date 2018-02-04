@@ -8,12 +8,31 @@ import com.fasterxml.jackson.core.Version;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.MapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 
 public class JavaPropsMapper extends ObjectMapper
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3L;
+
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * Java Properties backend.
+     *
+     * @since 3.0
+     */
+    public static class Builder extends MapperBuilder<JavaPropsMapper, Builder>
+    {
+        public Builder(JavaPropsFactory f) {
+            super(f);
+        }
+
+        @Override
+        public JavaPropsMapper build() {
+            return new JavaPropsMapper(this);
+        }
+    }
 
     /*
     /**********************************************************
@@ -26,19 +45,27 @@ public class JavaPropsMapper extends ObjectMapper
     }
 
     public JavaPropsMapper(JavaPropsFactory f) {
-        super(f);
+        this(new Builder(f));
     }
 
-    protected JavaPropsMapper(JavaPropsMapper src) {
-        super(src);
+    public JavaPropsMapper(Builder b) {
+        super(b);
     }
-    
-    @Override
-    public JavaPropsMapper copy()
-    {
-        _checkInvalidCopy(JavaPropsMapper.class);
-        return new JavaPropsMapper(this);
+
+    @SuppressWarnings("unchecked")
+    public static Builder builder() {
+        return new Builder(new JavaPropsFactory());
     }
+
+    public static Builder builder(JavaPropsFactory streamFactory) {
+        return new Builder(streamFactory);
+    }
+
+    /*
+    /**********************************************************
+    /* Basic accessor overrides
+    /**********************************************************
+     */
 
     @Override
     public Version version() {

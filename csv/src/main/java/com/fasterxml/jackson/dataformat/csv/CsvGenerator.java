@@ -18,7 +18,7 @@ public class CsvGenerator extends GeneratorBase
      * (if any: currently none)
      */
     public enum Feature
-        implements FormatFeature // since 2.7
+        implements FormatFeature
     {
         /**
          * Feature that determines how much work is done before determining that
@@ -46,8 +46,6 @@ public class CsvGenerator extends GeneratorBase
          * If <code>true</code>, values and separators between values may be omitted, to slightly reduce
          * length of the row; if <code>false</code>, separators need to stay in place and values
          * are indicated by empty Strings.
-         * 
-         * @since 2.4
          */
         OMIT_MISSING_TAIL_COLUMNS(false),
 
@@ -68,12 +66,10 @@ public class CsvGenerator extends GeneratorBase
 
         /**
          * Feature that determines whether quote characters within quoted String values are escaped
-	 * using configured escape character, instead of being "doubled up" (that is: a quote character
-	 * is written twice in a row).
-	 *<p>
-	 * Default value is false so that quotes are doubled as necessary, not escaped.
-         *
-         * @since 2.9.3
+         * using configured escape character, instead of being "doubled up" (that is: a quote character
+         * is written twice in a row).
+         *<p>
+         * Default value is false so that quotes are doubled as necessary, not escaped.
          */
         ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
         ;

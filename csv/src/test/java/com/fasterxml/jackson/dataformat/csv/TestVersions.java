@@ -26,16 +26,6 @@ public class TestVersions extends ModuleTestBase
         assertTrue(mapper.isEnabled(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY));
     }
 
-    // Also, not strictly related to version but...
-
-    public void testMapperCopy() 
-    {
-        CsvMapper mapper = new CsvMapper();
-        CsvMapper copy = mapper.copy();
-        // for now, not throwing exception is a happy-enough case
-        assertNotNull(copy);
-    }
-    
     /*
     /**********************************************************
     /* Helper methods

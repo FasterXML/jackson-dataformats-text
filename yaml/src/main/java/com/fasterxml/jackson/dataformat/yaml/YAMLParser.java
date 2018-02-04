@@ -126,8 +126,6 @@ public class YAMLParser extends ParserBase
     /**
      * Flag that is set when current token was derived from an Alias
      * (reference to another value's anchor)
-     * 
-     * @since 2.1
      */
     protected boolean _currentIsAlias;
 
@@ -163,8 +161,6 @@ public class YAMLParser extends ParserBase
     /**
      * Method that can be used to check whether current token was
      * created from YAML Alias token (reference to an anchor).
-     * 
-     * @since 2.1
      */
     public boolean isCurrentAlias() {
         return _currentIsAlias;
@@ -174,12 +170,11 @@ public class YAMLParser extends ParserBase
      * Method that can be used to check if the current token has an
      * associated anchor (id to reference via Alias)
      * 
-     * @deprecated Since 2.3 (was added in 2.1) -- use {@link #getObjectId} instead
-     */
-    @Deprecated
+     * deprecated Since 2.3 (was added in 2.1) -- use {@link #getObjectId} instead
     public String getCurrentAnchor() {
         return _currentAnchor;
     }
+    */
     
     /*                                                                                       
     /**********************************************************                              
