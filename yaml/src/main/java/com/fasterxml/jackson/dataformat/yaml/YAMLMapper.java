@@ -1,9 +1,8 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import com.fasterxml.jackson.core.Version;
-
-import com.fasterxml.jackson.databind.MapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 
 /**
  * Convenience version of {@link ObjectMapper} which is configured

@@ -8,8 +8,8 @@ import com.fasterxml.jackson.core.Version;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.MapperBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 
 public class JavaPropsMapper extends ObjectMapper
