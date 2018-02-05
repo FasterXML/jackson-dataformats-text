@@ -118,6 +118,12 @@ public class JavaPropsFactory
         return null;
     }
 
+    @Override
+    public int getFormatParserFeatures() { return 0; }
+
+    @Override
+    public int getFormatGeneratorFeatures() { return 0; }
+
     /*
     /**********************************************************************
     /* Extended parser/generator factory methods

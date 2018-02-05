@@ -34,8 +34,6 @@ public class CsvMapper extends ObjectMapper
 
         public Builder(CsvFactory f) {
             super(f);
-            _formatParserFeatures = f._formatParserFeatures;
-            _formatGeneratorFeatures = f._formatGeneratorFeatures;
         }
 
         @Override

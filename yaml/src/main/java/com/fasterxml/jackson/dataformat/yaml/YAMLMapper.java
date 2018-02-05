@@ -23,7 +23,6 @@ public class YAMLMapper extends ObjectMapper
     {
         public Builder(YAMLFactory f) {
             super(f);
-            _formatGeneratorFeatures = f._formatGeneratorFeatures;
         }
 
         @Override

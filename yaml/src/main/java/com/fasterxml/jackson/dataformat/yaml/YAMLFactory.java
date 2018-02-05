@@ -176,6 +176,12 @@ public class YAMLFactory
         return (_formatParserFeatures & f.getMask()) != 0;
     }
     */
+
+    @Override
+    public int getFormatParserFeatures() { return 0; }
+
+    @Override
+    public int getFormatGeneratorFeatures() { return _formatGeneratorFeatures; }
     
     /*
     /******************************************************

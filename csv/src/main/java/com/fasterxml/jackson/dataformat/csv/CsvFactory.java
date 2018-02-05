@@ -184,6 +184,12 @@ public class CsvFactory
         return CsvGenerator.Feature.class;
     }
 
+    @Override
+    public int getFormatParserFeatures() { return _formatParserFeatures; }
+
+    @Override
+    public int getFormatGeneratorFeatures() { return _formatGeneratorFeatures; }
+
     /**
      * Checked whether specified parser feature is enabled.
      */
