@@ -25,9 +25,9 @@ import com.fasterxml.jackson.core.util.BufferRecycler;
  */
 public class YAMLParser extends ParserBase
 {
+    // 04-Feb-2018, tatu: None defined yet so...
     /**
      * Enumeration that defines all togglable features for YAML parsers.
-     */
     public enum Feature implements FormatFeature
     {
         ;
@@ -35,10 +35,8 @@ public class YAMLParser extends ParserBase
         final boolean _defaultState;
         final int _mask;
         
-        /**
-         * Method that calculates bit set (flags) of all features that
-         * are enabled by default.
-         */
+        // Method that calculates bit set (flags) of all features that
+        // are enabled by default.
         public static int collectDefaults()
         {
             int flags = 0;
@@ -62,6 +60,7 @@ public class YAMLParser extends ParserBase
         @Override
         public int getMask() { return _mask; }
     }
+    */
 
     // note: does NOT include '0', handled separately
 //    private final static Pattern PATTERN_INT = Pattern.compile("-?[1-9][0-9]*");
@@ -79,7 +78,7 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
-    protected int _formatFeatures;
+//    protected int _formatFeatures;
 
     /*
     /**********************************************************************
@@ -142,12 +141,10 @@ public class YAMLParser extends ParserBase
      */
     
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            BufferRecycler br,
-            int parserFeatures, int formatFeatures,
-            Reader reader)
+            BufferRecycler br, int parserFeatures, Reader reader)
     {
         super(readCtxt, ioCtxt, parserFeatures);    
-        _formatFeatures = formatFeatures;
+//        _formatFeatures = formatFeatures;
         _reader = reader;
         _yamlParser = new ParserImpl(new StreamReader(reader));
     }
@@ -200,62 +197,16 @@ public class YAMLParser extends ParserBase
     
     /*
     /**********************************************************                              
-    /* FormatFeature support
+    /* FormatFeature support (none yet)
     /**********************************************************                              
      */
 
+    /*
     @Override
     public int getFormatFeatures() {
         return _formatFeatures;
     }
-
-    /*
-    /***************************************************
-    /* Public API, configuration
-    /***************************************************
-     */
-
-    /**
-     * Method for enabling specified CSV feature
-     * (check {@link Feature} for list of features)
-     */
-    public JsonParser enable(YAMLParser.Feature f)
-    {
-        _formatFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified  CSV feature
-     * (check {@link Feature} for list of features)
-     */
-    public JsonParser disable(YAMLParser.Feature f)
-    {
-        _formatFeatures &= ~f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for enabling or disabling specified CSV feature
-     * (check {@link Feature} for list of features)
-     */
-    public JsonParser configure(YAMLParser.Feature f, boolean state)
-    {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-
-    /**
-     * Method for checking whether specified CSV {@link Feature}
-     * is enabled.
-     */
-    public boolean isEnabled(YAMLParser.Feature f) {
-        return (_formatFeatures & f.getMask()) != 0;
-    }
+    */
 
 //    @Override public CsvSchema getSchema() 
     

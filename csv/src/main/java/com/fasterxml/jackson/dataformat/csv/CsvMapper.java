@@ -26,13 +26,75 @@ public class CsvMapper extends ObjectMapper
      */
     public static class Builder extends MapperBuilder<CsvMapper, Builder>
     {
+        /*
+        /******************************************************************
+        /* Feature flags: formad read/write
+        /******************************************************************
+         */
+
         public Builder(CsvFactory f) {
             super(f);
+            _formatParserFeatures = f._formatParserFeatures;
+            _formatGeneratorFeatures = f._formatGeneratorFeatures;
         }
 
         @Override
         public CsvMapper build() {
             return new CsvMapper(this);
+        }
+
+        /*
+        /******************************************************************
+        /* Format features
+        /******************************************************************
+         */
+
+        public Builder enable(CsvParser.Feature... features) {
+            for (CsvParser.Feature f : features) {
+                _formatParserFeatures |= f.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(CsvParser.Feature... features) {
+            for (CsvParser.Feature f : features) {
+                _formatParserFeatures &= ~f.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(CsvParser.Feature feature, boolean state)
+        {
+            if (state) {
+                _formatParserFeatures |= feature.getMask();
+            } else {
+                _formatParserFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
+
+        public Builder enable(CsvGenerator.Feature... features) {
+            for (CsvGenerator.Feature f : features) {
+                _formatGeneratorFeatures |= f.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(CsvGenerator.Feature... features) {
+            for (CsvGenerator.Feature f : features) {
+                _formatGeneratorFeatures &= ~f.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(CsvGenerator.Feature feature, boolean state)
+        {
+            if (state) {
+                _formatGeneratorFeatures |= feature.getMask();
+            } else {
+                _formatGeneratorFeatures &= ~feature.getMask();
+            }
+            return this;
         }
     }
 
@@ -61,14 +123,11 @@ public class CsvMapper extends ObjectMapper
      */
 
     public CsvMapper() {
-        this(new CsvFactory());
+        this(new Builder(new CsvFactory()));
     }
 
-    public CsvMapper(CsvFactory f)
-    {
-        super(f);
-        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+    public CsvMapper(CsvFactory f) {
+        this(new Builder(f));
     }
 
     /**

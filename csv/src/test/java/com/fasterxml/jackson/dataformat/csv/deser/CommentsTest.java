@@ -15,10 +15,9 @@ public class CommentsTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
 
-        String[] row;
-        
         // First, with comments disabled:
         
+        String[] row;
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
                 // to handle comments that follow leading spaces
                 .with(CsvParser.Feature.TRIM_SPACES)
@@ -121,9 +120,9 @@ public class CommentsTest extends ModuleTestBase
     // Alternate test to ensure comments may be enabled
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
-        CsvMapper mapper = new CsvMapper(CsvFactory.builder()
+        CsvMapper mapper = CsvMapper.builder()
                 .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
-                .build());
+                .build();
         final String CSV = "# comment!\na,b\n";
         
         MappingIterator<String[]> it = mapper.readerFor(String[].class)

@@ -17,10 +17,7 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
     /**********************************************************
      */
 
-    /**
-     * Set of {@link YAMLParser.Feature}s enabled, as bitmask.
-     */
-    protected int _formatParserFeatures;
+//    protected int _formatParserFeatures;
 
     /**
      * Set of {@link YAMLGenerator.Feature}s enabled, as bitmask.
@@ -34,47 +31,15 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
      */
 
     protected YAMLFactoryBuilder() {
-        _formatParserFeatures = YAMLFactory.DEFAULT_YAML_PARSER_FEATURE_FLAGS;
         _formatGeneratorFeatures = YAMLFactory.DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
     }
 
     public YAMLFactoryBuilder(YAMLFactory base) {
         super(base);
-        _formatParserFeatures = base._formatParserFeatures;
         _formatGeneratorFeatures = base._formatGeneratorFeatures;
     }
 
-    // // // Parser features
-
-    public YAMLFactoryBuilder enable(YAMLParser.Feature f) {
-        _formatParserFeatures |= f.getMask();
-        return _this();
-    }
-
-    public YAMLFactoryBuilder enable(YAMLParser.Feature first, YAMLParser.Feature... other) {
-        _formatParserFeatures |= first.getMask();
-        for (YAMLParser.Feature f : other) {
-            _formatParserFeatures |= f.getMask();
-        }
-        return _this();
-    }
-
-    public YAMLFactoryBuilder disable(YAMLParser.Feature f) {
-        _formatParserFeatures &= ~f.getMask();
-        return _this();
-    }
-
-    public YAMLFactoryBuilder disable(YAMLParser.Feature first, YAMLParser.Feature... other) {
-        _formatParserFeatures &= ~first.getMask();
-        for (YAMLParser.Feature f : other) {
-            _formatParserFeatures &= ~f.getMask();
-        }
-        return _this();
-    }
-
-    public YAMLFactoryBuilder configure(YAMLParser.Feature f, boolean state) {
-        return state ? enable(f) : disable(f);
-    }
+    // // // Parser features NOT YET defined
 
     // // // Generator features
 
@@ -110,7 +75,7 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
     
     // // // Accessors
 
-    public int formatParserFeaturesMask() { return _formatParserFeatures; }
+//    public int formatParserFeaturesMask() { return _formatParserFeatures; }
     public int formatGeneratorFeaturesMask() { return _formatGeneratorFeatures; }
 
     @Override

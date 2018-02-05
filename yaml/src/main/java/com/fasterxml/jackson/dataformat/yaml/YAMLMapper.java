@@ -23,21 +23,54 @@ public class YAMLMapper extends ObjectMapper
     {
         public Builder(YAMLFactory f) {
             super(f);
+            _formatGeneratorFeatures = f._formatGeneratorFeatures;
         }
 
         @Override
         public YAMLMapper build() {
             return new YAMLMapper(this);
         }
+
+        /*
+        /******************************************************************
+        /* Format features
+        /******************************************************************
+         */
+
+        // No Parser-features yet
+        
+        public Builder enable(YAMLGenerator.Feature... features) {
+            for (YAMLGenerator.Feature f : features) {
+                _formatGeneratorFeatures |= f.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(YAMLGenerator.Feature... features) {
+            for (YAMLGenerator.Feature f : features) {
+                _formatGeneratorFeatures &= ~f.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(YAMLGenerator.Feature feature, boolean state)
+        {
+            if (state) {
+                _formatGeneratorFeatures |= feature.getMask();
+            } else {
+                _formatGeneratorFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
     }
-    
+
     /*
     /**********************************************************
     /* Life-cycle
     /**********************************************************
      */
     
-    public YAMLMapper() { this(new YAMLFactory()); }
+    public YAMLMapper() { this(new Builder(new YAMLFactory())); }
 
     public YAMLMapper(YAMLFactory f) {
         this(new Builder(f));
