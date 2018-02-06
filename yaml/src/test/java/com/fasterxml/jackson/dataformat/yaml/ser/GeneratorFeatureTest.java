@@ -1,7 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -53,5 +55,39 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("- \"first\"", parts[1].trim());
         assertEquals("- \"second\"", parts[2].trim());
         assertEquals("- \"third\"", parts[3].trim());
+    }
+
+    public void testQuotedKeys() throws Exception
+    {
+        Map<String, String> input = new HashMap<>();
+        input.put("no", "first");
+        input.put("yes", "second");
+
+        String yaml = MAPPER.writeValueAsString(input);
+
+        if (yaml.startsWith("---")) {
+            yaml = yaml.substring(3);
+        }
+
+        yaml = yaml.trim();
+
+        String[] parts = yaml.split("\n");
+        assertEquals(parts.length, 2);
+        assertEquals("no: \"first\"", parts[0].trim());
+        assertEquals("yes: \"second\"", parts[1].trim());
+
+        ObjectWriter w = MAPPER.writer().with(YAMLGenerator.Feature.ALWAYS_QUOTE_KEYS);
+
+        yaml = w.writeValueAsString(input);
+        if (yaml.startsWith("---")) {
+            yaml = yaml.substring(3);
+        }
+
+        yaml = yaml.trim();
+
+        parts = yaml.split("\n");
+        assertEquals(parts.length, 2);
+        assertEquals("\"no\": \"first\"", parts[0].trim());
+        assertEquals("\"yes\": \"second\"", parts[1].trim());
     }
 }
