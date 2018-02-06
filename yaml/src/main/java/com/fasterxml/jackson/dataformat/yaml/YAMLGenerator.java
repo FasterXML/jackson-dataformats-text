@@ -97,7 +97,12 @@ public class YAMLGenerator extends GeneratorBase
          *<p>
          * Default value is `false` for backwards compatibility
          */
-        INDENT_ARRAYS(false)
+        INDENT_ARRAYS(false),
+
+        /**
+         * Whether keys should always be quoted.
+         */
+        ALWAYS_QUOTE_KEYS(false)
         ;
 
         protected final boolean _defaultState;
@@ -391,7 +396,11 @@ public class YAMLGenerator extends GeneratorBase
     private final void _writeFieldName(String name)
         throws IOException
     {
-        _writeScalar(name, "string", STYLE_NAME);
+        Character style = STYLE_NAME;
+        if (Feature.ALWAYS_QUOTE_KEYS.enabledIn(_formatFeatures)) {
+            style = STYLE_QUOTED;
+        }
+        _writeScalar(name, "string", style);
     }
 
     /*
