@@ -45,9 +45,9 @@ public class FilteringTest extends ModuleTestBase
             FilterProvider filterProvider = new SimpleFilterProvider().addFilter( CSV_FILTER_NAME, csvReponseFilter );
 
             CsvMapper csvMapper = CsvMapper.builder()
+                    .annotationIntrospector(new CsvAnnotationIntrospector())
                     .filterProvider(filterProvider)
                     .build();
-            csvMapper.setAnnotationIntrospector(new CsvAnnotationIntrospector());
 
             ObjectWriter objectWriter = csvMapper.writer(csvSchema);
             objectWriter.writeValue( outputStream, objects);

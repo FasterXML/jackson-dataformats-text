@@ -407,7 +407,7 @@ public class CsvMapper extends ObjectMapper
         if (_nonPojoType(pojoType)) {
             return;
         }
-        BeanDescription beanDesc = getSerializationConfig().introspect(pojoType);
+        BeanDescription beanDesc = serializationConfig().introspect(pojoType);
         for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
             // ignore setter-only properties:
             if (!prop.couldSerialize()) {
