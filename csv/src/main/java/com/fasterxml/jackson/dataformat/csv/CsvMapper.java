@@ -6,10 +6,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
-import com.fasterxml.jackson.dataformat.csv.impl.LRUMap;
+import com.fasterxml.jackson.databind.util.SimpleLookupCache;
 
 /**
  * Specialized {@link ObjectMapper}, with extended functionality to
@@ -38,7 +39,7 @@ public class CsvMapper extends ObjectMapper
         }
 
         @Override
-        public CsvMapper build() {
+        public CsvMapper _constructMapper(MapperBuilderState state) {
             return new CsvMapper(this);
         }
 
@@ -107,13 +108,13 @@ public class CsvMapper extends ObjectMapper
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for "loose" (non-typed) schemas
      */
-    protected final LRUMap<JavaType,CsvSchema> _untypedSchemas;
+    protected final SimpleLookupCache<JavaType,CsvSchema> _untypedSchemas;
 
     /**
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for typed schemas
      */
-    protected final LRUMap<JavaType,CsvSchema> _typedSchemas;
+    protected final SimpleLookupCache<JavaType,CsvSchema> _typedSchemas;
 
     /*
     /**********************************************************************
@@ -134,8 +135,8 @@ public class CsvMapper extends ObjectMapper
      */
     public CsvMapper(CsvMapper.Builder b) {
         super(b);
-        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+        _untypedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
+        _typedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
     }
 
     /**
@@ -351,7 +352,7 @@ public class CsvMapper extends ObjectMapper
     /**********************************************************************
      */
 
-    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas,
+    protected CsvSchema _schemaFor(JavaType pojoType, SimpleLookupCache<JavaType,CsvSchema> schemas,
             boolean typed)
     {
         synchronized (schemas) {
