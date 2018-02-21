@@ -3,7 +3,6 @@ package com.fasterxml.jackson.dataformat.yaml;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
-import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 
 /**
  * Convenience version of {@link ObjectMapper} which is configured
@@ -26,7 +25,7 @@ public class YAMLMapper extends ObjectMapper
         }
 
         @Override
-        public YAMLMapper _constructMapper(MapperBuilderState state) {
+        public YAMLMapper build() {
             return new YAMLMapper(this);
         }
 
