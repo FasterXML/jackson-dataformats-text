@@ -97,9 +97,16 @@ public class YAMLFactory
     }
 
     @Override
-    public YAMLFactory copy()
-    {
+    public YAMLFactory copy() {
         return new YAMLFactory(this);
+    }
+
+    /**
+     * Instances are immutable so just return `this`
+     */
+    @Override
+    public TokenStreamFactory snapshot() {
+        return this;
     }
 
     /*

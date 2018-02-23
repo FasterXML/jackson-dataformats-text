@@ -111,11 +111,18 @@ public class CsvFactory
     }
 
     @Override
-    public CsvFactory copy()
-    {
+    public CsvFactory copy() {
         return new CsvFactory(this);
     }
 
+    /**
+     * Instances are immutable so just return `this`
+     */
+    @Override
+    public TokenStreamFactory snapshot() {
+        return this;
+    }
+    
     /*
     /**********************************************************
     /* Serializable overrides

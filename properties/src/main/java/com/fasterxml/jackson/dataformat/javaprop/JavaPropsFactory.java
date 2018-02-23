@@ -59,9 +59,16 @@ public class JavaPropsFactory
     }
 
     @Override
-    public JavaPropsFactory copy()
-    {
+    public JavaPropsFactory copy() {
         return new JavaPropsFactory(this);
+    }
+
+    /**
+     * Instances are immutable so just return `this`
+     */
+    @Override
+    public TokenStreamFactory snapshot() {
+        return this;
     }
 
     /*
