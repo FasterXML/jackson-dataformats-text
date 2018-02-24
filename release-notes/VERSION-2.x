@@ -8,14 +8,17 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.5 (not yet released)
+
+#74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
+ (reported by Fabrice D)
+
 2.9.4 (24-Jan-2018)
 
 #62 (yaml): SnakeYAML base64Coder is not OSGI exported
  (reported by mbechler@github)
 #65 (yaml): `YAMLParser` incorrectly handles numbers with underscores in them
  (reported by Mike K)
-#74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
- (reported by Fabrice D)
 
 2.9.3 (09-Dec-2017)
 
