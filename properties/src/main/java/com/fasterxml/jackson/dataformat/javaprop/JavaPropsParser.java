@@ -50,7 +50,7 @@ public class JavaPropsParser extends ParserMinimalBase
     /* Parsing state
     /**********************************************************
      */
-    
+
     protected JPropReadContext _readContext;
 
     protected boolean _closed;
@@ -60,11 +60,11 @@ public class JavaPropsParser extends ParserMinimalBase
     /* Recycled helper objects
     /**********************************************************
      */
-    
+
     protected ByteArrayBuilder _byteArrayBuilder;
-    
+
     protected byte[] _binaryValue;
-    
+
     /*
     /**********************************************************
     /* Life-cycle
@@ -209,7 +209,7 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public JsonToken nextToken() throws IOException {
-
+        _binaryValue = null;
         if (_readContext == null) {
             if (_closed) {
                 return null;
@@ -225,7 +225,6 @@ System.err.println("SOURCE: ("+root.getClass().getName()+") <<\n"+new ObjectMapp
 System.err.println("\n>>");
 */
         }
-
         while ((_currToken = _readContext.nextToken()) == null) {
             _readContext = _readContext.nextContext();
             if (_readContext == null) { // end of content

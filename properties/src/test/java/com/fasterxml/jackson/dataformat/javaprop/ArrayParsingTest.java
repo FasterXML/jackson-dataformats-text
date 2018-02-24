@@ -49,13 +49,13 @@ public class ArrayParsingTest extends ModuleTestBase
         public String[] str;
     }
 
-    private final ObjectMapper MAPPER = mapperForProps();
-    
     /*
     /**********************************************************************
     /* Test methods
     /**********************************************************************
      */
+
+    private final ObjectMapper MAPPER = mapperForProps();
 
     public void testArrayWithBranch() throws Exception
     {
