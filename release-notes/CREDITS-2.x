@@ -15,3 +15,9 @@ Mike Kobit (mkobit@github.com)
 
 * Reported #65 (yaml): `YAMLParser` incorrectly handles numbers with underscores in them
  (2.9.4)
+
+Fabrice Delhoste (spifd@github)
+
+* Reported #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
+ (2.9.5)
+
