@@ -29,6 +29,10 @@ public class JavaPropsMapper extends ObjectMapper
             super(f);
         }
 
+        public Builder(StateImpl state) {
+            super(state);
+        }
+
         @Override
         public JavaPropsMapper build() {
             return new JavaPropsMapper(this);
@@ -36,8 +40,24 @@ public class JavaPropsMapper extends ObjectMapper
 
         @Override
         protected MapperBuilderState _saveState() {
-            // nothing extra
-            return new MapperBuilderState(this);
+            return new StateImpl(this);
+        }
+
+        protected static class StateImpl extends MapperBuilderState
+            implements java.io.Serializable // important!
+        {
+            private static final long serialVersionUID = 3L;
+    
+            public StateImpl(Builder src) {
+                super(src);
+            }
+    
+            // We also need actual instance of state as base class can not implement logic
+             // for reinstating mapper (via mapper builder) from state.
+            @Override
+            protected Object readResolve() {
+                return new Builder(this).build();
+            }
         }
     }
 
@@ -66,6 +86,24 @@ public class JavaPropsMapper extends ObjectMapper
 
     public static Builder builder(JavaPropsFactory streamFactory) {
         return new Builder(streamFactory);
+    }
+
+    /*
+    /**********************************************************************
+    /* Life-cycle: JDK serialization support
+    /**********************************************************************
+     */
+
+    // 27-Feb-2018, tatu: Not sure why but it seems base class definitions
+    //   are not sufficient alone; sub-classes must re-define.
+    @Override
+    protected Object writeReplace() {
+        return _savedBuilderState;
+    }
+
+    @Override
+    protected Object readResolve() {
+        throw new IllegalStateException("Should never deserialize `"+getClass().getName()+"` directly");
     }
 
     /*
