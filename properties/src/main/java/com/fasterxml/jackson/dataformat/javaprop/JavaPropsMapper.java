@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
 
 public class JavaPropsMapper extends ObjectMapper
@@ -31,6 +32,12 @@ public class JavaPropsMapper extends ObjectMapper
         @Override
         public JavaPropsMapper build() {
             return new JavaPropsMapper(this);
+        }
+
+        @Override
+        protected MapperBuilderState _saveState() {
+            // nothing extra
+            return new MapperBuilderState(this);
         }
     }
 

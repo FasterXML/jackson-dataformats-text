@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
@@ -40,6 +41,12 @@ public class CsvMapper extends ObjectMapper
         @Override
         public CsvMapper build() {
             return new CsvMapper(this);
+        }
+
+        @Override
+        protected MapperBuilderState _saveState() {
+            // nothing exra, just format features
+            return new MapperBuilderState(this);
         }
 
         /*
