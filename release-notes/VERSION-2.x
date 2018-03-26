@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.5 (not yet released)
+2.9.5 (26-Mar-2018)
 
 #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
  (reported by Fabrice D)
