@@ -1,6 +1,6 @@
 # Overview
 
-This project contains [Jackson](http://wiki.fasterxml.com/JacksonHome) extension component for reading and writing [YAML](http://en.wikipedia.org/wiki/YAML) encoded data.
+This project contains [Jackson](../../../../jackson) extension component for reading and writing [YAML](http://en.wikipedia.org/wiki/YAML) encoded data.
 [SnakeYAML](https://bitbucket.org/asomov/snakeyaml/) library is used for low-level YAML parsing.
 This project adds necessary abstractions on top to make things work with other Jackson functionality.
 
