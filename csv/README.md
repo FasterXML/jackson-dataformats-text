@@ -143,6 +143,7 @@ Barbara,36
 we could use following code:
 
 ```java
+File csvFile = new File(fileName);
 CsvMapper mapper = new CsvMapper();
 CsvSchema schema = CsvSchema.emptySchema().withHeader(); // use first row as header; otherwise defaults are fine
 MappingIterator<Map<String,String>> it = mapper.readerFor(Map.class)
