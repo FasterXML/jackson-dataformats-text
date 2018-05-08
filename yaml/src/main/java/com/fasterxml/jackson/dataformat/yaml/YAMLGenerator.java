@@ -92,6 +92,14 @@ public class YAMLGenerator extends GeneratorBase
         LITERAL_BLOCK_STYLE(false),
 
         /**
+         * Option passed to SnakeYAML that determines if the line breaks used for
+         * serialization should be same as what the default is for current platform.
+         * <p>
+         * Default value is `false` for backwards compatibility
+         */
+        USE_PLATFORM_LINE_BREAKS(false),
+
+        /**
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
          *<p>
@@ -250,6 +258,9 @@ public class YAMLGenerator extends GeneratorBase
             // Also looks like all kinds of values do work, except for both being 2... weird.
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
+        }
+        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
+            opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
         }
         return opt;
     }
