@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.nio.charset.Charset;
 
-import org.yaml.snakeyaml.DumperOptions;
+import org.snakeyaml.engine.common.SpecVersion;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
@@ -43,7 +43,7 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-    protected DumperOptions.Version _version;
+    protected SpecVersion _version;
     
     /**
      * Default constructor used to create factory instances.

@@ -3,15 +3,24 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.yaml.snakeyaml.error.Mark;
-import org.yaml.snakeyaml.events.*;
-import org.yaml.snakeyaml.nodes.NodeId;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.parser.ParserImpl;
-import org.yaml.snakeyaml.reader.StreamReader;
-import org.yaml.snakeyaml.resolver.Resolver;
+import org.snakeyaml.engine.api.LoadSettings;
+import org.snakeyaml.engine.common.Anchor;
+import org.snakeyaml.engine.events.AliasEvent;
+import org.snakeyaml.engine.events.CollectionStartEvent;
+import org.snakeyaml.engine.events.Event;
+import org.snakeyaml.engine.events.MappingStartEvent;
+import org.snakeyaml.engine.events.NodeEvent;
+import org.snakeyaml.engine.events.ScalarEvent;
+import org.snakeyaml.engine.exceptions.Mark;
+import org.snakeyaml.engine.nodes.NodeType;
+import org.snakeyaml.engine.nodes.Tag;
+import org.snakeyaml.engine.parser.ParserImpl;
+import org.snakeyaml.engine.resolver.JsonScalarResolver;
+import org.snakeyaml.engine.resolver.ScalarResolver;
+import org.snakeyaml.engine.scanner.StreamReader;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
@@ -93,7 +102,7 @@ public class YAMLParser extends ParserBase
     protected final Reader _reader;
 
     protected final ParserImpl _yamlParser;
-    protected final Resolver _yamlResolver = new Resolver();
+    protected final ScalarResolver _yamlResolver = new JsonScalarResolver();
 
     /*
     /**********************************************************************
@@ -132,7 +141,7 @@ public class YAMLParser extends ParserBase
      * Anchor for the value that parser currently points to: in case of
      * structured types, value whose first token current token is.
      */
-    protected String _currentAnchor;
+    protected Optional<Anchor> _currentAnchor;
     
     /*
     /**********************************************************************
@@ -146,7 +155,8 @@ public class YAMLParser extends ParserBase
         super(readCtxt, ioCtxt, parserFeatures);    
 //        _formatFeatures = formatFeatures;
         _reader = reader;
-        _yamlParser = new ParserImpl(new StreamReader(reader));
+        LoadSettings settings = new LoadSettings();//TODO use parserFeatures
+        _yamlParser = new ParserImpl(new StreamReader(reader, settings), settings);
     }
 
     /*                                                                                       
@@ -234,12 +244,13 @@ public class YAMLParser extends ParserBase
         return _locationFor(_lastEvent.getEndMark());
     }
     
-    protected JsonLocation _locationFor(Mark m)
+    protected JsonLocation _locationFor(Optional<Mark> option)
     {
-        if (m == null) {
+        if (!option.isPresent()) {
             return new JsonLocation(_ioContext.getSourceReference(),
                     -1, -1, -1);
         }
+        Mark m = option.get();
         return new JsonLocation(_ioContext.getSourceReference(),
                 -1,
                 m.getLine() + 1, // from 0- to 1-based
@@ -260,19 +271,19 @@ public class YAMLParser extends ParserBase
     {
         _currentIsAlias = false;
         _binaryValue = null;
-        _currentAnchor = null;
+        _currentAnchor = Optional.empty();
         if (_closed) {
             return null;
         }
 
-        while (true) {
+        while (_yamlParser.hasNext()) {
             Event evt;
             try {
-                evt = _yamlParser.getEvent();
-            } catch (org.yaml.snakeyaml.error.YAMLException e) {
-                if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
+                evt = _yamlParser.next();
+            } catch (org.snakeyaml.engine.exceptions.YamlEngineException e) {
+                if (e instanceof org.snakeyaml.engine.exceptions.MarkedYamlEngineException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
-                        (this, (org.yaml.snakeyaml.error.MarkedYAMLException) e);
+                        (this, (org.snakeyaml.engine.exceptions.MarkedYamlEngineException) e);
                 }
                 throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.YAMLException.from(this, e);
             }
@@ -286,9 +297,9 @@ public class YAMLParser extends ParserBase
              * fact that we are in Object context...
              */
             if (_parsingContext.inObject() && _currToken != JsonToken.FIELD_NAME) {
-                if (!evt.is(Event.ID.Scalar)) {
+                if (!evt.isEvent(Event.ID.Scalar)) {
                     // end is fine
-                    if (evt.is(Event.ID.MappingEnd)) {
+                    if (evt.isEvent(Event.ID.MappingEnd)) {
                         if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
                             _reportMismatchedEndMarker('}', ']');
                         }
@@ -304,33 +315,35 @@ public class YAMLParser extends ParserBase
                 _currentAnchor = scalar.getAnchor();
                 return (_currToken = JsonToken.FIELD_NAME);
             }
-            // Ugh. Why not expose id, to be able to Switch?
+            // TODO Ugh. Why not expose id, to be able to Switch?
 
             // scalar values are probably the commonest:
-            if (evt.is(Event.ID.Scalar)) {
+            if (evt.isEvent(Event.ID.Scalar)) {
                 JsonToken t = _decodeScalar((ScalarEvent) evt);
                 _currToken = t;
                 return t;
             }
 
             // followed by maps, then arrays
-            if (evt.is(Event.ID.MappingStart)) {
-                Mark m = evt.getStartMark();
+            if (evt.isEvent(Event.ID.MappingStart)) {
+                Optional<Mark> m = evt.getStartMark();
                 MappingStartEvent map = (MappingStartEvent) evt;
                 _currentAnchor = map.getAnchor();
-                _parsingContext = _parsingContext.createChildObjectContext(m.getLine(), m.getColumn());
+                _parsingContext = _parsingContext.createChildObjectContext(
+                        m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
                 return (_currToken = JsonToken.START_OBJECT);
             }
-            if (evt.is(Event.ID.MappingEnd)) { // actually error; can not have map-end here
+            if (evt.isEvent(Event.ID.MappingEnd)) { // actually error; can not have map-end here
                 _reportError("Not expecting END_OBJECT but a value");
             }
-            if (evt.is(Event.ID.SequenceStart)) {
-                Mark m = evt.getStartMark();
+            if (evt.isEvent(Event.ID.SequenceStart)) {
+                Optional<Mark> m = evt.getStartMark();
                 _currentAnchor = ((NodeEvent)evt).getAnchor();
-                _parsingContext = _parsingContext.createChildArrayContext(m.getLine(), m.getColumn());
+                _parsingContext = _parsingContext.createChildArrayContext(
+                        m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
                 return (_currToken = JsonToken.START_ARRAY);
             }
-            if (evt.is(Event.ID.SequenceEnd)) {
+            if (evt.isEvent(Event.ID.SequenceEnd)) {
                 if (!_parsingContext.inArray()) { // sanity check is optional, but let's do it for now
                     _reportMismatchedEndMarker(']', '}');
                 }
@@ -340,34 +353,36 @@ public class YAMLParser extends ParserBase
 
             // after this, less common tokens:
 
-            if (evt.is(Event.ID.DocumentEnd)) {
+            if (evt.isEvent(Event.ID.DocumentEnd)) {
                 // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
                 // or return null as marker (but do NOT close). Earlier returned `null`, but
                 // to allow multi-document reading should actually just skip.
 //                return (_currToken = null);
                 continue;
             }
-            if (evt.is(Event.ID.DocumentStart)) {
+            if (evt.isEvent(Event.ID.DocumentStart)) {
 //                DocumentStartEvent dd = (DocumentStartEvent) evt;
                 // does this matter? Shouldn't, should it?
                 continue;
             }
-            if (evt.is(Event.ID.Alias)) {
+            if (evt.isEvent(Event.ID.Alias)) {
                 AliasEvent alias = (AliasEvent) evt;
                 _currentIsAlias = true;
-                _textValue = alias.getAnchor();
+                _textValue = alias.getAlias().getAnchor();
                 _cleanedTextValue = null;
                 // for now, nothing to do: in future, maybe try to expose as ObjectIds?
                 return (_currToken = JsonToken.VALUE_STRING);
             }
-            if (evt.is(Event.ID.StreamEnd)) { // end-of-input; force closure
+            if (evt.isEvent(Event.ID.StreamEnd)) { // end-of-input; force closure
                 close();
                 return (_currToken = null);
             }
-            if (evt.is(Event.ID.StreamStart)) { // useless, skip
+            if (evt.isEvent(Event.ID.StreamStart)) { // useless, skip
                 continue;
             }
         }
+        //TODO what should be thrown here ?
+        throw new RuntimeException("Unexpected events.");
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
@@ -376,11 +391,11 @@ public class YAMLParser extends ParserBase
         _textValue = value;
         _cleanedTextValue = null;
         // we may get an explicit tag, if so, use for corroborating...
-        String typeTag = scalar.getTag();
+        Optional<String> typeTagOptional = scalar.getTag();
         final int len = value.length();
 
-        if (typeTag == null || typeTag.equals("!")) { // no, implicit
-            Tag nodeTag = _yamlResolver.resolve(NodeId.scalar, value, scalar.getImplicit().canOmitTagInPlainScalar());
+        if (!typeTagOptional.isPresent() || typeTagOptional.get().equals("!")) { // no, implicit
+            Tag nodeTag = _yamlResolver.resolve(value, scalar.getImplicit().canOmitTagInPlainScalar());
             if (nodeTag == Tag.STR) {
                 return JsonToken.VALUE_STRING;
             }
@@ -403,6 +418,7 @@ public class YAMLParser extends ParserBase
                 return JsonToken.VALUE_STRING;
             }
         } else { // yes, got type tag
+            String typeTag = typeTagOptional.get();
             if (typeTag.startsWith("tag:yaml.org,2002:")) {
                 typeTag = typeTag.substring("tag:yaml.org,2002:".length());
                 if (typeTag.contains(",")) {
@@ -447,6 +463,7 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_STRING;
     }
 
+    //TODO leave only true and false
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
         switch (len) {
@@ -753,21 +770,22 @@ public class YAMLParser extends ParserBase
     @Override
     public String getObjectId() throws IOException, JsonGenerationException
     {
-        return _currentAnchor;
+        return _currentAnchor.map(a -> a.getAnchor()).orElse(null);
     }
 
     @Override
     public String getTypeId() throws IOException, JsonGenerationException
     {
-        String tag;
+        Optional<String> tagOpt;
         if (_lastEvent instanceof CollectionStartEvent) {
-            tag = ((CollectionStartEvent) _lastEvent).getTag();
+            tagOpt = ((CollectionStartEvent) _lastEvent).getTag();
         } else if (_lastEvent instanceof ScalarEvent) {
-            tag = ((ScalarEvent) _lastEvent).getTag();
+            tagOpt = ((ScalarEvent) _lastEvent).getTag();
         } else {
             return null;
         }
-        if (tag != null) {
+        if (tagOpt.isPresent()) {
+            String tag = tagOpt.get();
             /* 04-Aug-2013, tatu: Looks like YAML parser's expose these in...
              *   somewhat exotic ways sometimes. So let's prepare to peel off
              *   some wrappings:

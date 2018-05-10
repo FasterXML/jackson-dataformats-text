@@ -6,13 +6,27 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.emitter.Emitter;
-import org.yaml.snakeyaml.events.*;
-import org.yaml.snakeyaml.nodes.Tag;
+import org.snakeyaml.engine.api.DumpSettings;
+import org.snakeyaml.engine.common.Anchor;
+import org.snakeyaml.engine.common.FlowStyle;
+import org.snakeyaml.engine.common.ScalarStyle;
+import org.snakeyaml.engine.common.SpecVersion;
+import org.snakeyaml.engine.emitter.Emitter;
+import org.snakeyaml.engine.events.AliasEvent;
+import org.snakeyaml.engine.events.DocumentEndEvent;
+import org.snakeyaml.engine.events.DocumentStartEvent;
+import org.snakeyaml.engine.events.ImplicitTuple;
+import org.snakeyaml.engine.events.MappingEndEvent;
+import org.snakeyaml.engine.events.MappingStartEvent;
+import org.snakeyaml.engine.events.ScalarEvent;
+import org.snakeyaml.engine.events.SequenceEndEvent;
+import org.snakeyaml.engine.events.SequenceStartEvent;
+import org.snakeyaml.engine.events.StreamEndEvent;
+import org.snakeyaml.engine.events.StreamStartEvent;
+import org.snakeyaml.engine.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -159,23 +173,23 @@ public class YAMLGenerator extends GeneratorBase
 
     protected Writer _writer;
 
-    protected DumperOptions _outputOptions;
+    protected DumpSettings _outputOptions;
 
     // for field names, leave out quotes
-    private final static Character STYLE_NAME = null;
+    private final static ScalarStyle STYLE_NAME = ScalarStyle.PLAIN;
 
     // numbers, booleans, should use implicit
-    private final static Character STYLE_SCALAR = null;
+    private final static ScalarStyle STYLE_SCALAR = ScalarStyle.PLAIN;
     // Strings quoted for fun
-    private final static Character STYLE_QUOTED = Character.valueOf('"');
+    private final static ScalarStyle STYLE_QUOTED = ScalarStyle.DOUBLE_QUOTED;
     // Strings in literal (block) style
-    private final static Character STYLE_LITERAL = Character.valueOf('|');
+    private final static ScalarStyle STYLE_LITERAL = ScalarStyle.LITERAL;
 
     // Which flow style to use for Base64? Maybe basic quoted?
     // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
-    private final static Character STYLE_BASE64 = STYLE_LITERAL;
+    private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
 
-    private final static Character STYLE_PLAIN = null;
+    private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
 
     /*
     /**********************************************************
@@ -206,7 +220,7 @@ public class YAMLGenerator extends GeneratorBase
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
             int generatorFeatures, int yamlFeatures,
             Writer out,
-            org.yaml.snakeyaml.DumperOptions.Version version)
+            SpecVersion version)
         throws IOException
     {
         super(writeContext, generatorFeatures);
@@ -216,22 +230,22 @@ public class YAMLGenerator extends GeneratorBase
 
         _outputOptions = buildDumperOptions(generatorFeatures, yamlFeatures, version);
 
-        _emitter = new Emitter(_writer, _outputOptions);
+        _emitter = new Emitter( _outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
-        _emitter.emit(new StreamStartEvent(null, null));
+        _emitter.emit(new StreamStartEvent());
         Map<String,String> noTags = Collections.emptyMap();
 
         boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(yamlFeatures);
 
-        _emitter.emit(new DocumentStartEvent(null, null, startMarker,
-                version, // for 1.10 was: ((version == null) ? null : version.getArray()),
+        _emitter.emit(new DocumentStartEvent(startMarker, Optional.empty(),
+                 // for 1.10 was: ((version == null) ? null : version.getArray()),
                 noTags));
     }
 
-    protected DumperOptions buildDumperOptions(int jsonFeatures, int yamlFeatures,
-            org.yaml.snakeyaml.DumperOptions.Version version)
+    protected DumpSettings buildDumperOptions(int jsonFeatures, int yamlFeatures,
+            SpecVersion version)
     {
-        DumperOptions opt = new DumperOptions();
+        DumpSettings opt = new DumpSettings();
         // would we want canonical?
         if (Feature.CANONICAL_OUTPUT.enabledIn(_formatFeatures)) {
             opt.setCanonical(true);
@@ -410,8 +424,8 @@ public class YAMLGenerator extends GeneratorBase
     public void close() throws IOException
     {
         if (!isClosed()) {
-            _emitter.emit(new DocumentEndEvent(null, null, false));
-            _emitter.emit(new StreamEndEvent(null, null));
+            _emitter.emit(new DocumentEndEvent( false));
+            _emitter.emit(new StreamEndEvent());
             super.close();
             _writer.close();
         }
@@ -428,15 +442,15 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _outputContext = _outputContext.createChildArrayContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new SequenceStartEvent(anchor, yamlTag,
-                implicit,  null, null, style));
+        _emitter.emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
+                implicit,  style));
     }
 
     @Override
@@ -448,7 +462,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _outputContext = _outputContext.getParent();
-        _emitter.emit(new SequenceEndEvent(null, null));
+        _emitter.emit(new SequenceEndEvent());
     }
 
     @Override
@@ -456,15 +470,14 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _outputContext = _outputContext.createChildObjectContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new MappingStartEvent(anchor, yamlTag,
-                implicit, null, null, style));
+        _emitter.emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
     }
 
     @Override
@@ -476,7 +489,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _outputContext = _outputContext.getParent();
-        _emitter.emit(new MappingEndEvent(null, null));
+        _emitter.emit(new MappingEndEvent());
     }
 
     /*
@@ -493,7 +506,7 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write String value");
-        Character style = STYLE_QUOTED;
+        ScalarStyle style = STYLE_QUOTED;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
           // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
@@ -723,7 +736,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         _verifyValueWrite("write Object reference");
-        AliasEvent evt = new AliasEvent(String.valueOf(id), null, null);
+        AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
         _emitter.emit(evt);
     }
 
@@ -768,7 +781,7 @@ public class YAMLGenerator extends GeneratorBase
     // ... and sometimes we specifically DO want explicit tag:
     private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
-    protected void _writeScalar(String value, String type, Character style) throws IOException
+    protected void _writeScalar(String value, String type, ScalarStyle style) throws IOException
     {
         _emitter.emit(_scalarEvent(value, style));
     }
@@ -782,23 +795,21 @@ public class YAMLGenerator extends GeneratorBase
             b64variant = Base64Variants.MIME;
         }
         String encoded = b64variant.encode(data);
-        _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
-                null, null, STYLE_BASE64));
+        _emitter.emit(new ScalarEvent(Optional.empty(), Optional.ofNullable(TAG_BINARY), EXPLICIT_TAGS, encoded, STYLE_BASE64));
     }
 
-    protected ScalarEvent _scalarEvent(String value, Character style)
+    protected ScalarEvent _scalarEvent(String value, ScalarStyle style)
     {
         String yamlTag = _typeId;
         if (yamlTag != null) {
             _typeId = null;
         }
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
-        return new ScalarEvent(anchor, yamlTag, NO_TAGS, value,
-                null, null, style);
+        return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
     }
 }

@@ -14,16 +14,16 @@ public class MarkedYAMLException extends YAMLException
 {
     private static final long serialVersionUID = 1L;
 
-    protected final org.yaml.snakeyaml.error.MarkedYAMLException _source;
+    protected final org.snakeyaml.engine.exceptions.MarkedYamlEngineException _source;
 
     protected MarkedYAMLException(JsonParser p,
-            org.yaml.snakeyaml.error.MarkedYAMLException src) {
+                                  org.snakeyaml.engine.exceptions.MarkedYamlEngineException src) {
         super(p, src);
         _source = src;
     }
 
     public static MarkedYAMLException from(JsonParser p,
-            org.yaml.snakeyaml.error.MarkedYAMLException src) {
+                                           org.snakeyaml.engine.exceptions.MarkedYamlEngineException src) {
         return new MarkedYAMLException(p, src);
     }
 

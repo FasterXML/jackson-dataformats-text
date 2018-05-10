@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.snakeyaml.error;
 
+import java.util.Optional;
+
 /**
  * Placeholder for shaded <code>org.yaml.snakeyaml.error.Mark</code>
  *
@@ -10,28 +12,20 @@ package com.fasterxml.jackson.dataformat.yaml.snakeyaml.error;
 @Deprecated // since 2.8
 public class Mark
 {
-    protected final org.yaml.snakeyaml.error.Mark _source;
+    protected final org.snakeyaml.engine.exceptions.Mark _source;
 
-    protected Mark(org.yaml.snakeyaml.error.Mark src) {
+    protected Mark(org.snakeyaml.engine.exceptions.Mark src) {
         _source = src;
     }
     
-    public static Mark from(org.yaml.snakeyaml.error.Mark src) {
-        return (src == null)  ? null : new Mark(src);
+    public static Mark from(Optional<org.snakeyaml.engine.exceptions.Mark> src) {
+        return (!src.isPresent())  ? null : new Mark(src.get());
     }
 
     public String getName() {
         return _source.getName();
     }
     
-    public String get_snippet() {
-        return _source.get_snippet();
-    }
-
-    public String get_snippet(int indent, int max_length) {
-        return _source.get_snippet(indent, max_length);
-    }
-
     public int getColumn() {
         return _source.getColumn();
     }
