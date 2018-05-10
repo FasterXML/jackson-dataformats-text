@@ -162,8 +162,8 @@ public class StreamingParseTest extends ModuleTestBase
         p.close();
     }
 
-    // Testing addition of underscores
-    public void testIntParsingUnderscoresSm() throws Exception
+    // TODO Testing addition of underscores (It was dropped in YAML 1.2)
+    public void /*test*/ IntParsingUnderscoresSm() throws Exception
     {
         // First, couple of simple small values
         try (JsonParser p = MAPPER.createParser("num: 10_345")) {
@@ -305,7 +305,7 @@ public class StreamingParseTest extends ModuleTestBase
         // First, test out valid use case.
         String YAML;
 
-        YAML = "num: +1_000.25"; // note underscores; legal in YAML apparently
+        YAML = "num: +1000.25";
         JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
@@ -315,16 +315,16 @@ public class StreamingParseTest extends ModuleTestBase
         StringWriter w = new StringWriter();
         assertEquals(3, p.getText(w));
         assertEquals("num", w.toString());
-        
+
         // should be considered a String...
         assertToken(JsonToken.VALUE_NUMBER_FLOAT, p.nextToken());
         assertEquals(1000.25, p.getDoubleValue());
         // let's retain exact representation text however:
-        assertEquals("+1_000.25", p.getText());
+        assertEquals("+1000.25", p.getText());
         p.close();
-        
+
         // and then non-number that may be mistaken
-        
+
         final String IP = "10.12.45.127";
         YAML = "ip: "+IP+"\n";
         p = MAPPER.createParser(YAML);
@@ -337,7 +337,7 @@ public class StreamingParseTest extends ModuleTestBase
         w = new StringWriter();
         assertEquals(IP.length(), p.getText(w));
         assertEquals(IP, w.toString());
-        
+
         assertEquals(IP, p.getText());
         p.close();
     }
@@ -365,7 +365,7 @@ public class StreamingParseTest extends ModuleTestBase
 
         p.close();
     }
-    
+
     /**
      * How should YAML Anchors be exposed?
      */
@@ -418,7 +418,7 @@ public class StreamingParseTest extends ModuleTestBase
         assertToken(JsonToken.END_OBJECT, yp.nextToken());
 
         assertToken(JsonToken.END_OBJECT, yp.nextToken());
-        
+
         assertNull(yp.nextToken());
         yp.close();
     }
@@ -536,7 +536,10 @@ public class StreamingParseTest extends ModuleTestBase
         p.close();
     }
 
-    public void testTildeNulls() throws Exception
+    /*
+     * Tilde '~' is back to string in YAML 1.2 (using the JSON schema)
+     */
+    public void testTildeIsString() throws Exception
     {
         String YAML = "nulls: [~ ]";
         JsonParser p = MAPPER.createParser(YAML);
@@ -545,7 +548,7 @@ public class StreamingParseTest extends ModuleTestBase
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("nulls", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
-        assertToken(JsonToken.VALUE_NULL, p.nextToken());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertNull(p.nextToken());
