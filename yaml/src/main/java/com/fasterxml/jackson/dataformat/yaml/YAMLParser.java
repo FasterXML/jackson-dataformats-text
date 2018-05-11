@@ -282,7 +282,7 @@ public class YAMLParser extends ParserBase
             return null;
         }
 
-        while (_yamlParser.hasNext()) {
+        while (true /*_yamlParser.hasNext()*/) {
             Event evt;
             try {
                 evt = _yamlParser.next();
@@ -386,8 +386,6 @@ public class YAMLParser extends ParserBase
                     continue;
             }
         }
-        //TODO what should be thrown here ?
-        throw new RuntimeException("Unexpected events.");
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
