@@ -468,25 +468,11 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_STRING;
     }
 
-    //TODO leave only true and false
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
         switch (len) {
-        case 1:
-            switch (value.charAt(0)) {
-            case 'y': case 'Y': return Boolean.TRUE;
-            case 'n': case 'N': return Boolean.FALSE;
-            }
-            break;
-        case 2:
-            if ("no".equalsIgnoreCase(value)) return Boolean.FALSE;
-            if ("on".equalsIgnoreCase(value)) return Boolean.TRUE;
-            break;
-        case 3:
-            if ("yes".equalsIgnoreCase(value)) return Boolean.TRUE;
-            if ("off".equalsIgnoreCase(value)) return Boolean.FALSE;
-            break;
         case 4:
+            //TODO it should be only lower case
             if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
             break;
         case 5:
