@@ -15,14 +15,20 @@ import org.snakeyaml.engine.events.MappingStartEvent;
 import org.snakeyaml.engine.events.NodeEvent;
 import org.snakeyaml.engine.events.ScalarEvent;
 import org.snakeyaml.engine.exceptions.Mark;
-import org.snakeyaml.engine.nodes.NodeType;
 import org.snakeyaml.engine.nodes.Tag;
 import org.snakeyaml.engine.parser.ParserImpl;
 import org.snakeyaml.engine.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.resolver.ScalarResolver;
 import org.snakeyaml.engine.scanner.StreamReader;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.Base64Variant;
+import com.fasterxml.jackson.core.Base64Variants;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.ObjectReadContext;
+import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
@@ -43,7 +49,7 @@ public class YAMLParser extends ParserBase
 
         final boolean _defaultState;
         final int _mask;
-        
+
         // Method that calculates bit set (flags) of all features that
         // are enabled by default.
         public static int collectDefaults()
@@ -56,16 +62,16 @@ public class YAMLParser extends ParserBase
             }
             return flags;
         }
-        
+
         private Feature(boolean defaultState) {
             _defaultState = defaultState;
             _mask = (1 << ordinal());
         }
-        
+
         @Override
         public boolean enabledByDefault() { return _defaultState; }
         @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }        
+        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
         @Override
         public int getMask() { return _mask; }
     }
@@ -125,7 +131,7 @@ public class YAMLParser extends ParserBase
      * mostly free of underscores
      */
     protected String _cleanedTextValue;
-    
+
     /**
      * Let's also have a local copy of the current field name
      */
@@ -148,11 +154,11 @@ public class YAMLParser extends ParserBase
     /* Life-cycle
     /**********************************************************************
      */
-    
+
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             BufferRecycler br, int parserFeatures, Reader reader)
     {
-        super(readCtxt, ioCtxt, parserFeatures);    
+        super(readCtxt, ioCtxt, parserFeatures);
 //        _formatFeatures = formatFeatures;
         _reader = reader;
         LoadSettings settings = new LoadSettings();//TODO use parserFeatures
@@ -176,7 +182,7 @@ public class YAMLParser extends ParserBase
     /**
      * Method that can be used to check if the current token has an
      * associated anchor (id to reference via Alias)
-     * 
+     *
      * deprecated Since 2.3 (was added in 2.1) -- use {@link #getObjectId} instead
     public String getCurrentAnchor() {
         return _currentAnchor;
@@ -243,7 +249,7 @@ public class YAMLParser extends ParserBase
         }
         return _locationFor(_lastEvent.getEndMark());
     }
-    
+
     protected JsonLocation _locationFor(Optional<Mark> option)
     {
         if (!option.isPresent()) {
@@ -283,7 +289,7 @@ public class YAMLParser extends ParserBase
             } catch (org.snakeyaml.engine.exceptions.YamlEngineException e) {
                 if (e instanceof org.snakeyaml.engine.exceptions.MarkedYamlEngineException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
-                        (this, (org.snakeyaml.engine.exceptions.MarkedYamlEngineException) e);
+                            (this, (org.snakeyaml.engine.exceptions.MarkedYamlEngineException) e);
                 }
                 throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.YAMLException.from(this, e);
             }
@@ -292,7 +298,7 @@ public class YAMLParser extends ParserBase
                 return (_currToken = null);
             }
             _lastEvent = evt;
-            
+
             /* One complication: field names are only inferred from the
              * fact that we are in Object context...
              */
@@ -315,70 +321,69 @@ public class YAMLParser extends ParserBase
                 _currentAnchor = scalar.getAnchor();
                 return (_currToken = JsonToken.FIELD_NAME);
             }
-            // TODO Ugh. Why not expose id, to be able to Switch?
+            switch (evt.getEventId()) {
+                case Scalar:
+                    // scalar values are probably the commonest:
+                    JsonToken t = _decodeScalar((ScalarEvent) evt);
+                    _currToken = t;
+                    return t;
 
-            // scalar values are probably the commonest:
-            if (evt.isEvent(Event.ID.Scalar)) {
-                JsonToken t = _decodeScalar((ScalarEvent) evt);
-                _currToken = t;
-                return t;
-            }
+                case MappingStart:
+                    // followed by maps, then arrays
+                    Optional<Mark> m = evt.getStartMark();
+                    MappingStartEvent map = (MappingStartEvent) evt;
+                    _currentAnchor = map.getAnchor();
+                    _parsingContext = _parsingContext.createChildObjectContext(
+                            m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
+                    return (_currToken = JsonToken.START_OBJECT);
 
-            // followed by maps, then arrays
-            if (evt.isEvent(Event.ID.MappingStart)) {
-                Optional<Mark> m = evt.getStartMark();
-                MappingStartEvent map = (MappingStartEvent) evt;
-                _currentAnchor = map.getAnchor();
-                _parsingContext = _parsingContext.createChildObjectContext(
-                        m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
-                return (_currToken = JsonToken.START_OBJECT);
-            }
-            if (evt.isEvent(Event.ID.MappingEnd)) { // actually error; can not have map-end here
-                _reportError("Not expecting END_OBJECT but a value");
-            }
-            if (evt.isEvent(Event.ID.SequenceStart)) {
-                Optional<Mark> m = evt.getStartMark();
-                _currentAnchor = ((NodeEvent)evt).getAnchor();
-                _parsingContext = _parsingContext.createChildArrayContext(
-                        m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
-                return (_currToken = JsonToken.START_ARRAY);
-            }
-            if (evt.isEvent(Event.ID.SequenceEnd)) {
-                if (!_parsingContext.inArray()) { // sanity check is optional, but let's do it for now
-                    _reportMismatchedEndMarker(']', '}');
-                }
-                _parsingContext = _parsingContext.getParent();
-                return (_currToken = JsonToken.END_ARRAY);
-            }
+                case MappingEnd:
+                    // actually error; can not have map-end here
+                    _reportError("Not expecting END_OBJECT but a value");
 
-            // after this, less common tokens:
+                case SequenceStart:
+                    Optional<Mark> mrk = evt.getStartMark();
+                    _currentAnchor = ((NodeEvent) evt).getAnchor();
+                    _parsingContext = _parsingContext.createChildArrayContext(
+                            mrk.map(mark -> mark.getLine()).orElse(0), mrk.map(mark -> mark.getColumn()).orElse(0));
+                    return (_currToken = JsonToken.START_ARRAY);
 
-            if (evt.isEvent(Event.ID.DocumentEnd)) {
-                // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
-                // or return null as marker (but do NOT close). Earlier returned `null`, but
-                // to allow multi-document reading should actually just skip.
-//                return (_currToken = null);
-                continue;
-            }
-            if (evt.isEvent(Event.ID.DocumentStart)) {
-//                DocumentStartEvent dd = (DocumentStartEvent) evt;
-                // does this matter? Shouldn't, should it?
-                continue;
-            }
-            if (evt.isEvent(Event.ID.Alias)) {
-                AliasEvent alias = (AliasEvent) evt;
-                _currentIsAlias = true;
-                _textValue = alias.getAlias().getAnchor();
-                _cleanedTextValue = null;
-                // for now, nothing to do: in future, maybe try to expose as ObjectIds?
-                return (_currToken = JsonToken.VALUE_STRING);
-            }
-            if (evt.isEvent(Event.ID.StreamEnd)) { // end-of-input; force closure
-                close();
-                return (_currToken = null);
-            }
-            if (evt.isEvent(Event.ID.StreamStart)) { // useless, skip
-                continue;
+                case SequenceEnd:
+                    if (!_parsingContext.inArray()) { // sanity check is optional, but let's do it for now
+                        _reportMismatchedEndMarker(']', '}');
+                    }
+                    _parsingContext = _parsingContext.getParent();
+                    return (_currToken = JsonToken.END_ARRAY);
+
+                // after this, less common tokens:
+                case DocumentEnd:
+                    // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
+                    // or return null as marker (but do NOT close). Earlier returned `null`, but
+                    // to allow multi-document reading should actually just skip.
+                    // return (_currToken = null);
+                    continue;
+
+                case DocumentStart:
+                    // DocumentStartEvent dd = (DocumentStartEvent) evt;
+                    // does this matter? Shouldn't, should it?
+                    continue;
+
+                case Alias:
+                    AliasEvent alias = (AliasEvent) evt;
+                    _currentIsAlias = true;
+                    _textValue = alias.getAlias().getAnchor();
+                    _cleanedTextValue = null;
+                    // for now, nothing to do: in future, maybe try to expose as ObjectIds?
+                    return (_currToken = JsonToken.VALUE_STRING);
+
+                case StreamEnd:
+                    // end-of-input; force closure
+                    close();
+                    return (_currToken = null);
+
+                case StreamStart:
+                    // useless, skip
+                    continue;
             }
         }
         //TODO what should be thrown here ?
@@ -458,7 +463,7 @@ public class YAMLParser extends ParserBase
                 }
             }
         }
-        
+
         // any way to figure out actual type? No?
         return JsonToken.VALUE_STRING;
     }
@@ -546,11 +551,11 @@ public class YAMLParser extends ParserBase
             _numTypesValid = 0;
             return _cleanYamlFloat(_textValue);
         }
-        
+
         // 25-Aug-2016, tatu: If we can't actually match it to valid number,
         //    consider String; better than claiming there's not toekn
         return JsonToken.VALUE_STRING;
-    }   
+    }
 
     protected JsonToken _decodeIntWithUnderscores(String value, final int len)
     {
@@ -568,7 +573,7 @@ public class YAMLParser extends ParserBase
     public boolean hasTextCharacters() {
         return false;
     }
-    
+
     @Override
     public String getText() throws IOException
     {
@@ -632,7 +637,7 @@ public class YAMLParser extends ParserBase
 
     @Override
     public Object getEmbeddedObject() throws IOException {
-        if (_currToken == JsonToken.VALUE_EMBEDDED_OBJECT ) {
+        if (_currToken == JsonToken.VALUE_EMBEDDED_OBJECT) {
             return _binaryValue;
         }
         return null;
@@ -654,7 +659,7 @@ public class YAMLParser extends ParserBase
     /* Number accessor overrides
     /**********************************************************************
      */
-    
+
     @Override
     protected void _parseNumericValue(int expType) throws IOException
     {
@@ -706,7 +711,7 @@ public class YAMLParser extends ParserBase
             } catch (NumberFormatException nex) {
                 // NOTE: pass non-cleaned variant for error message
                 // Can this ever occur? Due to overflow, maybe?
-                _wrapError("Malformed numeric value '"+_textValue+"'", nex);
+                _wrapError("Malformed numeric value '" + _textValue + "'", nex);
             }
         }
         if (_currToken == JsonToken.VALUE_NUMBER_FLOAT) {
@@ -724,11 +729,11 @@ public class YAMLParser extends ParserBase
             } catch (NumberFormatException nex) {
                 // Can this ever occur? Due to overflow, maybe?
                 // NOTE: pass non-cleaned variant for error message
-                _wrapError("Malformed numeric value '"+_textValue+"'", nex);
+                _wrapError("Malformed numeric value '" + _textValue + "'", nex);
             }
             return;
         }
-        _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
+        _reportError("Current token (" + _currToken + ") not numeric, can not use numeric value accessors");
     }
 
     @Override
@@ -761,12 +766,12 @@ public class YAMLParser extends ParserBase
     public boolean canReadObjectId() { // yup
         return true;
     }
-    
+
     @Override
     public boolean canReadTypeId() {
         return true; // yes, YAML got 'em
     }
-    
+
     @Override
     public String getObjectId() throws IOException, JsonGenerationException
     {
@@ -803,7 +808,7 @@ public class YAMLParser extends ParserBase
     /* Internal methods
     /**********************************************************************
      */
-    
+
     /**
      * Helper method used to clean up YAML floating-point value so it can be parsed
      * using standard JDK classes.
