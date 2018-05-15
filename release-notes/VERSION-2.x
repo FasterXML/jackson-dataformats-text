@@ -8,6 +8,12 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.6 (not yet released)
+
+#84 (yaml): Add option to allow use of platform-linefeed
+  (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
+ (contributed by Thomas H)
+
 2.9.5 (26-Mar-2018)
 
 #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
