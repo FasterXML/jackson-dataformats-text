@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.6 (not yet released)
+2.9.6 (12-Jun-2018)
 
 #84 (yaml): Add option to allow use of platform-linefeed
   (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
