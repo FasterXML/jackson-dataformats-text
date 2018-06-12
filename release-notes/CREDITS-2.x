@@ -21,3 +21,8 @@ Fabrice Delhoste (spifd@github)
 * Reported #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
  (2.9.5)
 
+Thomas Hauk (thauk-copperleaf@github)
+
+* Contibuted #84 (yaml): Add option to allow use of platform-linefeed
+  (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
+ (2.9.6)
