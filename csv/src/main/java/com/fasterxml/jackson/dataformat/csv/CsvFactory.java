@@ -75,7 +75,7 @@ public class CsvFactory extends JsonFactory
      * and this reuse only works within context of a single
      * factory instance.
      */
-    public CsvFactory() { this(null); }
+    public CsvFactory() { this((ObjectCodec) null); }
 
     public CsvFactory(ObjectCodec oc) { super(oc); }
 
@@ -88,6 +88,31 @@ public class CsvFactory extends JsonFactory
         _csvParserFeatures = src._csvParserFeatures;
         _csvGeneratorFeatures = src._csvGeneratorFeatures;
         _schema = src._schema;
+    }
+
+    /**
+     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     *
+     * @since 2.9
+     */
+    protected CsvFactory(CsvFactoryBuilder b)
+    {
+        super(b, false);
+        _csvParserFeatures = b.formatParserFeaturesMask();
+        _csvGeneratorFeatures = b.formatGeneratorFeaturesMask();
+    }
+
+    @Override
+    public CsvFactoryBuilder rebuild() {
+        return new CsvFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link CsvFactory} instances with
+     * different configuration.
+     */
+    public static CsvFactoryBuilder builder() {
+        return new CsvFactoryBuilder();
     }
     
     @Override
@@ -341,7 +366,7 @@ public class CsvFactory extends JsonFactory
     public CsvGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
         OutputStream out = new FileOutputStream(f);
         // Important: make sure that we always auto-close stream we create:
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(out, true);
         ctxt.setEncoding(enc);
         return _createGenerator(ctxt,
                 _createWriter(_decorate(out, ctxt), enc, ctxt));

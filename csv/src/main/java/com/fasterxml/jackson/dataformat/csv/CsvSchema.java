@@ -43,7 +43,7 @@ import com.fasterxml.jackson.core.FormatSchema;
  *    some database dumps do this)
  *  </li>
  * <li>nullValue (String) [default: "" (empty String)]: When asked to write Java `null`,
- *    this String value will be used instead.<br />
+ *    this String value will be used instead.<br>
  *   With 2.6, value will also be recognized during value reads.
  *  </li>
  * <li>strictHeaders (boolean) [default: false] (added in Jackson 2.7): whether names of

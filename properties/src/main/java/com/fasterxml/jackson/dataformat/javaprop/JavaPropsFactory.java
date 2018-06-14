@@ -38,6 +38,29 @@ public class JavaPropsFactory extends JsonFactory
         super(src, oc);
     }
 
+    /**
+     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     *
+     * @since 2.9
+     */
+    protected JavaPropsFactory(JavaPropsFactoryBuilder b)
+    {
+        super(b, false);
+    }
+
+    @Override
+    public JavaPropsFactoryBuilder rebuild() {
+        return new JavaPropsFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link JavaPropsFactory} instances with
+     * different configuration.
+     */
+    public static JavaPropsFactoryBuilder builder() {
+        return new JavaPropsFactoryBuilder();
+    }
+
     @Override
     public JavaPropsFactory copy()
     {

@@ -66,7 +66,7 @@ public class YAMLFactory extends JsonFactory
      * and this reuse only works within context of a single
      * factory instance.
      */
-    public YAMLFactory() { this(null); }
+    public YAMLFactory() { this((ObjectCodec) null); }
 
     public YAMLFactory(ObjectCodec oc)
     {
@@ -89,6 +89,30 @@ public class YAMLFactory extends JsonFactory
         _version = src._version;
         _yamlParserFeatures = src._yamlParserFeatures;
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
+    }
+
+    /**
+     * Constructors used by {@link YAMLFactoryBuilder} for instantiation.
+     *
+     * @since 3.0
+     */
+    protected YAMLFactory(YAMLFactoryBuilder b)
+    {
+        super(b, false);
+        _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
+    }
+
+    @Override
+    public YAMLFactoryBuilder rebuild() {
+        return new YAMLFactoryBuilder(this);
+    }
+
+    /**
+     * Main factory method to use for constructing {@link YAMLFactory} instances with
+     * different configuration.
+     */
+    public static YAMLFactoryBuilder builder() {
+        return new YAMLFactoryBuilder();
     }
 
     @Override

@@ -3,11 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml.ser;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+import com.fasterxml.jackson.dataformat.yaml.*;
 
 public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
