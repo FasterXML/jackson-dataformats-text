@@ -47,7 +47,7 @@ public class YAMLFactory extends JsonFactory
     protected int _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
 
     protected int _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
-    
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -269,6 +269,11 @@ public class YAMLFactory extends JsonFactory
         return (_yamlParserFeatures & f.getMask()) != 0;
     }
 
+    @Override
+    public int getFormatParserFeatures() {
+        return _yamlParserFeatures;
+    }
+
     /*
     /**********************************************************
     /* Configuration, generator settings
@@ -312,6 +317,11 @@ public class YAMLFactory extends JsonFactory
      */
     public final boolean isEnabled(YAMLGenerator.Feature f) {
         return (_yamlGeneratorFeatures & f.getMask()) != 0;
+    }
+
+    @Override
+    public int getFormatGeneratorFeatures() {
+        return _yamlGeneratorFeatures;
     }
 
     /*

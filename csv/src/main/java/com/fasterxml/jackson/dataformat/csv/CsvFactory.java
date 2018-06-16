@@ -233,6 +233,11 @@ public class CsvFactory extends JsonFactory
         return (_csvParserFeatures & f.getMask()) != 0;
     }
 
+    @Override
+    public int getFormatParserFeatures() {
+        return _csvParserFeatures;
+    }
+
     /*
     /**********************************************************
     /* Configuration, generator settings
@@ -277,7 +282,12 @@ public class CsvFactory extends JsonFactory
     public final boolean isEnabled(CsvGenerator.Feature f) {
         return (_csvGeneratorFeatures & f.getMask()) != 0;
     }
-    
+
+    @Override
+    public int getFormatGeneratorFeatures() {
+        return _csvGeneratorFeatures;
+    }
+
     /*
     /**********************************************************
     /* Overridden parser factory methods, 2.1
