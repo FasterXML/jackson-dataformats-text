@@ -129,6 +129,11 @@ public class WriterBackedGenerator extends JavaPropsGenerator
             _outputTail = 0;
         }
     }
+    
+    @Override
+    protected void encode(StringBuilder sb, String key) {
+    	JPropEscapes.appendKey(_basePath, key);
+    }
 
     /*
     /**********************************************************

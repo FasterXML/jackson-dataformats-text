@@ -66,6 +66,11 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
 
     @Override
     protected void _releaseBuffers() { }
+    
+    @Override
+    protected void encode(StringBuilder sb, String key) {
+    	sb.append(key);
+    }
 
     /*
     /**********************************************************

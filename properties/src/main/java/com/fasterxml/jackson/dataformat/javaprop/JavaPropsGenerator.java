@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
-import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
@@ -236,12 +235,12 @@ public abstract class JavaPropsGenerator
                 _basePath.append(sep);
             }
         }
-        // Note that escaping needs to be applied now...
+
+        encode(_basePath, name);
         
-        JPropEscapes.appendKey(_basePath, name);
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
     }
-
+    
     /*
     /**********************************************************
     /* Public API: structural output
@@ -507,5 +506,7 @@ public abstract class JavaPropsGenerator
     protected abstract void _writeRaw(String text) throws IOException;
     protected abstract void _writeRaw(StringBuilder text) throws IOException;
     protected abstract void _writeRaw(char[] text, int offset, int len) throws IOException;
+    protected abstract void encode(StringBuilder sb, String key);
+    
     
 }
