@@ -15,7 +15,7 @@ public class NullWritingTest extends ModuleTestBase
         public String a, b, c, d;
     }
 
-    private final CsvMapper csv = new CsvMapper();
+    private final CsvMapper csv = mapperForCsv();
 
     public void testObjectWithNullMembersToString() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);

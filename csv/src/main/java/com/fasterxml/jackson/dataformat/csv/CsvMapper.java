@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
@@ -16,6 +17,73 @@ import com.fasterxml.jackson.dataformat.csv.impl.LRUMap;
 public class CsvMapper extends ObjectMapper
 {
     private static final long serialVersionUID = 1;
+
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * CSV backend.
+     *
+     * @since 2.10
+     */
+    public static class Builder extends MapperBuilder<CsvMapper, Builder>
+    {
+        public Builder(CsvMapper m) {
+            super(m);
+        }
+
+        /*
+        /******************************************************************
+        /* Format features
+        /******************************************************************
+         */
+
+        public Builder enable(CsvParser.Feature... features) {
+            for (CsvParser.Feature f : features) {
+                _mapper.enable(f);
+            }
+            return this;
+        }
+
+        public Builder disable(CsvParser.Feature... features) {
+            for (CsvParser.Feature f : features) {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
+        public Builder configure(CsvParser.Feature f, boolean state)
+        {
+            if (state) {
+                _mapper.enable(f);
+            } else {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
+        public Builder enable(CsvGenerator.Feature... features) {
+            for (CsvGenerator.Feature f : features) {
+                _mapper.enable(f);
+            }
+            return this;
+        }
+
+        public Builder disable(CsvGenerator.Feature... features) {
+            for (CsvGenerator.Feature f : features) {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
+        public Builder configure(CsvGenerator.Feature f, boolean state)
+        {
+            if (state) {
+                _mapper.enable(f);
+            } else {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+    }
 
     /**
      * Simple caching for schema instances, given that they are relatively expensive
@@ -60,6 +128,33 @@ public class CsvMapper extends ObjectMapper
         super(src);
         _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
         _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+    }
+
+    /**
+     * Short-cut for:
+     *<pre>
+     *   return builder(new CsvFactory());
+     *</pre>
+     *
+     * @since 2.10
+     */
+    public static CsvMapper.Builder csvBuilder() {
+        return new CsvMapper.Builder(new CsvMapper());
+    }
+
+    /**
+     * @since 2.10
+     */
+    @SuppressWarnings("unchecked")
+    public static CsvMapper.Builder builder() {
+        return new CsvMapper.Builder(new CsvMapper());
+    }
+
+    /**
+     * @since 2.10
+     */
+    public static CsvMapper.Builder builder(CsvFactory streamFactory) {
+        return new CsvMapper.Builder(new CsvMapper(streamFactory));
     }
 
     /**

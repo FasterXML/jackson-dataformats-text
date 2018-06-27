@@ -9,14 +9,16 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 import com.google.common.collect.ImmutableMap;
 
-public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
-
-    public void testWithAStringAndAUuid() throws JsonProcessingException {
+public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
+{
+    private final CsvMapper MAPPER = mapperForCsv();
+    
+    public void testWithAStringAndAUuid() throws Exception {
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
                 .addColumn("string2", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -34,7 +36,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string2", CsvSchema.ColumnType.STRING)
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -53,7 +55,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string2", CsvSchema.ColumnType.STRING)
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string2", "world");
@@ -71,7 +73,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string2", CsvSchema.ColumnType.STRING)
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -90,7 +92,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .addColumn("string4", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -111,7 +113,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .addColumn("string4", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string2", "hello");
@@ -131,7 +133,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .addColumn("string4", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -151,7 +153,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .addColumn("string4", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -171,7 +173,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
                 .addColumn("string3", CsvSchema.ColumnType.STRING)
                 .addColumn("string4", CsvSchema.ColumnType.STRING)
                 .build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final ImmutableMap.Builder<String, String> builder = new ImmutableMap.Builder<String, String>();
         builder.put("string1", "hello");
@@ -190,7 +192,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         csvSchemaBuilder.addColumn("value", CsvSchema.ColumnType.NUMBER);
         csvSchemaBuilder.addColumn("id", CsvSchema.ColumnType.STRING);
         final CsvSchema schema = csvSchemaBuilder.build();
-        final ObjectWriter writer = new CsvMapper().writer().with(schema);
+        final ObjectWriter writer = MAPPER.writer().with(schema);
 
         final String string = writer.writeValueAsString(
                 ImmutableMap.of("timestamp", 0L, "value", 42));

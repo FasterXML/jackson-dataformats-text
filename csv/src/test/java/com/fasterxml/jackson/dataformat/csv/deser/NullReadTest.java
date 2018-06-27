@@ -32,7 +32,7 @@ public class NullReadTest extends ModuleTestBase
 
     public void testNullIssue83() throws Exception
     {
-        CsvMapper mapper = new CsvMapper();
+        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(Pojo83.class);
         final ObjectWriter writer = mapper.writer(schema);
 

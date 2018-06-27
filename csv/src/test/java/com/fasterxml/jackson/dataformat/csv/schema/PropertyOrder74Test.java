@@ -17,12 +17,11 @@ public class PropertyOrder74Test extends ModuleTestBase
     @JsonPropertyOrder()
     public static class PointWithAnnotation extends Point {}
 
-    private final CsvMapper MAPPER = new CsvMapper();
-    
     public void testSchemaWithOrdering() throws Exception
     {
-        CsvSchema schema1 = MAPPER.schemaFor(Point.class);
-        CsvSchema schema2 = MAPPER.schemaFor(PointWithAnnotation.class);
+        final CsvMapper mapper = mapperForCsv();
+        CsvSchema schema1 = mapper.schemaFor(Point.class);
+        CsvSchema schema2 = mapper.schemaFor(PointWithAnnotation.class);
 
         assertEquals(schema1.size(), schema2.size());
         assertEquals(schema1.column(0).getName(), schema2.column(0).getName());
