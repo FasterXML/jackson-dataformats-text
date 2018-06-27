@@ -13,7 +13,7 @@ public class DefaultConfigsTest extends ModuleTestBase
     
     public void testMapperBaseConfig()
     {
-        JavaPropsMapper mapper = new JavaPropsMapper();
+        JavaPropsMapper mapper = mapperForProps();
         _verifyVersion(mapper);
         JavaPropsMapper copy = mapper.copy();
         assertNotSame(mapper, copy);
@@ -21,7 +21,7 @@ public class DefaultConfigsTest extends ModuleTestBase
 
     public void testFactoryBaseConfig()
     {
-        JavaPropsFactory f = new JavaPropsFactory();
+        JavaPropsFactory f = JavaPropsFactory.builder().build();
         _verifyVersion(f);
         JavaPropsFactory copy = f.copy();
         assertNotSame(f, copy);
@@ -34,7 +34,7 @@ public class DefaultConfigsTest extends ModuleTestBase
 
     public void testGeneratorConfig() throws Exception
     {
-        JavaPropsFactory f = new JavaPropsFactory();
+        JavaPropsFactory f = JavaPropsFactory.builder().build();
         JsonGenerator gen = f.createGenerator(new StringWriter());
         _verifyVersion(gen);
         assertTrue(gen.canOmitFields());

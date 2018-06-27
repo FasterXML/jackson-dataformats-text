@@ -5,12 +5,27 @@ import java.util.Properties;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
+
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 
 public class JavaPropsMapper extends ObjectMapper
 {
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * Java Properties backend.
+     *
+     * @since 2.10
+     */
+    public static class Builder extends MapperBuilder<JavaPropsMapper, Builder>
+    {
+        public Builder(JavaPropsMapper m) {
+            super(m);
+        }
+    }
 
     /*
     /**********************************************************
@@ -30,6 +45,16 @@ public class JavaPropsMapper extends ObjectMapper
         super(src);
     }
     
+
+    @SuppressWarnings("unchecked")
+    public static Builder builder() {
+        return new JavaPropsMapper.Builder(new JavaPropsMapper());
+    }
+
+    public static Builder builder(JavaPropsFactory streamFactory) {
+        return new JavaPropsMapper.Builder(new JavaPropsMapper(streamFactory));
+    }
+
     @Override
     public JavaPropsMapper copy()
     {
