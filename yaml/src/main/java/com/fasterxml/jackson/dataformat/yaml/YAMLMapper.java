@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 
 //import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -12,6 +13,51 @@ public class YAMLMapper extends ObjectMapper
 {
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Base implementation for "Vanilla" {@link ObjectMapper}, used with
+     * YAML backend.
+     *
+     * @since 3.0
+     */
+    public static class Builder extends MapperBuilder<YAMLMapper, Builder>
+    {
+        public Builder(YAMLMapper m) {
+            super(m);
+        }
+
+        /*
+        /******************************************************************
+        /* Format features
+        /******************************************************************
+         */
+
+        // No Parser-features yet
+        
+        public Builder enable(YAMLGenerator.Feature... features) {
+            for (YAMLGenerator.Feature f : features) {
+                _mapper.enable(f);
+            }
+            return this;
+        }
+
+        public Builder disable(YAMLGenerator.Feature... features) {
+            for (YAMLGenerator.Feature f : features) {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
+        public Builder configure(YAMLGenerator.Feature f, boolean state)
+        {
+            if (state) {
+                _mapper.enable(f);
+            } else {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+    }
+    
     public YAMLMapper() { this(new YAMLFactory()); }
 
     public YAMLMapper(YAMLFactory f) {
@@ -23,6 +69,15 @@ public class YAMLMapper extends ObjectMapper
      */
     public YAMLMapper(YAMLMapper base) {
         super(base);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static YAMLMapper.Builder builder() {
+        return new YAMLMapper.Builder(new YAMLMapper());
+    }
+
+    public static YAMLMapper.Builder builder(YAMLFactory streamFactory) {
+        return new YAMLMapper.Builder(new YAMLMapper(streamFactory));
     }
 
     /**

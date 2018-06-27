@@ -41,7 +41,7 @@ public class TypeIdTest extends ModuleTestBase
 
     public void testNonNativeSerialization() throws Exception
     {
-        YAMLMapper mapper = new YAMLMapper();
+        YAMLMapper mapper = newObjectMapper();
         mapper.disable(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID);
         String yaml = mapper.writeValueAsString(new Impl(13));
         yaml = yaml.trim();

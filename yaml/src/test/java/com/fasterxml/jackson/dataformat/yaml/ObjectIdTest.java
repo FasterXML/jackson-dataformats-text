@@ -124,8 +124,9 @@ public class ObjectIdTest extends ModuleTestBase
     // [dataformat-yaml#23]
     public void testNonNativeSerialization() throws Exception
     {
-        YAMLMapper mapper = new YAMLMapper();
-        mapper.disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID);
+        YAMLMapper mapper = YAMLMapper.builder()
+                .disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
+                .build();
         Node first = new Node("first");
         Node second = new Node("second");
         first.next = second;

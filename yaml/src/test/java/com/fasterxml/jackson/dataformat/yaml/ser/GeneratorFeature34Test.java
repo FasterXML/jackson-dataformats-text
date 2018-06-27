@@ -25,7 +25,9 @@ public class GeneratorFeature34Test extends ModuleTestBase
                 "        - \"second\"\n" +
                 "      name: \"Mathematics\"";
 
-        YAMLMapper yamlMapper = new YAMLMapper().enable(YAMLGenerator.Feature.INDENT_ARRAYS);
+        YAMLMapper yamlMapper = YAMLMapper.builder()
+                .enable(YAMLGenerator.Feature.INDENT_ARRAYS)
+                .build();
         Map<?,?> stuff = yamlMapper.readValue(yamlBefore, Map.class);
         String yamlAfter = yamlMapper.writeValueAsString(stuff);
         // and do it again to ensure it is parseable (no need to be identical)
