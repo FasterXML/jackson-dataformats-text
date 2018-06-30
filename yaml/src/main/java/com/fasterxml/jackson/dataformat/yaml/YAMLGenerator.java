@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
+import org.yaml.snakeyaml.DumperOptions.ScalarStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -182,7 +183,7 @@ public class YAMLGenerator extends GeneratorBase
 
     // Which flow style to use for Base64? Maybe basic quoted?
     // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
-    private final static Character STYLE_BASE64 = STYLE_LITERAL;
+    private final static ScalarStyle STYLE_BASE64 = ScalarStyle.createStyle(STYLE_LITERAL);
 
     private final static Character STYLE_PLAIN = null;
 
@@ -441,7 +442,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _outputContext = _outputContext.createChildArrayContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
@@ -469,7 +470,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _outputContext = _outputContext.createChildObjectContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
@@ -812,6 +813,6 @@ public class YAMLGenerator extends GeneratorBase
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, yamlTag, NO_TAGS, value,
-                null, null, style);
+                null, null, ScalarStyle.createStyle(style));
     }
 }
