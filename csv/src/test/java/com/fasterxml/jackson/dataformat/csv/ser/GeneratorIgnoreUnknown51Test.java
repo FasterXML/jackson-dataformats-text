@@ -74,12 +74,14 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
         myClass.phoneNumber = "123";
 
         StringWriter sw = new StringWriter();
-        try {
-            mapper.writer(schema).writeValue(sw, myClass);
-            fail("Should not pass");
-        } catch (CsvMappingException e) {
-            verifyException(e, "CSV generator does not support");
-            verifyException(e, "nested Objects");
-        }
+        mapper.writer(schema).writeValue(sw, myClass);
+
+
+        StringBuffer expectedResults = new StringBuffer();
+        expectedResults.append( "address,people\n" );
+        expectedResults.append( "AAA,\n" );
+
+        assertEquals(expectedResults.toString(), sw.toString());
+
     }
 }
