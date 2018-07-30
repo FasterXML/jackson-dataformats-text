@@ -597,10 +597,11 @@ public class CsvGenerator extends GeneratorBase
         if (!_writeContext.inObject()) {
             _reportError("Current context not Object but " + _writeContext.typeDesc());
         }
+        CsvWriteContext _origContext = _writeContext;
         _writeContext = _writeContext.getParent();
         // 14-Dec-2015, tatu: To complete skipping of ignored structured value, need this:
         if (_skipWithin != null) {
-            if (_writeContext == _skipWithin) {
+            if (_writeContext == _skipWithin || _origContext == _skipWithin) {
                 _skipWithin = null;
             }
 
