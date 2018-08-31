@@ -139,6 +139,12 @@ public class JavaPropsSchema
      */
     protected String _header = "";
 
+    /**
+     * Optional prefix to strip and append to key names.
+     * Useful when subset of properties need to be processed.
+     */
+    protected String _prefix;
+
     /*
     /**********************************************************************
     /* Construction, factories, mutant factories
@@ -157,6 +163,7 @@ public class JavaPropsSchema
         _keyValueSeparator = base._keyValueSeparator;
         _lineEnding = base._lineEnding;
         _header = base._header;
+        _prefix = base._prefix;
     }
 
     /**
@@ -287,6 +294,15 @@ public class JavaPropsSchema
         return s;
     }
 
+    public JavaPropsSchema withPrefix(String v) {
+        if (_equals(v, _prefix)) {
+            return this;
+        }
+        JavaPropsSchema s = new JavaPropsSchema(this);
+        s._prefix = v;
+        return s;
+    }
+
     /**
      * Mutant factory for constructing schema instance where specified
      * header section (piece of text written out right before actual
@@ -369,6 +385,10 @@ public class JavaPropsSchema
 
     public String pathSeparator() {
         return _pathSeparator;
+    }
+
+    public String prefix() {
+        return _prefix;
     }
 
     public boolean writeIndexUsingMarkers() {

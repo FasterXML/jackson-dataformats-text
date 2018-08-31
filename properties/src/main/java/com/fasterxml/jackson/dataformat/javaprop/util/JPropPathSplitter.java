@@ -35,7 +35,8 @@ public abstract class JPropPathSplitter
         }
         return new FullSplitter(sep, schema.parseSimpleIndexes(),
                 indexMarker,
-                pathOnlySplitter(schema));
+                pathOnlySplitter(schema),
+                schema.prefix());
     }
 
     private static JPropPathSplitter pathOnlySplitter(JavaPropsSchema schema)
@@ -262,14 +263,21 @@ public abstract class JPropPathSplitter
         // small but important optimization for cases where index markers are absent
         protected final int _indexFirstChar;
         protected final JPropPathSplitter _simpleSplitter;
-        
+        protected final String _prefix;
+
         public FullSplitter(String pathSeparator, boolean useSimpleIndex,
-                Markers indexMarker, JPropPathSplitter fallbackSplitter)
+                Markers indexMarker, JPropPathSplitter fallbackSplitter,
+                String prefix)
         {
             super(useSimpleIndex);
             String startMarker = indexMarker.getStart();
             _indexFirstChar = startMarker.charAt(0);
             _simpleSplitter = fallbackSplitter;
+            if (prefix == null || prefix.isEmpty()) {
+                _prefix = null;
+            } else {
+                _prefix = prefix + pathSeparator;
+            }
             _indexMatch = Pattern.compile(String.format
                     ("(%s)|(%s(\\d{1,9})%s)",
                             Pattern.quote(pathSeparator),
@@ -281,6 +289,13 @@ public abstract class JPropPathSplitter
         public JPropNode splitAndAdd(JPropNode parent,
                 String key, String value)
         {
+            if (_prefix != null) {
+                if (!key.startsWith(_prefix)) {
+                    return null;
+                }
+                key = key.substring(_prefix.length());
+            }
+
             if (key.indexOf(_indexFirstChar) < 0) { // no index start marker
                 return _simpleSplitter.splitAndAdd(parent, key, value);
             }
