@@ -11,7 +11,7 @@ Modules:
 2.10.0 (not yet released)
 
 #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
- (contributed by Yegor B)
+ (contributed by Andrey S)
 
 2.9.7 (not yet released)
 
