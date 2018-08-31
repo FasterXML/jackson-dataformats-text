@@ -143,6 +143,9 @@ public abstract class JavaPropsGenerator
                     _basePath.append(indent);
                     _jpropContext = JPropWriteContext.createRootContext(_indentLength);
                 }
+                if (_schema.prefix() != null) {
+                    _basePath.append(_schema.prefix());
+                }
             }
             return;
         }
