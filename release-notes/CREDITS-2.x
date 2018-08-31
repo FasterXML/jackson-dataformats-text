@@ -26,3 +26,9 @@ Thomas Hauk (thauk-copperleaf@github)
 * Contibuted #84 (yaml): Add option to allow use of platform-linefeed
   (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
  (2.9.6)
+
+Yegor Borovikov (yborovikov@gitub)
+
+* Reported #81 (yaml): Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
+ (2.9.7)
+

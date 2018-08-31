@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.7 (not yet released)
+
+#81: Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
+ (reported by Yegor B)
+
 2.9.6 (12-Jun-2018)
 
 #84 (yaml): Add option to allow use of platform-linefeed
