@@ -189,20 +189,20 @@ public class YAMLGenerator extends GeneratorBase
     protected DumperOptions _outputOptions;
 
     // for field names, leave out quotes
-    private final static Character STYLE_NAME = null;
+    private final static DumperOptions.ScalarStyle STYLE_NAME = DumperOptions.ScalarStyle.PLAIN;
 
     // numbers, booleans, should use implicit
-    private final static Character STYLE_SCALAR = null;
+    private final static DumperOptions.ScalarStyle STYLE_SCALAR = DumperOptions.ScalarStyle.PLAIN;
     // Strings quoted for fun
-    private final static Character STYLE_QUOTED = Character.valueOf('"');
+    private final static DumperOptions.ScalarStyle STYLE_QUOTED = DumperOptions.ScalarStyle.DOUBLE_QUOTED;
     // Strings in literal (block) style
-    private final static Character STYLE_LITERAL = Character.valueOf('|');
+    private final static DumperOptions.ScalarStyle STYLE_LITERAL = DumperOptions.ScalarStyle.LITERAL;
 
     // Which flow style to use for Base64? Maybe basic quoted?
     // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
-    private final static Character STYLE_BASE64 = STYLE_LITERAL;
+    private final static DumperOptions.ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
 
-    private final static Character STYLE_PLAIN = null;
+    private final static DumperOptions.ScalarStyle STYLE_PLAIN = DumperOptions.ScalarStyle.PLAIN;
 
     /*
     /**********************************************************
@@ -466,7 +466,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _writeContext = _writeContext.createChildArrayContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
@@ -494,7 +494,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _writeContext = _writeContext.createChildObjectContext();
-        Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
+        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
@@ -531,7 +531,7 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write String value");
-        Character style = STYLE_QUOTED;
+        DumperOptions.ScalarStyle style = STYLE_QUOTED;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
           // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
@@ -806,7 +806,7 @@ public class YAMLGenerator extends GeneratorBase
     // ... and sometimes we specifically DO want explicit tag:
     private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
-    protected void _writeScalar(String value, String type, Character style) throws IOException
+    protected void _writeScalar(String value, String type, DumperOptions.ScalarStyle style) throws IOException
     {
         _emitter.emit(_scalarEvent(value, style));
     }
@@ -824,7 +824,7 @@ public class YAMLGenerator extends GeneratorBase
                 null, null, STYLE_BASE64));
     }
 
-    protected ScalarEvent _scalarEvent(String value, Character style)
+    protected ScalarEvent _scalarEvent(String value, DumperOptions.ScalarStyle style)
     {
         String yamlTag = _typeId;
         if (yamlTag != null) {
