@@ -30,7 +30,7 @@
     <dependency>
       <groupId>org.snakeyaml</groupId>
       <artifactId>snakeyaml-engine</artifactId>
-      <version>0.1-SNAPSHOT</version>
+      <version>1.0</version>
     </dependency>
 
      <!-- and for testing need annotations -->

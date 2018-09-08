@@ -6,20 +6,21 @@ import java.math.BigInteger;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.snakeyaml.engine.api.LoadSettings;
-import org.snakeyaml.engine.common.Anchor;
-import org.snakeyaml.engine.events.AliasEvent;
-import org.snakeyaml.engine.events.CollectionStartEvent;
-import org.snakeyaml.engine.events.Event;
-import org.snakeyaml.engine.events.MappingStartEvent;
-import org.snakeyaml.engine.events.NodeEvent;
-import org.snakeyaml.engine.events.ScalarEvent;
-import org.snakeyaml.engine.exceptions.Mark;
-import org.snakeyaml.engine.nodes.Tag;
-import org.snakeyaml.engine.parser.ParserImpl;
-import org.snakeyaml.engine.resolver.JsonScalarResolver;
-import org.snakeyaml.engine.resolver.ScalarResolver;
-import org.snakeyaml.engine.scanner.StreamReader;
+import org.snakeyaml.engine.v1.api.LoadSettings;
+import org.snakeyaml.engine.v1.api.LoadSettingsBuilder;
+import org.snakeyaml.engine.v1.common.Anchor;
+import org.snakeyaml.engine.v1.events.AliasEvent;
+import org.snakeyaml.engine.v1.events.CollectionStartEvent;
+import org.snakeyaml.engine.v1.events.Event;
+import org.snakeyaml.engine.v1.events.MappingStartEvent;
+import org.snakeyaml.engine.v1.events.NodeEvent;
+import org.snakeyaml.engine.v1.events.ScalarEvent;
+import org.snakeyaml.engine.v1.exceptions.Mark;
+import org.snakeyaml.engine.v1.nodes.Tag;
+import org.snakeyaml.engine.v1.parser.ParserImpl;
+import org.snakeyaml.engine.v1.resolver.JsonScalarResolver;
+import org.snakeyaml.engine.v1.resolver.ScalarResolver;
+import org.snakeyaml.engine.v1.scanner.StreamReader;
 
 import com.fasterxml.jackson.core.Base64Variant;
 import com.fasterxml.jackson.core.Base64Variants;
@@ -161,7 +162,7 @@ public class YAMLParser extends ParserBase
         super(readCtxt, ioCtxt, parserFeatures);
 //        _formatFeatures = formatFeatures;
         _reader = reader;
-        LoadSettings settings = new LoadSettings();//TODO use parserFeatures
+        LoadSettings settings = new LoadSettingsBuilder().build();//TODO use parserFeatures
         _yamlParser = new ParserImpl(new StreamReader(reader, settings), settings);
     }
 
@@ -286,10 +287,10 @@ public class YAMLParser extends ParserBase
             Event evt;
             try {
                 evt = _yamlParser.next();
-            } catch (org.snakeyaml.engine.exceptions.YamlEngineException e) {
-                if (e instanceof org.snakeyaml.engine.exceptions.MarkedYamlEngineException) {
+            } catch (org.snakeyaml.engine.v1.exceptions.YamlEngineException e) {
+                if (e instanceof org.snakeyaml.engine.v1.exceptions.MarkedYamlEngineException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
-                            (this, (org.snakeyaml.engine.exceptions.MarkedYamlEngineException) e);
+                            (this, (org.snakeyaml.engine.v1.exceptions.MarkedYamlEngineException) e);
                 }
                 throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.YAMLException.from(this, e);
             }
@@ -371,7 +372,7 @@ public class YAMLParser extends ParserBase
                 case Alias:
                     AliasEvent alias = (AliasEvent) evt;
                     _currentIsAlias = true;
-                    _textValue = alias.getAlias().getAnchor();
+                    _textValue = alias.getAnchor().orElseThrow(() -> new RuntimeException("Alias must be provided.")).getAnchor();
                     _cleanedTextValue = null;
                     // for now, nothing to do: in future, maybe try to expose as ObjectIds?
                     return (_currToken = JsonToken.VALUE_STRING);

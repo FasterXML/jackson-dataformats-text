@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.nio.charset.Charset;
 
-import org.snakeyaml.engine.common.SpecVersion;
+import org.snakeyaml.engine.v1.common.SpecVersion;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;

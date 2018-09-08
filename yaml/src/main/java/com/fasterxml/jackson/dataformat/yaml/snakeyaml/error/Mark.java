@@ -12,13 +12,13 @@ import java.util.Optional;
 @Deprecated // since 2.8
 public class Mark
 {
-    protected final org.snakeyaml.engine.exceptions.Mark _source;
+    protected final org.snakeyaml.engine.v1.exceptions.Mark _source;
 
-    protected Mark(org.snakeyaml.engine.exceptions.Mark src) {
+    protected Mark(org.snakeyaml.engine.v1.exceptions.Mark src) {
         _source = src;
     }
     
-    public static Mark from(Optional<org.snakeyaml.engine.exceptions.Mark> src) {
+    public static Mark from(Optional<org.snakeyaml.engine.v1.exceptions.Mark> src) {
         return (!src.isPresent())  ? null : new Mark(src.get());
     }
 

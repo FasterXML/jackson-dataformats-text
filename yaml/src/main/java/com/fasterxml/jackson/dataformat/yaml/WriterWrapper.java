@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.IOException;
 import java.io.Writer;
 
-import org.snakeyaml.engine.api.StreamDataWriter;
+import org.snakeyaml.engine.v1.api.StreamDataWriter;
 
 public class WriterWrapper implements StreamDataWriter {
     private final Writer _writer;

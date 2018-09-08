@@ -9,24 +9,25 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.snakeyaml.engine.api.DumpSettings;
-import org.snakeyaml.engine.common.Anchor;
-import org.snakeyaml.engine.common.FlowStyle;
-import org.snakeyaml.engine.common.ScalarStyle;
-import org.snakeyaml.engine.common.SpecVersion;
-import org.snakeyaml.engine.emitter.Emitter;
-import org.snakeyaml.engine.events.AliasEvent;
-import org.snakeyaml.engine.events.DocumentEndEvent;
-import org.snakeyaml.engine.events.DocumentStartEvent;
-import org.snakeyaml.engine.events.ImplicitTuple;
-import org.snakeyaml.engine.events.MappingEndEvent;
-import org.snakeyaml.engine.events.MappingStartEvent;
-import org.snakeyaml.engine.events.ScalarEvent;
-import org.snakeyaml.engine.events.SequenceEndEvent;
-import org.snakeyaml.engine.events.SequenceStartEvent;
-import org.snakeyaml.engine.events.StreamEndEvent;
-import org.snakeyaml.engine.events.StreamStartEvent;
-import org.snakeyaml.engine.nodes.Tag;
+import org.snakeyaml.engine.v1.api.DumpSettings;
+import org.snakeyaml.engine.v1.api.DumpSettingsBuilder;
+import org.snakeyaml.engine.v1.common.Anchor;
+import org.snakeyaml.engine.v1.common.FlowStyle;
+import org.snakeyaml.engine.v1.common.ScalarStyle;
+import org.snakeyaml.engine.v1.common.SpecVersion;
+import org.snakeyaml.engine.v1.emitter.Emitter;
+import org.snakeyaml.engine.v1.events.AliasEvent;
+import org.snakeyaml.engine.v1.events.DocumentEndEvent;
+import org.snakeyaml.engine.v1.events.DocumentStartEvent;
+import org.snakeyaml.engine.v1.events.ImplicitTuple;
+import org.snakeyaml.engine.v1.events.MappingEndEvent;
+import org.snakeyaml.engine.v1.events.MappingStartEvent;
+import org.snakeyaml.engine.v1.events.ScalarEvent;
+import org.snakeyaml.engine.v1.events.SequenceEndEvent;
+import org.snakeyaml.engine.v1.events.SequenceStartEvent;
+import org.snakeyaml.engine.v1.events.StreamEndEvent;
+import org.snakeyaml.engine.v1.events.StreamStartEvent;
+import org.snakeyaml.engine.v1.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -111,7 +112,12 @@ public class YAMLGenerator extends GeneratorBase
          * If disabled, Unix linefeed ({@code \n}) will be used.
          * <p>
          * Default value is `false` for backwards compatibility.
+         *
+         * This setting does not do anything. Regardless of its value, SnakeYAML Engine will use the line break defined
+         * in System.getProperty("line.separator")
+         * @deprecated
          */
+        @Deprecated
         USE_PLATFORM_LINE_BREAKS(false),
 
         /**
@@ -254,7 +260,7 @@ public class YAMLGenerator extends GeneratorBase
     protected DumpSettings buildDumperOptions(int jsonFeatures, int yamlFeatures,
             SpecVersion version)
     {
-        DumpSettings opt = new DumpSettings();
+        DumpSettingsBuilder opt = new DumpSettingsBuilder();
         // would we want canonical?
         if (Feature.CANONICAL_OUTPUT.enabledIn(_formatFeatures)) {
             opt.setCanonical(true);
@@ -274,11 +280,7 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
         }
-        // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
-        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
-            opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
-        }
-        return opt;
+        return opt.build();
     }
 
     /*
