@@ -8,6 +8,22 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.10.0 (not yet released)
+
+#101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
+ (contributed by Andrey S)
+
+2.9.7 (not yet released)
+
+#81: Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
+ (reported by Yegor B)
+
+2.9.6 (12-Jun-2018)
+
+#84 (yaml): Add option to allow use of platform-linefeed
+  (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
+ (contributed by Thomas H)
+
 2.9.5 (26-Mar-2018)
 
 #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties

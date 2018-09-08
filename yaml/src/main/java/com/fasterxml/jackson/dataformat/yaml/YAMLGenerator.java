@@ -106,12 +106,21 @@ public class YAMLGenerator extends GeneratorBase
         LITERAL_BLOCK_STYLE(false),
 
         /**
+         * Option passed to SnakeYAML that determines if the line breaks used for
+         * serialization should be same as what the default is for current platform.
+         * If disabled, Unix linefeed ({@code \n}) will be used.
+         * <p>
+         * Default value is `false` for backwards compatibility.
+         */
+        USE_PLATFORM_LINE_BREAKS(false),
+
+        /**
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
          *<p>
          * Default value is `false` for backwards compatibility
          */
-        INDENT_ARRAYS(false)
+        INDENT_ARRAYS(false),
         ;
 
         protected final boolean _defaultState;
@@ -146,9 +155,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal constants
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
@@ -157,9 +166,9 @@ public class YAMLGenerator extends GeneratorBase
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     final protected IOContext _ioContext;
@@ -192,9 +201,9 @@ public class YAMLGenerator extends GeneratorBase
     private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output state
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected Emitter _emitter;
@@ -212,9 +221,9 @@ public class YAMLGenerator extends GeneratorBase
     protected String _typeId;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
@@ -265,13 +274,17 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
         }
+        // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
+        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
+            opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
+        }
         return opt;
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Versioned
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -280,9 +293,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -333,9 +346,9 @@ public class YAMLGenerator extends GeneratorBase
     //@Override public void setSchema(FormatSchema schema)
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Extended API, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     public YAMLGenerator enable(Feature f) {
@@ -409,9 +422,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: low-level I/O
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -432,9 +445,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: structural output
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -493,9 +506,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, textual
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -555,9 +568,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, unprocessed ("raw")
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -596,9 +609,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, base64-encoded binary
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -616,9 +629,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, scalars
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -704,9 +717,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, write methods, Native Ids
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -749,9 +762,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -770,9 +783,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     // Implicit means that (type) tags won't be shown, right?

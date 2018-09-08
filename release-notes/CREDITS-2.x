@@ -21,3 +21,19 @@ Fabrice Delhoste (spifd@github)
 * Reported #74 (properties): `JavaPropsMapper` issue deserializing multiple byte array properties
  (2.9.5)
 
+Thomas Hauk (thauk-copperleaf@github)
+
+* Contibuted #84 (yaml): Add option to allow use of platform-linefeed
+  (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
+ (2.9.6)
+
+Yegor Borovikov (yborovikov@gitub)
+
+* Reported #81 (yaml): Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
+ (2.9.7)
+
+Andrey Somov (asomov@github)
+
+* Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
+ (2.10.0)
+
