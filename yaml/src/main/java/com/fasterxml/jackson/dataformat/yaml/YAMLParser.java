@@ -191,6 +191,11 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
+    public Reader getInputSource() {
+        return _reader;
+    }
+
+    @Override
     protected void _closeInput() throws IOException {
         _reader.close();
     }
