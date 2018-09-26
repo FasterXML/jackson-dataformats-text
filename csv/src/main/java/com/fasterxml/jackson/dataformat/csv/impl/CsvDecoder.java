@@ -256,14 +256,15 @@ public class CsvDecoder
 
     public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema, TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
-//            boolean autoCloseInput, boolean trimSpaces)
     {
         _owner = owner;
         _ioContext = ctxt;
         _inputSource = r;
         _textBuffer = textBuffer;
         _autoCloseInput =  JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
-        _allowComments = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
+        @SuppressWarnings("deprecation")
+        final boolean legacy = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
+        _allowComments = legacy | CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it

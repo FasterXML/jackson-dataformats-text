@@ -90,6 +90,15 @@ public class CsvParser
         ALLOW_TRAILING_COMMA(true),
 
         /**
+         * Feature that allows accepting "hash comments" by default, similar to
+         * {@link CsvSchema#withAllowComments(boolean)}. If enabled, such comments
+         * are by default allowed on all columns of all documents.
+         *
+         * @since 2.10
+         */
+        ALLOW_COMMENTS(false),
+        
+        /**
          * Feature that allows failing (with a {@link CsvMappingException}) in cases
          * where number of column values encountered is less than number of columns
          * declared in active schema ("missing columns").
