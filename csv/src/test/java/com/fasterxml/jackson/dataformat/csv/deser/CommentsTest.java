@@ -2,7 +2,6 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
 
@@ -120,8 +119,9 @@ public class CommentsTest extends ModuleTestBase
     // Alternate test to ensure comments may be enabled
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
-        CsvMapper mapper = CsvMapper.builder()
-                .enable(JsonParser.Feature.ALLOW_YAML_COMMENTS)
+        CsvMapper mapper = mapperBuilder()
+                .enable(CsvParser.Feature.ALLOW_COMMENTS)
+                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
                 .build();
         final String CSV = "# comment!\na,b\n";
         
