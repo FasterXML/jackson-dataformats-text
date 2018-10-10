@@ -107,13 +107,18 @@ public class YAMLMapper extends ObjectMapper
         super(b);
     }
 
-    @SuppressWarnings("unchecked")
     public static Builder builder() {
         return new Builder(new YAMLFactory());
     }
 
     public static Builder builder(YAMLFactory streamFactory) {
         return new Builder(streamFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
     }
 
     /*

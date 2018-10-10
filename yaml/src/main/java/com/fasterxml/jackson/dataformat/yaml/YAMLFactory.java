@@ -43,7 +43,7 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-    protected DumperOptions.Version _version;
+    protected DumperOptions.Version _version; // enum, is serializable
     
     /**
      * Default constructor used to create factory instances.

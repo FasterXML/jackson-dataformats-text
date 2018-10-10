@@ -79,13 +79,18 @@ public class JavaPropsMapper extends ObjectMapper
         super(b);
     }
 
-    @SuppressWarnings("unchecked")
     public static Builder builder() {
         return new Builder(new JavaPropsFactory());
     }
 
     public static Builder builder(JavaPropsFactory streamFactory) {
         return new Builder(streamFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
     }
 
     /*

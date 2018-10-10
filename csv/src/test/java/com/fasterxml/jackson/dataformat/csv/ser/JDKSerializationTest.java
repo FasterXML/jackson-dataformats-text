@@ -50,7 +50,7 @@ public class JDKSerializationTest extends ModuleTestBase
         assertNotNull(out);
     }
     
-    public void testObjectMapper() throws IOException
+    public void testMapperJDKSerialization() throws IOException
     {
         final String EXP_CSV = "2,3";
         final MyPojo p = new MyPojo(2, 3);
@@ -73,6 +73,14 @@ public class JDKSerializationTest extends ModuleTestBase
         assertNotNull(csv);
     }
 
+    public void testMapperCopy() throws IOException
+    {
+        CsvMapper mapper2 = MAPPER.rebuild().build();
+        assertNotSame(MAPPER, mapper2);
+        // but underlying factory need not be copied (immutable!)
+        assertSame(MAPPER.tokenStreamFactory(), mapper2.tokenStreamFactory());
+    }
+    
     /*
     /**********************************************************
     /* Helper methods

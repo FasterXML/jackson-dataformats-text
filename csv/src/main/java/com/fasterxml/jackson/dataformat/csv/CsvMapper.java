@@ -43,7 +43,7 @@ public class CsvMapper extends ObjectMapper
 
         @Override
         protected MapperBuilderState _saveState() {
-            // nothing exra, just format features
+            // nothing extra, just format features
             return new StateImpl(this);
         }
 
@@ -160,25 +160,18 @@ public class CsvMapper extends ObjectMapper
         _typedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
     }
 
-    /**
-     * Short-cut for:
-     *<pre>
-     *   return builder(new CsvFactory());
-     *</pre>
-     *
-     * @since 3.0
-     */
-    public static CsvMapper.Builder csvBuilder() {
-        return new CsvMapper.Builder(new CsvFactory());
-    }
-
-    @SuppressWarnings("unchecked")
     public static CsvMapper.Builder builder() {
         return new CsvMapper.Builder(new CsvFactory());
     }
 
     public static CsvMapper.Builder builder(CsvFactory streamFactory) {
         return new CsvMapper.Builder(streamFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
     }
 
     /*
