@@ -16,6 +16,8 @@ public class YAMLFactory extends JsonFactory
 {
 	private static final long serialVersionUID = 1L;
 
+	protected final static Charset UTF8 = Charset.forName("UTF-8");
+
 	/**
      * Name used to identify YAML format.
      * (and returned by {@link #getFormatName()}
@@ -503,8 +505,6 @@ public class YAMLFactory extends JsonFactory
     /* Internal methods
     /**********************************************************
      */
-
-    protected final Charset UTF8 = Charset.forName("UTF-8");
 
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
     {
