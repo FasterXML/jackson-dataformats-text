@@ -36,9 +36,6 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-//    protected final int _formatParserFeatures;
-    protected final int _formatGeneratorFeatures;
-
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -59,8 +56,7 @@ public class YAMLFactory
      */
     public YAMLFactory()
     {
-        super();
-        _formatGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
+        super(0, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         //_version = DumperOptions.Version.V1_1;
@@ -71,7 +67,6 @@ public class YAMLFactory
     {
         super(src);
         _version = src._version;
-        _formatGeneratorFeatures = src._formatGeneratorFeatures;
     }
 
     /**
@@ -82,7 +77,6 @@ public class YAMLFactory
     protected YAMLFactory(YAMLFactoryBuilder b)
     {
         super(b);
-        _formatGeneratorFeatures = b.formatGeneratorFeaturesMask();
     }
 
     @Override
@@ -171,7 +165,7 @@ public class YAMLFactory
      * Check whether specified generator feature is enabled.
      */
     public final boolean isEnabled(YAMLGenerator.Feature f) {
-        return (_formatGeneratorFeatures & f.getMask()) != 0;
+        return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
     // 04-Feb-2018, tatu: None defined yet:
@@ -190,7 +184,7 @@ public class YAMLFactory
     public int getFormatParserFeatures() { return 0; }
 
     @Override
-    public int getFormatGeneratorFeatures() { return _formatGeneratorFeatures; }
+    public int getFormatGeneratorFeatures() { return _formatWriteFeatures; }
     
     /*
     /******************************************************
@@ -203,7 +197,7 @@ public class YAMLFactory
             InputStream in) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
-                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getParserFeatures(_streamReadFeatures),
                 _createReader(in, null, ioCtxt));
     }
 
@@ -212,7 +206,7 @@ public class YAMLFactory
             Reader r) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(), 
-                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getParserFeatures(_streamReadFeatures),
                 r);
     }
 
@@ -221,7 +215,7 @@ public class YAMLFactory
             char[] data, int offset, int len,
             boolean recyclable) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
-                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getParserFeatures(_streamReadFeatures),
                 new CharArrayReader(data, offset, len));
     }
 
@@ -229,7 +223,7 @@ public class YAMLFactory
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             byte[] data, int offset, int len) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
-                readCtxt.getParserFeatures(_parserFeatures),
+                readCtxt.getParserFeatures(_streamReadFeatures),
                 _createReader(data, offset, len, null, ioCtxt));
     }
 
@@ -250,8 +244,8 @@ public class YAMLFactory
             IOContext ioCtxt, Writer out) throws IOException
     {
         return new YAMLGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
+                writeCtxt.getGeneratorFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
                 out, _version);
     }
 
