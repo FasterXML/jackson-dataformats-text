@@ -89,7 +89,6 @@ public class SimpleGenerationTest extends ModuleTestBase
 
         // and then, disabling, and not any more
         ow = ow.without(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
-//        assertFalse(ow.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
         w = new StringWriter();
         gen = (YAMLGenerator)ow.createGenerator(w);
         assertFalse(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
@@ -106,8 +105,10 @@ public class SimpleGenerationTest extends ModuleTestBase
 
         f = f.rebuild().enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
                 .build();
+        assertTrue(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
 
         YAMLMapper mapper = new YAMLMapper(f);
+        assertTrue(mapper.tokenStreamFactory().isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
 
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("text", "Hello\nWorld");

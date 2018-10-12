@@ -164,7 +164,7 @@ public class YAMLGenerator extends GeneratorBase
      * {@link YAMLGenerator.Feature}s
      * are enabled.
      */
-    protected int _formatFeatures;
+    protected int _formatWriteFeatures;
 
     protected Writer _writer;
 
@@ -213,17 +213,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
-            int generatorFeatures, int yamlFeatures,
+            int streamWriteFeatures, int yamlFeatures,
             Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
     {
-        super(writeContext, generatorFeatures);
+        super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
-        _formatFeatures = yamlFeatures;
+        _formatWriteFeatures = yamlFeatures;
         _writer = out;
 
-        _outputOptions = buildDumperOptions(generatorFeatures, yamlFeatures, version);
+        _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
 
         _emitter = new Emitter(_writer, _outputOptions);
         // should we start output now, or try to defer?
@@ -237,12 +237,12 @@ public class YAMLGenerator extends GeneratorBase
                 noTags));
     }
 
-    protected DumperOptions buildDumperOptions(int jsonFeatures, int yamlFeatures,
+    protected DumperOptions buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
             org.yaml.snakeyaml.DumperOptions.Version version)
     {
         DumperOptions opt = new DumperOptions();
         // would we want canonical?
-        if (Feature.CANONICAL_OUTPUT.enabledIn(_formatFeatures)) {
+        if (Feature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
             opt.setCanonical(true);
         } else {
             opt.setCanonical(false);
@@ -250,9 +250,9 @@ public class YAMLGenerator extends GeneratorBase
             opt.setDefaultFlowStyle(FlowStyle.BLOCK);
         }
         // split-lines for text blocks?
-        opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatFeatures));
+        opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatWriteFeatures));
         // array indentation?
-        if (Feature.INDENT_ARRAYS.enabledIn(_formatFeatures)) {
+        if (Feature.INDENT_ARRAYS.enabledIn(_formatWriteFeatures)) {
             // But, wrt [dataformats-text#34]: need to set both to diff values to work around bug
             // (otherwise indentation level is "invisible". Note that this should NOT be necessary
             // but is needed up to at least SnakeYAML 1.18.
@@ -261,7 +261,7 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndent(2);
         }
         // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
-        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
+        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatWriteFeatures)) {
             opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
         }
         return opt;
@@ -318,7 +318,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public int getFormatFeatures() {
-        return _formatFeatures;
+        return _formatWriteFeatures;
     }
 
     @Override
@@ -338,17 +338,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator enable(Feature f) {
-        _formatFeatures |= f.getMask();
+        _formatWriteFeatures |= f.getMask();
         return this;
     }
 
     public YAMLGenerator disable(Feature f) {
-        _formatFeatures &= ~f.getMask();
+        _formatWriteFeatures &= ~f.getMask();
         return this;
     }
 
     public final boolean isEnabled(Feature f) {
-        return (_formatFeatures & f.getMask()) != 0;
+        return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
     public YAMLGenerator configure(Feature f, boolean state) {
@@ -507,9 +507,9 @@ public class YAMLGenerator extends GeneratorBase
         }
         _verifyValueWrite("write String value");
         DumperOptions.ScalarStyle style = STYLE_QUOTED;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
+        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures) && !isBooleanContent(text)) {
           // If this string could be interpreted as a number, it must be quoted.
-            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
+            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
             } else if (text.indexOf('\n') >= 0) {
@@ -517,7 +517,7 @@ public class YAMLGenerator extends GeneratorBase
             } else {
                 style = STYLE_PLAIN;
             }
-        } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures) && text.indexOf('\n') >= 0) {
+        } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures) && text.indexOf('\n') >= 0) {
             style = STYLE_LITERAL;
         }
         _writeScalar(text, "string", style);
@@ -713,14 +713,14 @@ public class YAMLGenerator extends GeneratorBase
     public boolean canWriteObjectId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#23] might not want to...
-        return Feature.USE_NATIVE_OBJECT_ID.enabledIn(_formatFeatures);
+        return Feature.USE_NATIVE_OBJECT_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
     public boolean canWriteTypeId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#22] might not want to...
-        return Feature.USE_NATIVE_TYPE_ID.enabledIn(_formatFeatures);
+        return Feature.USE_NATIVE_TYPE_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
