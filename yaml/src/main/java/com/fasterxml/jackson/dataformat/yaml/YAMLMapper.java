@@ -51,14 +51,14 @@ public class YAMLMapper extends ObjectMapper
         
         public Builder enable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
-                _formatGeneratorFeatures |= f.getMask();
+                _formatWriteFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
-                _formatGeneratorFeatures &= ~f.getMask();
+                _formatWriteFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -66,9 +66,9 @@ public class YAMLMapper extends ObjectMapper
         public Builder configure(YAMLGenerator.Feature feature, boolean state)
         {
             if (state) {
-                _formatGeneratorFeatures |= feature.getMask();
+                _formatWriteFeatures |= feature.getMask();
             } else {
-                _formatGeneratorFeatures &= ~feature.getMask();
+                _formatWriteFeatures &= ~feature.getMask();
             }
             return this;
         }

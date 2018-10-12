@@ -176,10 +176,10 @@ public class CsvFactory
     }
 
     @Override
-    public int getFormatParserFeatures() { return _formatReadFeatures; }
+    public int getFormatReadFeatures() { return _formatReadFeatures; }
 
     @Override
-    public int getFormatGeneratorFeatures() { return _formatWriteFeatures; }
+    public int getFormatWriteFeatures() { return _formatWriteFeatures; }
 
     /**
      * Checked whether specified parser feature is enabled.

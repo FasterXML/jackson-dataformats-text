@@ -181,10 +181,10 @@ public class YAMLFactory
     */
 
     @Override
-    public int getFormatParserFeatures() { return 0; }
+    public int getFormatReadFeatures() { return 0; }
 
     @Override
-    public int getFormatGeneratorFeatures() { return _formatWriteFeatures; }
+    public int getFormatWriteFeatures() { return _formatWriteFeatures; }
     
     /*
     /******************************************************

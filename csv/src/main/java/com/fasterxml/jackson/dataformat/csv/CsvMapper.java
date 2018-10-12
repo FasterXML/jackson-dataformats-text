@@ -55,14 +55,14 @@ public class CsvMapper extends ObjectMapper
 
         public Builder enable(CsvParser.Feature... features) {
             for (CsvParser.Feature f : features) {
-                _formatParserFeatures |= f.getMask();
+                _formatReadFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(CsvParser.Feature... features) {
             for (CsvParser.Feature f : features) {
-                _formatParserFeatures &= ~f.getMask();
+                _formatReadFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -70,23 +70,23 @@ public class CsvMapper extends ObjectMapper
         public Builder configure(CsvParser.Feature feature, boolean state)
         {
             if (state) {
-                _formatParserFeatures |= feature.getMask();
+                _formatReadFeatures |= feature.getMask();
             } else {
-                _formatParserFeatures &= ~feature.getMask();
+                _formatReadFeatures &= ~feature.getMask();
             }
             return this;
         }
 
         public Builder enable(CsvGenerator.Feature... features) {
             for (CsvGenerator.Feature f : features) {
-                _formatGeneratorFeatures |= f.getMask();
+                _formatWriteFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(CsvGenerator.Feature... features) {
             for (CsvGenerator.Feature f : features) {
-                _formatGeneratorFeatures &= ~f.getMask();
+                _formatWriteFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -94,9 +94,9 @@ public class CsvMapper extends ObjectMapper
         public Builder configure(CsvGenerator.Feature feature, boolean state)
         {
             if (state) {
-                _formatGeneratorFeatures |= feature.getMask();
+                _formatWriteFeatures |= feature.getMask();
             } else {
-                _formatGeneratorFeatures &= ~feature.getMask();
+                _formatWriteFeatures &= ~feature.getMask();
             }
             return this;
         }
