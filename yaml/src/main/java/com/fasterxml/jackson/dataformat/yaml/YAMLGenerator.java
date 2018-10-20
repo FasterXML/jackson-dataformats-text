@@ -19,8 +19,7 @@ import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 
-public class YAMLGenerator extends GeneratorBase
-{
+public class YAMLGenerator extends GeneratorBase {
     /**
      * Enumeration that defines all togglable features for YAML generators
      */
@@ -62,7 +61,7 @@ public class YAMLGenerator extends GeneratorBase
         /**
          * Options passed to SnakeYAML that determines whether longer textual content
          * gets automatically split into multiple lines or not.
-         *<p>
+         * <p>
          * Feature is enabled by default to conform to SnakeYAML defaults as well as
          * backwards compatibility with 2.5 and earlier versions.
          *
@@ -73,7 +72,7 @@ public class YAMLGenerator extends GeneratorBase
         /**
          * Whether strings will be rendered without quotes (true) or
          * with quotes (false, default).
-         *<p>
+         * <p>
          * Minimized quote usage makes for more human readable output; however, content is
          * limited to printable characters according to the rules of
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
@@ -85,7 +84,7 @@ public class YAMLGenerator extends GeneratorBase
         /**
          * Whether numbers stored as strings will be rendered with quotes (true) or
          * without quotes (false, default) when MINIMIZE_QUOTES is enabled.
-         *<p>
+         * <p>
          * Minimized quote usage makes for more human readable output; however, content is
          * limited to printable characters according to the rules of
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
@@ -108,7 +107,7 @@ public class YAMLGenerator extends GeneratorBase
         /**
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
-         *<p>
+         * <p>
          * Default value is `false` for backwards compatibility
          *
          * @since 2.9
@@ -134,8 +133,7 @@ public class YAMLGenerator extends GeneratorBase
          * Method that calculates bit set (flags) of all features that
          * are enabled by default.
          */
-        public static int collectDefaults()
-        {
+        public static int collectDefaults() {
             int flags = 0;
             for (Feature f : values()) {
                 if (f.enabledByDefault()) {
@@ -151,11 +149,19 @@ public class YAMLGenerator extends GeneratorBase
         }
 
         @Override
-        public boolean enabledByDefault() { return _defaultState; }
+        public boolean enabledByDefault() {
+            return _defaultState;
+        }
+
         @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
+        public boolean enabledIn(int flags) {
+            return (flags & _mask) != 0;
+        }
+
         @Override
-        public int getMask() { return _mask; }
+        public int getMask() {
+            return _mask;
+        }
     }
 
     /*
@@ -231,10 +237,9 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
-            ObjectCodec codec, Writer out,
-            org.yaml.snakeyaml.DumperOptions.Version version)
-        throws IOException
-    {
+                         ObjectCodec codec, Writer out,
+                         org.yaml.snakeyaml.DumperOptions.Version version)
+            throws IOException {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
         _formatFeatures = yamlFeatures;
@@ -245,7 +250,7 @@ public class YAMLGenerator extends GeneratorBase
         _emitter = new Emitter(_writer, _outputOptions);
         // should we start output now, or try to defer?
         _emitter.emit(new StreamStartEvent(null, null));
-        Map<String,String> noTags = Collections.emptyMap();
+        Map<String, String> noTags = Collections.emptyMap();
 
         boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(yamlFeatures);
 
@@ -255,8 +260,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     protected DumperOptions buildDumperOptions(int jsonFeatures, int yamlFeatures,
-            org.yaml.snakeyaml.DumperOptions.Version version)
-    {
+                                               org.yaml.snakeyaml.DumperOptions.Version version) {
         DumperOptions opt = new DumperOptions();
         // would we want canonical?
         if (Feature.CANONICAL_OUTPUT.enabledIn(_formatFeatures)) {
@@ -305,8 +309,7 @@ public class YAMLGenerator extends GeneratorBase
      * Not sure what to do here; could reset indentation to some value maybe?
      */
     @Override
-    public YAMLGenerator useDefaultPrettyPrinter()
-    {
+    public YAMLGenerator useDefaultPrettyPrinter() {
         return this;
     }
 
@@ -352,7 +355,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public boolean canWriteFormattedNumbers() { return true; }
+    public boolean canWriteFormattedNumbers() {
+        return true;
+    }
 
     //@Override public void setSchema(FormatSchema schema)
 
@@ -396,8 +401,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeFieldName(String name) throws IOException
-    {
+    public final void writeFieldName(String name) throws IOException {
         if (_writeContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
@@ -406,8 +410,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public final void writeFieldName(SerializableString name)
-        throws IOException
-    {
+            throws IOException {
         // Object is a value, need to verify it's allowed
         if (_writeContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
@@ -417,8 +420,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public final void writeStringField(String fieldName, String value)
-        throws IOException
-    {
+            throws IOException {
         if (_writeContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
@@ -427,8 +429,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     private final void _writeFieldName(String name)
-        throws IOException
-    {
+            throws IOException {
         _writeScalar(name, "string", STYLE_NAME);
     }
 
@@ -439,14 +440,12 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void flush() throws IOException
-    {
+    public final void flush() throws IOException {
         _writer.flush();
     }
 
     @Override
-    public void close() throws IOException
-    {
+    public void close() throws IOException {
         if (!isClosed()) {
             _emitter.emit(new DocumentEndEvent(null, null, false));
             _emitter.emit(new StreamEndEvent(null, null));
@@ -462,8 +461,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeStartArray() throws IOException
-    {
+    public final void writeStartArray() throws IOException {
         _verifyValueWrite("start an array");
         _writeContext = _writeContext.createChildArrayContext();
         Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
@@ -474,14 +472,13 @@ public class YAMLGenerator extends GeneratorBase
             _objectId = null;
         }
         _emitter.emit(new SequenceStartEvent(anchor, yamlTag,
-                implicit,  null, null, style));
+                implicit, null, null, style));
     }
 
     @Override
-    public final void writeEndArray() throws IOException
-    {
+    public final void writeEndArray() throws IOException {
         if (!_writeContext.inArray()) {
-            _reportError("Current context not Array but "+_writeContext.typeDesc());
+            _reportError("Current context not Array but " + _writeContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
@@ -490,8 +487,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartObject() throws IOException
-    {
+    public final void writeStartObject() throws IOException {
         _verifyValueWrite("start an object");
         _writeContext = _writeContext.createChildObjectContext();
         Boolean style = _outputOptions.getDefaultFlowStyle().getStyleBoolean();
@@ -506,10 +502,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeEndObject() throws IOException
-    {
+    public final void writeEndObject() throws IOException {
         if (!_writeContext.inObject()) {
-            _reportError("Current context not Object but "+_writeContext.typeDesc());
+            _reportError("Current context not Object but " + _writeContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
@@ -524,8 +519,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws IOException,JsonGenerationException
-    {
+    public void writeString(String text) throws IOException, JsonGenerationException {
         if (text == null) {
             writeNull();
             return;
@@ -533,7 +527,7 @@ public class YAMLGenerator extends GeneratorBase
         _verifyValueWrite("write String value");
         Character style = STYLE_QUOTED;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
-          // If this string could be interpreted as a number, it must be quoted.
+            // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
@@ -553,29 +547,25 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws IOException
-    {
+    public void writeString(char[] text, int offset, int len) throws IOException {
         writeString(new String(text, offset, len));
     }
 
     @Override
     public final void writeString(SerializableString sstr)
-        throws IOException
-    {
+            throws IOException {
         writeString(sstr.toString());
     }
 
     @Override
     public void writeRawUTF8String(byte[] text, int offset, int len)
-        throws IOException
-    {
+            throws IOException {
         _reportUnsupportedOperation();
     }
 
     @Override
     public final void writeUTF8String(byte[] text, int offset, int len)
-        throws IOException
-    {
+            throws IOException {
         writeString(new String(text, offset, len, "UTF-8"));
     }
 
@@ -627,15 +617,14 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws IOException
-    {
+    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws IOException {
         if (data == null) {
             writeNull();
             return;
         }
         _verifyValueWrite("write Binary value");
-        if (offset > 0 || (offset+len) != data.length) {
-            data = Arrays.copyOfRange(data, offset, offset+len);
+        if (offset > 0 || (offset + len) != data.length) {
+            data = Arrays.copyOfRange(data, offset, offset + len);
         }
         _writeScalarBinary(b64variant, data);
     }
@@ -647,22 +636,19 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBoolean(boolean state) throws IOException
-    {
+    public void writeBoolean(boolean state) throws IOException {
         _verifyValueWrite("write boolean value");
         _writeScalar(state ? "true" : "false", "bool", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(int i) throws IOException
-    {
+    public void writeNumber(int i) throws IOException {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(i), "int", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(long l) throws IOException
-    {
+    public void writeNumber(long l) throws IOException {
         // First: maybe 32 bits is enough?
         if (l <= MAX_INT_AS_LONG && l >= MIN_INT_AS_LONG) {
             writeNumber((int) l);
@@ -673,8 +659,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws IOException
-    {
+    public void writeNumber(BigInteger v) throws IOException {
         if (v == null) {
             writeNull();
             return;
@@ -684,22 +669,19 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(double d) throws IOException
-    {
+    public void writeNumber(double d) throws IOException {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(float f) throws IOException
-    {
+    public void writeNumber(float f) throws IOException {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws IOException
-    {
+    public void writeNumber(BigDecimal dec) throws IOException {
         if (dec == null) {
             writeNull();
             return;
@@ -710,8 +692,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws IOException,JsonGenerationException, UnsupportedOperationException
-    {
+    public void writeNumber(String encodedValue) throws IOException, JsonGenerationException, UnsupportedOperationException {
         if (encodedValue == null) {
             writeNull();
             return;
@@ -721,8 +702,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNull() throws IOException
-    {
+    public void writeNull() throws IOException {
         _verifyValueWrite("write null value");
         // no real type for this, is there?
         _writeScalar("null", "object", STYLE_SCALAR);
@@ -750,16 +730,14 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public void writeTypeId(Object id)
-        throws IOException
-    {
+            throws IOException {
         // should we verify there's no preceding type id?
         _typeId = String.valueOf(id);
     }
 
     @Override
     public void writeObjectRef(Object id)
-        throws IOException
-    {
+            throws IOException {
         _verifyValueWrite("write Object reference");
         AliasEvent evt = new AliasEvent(String.valueOf(id), null, null);
         _emitter.emit(evt);
@@ -767,8 +745,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public void writeObjectId(Object id)
-        throws IOException
-    {
+            throws IOException {
         // should we verify there's no preceding id?
         _objectId = String.valueOf(id);
     }
@@ -781,11 +758,10 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     protected final void _verifyValueWrite(String typeMsg)
-        throws IOException
-    {
+            throws IOException {
         int status = _writeContext.writeValue();
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
-            _reportError("Can not "+typeMsg+", expecting field name");
+            _reportError("Can not " + typeMsg + ", expecting field name");
         }
     }
 
@@ -806,26 +782,65 @@ public class YAMLGenerator extends GeneratorBase
     // ... and sometimes we specifically DO want explicit tag:
     private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
-    protected void _writeScalar(String value, String type, Character style) throws IOException
-    {
+    protected void _writeScalar(String value, String type, Character style) throws IOException {
         _emitter.emit(_scalarEvent(value, style));
     }
 
     private void _writeScalarBinary(Base64Variant b64variant,
-            byte[] data) throws IOException
-    {
+                                    byte[] data) throws IOException {
         // 15-Dec-2017, tatu: as per [dataformats-text#62], can not use SnakeYAML's internal
         //    codec. Also: force use of linefeed variant if using default
         if (b64variant == Base64Variants.getDefaultVariant()) {
             b64variant = Base64Variants.MIME;
         }
-        String encoded = b64variant.encode(data);
+        String encoded = encode(b64variant, data);
         _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
                 null, null, STYLE_BASE64));
     }
 
-    protected ScalarEvent _scalarEvent(String value, Character style)
-    {
+    // NOTE: copied and slightly modified from Jackson core Base64Variant.encode(byte[] input, boolean addQuotes)
+    // the line breaks are printed without escaping and according to the USE_PLATFORM_LINE_BREAKS setting
+    private String encode(Base64Variant b64variant, byte[] input) {
+        int inputEnd = input.length;
+        StringBuilder sb;
+        {
+            // let's approximate... 33% overhead, ~= 3/8 (0.375)
+            int outputLen = inputEnd + (inputEnd >> 2) + (inputEnd >> 3);
+            sb = new StringBuilder(outputLen);
+        }
+
+        int chunksBeforeLF = b64variant.getMaxLineLength() >> 2;
+
+        // Ok, first we loop through all full triplets of data:
+        int inputPtr = 0;
+        int safeInputEnd = inputEnd-3; // to get only full triplets
+
+        while (inputPtr <= safeInputEnd) {
+            // First, mash 3 bytes into lsb of 32-bit int
+            int b24 = ((int) input[inputPtr++]) << 8;
+            b24 |= ((int) input[inputPtr++]) & 0xFF;
+            b24 = (b24 << 8) | (((int) input[inputPtr++]) & 0xFF);
+            b64variant.encodeBase64Chunk(sb, b24);
+            if (--chunksBeforeLF <= 0) {
+                sb.append(_outputOptions.getLineBreak().getString());
+                chunksBeforeLF = b64variant.getMaxLineLength() >> 2;
+            }
+        }
+
+        // And then we may have 1 or 2 leftover bytes to encode
+        int inputLeft = inputEnd - inputPtr; // 0, 1 or 2
+        if (inputLeft > 0) { // yes, but do we have room for output?
+            int b24 = ((int) input[inputPtr++]) << 16;
+            if (inputLeft == 2) {
+                b24 |= (((int) input[inputPtr++]) & 0xFF) << 8;
+            }
+            b64variant.encodeBase64Partial(sb, b24, inputLeft);
+        }
+
+        return sb.toString();
+    }
+
+    protected ScalarEvent _scalarEvent(String value, Character style) {
         String yamlTag = _typeId;
         if (yamlTag != null) {
             _typeId = null;
