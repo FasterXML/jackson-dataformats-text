@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.8 (not yet released)
+
+#99: `YamlGenerator` closes the target stream when configured not to
+ (reported by moabck@github; fix contributed by vboulaye@github)
+
 2.9.7 (19-Sep-2018)
 
 #81: Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
