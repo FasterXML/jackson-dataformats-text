@@ -282,7 +282,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public int getFormatFeatures() {
+    public int formatWriteFeatures() {
         return _formatFeatures;
     }
 

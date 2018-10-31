@@ -406,7 +406,7 @@ public class CsvParser
      */
 
     @Override
-    public int getFormatFeatures() {
+    public int formatReadFeatures() {
         return _formatFeatures;
     }
 

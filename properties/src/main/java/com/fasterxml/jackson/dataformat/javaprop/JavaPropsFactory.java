@@ -146,7 +146,7 @@ public class JavaPropsFactory
      */
     public JavaPropsParser createParser(ObjectReadContext readCtxt, Properties props) {
         return new JavaPropsParser(readCtxt, _createContext(props, true),
-                readCtxt.getParserFeatures(_streamReadFeatures),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 _getSchema(readCtxt),
                 props, props);
     }
@@ -161,7 +161,7 @@ public class JavaPropsFactory
     {
         return new PropertiesBackedGenerator(writeCtxt,
                 _createContext(props, true),
-                writeCtxt.getGeneratorFeatures(_streamWriteFeatures),
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 _getSchema(writeCtxt),
                 props);
     }
@@ -185,7 +185,7 @@ public class JavaPropsFactory
     {
         Properties props = _loadProperties(in, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
-                readCtxt.getParserFeatures(_streamReadFeatures),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 _getSchema(readCtxt),
                 in, props);
     }
@@ -195,7 +195,7 @@ public class JavaPropsFactory
             Reader r) throws IOException {
         Properties props = _loadProperties(r, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
-                readCtxt.getParserFeatures(_streamReadFeatures),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 _getSchema(readCtxt),
                 r, props);
     }
@@ -240,7 +240,7 @@ public class JavaPropsFactory
             IOContext ioCtxt, Writer out) throws IOException
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getGeneratorFeatures(_streamWriteFeatures),
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 _getSchema(writeCtxt),
                 out);
     }
@@ -250,7 +250,7 @@ public class JavaPropsFactory
             IOContext ioCtxt, OutputStream out) throws IOException
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getGeneratorFeatures(_streamWriteFeatures),
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 _getSchema(writeCtxt),
                 _createWriter(ioCtxt, out, null));
     }

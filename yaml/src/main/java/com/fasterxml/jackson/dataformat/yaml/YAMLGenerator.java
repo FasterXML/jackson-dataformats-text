@@ -317,7 +317,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public int getFormatFeatures() {
+    public int formatWriteFeatures() {
         return _formatWriteFeatures;
     }
 
