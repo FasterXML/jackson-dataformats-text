@@ -341,7 +341,7 @@ public class CsvParser
     {
         super(readCtxt, stdFeatures);
         _textBuffer =  ioCtxt.csvTextBuffer();
-        DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
+        DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;
         _parsingContext = JsonReadContext.createRootContext(dups);

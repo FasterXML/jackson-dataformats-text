@@ -4,8 +4,7 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-
+import com.fasterxml.jackson.core.StreamWriteFeature;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
@@ -64,7 +63,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
                 .build();
         ObjectWriter writer = mapper.writerFor(Point.class)
                 .with(schema)
-                .with(JsonGenerator.Feature.IGNORE_UNKNOWN);
+                .with(StreamWriteFeature.IGNORE_UNKNOWN);
         String csv = writer.writeValueAsString(new Point());
         assertNotNull(csv);
     }
@@ -79,7 +78,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
                 .build();
         ObjectWriter writer = mapper.writerFor(PointAndExtra.class)
                 .with(schema)
-                .with(JsonGenerator.Feature.IGNORE_UNKNOWN);
+                .with(StreamWriteFeature.IGNORE_UNKNOWN);
         String csv = writer.writeValueAsString(new PointAndExtra());
         assertNotNull(csv);
         assertEquals("1,2\n", csv);
@@ -94,7 +93,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
                 .build();
         ObjectWriter writer = mapper.writerFor(PointAndStuff.class)
                 .with(schema)
-                .with(JsonGenerator.Feature.IGNORE_UNKNOWN);
+                .with(StreamWriteFeature.IGNORE_UNKNOWN);
 
         List<String> l = Arrays.asList("a", "b");
         String csv = writer.writeValueAsString(new PointAndStuff(l));
@@ -117,7 +116,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
                 .build();
         ObjectWriter writer = mapper.writerFor(PointAndArray.class)
                 .with(schema)
-                .with(JsonGenerator.Feature.IGNORE_UNKNOWN);
+                .with(StreamWriteFeature.IGNORE_UNKNOWN);
 
         String csv = writer.writeValueAsString(new PointAndArray(3,5));
 

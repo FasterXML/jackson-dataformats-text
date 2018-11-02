@@ -680,7 +680,7 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write number");
-        String str = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
+        String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeScalar(str, "java.math.BigDecimal", STYLE_SCALAR);
     }
 

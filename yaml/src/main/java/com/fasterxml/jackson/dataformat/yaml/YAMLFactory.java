@@ -278,7 +278,7 @@ public class YAMLFactory
         }
         // default to UTF-8 if encoding missing
         if (enc == JsonEncoding.UTF8) {
-            boolean autoClose = ctxt.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+            boolean autoClose = ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE);
             return new UTF8Reader(in, autoClose);
 //          return new InputStreamReader(in, UTF8);
         }
