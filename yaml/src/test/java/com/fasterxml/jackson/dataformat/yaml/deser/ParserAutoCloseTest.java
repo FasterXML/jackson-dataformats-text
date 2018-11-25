@@ -6,7 +6,7 @@ import java.io.StringReader;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
@@ -19,6 +19,7 @@ public class ParserAutoCloseTest extends ModuleTestBase {
         yamlMapper.readTree(reader);
 
         Assert.assertEquals(true, reader.isClosed());
+        reader.close();
     }
 
     public void testParseStreamWithAutoClose() throws IOException {
@@ -28,27 +29,32 @@ public class ParserAutoCloseTest extends ModuleTestBase {
         yamlMapper.readTree(stream);
 
         Assert.assertEquals(true, stream.isClosed());
+        stream.close();
     }
 
     public void testParseReaderWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+        ObjectMapper yamlMapper = newMapperBuilder()
+                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+                .build();
 
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
         yamlMapper.readTree(reader);
 
         Assert.assertEquals(false, reader.isClosed());
+        reader.close();
     }
 
 
     public void testParseStreamWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+        ObjectMapper yamlMapper = newMapperBuilder()
+                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+                .build();
 
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
         yamlMapper.readTree(stream);
 
         Assert.assertEquals(false, stream.isClosed());
+        stream.close();
     }
 
     public static class CloseTrackerReader extends StringReader {
@@ -68,7 +74,6 @@ public class ParserAutoCloseTest extends ModuleTestBase {
             return closed;
         }
     }
-
 
     public static class CloseTrackerOutputStream extends ByteArrayInputStream {
         private boolean closed;

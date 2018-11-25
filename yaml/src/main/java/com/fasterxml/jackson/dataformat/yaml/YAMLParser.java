@@ -204,11 +204,11 @@ public class YAMLParser extends ParserBase
          *   Reader (granted, we only do that for UTF-32...) this
          *   means that buffer recycling won't work correctly.
          */
-        if (_ioContext.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
+        if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             _reader.close();
         }
     }
-    
+
     /*
     /**********************************************************                              
     /* FormatFeature support (none yet)

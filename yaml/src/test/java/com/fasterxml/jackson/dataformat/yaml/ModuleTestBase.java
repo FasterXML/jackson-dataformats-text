@@ -68,9 +68,12 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /**********************************************************************
      */
 
-    protected YAMLMapper newObjectMapper()
-    {
+    protected YAMLMapper newObjectMapper() {
         return new YAMLMapper();
+    }
+
+    protected YAMLMapper.Builder newMapperBuilder() {
+        return YAMLMapper.builder();
     }
     
     /*

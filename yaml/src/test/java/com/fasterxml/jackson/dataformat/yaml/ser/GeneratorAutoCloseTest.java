@@ -6,7 +6,7 @@ import java.io.StringWriter;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.StreamWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -20,6 +20,7 @@ public class GeneratorAutoCloseTest extends ModuleTestBase {
         ObjectMapper yamlMapper = newObjectMapper();
         yamlMapper.writeValue(writer, pojo);
         Assert.assertEquals(true, writer.isClosed());
+        writer.close();
     }
 
     public void testGenerateOutputStreamWithAutoCloseTarget() throws IOException {
@@ -27,34 +28,40 @@ public class GeneratorAutoCloseTest extends ModuleTestBase {
         ObjectMapper yamlMapper = newObjectMapper();
         yamlMapper.writeValue(stream, pojo);
         Assert.assertEquals(true, stream.isClosed());
+        stream.close();
     }
 
     public void testGenerateWriterWithoutAutoCloseTarget() throws IOException {
         CloseTrackerWriter writer = new CloseTrackerWriter();
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        ObjectMapper yamlMapper = newMapperBuilder()
+                .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+                .build();
         yamlMapper.writeValue(writer, pojo);
         Assert.assertEquals(false, writer.isClosed());
+        writer.close();
     }
 
     public void testGenerateOutputStreamWithoutAutoCloseTarget() throws IOException {
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream();
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET);
+        ObjectMapper yamlMapper = newMapperBuilder()
+                .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+                .build();
         yamlMapper.writeValue(stream, pojo);
         Assert.assertEquals(false, stream.isClosed());
+        stream.close();
     }
 
     public void testGenerateOutputStreamWithoutAutoCloseTargetOnFactory() throws IOException {
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream();
         ObjectMapper yamlMapper = new ObjectMapper(
-                new YAMLFactory()
-                        .disable(JsonGenerator.Feature.AUTO_CLOSE_TARGET)
+                YAMLFactory.builder()
+                        .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+                        .build()
         );
         yamlMapper.writeValue(stream, pojo);
         Assert.assertEquals(false, stream.isClosed());
+        stream.close();
     }
-
 
     static class CloseTrackerOutputStream extends OutputStream {
         private boolean closed;

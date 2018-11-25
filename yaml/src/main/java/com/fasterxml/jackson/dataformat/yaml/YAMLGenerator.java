@@ -434,9 +434,9 @@ public class YAMLGenerator extends GeneratorBase
              *   may not be properly recycled if we don't close the writer.
              */
             if (_writer != null) {
-                if (_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
+                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
                     _writer.close();
-                } else  if (isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)) {
+                } else  if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                     // If we can't close it, we should at least flush
                     _writer.flush();
                 }
