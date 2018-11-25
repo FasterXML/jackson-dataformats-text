@@ -434,6 +434,7 @@ public class CsvGenerator extends GeneratorBase
     /**********************************************************
      */
 
+    @SuppressWarnings("deprecation")
     @Override
     public final void flush() throws IOException {
         _writer.flush(isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));

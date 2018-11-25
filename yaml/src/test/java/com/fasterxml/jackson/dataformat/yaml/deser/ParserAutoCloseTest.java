@@ -10,8 +10,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
-public class ParserAutoCloseTest extends ModuleTestBase {
-
+@SuppressWarnings("resource")
+public class ParserAutoCloseTest extends ModuleTestBase
+{
     public void testParseReaderWithAutoClose() throws IOException {
         ObjectMapper yamlMapper = newObjectMapper();
 
@@ -30,6 +31,7 @@ public class ParserAutoCloseTest extends ModuleTestBase {
         Assert.assertEquals(true, stream.isClosed());
     }
 
+    @SuppressWarnings("deprecation")
     public void testParseReaderWithoutAutoClose() throws IOException {
         ObjectMapper yamlMapper = newObjectMapper()
                 .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
@@ -41,6 +43,7 @@ public class ParserAutoCloseTest extends ModuleTestBase {
     }
 
 
+    @SuppressWarnings("deprecation")
     public void testParseStreamWithoutAutoClose() throws IOException {
         ObjectMapper yamlMapper = newObjectMapper()
                 .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);

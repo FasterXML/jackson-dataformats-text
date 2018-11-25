@@ -75,6 +75,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     /**********************************************************
      */
 
+    @SuppressWarnings("deprecation")
     @Override
     public void close() throws IOException
     {
@@ -94,6 +95,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         _releaseBuffers();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void flush() throws IOException
     {

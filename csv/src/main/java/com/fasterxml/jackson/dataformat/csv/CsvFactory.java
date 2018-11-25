@@ -457,8 +457,7 @@ public class CsvFactory extends JsonFactory
         return gen;
     }
 
-//    protected final Charset UTF8 = Charset.forName("UTF-8");
-    
+    @SuppressWarnings("deprecation")
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
     {
         // default to UTF-8 if encoding missing

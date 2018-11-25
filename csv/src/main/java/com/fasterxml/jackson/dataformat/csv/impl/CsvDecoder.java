@@ -254,6 +254,7 @@ public class CsvDecoder
     /**********************************************************************
      */
 
+    @SuppressWarnings("deprecation")
     public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema, TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
     {
@@ -262,7 +263,6 @@ public class CsvDecoder
         _inputSource = r;
         _textBuffer = textBuffer;
         _autoCloseInput =  JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
-        @SuppressWarnings("deprecation")
         final boolean legacy = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
         _allowComments = legacy | CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);

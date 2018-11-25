@@ -506,6 +506,7 @@ public class YAMLFactory extends JsonFactory
     /**********************************************************
      */
 
+    @SuppressWarnings("deprecation")
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
     {
         if (enc == null) {

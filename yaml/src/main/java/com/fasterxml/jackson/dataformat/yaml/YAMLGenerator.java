@@ -444,6 +444,7 @@ public class YAMLGenerator extends GeneratorBase
         _writer.flush();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void close() throws IOException
     {
