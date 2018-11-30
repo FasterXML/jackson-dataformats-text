@@ -130,7 +130,8 @@ public class JavaPropsFactory extends JsonFactory
      * @since 2.9
      */
     public JavaPropsParser createParser(Properties props) {
-        return new JavaPropsParser(_createContext(props, true),
+        IOContext ctxt = _createContext(props, true);
+        return new JavaPropsParser(ctxt,
                 props, _parserFeatures, _objectCodec, props);
     }
 
@@ -142,7 +143,8 @@ public class JavaPropsFactory extends JsonFactory
      * @since 2.9
      */
     public JavaPropsGenerator createGenerator(Properties props) {
-        return new PropertiesBackedGenerator(_createContext(props, true),
+        IOContext ctxt = _createContext(props, true);
+        return new PropertiesBackedGenerator(ctxt,
                 props, _generatorFeatures, _objectCodec);
     }
 
@@ -154,27 +156,44 @@ public class JavaPropsFactory extends JsonFactory
 
     @Override
     public JsonParser createParser(File f) throws IOException {
-        return _createParser(new FileInputStream(f), _createContext(f, true));
+        IOContext ctxt = _createContext(f, true);
+        return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(URL url) throws IOException {
-        return _createParser(_optimizedStreamFromURL(url), _createContext(url, true));
+        IOContext ctxt = _createContext(url, true);
+        return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(InputStream in) throws IOException {
-        return _createParser(in, _createContext(in, false));
+        IOContext ctxt = _createContext(in, false);
+        return _createParser(_decorate(in, ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(byte[] data) throws IOException {
-        return _createParser(data, 0, data.length, _createContext(data, true));
+        IOContext ctxt = _createContext(data, true);
+        if (_inputDecorator != null) {
+            InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
+            if (in != null) {
+                return _createParser(in, ctxt);
+            }
+        }
+        return _createParser(data, 0, data.length, ctxt);
     }
 
     @Override
     public JsonParser createParser(byte[] data, int offset, int len) throws IOException {
-        return _createParser(data, offset, len, _createContext(data, true));
+        IOContext ctxt = _createContext(data, true);
+        if (_inputDecorator != null) {
+            InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
+            if (in != null) {
+                return _createParser(in, ctxt);
+            }
+        }
+        return _createParser(data, offset, len, ctxt);
     }
 
     /*
@@ -187,8 +206,8 @@ public class JavaPropsFactory extends JsonFactory
     public JsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
         IOContext ctxt = _createContext(out, false);
         ctxt.setEncoding(enc);
-        out = _decorate(out, ctxt);
-        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec, out);
+        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec,
+                _decorate(out, ctxt));
     }
 
     /**
@@ -201,8 +220,8 @@ public class JavaPropsFactory extends JsonFactory
     @Override
     public JsonGenerator createGenerator(OutputStream out) throws IOException {
         IOContext ctxt = _createContext(out, false);
-        out = _decorate(out, ctxt);
-        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec, out);
+        return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec,
+                _decorate(out, ctxt));
     }
 
     /*
