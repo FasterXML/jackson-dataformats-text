@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
@@ -68,9 +69,20 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /**********************************************************************
      */
 
-    protected YAMLMapper newObjectMapper()
-    {
-        return YAMLMapper.builder().build();
+    protected YAMLFactoryBuilder streamFactoryBuilder() {
+        return YAMLFactory.builder();
+    }
+
+    protected YAMLMapper newObjectMapper() {
+        return mapperBuilder().build();
+    }
+
+    protected YAMLMapper.Builder mapperBuilder() {
+        return YAMLMapper.builder();
+    }
+    
+    protected YAMLMapper.Builder mapperBuilder(YAMLFactory f) {
+        return YAMLMapper.builder(f);
     }
     
     /*
@@ -81,6 +93,10 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 
     public String quote(String str) {
         return '"'+str+'"';
+    }
+
+    public byte[] utf8(String str) {
+        return str.getBytes(StandardCharsets.UTF_8);
     }
 
     protected void assertToken(JsonToken expToken, JsonToken actToken)
