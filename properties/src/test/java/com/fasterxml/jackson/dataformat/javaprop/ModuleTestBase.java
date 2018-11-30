@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
@@ -126,9 +127,20 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /**********************************************************************
      */
 
-    protected JavaPropsMapper mapperForProps()
-    {
-        return new JavaPropsMapper();
+    protected JavaPropsFactoryBuilder streamFactoryBuilder() {
+        return JavaPropsFactory.builder();
+    }
+
+    protected JavaPropsMapper mapperForProps() {
+        return mapperBuilder().build();
+    }
+
+    protected JavaPropsMapper.Builder mapperBuilder() {
+        return JavaPropsMapper.builder();
+    }
+    
+    protected JavaPropsMapper.Builder mapperBuilder(JavaPropsFactory f) {
+        return JavaPropsMapper.builder(f);
     }
 
     /*
@@ -171,6 +183,10 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 
     protected String aposToQuotes(String json) {
         return json.replace("'", "\"");
+    }
+
+    public byte[] utf8(String str) {
+        return str.getBytes(StandardCharsets.UTF_8);
     }
 
     protected void assertToken(JsonToken expToken, JsonToken actToken) {

@@ -33,7 +33,7 @@ public class GeneratorAutoCloseTest extends ModuleTestBase {
 
     public void testGenerateWriterWithoutAutoCloseTarget() throws IOException {
         CloseTrackerWriter writer = new CloseTrackerWriter();
-        ObjectMapper yamlMapper = newMapperBuilder()
+        ObjectMapper yamlMapper = mapperBuilder()
                 .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
                 .build();
         yamlMapper.writeValue(writer, pojo);
@@ -43,7 +43,7 @@ public class GeneratorAutoCloseTest extends ModuleTestBase {
 
     public void testGenerateOutputStreamWithoutAutoCloseTarget() throws IOException {
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream();
-        ObjectMapper yamlMapper = newMapperBuilder()
+        ObjectMapper yamlMapper = mapperBuilder()
                 .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
                 .build();
         yamlMapper.writeValue(stream, pojo);

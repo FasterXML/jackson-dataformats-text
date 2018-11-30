@@ -33,7 +33,7 @@ public class ParserAutoCloseTest extends ModuleTestBase {
     }
 
     public void testParseReaderWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newMapperBuilder()
+        ObjectMapper yamlMapper = mapperBuilder()
                 .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .build();
 
@@ -46,7 +46,7 @@ public class ParserAutoCloseTest extends ModuleTestBase {
 
 
     public void testParseStreamWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newMapperBuilder()
+        ObjectMapper yamlMapper = mapperBuilder()
                 .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .build();
 
