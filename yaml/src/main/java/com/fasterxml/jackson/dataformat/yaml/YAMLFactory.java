@@ -378,7 +378,6 @@ public class YAMLFactory extends JsonFactory
     public YAMLParser createParser(byte[] data) throws IOException
     {
         IOContext ctxt = _createContext(data, true);
-        // [JACKSON-512]: allow wrapping with InputDecorator
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
             if (in != null) {
@@ -392,7 +391,6 @@ public class YAMLFactory extends JsonFactory
     public YAMLParser createParser(byte[] data, int offset, int len) throws IOException
     {
         IOContext ctxt = _createContext(data, true);
-        // [JACKSON-512]: allow wrapping with InputDecorator
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
             if (in != null) {
