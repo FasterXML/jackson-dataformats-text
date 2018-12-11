@@ -1,0 +1,19 @@
+Project: jackson-datatypes-text
+Modules:
+  jackson-dataformat-csv
+  jackson-dataformat-properties
+  jackson-dataformat-yaml
+Versions 3.x (for earlier see VERSION-2.x)
+
+Contains streaming API format codec implementations for supported textual formats
+(except for xml which is in separate repo)
+as well as support for integration via `jackson-databind` (`ObjectMapper` subtype
+implementations)
+
+------------------------------------------------------------------------
+=== Releases ===
+------------------------------------------------------------------------
+
+3.0.0 (not yet released)
+
+- Add `XxxMapper.shared()` methods for getting globally shared default instances

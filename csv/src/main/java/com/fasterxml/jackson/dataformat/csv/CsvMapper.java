@@ -176,6 +176,22 @@ public class CsvMapper extends ObjectMapper
 
     /*
     /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link CsvMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static CsvMapper shared() {
+        return SharedWrapper.wrapped();
+    }
+    
+    /*
+    /**********************************************************************
     /* Life-cycle: JDK serialization support
     /**********************************************************************
      */
@@ -508,5 +524,21 @@ public class CsvMapper extends ObjectMapper
         }
         // but in general we will just do what we can:
         return CsvSchema.ColumnType.NUMBER_OR_STRING;
+    }
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static CsvMapper MAPPER = CsvMapper.builder().build();
+
+        public static CsvMapper wrapped() { return MAPPER; }
     }
 }

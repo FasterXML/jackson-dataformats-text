@@ -11,12 +11,14 @@ public class TestVersions extends ModuleTestBase
     @SuppressWarnings("resource")
     public void testMapperVersions() throws IOException
     {
-//        assertVersion(MAPPER);
-        assertVersion(MAPPER.tokenStreamFactory());
-        JsonParser p = MAPPER.createParser("123");
+        // Test shared instance for funsies
+        final YAMLMapper mapper = YAMLMapper.shared();
+
+        assertVersion(mapper.tokenStreamFactory());
+        JsonParser p = mapper.createParser("123");
         assertVersion(p);
         p.close();
-        JsonGenerator gen = MAPPER.createGenerator(new ByteArrayOutputStream());
+        JsonGenerator gen = mapper.createGenerator(new ByteArrayOutputStream());
         assertVersion(gen);
     }
 

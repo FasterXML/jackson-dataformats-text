@@ -123,6 +123,22 @@ public class YAMLMapper extends ObjectMapper
 
     /*
     /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link YAMLMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static YAMLMapper shared() {
+        return SharedWrapper.wrapped();
+    }
+
+    /*
+    /**********************************************************************
     /* Life-cycle: JDK serialization support
     /**********************************************************************
      */
@@ -157,5 +173,21 @@ public class YAMLMapper extends ObjectMapper
     @Override
     public final YAMLFactory tokenStreamFactory() {
         return (YAMLFactory) _streamFactory;
+    }
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static YAMLMapper MAPPER = YAMLMapper.builder().build();
+
+        public static YAMLMapper wrapped() { return MAPPER; }
     }
 }

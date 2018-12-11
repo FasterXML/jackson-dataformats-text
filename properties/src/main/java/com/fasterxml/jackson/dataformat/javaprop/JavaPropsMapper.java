@@ -95,6 +95,22 @@ public class JavaPropsMapper extends ObjectMapper
 
     /*
     /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link JavaPropsMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static JavaPropsMapper shared() {
+        return SharedWrapper.wrapped();
+    }
+
+    /*
+    /**********************************************************************
     /* Life-cycle: JDK serialization support
     /**********************************************************************
      */
@@ -317,4 +333,20 @@ public class JavaPropsMapper extends ObjectMapper
      */
 
     // do we have any actually?
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static JavaPropsMapper MAPPER = JavaPropsMapper.builder().build();
+
+        public static JavaPropsMapper wrapped() { return MAPPER; }
+    }
 }

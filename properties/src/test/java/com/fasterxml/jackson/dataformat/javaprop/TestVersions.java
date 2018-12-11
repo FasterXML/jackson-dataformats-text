@@ -9,7 +9,8 @@ public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException
     {
-        ObjectMapper mapper = mapperForProps();
+        // Test shared instance for funsies
+        ObjectMapper mapper = JavaPropsMapper.shared();
         assertVersion(mapper.tokenStreamFactory());
         JavaPropsParser p = (JavaPropsParser) mapper.createParser("abc=foo");
         assertVersion(p);

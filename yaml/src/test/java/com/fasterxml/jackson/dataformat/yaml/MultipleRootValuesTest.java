@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 
 public class MultipleRootValuesTest extends ModuleTestBase
 {
-    private final YAMLMapper MAPPER = new YAMLMapper();
+    private final YAMLMapper MAPPER = YAMLMapper.shared();
 
     public void testMultipleDocumentsViaParser() throws Exception
     {
