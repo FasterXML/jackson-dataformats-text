@@ -425,7 +425,8 @@ public class CsvGenerator extends GeneratorBase
         if (_handleFirstLine) {
             _handleFirstLine();
         }
-        _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET));
+        _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
+                isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
     }
 
     /*
