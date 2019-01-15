@@ -872,12 +872,12 @@ public class CsvEncoder
         }
     }
 
-    public void close(boolean autoClose) throws IOException
+    public void close(boolean autoClose, boolean flushStream) throws IOException
     {
         _flushBuffer();
         if (autoClose) {
             _out.close();
-        } else {
+        } else if (flushStream) {
             // If we can't close it, we should at least flush
             _out.flush();
         }

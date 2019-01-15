@@ -434,7 +434,6 @@ public class CsvGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    @SuppressWarnings("deprecation")
     @Override
     public final void flush() throws IOException {
         _writer.flush(isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
@@ -452,7 +451,8 @@ public class CsvGenerator extends GeneratorBase
         if (_handleFirstLine) {
             _handleFirstLine();
         }
-        _writer.close(_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET));
+        _writer.close(_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET),
+                isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
     }
 
     /*

@@ -441,10 +441,11 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void flush() throws IOException
     {
-        _writer.flush();
+        if (isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)) {
+            _writer.flush();
+        }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void close() throws IOException
     {
@@ -462,7 +463,7 @@ public class YAMLGenerator extends GeneratorBase
             if (_writer != null) {
                 if (_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET)) {
                     _writer.close();
-                } else  if (isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)) {
+                } else if (isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM)) {
                     // If we can't close it, we should at least flush
                     _writer.flush();
                 }
