@@ -22,6 +22,14 @@ import com.fasterxml.jackson.core.io.IOContext;
 public class YAMLGenerator extends GeneratorBase
 {
     /**
+     * Static string values which should not be instantiated every time.
+     */
+    private final static String TRUE_VALUE = "true";
+    private final static String FALSE_VALUE = "false";
+    private final static String NULL_UP_VALUE = "NULL";
+    private final static String NULL_LW_VALUE = "null";
+    
+    /**
      * Enumeration that defines all togglable features for YAML generators
      */
     public enum Feature implements FormatFeature
@@ -523,8 +531,12 @@ public class YAMLGenerator extends GeneratorBase
         }
         _verifyValueWrite("write String value");
         DumperOptions.ScalarStyle style = STYLE_QUOTED;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures) && !isBooleanContent(text)) {
-          // If this string could be interpreted as a number, it must be quoted.
+        
+        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures) 
+                && !isBooleanContent(text) 
+                && !isStringNullContent(text)) {
+        
+            // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
@@ -533,6 +545,7 @@ public class YAMLGenerator extends GeneratorBase
             } else {
                 style = STYLE_PLAIN;
             }
+            
         } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures) && text.indexOf('\n') >= 0) {
             style = STYLE_LITERAL;
         }
@@ -540,7 +553,11 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     private boolean isBooleanContent(String text) {
-        return text.equals("true") || text.equals("false");
+        return TRUE_VALUE.equals(text) || FALSE_VALUE.equals(text);
+    }
+    
+    private boolean isStringNullContent(String text) {
+        return NULL_LW_VALUE.equals(text) || NULL_UP_VALUE.equals(text);
     }
 
     @Override
