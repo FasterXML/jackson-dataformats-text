@@ -761,7 +761,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         // should we verify there's no preceding id?
-        _objectId = String.valueOf(id);
+        _objectId = (id == null) ? null : String.valueOf(id);
     }
 
     /*
