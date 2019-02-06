@@ -547,7 +547,7 @@ public class YAMLGenerator extends GeneratorBase
         _verifyValueWrite("write String value");
         Character style = STYLE_QUOTED;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
-          // If this string could be interpreted as a number, it must be quoted.
+            // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
@@ -784,7 +784,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         // should we verify there's no preceding id?
-        _objectId = String.valueOf(id);
+        _objectId = (id == null) ? null : String.valueOf(id);
     }
 
     /*
