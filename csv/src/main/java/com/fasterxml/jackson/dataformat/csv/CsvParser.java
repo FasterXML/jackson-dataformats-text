@@ -24,7 +24,10 @@ import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
 public class CsvParser
     extends ParserMinimalBase
 {
-    /**
+    // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
+    private final static int MAX_COLUMNS = 99999;
+
+            /**
      * Enumeration that defines all togglable features for CSV parsers
      */
     public enum Feature
@@ -340,6 +343,9 @@ public class CsvParser
             Reader reader)
     {
         super(readCtxt, stdFeatures);
+        if (reader == null) {
+            throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
+        }
         _textBuffer =  ioCtxt.csvTextBuffer();
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
@@ -686,10 +692,14 @@ public class CsvParser
                 if ((name = _reader.nextString()) != null) {
                     _reportError(String.format("Extra header %s", name));
                 }
-            }
-            else {
-                //noinspection StatementWithEmptyBody
-                while (_reader.nextString() != null) { /* does nothing */ }
+            } else {
+                int allowed = MAX_COLUMNS;
+                while (_reader.nextString() != null) {
+                    // If we don't care about validation, just skip. But protect against infinite loop
+                    if (--allowed < 0) {
+                        _reportError("Internal error: skipped "+MAX_COLUMNS+" header columns");
+                    }
+                }
             }
             return;
         }
@@ -697,6 +707,7 @@ public class CsvParser
         // either the schema is empty or reorder columns flag is set
         String name;
         CsvSchema.Builder builder = _schema.rebuild().clearColumns();
+        int count = 0;
 
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
@@ -708,6 +719,9 @@ public class CsvParser
                 builder.addColumn(name, prev.getType());
             } else {
                 builder.addColumn(name);
+            }
+            if (++count > MAX_COLUMNS) {
+                _reportError("Internal error: reached maximum of "+MAX_COLUMNS+" header columns");
             }
         }
 
@@ -743,9 +757,8 @@ public class CsvParser
             _reader.skipLeadingComments();
         }
         
-        /* Only one real complication, actually; empy documents (zero bytes).
-         * Those have no entries. Should be easy enough to detect like so:
-         */
+        // Only one real complication, actually; empty documents (zero bytes).
+        // Those have no entries. Should be easy enough to detect like so:
         final boolean wrapAsArray = Feature.WRAP_AS_ARRAY.enabledIn(_formatFeatures);
         if (!_reader.hasMoreInput()) {
             _state = STATE_DOC_END;
