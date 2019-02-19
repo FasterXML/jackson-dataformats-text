@@ -268,13 +268,11 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
-    @SuppressWarnings("deprecation")
     @Override
     public JsonToken nextToken() throws IOException
     {
         _currentIsAlias = false;
         _binaryValue = null;
-        _currentAnchor = null;
         if (_closed) {
             return null;
         }
@@ -284,23 +282,20 @@ public class YAMLParser extends ParserBase
             try {
                 evt = _yamlParser.getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
-                if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
-                    throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
-                        (this, (org.yaml.snakeyaml.error.MarkedYAMLException) e);
-                }
-                throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.YAMLException.from(this, e);
+                throw new JacksonYAMLParseException(this, e.getMessage(), e);
             }
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
+                _currentAnchor = null;
                 return (_currToken = null);
             }
             _lastEvent = evt;
             
-            /* One complication: field names are only inferred from the
-             * fact that we are in Object context...
-             */
+            // One complication: field names are only inferred from the
+            // fact that we are in Object context...
             if (_parsingContext.inObject() && _currToken != JsonToken.FIELD_NAME) {
                 if (!evt.is(Event.ID.Scalar)) {
+                    _currentAnchor = null;
                     // end is fine
                     if (evt.is(Event.ID.MappingEnd)) {
                         if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
@@ -318,6 +313,9 @@ public class YAMLParser extends ParserBase
                 _currentAnchor = scalar.getAnchor();
                 return (_currToken = JsonToken.FIELD_NAME);
             }
+
+            _currentAnchor = null;
+
             // Ugh. Why not expose id, to be able to Switch?
 
             // scalar values are probably the commonest:
@@ -765,13 +763,13 @@ public class YAMLParser extends ParserBase
     }
     
     @Override
-    public String getObjectId() throws IOException, JsonGenerationException
+    public String getObjectId() throws IOException
     {
         return _currentAnchor;
     }
 
     @Override
-    public String getTypeId() throws IOException, JsonGenerationException
+    public String getTypeId() throws IOException
     {
         String tag;
         if (_lastEvent instanceof CollectionStartEvent) {

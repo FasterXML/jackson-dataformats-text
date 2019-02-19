@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
 /**
  * Replacement for formerly shaded exception type from SnakeYAML; included
  * in 2.8 solely for backwards compatibility: new code that relies on Jackson 2.8
- * and alter should NOT use this type but only base type {@link YAMLException}.
+ * and after should NOT use this type but only base type {@link JacksonYAMLParseException}.
  *
  * @deprecated Since 2.8
  */

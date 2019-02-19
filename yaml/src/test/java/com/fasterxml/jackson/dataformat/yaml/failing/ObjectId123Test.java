@@ -27,7 +27,8 @@ public class ObjectId123Test extends ModuleTestBase
         public StringHolder boo;
     }
 
-    @JsonIdentityInfo(generator = ObjectIdGenerators.None.class)
+//    @JsonIdentityInfo(generator = ObjectIdGenerators.None.class)
+    @JsonIdentityInfo(generator = ObjectIdGenerators.StringIdGenerator.class)
     static class StringHolder {
         public String value;
 
