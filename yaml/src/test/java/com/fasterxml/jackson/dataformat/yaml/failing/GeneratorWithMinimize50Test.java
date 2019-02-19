@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
-public class GeratorWithMinimize50Test extends ModuleTestBase
+public class GeneratorWithMinimize50Test extends ModuleTestBase
 {
     private final static YAMLMapper MINIM_MAPPER = new YAMLMapper();
     static {
