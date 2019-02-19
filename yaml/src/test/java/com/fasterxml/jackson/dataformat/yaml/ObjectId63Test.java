@@ -3,7 +3,6 @@ package com.fasterxml.jackson.dataformat.yaml;
 import com.fasterxml.jackson.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.*;
 
 // for [dataformats-text#63], problem with YAML, Object Ids
 public class ObjectId63Test extends ModuleTestBase
