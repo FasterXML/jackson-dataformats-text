@@ -10,8 +10,10 @@ Modules:
 
 2.9.9 (not yet released)
 
-#63: `null` Object Id serialized as anchor for YAML
+#63: (yaml) `null` Object Id serialized as anchor for YAML
  (reported by jflefebvre06@github)
+#122: (csv) `readValues(null)` causes infinite loop
+ (reported by andyeko@github) 
 
 2.9.8 (15-Dec-2018)
 
