@@ -345,7 +345,6 @@ public class YAMLParser extends ParserBase
     {
         _currentIsAlias = false;
         _binaryValue = null;
-        _currentAnchor = null;
         if (_closed) {
             return null;
         }
@@ -363,33 +362,37 @@ public class YAMLParser extends ParserBase
             }
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
+                _currentAnchor = null;
                 return (_currToken = null);
             }
             _lastEvent = evt;
-            
-            /* One complication: field names are only inferred from the
-             * fact that we are in Object context...
-             */
-            if (_parsingContext.inObject() && _currToken != JsonToken.FIELD_NAME) {
-                if (!evt.is(Event.ID.Scalar)) {
-                    // end is fine
-                    if (evt.is(Event.ID.MappingEnd)) {
-                        if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
-                            _reportMismatchedEndMarker('}', ']');
+
+            // One complication: field names are only inferred from the
+            // fact that we are in Object context...
+            if (_parsingContext.inObject()) {
+                if (_currToken != JsonToken.FIELD_NAME) {
+                    if (!evt.is(Event.ID.Scalar)) {
+                        _currentAnchor = null;
+                        // end is fine
+                        if (evt.is(Event.ID.MappingEnd)) {
+                            if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
+                                _reportMismatchedEndMarker('}', ']');
+                            }
+                            _parsingContext = _parsingContext.getParent();
+                            return (_currToken = JsonToken.END_OBJECT);
                         }
-                        _parsingContext = _parsingContext.getParent();
-                        return (_currToken = JsonToken.END_OBJECT);
+                        _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
                     }
-                    _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
+                    ScalarEvent scalar = (ScalarEvent) evt;
+                    String name = scalar.getValue();
+                    _currentFieldName = name;
+                    _parsingContext.setCurrentName(name);
+                    _currentAnchor = scalar.getAnchor();
+                    return (_currToken = JsonToken.FIELD_NAME);
                 }
-                ScalarEvent scalar = (ScalarEvent) evt;
-                String name = scalar.getValue();
-                _currentFieldName = name;
-                _parsingContext.setCurrentName(name);
-                _currentAnchor = scalar.getAnchor();
-                return (_currToken = JsonToken.FIELD_NAME);
             }
             // Ugh. Why not expose id, to be able to Switch?
+            _currentAnchor = null;
 
             // scalar values are probably the commonest:
             if (evt.is(Event.ID.Scalar)) {
