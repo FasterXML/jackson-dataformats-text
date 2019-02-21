@@ -1,8 +1,9 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.misc;
 
-import com.fasterxml.jackson.annotation.*;
-
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
 
 // for [dataformats-text#63], problem with YAML, Object Ids
 public class ObjectId63Test extends ModuleTestBase
