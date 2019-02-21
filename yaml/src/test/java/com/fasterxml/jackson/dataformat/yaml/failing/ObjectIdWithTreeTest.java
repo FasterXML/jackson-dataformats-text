@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
  * Although native Object Ids work in general, Tree Model currently
  * has issues with it (see [dataformat-yaml#24])
  */
-public class ObjectIdTest extends ModuleTestBase
+public class ObjectIdWithTreeTest extends ModuleTestBase
 {
     @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
     static class Node

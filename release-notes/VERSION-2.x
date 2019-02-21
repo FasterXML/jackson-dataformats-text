@@ -14,6 +14,7 @@ Modules:
  (reported by jflefebvre06@github)
 #122: (csv) `readValues(null)` causes infinite loop
  (reported by andyeko@github) 
+#123: (yaml) YAML Anchor, reference fails with simple example
 
 2.9.8 (15-Dec-2018)
 
