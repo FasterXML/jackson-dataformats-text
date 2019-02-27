@@ -833,7 +833,8 @@ public class YAMLGenerator extends GeneratorBase
         if (b64variant == Base64Variants.getDefaultVariant()) {
             b64variant = Base64Variants.MIME;
         }
-        String encoded = b64variant.encode(data);
+        final String lf = _lf();
+        String encoded = _base64encode(b64variant, data, lf);
         _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
                 null, null, STYLE_BASE64));
     }
@@ -852,5 +853,43 @@ public class YAMLGenerator extends GeneratorBase
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, yamlTag, NO_TAGS, value,
                 null, null, style);
+    }
+
+    // // // 26-Feb-2019, tatu: Copied temporarily (for 2.10) from `Base64Variant` to prevent
+    // // //   hard dependency for same minor version
+
+    private String _base64encode(final Base64Variant b64v, final byte[] input, final String linefeed)
+    {
+        final int inputEnd = input.length;
+        final StringBuilder sb = new StringBuilder(inputEnd + (inputEnd >> 2) + (inputEnd >> 3));
+
+        int chunksBeforeLF = b64v.getMaxLineLength() >> 2;
+
+        int inputPtr = 0;
+        int safeInputEnd = inputEnd-3;
+
+        while (inputPtr <= safeInputEnd) {
+            int b24 = ((int) input[inputPtr++]) << 8;
+            b24 |= ((int) input[inputPtr++]) & 0xFF;
+            b24 = (b24 << 8) | (((int) input[inputPtr++]) & 0xFF);
+            b64v.encodeBase64Chunk(sb, b24);
+            if (--chunksBeforeLF <= 0) {
+                sb.append(linefeed);
+                chunksBeforeLF = b64v.getMaxLineLength() >> 2;
+            }
+        }
+        int inputLeft = inputEnd - inputPtr;
+        if (inputLeft > 0) {
+            int b24 = ((int) input[inputPtr++]) << 16;
+            if (inputLeft == 2) {
+                b24 |= (((int) input[inputPtr++]) & 0xFF) << 8;
+            }
+            b64v.encodeBase64Partial(sb, b24, inputLeft);
+        }
+        return sb.toString();
+    }
+
+    protected String _lf() {
+        return _outputOptions.getLineBreak().getString();
     }
 }

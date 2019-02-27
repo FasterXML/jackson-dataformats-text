@@ -12,6 +12,8 @@ Modules:
 
 #63: (yaml) `null` Object Id serialized as anchor for YAML
  (reported by jflefebvre06@github)
+#90: (yaml) Exception when decoding Jackson-encoded `Base64` binary value in YAML
+ (reported by Tanguy L)
 #122: (csv) `readValues(null)` causes infinite loop
  (reported by andyeko@github) 
 #123: (yaml) YAML Anchor, reference fails with simple example
