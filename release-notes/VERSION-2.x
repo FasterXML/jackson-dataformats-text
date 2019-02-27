@@ -10,9 +10,11 @@ Modules:
 
 2.10.0 (not yet released)
 
-#101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
+#90: Exception when decoding Jackson-encoded `Base64` binary value in YAML
+ (reported by Tanguy L)
+#101: (yaml) Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (contributed by Andrey S)
-#108: Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
+#108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
 
 2.9.9 (not yet released)

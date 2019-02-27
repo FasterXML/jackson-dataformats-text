@@ -1,9 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.junit.Assert;
+
+import com.fasterxml.jackson.core.*;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -40,5 +44,30 @@ public class BinaryReadTest extends ModuleTestBase
         final byte[] actualFileHeader = Arrays.copyOfRange(gif, 0, 6);
         final byte[] expectedFileHeader = new byte[]{'G', 'I', 'F', '8', '9', 'a'};    
         Assert.assertArrayEquals(expectedFileHeader, actualFileHeader);
+    }
+
+    // [dataformats-text#90]
+    public void testReadLongBinary() throws Exception {
+        final byte[] data = new byte[1000];
+        new Random(1234).nextBytes(data);
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        try (JsonGenerator gen =  MAPPER.getFactory().createGenerator(os)) {
+            gen.writeStartObject();
+            gen.writeBinaryField("data", data);
+            gen.writeEndObject();
+            gen.close();
+        }
+
+        try (JsonParser parser = MAPPER.getFactory().createParser(os.toByteArray())) {
+            assertEquals(JsonToken.START_OBJECT, parser.nextToken());
+            assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+            assertEquals("data", parser.currentName());
+            assertEquals(JsonToken.VALUE_EMBEDDED_OBJECT, parser.nextToken());
+            Assert.assertArrayEquals(data, parser.getBinaryValue());
+            assertEquals(JsonToken.END_OBJECT, parser.nextToken());
+            assertNull(parser.nextToken());
+        }
     }
 }
