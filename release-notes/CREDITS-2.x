@@ -37,3 +37,7 @@ Andrey Somov (asomov@github)
 * Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (2.10.0)
 
+Tanguy Leroux (tlrx@github)
+
+* Reported #90: Exception when decoding Jackson-encoded `Base64` binary value in YAML
+ (2.10.0)
