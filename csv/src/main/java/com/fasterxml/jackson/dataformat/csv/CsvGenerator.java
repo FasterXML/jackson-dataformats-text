@@ -282,7 +282,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public int getFormatFeatures() {
+    public int formatWriteFeatures() {
         return _formatFeatures;
     }
 
@@ -360,7 +360,7 @@ public class CsvGenerator extends GeneratorBase
         // note: we are likely to get next column name, so pass it as hint
         CsvSchema.Column col = _schema.column(name, _nextColumnByName+1);
         if (col == null) {
-            if (isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
+            if (isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
                 _skipValue = true;
                 _nextColumnByName = -1;
                 return;
@@ -410,7 +410,7 @@ public class CsvGenerator extends GeneratorBase
 
     @Override
     public final void flush() throws IOException {
-        _writer.flush(isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
+        _writer.flush(isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
     }
     
     @Override
@@ -425,7 +425,8 @@ public class CsvGenerator extends GeneratorBase
         if (_handleFirstLine) {
             _handleFirstLine();
         }
-        _writer.close(_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET));
+        _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
+                isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
     }
 
     /*
@@ -442,7 +443,7 @@ public class CsvGenerator extends GeneratorBase
         // can not nest arrays in objects
         if (_outputContext.inObject()) {
             if ((_skipWithin == null)
-                    && _skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
+                    && _skipValue && isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
                 _skipWithin = _outputContext;
             } else if (!_skipValue) {
                 // First: column may have its own separator
@@ -512,7 +513,7 @@ public class CsvGenerator extends GeneratorBase
                 // 07-Nov-2017, tatu: But we may actually be nested indirectly; so check
                 (_outputContext.inArray() && !_outputContext.getParent().inRoot())) {
             if (_skipWithin == null) { // new in 2.7
-                if (_skipValue && isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
+                if (_skipValue && isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
                     _skipWithin = _outputContext;
                 } else {
                     _reportMappingError("CSV generator does not support Object values for properties (nested Objects)");
@@ -814,7 +815,7 @@ public class CsvGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
-            String str = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
+            String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
                     ? v.toPlainString() : v.toString();
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));

@@ -84,9 +84,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         _outputTail = 0; // just to ensure we don't think there's anything buffered
 
         if (_out != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(Feature.AUTO_CLOSE_TARGET)) {
+            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
                 _out.close();
-            } else if (isEnabled(Feature.FLUSH_PASSED_TO_STREAM)) {
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
                 _out.flush();
             }
@@ -100,7 +100,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     {
         _flushBuffer();
         if (_out != null) {
-            if (isEnabled(Feature.FLUSH_PASSED_TO_STREAM)) {
+            if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 _out.flush();
             }
         }

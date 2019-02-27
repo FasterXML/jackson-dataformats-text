@@ -12,7 +12,8 @@ import com.fasterxml.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 public class JavaPropsFactoryBuilder extends DecorableTSFBuilder<JavaPropsFactory, JavaPropsFactoryBuilder>
 {
     public JavaPropsFactoryBuilder() {
-        super();
+        // No format-specific features yet so:
+        super(0, 0);
     }
 
     public JavaPropsFactoryBuilder(JavaPropsFactory base) {
@@ -21,7 +22,6 @@ public class JavaPropsFactoryBuilder extends DecorableTSFBuilder<JavaPropsFactor
 
     @Override
     public JavaPropsFactory build() {
-        // 28-Dec-2017, tatu: No special settings beyond base class ones, so:
         return new JavaPropsFactory(this);
     }
 }

@@ -262,8 +262,8 @@ public class CsvDecoder
         _ioContext = ctxt;
         _inputSource = r;
         _textBuffer = textBuffer;
-        _autoCloseInput =  JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
-        _allowComments = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
+        _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
+        _allowComments = CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it

@@ -43,7 +43,7 @@ public class CsvMapper extends ObjectMapper
 
         @Override
         protected MapperBuilderState _saveState() {
-            // nothing exra, just format features
+            // nothing extra, just format features
             return new StateImpl(this);
         }
 
@@ -55,14 +55,14 @@ public class CsvMapper extends ObjectMapper
 
         public Builder enable(CsvParser.Feature... features) {
             for (CsvParser.Feature f : features) {
-                _formatParserFeatures |= f.getMask();
+                _formatReadFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(CsvParser.Feature... features) {
             for (CsvParser.Feature f : features) {
-                _formatParserFeatures &= ~f.getMask();
+                _formatReadFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -70,23 +70,23 @@ public class CsvMapper extends ObjectMapper
         public Builder configure(CsvParser.Feature feature, boolean state)
         {
             if (state) {
-                _formatParserFeatures |= feature.getMask();
+                _formatReadFeatures |= feature.getMask();
             } else {
-                _formatParserFeatures &= ~feature.getMask();
+                _formatReadFeatures &= ~feature.getMask();
             }
             return this;
         }
 
         public Builder enable(CsvGenerator.Feature... features) {
             for (CsvGenerator.Feature f : features) {
-                _formatGeneratorFeatures |= f.getMask();
+                _formatWriteFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(CsvGenerator.Feature... features) {
             for (CsvGenerator.Feature f : features) {
-                _formatGeneratorFeatures &= ~f.getMask();
+                _formatWriteFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -94,9 +94,9 @@ public class CsvMapper extends ObjectMapper
         public Builder configure(CsvGenerator.Feature feature, boolean state)
         {
             if (state) {
-                _formatGeneratorFeatures |= feature.getMask();
+                _formatWriteFeatures |= feature.getMask();
             } else {
-                _formatGeneratorFeatures &= ~feature.getMask();
+                _formatWriteFeatures &= ~feature.getMask();
             }
             return this;
         }
@@ -160,19 +160,6 @@ public class CsvMapper extends ObjectMapper
         _typedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
     }
 
-    /**
-     * Short-cut for:
-     *<pre>
-     *   return builder(new CsvFactory());
-     *</pre>
-     *
-     * @since 3.0
-     */
-    public static CsvMapper.Builder csvBuilder() {
-        return new CsvMapper.Builder(new CsvFactory());
-    }
-
-    @SuppressWarnings("unchecked")
     public static CsvMapper.Builder builder() {
         return new CsvMapper.Builder(new CsvFactory());
     }
@@ -181,6 +168,28 @@ public class CsvMapper extends ObjectMapper
         return new CsvMapper.Builder(streamFactory);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
+    }
+
+    /*
+    /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link CsvMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static CsvMapper shared() {
+        return SharedWrapper.wrapped();
+    }
+    
     /*
     /**********************************************************************
     /* Life-cycle: JDK serialization support
@@ -515,5 +524,21 @@ public class CsvMapper extends ObjectMapper
         }
         // but in general we will just do what we can:
         return CsvSchema.ColumnType.NUMBER_OR_STRING;
+    }
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static CsvMapper MAPPER = CsvMapper.builder().build();
+
+        public static CsvMapper wrapped() { return MAPPER; }
     }
 }

@@ -9,7 +9,8 @@ public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException
     {
-        CsvMapper mapper = new CsvMapper();
+        // Test shared instance for funsies
+        CsvMapper mapper = CsvMapper.shared();
         assertVersion(mapper.tokenStreamFactory());
         JsonParser p = mapper.createParser("abc");
         assertVersion(p);

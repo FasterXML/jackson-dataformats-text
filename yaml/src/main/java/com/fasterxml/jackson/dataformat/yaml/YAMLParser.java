@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.core.*;
 import org.snakeyaml.engine.v1.api.LoadSettings;
 import org.snakeyaml.engine.v1.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v1.common.Anchor;
@@ -22,14 +23,6 @@ import org.snakeyaml.engine.v1.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.v1.resolver.ScalarResolver;
 import org.snakeyaml.engine.v1.scanner.StreamReader;
 
-import com.fasterxml.jackson.core.Base64Variant;
-import com.fasterxml.jackson.core.Base64Variants;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectReadContext;
-import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
@@ -208,10 +201,24 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    protected void _closeInput() throws IOException {
-        _reader.close();
+    public Reader getInputSource() {
+        return _reader;
     }
-    
+
+    @Override
+    protected void _closeInput() throws IOException {
+        /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
+         *   on the underlying Reader, unless we "own" it, or auto-closing
+         *   feature is enabled.
+         *   One downside is that when using our optimized
+         *   Reader (granted, we only do that for UTF-32...) this
+         *   means that buffer recycling won't work correctly.
+         */
+        if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            _reader.close();
+        }
+    }
+
     /*
     /**********************************************************                              
     /* FormatFeature support (none yet)
@@ -272,13 +279,11 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
-    @SuppressWarnings("deprecation")
     @Override
     public JsonToken nextToken() throws IOException
     {
         _currentIsAlias = false;
         _binaryValue = null;
-        _currentAnchor = Optional.empty();
         if (_closed) {
             return null;
         }
@@ -288,47 +293,57 @@ public class YAMLParser extends ParserBase
             try {
                 evt = _yamlParser.next();
             } catch (org.snakeyaml.engine.v1.exceptions.YamlEngineException e) {
-                if (e instanceof org.snakeyaml.engine.v1.exceptions.MarkedYamlEngineException) {
-                    throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
-                            (this, (org.snakeyaml.engine.v1.exceptions.MarkedYamlEngineException) e);
-                }
-                throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.YAMLException.from(this, e);
+                throw new JacksonYAMLParseException(this, e.getMessage(), e);
             }
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
+                _currentAnchor = Optional.empty();
                 return (_currToken = null);
             }
             _lastEvent = evt;
-
-            /* One complication: field names are only inferred from the
-             * fact that we are in Object context...
-             */
-            if (_parsingContext.inObject() && _currToken != JsonToken.FIELD_NAME) {
-                if (!evt.isEvent(Event.ID.Scalar)) {
-                    // end is fine
-                    if (evt.isEvent(Event.ID.MappingEnd)) {
-                        if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
-                            _reportMismatchedEndMarker('}', ']');
+            // One complication: field names are only inferred from the fact that we are
+            // in Object context; they are just ScalarEvents (but separate and NOT just tagged
+            // on values)
+            if (_parsingContext.inObject()) {
+                if (_currToken != JsonToken.FIELD_NAME) {
+                    if (evt.getEventId() != Event.ID.Scalar) {
+                        _currentAnchor = Optional.empty();
+                        // end is fine
+                        if (evt.getEventId() == Event.ID.MappingEnd) {
+                            if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
+                                _reportMismatchedEndMarker('}', ']');
+                            }
+                            _parsingContext = _parsingContext.getParent();
+                            return (_currToken = JsonToken.END_OBJECT);
                         }
-                        _parsingContext = _parsingContext.getParent();
-                        return (_currToken = JsonToken.END_OBJECT);
+                        _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
                     }
-                    _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
+                    // 20-Feb-2019, tatu: [dataformats-text#123] Looks like YAML exposes Anchor for Object at point
+                    //   where we return START_OBJECT (which makes sense), but, alas, Jackson expects that at point
+                    //   after first FIELD_NAME. So we will need to defer clearing of the anchor slightly,
+                    //   just for the very first entry; and only if no anchor for name found.
+                    //  ... not even 100% sure this is correct, or robust, but does appear to work for specific
+                    //  test case given.
+                    final ScalarEvent scalar = (ScalarEvent) evt;
+                    final Optional<Anchor> newAnchor = scalar.getAnchor();
+                    if (newAnchor.isPresent() || (_currToken != JsonToken.START_OBJECT)) {
+                        _currentAnchor = scalar.getAnchor();
+                    }
+                    final String name = scalar.getValue();
+                    _currentFieldName = name;
+                    _parsingContext.setCurrentName(name);
+                    return (_currToken = JsonToken.FIELD_NAME);
                 }
-                ScalarEvent scalar = (ScalarEvent) evt;
-                String name = scalar.getValue();
-                _currentFieldName = name;
-                _parsingContext.setCurrentName(name);
-                _currentAnchor = scalar.getAnchor();
-                return (_currToken = JsonToken.FIELD_NAME);
             }
+
+            _currentAnchor = Optional.empty();
+
             switch (evt.getEventId()) {
                 case Scalar:
                     // scalar values are probably the commonest:
                     JsonToken t = _decodeScalar((ScalarEvent) evt);
                     _currToken = t;
                     return t;
-
                 case MappingStart:
                     // followed by maps, then arrays
                     Optional<Mark> m = evt.getStartMark();
@@ -758,13 +773,13 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public String getObjectId() throws IOException, JsonGenerationException
+    public String getObjectId() throws IOException
     {
         return _currentAnchor.map(a -> a.getAnchor()).orElse(null);
     }
 
     @Override
-    public String getTypeId() throws IOException, JsonGenerationException
+    public String getTypeId() throws IOException
     {
         Optional<String> tagOpt;
         if (_lastEvent instanceof CollectionStartEvent) {
@@ -776,10 +791,8 @@ public class YAMLParser extends ParserBase
         }
         if (tagOpt.isPresent()) {
             String tag = tagOpt.get();
-            /* 04-Aug-2013, tatu: Looks like YAML parser's expose these in...
-             *   somewhat exotic ways sometimes. So let's prepare to peel off
-             *   some wrappings:
-             */
+            // 04-Aug-2013, tatu: Looks like YAML parser's expose these in... somewhat exotic
+            //   ways sometimes. So let's prepare to peel off some wrappings:
             while (tag.startsWith("!")) {
                 tag = tag.substring(1);
             }

@@ -45,17 +45,6 @@ public class CsvFactory
     /**********************************************************************
      */
 
-    protected final int _formatParserFeatures;
-    protected final int _formatGeneratorFeatures;
-
-    /*
-    protected char _cfgColumnSeparator = ',';
-
-    protected char _cfgQuoteCharacter = '"';
-    
-    protected char[] _cfgLineSeparator = DEFAULT_LF;
-    */
-    
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -73,16 +62,13 @@ public class CsvFactory
      * factory instance.
      */
     public CsvFactory() {
-        super();
-        _formatParserFeatures = DEFAULT_CSV_PARSER_FEATURE_FLAGS;
-        _formatGeneratorFeatures = DEFAULT_CSV_GENERATOR_FEATURE_FLAGS;
+        super(DEFAULT_CSV_PARSER_FEATURE_FLAGS,
+                DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
     }
 
     protected CsvFactory(CsvFactory src)
     {
         super(src);
-        _formatParserFeatures = src._formatParserFeatures;
-        _formatGeneratorFeatures = src._formatGeneratorFeatures;
     }
 
     /**
@@ -93,8 +79,6 @@ public class CsvFactory
     protected CsvFactory(CsvFactoryBuilder b)
     {
         super(b);
-        _formatParserFeatures = b.formatParserFeaturesMask();
-        _formatGeneratorFeatures = b.formatGeneratorFeaturesMask();
     }
 
     @Override
@@ -192,23 +176,23 @@ public class CsvFactory
     }
 
     @Override
-    public int getFormatParserFeatures() { return _formatParserFeatures; }
+    public int getFormatReadFeatures() { return _formatReadFeatures; }
 
     @Override
-    public int getFormatGeneratorFeatures() { return _formatGeneratorFeatures; }
+    public int getFormatWriteFeatures() { return _formatWriteFeatures; }
 
     /**
      * Checked whether specified parser feature is enabled.
      */
     public final boolean isEnabled(CsvParser.Feature f) {
-        return (_formatParserFeatures & f.getMask()) != 0;
+        return (_formatReadFeatures & f.getMask()) != 0;
     }
 
     /**
      * Check whether specified generator feature is enabled.
      */
     public boolean isEnabled(CsvGenerator.Feature f) {
-        return (_formatGeneratorFeatures & f.getMask()) != 0;
+        return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
     /*
@@ -225,8 +209,8 @@ public class CsvFactory
             InputStream in) throws IOException {
         return new CsvParserBootstrapper(ioCtxt, in)
             .constructParser(readCtxt,
-                    readCtxt.getParserFeatures(_parserFeatures),
-                    readCtxt.getFormatReadFeatures(_formatParserFeatures),
+                    readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                    readCtxt.getFormatReadFeatures(_formatReadFeatures),
                     _getSchema(readCtxt));
     }
 
@@ -235,8 +219,8 @@ public class CsvFactory
             byte[] data, int offset, int len) throws IOException {
         return new CsvParserBootstrapper(ioCtxt, data, offset, len)
                .constructParser(readCtxt,
-                       readCtxt.getParserFeatures(_parserFeatures),
-                       readCtxt.getFormatReadFeatures(_formatParserFeatures),
+                       readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                       readCtxt.getFormatReadFeatures(_formatReadFeatures),
                        _getSchema(readCtxt));
     }
 
@@ -247,8 +231,8 @@ public class CsvFactory
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r) throws IOException {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
-                readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_formatParserFeatures),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _getSchema(readCtxt),
                 r);
     }
@@ -259,8 +243,8 @@ public class CsvFactory
             boolean recyclable) throws IOException
     {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
-                readCtxt.getParserFeatures(_parserFeatures),
-                readCtxt.getFormatReadFeatures(_formatParserFeatures),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _getSchema(readCtxt),
                 new CharArrayReader(data, offset, len));
     }
@@ -290,8 +274,8 @@ public class CsvFactory
             IOContext ioCtxt, Writer out) throws IOException
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
                 out, _getSchema(writeCtxt));
     }
 
@@ -301,8 +285,8 @@ public class CsvFactory
             IOContext ioCtxt, OutputStream out) throws IOException
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getGeneratorFeatures(_generatorFeatures),
-                writeCtxt.getFormatWriteFeatures(_formatGeneratorFeatures),
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
                 new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
     }
 

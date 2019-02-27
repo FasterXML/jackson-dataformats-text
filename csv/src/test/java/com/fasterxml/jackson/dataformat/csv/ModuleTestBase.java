@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
@@ -87,12 +88,23 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /* Helper methods, setup
     /**********************************************************************
      */
-    
-    protected CsvMapper mapperForCsv()
-    {
+
+    protected CsvFactoryBuilder streamFactoryBuilder() {
+        return CsvFactory.builder();
+    }
+
+    protected CsvMapper mapperForCsv() {
         return new CsvMapper();
     }
+
+    protected CsvMapper.Builder mapperBuilder() {
+        return CsvMapper.builder();
+    }
     
+    protected CsvMapper.Builder mapperBuilder(CsvFactory f) {
+        return CsvMapper.builder(f);
+    }
+
     /*
     /**********************************************************
     /* Helper methods; low-level
@@ -101,6 +113,10 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 
     public String quote(String str) {
         return '"'+str+'"';
+    }
+
+    public byte[] utf8(String str) {
+        return str.getBytes(StandardCharsets.UTF_8);
     }
 
     protected String aposToQuotes(String json) {

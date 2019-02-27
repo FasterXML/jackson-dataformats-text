@@ -36,7 +36,7 @@ public class ArrayWriteTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final CsvMapper MAPPER = mapperForCsv();
+    private final CsvMapper MAPPER = CsvMapper.shared();
     
     public void testSimpleExplicit() throws Exception
     {

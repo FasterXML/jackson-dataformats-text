@@ -10,10 +10,27 @@ Modules:
 
 2.10.0 (not yet released)
 
-#101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
+#101: (yaml) Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (contributed by Andrey S)
+#108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
+ `JsonParser.Feature.ALLOW_YAML_COMMENTS`
 
-2.9.7 (not yet released)
+2.9.9 (not yet released)
+
+#63: (yaml) `null` Object Id serialized as anchor for YAML
+ (reported by jflefebvre06@github)
+#90: (yaml) Exception when decoding Jackson-encoded `Base64` binary value in YAML
+ (reported by Tanguy L)
+#122: (csv) `readValues(null)` causes infinite loop
+ (reported by andyeko@github) 
+#123: (yaml) YAML Anchor, reference fails with simple example
+
+2.9.8 (15-Dec-2018)
+
+#99: `YamlGenerator` closes the target stream when configured not to
+ (reported by moabck@github; fix contributed by vboulaye@github)
+
+2.9.7 (19-Sep-2018)
 
 #81: Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
  (reported by Yegor B)

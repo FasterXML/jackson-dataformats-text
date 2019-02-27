@@ -51,14 +51,14 @@ public class YAMLMapper extends ObjectMapper
         
         public Builder enable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
-                _formatGeneratorFeatures |= f.getMask();
+                _formatWriteFeatures |= f.getMask();
             }
             return this;
         }
 
         public Builder disable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
-                _formatGeneratorFeatures &= ~f.getMask();
+                _formatWriteFeatures &= ~f.getMask();
             }
             return this;
         }
@@ -66,9 +66,9 @@ public class YAMLMapper extends ObjectMapper
         public Builder configure(YAMLGenerator.Feature feature, boolean state)
         {
             if (state) {
-                _formatGeneratorFeatures |= feature.getMask();
+                _formatWriteFeatures |= feature.getMask();
             } else {
-                _formatGeneratorFeatures &= ~feature.getMask();
+                _formatWriteFeatures &= ~feature.getMask();
             }
             return this;
         }
@@ -107,13 +107,34 @@ public class YAMLMapper extends ObjectMapper
         super(b);
     }
 
-    @SuppressWarnings("unchecked")
     public static Builder builder() {
         return new Builder(new YAMLFactory());
     }
 
     public static Builder builder(YAMLFactory streamFactory) {
         return new Builder(streamFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
+    }
+
+    /*
+    /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link YAMLMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static YAMLMapper shared() {
+        return SharedWrapper.wrapped();
     }
 
     /*
@@ -152,5 +173,21 @@ public class YAMLMapper extends ObjectMapper
     @Override
     public final YAMLFactory tokenStreamFactory() {
         return (YAMLFactory) _streamFactory;
+    }
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static YAMLMapper MAPPER = YAMLMapper.builder().build();
+
+        public static YAMLMapper wrapped() { return MAPPER; }
     }
 }

@@ -79,13 +79,34 @@ public class JavaPropsMapper extends ObjectMapper
         super(b);
     }
 
-    @SuppressWarnings("unchecked")
     public static Builder builder() {
         return new Builder(new JavaPropsFactory());
     }
 
     public static Builder builder(JavaPropsFactory streamFactory) {
         return new Builder(streamFactory);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Builder rebuild() {
+        return new Builder((Builder.StateImpl) _savedBuilderState);
+    }
+
+    /*
+    /**********************************************************************
+    /* Life-cycle, shared "vanilla" (default configuration) instance
+    /**********************************************************************
+     */
+
+    /**
+     * Accessor method for getting globally shared "default" {@link JavaPropsMapper}
+     * instance: one that has default configuration, no modules registered, no
+     * config overrides. Usable mostly when dealing "untyped" or Tree-style
+     * content reading and writing.
+     */
+    public static JavaPropsMapper shared() {
+        return SharedWrapper.wrapped();
     }
 
     /*
@@ -312,4 +333,20 @@ public class JavaPropsMapper extends ObjectMapper
      */
 
     // do we have any actually?
+
+    /*
+    /**********************************************************
+    /* Helper class(es)
+    /**********************************************************
+     */
+
+    /**
+     * Helper class to contain dynamically constructed "shared" instance of
+     * mapper, should one be needed via {@link #shared}.
+     */
+    private final static class SharedWrapper {
+        private final static JavaPropsMapper MAPPER = JavaPropsMapper.builder().build();
+
+        public static JavaPropsMapper wrapped() { return MAPPER; }
+    }
 }

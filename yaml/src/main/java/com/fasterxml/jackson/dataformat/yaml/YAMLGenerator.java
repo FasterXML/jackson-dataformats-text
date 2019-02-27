@@ -184,7 +184,7 @@ public class YAMLGenerator extends GeneratorBase
      * {@link YAMLGenerator.Feature}s
      * are enabled.
      */
-    protected int _formatFeatures;
+    protected int _formatWriteFeatures;
 
     protected Writer _writer;
 
@@ -233,17 +233,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
-            int generatorFeatures, int yamlFeatures,
+            int streamWriteFeatures, int yamlFeatures,
             Writer out,
             SpecVersion version)
         throws IOException
     {
-        super(writeContext, generatorFeatures);
+        super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
-        _formatFeatures = yamlFeatures;
+        _formatWriteFeatures = yamlFeatures;
         _writer = out;
 
-        _outputOptions = buildDumperOptions(generatorFeatures, yamlFeatures, version);
+        _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
 
         _emitter = new Emitter( _outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
@@ -257,12 +257,12 @@ public class YAMLGenerator extends GeneratorBase
                 noTags));
     }
 
-    protected DumpSettings buildDumperOptions(int jsonFeatures, int yamlFeatures,
+    protected DumpSettings buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
             SpecVersion version)
     {
         DumpSettingsBuilder opt = new DumpSettingsBuilder();
         // would we want canonical?
-        if (Feature.CANONICAL_OUTPUT.enabledIn(_formatFeatures)) {
+        if (Feature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
             opt.setCanonical(true);
         } else {
             opt.setCanonical(false);
@@ -270,9 +270,9 @@ public class YAMLGenerator extends GeneratorBase
             opt.setDefaultFlowStyle(FlowStyle.BLOCK);
         }
         // split-lines for text blocks?
-        opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatFeatures));
+        opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatWriteFeatures));
         // array indentation?
-        if (Feature.INDENT_ARRAYS.enabledIn(_formatFeatures)) {
+        if (Feature.INDENT_ARRAYS.enabledIn(_formatWriteFeatures)) {
             // But, wrt [dataformats-text#34]: need to set both to diff values to work around bug
             // (otherwise indentation level is "invisible". Note that this should NOT be necessary
             // but is needed up to at least SnakeYAML 1.18.
@@ -333,8 +333,8 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public int getFormatFeatures() {
-        return _formatFeatures;
+    public int formatWriteFeatures() {
+        return _formatWriteFeatures;
     }
 
     @Override
@@ -354,17 +354,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator enable(Feature f) {
-        _formatFeatures |= f.getMask();
+        _formatWriteFeatures |= f.getMask();
         return this;
     }
 
     public YAMLGenerator disable(Feature f) {
-        _formatFeatures &= ~f.getMask();
+        _formatWriteFeatures &= ~f.getMask();
         return this;
     }
 
     public final boolean isEnabled(Feature f) {
-        return (_formatFeatures & f.getMask()) != 0;
+        return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
     public YAMLGenerator configure(Feature f, boolean state) {
@@ -432,7 +432,9 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void flush() throws IOException
     {
-        _writer.flush();
+        if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+            _writer.flush();
+        }
     }
 
     @Override
@@ -442,7 +444,21 @@ public class YAMLGenerator extends GeneratorBase
             _emitter.emit(new DocumentEndEvent( false));
             _emitter.emit(new StreamEndEvent());
             super.close();
-            _writer.close();
+
+            /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
+             *   on the underlying Reader, unless we "own" it, or auto-closing
+             *   feature is enabled.
+             *   One downside: when using UTF8Writer, underlying buffer(s)
+             *   may not be properly recycled if we don't close the writer.
+             */
+            if (_writer != null) {
+                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                    _writer.close();
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    // If we can't close it, we should at least flush
+                    _writer.flush();
+                }
+            }
         }
     }
 
@@ -522,9 +538,9 @@ public class YAMLGenerator extends GeneratorBase
         }
         _verifyValueWrite("write String value");
         ScalarStyle style = STYLE_QUOTED;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
+        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures) && !isBooleanContent(text)) {
           // If this string could be interpreted as a number, it must be quoted.
-            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
+            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
             } else if (text.indexOf('\n') >= 0) {
@@ -532,7 +548,7 @@ public class YAMLGenerator extends GeneratorBase
             } else {
                 style = STYLE_PLAIN;
             }
-        } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures) && text.indexOf('\n') >= 0) {
+        } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures) && text.indexOf('\n') >= 0) {
             style = STYLE_LITERAL;
         }
         _writeScalar(text, "string", style);
@@ -695,7 +711,7 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write number");
-        String str = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
+        String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeScalar(str, "java.math.BigDecimal", STYLE_SCALAR);
     }
 
@@ -728,14 +744,14 @@ public class YAMLGenerator extends GeneratorBase
     public boolean canWriteObjectId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#23] might not want to...
-        return Feature.USE_NATIVE_OBJECT_ID.enabledIn(_formatFeatures);
+        return Feature.USE_NATIVE_OBJECT_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
     public boolean canWriteTypeId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#22] might not want to...
-        return Feature.USE_NATIVE_TYPE_ID.enabledIn(_formatFeatures);
+        return Feature.USE_NATIVE_TYPE_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
@@ -760,7 +776,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         // should we verify there's no preceding id?
-        _objectId = String.valueOf(id);
+        _objectId = (id == null) ? null : String.valueOf(id);
     }
 
     /*
@@ -809,8 +825,10 @@ public class YAMLGenerator extends GeneratorBase
         if (b64variant == Base64Variants.getDefaultVariant()) {
             b64variant = Base64Variants.MIME;
         }
-        String encoded = b64variant.encode(data);
+        final String lf = _lf();
+        String encoded = b64variant.encode(data, false, lf);
         _emitter.emit(new ScalarEvent(Optional.empty(), Optional.ofNullable(TAG_BINARY), EXPLICIT_TAGS, encoded, STYLE_BASE64));
+
     }
 
     protected ScalarEvent _scalarEvent(String value, ScalarStyle style)
@@ -826,5 +844,9 @@ public class YAMLGenerator extends GeneratorBase
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
+    }
+
+    protected String _lf() {
+        return _outputOptions.getBestLineBreak();
     }
 }
