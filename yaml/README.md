@@ -41,7 +41,7 @@ but you can also just use underlying `YAMLFactory` and parser it produces, for e
 
 ```java
 YAMLFactory factory = new YAMLFactory();
-JsonParser parser = factory.createJsonParser(yamlString); // don't be fooled by method name...
+YAMLParser parser = factory.createParser(yamlString);
 while (parser.nextToken() != null) {
   // do something!
 }
