@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -169,6 +171,16 @@ public class YAMLGenerator extends GeneratorBase
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[0-9]*(\\.[0-9]*)?");
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
+    /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
+     * aliases for booleans, and we better quote such values as keys; although Jackson
+     * itself has no problems dealing with them, some other tools do have.
+     */
+    private final static Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList(
+            "y", "Y", "yes", "Yes", "YES", "n", "N", "no", "No", "NO",
+            "true", "True", "TRUE", "false", "False", "FALSE",
+            "on", "On", "ON", "off", "Off", "OFF"
+    ));
+
     /*
     /**********************************************************
     /* Configuration
@@ -188,9 +200,13 @@ public class YAMLGenerator extends GeneratorBase
 
     protected DumperOptions _outputOptions;
 
-    // for field names, leave out quotes
-    private final static Character STYLE_NAME = null;
-
+    /**
+     * Names are written unquoted, by default.
+     *
+     * @since 2.10
+     */
+    private Character _styleName = null;
+    
     // numbers, booleans, should use implicit
     private final static Character STYLE_SCALAR = null;
     // Strings quoted for fun
@@ -429,7 +445,13 @@ public class YAMLGenerator extends GeneratorBase
     private final void _writeFieldName(String name)
         throws IOException
     {
-        _writeScalar(name, "string", STYLE_NAME);
+        Character style = _styleName;
+        if (style == null) {
+            if (RESERVED_NAMES.contains(name)) {
+                style = STYLE_QUOTED;
+            }
+        }
+        _writeScalar(name, "string", style);
     }
 
     /*

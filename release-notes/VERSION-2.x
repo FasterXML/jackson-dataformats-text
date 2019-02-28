@@ -12,6 +12,8 @@ Modules:
 
 #63: (yaml) `null` Object Id serialized as anchor for YAML
  (reported by jflefebvre06@github)
+#68: (yaml) When field names are reserved words, they should be written out with quotes
+ (reported by Gowtam L)
 #90: (yaml) Exception when decoding Jackson-encoded `Base64` binary value in YAML
  (reported by Tanguy L)
 #122: (csv) `readValues(null)` causes infinite loop

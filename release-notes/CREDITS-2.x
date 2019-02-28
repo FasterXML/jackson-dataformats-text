@@ -32,3 +32,8 @@ Yegor Borovikov (yborovikov@gitub)
 * Reported #81 (yaml): Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
  (2.9.7)
 
+Gowtam Lal (baconmania@github)
+
+* Reported #68: (yaml) When field names are reserved words, they should be
+  written out with quotes
+ (2.9.9)

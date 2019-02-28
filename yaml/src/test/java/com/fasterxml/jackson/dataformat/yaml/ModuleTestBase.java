@@ -168,8 +168,8 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     protected static String trimDocMarker(String doc)
     {
         if (doc.startsWith("---")) {
-            doc = doc.substring(3).trim();
+            doc = doc.substring(3);
         }
-        return doc;
+        return doc.trim();
     }
 }
