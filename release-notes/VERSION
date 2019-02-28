@@ -17,3 +17,8 @@ implementations)
 3.0.0 (not yet released)
 
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
+
+YAML:
+
+#106: Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)
+ (contributed by Andrey S)
