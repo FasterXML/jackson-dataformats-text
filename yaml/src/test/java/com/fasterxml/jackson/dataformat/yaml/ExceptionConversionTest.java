@@ -14,7 +14,7 @@ public class ExceptionConversionTest extends ModuleTestBase
         try {
              mapper.readTree("foo:\nbar: true\n  baz: false");
              fail("Should not pass with invalid YAML");
-        } catch (org.yaml.snakeyaml.scanner.ScannerException e) {
+        } catch (org.snakeyaml.engine.v1.exceptions.ScannerException e) {
             fail("Internal exception type: "+e);
         } catch (JacksonYAMLParseException e) { // as of 2.8, this is the type to expect
             // (subtype of JsonParseException)

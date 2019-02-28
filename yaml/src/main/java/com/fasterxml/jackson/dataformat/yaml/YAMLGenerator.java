@@ -6,13 +6,28 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.DumperOptions.FlowStyle;
-import org.yaml.snakeyaml.emitter.Emitter;
-import org.yaml.snakeyaml.events.*;
-import org.yaml.snakeyaml.nodes.Tag;
+import org.snakeyaml.engine.v1.api.DumpSettings;
+import org.snakeyaml.engine.v1.api.DumpSettingsBuilder;
+import org.snakeyaml.engine.v1.common.Anchor;
+import org.snakeyaml.engine.v1.common.FlowStyle;
+import org.snakeyaml.engine.v1.common.ScalarStyle;
+import org.snakeyaml.engine.v1.common.SpecVersion;
+import org.snakeyaml.engine.v1.emitter.Emitter;
+import org.snakeyaml.engine.v1.events.AliasEvent;
+import org.snakeyaml.engine.v1.events.DocumentEndEvent;
+import org.snakeyaml.engine.v1.events.DocumentStartEvent;
+import org.snakeyaml.engine.v1.events.ImplicitTuple;
+import org.snakeyaml.engine.v1.events.MappingEndEvent;
+import org.snakeyaml.engine.v1.events.MappingStartEvent;
+import org.snakeyaml.engine.v1.events.ScalarEvent;
+import org.snakeyaml.engine.v1.events.SequenceEndEvent;
+import org.snakeyaml.engine.v1.events.SequenceStartEvent;
+import org.snakeyaml.engine.v1.events.StreamEndEvent;
+import org.snakeyaml.engine.v1.events.StreamStartEvent;
+import org.snakeyaml.engine.v1.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -97,7 +112,12 @@ public class YAMLGenerator extends GeneratorBase
          * If disabled, Unix linefeed ({@code \n}) will be used.
          * <p>
          * Default value is `false` for backwards compatibility.
+         *
+         * This setting does not do anything. Regardless of its value, SnakeYAML Engine will use the line break defined
+         * in System.getProperty("line.separator")
+         * @deprecated
          */
+        @Deprecated
         USE_PLATFORM_LINE_BREAKS(false),
 
         /**
@@ -168,23 +188,23 @@ public class YAMLGenerator extends GeneratorBase
 
     protected Writer _writer;
 
-    protected DumperOptions _outputOptions;
+    protected DumpSettings _outputOptions;
 
     // for field names, leave out quotes
-    private final static DumperOptions.ScalarStyle STYLE_NAME = DumperOptions.ScalarStyle.PLAIN;
+    private final static ScalarStyle STYLE_NAME = ScalarStyle.PLAIN;
 
     // numbers, booleans, should use implicit
-    private final static DumperOptions.ScalarStyle STYLE_SCALAR = DumperOptions.ScalarStyle.PLAIN;
+    private final static ScalarStyle STYLE_SCALAR = ScalarStyle.PLAIN;
     // Strings quoted for fun
-    private final static DumperOptions.ScalarStyle STYLE_QUOTED = DumperOptions.ScalarStyle.DOUBLE_QUOTED;
+    private final static ScalarStyle STYLE_QUOTED = ScalarStyle.DOUBLE_QUOTED;
     // Strings in literal (block) style
-    private final static DumperOptions.ScalarStyle STYLE_LITERAL = DumperOptions.ScalarStyle.LITERAL;
+    private final static ScalarStyle STYLE_LITERAL = ScalarStyle.LITERAL;
 
     // Which flow style to use for Base64? Maybe basic quoted?
     // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
-    private final static DumperOptions.ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
+    private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
 
-    private final static DumperOptions.ScalarStyle STYLE_PLAIN = DumperOptions.ScalarStyle.PLAIN;
+    private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
 
     /*
     /**********************************************************************
@@ -215,7 +235,7 @@ public class YAMLGenerator extends GeneratorBase
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
             int streamWriteFeatures, int yamlFeatures,
             Writer out,
-            org.yaml.snakeyaml.DumperOptions.Version version)
+            SpecVersion version)
         throws IOException
     {
         super(writeContext, streamWriteFeatures);
@@ -225,22 +245,22 @@ public class YAMLGenerator extends GeneratorBase
 
         _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
 
-        _emitter = new Emitter(_writer, _outputOptions);
+        _emitter = new Emitter( _outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
-        _emitter.emit(new StreamStartEvent(null, null));
+        _emitter.emit(new StreamStartEvent());
         Map<String,String> noTags = Collections.emptyMap();
 
         boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(yamlFeatures);
 
-        _emitter.emit(new DocumentStartEvent(null, null, startMarker,
-                version, // for 1.10 was: ((version == null) ? null : version.getArray()),
+        _emitter.emit(new DocumentStartEvent(startMarker, Optional.empty(),
+                 // for 1.10 was: ((version == null) ? null : version.getArray()),
                 noTags));
     }
 
-    protected DumperOptions buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
-            org.yaml.snakeyaml.DumperOptions.Version version)
+    protected DumpSettings buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
+            SpecVersion version)
     {
-        DumperOptions opt = new DumperOptions();
+        DumpSettingsBuilder opt = new DumpSettingsBuilder();
         // would we want canonical?
         if (Feature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
             opt.setCanonical(true);
@@ -260,11 +280,7 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
         }
-        // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
-        if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatWriteFeatures)) {
-            opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
-        }
-        return opt;
+        return opt.build();
     }
 
     /*
@@ -425,8 +441,8 @@ public class YAMLGenerator extends GeneratorBase
     public void close() throws IOException
     {
         if (!isClosed()) {
-            _emitter.emit(new DocumentEndEvent(null, null, false));
-            _emitter.emit(new StreamEndEvent(null, null));
+            _emitter.emit(new DocumentEndEvent( false));
+            _emitter.emit(new StreamEndEvent());
             super.close();
 
             /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
@@ -460,12 +476,12 @@ public class YAMLGenerator extends GeneratorBase
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new SequenceStartEvent(anchor, yamlTag,
-                implicit,  null, null, style));
+        _emitter.emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
+                implicit,  style));
     }
 
     @Override
@@ -477,7 +493,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _outputContext = _outputContext.getParent();
-        _emitter.emit(new SequenceEndEvent(null, null));
+        _emitter.emit(new SequenceEndEvent());
     }
 
     @Override
@@ -488,12 +504,11 @@ public class YAMLGenerator extends GeneratorBase
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new MappingStartEvent(anchor, yamlTag,
-                implicit, null, null, style));
+        _emitter.emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
     }
 
     @Override
@@ -505,7 +520,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _outputContext = _outputContext.getParent();
-        _emitter.emit(new MappingEndEvent(null, null));
+        _emitter.emit(new MappingEndEvent());
     }
 
     /*
@@ -522,7 +537,7 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write String value");
-        DumperOptions.ScalarStyle style = STYLE_QUOTED;
+        ScalarStyle style = STYLE_QUOTED;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures) && !isBooleanContent(text)) {
           // If this string could be interpreted as a number, it must be quoted.
             if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
@@ -752,7 +767,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         _verifyValueWrite("write Object reference");
-        AliasEvent evt = new AliasEvent(String.valueOf(id), null, null);
+        AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
         _emitter.emit(evt);
     }
 
@@ -797,7 +812,7 @@ public class YAMLGenerator extends GeneratorBase
     // ... and sometimes we specifically DO want explicit tag:
     private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
-    protected void _writeScalar(String value, String type, DumperOptions.ScalarStyle style) throws IOException
+    protected void _writeScalar(String value, String type, ScalarStyle style) throws IOException
     {
         _emitter.emit(_scalarEvent(value, style));
     }
@@ -812,27 +827,26 @@ public class YAMLGenerator extends GeneratorBase
         }
         final String lf = _lf();
         String encoded = b64variant.encode(data, false, lf);
-        _emitter.emit(new ScalarEvent(null, TAG_BINARY, EXPLICIT_TAGS, encoded,
-                null, null, STYLE_BASE64));
+        _emitter.emit(new ScalarEvent(Optional.empty(), Optional.ofNullable(TAG_BINARY), EXPLICIT_TAGS, encoded, STYLE_BASE64));
+
     }
 
-    protected ScalarEvent _scalarEvent(String value, DumperOptions.ScalarStyle style)
+    protected ScalarEvent _scalarEvent(String value, ScalarStyle style)
     {
         String yamlTag = _typeId;
         if (yamlTag != null) {
             _typeId = null;
         }
-        String anchor = _objectId;
-        if (anchor != null) {
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
+        if (anchor.isPresent()) {
             _objectId = null;
         }
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
-        return new ScalarEvent(anchor, yamlTag, NO_TAGS, value,
-                null, null, style);
+        return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
     }
 
     protected String _lf() {
-        return _outputOptions.getLineBreak().getString();
+        return _outputOptions.getBestLineBreak();
     }
 }
