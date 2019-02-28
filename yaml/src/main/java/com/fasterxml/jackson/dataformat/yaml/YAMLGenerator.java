@@ -5,7 +5,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.DumperOptions;
@@ -169,6 +171,16 @@ public class YAMLGenerator extends GeneratorBase
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[0-9]*(\\.[0-9]*)?");
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
+    /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
+     * aliases for booleans, and we better quote such values as keys; although Jackson
+     * itself has no problems dealing with them, some other tools do have.
+     */
+    private final static Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList(
+            "y", "Y", "yes", "Yes", "YES", "n", "N", "no", "No", "NO",
+            "true", "True", "TRUE", "false", "False", "FALSE",
+            "on", "On", "ON", "off", "Off", "OFF"
+    ));
+
     /*
     /**********************************************************
     /* Configuration
@@ -189,7 +201,7 @@ public class YAMLGenerator extends GeneratorBase
     protected DumperOptions _outputOptions;
 
     // for field names, leave out quotes
-    private final static DumperOptions.ScalarStyle STYLE_NAME = DumperOptions.ScalarStyle.PLAIN;
+    private final static DumperOptions.ScalarStyle STYLE_UNQUOTED_NAME = DumperOptions.ScalarStyle.PLAIN;
 
     // numbers, booleans, should use implicit
     private final static DumperOptions.ScalarStyle STYLE_SCALAR = DumperOptions.ScalarStyle.PLAIN;
@@ -426,12 +438,38 @@ public class YAMLGenerator extends GeneratorBase
         writeString(value);
     }
 
-    private final void _writeFieldName(String name)
-        throws IOException
+    private final void _writeFieldName(String name) throws IOException
     {
-        _writeScalar(name, "string", STYLE_NAME);
+        _writeScalar(name, "string",
+                _needQuoting(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
     }
 
+    private boolean _needQuoting(String name) {
+        if (name.length() == 0) {
+            return false;
+        }
+        switch (name.charAt(0)) {
+        // First, reserved name starting chars:
+        case 'f': // false
+        case 'o': // on/off
+        case 'n': // no
+        case 't': // true
+        case 'y': // yes
+        case 'F': // False
+        case 'O': // On/Off
+        case 'N': // No
+        case 'T': // True
+        case 'Y': // Yes
+            return RESERVED_NAMES.contains(name);
+
+            // And then numbers
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+        case '-' : case '+': case '.':
+            return true;
+        }
+        return false;
+    }    
     /*
     /**********************************************************
     /* Public API: low-level I/O
