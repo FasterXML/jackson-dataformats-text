@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.io.Writer;
 
 import org.snakeyaml.engine.v1.api.StreamDataWriter;
@@ -17,16 +18,16 @@ public class WriterWrapper implements StreamDataWriter {
         try {
             _writer.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
     @Override
     public void write(String str) {
         try {
-        _writer.write(str);
+            _writer.write(str);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -35,7 +36,7 @@ public class WriterWrapper implements StreamDataWriter {
         try {
             _writer.write(str, off, len);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
     }
 }
