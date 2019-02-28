@@ -1,6 +1,8 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import org.junit.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.UTF8Writer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
