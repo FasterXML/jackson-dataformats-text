@@ -1,9 +1,12 @@
-package com.fasterxml.jackson.dataformat.yaml;
+package com.fasterxml.jackson.dataformat.yaml.type;
 
 import com.fasterxml.jackson.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public class TypeIdTest extends ModuleTestBase
 {
