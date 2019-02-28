@@ -32,12 +32,18 @@ Yegor Borovikov (yborovikov@gitub)
 * Reported #81 (yaml): Jackson 2.9.5, 2.9.6 incompatible with snakeyaml 1.20, 1.21
  (2.9.7)
 
-Andrey Somov (asomov@github)
+Gowtam Lal (baconmania@github)
 
-* Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
- (2.10.0)
+* Reported #68: (yaml) When field names are reserved words, they should be
+  written out with quotes
+ (2.9.9)
 
 Tanguy Leroux (tlrx@github)
 
 * Reported #90: Exception when decoding Jackson-encoded `Base64` binary value in YAML
+ (2.10.0)
+
+Andrey Somov (asomov@github)
+
+* Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (2.10.0)
