@@ -309,7 +309,7 @@ public class JavaPropsMapper extends ObjectMapper
     public Properties writeValueAsProperties(Object value)
         throws IOException
     {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         writeValue(props, value);
         return props;
     }
