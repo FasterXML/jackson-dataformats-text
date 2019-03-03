@@ -37,3 +37,7 @@ Gowtam Lal (baconmania@github)
 * Reported #68: (yaml) When field names are reserved words, they should be
   written out with quotes
  (2.9.9)
+
+Dimitris Mandalidis (dmandalidis@github)
+* Reported #91: (properties) `JavaPropsGenerator#writeFieldName()` should not escape property keys
+ (2.9.9)

@@ -16,6 +16,8 @@ Modules:
  (reported by Gowtam L)
 #90: (yaml) Exception when decoding Jackson-encoded `Base64` binary value in YAML
  (reported by Tanguy L)
+#91: (properties) `JavaPropsGenerator#writeFieldName()` should not escape property keys
+ (reported by Dimitris M)
 #122: (csv) `readValues(null)` causes infinite loop
  (reported by andyeko@github) 
 #123: (yaml) YAML Anchor, reference fails with simple example

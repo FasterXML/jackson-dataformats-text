@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
-import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
@@ -206,6 +205,8 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************************
      */
 
+// varies between impls so:
+//    @Override public void writeFieldName(String name) throws IOException
     @Override
     public void writeFieldName(String name) throws IOException
     {
@@ -230,11 +231,10 @@ public abstract class JavaPropsGenerator extends GeneratorBase
                 _basePath.append(sep);
             }
         }
-        // Note that escaping needs to be applied now...
-        
-        JPropEscapes.appendKey(_basePath, name);
-        // NOTE: we do NOT yet write the key; wait until we have value; just append to path
+        _appendFieldName(_basePath, name);
     }
+
+    protected abstract void _appendFieldName(StringBuilder path, String name);
 
     /*
     /**********************************************************

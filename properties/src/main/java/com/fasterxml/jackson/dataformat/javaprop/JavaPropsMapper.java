@@ -210,8 +210,7 @@ public class JavaPropsMapper extends ObjectMapper
         if (targetProps == null) {
             throw new IllegalArgumentException("Can not pass null Properties as target");
         }
-        JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(targetProps);
+        JavaPropsGenerator g = getFactory().createGenerator(targetProps);
         if (schema != null) {
             g.setSchema(schema);
         }
@@ -229,7 +228,7 @@ public class JavaPropsMapper extends ObjectMapper
     public Properties writeValueAsProperties(Object value)
         throws IOException
     {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         writeValue(props, value);
         return props;
     }

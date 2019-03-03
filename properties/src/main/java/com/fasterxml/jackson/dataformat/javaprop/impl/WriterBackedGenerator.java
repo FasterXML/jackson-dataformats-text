@@ -129,6 +129,13 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         }
     }
 
+    @Override
+    protected void _appendFieldName(StringBuilder path, String name) {
+        // Note that escaping needs to be applied now...
+        JPropEscapes.appendKey(_basePath, name);
+        // NOTE: we do NOT yet write the key; wait until we have value; just append to path
+    }
+
     /*
     /**********************************************************
     /* Internal methods; escaping writes

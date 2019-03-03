@@ -32,6 +32,10 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     {
         super(ctxt, stdFeatures, codec);
         _props = props;
+
+        // Since this is not physically encoding properties, should NOT try
+        // to attempt writing headers. Easy way is to just fake we already did it
+        _headerChecked = true;
     }
 
     /*
@@ -66,6 +70,12 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     @Override
     protected void _releaseBuffers() { }
 
+    @Override
+    protected void _appendFieldName(StringBuilder path, String name) {
+        // No escaping should be applied
+        path.append(name);
+    }
+    
     /*
     /**********************************************************
     /* Internal methods; escaping writes
