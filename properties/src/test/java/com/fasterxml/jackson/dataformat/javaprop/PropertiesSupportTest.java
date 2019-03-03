@@ -51,4 +51,24 @@ public class PropertiesSupportTest extends ModuleTestBase
         assertEquals(1, m2.size());
         assertEquals("foo", m2.get("z"));
     }
+
+    static class TestObject91 {
+        Map<String, String> values = new HashMap<>();
+        public Map<String, String> getValues() {
+             return values;
+        }
+        public void setValues(Map<String, String> values) {
+             this.values = values;
+        }
+    }
+
+    // [dataformats-text#91]
+    public void testEscapingWithReadPropertiesAs() throws Exception
+    {
+        TestObject91 expected = new TestObject91();
+        expected.values.put("foo:bar", "1");
+        Properties properties = MAPPER.writeValueAsProperties(expected);
+        TestObject91 actual = MAPPER.readPropertiesAs(properties, TestObject91.class);
+        assertEquals(expected.values, actual.values);
+    }
 }

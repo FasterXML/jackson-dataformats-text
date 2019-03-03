@@ -38,6 +38,11 @@ Gowtam Lal (baconmania@github)
   written out with quotes
  (2.9.9)
 
+Dimitris Mandalidis (dmandalidis@github)
+
+* Reported #91: (properties) `JavaPropsGenerator#writeFieldName()` should not escape property keys
+ (2.9.9)
+
 Tanguy Leroux (tlrx@github)
 
 * Reported #90: Exception when decoding Jackson-encoded `Base64` binary value in YAML
@@ -47,3 +52,4 @@ Andrey Somov (asomov@github)
 
 * Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (2.10.0)
+
