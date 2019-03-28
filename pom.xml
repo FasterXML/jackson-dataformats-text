@@ -39,12 +39,6 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
     </dependency>
-
-    <dependency> <!-- all components use junit for testing -->
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <!-- Alas, need to include snapshot reference since otherwise can not find

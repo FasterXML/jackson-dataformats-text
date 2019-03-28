@@ -8,8 +8,8 @@ module com.fasterxml.jackson.dataformat.javaprop {
     exports com.fasterxml.jackson.dataformat.javaprop.io;
     exports com.fasterxml.jackson.dataformat.javaprop.util;
 
-    provides com.fasterxml.jackson.core.JsonFactory with
+    provides com.fasterxml.jackson.core.TokenStreamFactory with
         com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-    provides com.fasterxml.jackson.core.ObjectCodec with
+    provides com.fasterxml.jackson.databind.ObjectMapper with
         com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 }

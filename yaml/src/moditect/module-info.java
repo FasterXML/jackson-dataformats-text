@@ -7,11 +7,9 @@ module com.fasterxml.jackson.dataformat.yaml {
     requires snakeyaml;
 
     exports com.fasterxml.jackson.dataformat.yaml;
-    // probably need to expose this for 2.x?
-    exports com.fasterxml.jackson.dataformat.yaml.snakeyaml.error;
 
-    provides com.fasterxml.jackson.core.JsonFactory with
+    provides com.fasterxml.jackson.core.TokenStreamFactory with
         com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-    provides com.fasterxml.jackson.core.ObjectCodec with
+    provides com.fasterxml.jackson.databind.ObjectMapper with
         com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 }

@@ -6,8 +6,8 @@ module com.fasterxml.jackson.dataformat.csv {
     exports com.fasterxml.jackson.dataformat.csv;
 //    exports com.fasterxml.jackson.dataformat.csv.impl;
 
-    provides com.fasterxml.jackson.core.JsonFactory with
+    provides com.fasterxml.jackson.core.TokenStreamFactory with
         com.fasterxml.jackson.dataformat.csv.CsvFactory;
-    provides com.fasterxml.jackson.core.ObjectCodec with
+    provides com.fasterxml.jackson.databind.ObjectMapper with
         com.fasterxml.jackson.dataformat.csv.CsvMapper;
 }
