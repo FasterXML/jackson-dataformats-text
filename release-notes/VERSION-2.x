@@ -14,6 +14,7 @@ Modules:
  (contributed by Andrey S)
 #108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
+- Add JDK9+ module info using Moditect plugin
 
 2.9.9 (not yet released)
 
