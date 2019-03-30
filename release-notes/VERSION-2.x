@@ -10,7 +10,7 @@ Modules:
 
 2.10.0 (not yet released)
 
-#101: (yaml) Use latest SnakeYAML version 1.23 and get rid of deprecated methods
+#101: (yaml) Use latest SnakeYAML version 1.24 and get rid of deprecated methods
  (contributed by Andrey S)
 #108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
