@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
+import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
@@ -15,6 +17,14 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
  */
 public class CsvEncoder
 {
+
+    /*
+     * default set of escaped characters.
+     */
+    private static final int [] sOutputEscapes = new int[0];
+
+    final protected static char[] HEX_CHARS = CharTypes.copyHexChars();
+
     /* As an optimization we try coalescing short writes into
      * buffer; but pass longer directly.
      */
@@ -29,7 +39,13 @@ public class CsvEncoder
 
     private final static char[] TRUE_CHARS = "true".toCharArray();
     private final static char[] FALSE_CHARS = "false".toCharArray();
-    
+
+    /**
+     * Currently active set of output escape code definitions (whether
+     * and how to escape or not).
+     */
+    protected int[] _outputEscapes = sOutputEscapes;
+
     /*
     /**********************************************************
     /* Configuration
@@ -93,7 +109,17 @@ public class CsvEncoder
 
     protected boolean _cfgEscapeQuoteCharWithEscapeChar;
 
+    /**
+     * @since 2.9.9
+     */
+    protected boolean _cfgEscapeControlCharWithEscapeChar;
+
     protected final char _cfgQuoteCharEscapeChar;
+
+    /**
+     * @since 2.9.9
+     */
+    protected final char _cfgControlCharEscapeChar;
 
     /*
     /**********************************************************
@@ -174,6 +200,7 @@ public class CsvEncoder
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
         _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
+        _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
         _outputBuffer = ctxt.allocConcatBuffer();
         _bufferRecyclable = true;
@@ -198,6 +225,8 @@ public class CsvEncoder
           _cfgQuoteCharacter,
           _cfgEscapeCharacter
         );
+
+        _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
     }
 
     public CsvEncoder(CsvEncoder base, CsvSchema newSchema)
@@ -209,12 +238,14 @@ public class CsvEncoder
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
         _cfgAlwaysQuoteEmptyStrings = base._cfgAlwaysQuoteEmptyStrings;
         _cfgEscapeQuoteCharWithEscapeChar = base._cfgEscapeQuoteCharWithEscapeChar;
+        _cfgEscapeControlCharWithEscapeChar = base._cfgEscapeControlCharWithEscapeChar;
 
         _outputBuffer = base._outputBuffer;
         _bufferRecyclable = base._bufferRecyclable;
         _outputEnd = base._outputEnd;
         _out = base._out;
         _cfgMaxQuoteCheckChars = base._cfgMaxQuoteCheckChars;
+        _outputEscapes = base._outputEscapes;
 
         _cfgColumnSeparator = newSchema.getColumnSeparator();
         _cfgQuoteCharacter = newSchema.getQuoteChar();
@@ -229,6 +260,7 @@ public class CsvEncoder
           newSchema.getQuoteChar(),
           newSchema.getEscapeChar()
         );
+        _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
     }
 
     private final char _getQuoteCharEscapeChar(
@@ -275,7 +307,13 @@ public class CsvEncoder
             _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(feat);
             _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(feat);
             _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(feat);
+            _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(feat);
         }
+        return this;
+    }
+
+    public CsvEncoder setOutputEscapes(int [] esc) {
+        _outputEscapes = (esc != null) ? esc : sOutputEscapes;
         return this;
     }
 
@@ -696,6 +734,9 @@ public class CsvEncoder
 
     public void _writeQuoted(String text) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
         }
@@ -718,8 +759,15 @@ public class CsvEncoder
         text.getChars(0, len, buf, ptr);
 
         final int end = ptr+len;
-        
-        for (; ptr < end && buf[ptr] != q; ++ptr) { }
+
+        for (; ptr < end; ++ptr) {
+            char c = buf[ptr];
+            // see if any of the characters need escaping.
+            // if yes, fall back to the more convoluted write method
+            if ((c == q) || (c < escLen && escCodes[c] != 0)) {
+                break; // for
+            }
+        }
 
         if (ptr == end) { // all good, no quoting or escaping!
             _outputBuffer[ptr] = q;
@@ -731,16 +779,28 @@ public class CsvEncoder
 
     protected void _writeQuoted(String text, char q, int i) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         final char[] buf = _outputBuffer;
         _outputTail += i;
         final int len = text.length();
         for (; i < len; ++i) {
             char c = text.charAt(i);
+            if (c < escLen) {
+                int escCode = escCodes[c];
+                if (escCode != 0) { // for escape control and double quotes, c will be 0
+                    _appendCharacterEscape(c, escCode);
+                    continue; // for
+                }
+            }
+
             if (c == q) { // double up
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
-                buf[_outputTail++] = _cfgQuoteCharEscapeChar;
+
+                buf[_outputTail++] = _cfgQuoteCharEscapeChar; // this will be the quote
             }
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
@@ -755,12 +815,23 @@ public class CsvEncoder
 
     private final void _writeLongQuoted(String text, char q) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         final int len = text.length();
         for (int i = 0; i < len; ++i) {
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
             }
             char c = text.charAt(i);
+            if (c < escLen) {
+                int escCode = escCodes[c];
+                if (escCode != 0) { // for escape control and double quotes, c will be 0
+                    _appendCharacterEscape(c, escCode);
+                    continue; // for
+                }
+            }
+
             if (c == q) { // double up
                 _outputBuffer[_outputTail++] = _cfgQuoteCharEscapeChar;
                 if (_outputTail >= _outputEnd) {
@@ -777,6 +848,9 @@ public class CsvEncoder
 
     public void _writeQuotedAndEscaped(String text, char esc) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
         }
@@ -796,7 +870,7 @@ public class CsvEncoder
         final int end = ptr+len;
         for (; ptr < end; ++ptr) {
             char c = buf[ptr];
-            if ((c == q) || (c == esc)) {
+            if ((c == q) || (c == esc) || (c < escLen && escCodes[c] != 0)) {
                 break;
             }
         }
@@ -811,17 +885,36 @@ public class CsvEncoder
 
     protected void _writeQuotedAndEscaped(String text, char q, char esc, int i) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         final char[] buf = _outputBuffer;
         _outputTail += i;
         final int len = text.length();
         for (; i < len; ++i) {
             char c = text.charAt(i);
-            if ((c == q) || (c == esc)) { // double up, either way
+            if (c < escLen) {
+                int escCode = escCodes[c];
+                if (escCode != 0) { // for escape control and double quotes, c will be 0
+                    _appendCharacterEscape(c, escCode);
+                    continue; // for
+                }
+            }
+
+            if (c == q) { // double up
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
-                buf[_outputTail++] = (c == q) ? _cfgQuoteCharEscapeChar : c;
+
+                _outputBuffer[_outputTail++] = _cfgQuoteCharEscapeChar;
+            } else if (c == esc) { // double up
+                if (_outputTail >= _outputEnd) {
+                    _flushBuffer();
+                }
+
+                _outputBuffer[_outputTail++] = _cfgControlCharEscapeChar;
             }
+
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();
             }
@@ -835,6 +928,9 @@ public class CsvEncoder
     
     private final void _writeLongQuotedAndEscaped(String text, char esc) throws IOException
     {
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         final int len = text.length();
         // NOTE: caller should guarantee quote char is valid (not -1) at this point:
         final char q = (char) _cfgQuoteCharacter;
@@ -844,12 +940,26 @@ public class CsvEncoder
                 _flushBuffer();
             }
             char c = text.charAt(i);
-            if ((c == q) || (c == esc)) { // double up, either way
-                _outputBuffer[_outputTail++] = (c == q) ? quoteEscape : c;
+            if (c < escLen) {
+                int escCode = escCodes[c];
+                if (escCode != 0) { // for escape control and double quotes, c will be 0
+                    _appendCharacterEscape(c, escCode);
+                    continue; // for
+                }
+            }
+
+            if (c == q) { // double up
+                _outputBuffer[_outputTail++] = _cfgQuoteCharEscapeChar;
+                if (_outputTail >= _outputEnd) {
+                    _flushBuffer();
+                }
+            } else if (c == esc) { // double up
+                _outputBuffer[_outputTail++] = _cfgControlCharEscapeChar;
                 if (_outputTail >= _outputEnd) {
                     _flushBuffer();
                 }
             }
+
             _outputBuffer[_outputTail++] = c;
         }
         if (_outputTail >= _outputEnd) {
@@ -954,11 +1064,15 @@ public class CsvEncoder
     protected boolean _needsQuotingStrict(String value)
     {
         final int minSafe = _cfgMinSafeChar;
+
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || c == '\r' || c == '\n'
+                        || (c < escLen && escCodes[c] != 0)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
@@ -974,11 +1088,15 @@ public class CsvEncoder
     protected boolean _needsQuotingStrict(String value, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
+
+        final int[] escCodes = _outputEscapes;
+        final int escLen = escCodes.length;
+
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || c == '\r' || c == '\n'
+                        || (c < escLen && escCodes[c] != 0)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
@@ -1015,5 +1133,43 @@ public class CsvEncoder
             _outputBuffer = null;
             _ioContext.releaseConcatBuffer(buf);
         }
+    }
+
+    /**
+     * Method called to append escape sequence for given character, at the
+     * end of standard output buffer; or if not possible, write out directly.
+     */
+    private void _appendCharacterEscape(char ch, int escCode) throws IOException
+    {
+        if (escCode >= 0) { // \\N (2 char)
+            if ((_outputTail + 2) > _outputEnd) {
+                _flushBuffer();
+            }
+            _outputBuffer[_outputTail++] = _cfgControlCharEscapeChar;
+            _outputBuffer[_outputTail++] = (char) escCode;
+            return;
+        }
+
+        if ((_outputTail + 5) >= _outputEnd) {
+            _flushBuffer();
+        }
+        int ptr = _outputTail;
+        char[] buf = _outputBuffer;
+        buf[ptr++] = '\\';
+        buf[ptr++] = 'u';
+        // We know it's a control char, so only the last 2 chars are non-0
+        if (ch > 0xFF) { // beyond 8 bytes
+            int hi = (ch >> 8) & 0xFF;
+            buf[ptr++] = HEX_CHARS[hi >> 4];
+            buf[ptr++] = HEX_CHARS[hi & 0xF];
+            ch &= 0xFF;
+        } else {
+            buf[ptr++] = '0';
+            buf[ptr++] = '0';
+        }
+        buf[ptr++] = HEX_CHARS[ch >> 4];
+        buf[ptr++] = HEX_CHARS[ch & 0xF];
+        _outputTail = ptr;
+        return;
     }
 }
