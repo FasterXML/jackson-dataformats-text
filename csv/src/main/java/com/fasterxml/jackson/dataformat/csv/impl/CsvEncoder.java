@@ -1,14 +1,14 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Arrays;
-
 import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Arrays;
 
 /**
  * Helper class that handles actual low-level construction of
@@ -1039,8 +1039,14 @@ public class CsvEncoder
      */
     protected final boolean _needsQuotingLoose(String value)
     {
+        char esc1 = _cfgQuoteCharEscapeChar;
+        char esc2 = _cfgControlCharEscapeChar;
+
         for (int i = 0, len = value.length(); i < len; ++i) {
-            if (value.charAt(i) < _cfgMinSafeChar) {
+            char c = value.charAt(i);
+            if ((c < _cfgMinSafeChar)
+                    || (c == esc1)
+                    || (c == esc2)) {
                 return true;
             }
         }
