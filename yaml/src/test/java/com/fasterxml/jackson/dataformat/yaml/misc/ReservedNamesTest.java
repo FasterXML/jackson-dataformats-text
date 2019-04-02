@@ -15,10 +15,10 @@ public class ReservedNamesTest extends ModuleTestBase
         for (String value : new String[] {
                 "true", "True",
                 "false", "False",
-                "yes", "y", "Y",
-                "no", "n", "N",
-                "on",
-                "off",
+                "yes", "no",
+                // NOTE: single-letter cases left out on purpose
+//                "y", "Y", "n", "N",
+                "on", "off",
         }) {
             _testQuotingOfBooleanKeys(value);
         }
