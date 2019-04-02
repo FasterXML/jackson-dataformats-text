@@ -175,8 +175,11 @@ public class YAMLGenerator extends GeneratorBase
      * aliases for booleans, and we better quote such values as keys; although Jackson
      * itself has no problems dealing with them, some other tools do have.
      */
+    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out 
+    //    single letter case (esp so 'y' won't get escaped)
     private final static Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList(
-            "y", "Y", "yes", "Yes", "YES", "n", "N", "no", "No", "NO",
+//            "y", "Y", "n", "N",
+            "yes", "Yes", "YES", "no", "No", "NO",
             "true", "True", "TRUE", "false", "False", "FALSE",
             "on", "On", "ON", "off", "Off", "OFF"
     ));
