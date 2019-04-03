@@ -1,12 +1,19 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -43,6 +50,142 @@ public class TestGenerator extends ModuleTestBase
     /**********************************************************************
      */
 
+    public void testNestedProperties() throws Exception {
+        ObjectMapper mapper = mapperForCsv().configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+        CsvSchema schema = CsvSchema.builder()
+                                    .setPathSeparator(".")
+                                    .setUseHeader(true)
+                                    .addColumn("firstName")
+                                    .addColumn("lastName")
+                                    .addColumn("gender")
+                                    .addColumn("userImage")
+                                    .addColumn("verified")
+                                    .addColumn("address.streetName")
+                                    .addColumn("address.city")
+                                    .build();
+
+        List<TenMinuteUser> users = new ArrayList<>();
+        users.add(new TenMinuteUser("Silu", "Seppala", false, Gender.MALE,
+                                                 new byte[] { 1, 2, 3, 4, 5}, new Address("someStreet", "someCity")));
+        users.add(new TenMinuteUser("Petar", "Tahchiev", false, Gender.MALE,
+                                    new byte[] { 1, 2, 3, 4, 5}, new Address("someOtherStreet", "someOtherCity")));
+
+
+
+        String result = mapper.writer(schema).writeValueAsString(users);
+
+        StringBuffer expectedResults = new StringBuffer();
+        expectedResults.append( "firstName,lastName,gender,userImage,verified,address.streetName,address.city\n" );
+        expectedResults.append( "Silu,Seppala,MALE,AQIDBAU=,false,someStreet,someCity\n" );
+        expectedResults.append( "Petar,Tahchiev,MALE,AQIDBAU=,false,someOtherStreet,someOtherCity\n");
+
+        assertEquals(expectedResults.toString(), result);
+    }
+
+    public void testNestedMap() throws Exception {
+        ObjectMapper mapper = mapperForCsv().configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+        CsvSchema schema = CsvSchema.builder()
+                                    .setPathSeparator(".")
+                                    .setUseHeader(true)
+                                    .addColumn("firstName")
+                                    .addColumn("localizedName.en.value")
+                                    .addColumn("localizedName.bg.value")
+                                    .build();
+
+        Map<Locale, LocalizedValue> siluLocalizedName = new HashMap<>();
+        siluLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Silu Seppala"));
+        siluLocalizedName.put(new Locale("bg"), new LocalizedValue("Силу Сепала"));
+
+        Map<Locale, LocalizedValue> petarLocalizedName = new HashMap<>();
+        petarLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Petar Tahchiev"));
+        petarLocalizedName.put(new Locale("bg"), new LocalizedValue("Петър Тахчиев"));
+
+        List<FifteenMinuteUser> users = new ArrayList<>();
+        users.add(new FifteenMinuteUser("Silu", "Seppala", false, Gender.MALE,
+                                    new byte[] { 1, 2, 3, 4, 5}, siluLocalizedName));
+        users.add(new FifteenMinuteUser("Petar", "Tahchiev", false, Gender.MALE,
+                                    new byte[] { 1, 2, 3, 4, 5}, petarLocalizedName));
+
+        String result = mapper.writer(schema).writeValueAsString(users);
+
+        StringBuffer expectedResults = new StringBuffer();
+        expectedResults.append( "firstName,localizedName.en.value,localizedName.bg.value\n" );
+        expectedResults.append( "Silu,\"Silu Seppala\",\"Силу Сепала\"\n" );
+        expectedResults.append( "Petar,\"Petar Tahchiev\",\"Петър Тахчиев\"\n");
+
+        assertEquals(expectedResults.toString(), result);
+
+    }
+
+    public void testNestedMap2() throws JsonProcessingException {
+        ObjectMapper mapper = mapperForCsv().configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+        CsvSchema schema = CsvSchema.builder()
+                          .setPathSeparator(".")
+                          .setUseHeader(true)
+                          .addColumn("firstName")
+                          .addColumn("localizedName.en.value")
+                          .build();
+
+        Map<Locale, LocalizedValue> siluLocalizedName = new HashMap<>();
+        siluLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Silu Seppala"));
+        siluLocalizedName.put(new Locale("bg"), new LocalizedValue("Силу Сепала"));
+
+        Map<Locale, LocalizedValue> petarLocalizedName = new HashMap<>();
+        petarLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Petar Tahchiev"));
+        petarLocalizedName.put(new Locale("bg"), new LocalizedValue("Петър Тахчиев"));
+
+        List<FifteenMinuteUser> users = new ArrayList<>();
+        users.add(new FifteenMinuteUser("Silu", "Seppala", false, Gender.MALE,
+                                        new byte[] { 1, 2, 3, 4, 5}, siluLocalizedName));
+        users.add(new FifteenMinuteUser("Petar", "Tahchiev", false, Gender.MALE,
+                                        new byte[] { 1, 2, 3, 4, 5}, petarLocalizedName));
+
+
+        String result = mapper.writer(schema).writeValueAsString(users);
+
+        StringBuffer expectedResults = new StringBuffer();
+        expectedResults.append( "firstName,localizedName.en.value\n" );
+        expectedResults.append( "Silu,\"Silu Seppala\"\n" );
+        expectedResults.append( "Petar,\"Petar Tahchiev\"\n");
+
+        assertEquals(expectedResults.toString(), result);
+    }
+
+    public void testNestedMap3() throws JsonProcessingException {
+        ObjectMapper mapper = mapperForCsv().configure(JsonGenerator.Feature.IGNORE_UNKNOWN, true);
+        CsvSchema schema = CsvSchema.builder()
+                                    .setPathSeparator(".")
+                                    .setUseHeader(true)
+                                    .addColumn("firstName")
+                                    .addColumn("localizedName.bg.value")
+                                    .addColumn("lastName")
+                                    .build();
+
+        Map<Locale, LocalizedValue> siluLocalizedName = new HashMap<>();
+        siluLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Silu Seppala"));
+        siluLocalizedName.put(new Locale("bg"), new LocalizedValue("Силу Сепала"));
+
+        Map<Locale, LocalizedValue> petarLocalizedName = new HashMap<>();
+        petarLocalizedName.put(Locale.ENGLISH, new LocalizedValue("Petar Tahchiev"));
+        petarLocalizedName.put(new Locale("bg"), new LocalizedValue("Петър Тахчиев"));
+
+        List<FifteenMinuteUser> users = new ArrayList<>();
+        users.add(new FifteenMinuteUser("Silu", "Seppala", false, Gender.MALE,
+                                        new byte[] { 1, 2, 3, 4, 5}, siluLocalizedName));
+        users.add(new FifteenMinuteUser("Petar", "Tahchiev", false, Gender.MALE,
+                                        new byte[] { 1, 2, 3, 4, 5}, petarLocalizedName));
+
+
+        String result = mapper.writer(schema).writeValueAsString(users);
+
+        StringBuffer expectedResults = new StringBuffer();
+        expectedResults.append( "firstName,localizedName.bg.value,lastName\n" );
+        expectedResults.append( "Silu,\"Силу Сепала\",Seppala\n" );
+        expectedResults.append( "Petar,\"Петър Тахчиев\",Tahchiev\n");
+
+        assertEquals(expectedResults.toString(), result);
+    }
+
     public void testSimpleExplicit() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
@@ -56,7 +199,7 @@ public class TestGenerator extends ModuleTestBase
 
         // from base, default order differs:
         // @JsonPropertyOrder({"firstName", "lastName", "gender" ,"verified", "userImage"})
-        
+
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
         String csv = mapper.writer(schema).writeValueAsString(user);
@@ -74,10 +217,10 @@ public class TestGenerator extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(FiveMinuteUser.class).withHeader();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
-        String result = mapper.writer(schema).writeValueAsString(user);        
+        String result = mapper.writer(schema).writeValueAsString(user);
         assertEquals("firstName,lastName,gender,verified,userImage\n"
                 +"Barbie,Benton,FEMALE,false,\n", result);
-        
+
     }
 
     /**
@@ -90,7 +233,7 @@ public class TestGenerator extends ModuleTestBase
         CsvSchema schema = CsvSchema.builder().setUseHeader(true).build();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
         try {
-            mapper.writer(schema).writeValueAsString(user);        
+            mapper.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
         } catch (JsonMappingException e) {
             verifyException(e, "contains no column names");
@@ -131,7 +274,7 @@ public class TestGenerator extends ModuleTestBase
             .addColumn("id")
             .addColumn("desc")
             .build();
-        
+
         String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", "Some \"stuff\""));
         // MUST use doubling for quotes!
         assertEquals("id,\"Some \"\"stuff\"\"\"\n", result);
@@ -148,7 +291,7 @@ public class TestGenerator extends ModuleTestBase
 
         String base = "Longer sequence with bunch of words to test quoting with needs to be at least one line "
                 +"long to allow for appropriate indexes and boundary crossing conditions as well";
-        
+
         StringBuilder sb = new StringBuilder();
         do {
             for (String word : base.split("\\s")) {
@@ -333,9 +476,9 @@ public class TestGenerator extends ModuleTestBase
         String result;
         // having virtual root-level array should make no difference:
         if (wrapAsArray) {
-            result = mapper.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });        
+            result = mapper.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });
         } else {
-            result = mapper.writer(schema).writeValueAsString(user);        
+            result = mapper.writer(schema).writeValueAsString(user);
         }
         assertEquals("Veltto,Virtanen,MALE,true,AwE=\n", result);
     }
