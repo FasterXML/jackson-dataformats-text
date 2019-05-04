@@ -419,6 +419,8 @@ public class CsvFactory extends JsonFactory
         CsvGenerator gen = new CsvGenerator(ctxt, _generatorFeatures, _csvGeneratorFeatures,
                 _objectCodec, out, _schema);
         // any other initializations? No?
+
+        gen.setCharacterEscapes(CsvCharacterEscapes.fromCsvFeatures(_csvGeneratorFeatures));
         return gen;
     }
 
