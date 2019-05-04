@@ -21,7 +21,7 @@ Modules:
 #122: (csv) `readValues(null)` causes infinite loop
  (reported by andyeko@github) 
 #123: (yaml) YAML Anchor, reference fails with simple example
-#125: (csv) Add `CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR` for escaping
+#124: (csv) Add `CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR` for escaping
   non-printable characters in CSV output/input 
  (contributed by Henning S)
 
