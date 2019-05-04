@@ -41,3 +41,9 @@ Gowtam Lal (baconmania@github)
 Dimitris Mandalidis (dmandalidis@github)
 * Reported #91: (properties) `JavaPropsGenerator#writeFieldName()` should not escape property keys
  (2.9.9)
+
+Henning Schmiedehausen (hgschmie@github)
+* Contributed #125: (csv) Add `CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR` for escaping
+  non-printable characters in CSV output/input
+ (2.9.9)
+
