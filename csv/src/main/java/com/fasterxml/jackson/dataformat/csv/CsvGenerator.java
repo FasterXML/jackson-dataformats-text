@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
@@ -81,7 +82,19 @@ public class CsvGenerator extends GeneratorBase
          *
          * @since 2.9.3
          */
-        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
+        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false),
+
+        /**
+         * Feature that determines whether control characters (non-printable) are escaped using the
+         * configured escape character. This feature allows LF and CR characters to be output as <pre>\n</pre>
+         * and <pre>\r</pre> instead of being echoed out. This is a compatibility feature for some
+         * parsers that can not read such output back in.
+         * <p>
+         * Default value is false so that control characters are echoed out (backwards compatible).
+         *
+         * @since 2.9.9
+         */
+        ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false)
         ;
 
         protected final boolean _defaultState;
@@ -145,6 +158,8 @@ public class CsvGenerator extends GeneratorBase
 
     // note: can not be final since we may need to re-create it for new schema
     protected CsvEncoder _writer;
+
+    protected CharacterEscapes _characterEscapes = null;
 
     /*
     /**********************************************************
@@ -220,6 +235,8 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         _schema = schema;
         _writer = new CsvEncoder(ctxt, csvFeatures, out, schema);
+
+        _writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(csvFeatures).getEscapeCodesForAscii());
     }
 
     public CsvGenerator(IOContext ctxt, int jsonFeatures, int csvFeatures,
@@ -311,6 +328,22 @@ public class CsvGenerator extends GeneratorBase
         }
         return this;
     }
+
+    public JsonGenerator setCharacterEscapes(CharacterEscapes esc) {
+        this._characterEscapes = esc;
+        if (esc != null) {
+            this._writer.setOutputEscapes(esc.getEscapeCodesForAscii());
+        } else {
+            this._writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(_formatFeatures).getEscapeCodesForAscii());
+        }
+
+        return this;
+    }
+
+    public CharacterEscapes getCharacterEscapes() {
+        return this._characterEscapes;
+    }
+
 
     /*
     /**********************************************************
