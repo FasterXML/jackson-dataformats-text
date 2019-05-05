@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
@@ -71,7 +72,19 @@ public class CsvGenerator extends GeneratorBase
          *<p>
          * Default value is false so that quotes are doubled as necessary, not escaped.
          */
-        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false)
+        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false),
+
+        /**
+         * Feature that determines whether control characters (non-printable) are escaped using the
+         * configured escape character. This feature allows LF and CR characters to be output as <pre>\n</pre>
+         * and <pre>\r</pre> instead of being echoed out. This is a compatibility feature for some
+         * parsers that can not read such output back in.
+         * <p>
+         * Default value is false so that control characters are echoed out (backwards compatible).
+         *
+         * @since 2.9.9
+         */
+        ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false)
         ;
 
         protected final boolean _defaultState;
@@ -135,6 +148,8 @@ public class CsvGenerator extends GeneratorBase
 
     // note: can not be final since we may need to re-create it for new schema
     protected CsvEncoder _writer;
+
+    protected CharacterEscapes _characterEscapes = null;
 
     /*
     /**********************************************************
@@ -206,6 +221,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         _schema = schema;
         _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema);
+        this.setCharacterEscapes(CsvCharacterEscapes.fromCsvFeatures(csvFeatures));
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
@@ -284,6 +300,23 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public int formatWriteFeatures() {
         return _formatFeatures;
+    }
+
+    @Override
+    public CsvGenerator setCharacterEscapes(CharacterEscapes esc) {
+        _characterEscapes = esc;
+        if (esc != null) {
+            _writer.setOutputEscapes(esc.getEscapeCodesForAscii());
+        } else {
+            _writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(_formatFeatures).getEscapeCodesForAscii());
+        }
+
+        return this;
+    }
+
+    @Override
+    public CharacterEscapes getCharacterEscapes() {
+        return this._characterEscapes;
     }
 
     /*
