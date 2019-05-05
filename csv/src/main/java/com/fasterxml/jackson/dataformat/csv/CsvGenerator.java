@@ -81,8 +81,6 @@ public class CsvGenerator extends GeneratorBase
          * parsers that can not read such output back in.
          * <p>
          * Default value is false so that control characters are echoed out (backwards compatible).
-         *
-         * @since 2.9.9
          */
         ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false)
         ;
@@ -149,8 +147,6 @@ public class CsvGenerator extends GeneratorBase
     // note: can not be final since we may need to re-create it for new schema
     protected CsvEncoder _writer;
 
-    protected CharacterEscapes _characterEscapes = null;
-
     /*
     /**********************************************************
     /* Output state
@@ -173,16 +169,12 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Flag set when property to write is unknown, and the matching value
      * is to be skipped quietly.
-     *
-     * @since 2.5
      */
     protected boolean _skipValue;
 
     /**
      * Separator to use during writing of (simple) array value, to be encoded as a
      * single column value, if any.
-     *
-     * @since 2.5
      */
     protected String _arraySeparator = CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
 
@@ -195,8 +187,6 @@ public class CsvGenerator extends GeneratorBase
      * Additional counter that indicates number of value entries in the
      * array. Needed because `null` entries do not add content, but need
      * to be separated by array cell separator
-     *
-     * @since 2.7
      */
     protected int _arrayElements;
 
@@ -214,14 +204,17 @@ public class CsvGenerator extends GeneratorBase
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int generatorFeatures, int csvFeatures,
-            Writer out, CsvSchema schema)
+            Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes)
     {
         super(writeCtxt, generatorFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         _schema = schema;
-        _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema);
-        this.setCharacterEscapes(CsvCharacterEscapes.fromCsvFeatures(csvFeatures));
+
+        if (characterEscapes == null) {
+            characterEscapes = CsvCharacterEscapes.fromCsvFeatures(csvFeatures);
+        }
+        _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes);
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
@@ -304,19 +297,15 @@ public class CsvGenerator extends GeneratorBase
 
     @Override
     public CsvGenerator setCharacterEscapes(CharacterEscapes esc) {
-        _characterEscapes = esc;
         if (esc != null) {
             _writer.setOutputEscapes(esc.getEscapeCodesForAscii());
-        } else {
-            _writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(_formatFeatures).getEscapeCodesForAscii());
         }
-
         return this;
     }
 
     @Override
     public CharacterEscapes getCharacterEscapes() {
-        return this._characterEscapes;
+        return null;
     }
 
     /*
@@ -935,8 +924,6 @@ public class CsvGenerator extends GeneratorBase
      * Method called when there is a problem related to mapping data
      * (compared to a low-level generation); if so, should be surfaced
      * as 
-     *
-     * @since 2.7
      */
     protected void _reportMappingError(String msg) throws JsonProcessingException {
         throw CsvMappingException.from(this, msg, _schema);

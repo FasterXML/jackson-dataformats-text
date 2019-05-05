@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
 /**
@@ -17,6 +18,8 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
     /**********************************************************
      */
 
+    protected CsvCharacterEscapes _characterEscapes;
+    
     /*
     /**********************************************************
     /* Life cycle
@@ -100,5 +103,23 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
 
     public CsvFactoryBuilder configure(CsvGenerator.Feature f, boolean state) {
         return state ? enable(f) : disable(f);
+    }
+
+    // // // Other CSV-specific configuration
+    
+    /**
+     * Method for defining custom escapes factory uses for {@link JsonGenerator}s
+     * it creates.
+     */
+    public CsvFactoryBuilder characterEscapes(CsvCharacterEscapes esc) {
+        _characterEscapes = esc;
+        return this;
+    }
+
+    public CsvCharacterEscapes characterEscapes() {
+        if (_characterEscapes == null) {
+            
+        }
+        return _characterEscapes;
     }
 }

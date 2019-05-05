@@ -45,6 +45,8 @@ public class CsvFactory
     /**********************************************************************
      */
 
+    protected final CsvCharacterEscapes _characterEscapes;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -64,11 +66,13 @@ public class CsvFactory
     public CsvFactory() {
         super(DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
+        _characterEscapes = null; // derive from flags
     }
 
     protected CsvFactory(CsvFactory src)
     {
         super(src);
+        _characterEscapes = src._characterEscapes;
     }
 
     /**
@@ -79,6 +83,7 @@ public class CsvFactory
     protected CsvFactory(CsvFactoryBuilder b)
     {
         super(b);
+        _characterEscapes = b.characterEscapes();
     }
 
     @Override
@@ -276,7 +281,7 @@ public class CsvFactory
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
-                out, _getSchema(writeCtxt));
+                out, _getSchema(writeCtxt), _characterEscapes);
     }
 
     @SuppressWarnings("resource")
@@ -287,7 +292,8 @@ public class CsvFactory
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
-                new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt));
+                new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt),
+                _characterEscapes);
     }
 
     private final CsvSchema _getSchema(ObjectWriteContext writeCtxt) {

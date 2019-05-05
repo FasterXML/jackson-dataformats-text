@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
 import com.fasterxml.jackson.core.io.CharTypes;
+import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
@@ -17,7 +18,6 @@ import java.util.Arrays;
  */
 public class CsvEncoder
 {
-
     /*
      * default set of escaped characters.
      */
@@ -127,9 +127,6 @@ public class CsvEncoder
     /**********************************************************
      */
 
-    /**
-     * @since 2.4
-     */
     protected int _columnCount;
     
     /**
@@ -191,7 +188,8 @@ public class CsvEncoder
     /**********************************************************
      */
 
-    public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema)
+    public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema,
+            CharacterEscapes esc)
     {
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
@@ -213,8 +211,9 @@ public class CsvEncoder
         _cfgLineSeparator = schema.getLineSeparator();
         _cfgLineSeparatorLength = (_cfgLineSeparator == null) ? 0 : _cfgLineSeparator.length;
         _cfgNullValue = schema.getNullValueOrEmpty();
-        
+
         _columnCount = schema.size();
+        _outputEscapes = (esc == null) ? sOutputEscapes : esc.getEscapeCodesForAscii();
 
         _cfgMinSafeChar = _calcSafeChar();
 
