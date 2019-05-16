@@ -8,7 +8,7 @@
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
   <name>Jackson dataformats: Text</name>
-  <version>2.9.9</version>
+  <version>2.9.10-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>Parent pom for Jackson text-based dataformats (as opposed to binary).
   </description>
@@ -24,7 +24,7 @@
     <connection>scm:git:git@github.com:FasterXML/jackson-dataformats-text.git</connection>
     <developerConnection>scm:git:git@github.com:FasterXML/jackson-dataformats-text.git</developerConnection>
     <url>http://github.com/FasterXML/jackson-dataformats-text</url>    
-    <tag>jackson-dataformats-text-2.9.9</tag>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <url>https://github.com/FasterXML/jackson-dataformats-text/issues</url>
