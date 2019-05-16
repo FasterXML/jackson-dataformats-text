@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.9.9 (not yet released)
+2.9.9 (16-May-2019)
 
 #63: (yaml) `null` Object Id serialized as anchor for YAML
  (reported by jflefebvre06@github)
