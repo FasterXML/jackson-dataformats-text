@@ -49,12 +49,13 @@ Henning Schmiedehausen (hgschmie@github)
  (2.9.9)
 
 Tanguy Leroux (tlrx@github)
-
 * Reported #90: Exception when decoding Jackson-encoded `Base64` binary value in YAML
  (2.10.0)
 
 Andrey Somov (asomov@github)
-
 * Contributed #101: Use latest SnakeYAML version 1.23 and get rid of deprecated methods
  (2.10.0)
 
+Alon Bar-Lev (alonbl@github)
+* Contributed #100: (properties) Add an option to specify properties prefix
+ (2.10.0)

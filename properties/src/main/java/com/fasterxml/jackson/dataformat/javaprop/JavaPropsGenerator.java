@@ -143,8 +143,10 @@ public abstract class JavaPropsGenerator
                     _basePath.append(indent);
                     _jpropContext = JPropWriteContext.createRootContext(_indentLength);
                 }
-                if (_schema.prefix() != null) {
-                    _basePath.append(_schema.prefix());
+                // [dataformats-text#100]: Allow use of optional prefix
+                final String prefix = _schema.prefix();
+                if (prefix != null) {
+                    _basePath.append(prefix);
                 }
             }
             return;

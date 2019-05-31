@@ -263,6 +263,7 @@ public abstract class JPropPathSplitter
         // small but important optimization for cases where index markers are absent
         protected final int _indexFirstChar;
         protected final JPropPathSplitter _simpleSplitter;
+
         protected final String _prefix;
 
         public FullSplitter(String pathSeparator, boolean useSimpleIndex,
@@ -289,13 +290,13 @@ public abstract class JPropPathSplitter
         public JPropNode splitAndAdd(JPropNode parent,
                 String key, String value)
         {
+            // [dataformats-text#100]: handle possible prefix
             if (_prefix != null) {
                 if (!key.startsWith(_prefix)) {
                     return null;
                 }
                 key = key.substring(_prefix.length());
             }
-
             if (key.indexOf(_indexFirstChar) < 0) { // no index start marker
                 return _simpleSplitter.splitAndAdd(parent, key, value);
             }

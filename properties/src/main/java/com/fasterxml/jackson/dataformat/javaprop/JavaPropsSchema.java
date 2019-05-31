@@ -294,6 +294,11 @@ public class JavaPropsSchema
         return s;
     }
 
+    /**
+     * Mutant factory for constructing schema instance where specified
+     * prefix is prepended before logical path when generator writes output
+     * and removed by parser before binding back as properties.
+     */
     public JavaPropsSchema withPrefix(String v) {
         if (_equals(v, _prefix)) {
             return this;
