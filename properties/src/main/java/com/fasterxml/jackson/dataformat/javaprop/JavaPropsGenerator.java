@@ -137,6 +137,11 @@ public abstract class JavaPropsGenerator extends GeneratorBase
                     _basePath.append(indent);
                     _jpropContext = JPropWriteContext.createRootContext(_indentLength);
                 }
+                // [dataformats-text#100]: Allow use of optional prefix
+                final String prefix = _schema.prefix();
+                if (prefix != null) {
+                    _basePath.append(prefix);
+                }
             }
             return;
         }
