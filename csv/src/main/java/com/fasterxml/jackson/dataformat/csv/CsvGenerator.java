@@ -329,17 +329,19 @@ public class CsvGenerator extends GeneratorBase
         return this;
     }
 
+    @Override
     public JsonGenerator setCharacterEscapes(CharacterEscapes esc) {
         this._characterEscapes = esc;
         if (esc != null) {
-            this._writer.setOutputEscapes(esc.getEscapeCodesForAscii());
+            _writer.setOutputEscapes(esc.getEscapeCodesForAscii());
         } else {
-            this._writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(_formatFeatures).getEscapeCodesForAscii());
+            _writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(_formatFeatures).getEscapeCodesForAscii());
         }
 
         return this;
     }
 
+    @Override
     public CharacterEscapes getCharacterEscapes() {
         return this._characterEscapes;
     }
