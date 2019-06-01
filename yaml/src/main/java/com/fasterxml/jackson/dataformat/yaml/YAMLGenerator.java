@@ -186,6 +186,22 @@ public class YAMLGenerator extends GeneratorBase
             "on", "On", "ON", "off", "Off", "OFF"
     ));
 
+    // for field names, leave out quotes
+    private final static ScalarStyle STYLE_UNQUOTED_NAME = ScalarStyle.PLAIN;
+
+    // numbers, booleans, should use implicit
+    private final static ScalarStyle STYLE_SCALAR = ScalarStyle.PLAIN;
+    // Strings quoted for fun
+    private final static ScalarStyle STYLE_QUOTED = ScalarStyle.DOUBLE_QUOTED;
+    // Strings in literal (block) style
+    private final static ScalarStyle STYLE_LITERAL = ScalarStyle.LITERAL;
+
+    // Which flow style to use for Base64? Maybe basic quoted?
+    // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
+    private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
+
+    private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
+
     /*
     /**********************************************************************
     /* Configuration
@@ -205,22 +221,8 @@ public class YAMLGenerator extends GeneratorBase
 
     protected DumpSettings _outputOptions;
 
-    // for field names, leave out quotes
-    private final static ScalarStyle STYLE_UNQUOTED_NAME = ScalarStyle.PLAIN;
-
-    // numbers, booleans, should use implicit
-    private final static ScalarStyle STYLE_SCALAR = ScalarStyle.PLAIN;
-    // Strings quoted for fun
-    private final static ScalarStyle STYLE_QUOTED = ScalarStyle.DOUBLE_QUOTED;
-    // Strings in literal (block) style
-    private final static ScalarStyle STYLE_LITERAL = ScalarStyle.LITERAL;
-
-    // Which flow style to use for Base64? Maybe basic quoted?
-    // 29-Nov-2017, tatu: Actually SnakeYAML uses block style so:
-    private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
-
-    private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
-
+    protected final boolean _cfgMinimizeQuotes;
+    
     /*
     /**********************************************************************
     /* Output state
@@ -256,6 +258,7 @@ public class YAMLGenerator extends GeneratorBase
         super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
         _formatWriteFeatures = yamlFeatures;
+        _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
         _writer = out;
 
         _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
@@ -583,7 +586,7 @@ public class YAMLGenerator extends GeneratorBase
         // [dataformats-text#50]: Empty String always quoted
         if (text.isEmpty()) {
             style = STYLE_QUOTED;
-        } else if (Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures)) {
+        } else if (_cfgMinimizeQuotes) {
             if (isBooleanContent(text)) {
                 style = STYLE_QUOTED;
             // If this string could be interpreted as a number, it must be quoted.
