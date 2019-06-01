@@ -166,8 +166,8 @@ public final class CsvParserBootstrapper
         switch (enc) { 
         case UTF32_BE:
         case UTF32_LE:
-            return new UTF32Reader(_context, _in, _inputBuffer, _inputPtr, _inputEnd,
-                                   enc.isBigEndian());
+            return new UTF32Reader(_context, _in, autoClose,
+                    _inputBuffer, _inputPtr, _inputEnd, enc.isBigEndian());
 
         case UTF16_BE:
         case UTF16_LE:
@@ -207,9 +207,8 @@ public final class CsvParserBootstrapper
      */
     private boolean handleBOM(int quad) throws IOException
     {
-        /* Handling of (usually) optional BOM (required for
-         * multi-byte formats); first 32-bit charsets:
-         */
+        // Handling of (usually) optional BOM (required for
+        // multi-byte formats); first 32-bit charsets:
         switch (quad) {
         case 0x0000FEFF:
             _bigEndian = true;
