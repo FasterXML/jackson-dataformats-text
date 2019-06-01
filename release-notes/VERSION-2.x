@@ -10,6 +10,8 @@ Modules:
 
 2.10.0 (not yet released)
 
+#50: (yaml) Empty string serialized without quotes if MINIMIZE_QUOTES is enabled
+ (reported by tim-palmer@github)
 #100: (properties) Add an option to specify properties prefix
  (contributed by Alon B-L)
 #101: (yaml) Use latest SnakeYAML version 1.24 and get rid of deprecated methods

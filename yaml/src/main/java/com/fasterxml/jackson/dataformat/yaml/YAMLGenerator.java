@@ -588,10 +588,16 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write String value");
-        DumperOptions.ScalarStyle style = STYLE_QUOTED;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
+        DumperOptions.ScalarStyle style;
+
+        // [dataformats-text#50]: Empty String always quoted
+        if (text.isEmpty()) {
+            style = STYLE_QUOTED;
+        } else if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures)) {
+            if (isBooleanContent(text)) {
+                style = STYLE_QUOTED;
             // If this string could be interpreted as a number, it must be quoted.
-            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
+            } else if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
                     && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
             } else if (text.indexOf('\n') >= 0) {
@@ -599,14 +605,20 @@ public class YAMLGenerator extends GeneratorBase
             } else {
                 style = STYLE_PLAIN;
             }
-        } else if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures) && text.indexOf('\n') >= 0) {
-            style = STYLE_LITERAL;
+            _writeScalar(text, "string", style);
+            return;
+        } else {
+            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures) && text.indexOf('\n') >= 0) {
+                style = STYLE_LITERAL;
+            } else {
+                style = STYLE_QUOTED;
+            }
         }
         _writeScalar(text, "string", style);
     }
 
     private boolean isBooleanContent(String text) {
-        return text.equals("true") || text.equals("false");
+        return "true".equals(text) || "false".equals(text);
     }
 
     @Override

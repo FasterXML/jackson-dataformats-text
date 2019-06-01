@@ -127,4 +127,14 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n" +
                 "key: 2.0.1.2.3", yaml);
     }
+
+    // [dataformats-test#50]
+    public void testEmptyStringWithMinimizeQuotes() throws Exception
+    {
+        Map<String, Object> content = new HashMap<>();
+        content.put("key", "");
+        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+
+        assertEquals("---\nkey: \"\"", yaml);
+    }
 }
