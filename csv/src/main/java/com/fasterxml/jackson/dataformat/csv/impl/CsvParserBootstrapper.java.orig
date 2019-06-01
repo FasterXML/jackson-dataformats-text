@@ -156,14 +156,12 @@ public final class CsvParserBootstrapper
             throw new RuntimeException("Internal error"); // should never get here
         }
         _context.setEncoding(enc);
-        final boolean autoClose = _context.isResourceManaged()
-                || JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(baseFeatures);
         return new CsvParser((CsvIOContext) _context, baseFeatures, csvFeatures, _codec,
-                _createReader(enc, autoClose));
+                _createReader(enc));
     }
-
+    
     @SuppressWarnings("resource")
-    private Reader _createReader(JsonEncoding enc, boolean autoClose) throws IOException
+    private Reader _createReader(JsonEncoding enc) throws IOException
     {
         switch (enc) { 
         case UTF32_BE:
@@ -180,8 +178,9 @@ public final class CsvParserBootstrapper
                 if (in == null) {
                     in = new ByteArrayInputStream(_inputBuffer, _inputPtr, _inputEnd);
                 } else {
-                    // Also, if we have any read but unused input (usually true),
-                    // need to merge that input in:
+                    /* Also, if we have any read but unused input (usually true),
+                     * need to merge that input in:
+                     */
                     if (_inputPtr < _inputEnd) {
                         in = new MergedStream(_context, in, _inputBuffer, _inputPtr, _inputEnd);
                     }
@@ -190,7 +189,7 @@ public final class CsvParserBootstrapper
             }
         case UTF8:
             // Important: do not pass context, if we got byte[], nothing to release
-            return new UTF8Reader((_in == null) ? null : _context, _in, autoClose,
+            return new UTF8Reader((_in == null) ? null : _context, _in, _context.isResourceManaged(),
                     _inputBuffer, _inputPtr, _inputEnd - _inputPtr);
         default:
             throw new RuntimeException();
@@ -288,7 +287,7 @@ public final class CsvParserBootstrapper
      */
 
     /**
-     * @return True if a BOM was successfully found, and encoding
+     * @return True if a BOM was succesfully found, and encoding
      *   thereby recognized.
      */
     private boolean handleBOM(int quad) throws IOException
