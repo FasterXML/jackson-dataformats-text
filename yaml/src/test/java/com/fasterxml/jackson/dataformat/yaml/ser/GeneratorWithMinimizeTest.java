@@ -60,6 +60,34 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: true", yaml);
     }
 
+    public void testMinimizeQuotesWithNulls() throws Exception
+    {
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("key", "null");
+        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"null\"", yaml);
+
+        content.clear();
+        content.put("key", "Null");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"Null\"", yaml);
+
+        content.clear();
+        content.put("key", "NULL");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"NULL\"", yaml);
+
+        // but not for any casing
+        content.clear();
+        content.put("key", "nuLL");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: nuLL", yaml);
+    }
+
     public void testLiteralStringsMultiLine() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();

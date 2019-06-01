@@ -59,3 +59,7 @@ Andrey Somov (asomov@github)
 Alon Bar-Lev (alonbl@github)
 * Contributed #100: (properties) Add an option to specify properties prefix
  (2.10.0)
+
+Stehan Leh (stefanleh@github)
+* Reported #116: (yaml) Error handling "null" String when Feature.MINIMIZE_QUOTES is active
+ (2.10.0)
