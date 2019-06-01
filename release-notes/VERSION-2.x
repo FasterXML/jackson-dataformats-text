@@ -18,6 +18,8 @@ Modules:
  (contributed by Andrey S)
 #108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
+#116: Error handling "null" String when Feature.MINIMIZE_QUOTES is active
+ (reported by Stefan L)
 - Add JDK9+ module info using Moditect plugin
 
 2.9.9 (16-May-2019)

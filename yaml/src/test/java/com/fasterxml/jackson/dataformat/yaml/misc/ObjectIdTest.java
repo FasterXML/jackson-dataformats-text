@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import com.fasterxml.jackson.annotation.*;
-
+import com.fasterxml.jackson.core.ObjectReadContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
@@ -166,7 +166,7 @@ public class ObjectIdTest extends ModuleTestBase
     {
         TokenBuffer tbuf = MAPPER.readValue(SIMPLE_YAML_NATIVE, TokenBuffer.class);
         assertNotNull(tbuf);
-        Node first = MAPPER.readValue(tbuf.asParser(), Node.class);
+        Node first = MAPPER.readValue(tbuf.asParser(ObjectReadContext.empty()), Node.class);
         tbuf.close();
         assertNotNull(first);
         _verify(first);

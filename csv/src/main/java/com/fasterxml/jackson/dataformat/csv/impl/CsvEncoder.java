@@ -933,7 +933,7 @@ public class CsvEncoder
         final int len = text.length();
         // NOTE: caller should guarantee quote char is valid (not -1) at this point:
         final char q = (char) _cfgQuoteCharacter;
-        final char quoteEscape = _cfgEscapeQuoteCharWithEscapeChar ? esc : q;
+//        final char quoteEscape = _cfgEscapeQuoteCharWithEscapeChar ? esc : q;
         for (int i = 0; i < len; ++i) {
             if (_outputTail >= _outputEnd) {
                 _flushBuffer();

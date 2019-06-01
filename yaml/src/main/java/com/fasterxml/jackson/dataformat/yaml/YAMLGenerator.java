@@ -173,19 +173,6 @@ public class YAMLGenerator extends GeneratorBase
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[0-9]*(\\.[0-9]*)?");
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
-    /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
-     * aliases for booleans, and we better quote such values as keys; although Jackson
-     * itself has no problems dealing with them, some other tools do have.
-     */
-    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out 
-    //    single letter case (esp so 'y' won't get escaped)
-    private final static Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList(
-//            "y", "Y", "n", "N",
-            "yes", "Yes", "YES", "no", "No", "NO",
-            "true", "True", "TRUE", "false", "False", "FALSE",
-            "on", "On", "ON", "off", "Off", "OFF"
-    ));
-
     // for field names, leave out quotes
     private final static ScalarStyle STYLE_UNQUOTED_NAME = ScalarStyle.PLAIN;
 
@@ -201,8 +188,31 @@ public class YAMLGenerator extends GeneratorBase
     private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
 
     private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
+    
+    /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
+     * aliases for booleans, and we better quote such values as keys; although Jackson
+     * itself has no problems dealing with them, some other tools do have.
+     */
+    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out 
+    //    single letter case (esp so 'y' won't get escaped)
+    private final static Set<String> MUST_QUOTE_NAMES = new HashSet<>(Arrays.asList(
+//            "y", "Y", "n", "N",
+            "yes", "Yes", "YES", "no", "No", "NO",
+            "true", "True", "TRUE", "false", "False", "FALSE",
+            "on", "On", "ON", "off", "Off", "OFF"
+    ));
 
-    /*
+    /**
+     * As per YAML <a href="https://yaml.org/type/null.html">null</a>
+     * and <a href="https://yaml.org/type/bool.html">boolean</a> type specs,
+     * better retain quoting for some values
+     */
+    private final static Set<String> MUST_QUOTE_VALUES = new HashSet<>(Arrays.asList(
+            "true", "True", "TRUE", "false", "False", "FALSE",
+            "null", "Null", "NULL"
+    ));
+
+/*
     /**********************************************************************
     /* Configuration
     /**********************************************************************
@@ -438,35 +448,9 @@ public class YAMLGenerator extends GeneratorBase
     private final void _writeFieldName(String name) throws IOException
     {
         _writeScalar(name, "string",
-                _needQuoting(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
+                _nameNeedsQuoting(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
     }
 
-    private boolean _needQuoting(String name) {
-        if (name.length() == 0) {
-            return false;
-        }
-        switch (name.charAt(0)) {
-        // First, reserved name starting chars:
-        case 'f': // false
-        case 'o': // on/off
-        case 'n': // no
-        case 't': // true
-        case 'y': // yes
-        case 'F': // False
-        case 'O': // On/Off
-        case 'N': // No
-        case 'T': // True
-        case 'Y': // Yes
-            return RESERVED_NAMES.contains(name);
-
-            // And then numbers
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-        case '-' : case '+': case '.':
-            return true;
-        }
-        return false;
-    }    
     /*
     /**********************************************************************
     /* Public API: low-level I/O
@@ -581,25 +565,25 @@ public class YAMLGenerator extends GeneratorBase
             return;
         }
         _verifyValueWrite("write String value");
-        ScalarStyle style;
 
         // [dataformats-text#50]: Empty String always quoted
         if (text.isEmpty()) {
-            style = STYLE_QUOTED;
-        } else if (_cfgMinimizeQuotes) {
-            if (isBooleanContent(text)) {
-                style = STYLE_QUOTED;
-            // If this string could be interpreted as a number, it must be quoted.
-            } else if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
-                    && PLAIN_NUMBER_P.matcher(text).matches()) {
+            _writeScalar(text, "string", STYLE_QUOTED);
+            return;
+        }
+        ScalarStyle style;
+        if (_cfgMinimizeQuotes) {
+            // If one of reserved values ("true", "null"), or, number, preserve quoting:
+            if (_valueNeedsQuoting(text)
+                || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
+                        && PLAIN_NUMBER_P.matcher(text).matches())
+                ) {
                 style = STYLE_QUOTED;
             } else if (text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
             } else {
                 style = STYLE_PLAIN;
             }
-            _writeScalar(text, "string", style);
-            return;
         } else {
             if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures) && text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
@@ -608,10 +592,6 @@ public class YAMLGenerator extends GeneratorBase
             }
         }
         _writeScalar(text, "string", style);
-    }
-
-    private boolean isBooleanContent(String text) {
-        return "true".equals(text) || "false".equals(text);
     }
 
     @Override
@@ -900,6 +880,47 @@ public class YAMLGenerator extends GeneratorBase
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
+    }
+
+    private boolean _nameNeedsQuoting(String name) {
+        if (name.length() == 0) { // empty String does indeed require quoting
+            return true;
+        }
+        switch (name.charAt(0)) {
+        // First, reserved name starting chars:
+        case 'f': // false
+        case 'o': // on/off
+        case 'n': // no
+        case 't': // true
+        case 'y': // yes
+        case 'F': // False
+        case 'O': // On/Off
+        case 'N': // No
+        case 'T': // True
+        case 'Y': // Yes
+            return MUST_QUOTE_NAMES.contains(name);
+
+            // And then numbers
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+        case '-' : case '+': case '.':
+            return true;
+        }
+        return false;
+    }    
+
+    private boolean _valueNeedsQuoting(String name) {
+        switch (name.charAt(0)) { // caller ensures no empty String
+        // First, reserved name starting chars:
+        case 'f': // false
+        case 'n': // null
+        case 't': // true
+        case 'F': // False/FALSE
+        case 'N': // Null/NULL
+        case 'T': // True/TRUE
+            return MUST_QUOTE_VALUES.contains(name);
+        }
+        return false;
     }
 
     protected String _lf() {

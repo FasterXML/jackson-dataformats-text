@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.type;
 
 import com.fasterxml.jackson.annotation.*;
-
+import com.fasterxml.jackson.core.ObjectReadContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
@@ -83,7 +83,7 @@ public class TypeIdTest extends ModuleTestBase
         ObjectMapper mapper = newObjectMapper();
         TokenBuffer tbuf = mapper.readValue("--- !impl\na: 13\n", TokenBuffer.class);
         assertNotNull(tbuf);
-        Base result = mapper.readValue(tbuf.asParser(), Base.class);
+        Base result = mapper.readValue(tbuf.asParser(ObjectReadContext.empty()), Base.class);
         tbuf.close();
         _verify(result);
     }
