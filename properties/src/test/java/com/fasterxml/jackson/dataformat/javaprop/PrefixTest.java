@@ -1,9 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.util.Map;
 import java.util.Properties;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PrefixTest extends ModuleTestBase
 {

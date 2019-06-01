@@ -33,12 +33,7 @@
       <version>1.0</version>
     </dependency>
 
-     <!-- and for testing need annotations -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <scope>test</scope>
-    </dependency>
+     <!-- and for testing need annotations; but those come via databind already -->
   </dependencies>
 
   <build>

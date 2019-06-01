@@ -27,11 +27,7 @@ configuration files as if there was implied nesting structure (by default using 
       <scope>provided</scope>
     </dependency>
 
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- and annotations for tests, but included via above -->
   </dependencies>
 
   <build>
