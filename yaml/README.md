@@ -1,7 +1,7 @@
 # Overview
 
 This project contains [Jackson](../../../../jackson) extension component for reading and writing [YAML](http://en.wikipedia.org/wiki/YAML) encoded data.
-[SnakeYAML](https://bitbucket.org/asomov/snakeyaml/) library is used for low-level YAML parsing.
+[SnakeYAML Engine](https://bitbucket.org/asomov/snakeyaml-engine/) library is used for low-level YAML parsing.
 This project adds necessary abstractions on top to make things work with other Jackson functionality.
 
 Project is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
