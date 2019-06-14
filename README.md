@@ -60,7 +60,7 @@ To use these format backends Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-[FORMAT]</artifactId>
-  <version>2.9.0</version>
+  <version>2.9.9</version>
 </dependency>
 ```
 
