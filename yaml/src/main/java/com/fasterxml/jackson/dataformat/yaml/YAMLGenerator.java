@@ -184,6 +184,19 @@ public class YAMLGenerator extends GeneratorBase
             "on", "On", "ON", "off", "Off", "OFF"
     ));
 
+    /**
+     * As per YAML <a href="https://yaml.org/type/null.html">null</a>
+     * and <a href="https://yaml.org/type/bool.html">boolean</a> type specs,
+     * better retain quoting for some values
+     */
+    private final static Set<String> RESERVED_VALUES = new HashSet<>(Arrays.asList(
+            "y", "Y", "n", "N",
+            "yes", "Yes", "YES", "no", "No", "NO",
+            "true", "True", "TRUE", "false", "False", "FALSE",
+            "on", "On", "ON", "off", "Off", "OFF",
+            "null", "Null", "NULL"
+));
+
     /*
     /**********************************************************
     /* Configuration
@@ -571,10 +584,12 @@ public class YAMLGenerator extends GeneratorBase
         }
         _verifyValueWrite("write String value");
         Character style = STYLE_QUOTED;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures) && !isBooleanContent(text)) {
+        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures)) {
             // If this string could be interpreted as a number, it must be quoted.
-            if (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
-                    && PLAIN_NUMBER_P.matcher(text).matches()) {
+            if (_valueNeedsQuoting(text)
+                || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
+                        && PLAIN_NUMBER_P.matcher(text).matches())
+                ) {
                 style = STYLE_QUOTED;
             } else if (text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
@@ -587,8 +602,22 @@ public class YAMLGenerator extends GeneratorBase
         _writeScalar(text, "string", style);
     }
 
-    private boolean isBooleanContent(String text) {
-        return text.equals("true") || text.equals("false");
+    private boolean _valueNeedsQuoting(String name) {
+        switch (name.charAt(0)) { // caller ensures no empty String
+        // First, reserved name starting chars:
+        case 'f': // false
+        case 'o': // on/off
+        case 'n': // null/n/no
+        case 't': // true
+        case 'y': // y/yes
+        case 'F': // False/FALSE
+        case 'O': // On/Off/ON/OFF
+        case 'N': // Null/NULL/N/No/NO
+        case 'T': // True/TRUE
+        case 'Y': // Y/Yes/YES
+            return RESERVED_VALUES.contains(name);
+        }
+        return false;
     }
 
     @Override
