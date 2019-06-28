@@ -190,7 +190,10 @@ public class YAMLGenerator extends GeneratorBase
      * better retain quoting for some values
      */
     private final static Set<String> MUST_QUOTE_VALUES = new HashSet<>(Arrays.asList(
+            "y", "Y", "n", "N",
+            "yes", "Yes", "YES", "no", "No", "NO",
             "true", "True", "TRUE", "false", "False", "FALSE",
+            "on", "On", "ON", "off", "Off", "OFF",
             "null", "Null", "NULL"
     ));
     
@@ -955,11 +958,15 @@ public class YAMLGenerator extends GeneratorBase
         switch (name.charAt(0)) { // caller ensures no empty String
         // First, reserved name starting chars:
         case 'f': // false
-        case 'n': // null
+        case 'o': // on/off
+        case 'n': // null/n/no
         case 't': // true
+        case 'y': // y/yes
         case 'F': // False/FALSE
-        case 'N': // Null/NULL
+        case 'O': // On/Off/ON/OFF
+        case 'N': // Null/NULL/N/No/NO
         case 'T': // True/TRUE
+        case 'Y': // Y/Yes/YES
             return MUST_QUOTE_VALUES.contains(name);
         }
         return false;
