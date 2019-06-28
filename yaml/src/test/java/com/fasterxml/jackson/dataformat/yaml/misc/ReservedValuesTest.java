@@ -16,10 +16,10 @@ public class ReservedValuesTest extends ModuleTestBase
                 "true", "True", "TRUE",
                 "false", "False", "FALSE",
                 "yes", "Yes", "YES",
-                "no" "No", "NO",
+                "no", "No", "NO",
                 "y", "Y", "n", "N",
                 "on", "On", "ON",
-                "off" "Off", "OFF"
+                "off", "Off", "OFF"
         }) {
             _testQuotingOfBooleanValues(value);
         }
@@ -27,7 +27,7 @@ public class ReservedValuesTest extends ModuleTestBase
 
     private void _testQuotingOfBooleanValues(String value) throws Exception
     {
-        final Map<String, Integer> input = Collections.singletonMap("key", value);
+        final Map<String, String> input = Collections.singletonMap("key", value);
         final String doc = trimDocMarker(MAPPER.writeValueAsString(input).trim());
 
         assertEquals("key: \""+value+"\"", doc);
