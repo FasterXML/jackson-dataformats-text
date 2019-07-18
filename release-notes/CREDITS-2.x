@@ -63,3 +63,7 @@ Alon Bar-Lev (alonbl@github)
 Stehan Leh (stefanleh@github)
 * Reported #116: (yaml) Error handling "null" String when Feature.MINIMIZE_QUOTES is active
  (2.10.0)
+
+Guillaume Smaha (GuillaumeSmaha@github)
+* Contributed fix for #129: (yaml) Convert YAML string issue
+ (2.10.0)

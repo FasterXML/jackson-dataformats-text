@@ -20,7 +20,9 @@ Modules:
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
 #116: Error handling "null" String when Feature.MINIMIZE_QUOTES is active
  (reported by Stefan L)
-#134: `CSVParserBootstrapper` creates `UTF8Reader` which is incorrectly not auto-closed
+#129: (yaml) Convert YAML string issue
+ (fix contributed by Guillaume S)
+#134: (csv) `CSVParserBootstrapper` creates `UTF8Reader` which is incorrectly not auto-closed
  (reported by iuliu-b@github)
 - Add JDK9+ module info using Moditect plugin
 
