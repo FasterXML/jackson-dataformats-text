@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.10.0 (not yet released)
+2.10.0.pr1 (19-Jul-2019)
 
 #50: (yaml) Empty string serialized without quotes if MINIMIZE_QUOTES is enabled
  (reported by tim-palmer@github)
