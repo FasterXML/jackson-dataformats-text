@@ -443,6 +443,18 @@ public class YAMLGenerator extends GeneratorBase
         _writeFieldName(name.getValue());
     }
 
+    @Override // override since 2.10 (method added in 2.8)
+    public void writeFieldId(long id) throws IOException {
+        // 24-Jul-2019, tatu: Should not force construction of a String here...
+        String idStr = Long.valueOf(id).toString(); // since instances for small values cached
+        if (_writeContext.writeFieldName(idStr) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+            _reportError("Can not write a field id, expecting a value");
+        }
+        // to avoid quoting
+//        _writeFieldName(idStr);
+        _writeScalar(idStr, "int", STYLE_SCALAR);
+    }
+
     @Override
     public final void writeStringField(String fieldName, String value)
         throws IOException

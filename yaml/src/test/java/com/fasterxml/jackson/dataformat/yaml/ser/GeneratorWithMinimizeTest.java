@@ -1,16 +1,19 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.*;
 
 public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
-    private final static YAMLMapper MINIM_MAPPER = new YAMLMapper();
-    static {
-        MINIM_MAPPER.enable(YAMLGenerator.Feature.MINIMIZE_QUOTES);
-    }
+    private final ObjectMapper VANILLA_MAPPER = newObjectMapper();
+
+    private final YAMLMapper MINIM_MAPPER = YAMLMapper.builder()
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .build();
 
     public void testDefaultSetting() {
         YAMLFactory f = new YAMLFactory();
@@ -164,5 +167,32 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
 
         assertEquals("---\nkey: \"\"", yaml);
+    }
+
+    // [dataformats-text#140]
+    public void testNumberKey() throws Exception
+    {
+        // First, test with Strings that happen to look like Integer
+        final Map<String, String> stringKeyMap = Collections.singletonMap(
+                "42", "answer");
+        // Quoted in both cases
+        assertEquals("---\n\"42\": \"answer\"",
+                VANILLA_MAPPER.writeValueAsString(stringKeyMap).trim());
+        // but not if minimizing quotes
+        assertEquals("---\n\"42\": answer",
+                MINIM_MAPPER.writeValueAsString(stringKeyMap).trim());
+
+        // And then true Integer keys
+        
+        final Map<Integer, String> intKeyMap = Collections.singletonMap(
+                Integer.valueOf(42), "answer");
+
+        // by default, is quoted
+        assertEquals("---\n42: \"answer\"",
+                VANILLA_MAPPER.writeValueAsString(intKeyMap).trim());
+
+        // but not if minimizing quotes
+        assertEquals("---\n42: answer",
+                MINIM_MAPPER.writeValueAsString(intKeyMap).trim());
     }
 }
