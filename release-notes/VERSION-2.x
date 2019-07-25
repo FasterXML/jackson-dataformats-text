@@ -8,6 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.10.0.pr2 (not yet released)
+
+#140: (yaml) Implement `JsonGenerator.writeFieldId(...)` for `YAMLGenerator`
+
 2.10.0.pr1 (19-Jul-2019)
 
 #50: (yaml) Empty string serialized without quotes if MINIMIZE_QUOTES is enabled
@@ -16,9 +20,9 @@ Modules:
  (contributed by Alon B-L)
 #101: (yaml) Use latest SnakeYAML version 1.24 and get rid of deprecated methods
  (contributed by Andrey S)
-#108: (yaml) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace deprecated
+#108: (csv) Add new `CsvParser.Feature.ALLOW_COMMENTS` to replace use of deprecated
  `JsonParser.Feature.ALLOW_YAML_COMMENTS`
-#116: Error handling "null" String when Feature.MINIMIZE_QUOTES is active
+#116: (yaml) Error handling "null" String when Feature.MINIMIZE_QUOTES is active
  (reported by Stefan L)
 #129: (yaml) Convert YAML string issue
  (fix contributed by Guillaume S)
