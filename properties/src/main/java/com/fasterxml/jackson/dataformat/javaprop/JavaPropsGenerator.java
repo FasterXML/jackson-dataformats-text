@@ -106,20 +106,6 @@ public abstract class JavaPropsGenerator
     /**********************************************************
      */
 
-    // // No way to indent
-    
-    @Override
-    public JsonGenerator useDefaultPrettyPrinter() {
-        // could alternatively throw exception but let it fly for now
-        return this;
-    }
-
-    @Override
-    public JsonGenerator setPrettyPrinter(PrettyPrinter pp) {
-        // could alternatively throw exception but let it fly for now
-        return this;
-    }
-
 //    public abstract getOutputTarget()
 
     // Base impl fine

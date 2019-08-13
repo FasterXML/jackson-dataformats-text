@@ -331,24 +331,6 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    /**
-     * Not sure what to do here; could reset indentation to some value maybe?
-     */
-    @Override
-    public YAMLGenerator useDefaultPrettyPrinter()
-    {
-        return this;
-    }
-
-    /**
-     * Not sure what to do here; will always indent, but uses
-     * YAML-specific settings etc.
-     */
-    @Override
-    public YAMLGenerator setPrettyPrinter(PrettyPrinter pp) {
-        return this;
-    }
-
     @Override
     public Object getOutputTarget() {
         return _writer;

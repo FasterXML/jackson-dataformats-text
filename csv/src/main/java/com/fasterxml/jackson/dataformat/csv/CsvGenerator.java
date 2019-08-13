@@ -239,28 +239,10 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
-
-    /**
-     * No way (or need) to indent anything, so let's block any attempts.
-     * (should we throw an exception instead?)
-     */
-    @Override
-    public CsvGenerator useDefaultPrettyPrinter() {
-        return this;
-    }
-
-    /**
-     * No way (or need) to indent anything, so let's block any attempts.
-     * (should we throw an exception instead?)
-     */
-    @Override
-    public CsvGenerator setPrettyPrinter(PrettyPrinter pp) {
-        return this;
-    }
 
     @Override
     public Object getOutputTarget() {
