@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.*;
@@ -35,10 +36,11 @@ public class JavaPropsParser extends ParserMinimalBase
     protected final Object _inputSource;
 
     /**
-     * Actual {@link java.util.Properties} that were parsed and handed to us
+     * Actual {@link java.util.Properties} (or, actually, any {@link java.util.Map}
+     * with String keys, values) that were parsed and handed to us
      * for further processing.
      */
-    protected final Properties _sourceProperties;
+    protected final Map<?,?> _sourceContent;
     
     /**
      * Schema we use for parsing Properties into structure of some kind.
@@ -71,13 +73,20 @@ public class JavaPropsParser extends ParserMinimalBase
     /**********************************************************
      */
 
+    @Deprecated // since 2.10
     public JavaPropsParser(IOContext ctxt, Object inputSource,
             int parserFeatures, ObjectCodec codec, Properties sourceProps)
+    {
+        this(ctxt, parserFeatures, inputSource, codec, (Map<?,?>) sourceProps);
+    }
+
+    public JavaPropsParser(IOContext ctxt, int parserFeatures, Object inputSource,
+            ObjectCodec codec, Map<?,?> sourceMap)
     {
         super(parserFeatures);
         _objectCodec = codec;
         _inputSource = inputSource;
-        _sourceProperties = sourceProps;
+        _sourceContent = sourceMap;
         
     }
 
@@ -215,7 +224,7 @@ public class JavaPropsParser extends ParserMinimalBase
                 return null;
             }
             _closed = true;
-            JPropNode root = JPropNodeBuilder.build(_schema, _sourceProperties);
+            JPropNode root = JPropNodeBuilder.build(_sourceContent, _schema);
             _readContext = JPropReadContext.create(root);
 
             // 30-Mar-2016, tatu: For debugging can be useful:

@@ -10,6 +10,8 @@ Modules:
 
 2.10.0.pr2 (not yet released)
 
+#139: (properties) Support for Map<String, String> in `JavaPropsMapper`
+ (suggested by Filip H)
 #140: (yaml) Implement `JsonGenerator.writeFieldId(...)` for `YAMLGenerator`
 
 2.10.0.pr1 (19-Jul-2019)

@@ -67,3 +67,8 @@ Stehan Leh (stefanleh@github)
 Guillaume Smaha (GuillaumeSmaha@github)
 * Contributed fix for #129: (yaml) Convert YAML string issue
  (2.10.0)
+
+Filip Hrisafov (filiphr@github)
+* Suggested #139: Support for Map<String, String> in `JavaPropsMapper`
+ (2.10.0)
+ 

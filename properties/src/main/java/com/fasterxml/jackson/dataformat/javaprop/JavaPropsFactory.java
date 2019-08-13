@@ -150,12 +150,17 @@ public class JavaPropsFactory extends JsonFactory
      * Convenience method to allow feeding a pre-parsed {@link Properties}
      * instance as input.
      *
-     * @since 2.9
+     * @since 2.10
      */
+    public JavaPropsParser createParser(Map<?,?> content) {
+        return new JavaPropsParser(_createContext(content, true),
+                _parserFeatures, content, _objectCodec, content);
+    }
+
+    @Deprecated // since 2.10
     public JavaPropsParser createParser(Properties props) {
-        IOContext ctxt = _createContext(props, true);
-        return new JavaPropsParser(ctxt,
-                props, _parserFeatures, _objectCodec, props);
+        return new JavaPropsParser(_createContext(props, true),
+                _parserFeatures, props, _objectCodec, props);
     }
 
     /**
