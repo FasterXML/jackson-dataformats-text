@@ -22,6 +22,11 @@ public class JavaPropsFactory
 
     protected final static String CHARSET_ID_LATIN1 = "ISO-8859-1";
 
+    final static JavaPropsSchema EMPTY_SCHEMA;
+    static {
+        EMPTY_SCHEMA = JavaPropsSchema.emptySchema();
+    }
+
     /*
     /**********************************************************
     /* Factory construction, configuration
@@ -142,13 +147,13 @@ public class JavaPropsFactory
 
     /**
      * Convenience method to allow feeding a pre-parsed {@link Properties}
-     * instance as input.
+     * (or, generally {@link java.util.Map}) instance as input.
      */
-    public JavaPropsParser createParser(ObjectReadContext readCtxt, Properties props) {
-        return new JavaPropsParser(readCtxt, _createContext(props, true),
+    public JavaPropsParser createParser(ObjectReadContext readCtxt,
+            JavaPropsSchema schema, Map<?,?> content) {
+        return new JavaPropsParser(readCtxt, _createContext(content, true),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
-                _getSchema(readCtxt),
-                props, props);
+                schema, content, content);
     }
 
     /**
@@ -157,13 +162,15 @@ public class JavaPropsFactory
      * are added.
      */
     public JavaPropsGenerator createGenerator(ObjectWriteContext writeCtxt,
-            Properties props)
+            JavaPropsSchema schema, Properties props)
     {
+        if (schema == null) {
+            schema = EMPTY_SCHEMA;
+        }
         return new PropertiesBackedGenerator(writeCtxt,
                 _createContext(props, true),
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
-                _getSchema(writeCtxt),
-                props);
+                schema, props);
     }
 
     /*

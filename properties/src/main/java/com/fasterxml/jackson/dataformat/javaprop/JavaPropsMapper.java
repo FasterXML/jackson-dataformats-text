@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -144,9 +145,9 @@ public class JavaPropsMapper extends ObjectMapper
     }
 
     /*
-    /**********************************************************
-    /* Extended read methods
-    /**********************************************************
+    /**********************************************************************
+    /* Extended read methods, from Properties objects
+    /**********************************************************************
      */
 
     /**
@@ -164,8 +165,7 @@ public class JavaPropsMapper extends ObjectMapper
             Class<T> valueType) throws IOException
     {
         DeserializationContext ctxt = createDeserializationContext();
-        JsonParser p = tokenStreamFactory().createParser(ctxt, props);
-        p.setSchema(schema);
+        JsonParser p = tokenStreamFactory().createParser(ctxt, schema, props);
         return (T) readValue(p, valueType);
     }
 
@@ -184,8 +184,7 @@ public class JavaPropsMapper extends ObjectMapper
             JavaType valueType) throws IOException
     {
         DeserializationContext ctxt = createDeserializationContext();
-        JsonParser p = tokenStreamFactory().createParser(ctxt, props);
-        p.setSchema(schema);
+        JsonParser p = tokenStreamFactory().createParser(ctxt, schema, props);
         return (T) readValue(p, valueType);
     }
 
@@ -208,7 +207,75 @@ public class JavaPropsMapper extends ObjectMapper
     public <T> T readPropertiesAs(Properties props, JavaType valueType) throws IOException {
         return readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
     }
+
+    /*
+    /**********************************************************************
+    /* Extended read methods, from Map objects
+    /**********************************************************************
+     */
+
+    /**
+     * Convenience method which uses given `Properties` as the source
+     * as if they had been read from an external source, processes
+     * them (splits paths etc), and then binds as given result
+     * value.
+     *<p>
+     * Note that this is NOT identical to calling {@link #convertValue(Object, Class)};
+     * rather, it would be similar to writing `Properties` out into a File,
+     * then calling `readValue()` on this mapper to bind contents.
+     */
+    @SuppressWarnings("resource")
+    public <T> T readMapAs(Map<String, String> map, JavaPropsSchema schema,
+            Class<T> valueType) throws IOException {
+        DeserializationContext ctxt = createDeserializationContext();
+        JsonParser p = tokenStreamFactory().createParser(ctxt, schema, map);
+        return (T) readValue(p, valueType);
+    }
+
+    /**
+     * Convenience method which uses given `Properties` as the source
+     * as if they had been read from an external source, processes
+     * them (splits paths etc), and then binds as given result
+     * value.
+     *<p>
+     * Note that this is NOT identical to calling {@link #convertValue(Object, Class)};
+     * rather, it would be similar to writing `Properties` out into a File,
+     * then calling `readValue()` on this mapper to bind contents.
+     */
+    @SuppressWarnings({ "resource", "unchecked" })
+    public <T> T readMapAs(Map<String, String> map, JavaPropsSchema schema,
+            JavaType valueType) throws IOException {
+        DeserializationContext ctxt = createDeserializationContext();
+        JsonParser p = tokenStreamFactory().createParser(ctxt, schema, map);
+        return (T) readValue(p, valueType);
+    }
+
+    /**
+     * Convenience method, functionally equivalent to:
+     *<pre>
+     *   readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
+     *</pre>
+     */
+    public <T> T readMapAs(Map<String, String> map, Class<T> valueType) throws IOException {
+        return readMapAs(map, JavaPropsSchema.emptySchema(), valueType);
+    }
+
+    /**
+     * Convenience method, functionally equivalent to:
+     *<pre>
+     *   readPropertiesAs(props, JavaPropsSchema.emptySchema(), valueType);
+     *</pre>
+     */
+    public <T> T readMapAs(Map<String, String> map, JavaType valueType) throws IOException {
+        return readMapAs(map, JavaPropsSchema.emptySchema(), valueType);
+    }
     
+    /*
+    /**********************************************************************
+    /* Extended read methods, from System Properties
+    /**********************************************************************
+     */
+
     /**
      * Convenience method, functionally equivalent to:
      *<pre>
@@ -231,6 +298,12 @@ public class JavaPropsMapper extends ObjectMapper
         return readPropertiesAs(System.getProperties(), schema, valueType);
     }
 
+    /*
+    /**********************************************************************
+    /* Extended read methods, from Env variables
+    /**********************************************************************
+     */
+    
     /**
      * Convenience method, functionally equivalent to:
      *<pre>
@@ -276,7 +349,7 @@ public class JavaPropsMapper extends ObjectMapper
         }
         DefaultSerializerProvider prov = _serializerProvider();
         JavaPropsGenerator g = tokenStreamFactory()
-                .createGenerator(prov, targetProps);
+                .createGenerator(prov, null, targetProps);
         writeValue(g, value);
         g.close();
     }
@@ -293,10 +366,7 @@ public class JavaPropsMapper extends ObjectMapper
         }
         DefaultSerializerProvider prov = _serializerProvider();
         JavaPropsGenerator g = tokenStreamFactory()
-                .createGenerator(prov, targetProps);
-        if (schema != null) {
-            g.setSchema(schema);
-        }
+                .createGenerator(prov, schema, targetProps);
         writeValue(g, value);
         g.close();
     }
@@ -321,7 +391,7 @@ public class JavaPropsMapper extends ObjectMapper
     public Properties writeValueAsProperties(Object value, JavaPropsSchema schema)
         throws IOException
     {
-        Properties props = new Properties();
+        final Properties props = new Properties();
         writeValue(props, value, schema);
         return props;
     }

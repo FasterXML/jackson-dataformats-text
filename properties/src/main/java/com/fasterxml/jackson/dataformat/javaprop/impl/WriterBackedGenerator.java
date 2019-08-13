@@ -5,6 +5,7 @@ import java.io.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsGenerator;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;
 
 public class WriterBackedGenerator extends JavaPropsGenerator
@@ -50,7 +51,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     public WriterBackedGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, FormatSchema schema,
+            int stdFeatures, JavaPropsSchema schema,
             Writer out)
     {
         super(writeCtxt, ioCtxt, stdFeatures, schema);

@@ -6,6 +6,7 @@ import java.util.Properties;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsGenerator;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class PropertiesBackedGenerator extends JavaPropsGenerator
 {
@@ -28,7 +29,7 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
 
     public PropertiesBackedGenerator(ObjectWriteContext writeCtxt, IOContext ctxt,
-            int stdFeatures, FormatSchema schema,
+            int stdFeatures, JavaPropsSchema schema,
             Properties props)
     {
         super(writeCtxt, ctxt, stdFeatures, schema);

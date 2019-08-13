@@ -20,7 +20,7 @@ public class JavaPropsSchema
     implements FormatSchema,
     java.io.Serializable
 {
-    private static final long serialVersionUID = 1L; // 2.5
+    private static final long serialVersionUID = 3L;
 
     protected final static Markers DEFAULT_INDEX_MARKER = Markers.create("[", "]");
 
@@ -269,9 +269,6 @@ public class JavaPropsSchema
         return s;
     }
 
-    /**
-     * @since 2.8
-     */
     public JavaPropsSchema withoutLineIndentation() {
         return withLineIndentation("");
     }
@@ -332,8 +329,6 @@ public class JavaPropsSchema
      *</pre>
      * used to ensure that no header is prepended before actual property values
      * are output.
-     *
-     * @since 2.8
      */
     public JavaPropsSchema withoutHeader() {
         return withHeader("");

@@ -1,18 +1,16 @@
 package com.fasterxml.jackson.dataformat.javaprop.util;
 
 import java.util.Map;
-import java.util.Properties;
 
 import com.fasterxml.jackson.dataformat.javaprop.*;
 
 public class JPropNodeBuilder
 {
-    public static JPropNode build(JavaPropsSchema schema,
-            Properties props)
+    public static JPropNode build(Map<?,?> content, JavaPropsSchema schema) 
     {
         JPropNode root = new JPropNode();
         JPropPathSplitter splitter = schema.pathSplitter();
-        for (Map.Entry<?,?> entry : props.entrySet()) {
+        for (Map.Entry<?,?> entry : content.entrySet()) {
             // these should be Strings; but due to possible "compromised" properties,
             // let's play safe, coerce if and as necessary
             String key = String.valueOf(entry.getKey());

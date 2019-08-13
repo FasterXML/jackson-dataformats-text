@@ -4,17 +4,41 @@ import java.util.*;
 
 /**
  * Tests for extended functionality to work with JDK `Properties` Object
+ * (as well as {@code java.util.Map}, since 2.10)
  */
 public class PropertiesSupportTest extends ModuleTestBase
 {
+    static class TestObject91 {
+        Map<String, String> values = new HashMap<>();
+        public Map<String, String> getValues() {
+             return values;
+        }
+        public void setValues(Map<String, String> values) {
+             this.values = values;
+        }
+    }
+
     private final JavaPropsMapper MAPPER = mapperForProps();
 
-    public void testSimpleEmployee() throws Exception
+    public void testSimpleEmployeeFromProperties() throws Exception
     {
         Properties props = new Properties();
         props.put("a.b", "14");
         props.put("x", "foo");
-        Map<?,?> result = MAPPER.readPropertiesAs(props, Map.class);
+        _verifySimple(MAPPER.readPropertiesAs(props, Map.class));
+    }
+
+    // for [dataformats-text#139]
+    public void testSimpleEmployeeFromMap() throws Exception
+    {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("a.b", "14");
+        map.put("x", "foo");
+        _verifySimple(MAPPER.readMapAs(map, Map.class));
+    }
+
+    private void _verifySimple(Map<?,?> result)
+    {        
         assertNotNull(result);
         assertEquals(2, result.size());
         assertEquals("foo", result.get("x"));
@@ -26,7 +50,7 @@ public class PropertiesSupportTest extends ModuleTestBase
         assertEquals("14", m2.get("b"));
     }
 
-    public void testWithCustomSchema() throws Exception
+    public void testWithCustomSchemaFromProperties() throws Exception
     {
         Properties props = new Properties();
         props.put("a/b", "14");
@@ -35,6 +59,24 @@ public class PropertiesSupportTest extends ModuleTestBase
                 .withPathSeparator("/");
         Map<?,?> result = MAPPER.readPropertiesAs(props, schema,
                 MAPPER.constructType(Map.class));
+        _verifyCustom(result);
+    }
+
+    // for [dataformats-text#139]
+    public void testWithCustomSchemaFromMap() throws Exception
+    {
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("a/b", "14");
+        map.put("x.y/z", "foo");
+        JavaPropsSchema schema = JavaPropsSchema.emptySchema()
+                .withPathSeparator("/");
+        Map<?,?> result = MAPPER.readMapAs(map, schema,
+                MAPPER.constructType(Map.class));
+        _verifyCustom(result);
+    }
+
+    private void _verifyCustom(Map<?,?> result)
+    {
         assertNotNull(result);
         assertEquals(2, result.size());
         Object ob = result.get("a");
@@ -50,16 +92,6 @@ public class PropertiesSupportTest extends ModuleTestBase
         m2 = (Map<?,?>) ob;
         assertEquals(1, m2.size());
         assertEquals("foo", m2.get("z"));
-    }
-
-    static class TestObject91 {
-        Map<String, String> values = new HashMap<>();
-        public Map<String, String> getValues() {
-             return values;
-        }
-        public void setValues(Map<String, String> values) {
-             this.values = values;
-        }
     }
 
     // [dataformats-text#91]

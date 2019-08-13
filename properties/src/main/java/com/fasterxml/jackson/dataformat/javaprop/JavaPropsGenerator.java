@@ -25,11 +25,6 @@ public abstract class JavaPropsGenerator
      */
     protected final static JsonWriteContext BOGUS_WRITE_CONTEXT = JsonWriteContext.createRootContext(null);
 
-    private final static JavaPropsSchema EMPTY_SCHEMA;
-    static {
-        EMPTY_SCHEMA = JavaPropsSchema.emptySchema();
-    }
-
     /*
     /**********************************************************
     /* Configuration
@@ -74,15 +69,12 @@ public abstract class JavaPropsGenerator
      */
 
     public JavaPropsGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, FormatSchema schema)
+            int stdFeatures, JavaPropsSchema schema)
     {
         super(writeCtxt, stdFeatures, BOGUS_WRITE_CONTEXT);
         _ioContext = ioCtxt;
         _jpropContext = JPropWriteContext.createRootContext();
-        if (schema == null) {
-            schema = EMPTY_SCHEMA;
-        }
-        setSchema(schema);
+        _setSchema(schema);
     }
 
     @Override
@@ -119,25 +111,29 @@ public abstract class JavaPropsGenerator
     @Override
     public void setSchema(FormatSchema schema) {
         if (schema instanceof JavaPropsSchema) {
-            _schema = (JavaPropsSchema) schema;
-            // Indentation to use?
-            if (_jpropContext.inRoot()) {
-                String indent = _schema.lineIndentation();
-                _indentLength = (indent == null) ? 0 : indent.length();
-                if (_indentLength > 0) {
-                    _basePath.setLength(0);
-                    _basePath.append(indent);
-                    _jpropContext = JPropWriteContext.createRootContext(_indentLength);
-                }
-                // [dataformats-text#100]: Allow use of optional prefix
-                final String prefix = _schema.prefix();
-                if (prefix != null) {
-                    _basePath.append(prefix);
-                }
-            }
-            return;
+            _setSchema((JavaPropsSchema) schema);
+        } else {
+            super.setSchema(schema);
         }
-        super.setSchema(schema);
+    }
+
+    private void _setSchema(JavaPropsSchema schema) {
+        _schema = schema;
+        // Indentation to use?
+        if (_jpropContext.inRoot()) {
+            String indent = _schema.lineIndentation();
+            _indentLength = (indent == null) ? 0 : indent.length();
+            if (_indentLength > 0) {
+                _basePath.setLength(0);
+                _basePath.append(indent);
+                _jpropContext = JPropWriteContext.createRootContext(_indentLength);
+            }
+            // [dataformats-text#100]: Allow use of optional prefix
+            final String prefix = _schema.prefix();
+            if (prefix != null) {
+                _basePath.append(prefix);
+            }
+        }
     }
 
     @Override
