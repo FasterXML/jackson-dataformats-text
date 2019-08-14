@@ -8,7 +8,6 @@ import java.util.Arrays;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
@@ -18,12 +17,6 @@ public abstract class JavaPropsGenerator
     // As an optimization we try coalescing short writes into
     // buffer; but pass longer directly.
     final protected static int SHORT_WRITE = 100;
-
-    /**
-     * Since our context object does NOT implement standard write context, need
-     * to do something like use a placeholder...
-     */
-    protected final static JsonWriteContext BOGUS_WRITE_CONTEXT = JsonWriteContext.createRootContext(null);
 
     /*
     /**********************************************************************
@@ -48,7 +41,7 @@ public abstract class JavaPropsGenerator
      * Current context, in form we can use it (GeneratorBase has
      * untyped reference; left as null)
      */
-    protected JPropWriteContext _jpropContext;
+    protected JPropWriteContext _tokenWriteContext;
 
     /*
     /**********************************************************************
@@ -73,7 +66,7 @@ public abstract class JavaPropsGenerator
     {
         super(writeCtxt, stdFeatures);
         _ioContext = ioCtxt;
-        _jpropContext = JPropWriteContext.createRootContext();
+        _tokenWriteContext = JPropWriteContext.createRootContext();
         _setSchema(schema);
     }
 
@@ -96,17 +89,17 @@ public abstract class JavaPropsGenerator
 
     @Override
     public TokenStreamContext getOutputContext() {
-        return _jpropContext;
+        return _tokenWriteContext;
     }
 
     @Override
     public Object getCurrentValue() {
-        return _jpropContext.getCurrentValue();
+        return _tokenWriteContext.getCurrentValue();
     }
 
     @Override
     public void setCurrentValue(Object v) {
-        _jpropContext.setCurrentValue(v);
+        _tokenWriteContext.setCurrentValue(v);
     }
 
     /*
@@ -137,13 +130,13 @@ public abstract class JavaPropsGenerator
     private void _setSchema(JavaPropsSchema schema) {
         _schema = schema;
         // Indentation to use?
-        if (_jpropContext.inRoot()) {
+        if (_tokenWriteContext.inRoot()) {
             String indent = _schema.lineIndentation();
             _indentLength = (indent == null) ? 0 : indent.length();
             if (_indentLength > 0) {
                 _basePath.setLength(0);
                 _basePath.append(indent);
-                _jpropContext = JPropWriteContext.createRootContext(_indentLength);
+                _tokenWriteContext = JPropWriteContext.createRootContext(_indentLength);
             }
             // [dataformats-text#100]: Allow use of optional prefix
             final String prefix = _schema.prefix();
@@ -205,7 +198,7 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeFieldName(String name) throws IOException
     {
-        if (!_jpropContext.writeFieldName(name)) {
+        if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
         }
         // also, may need to output header if this would be first write
@@ -219,7 +212,7 @@ public abstract class JavaPropsGenerator
 
         // Ok; append to base path at this point.
         // First: ensure possibly preceding field name is removed:
-        _jpropContext.truncatePath(_basePath);
+        _tokenWriteContext.truncatePath(_basePath);
         if (_basePath.length() > _indentLength) {
             String sep = _schema.pathSeparator();
             if (!sep.isEmpty()) {
@@ -240,30 +233,30 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeStartArray() throws IOException {
         _verifyValueWrite("start an array");
-        _jpropContext = _jpropContext.createChildArrayContext(_basePath.length());
+        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(_basePath.length());
     }
 
     @Override
     public void writeEndArray() throws IOException {
-        if (!_jpropContext.inArray()) {
-            _reportError("Current context not an Array but "+_jpropContext.typeDesc());
+        if (!_tokenWriteContext.inArray()) {
+            _reportError("Current context not an Array but "+_tokenWriteContext.typeDesc());
         }
-        _jpropContext = _jpropContext.getParent();
+        _tokenWriteContext = _tokenWriteContext.getParent();
     }
 
     @Override
     public void writeStartObject() throws IOException {
         _verifyValueWrite("start an object");
-        _jpropContext = _jpropContext.createChildObjectContext(_basePath.length());
+        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(_basePath.length());
     }
 
     @Override
     public void writeEndObject() throws IOException
     {
-        if (!_jpropContext.inObject()) {
-            _reportError("Current context not an Ibject but "+_jpropContext.typeDesc());
+        if (!_tokenWriteContext.inObject()) {
+            _reportError("Current context not an Ibject but "+_tokenWriteContext.typeDesc());
         }
-        _jpropContext = _jpropContext.getParent();
+        _tokenWriteContext = _tokenWriteContext.getParent();
     }
 
     /*
@@ -453,14 +446,14 @@ public abstract class JavaPropsGenerator
     protected void _verifyValueWrite(String typeMsg) throws IOException
     {
         // first, check that name/value cadence works
-        if (!_jpropContext.writeValue()) {
+        if (!_tokenWriteContext.writeValue()) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
         // and if so, update path if we are in array
-        if (_jpropContext.inArray()) {
+        if (_tokenWriteContext.inArray()) {
             // remove possible path remnants from an earlier sibling
-            _jpropContext.truncatePath(_basePath);
-            int ix = _jpropContext.getCurrentIndex() + _schema.firstArrayOffset();
+            _tokenWriteContext.truncatePath(_basePath);
+            int ix = _tokenWriteContext.getCurrentIndex() + _schema.firstArrayOffset();
             if (_schema.writeIndexUsingMarkers()) {
                 Markers m = _schema.indexMarker();
                 // no leading path separator, if using enclosed indexes

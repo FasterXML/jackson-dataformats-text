@@ -246,7 +246,7 @@ public class YAMLGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected JsonWriteContext _outputContext;
+    protected JsonWriteContext _tokenWriteContext;
 
     protected Emitter _emitter;
 
@@ -278,7 +278,7 @@ public class YAMLGenerator extends GeneratorBase
         _ioContext = ioCtxt;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _outputContext = JsonWriteContext.createRootContext(dups);
+        _tokenWriteContext = JsonWriteContext.createRootContext(dups);
 
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
@@ -342,16 +342,16 @@ public class YAMLGenerator extends GeneratorBase
      */
     
     @Override
-    public final TokenStreamContext getOutputContext() { return _outputContext; }
+    public final TokenStreamContext getOutputContext() { return _tokenWriteContext; }
 
     @Override
     public final Object getCurrentValue() {
-        return _outputContext.getCurrentValue();
+        return _tokenWriteContext.getCurrentValue();
     }
 
     @Override
     public final void setCurrentValue(Object v) {
-        _outputContext.setCurrentValue(v);
+        _tokenWriteContext.setCurrentValue(v);
     }
 
     /*
@@ -431,7 +431,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeFieldName(String name) throws IOException
     {
-        if (_outputContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_tokenWriteContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
@@ -442,7 +442,7 @@ public class YAMLGenerator extends GeneratorBase
         throws IOException
     {
         // Object is a value, need to verify it's allowed
-        if (_outputContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_tokenWriteContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -452,7 +452,7 @@ public class YAMLGenerator extends GeneratorBase
     public void writeFieldId(long id) throws IOException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
-        if (_outputContext.writeFieldName(idStr) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_tokenWriteContext.writeFieldName(idStr) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field id, expecting a value");
         }
         // to avoid quoting
@@ -464,7 +464,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStringField(String fieldName, String value)
         throws IOException
     {
-        if (_outputContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (_tokenWriteContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(fieldName);
@@ -526,7 +526,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartArray() throws IOException
     {
         _verifyValueWrite("start an array");
-        _outputContext = _outputContext.createChildArrayContext();
+        _tokenWriteContext = _tokenWriteContext.createChildArrayContext();
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -541,12 +541,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndArray() throws IOException
     {
-        if (!_outputContext.inArray()) {
-            _reportError("Current context not Array but "+_outputContext.typeDesc());
+        if (!_tokenWriteContext.inArray()) {
+            _reportError("Current context not Array but "+_tokenWriteContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _outputContext = _outputContext.getParent();
+        _tokenWriteContext = _tokenWriteContext.getParent();
         _emitter.emit(new SequenceEndEvent());
     }
 
@@ -554,7 +554,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartObject() throws IOException
     {
         _verifyValueWrite("start an object");
-        _outputContext = _outputContext.createChildObjectContext();
+        _tokenWriteContext = _tokenWriteContext.createChildObjectContext();
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -568,12 +568,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndObject() throws IOException
     {
-        if (!_outputContext.inObject()) {
-            _reportError("Current context not Object but "+_outputContext.typeDesc());
+        if (!_tokenWriteContext.inObject()) {
+            _reportError("Current context not Object but "+_tokenWriteContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _outputContext = _outputContext.getParent();
+        _tokenWriteContext = _tokenWriteContext.getParent();
         _emitter.emit(new MappingEndEvent());
     }
 
@@ -851,7 +851,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final void _verifyValueWrite(String typeMsg)
         throws IOException
     {
-        int status = _outputContext.writeValue();
+        int status = _tokenWriteContext.writeValue();
         if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
