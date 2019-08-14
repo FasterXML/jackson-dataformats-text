@@ -157,20 +157,20 @@ public class JavaPropsFactory
     }
 
     /**
-     * Convenience method to allow using a pre-constructed {@link Properties}
+     * Convenience method to allow using a pre-constructed {@link Map}
      * instance as output target, so that serialized property values
      * are added.
      */
     public JavaPropsGenerator createGenerator(ObjectWriteContext writeCtxt,
-            JavaPropsSchema schema, Properties props)
+            JavaPropsSchema schema, Map<?,?> target)
     {
         if (schema == null) {
             schema = EMPTY_SCHEMA;
         }
         return new PropertiesBackedGenerator(writeCtxt,
-                _createContext(props, true),
+                _createContext(target, true),
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
-                schema, props);
+                schema, target);
     }
 
     /*

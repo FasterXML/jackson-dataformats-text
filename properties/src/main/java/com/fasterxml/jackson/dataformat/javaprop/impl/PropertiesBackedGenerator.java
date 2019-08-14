@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop.impl;
 
 import java.io.*;
+import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.*;
@@ -20,7 +21,7 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      * Underlying {@link Properties} that we will update with logical
      * properties written out.
      */
-    final protected Properties _props;
+    final protected Map<String, Object> _content;
 
     /*
     /**********************************************************
@@ -28,13 +29,13 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     /**********************************************************
      */
 
+    @SuppressWarnings("unchecked")
     public PropertiesBackedGenerator(ObjectWriteContext writeCtxt, IOContext ctxt,
             int stdFeatures, JavaPropsSchema schema,
-            Properties props)
+            Map<?,?> content)
     {
         super(writeCtxt, ctxt, stdFeatures, schema);
-        _props = props;
-
+        _content = (Map<String, Object>) content;
         // Since this is not physically encoding properties, should NOT try
         // to attempt writing headers. Easy way is to just fake we already did it
         _headerChecked = true;
@@ -48,7 +49,7 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
 
     @Override
     public Object getOutputTarget() {
-        return _props;
+        return _content;
     }
 
     /*
@@ -92,13 +93,13 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     @Override
     protected void _writeEscapedEntry(String value) throws IOException
     {
-        _props.put(_basePath.toString(), value);
+        _content.put(_basePath.toString(), value);
     }
 
     @Override
     protected void _writeUnescapedEntry(String value) throws IOException
     {
-        _props.put(_basePath.toString(), value);
+        _content.put(_basePath.toString(), value);
     }
 
     /*
