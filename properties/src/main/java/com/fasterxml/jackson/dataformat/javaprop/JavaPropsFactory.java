@@ -163,17 +163,24 @@ public class JavaPropsFactory extends JsonFactory
                 _parserFeatures, props, _objectCodec, props);
     }
 
-    /**
-     * Convenience method to allow using a pre-constructed {@link Properties}
-     * instance as output target, so that serialized property values
-     * are added.
-     *
-     * @since 2.9
-     */
+    @Deprecated // since 2.10
     public JavaPropsGenerator createGenerator(Properties props) {
         IOContext ctxt = _createContext(props, true);
         return new PropertiesBackedGenerator(ctxt,
                 props, _generatorFeatures, _objectCodec);
+    }
+
+    /**
+     * Convenience method to allow using a pre-constructed {@link Map}
+     * instance as output target, so that serialized property values
+     * are added.
+     *
+     * @since 2.10
+     */
+    public JavaPropsGenerator createGenerator(Map<?,?> target, JavaPropsSchema schema) {
+        IOContext ctxt = _createContext(target, true);
+        return new PropertiesBackedGenerator(ctxt,
+                target, _generatorFeatures, _objectCodec);
     }
 
     /*

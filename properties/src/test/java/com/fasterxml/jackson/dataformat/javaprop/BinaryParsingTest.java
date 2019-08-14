@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import static org.junit.Assert.assertArrayEquals;
 
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.Properties;
 
 public class BinaryParsingTest extends ModuleTestBase
@@ -32,15 +33,31 @@ public class BinaryParsingTest extends ModuleTestBase
     // [dataformats-text#74]
     public void testMultipleBinaryFields() throws Exception
     {
-        MyBean src = new MyBean(true);
-        Properties props = MAPPER.writeValueAsProperties(src);
+        final MyBean src = new MyBean(true);
 
-        MyBean result = MAPPER.readPropertiesAs(props, MyBean.class);
-        assertArrayEquals(src.a, result.a);
-        assertArrayEquals(src.b, result.b);
-        ByteBuffer b1 = src.c;
-        ByteBuffer b2 = result.c;
+        {
+            Properties props = MAPPER.writeValueAsProperties(src);
+    
+            MyBean result = MAPPER.readPropertiesAs(props, MyBean.class);
+            assertArrayEquals(src.a, result.a);
+            assertArrayEquals(src.b, result.b);
+            ByteBuffer b1 = src.c;
+            ByteBuffer b2 = result.c;
+    
+            assertEquals(b1, b2);
+        }
 
-        assertEquals(b1, b2);
+        {
+            Map<String, String> map = MAPPER.writeValueAsMap(src);
+    
+            MyBean result = MAPPER.readMapAs(map, MyBean.class);
+            assertArrayEquals(src.a, result.a);
+            assertArrayEquals(src.b, result.b);
+            ByteBuffer b1 = src.c;
+            ByteBuffer b2 = result.c;
+    
+            assertEquals(b1, b2);
+        }
+    
     }
 }

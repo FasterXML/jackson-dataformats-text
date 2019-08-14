@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
+import java.util.Map;
 import java.util.Properties;
 
 public class SimpleGenerationTest extends ModuleTestBase
@@ -17,10 +18,18 @@ public class SimpleGenerationTest extends ModuleTestBase
                 +"verified=true\n"
                 +"userImage=AQIDBA==\n"
                 ,output);
-        Properties props = MAPPER.writeValueAsProperties(input);
-        assertEquals(5, props.size());
-        assertEquals("true", props.get("verified"));
-        assertEquals("MALE", props.get("gender"));
+        {
+            Properties props = MAPPER.writeValueAsProperties(input);
+            assertEquals(5, props.size());
+            assertEquals("true", props.get("verified"));
+            assertEquals("MALE", props.get("gender"));
+        }
+        {
+            Map<String, String> map = MAPPER.writeValueAsMap(input);
+            assertEquals(5, map.size());
+            assertEquals("true", map.get("verified"));
+            assertEquals("MALE", map.get("gender"));
+        }
     }
 
     public void testSimpleRectangle() throws Exception
@@ -32,9 +41,16 @@ public class SimpleGenerationTest extends ModuleTestBase
                 +"bottomRight.x=5\n"
                 +"bottomRight.y=10\n"
                 ,output);
-        Properties props = MAPPER.writeValueAsProperties(input);
-        assertEquals(4, props.size());
-        assertEquals("5", props.get("bottomRight.x"));
+        {
+            Properties props = MAPPER.writeValueAsProperties(input);
+            assertEquals(4, props.size());
+            assertEquals("5", props.get("bottomRight.x"));
+        }
+        {
+            Map<String, String> map = MAPPER.writeValueAsMap(input);
+            assertEquals(4, map.size());
+            assertEquals("5", map.get("bottomRight.x"));
+        }
     }
 
     public void testRectangleWithCustomKeyValueSeparator() throws Exception
@@ -48,9 +64,16 @@ public class SimpleGenerationTest extends ModuleTestBase
                 +"bottomRight.x: 5\n"
                 +"bottomRight.y: 10\n"
                 ,output);
-        Properties props = MAPPER.writeValueAsProperties(input, schema);
-        assertEquals(4, props.size());
-        assertEquals("5", props.get("bottomRight.x"));
+        {
+            Properties props = MAPPER.writeValueAsProperties(input, schema);
+            assertEquals(4, props.size());
+            assertEquals("5", props.get("bottomRight.x"));
+        }
+        {
+            Map<String, String> map = MAPPER.writeValueAsMap(input, schema);
+            assertEquals(4, map.size());
+            assertEquals("5", map.get("bottomRight.x"));
+        }
     }
 
     public void testRectangleWithHeader() throws Exception

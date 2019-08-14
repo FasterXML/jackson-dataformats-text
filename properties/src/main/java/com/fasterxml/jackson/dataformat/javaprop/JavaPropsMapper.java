@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -289,39 +290,49 @@ public class JavaPropsMapper extends ObjectMapper
 
     /**
      * Convenience method that "writes" given `value` as properties
-     * in given {@link Properties} object.
+     * in given {@link Map} object.
      *
-     * @since 2.9
+     * @since 2.10
      */
-    public void writeValue(Properties targetProps, Object value) throws IOException
+    public void writeValue(Map<?,?> target, Object value) throws IOException
     {
-        if (targetProps == null) {
-            throw new IllegalArgumentException("Can not pass null Properties as target");
+        if (target == null) {
+            throw new IllegalArgumentException("Can not pass `null` target");
         }
-        JavaPropsGenerator g = ((JavaPropsFactory) getFactory())
-                .createGenerator(targetProps);
-        writeValue(g, value);
-        g.close();
+        try (JavaPropsGenerator g = getFactory().createGenerator(target, null)) {
+            writeValue(g, value);
+        }
     }
 
     /**
      * Convenience method that "writes" given `value` as properties
-     * in given {@link Properties} object.
+     * in given {@link Map} object.
      *
-     * @since 2.9
+     * @since 2.10
      */
-    public void writeValue(Properties targetProps, Object value, JavaPropsSchema schema)
+    public void writeValue(Map<?,?> target, Object value, JavaPropsSchema schema)
             throws IOException
     {
-        if (targetProps == null) {
-            throw new IllegalArgumentException("Can not pass null Properties as target");
+        if (target == null) {
+            throw new IllegalArgumentException("Can not pass `null` target");
         }
-        JavaPropsGenerator g = getFactory().createGenerator(targetProps);
-        if (schema != null) {
-            g.setSchema(schema);
+        try (JavaPropsGenerator g = getFactory().createGenerator(target, schema)) {
+            if (schema != null) {
+                g.setSchema(schema);
+            }
+            writeValue(g, value);
         }
-        writeValue(g, value);
-        g.close();
+    }
+
+    @Deprecated // since 2.10
+    public void writeValue(Properties targetProps, Object value) throws IOException {
+        writeValue((Map<?,?>) targetProps, value);
+    }
+
+    @Deprecated // since 2.10
+    public void writeValue(Properties targetProps, Object value, JavaPropsSchema schema)
+            throws IOException {
+        writeValue((Map<?,?>) targetProps, value, schema);
     }
     
     /**
@@ -352,7 +363,36 @@ public class JavaPropsMapper extends ObjectMapper
         writeValue(props, value, schema);
         return props;
     }
-    
+
+    /**
+     * Convenience method that serializes given value but so that results are
+     * stored in a newly constructed {@link Properties}. Functionally equivalent
+     * to serializing in a File and reading contents into {@link Properties}.
+     *
+     * @since 2.10
+     */
+    public Map<String, String> writeValueAsMap(Object value)
+        throws IOException
+    {
+        final Map<String, String> map = new LinkedHashMap<>();
+        writeValue(map, value);
+        return map;
+    }
+
+    /**
+     * Convenience method that serializes given value but so that results are
+     * stored in given {@link Properties} instance.
+     *
+     * @since 2.10
+     */
+    public Map<String, String> writeValueAsMap(Object value, JavaPropsSchema schema)
+        throws IOException
+    {
+        final Map<String, String> map = new LinkedHashMap<>();
+        writeValue(map, value, schema);
+        return map;
+    }
+
     /*
     /**********************************************************
     /* Schema support methods?

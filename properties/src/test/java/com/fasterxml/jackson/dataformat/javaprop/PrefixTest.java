@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
+import java.util.Map;
 import java.util.Properties;
 
 public class PrefixTest extends ModuleTestBase
@@ -31,9 +32,18 @@ public class PrefixTest extends ModuleTestBase
                 +"org.o1.verified=true\n"
                 +"org.o1.userImage=AQIDBA==\n"
                 ,output);
-        Properties props = MAPPER.writeValueAsProperties(input, JavaPropsSchema.emptySchema().withPrefix("org.o1"));
-        assertEquals(5, props.size());
-        assertEquals("true", props.get("org.o1.verified"));
-        assertEquals("MALE", props.get("org.o1.gender"));
+        {
+            Properties props = MAPPER.writeValueAsProperties(input, JavaPropsSchema.emptySchema().withPrefix("org.o1"));
+            assertEquals(5, props.size());
+            assertEquals("true", props.get("org.o1.verified"));
+            assertEquals("MALE", props.get("org.o1.gender"));
+        }
+        {
+            Map<String, String> map = MAPPER.writeValueAsMap(input,
+                    JavaPropsSchema.emptySchema().withPrefix("org.o1"));
+            assertEquals(5, map.size());
+            assertEquals("true", map.get("org.o1.verified"));
+            assertEquals("MALE", map.get("org.o1.gender"));
+        }
     }
 }
