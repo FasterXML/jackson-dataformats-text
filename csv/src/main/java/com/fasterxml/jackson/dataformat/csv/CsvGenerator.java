@@ -8,6 +8,7 @@ import java.util.Arrays;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
+import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
@@ -148,10 +149,15 @@ public class CsvGenerator extends GeneratorBase
     protected CsvEncoder _writer;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output state
-    /**********************************************************
+    /**********************************************************************
      */
+
+    /**
+     * Object that keeps track of the current contextual state of the generator.
+     */
+    protected JsonWriteContext _outputContext;
 
     /**
      * Flag that indicates that we need to write header line, if
@@ -203,12 +209,15 @@ public class CsvGenerator extends GeneratorBase
      */
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int generatorFeatures, int csvFeatures,
+            int streamWriteFeatures, int csvFeatures,
             Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes)
     {
-        super(writeCtxt, generatorFeatures);
+        super(writeCtxt, streamWriteFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
+        final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _outputContext = JsonWriteContext.createRootContext(dups);
         _schema = schema;
 
         if (characterEscapes == null) {
@@ -218,12 +227,15 @@ public class CsvGenerator extends GeneratorBase
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int generatorFeatures, int csvFeatures,
+            int streamWriteFeatures, int csvFeatures,
             CsvEncoder csvWriter)
     {
-        super(writeCtxt, generatorFeatures);
+        super(writeCtxt, streamWriteFeatures);
         _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
+        final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _outputContext = JsonWriteContext.createRootContext(dups);
         _writer = csvWriter;
     }
 
@@ -236,6 +248,25 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public Version version() {
         return PackageVersion.VERSION;
+    }
+
+    /*
+    /**********************************************************************
+    /* Overridden output state handling methods
+    /**********************************************************************
+     */
+    
+    @Override
+    public final TokenStreamContext getOutputContext() { return _outputContext; }
+
+    @Override
+    public final Object getCurrentValue() {
+        return _outputContext.getCurrentValue();
+    }
+
+    @Override
+    public final void setCurrentValue(Object v) {
+        _outputContext.setCurrentValue(v);
     }
 
     /*

@@ -26,9 +26,9 @@ public abstract class JavaPropsGenerator
     protected final static JsonWriteContext BOGUS_WRITE_CONTEXT = JsonWriteContext.createRootContext(null);
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     final protected IOContext _ioContext;
@@ -39,9 +39,9 @@ public abstract class JavaPropsGenerator
     protected JavaPropsSchema _schema;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output state
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -51,9 +51,9 @@ public abstract class JavaPropsGenerator
     protected JPropWriteContext _jpropContext;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output buffering
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected final StringBuilder _basePath = new StringBuilder(50);
@@ -63,18 +63,40 @@ public abstract class JavaPropsGenerator
     protected int _indentLength;
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public JavaPropsGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, JavaPropsSchema schema)
     {
-        super(writeCtxt, stdFeatures, BOGUS_WRITE_CONTEXT);
+        super(writeCtxt, stdFeatures);
         _ioContext = ioCtxt;
         _jpropContext = JPropWriteContext.createRootContext();
         _setSchema(schema);
+    }
+
+    /*
+    /**********************************************************************
+    /* Versioned
+    /**********************************************************************
+     */
+
+    @Override
+    public Version version() {
+        return PackageVersion.VERSION;
+    }
+
+    /*
+    /**********************************************************************
+    /* Overridden output state handling methods
+    /**********************************************************************
+     */
+
+    @Override
+    public TokenStreamContext getOutputContext() {
+        return _jpropContext;
     }
 
     @Override
@@ -87,15 +109,10 @@ public abstract class JavaPropsGenerator
         _jpropContext.setCurrentValue(v);
     }
 
-    @Override
-    public Version version() {
-        return PackageVersion.VERSION;
-    }
-
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
 //    public abstract getOutputTarget()
@@ -138,11 +155,11 @@ public abstract class JavaPropsGenerator
 
     @Override
     public FormatSchema getSchema() { return _schema; }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overrides: capability introspection methods
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -176,21 +193,6 @@ public abstract class JavaPropsGenerator
     @Override
     public JsonGenerator overrideFormatFeatures(int values, int mask) { }
 */
-
-    /*
-    /**********************************************************
-    /* Overridden methods: low-level I/O
-    /**********************************************************
-     */
-
-//    public void close() throws IOException
-
-//    public void flush() throws IOException
-
-    @Override
-    public TokenStreamContext getOutputContext() {
-        return _jpropContext;
-    }
 
     /*
     /**********************************************************************
@@ -230,9 +232,9 @@ public abstract class JavaPropsGenerator
     protected abstract void _appendFieldName(StringBuilder path, String name);
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: structural output
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -265,9 +267,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, textual
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -302,9 +304,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, unprocessed ("raw")
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -333,9 +335,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, base64-encoded binary
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -356,9 +358,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, scalars
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -438,9 +440,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
 
 //    protected void _releaseBuffers()
@@ -479,9 +481,9 @@ public abstract class JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Abstract methods for sub-classes
-    /**********************************************************
+    /**********************************************************************
      */
     
     protected abstract void _writeEscapedEntry(String value) throws IOException;

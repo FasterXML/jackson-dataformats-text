@@ -33,6 +33,7 @@ import org.snakeyaml.engine.v1.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 
@@ -242,6 +243,11 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
+    /**
+     * Object that keeps track of the current contextual state of the generator.
+     */
+    protected JsonWriteContext _outputContext;
+
     protected Emitter _emitter;
 
     /**
@@ -270,6 +276,10 @@ public class YAMLGenerator extends GeneratorBase
     {
         super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
+        final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _outputContext = JsonWriteContext.createRootContext(dups);
+
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
         _writer = out;
@@ -323,6 +333,25 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public Version version() {
         return PackageVersion.VERSION;
+    }
+
+    /*
+    /**********************************************************************
+    /* Overridden output state handling methods
+    /**********************************************************************
+     */
+    
+    @Override
+    public final TokenStreamContext getOutputContext() { return _outputContext; }
+
+    @Override
+    public final Object getCurrentValue() {
+        return _outputContext.getCurrentValue();
+    }
+
+    @Override
+    public final void setCurrentValue(Object v) {
+        _outputContext.setCurrentValue(v);
     }
 
     /*
