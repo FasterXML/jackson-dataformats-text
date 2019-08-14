@@ -119,6 +119,11 @@ public abstract class JavaPropsGenerator
     */
 
     @Override
+    public int formatWriteFeatures() {
+        return 0; // none defined yet
+    }
+
+    @Override
     public void setSchema(FormatSchema schema) {
         if (schema instanceof JavaPropsSchema) {
             _setSchema((JavaPropsSchema) schema);
