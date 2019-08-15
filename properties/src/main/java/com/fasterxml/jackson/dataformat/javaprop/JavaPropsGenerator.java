@@ -238,7 +238,8 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeStartArray() throws IOException {
         _verifyValueWrite("start an array");
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(_basePath.length());
+        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null,
+                _basePath.length());
     }
 
     @Override
@@ -252,7 +253,13 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeStartObject() throws IOException {
         _verifyValueWrite("start an object");
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(_basePath.length());
+        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null, _basePath.length());
+    }
+
+    @Override
+    public void writeStartObject(Object forValue) throws IOException {
+        _verifyValueWrite("start an object");
+        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(forValue, _basePath.length());
     }
 
     @Override

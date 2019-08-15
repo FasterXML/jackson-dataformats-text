@@ -54,49 +54,51 @@ public class JPropWriteContext
      */
     
     protected JPropWriteContext(int type, JPropWriteContext parent,
-            int basePathLength)
+            Object currValue, int basePathLength)
     {
         super();
         _type = type;
         _parent = parent;
         _basePathLength = basePathLength;
         _index = -1;
+        _currentValue = currValue;
     }
 
-    private void reset(int type, int basePathLength) {
+    private void reset(int type, Object currValue, int basePathLength) {
         _type = type;
         _basePathLength = basePathLength;
         _currentValue = null;
         _index = -1;
+        _currentValue = currValue;
     }
     
     // // // Factory methods
 
     public static JPropWriteContext createRootContext() {
-        return new JPropWriteContext(TYPE_ROOT, null, 0);
+        return new JPropWriteContext(TYPE_ROOT, null, null, 0);
     }
 
     public static JPropWriteContext createRootContext(int basePathLength) {
-        return new JPropWriteContext(TYPE_ROOT, null, basePathLength);
+        return new JPropWriteContext(TYPE_ROOT, null, null, basePathLength);
     }
     
-    public JPropWriteContext createChildArrayContext(int basePathLength) {
+    public JPropWriteContext createChildArrayContext(Object currValue, int basePathLength) {
         JPropWriteContext ctxt = _child;
         if (ctxt == null) {
-            _child = ctxt = new JPropWriteContext(TYPE_ARRAY, this, basePathLength);
+            _child = ctxt = new JPropWriteContext(TYPE_ARRAY, this, currValue, basePathLength);
             return ctxt;
         }
-        ctxt.reset(TYPE_ARRAY, basePathLength);
+        ctxt.reset(TYPE_ARRAY, currValue, basePathLength);
         return ctxt;
     }
 
-    public JPropWriteContext createChildObjectContext(int basePathLength) {
+    public JPropWriteContext createChildObjectContext(Object currValue, int basePathLength) {
         JPropWriteContext ctxt = _child;
         if (ctxt == null) {
-            _child = ctxt = new JPropWriteContext(TYPE_OBJECT, this, basePathLength);
+            _child = ctxt = new JPropWriteContext(TYPE_OBJECT, this, currValue, basePathLength);
             return ctxt;
         }
-        ctxt.reset(TYPE_OBJECT, basePathLength);
+        ctxt.reset(TYPE_OBJECT, currValue, basePathLength);
         return ctxt;
     }
 

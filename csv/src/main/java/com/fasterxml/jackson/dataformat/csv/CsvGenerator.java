@@ -9,7 +9,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
+import com.fasterxml.jackson.core.util.SimpleTokenWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
 
@@ -157,7 +157,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected JsonWriteContext _tokenWriteContext;
+    protected SimpleTokenWriteContext _tokenWriteContext;
 
     /**
      * Flag that indicates that we need to write header line, if
@@ -200,7 +200,7 @@ public class CsvGenerator extends GeneratorBase
      * When skipping output (for "unknown" output), outermost write context
      * where skipping should occur
      */
-    protected JsonWriteContext _skipWithin;
+    protected SimpleTokenWriteContext _skipWithin;
 
     /*
     /**********************************************************
@@ -217,7 +217,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _tokenWriteContext = JsonWriteContext.createRootContext(dups);
+        _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
         _schema = schema;
 
         if (characterEscapes == null) {
@@ -235,7 +235,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _tokenWriteContext = JsonWriteContext.createRootContext(dups);
+        _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
         _writer = csvWriter;
     }
 
@@ -354,7 +354,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeFieldName(String name) throws IOException
     {
-        if (_tokenWriteContext.writeFieldName(name) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
@@ -364,7 +364,7 @@ public class CsvGenerator extends GeneratorBase
     public final void writeFieldName(SerializableString name) throws IOException
     {
         // Object is a value, need to verify it's allowed
-        if (_tokenWriteContext.writeFieldName(name.getValue()) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (!_tokenWriteContext.writeFieldName(name.getValue())) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -373,7 +373,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeStringField(String fieldName, String value) throws IOException
     {
-        if (_tokenWriteContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+        if (!_tokenWriteContext.writeFieldName(fieldName)) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(fieldName);
@@ -509,7 +509,7 @@ public class CsvGenerator extends GeneratorBase
                 _reportError("CSV generator does not support nested Array values");
             }
         }
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext();
+        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
         // and that's about it, really
     }
 
@@ -555,7 +555,7 @@ public class CsvGenerator extends GeneratorBase
                 }
             }
         }
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext();
+        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
     }
 
     @Override
@@ -893,7 +893,7 @@ public class CsvGenerator extends GeneratorBase
             // assumed to have been removed from schema too
         } else {
             // basically combination of "writeFieldName()" and "writeNull()"
-            if (_tokenWriteContext.writeFieldName(fieldName) == JsonWriteContext.STATUS_EXPECT_VALUE) {
+            if (!_tokenWriteContext.writeFieldName(fieldName)) {
                 _reportError("Can not skip a field, expecting a value");
             }
             // and all we do is just note index to use for following value write
@@ -913,8 +913,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     protected final void _verifyValueWrite(String typeMsg) throws IOException
     {
-        int status = _tokenWriteContext.writeValue();
-        if (status == JsonWriteContext.STATUS_EXPECT_NAME) {
+        if (!_tokenWriteContext.writeValue()) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
         if (_handleFirstLine) {
