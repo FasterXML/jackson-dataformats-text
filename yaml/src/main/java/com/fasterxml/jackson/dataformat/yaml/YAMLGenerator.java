@@ -539,6 +539,12 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
+    public final void writeStartArray(Object currValue) throws IOException {
+        writeStartArray();
+        setCurrentValue(currValue);
+    }
+
+    @Override
     public final void writeEndArray() throws IOException
     {
         if (!_tokenWriteContext.inArray()) {
@@ -563,6 +569,12 @@ public class YAMLGenerator extends GeneratorBase
             _objectId = null;
         }
         _emitter.emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
+    }
+
+    @Override
+    public final void writeStartObject(Object currValue) throws IOException {
+        writeStartObject();
+        setCurrentValue(currValue);
     }
 
     @Override

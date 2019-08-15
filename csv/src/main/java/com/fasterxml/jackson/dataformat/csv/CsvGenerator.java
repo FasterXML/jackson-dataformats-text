@@ -361,6 +361,12 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
+    public void writeFieldId(long id) throws IOException {
+        // 15-Aug-2019, tatu: should be improved to avoid String generation
+        writeFieldName(Long.toString(id));
+    }
+
+    @Override
     public final void writeFieldName(SerializableString name) throws IOException
     {
         // Object is a value, need to verify it's allowed
@@ -514,6 +520,12 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
+    public final void writeStartArray(Object currValue) throws IOException {
+        writeStartArray();
+        setCurrentValue(currValue);
+    }
+
+    @Override
     public final void writeEndArray() throws IOException
     {
         if (!_tokenWriteContext.inArray()) {
@@ -556,6 +568,12 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
+    }
+
+    @Override
+    public final void writeStartObject(Object currValue) throws IOException {
+        writeStartObject();
+        setCurrentValue(currValue);
     }
 
     @Override

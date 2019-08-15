@@ -227,6 +227,12 @@ public abstract class JavaPropsGenerator
         _appendFieldName(_basePath, name);
     }
 
+    @Override
+    public void writeFieldId(long id) throws IOException {
+        // 15-Aug-2019, tatu: should be improved to avoid String generation
+        writeFieldName(Long.toString(id));
+    }
+
     protected abstract void _appendFieldName(StringBuilder path, String name);
 
     /*
@@ -242,6 +248,13 @@ public abstract class JavaPropsGenerator
                 _basePath.length());
     }
 
+    @Override
+    public void writeStartArray(Object currValue) throws IOException {
+        _verifyValueWrite("start an array");
+        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(currValue,
+                _basePath.length());
+    }
+    
     @Override
     public void writeEndArray() throws IOException {
         if (!_tokenWriteContext.inArray()) {
