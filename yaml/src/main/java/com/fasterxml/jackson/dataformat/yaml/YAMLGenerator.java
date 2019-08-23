@@ -448,7 +448,7 @@ public class YAMLGenerator extends GeneratorBase
         _writeFieldName(name.getValue());
     }
 
-    @Override // override since 2.10 (method added in 2.8)
+    @Override
     public void writeFieldId(long id) throws IOException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
