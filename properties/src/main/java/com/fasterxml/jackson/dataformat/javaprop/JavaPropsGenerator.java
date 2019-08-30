@@ -27,9 +27,10 @@ public abstract class JavaPropsGenerator
     final protected IOContext _ioContext;
 
     /**
-     * Definition of columns being written, if available.
+     * Definition of mapping of logically structured property names into actual
+     * flattened property names.
      */
-    protected JavaPropsSchema _schema;
+    final protected JavaPropsSchema _schema;
 
     /*
     /**********************************************************************
@@ -67,7 +68,24 @@ public abstract class JavaPropsGenerator
         super(writeCtxt, stdFeatures);
         _ioContext = ioCtxt;
         _tokenWriteContext = JPropWriteContext.createRootContext();
-        _setSchema(schema);
+
+        // Formerly separate _setSchema(...)
+        _schema = schema;
+        // Indentation to use?
+        if (_tokenWriteContext.inRoot()) {
+            String indent = _schema.lineIndentation();
+            _indentLength = (indent == null) ? 0 : indent.length();
+            if (_indentLength > 0) {
+                _basePath.setLength(0);
+                _basePath.append(indent);
+                _tokenWriteContext = JPropWriteContext.createRootContext(_indentLength);
+            }
+            // [dataformats-text#100]: Allow use of optional prefix
+            final String prefix = _schema.prefix();
+            if (prefix != null) {
+                _basePath.append(prefix);
+            }
+        }
     }
 
     /*
@@ -123,6 +141,7 @@ public abstract class JavaPropsGenerator
         return 0; // none defined yet
     }
 
+    /*
     @Override
     public void setSchema(FormatSchema schema) {
         if (schema instanceof JavaPropsSchema) {
@@ -131,25 +150,7 @@ public abstract class JavaPropsGenerator
             super.setSchema(schema);
         }
     }
-
-    private void _setSchema(JavaPropsSchema schema) {
-        _schema = schema;
-        // Indentation to use?
-        if (_tokenWriteContext.inRoot()) {
-            String indent = _schema.lineIndentation();
-            _indentLength = (indent == null) ? 0 : indent.length();
-            if (_indentLength > 0) {
-                _basePath.setLength(0);
-                _basePath.append(indent);
-                _tokenWriteContext = JPropWriteContext.createRootContext(_indentLength);
-            }
-            // [dataformats-text#100]: Allow use of optional prefix
-            final String prefix = _schema.prefix();
-            if (prefix != null) {
-                _basePath.append(prefix);
-            }
-        }
-    }
+    */
 
     @Override
     public FormatSchema getSchema() { return _schema; }

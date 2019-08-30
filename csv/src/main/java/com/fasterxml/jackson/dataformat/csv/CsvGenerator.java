@@ -126,11 +126,8 @@ public class CsvGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    private final static CsvSchema EMPTY_SCHEMA;
-    static {
-        EMPTY_SCHEMA = CsvSchema.emptySchema();
-    }
-    
+    private final static CsvSchema EMPTY_SCHEMA = CsvSchema.emptySchema();
+
     final protected IOContext _ioContext;
 
     /**
@@ -143,7 +140,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Definition of columns being written, if available.
      */
-    protected CsvSchema _schema = EMPTY_SCHEMA;
+    protected final CsvSchema _schema;
 
     // note: can not be final since we may need to re-create it for new schema
     protected CsvEncoder _writer;
@@ -236,10 +233,11 @@ public class CsvGenerator extends GeneratorBase
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _schema = EMPTY_SCHEMA;
         _writer = csvWriter;
     }
 
-    /*                                                                                       
+    /*
     /**********************************************************                              
     /* Versioned                                                                             
     /**********************************************************                              
@@ -290,6 +288,7 @@ public class CsvGenerator extends GeneratorBase
         return _writer.getOutputBuffered();
     }
 
+    /*
     @Override
     public void setSchema(FormatSchema schema)
     {
@@ -302,6 +301,7 @@ public class CsvGenerator extends GeneratorBase
             super.setSchema(schema);
         }
     }
+    */
 
     @Override
     public int formatWriteFeatures() {

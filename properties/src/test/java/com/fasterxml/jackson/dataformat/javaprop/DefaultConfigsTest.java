@@ -37,8 +37,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(gen.canWriteTypeId());
         assertTrue(gen.canUseSchema(JavaPropsSchema.emptySchema()));
 
-        gen.setSchema(JavaPropsSchema.emptySchema());
-        assertSame(JavaPropsSchema.emptySchema(), gen.getSchema());
         gen.close();
     }
 
