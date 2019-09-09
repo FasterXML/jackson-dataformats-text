@@ -334,6 +334,8 @@ public class YAMLParser extends ParserBase
                     _parsingContext.setCurrentName(name);
                     return (_currToken = JsonToken.FIELD_NAME);
                 }
+            } else if (_parsingContext.inArray()) {
+                _parsingContext.expectComma();
             }
 
             _currentAnchor = Optional.empty();
