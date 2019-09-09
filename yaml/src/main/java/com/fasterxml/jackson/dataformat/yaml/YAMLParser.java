@@ -400,6 +400,11 @@ public class YAMLParser extends ParserBase
                     return (_currToken = JsonToken.FIELD_NAME);
                 }
             }
+
+            if (_parsingContext.inArray()) {
+                _parsingContext.expectComma();
+            }
+
             // Ugh. Why not expose id, to be able to Switch?
             _currentAnchor = null;
 
