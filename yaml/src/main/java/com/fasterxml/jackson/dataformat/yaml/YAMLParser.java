@@ -401,6 +401,10 @@ public class YAMLParser extends ParserBase
                 }
             }
 
+            if (_parsingContext.inArray()) {
+                _parsingContext.expectComma();
+            }
+
             _currentAnchor = null;
 
             // Ugh. Why not expose id, to be able to Switch?
