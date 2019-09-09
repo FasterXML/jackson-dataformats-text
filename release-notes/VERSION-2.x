@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.10.0 (not yet released)
+
+#83: (yaml) Update index of sequence context
+ (reported by Matti B; fix contributed by Maarten W)
+
 2.10.0.pr2 (31-Aug-2019)
 
 #139: (properties) Support for Map<String, String> in `JavaPropsMapper`

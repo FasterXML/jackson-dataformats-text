@@ -71,4 +71,11 @@ Guillaume Smaha (GuillaumeSmaha@github)
 Filip Hrisafov (filiphr@github)
 * Suggested #139: Support for Map<String, String> in `JavaPropsMapper`
  (2.10.0)
- 
+
+Matti Bickel (wundrian@github)
+* Reported #83: Update index of sequence context
+ (2.10.0)
+
+Maarten Winkels (mwinkels@github)
+* Contributed fix for #83: Update index of sequence context
+ (2.10.0)

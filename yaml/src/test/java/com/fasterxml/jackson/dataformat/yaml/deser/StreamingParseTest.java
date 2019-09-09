@@ -423,7 +423,6 @@ public class StreamingParseTest extends ModuleTestBase
         yp.close();
     }
 
-    // [Issue#10]
     // Scalars should not be parsed when not in the plain flow style.
     public void testQuotedStyles() throws Exception
     {
@@ -435,8 +434,10 @@ public class StreamingParseTest extends ModuleTestBase
         assertEquals("strings", p.getCurrentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals(0, p.getParsingContext().getCurrentIndex());
         assertEquals("true", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals(1, p.getParsingContext().getCurrentIndex());
         assertEquals("false", p.getText());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -507,8 +508,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals(0, p.getParsingContext().getCurrentIndex());
         assertEquals("Foo Bar", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals(1, p.getParsingContext().getCurrentIndex());
         assertEquals("Max Power", p.getText());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 
