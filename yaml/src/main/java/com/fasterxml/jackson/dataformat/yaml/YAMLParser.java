@@ -25,6 +25,7 @@ import org.snakeyaml.engine.v1.scanner.StreamReader;
 
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 
 /**
@@ -851,5 +852,13 @@ public class YAMLParser extends ParserBase
         }
         _cleanedTextValue = sb.toString();
         return JsonToken.VALUE_NUMBER_FLOAT;
+    }
+
+    // Promoted from `ParserBase` in 3.0
+    protected void _reportMismatchedEndMarker(int actCh, char expCh) throws JsonParseException {
+        JsonReadContext ctxt = getParsingContext();
+        _reportError(String.format(
+                "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
+                (char) actCh, expCh, ctxt.typeDesc(), ctxt.getStartLocation(_getSourceReference())));
     }
 }
