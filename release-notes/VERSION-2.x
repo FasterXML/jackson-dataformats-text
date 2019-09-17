@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.10.0 (not yet released)
+2.10.0.pr3 (17-Sep-2019)
 
 #83: (yaml) Update index of sequence context
  (reported by Matti B; fix contributed by Maarten W)
