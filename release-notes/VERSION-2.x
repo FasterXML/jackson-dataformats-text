@@ -37,6 +37,10 @@ Modules:
  (reported by iuliu-b@github)
 - Add JDK9+ module info using Moditect plugin
 
+2.9.10 (21-Sep-2019)
+
+No changes since 2.9.9
+
 2.9.9 (16-May-2019)
 
 #63: (yaml) `null` Object Id serialized as anchor for YAML
