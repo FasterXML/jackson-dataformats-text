@@ -8,21 +8,12 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.10.0.pr3 (17-Sep-2019)
-
-#83: (yaml) Update index of sequence context
- (reported by Matti B; fix contributed by Maarten W)
-
-2.10.0.pr2 (31-Aug-2019)
-
-#139: (properties) Support for Map<String, String> in `JavaPropsMapper`
- (suggested by Filip H)
-#140: (yaml) Implement `JsonGenerator.writeFieldId(...)` for `YAMLGenerator`
-
-2.10.0.pr1 (19-Jul-2019)
+2.10.0.pr3 (26-Sep-2019)
 
 #50: (yaml) Empty string serialized without quotes if MINIMIZE_QUOTES is enabled
  (reported by tim-palmer@github)
+#83: (yaml) Update index of sequence context
+ (reported by Matti B; fix contributed by Maarten W)
 #100: (properties) Add an option to specify properties prefix
  (contributed by Alon B-L)
 #101: (yaml) Use latest SnakeYAML version 1.24 and get rid of deprecated methods
@@ -35,7 +26,14 @@ Modules:
  (fix contributed by Guillaume S)
 #134: (csv) `CSVParserBootstrapper` creates `UTF8Reader` which is incorrectly not auto-closed
  (reported by iuliu-b@github)
+#139: (properties) Support for Map<String, String> in `JavaPropsMapper`
+ (suggested by Filip H)
+#140: (yaml) Implement `JsonGenerator.writeFieldId(...)` for `YAMLGenerator`
 - Add JDK9+ module info using Moditect plugin
+
+2.9.10 (21-Sep-2019)
+
+No changes since 2.9.9
 
 2.9.9 (16-May-2019)
 
