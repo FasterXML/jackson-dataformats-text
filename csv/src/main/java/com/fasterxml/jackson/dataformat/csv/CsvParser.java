@@ -123,6 +123,13 @@ public class CsvParser
          * Feature is disabled by default.
          */
         INSERT_NULLS_FOR_MISSING_COLUMNS(false),
+
+        /**
+         * Feature that enables coercing an empty {@link String} to `null`
+         *
+         * Feature is disabled by default
+         */
+        EMPTY_STRING_AS_NULL(false)
         ;
 
         final boolean _defaultState;
@@ -1055,6 +1062,9 @@ public class CsvParser
     public String getText() throws IOException {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName;
+        }
+        if (_currentValue.equals("")) {
+            return isEnabled(CsvParser.Feature.EMPTY_STRING_AS_NULL) ? null : _currentValue;
         }
         return _currentValue;
     }
