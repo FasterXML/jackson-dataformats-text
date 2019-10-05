@@ -376,16 +376,6 @@ public class CsvGenerator extends GeneratorBase
         _writeFieldName(name.getValue());
     }
 
-    @Override
-    public final void writeStringField(String fieldName, String value) throws IOException
-    {
-        if (!_tokenWriteContext.writeFieldName(fieldName)) {
-            _reportError("Can not write a field name, expecting a value");
-        }
-        _writeFieldName(fieldName);
-        writeString(value);
-    }
-
     private final void _writeFieldName(String name) throws IOException
     {
         // just find the matching index -- must have schema for that
