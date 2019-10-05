@@ -1,9 +1,5 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.json.DupDetector;
@@ -12,6 +8,12 @@ import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -744,17 +746,18 @@ public class CsvParser
      */
     protected JsonToken _handleStartDoc() throws IOException
     {
-        // also, if comments enabled, may need to skip leading ones
-        _reader.skipLeadingComments();
+        // also, if comments enabled, or skip empty lines, may need to skip leading ones
+        _reader.skipLinesWhenNeeded();
+
         // First things first: are we expecting header line? If so, read, process
         if (_schema.usesHeader()) {
             _readHeaderLine();
-            _reader.skipLeadingComments();
+            _reader.skipLinesWhenNeeded();
         }
         // and if we are to skip the first data line, skip it
         if (_schema.skipsFirstDataRow()) {
             _reader.skipLine();
-            _reader.skipLeadingComments();
+            _reader.skipLinesWhenNeeded();
         }
         
         // Only one real complication, actually; empty documents (zero bytes).

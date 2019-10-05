@@ -1,22 +1,26 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser.NumberType;
-import com.fasterxml.jackson.core.json.JsonReadContext;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Low-level helper class that handles actual reading of CSV,
  * purely based on indexes given without worrying about reordering etc.
  */
-public class CsvDecoder
-{
+public class CsvDecoder {
     private final static int INT_SPACE = 0x0020;
 
     private final static int INT_CR = '\r';
@@ -33,13 +37,13 @@ public class CsvDecoder
      * Unfortunate back reference, needed for error reporting
      */
     final protected CsvParser _owner;
-    
+
     /**
      * I/O context for this reader. It handles buffer allocation
      * for the reader.
      */
     final protected IOContext _ioContext;
-    
+
     /**
      * Input stream that can be used for reading more content, if one
      * in use. May be null, if input comes just as a full buffer,
@@ -50,7 +54,7 @@ public class CsvDecoder
     /**
      * Flag that indicates whether the input buffer is recycable (and
      * needs to be returned to recycler once we are done) or not.
-     *<p>
+     * <p>
      * If it is not, it also means that parser can NOT modify underlying
      * buffer.
      */
@@ -65,12 +69,14 @@ public class CsvDecoder
     protected boolean _trimSpaces;
 
     protected boolean _allowComments;
-    
+
+    protected boolean _skipEmptyLines;
+
     /**
      * Maximum of quote character, linefeeds (\r and \n), escape character.
      */
     protected int _maxSpecialChar;
-    
+
     protected int _separatorChar;
 
     protected int _quoteChar;
@@ -111,7 +117,7 @@ public class CsvDecoder
      * needs to be handled (indicates end-of-record).
      */
     protected int _pendingLF = 0;
-    
+
     /**
      * Flag that indicates whether parser is closed or not. Gets
      * set when parser is either closed by explicit call
@@ -152,7 +158,7 @@ public class CsvDecoder
      * For big (gigabyte-sized) sizes are possible, needs to be long,
      * unlike pointers and sizes related to in-memory buffers.
      */
-    protected long _tokenInputTotal = 0; 
+    protected long _tokenInputTotal = 0;
 
     /**
      * Input row on which current token starts, 1-based
@@ -202,8 +208,8 @@ public class CsvDecoder
 
     final static double MIN_INT_D = Integer.MIN_VALUE;
     final static double MAX_INT_D = Integer.MAX_VALUE;
-    
-    
+
+
     // Digits, numeric
     final protected static int INT_0 = '0';
     final protected static int INT_1 = '1';
@@ -224,7 +230,7 @@ public class CsvDecoder
     final protected static int INT_E = 'E';
 
     final protected static char CHAR_NULL = '\0';
-    
+
     // Numeric value holders: multiple fields used for
     // for efficiency
 
@@ -255,15 +261,15 @@ public class CsvDecoder
      */
 
     public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
-            CsvSchema schema, TextBuffer textBuffer,
-            int stdFeatures, int csvFeatures)
-    {
+                      CsvSchema schema, TextBuffer textBuffer,
+                      int stdFeatures, int csvFeatures) {
         _owner = owner;
         _ioContext = ctxt;
         _inputSource = r;
         _textBuffer = textBuffer;
         _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
         _allowComments = CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
+        _skipEmptyLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
@@ -273,8 +279,7 @@ public class CsvDecoder
         setSchema(schema);
     }
 
-    public void setSchema(CsvSchema schema)
-    {
+    public void setSchema(CsvSchema schema) {
         _separatorChar = schema.getColumnSeparator();
         _quoteChar = schema.getQuoteChar();
         _escapeChar = schema.getEscapeChar();
@@ -291,15 +296,16 @@ public class CsvDecoder
     /* JsonParser implementations passed-through by CsvParser
     /**********************************************************************
      */
-    
+
     public Object getInputSource() {
         return _inputSource;
     }
 
-    public boolean isClosed() { return _closed; }
-    
-    public void close() throws IOException
-    {
+    public boolean isClosed() {
+        return _closed;
+    }
+
+    public void close() throws IOException {
         _pendingLF = 1; // just to ensure we'll also check _closed flag later on
         if (!_closed) {
             _closed = true;
@@ -312,8 +318,7 @@ public class CsvDecoder
         }
     }
 
-    public int releaseBuffered(Writer out) throws IOException
-    {
+    public int releaseBuffered(Writer out) throws IOException {
         int count = _inputEnd - _inputPtr;
         if (count < 1) {
             return 0;
@@ -324,26 +329,22 @@ public class CsvDecoder
         return count;
     }
 
-    public JsonReadContext childArrayContext(JsonReadContext context)
-    {
+    public JsonReadContext childArrayContext(JsonReadContext context) {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
         return context.createChildArrayContext(_currInputRow, col);
     }
 
-    public JsonReadContext childObjectContext(JsonReadContext context)
-    {
+    public JsonReadContext childObjectContext(JsonReadContext context) {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
         return context.createChildObjectContext(_currInputRow, col);
     }
-    
-    public JsonLocation getTokenLocation()
-    {
+
+    public JsonLocation getTokenLocation() {
         return new JsonLocation(_inputSource, getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
 
-    public JsonLocation getCurrentLocation()
-    {
+    public JsonLocation getCurrentLocation() {
         int ptr = _inputPtr;
         /* One twist: when dealing with a "pending LF", need to
          * go back one position when calculating location
@@ -376,16 +377,21 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    protected final long getTokenCharacterOffset() { return _tokenInputTotal; }
-    protected final int getTokenLineNr() { return _tokenInputRow; }
+    protected final long getTokenCharacterOffset() {
+        return _tokenInputTotal;
+    }
+
+    protected final int getTokenLineNr() {
+        return _tokenInputRow;
+    }
+
     protected final int getTokenColumnNr() {
         // note: value of -1 means "not available"; otherwise convert from 0-based to 1-based
         int col = _tokenInputCol;
         return (col < 0) ? col : (col + 1);
     }
-    
-    protected void releaseBuffers() throws IOException
-    {
+
+    protected void releaseBuffers() throws IOException {
         _textBuffer.releaseBuffers();
         char[] buf = _inputBuffer;
         if (buf != null) {
@@ -394,8 +400,7 @@ public class CsvDecoder
         }
     }
 
-    protected void _closeInput() throws IOException
-    {
+    protected void _closeInput() throws IOException {
         _pendingLF = 1; // just to ensure we'll also check _closed flag later on
 
         /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
@@ -412,12 +417,11 @@ public class CsvDecoder
             _inputSource = null;
         }
     }
-    
-    protected final boolean loadMore() throws IOException
-    {
+
+    protected final boolean loadMore() throws IOException {
         _currInputProcessed += _inputEnd;
         _currInputRowStart -= _inputEnd;
-        
+
         if (_inputSource != null) {
             int count = _inputSource.read(_inputBuffer, 0, _inputBuffer.length);
             _inputEnd = count;
@@ -431,7 +435,7 @@ public class CsvDecoder
             _closeInput();
             // Should never return 0, so let's fail
             if (count == 0) {
-                throw new IOException("InputStream.read() returned 0 characters when trying to read "+_inputBuffer.length+" bytes");
+                throw new IOException("InputStream.read() returned 0 characters when trying to read " + _inputBuffer.length + " bytes");
             }
         }
         return false;
@@ -451,8 +455,7 @@ public class CsvDecoder
      * Method that can be called to see if there is at least one more
      * character to be parsed.
      */
-    public boolean hasMoreInput() throws IOException
-    {
+    public boolean hasMoreInput() throws IOException {
         if (_inputPtr < _inputEnd) {
             return true;
         }
@@ -462,11 +465,10 @@ public class CsvDecoder
     /**
      * Method called to handle details of starting a new line, which may
      * include skipping a linefeed.
-     * 
+     *
      * @return True if there is a new data line to handle; false if not
      */
-    public boolean startNewLine() throws IOException
-    {
+    public boolean startNewLine() throws IOException {
         // first: if pending LF, skip it
         if (_pendingLF != 0) {
             if (_inputSource == null) {
@@ -474,56 +476,38 @@ public class CsvDecoder
             }
             _handleLF();
         }
-        /* For now, we will only require that there is SOME data
-         * following linefeed -- even spaces will do.
-         * In future we may want to use better heuristics to possibly
-         * skip trailing empty line?
-         */
-        if ((_inputPtr >= _inputEnd) && !loadMore()) {
-            return false;
-        }
-
-        if (_allowComments && _inputBuffer[_inputPtr] == '#') {
-            int i = _skipCommentLines();
-            // end-of-input?
-            if (i < 0) {
-                return false;
-            }
-            // otherwise push last read char back
-            --_inputPtr;
-        }
-        return true;
+        return skipLinesWhenNeeded();
     }
 
-    public void skipLeadingComments() throws IOException
-    {
-        if (_allowComments) {
-            if ((_inputPtr < _inputEnd) || loadMore()) {
-                if (_inputBuffer[_inputPtr] == '#') {
-                    _skipCommentLines();
-                    --_inputPtr;
-                }
-            }
+    public boolean skipLinesWhenNeeded() throws IOException {
+        if (!(_allowComments || _skipEmptyLines)) {
+            return hasMoreInput();
         }
-    }
-    
-    protected int _skipCommentLines() throws IOException
-    {
-        while ((_inputPtr < _inputEnd) || loadMore()) {
+        int firstCharacterPtr = _inputPtr;
+        while (hasMoreInput()) {
             char ch = _inputBuffer[_inputPtr++];
-            if (ch >= ' ' || (ch != '\r' && ch != '\n')) {
+            if (ch == '\r' || ch == '\n') {
+                _pendingLF = ch;
+                _handleLF();
+                // track the start of the new line
+                firstCharacterPtr = _inputPtr;
                 continue;
             }
-            _pendingLF = ch;
-            _handleLF();
-
-            // Ok, skipped the end of the line. Check next one...
-            int i = _nextChar();
-            if (i != INT_HASH) {
-                return i;
+            if (_skipEmptyLines && ch == ' ') {
+                // skip all blanks
+                continue;
             }
+            if (_allowComments && _inputBuffer[firstCharacterPtr] == '#') {
+                // this line is commented, skip everything
+                continue;
+            }
+
+            // we reached a non skippable character, this line needs to be parsed
+            // rollback the input pointer to the beginning of the line
+            _inputPtr = firstCharacterPtr;
+            return true; // processing can go on
         }
-        return -1; // end of input
+        return false; // end of input
     }
 
     /**
@@ -531,8 +515,7 @@ public class CsvDecoder
      * aspects like quoting or escaping. Used currently simply to skip the first
      * line of input document, if instructed to do so.
      */
-    public boolean skipLine() throws IOException
-    {
+    public boolean skipLine() throws IOException {
         if (_pendingLF != 0) {
             if (_inputSource == null) {
                 return false;
@@ -550,19 +533,18 @@ public class CsvDecoder
         }
         return false;
     }
-    
+
     /**
      * Method called to parse the next token when we don't have any type
      * information, so that all tokens are exposed as basic String
      * values.
-     * 
+     *
      * @return Column value if more found; null to indicate end of line
-     *  of input
+     * of input
      */
-    public String nextString() throws IOException
-    {
+    public String nextString() throws IOException {
         _numTypesValid = NR_UNKNOWN;
-        
+
         if (_pendingLF > 0) { // either pendingLF, or closed
             if (_inputSource != null) { // if closed, we just need to return null
                 _handleLF();
@@ -615,7 +597,7 @@ public class CsvDecoder
             ptr = _inputPtr;
         }
         final int end;
-        
+
         {
             int max = Math.min(_inputEnd - ptr, outBuf.length - outPtr);
             end = ptr + max;
@@ -649,8 +631,7 @@ public class CsvDecoder
         return _nextUnquotedString(outBuf, outPtr);
     }
 
-    public JsonToken nextStringOrLiteral() throws IOException
-    {
+    public JsonToken nextStringOrLiteral() throws IOException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -660,8 +641,7 @@ public class CsvDecoder
         return JsonToken.VALUE_STRING;
     }
 
-    public JsonToken nextNumber() throws IOException
-    {
+    public JsonToken nextNumber() throws IOException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -670,8 +650,8 @@ public class CsvDecoder
         }
         return JsonToken.VALUE_STRING;
     }
-    public JsonToken nextNumberOrString() throws IOException
-    {
+
+    public JsonToken nextNumberOrString() throws IOException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -686,12 +666,11 @@ public class CsvDecoder
     /* Actual parsing, private helper methods
     /**********************************************************************
      */
-    
-    protected String _nextUnquotedString(char[] outBuf, int outPtr) throws IOException
-    {
+
+    protected String _nextUnquotedString(char[] outBuf, int outPtr) throws IOException {
         int c;
         final char[] inputBuffer = _inputBuffer;
-        
+
         main_loop:
         while (true) {
             int ptr = _inputPtr;
@@ -732,9 +711,8 @@ public class CsvDecoder
         }
         return _textBuffer.finishAndReturn(outPtr, _trimSpaces);
     }
-    
-    protected String _nextQuotedString() throws IOException
-    {
+
+    protected String _nextQuotedString() throws IOException {
         char[] outBuf = _textBuffer.emptyAndGetCurrentSegment();
         int outPtr = 0;
 
@@ -800,7 +778,7 @@ public class CsvDecoder
                 continue inner_loop;
             }
             // We get here if we hit a quote: check if it's doubled up, or end of value:
-            if (_inputPtr < _inputEnd || loadMore()) { 
+            if (_inputPtr < _inputEnd || loadMore()) {
                 if (_inputBuffer[_inputPtr] == _quoteChar) { // doubled up, append
                     // note: should have enough room, is safe
                     outBuf[outPtr++] = (char) _quoteChar;
@@ -833,9 +811,8 @@ public class CsvDecoder
         }
         return result;
     }
-    
-    protected final void _handleLF() throws IOException
-    {
+
+    protected final void _handleLF() throws IOException {
         // already skipped past first part; but may get \r\n so skip the other char too?
         if (_pendingLF == INT_CR) {
             if (_inputPtr < _inputEnd || loadMore()) {
@@ -849,8 +826,7 @@ public class CsvDecoder
         _currInputRowStart = _inputPtr;
     }
 
-    protected char _unescape() throws IOException
-    {
+    protected char _unescape() throws IOException {
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
                 _reportError("Unexpected EOF in escaped character");
@@ -859,21 +835,20 @@ public class CsvDecoder
         // Some characters are more special than others, so:
         char c = _inputBuffer[_inputPtr++];
         switch (c) {
-        case '0':
-            return '\0';
-        case 'n':
-            return '\n';
-        case 'r':
-            return '\r';
-        case 't':
-            return '\t';
+            case '0':
+                return '\0';
+            case 'n':
+                return '\n';
+            case 'r':
+                return '\r';
+            case 't':
+                return '\t';
         }
         // others, return as is...
         return c;
     }
-    
-    protected final int _nextChar() throws IOException
-    {
+
+    protected final int _nextChar() throws IOException {
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
                 return -1;
@@ -882,8 +857,7 @@ public class CsvDecoder
         return _inputBuffer[_inputPtr++];
     }
 
-    protected final int _skipLeadingSpace() throws IOException
-    {
+    protected final int _skipLeadingSpace() throws IOException {
         final int sep = _separatorChar;
         while (true) {
             if (_inputPtr >= _inputEnd) {
@@ -896,9 +870,9 @@ public class CsvDecoder
                 return ch;
             }
             switch (ch) {
-            case '\r':
-            case '\n':
-                return ch;
+                case '\r':
+                case '\n':
+                    return ch;
             }
         }
     }
@@ -909,8 +883,7 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    public Number getNumberValue() throws IOException
-    {
+    public Number getNumberValue() throws IOException {
         if (_numTypesValid == NR_UNKNOWN) {
             _parseNumericValue(NR_UNKNOWN); // will also check event type
         }
@@ -934,9 +907,8 @@ public class CsvDecoder
         }
         return Double.valueOf(_numberDouble);
     }
-    
-    public NumberType getNumberType() throws IOException
-    {
+
+    public NumberType getNumberType() throws IOException {
         if (_numTypesValid == NR_UNKNOWN) {
             _parseNumericValue(NR_UNKNOWN); // will also check event type
         }
@@ -949,7 +921,7 @@ public class CsvDecoder
         if ((_numTypesValid & NR_BIGINT) != 0) {
             return NumberType.BIG_INTEGER;
         }
-    
+
         // And then floating point types. Here optimal type
         // needs to be big decimal, to avoid losing any data?
         // However... using BD is slow, so let's allow returning
@@ -959,9 +931,8 @@ public class CsvDecoder
         }
         return NumberType.DOUBLE;
     }
-    
-    public int getIntValue() throws IOException
-    {
+
+    public int getIntValue() throws IOException {
         if ((_numTypesValid & NR_INT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) { // not parsed at all
                 _parseNumericValue(NR_INT); // will also check event type
@@ -972,9 +943,8 @@ public class CsvDecoder
         }
         return _numberInt;
     }
-    
-    public long getLongValue() throws IOException
-    {
+
+    public long getLongValue() throws IOException {
         if ((_numTypesValid & NR_LONG) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(NR_LONG);
@@ -985,9 +955,8 @@ public class CsvDecoder
         }
         return _numberLong;
     }
-    
-    public BigInteger getBigIntegerValue() throws IOException
-    {
+
+    public BigInteger getBigIntegerValue() throws IOException {
         if ((_numTypesValid & NR_BIGINT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(NR_BIGINT);
@@ -998,16 +967,14 @@ public class CsvDecoder
         }
         return _numberBigInt;
     }
-    
-    public float getFloatValue() throws IOException
-    {
+
+    public float getFloatValue() throws IOException {
         double value = getDoubleValue();
         // Bounds/range checks would be tricky here, so let's not bother...
         return (float) value;
     }
-    
-    public double getDoubleValue() throws IOException
-    {
+
+    public double getDoubleValue() throws IOException {
         if ((_numTypesValid & NR_DOUBLE) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(NR_DOUBLE);
@@ -1018,9 +985,8 @@ public class CsvDecoder
         }
         return _numberDouble;
     }
-    
-    public BigDecimal getDecimalValue() throws IOException
-    {
+
+    public BigDecimal getDecimalValue() throws IOException {
         if ((_numTypesValid & NR_BIGDECIMAL) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(NR_BIGDECIMAL);
@@ -1037,7 +1003,7 @@ public class CsvDecoder
     /* Conversion from textual to numeric representation
     /**********************************************************************
      */
-    
+
     /**
      * Method that will parse actual numeric value out of a syntactically
      * valid number value. Type it will parse into depends on whether
@@ -1045,18 +1011,17 @@ public class CsvDecoder
      * legal type (of ones available) is used for efficiency.
      *
      * @param expType Numeric type that we will immediately need, if any;
-     *   mostly necessary to optimize handling of floating point numbers
+     *                mostly necessary to optimize handling of floating point numbers
      */
     protected void _parseNumericValue(int expType)
-        throws IOException
-    {
+            throws IOException {
         // Int or float?
         if (_textBuffer.looksLikeInt()) {
             char[] buf = _textBuffer.getTextBuffer();
             int offset = _textBuffer.getTextOffset();
             char c = buf[offset];
             boolean neg;
-            
+
             if (c == '-') {
                 neg = true;
                 ++offset;
@@ -1110,10 +1075,9 @@ public class CsvDecoder
         */
         _parseSlowFloatValue(expType);
     }
-    
+
     private final void _parseSlowFloatValue(int expType)
-        throws IOException
-    {
+            throws IOException {
         /* Nope: floating point. Here we need to be careful to get
          * optimal parsing strategy: choice is between accurate but
          * slow (BigDecimal) and lossy but fast (Double). For now
@@ -1132,14 +1096,13 @@ public class CsvDecoder
             }
         } catch (NumberFormatException nex) {
             // Can this ever occur? Due to overflow, maybe?
-            throw constructError("Malformed numeric value '"+_textBuffer.contentsAsString()+"'", nex);
+            throw constructError("Malformed numeric value '" + _textBuffer.contentsAsString() + "'", nex);
         }
     }
-    
+
     private final void _parseSlowIntValue(int expType, char[] buf, int offset, int len,
-            boolean neg)
-        throws IOException
-    {
+                                          boolean neg)
+            throws IOException {
         String numStr = _textBuffer.contentsAsString();
         try {
             if (NumberInput.inLongRange(buf, offset, len, neg)) {
@@ -1153,7 +1116,7 @@ public class CsvDecoder
             }
         } catch (NumberFormatException nex) {
             // Can this ever occur? Due to overflow, maybe?
-            throw constructError("Malformed numeric value '"+numStr+"'", nex);
+            throw constructError("Malformed numeric value '" + numStr + "'", nex);
         }
     }
 
@@ -1161,16 +1124,15 @@ public class CsvDecoder
     /**********************************************************************
     /* Numeric conversions
     /**********************************************************************
-     */    
+     */
 
-    protected void convertNumberToInt() throws IOException
-    {
+    protected void convertNumberToInt() throws IOException {
         // First, converting from long ought to be easy
         if ((_numTypesValid & NR_LONG) != 0) {
             // Let's verify it's lossless conversion by simple roundtrip
             int result = (int) _numberLong;
             if (result != _numberLong) {
-                _reportError("Numeric value ("+getText()+") out of range of int");
+                _reportError("Numeric value (" + getText() + ") out of range of int");
             }
             _numberInt = result;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
@@ -1183,20 +1145,19 @@ public class CsvDecoder
             }
             _numberInt = (int) _numberDouble;
         } else if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            if (BD_MIN_INT.compareTo(_numberBigDecimal) > 0 
-                || BD_MAX_INT.compareTo(_numberBigDecimal) < 0) {
+            if (BD_MIN_INT.compareTo(_numberBigDecimal) > 0
+                    || BD_MAX_INT.compareTo(_numberBigDecimal) < 0) {
                 reportOverflowInt();
             }
             _numberInt = _numberBigDecimal.intValue();
         } else {
             _throwInternal(); // should never get here
         }
-    
+
         _numTypesValid |= NR_INT;
     }
-    
-    protected void convertNumberToLong() throws IOException
-    {
+
+    protected void convertNumberToLong() throws IOException {
         if ((_numTypesValid & NR_INT) != 0) {
             _numberLong = _numberInt;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
@@ -1209,21 +1170,20 @@ public class CsvDecoder
             }
             _numberLong = (long) _numberDouble;
         } else if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            if (BD_MIN_LONG.compareTo(_numberBigDecimal) > 0 
-                || BD_MAX_LONG.compareTo(_numberBigDecimal) < 0) {
+            if (BD_MIN_LONG.compareTo(_numberBigDecimal) > 0
+                    || BD_MAX_LONG.compareTo(_numberBigDecimal) < 0) {
                 reportOverflowLong();
             }
             _numberLong = _numberBigDecimal.longValue();
         } else {
             _throwInternal(); // should never get here
         }
-    
+
         _numTypesValid |= NR_LONG;
     }
-    
+
     protected void convertNumberToBigInteger()
-        throws IOException
-    {
+            throws IOException {
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             // here it'll just get truncated, no exceptions thrown
             _numberBigInt = _numberBigDecimal.toBigInteger();
@@ -1238,16 +1198,15 @@ public class CsvDecoder
         }
         _numTypesValid |= NR_BIGINT;
     }
-    
+
     protected void convertNumberToDouble()
-        throws IOException
-    {
+            throws IOException {
         /* 05-Aug-2008, tatus: Important note: this MUST start with
          *   more accurate representations, since we don't know which
          *   value is the original one (others get generated when
          *   requested)
          */
-    
+
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             _numberDouble = _numberBigDecimal.doubleValue();
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
@@ -1259,12 +1218,11 @@ public class CsvDecoder
         } else {
             _throwInternal(); // should never get here
         }
-    
+
         _numTypesValid |= NR_DOUBLE;
     }
-    
-    protected void convertNumberToBigDecimal() throws IOException
-    {
+
+    protected void convertNumberToBigDecimal() throws IOException {
         if ((_numTypesValid & NR_DOUBLE) != 0) {
             /* Let's actually parse from String representation, to avoid
              * rounding errors that non-decimal floating operations could incur
@@ -1286,46 +1244,44 @@ public class CsvDecoder
     /**********************************************************
     /* Number handling exceptions
     /**********************************************************
-     */    
-    
+     */
+
     protected void reportUnexpectedNumberChar(int ch, String comment)
-        throws JsonParseException
-    {
-        String msg = "Unexpected character ("+_getCharDesc(ch)+") in numeric value";
+            throws JsonParseException {
+        String msg = "Unexpected character (" + _getCharDesc(ch) + ") in numeric value";
         if (comment != null) {
-            msg += ": "+comment;
+            msg += ": " + comment;
         }
         _reportError(msg);
     }
-    
+
     protected void reportInvalidNumber(String msg) throws JsonParseException {
-        _reportError("Invalid numeric value: "+msg);
+        _reportError("Invalid numeric value: " + msg);
     }
-    
+
     protected void reportOverflowInt() throws IOException {
-        _reportError("Numeric value ("+getText()+") out of range of int ("+Integer.MIN_VALUE+" - "+Integer.MAX_VALUE+")");
+        _reportError("Numeric value (" + getText() + ") out of range of int (" + Integer.MIN_VALUE + " - " + Integer.MAX_VALUE + ")");
     }
-    
+
     protected void reportOverflowLong() throws IOException {
-        _reportError("Numeric value ("+getText()+") out of range of long ("+Long.MIN_VALUE+" - "+Long.MAX_VALUE+")");
+        _reportError("Numeric value (" + getText() + ") out of range of long (" + Long.MIN_VALUE + " - " + Long.MAX_VALUE + ")");
     }
 
     protected final JsonParseException constructError(String msg, Throwable t) {
         return new JsonParseException(_owner, msg, t);
     }
-    
-    protected final static String _getCharDesc(int ch)
-    {
+
+    protected final static String _getCharDesc(int ch) {
         char c = (char) ch;
         if (Character.isISOControl(c)) {
-            return "(CTRL-CHAR, code "+ch+")";
+            return "(CTRL-CHAR, code " + ch + ")";
         }
         if (ch > 255) {
-            return "'"+c+"' (code "+ch+" / 0x"+Integer.toHexString(ch)+")";
+            return "'" + c + "' (code " + ch + " / 0x" + Integer.toHexString(ch) + ")";
         }
-        return "'"+c+"' (code "+ch+")";
+        return "'" + c + "' (code " + ch + ")";
     }
-    
+
     private void _throwInternal() {
         throw new IllegalStateException("Internal error: code path should never get executed");
     }
