@@ -288,7 +288,7 @@ System.err.println("\n>>");
         writer.write(str);
         return str.length();
     }
-    
+
     @SuppressWarnings("resource")
     @Override
     public byte[] getBinaryValue(Base64Variant variant) throws IOException

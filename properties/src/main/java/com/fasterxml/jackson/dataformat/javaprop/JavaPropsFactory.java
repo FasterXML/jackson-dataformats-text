@@ -272,17 +272,22 @@ public class JavaPropsFactory extends JsonFactory
     }
     */
 
+    /*
+    public JavaPropsParser(IOContext ctxt, int parserFeatures, Object inputSource,
+            ObjectCodec codec, Map<?,?> sourceMap)
+     */
+    
     @Override
     protected JsonParser _createParser(InputStream in, IOContext ctxt) throws IOException
     {
         Properties props = _loadProperties(in, ctxt);
-        return new JavaPropsParser(ctxt, in, _parserFeatures, _objectCodec, props);
+        return new JavaPropsParser(ctxt, _parserFeatures, in, _objectCodec, props);
     }
 
     @Override
     protected JsonParser _createParser(Reader r, IOContext ctxt) throws IOException {
         Properties props = _loadProperties(r, ctxt);
-        return new JavaPropsParser(ctxt, r, _parserFeatures, _objectCodec, props);
+        return new JavaPropsParser(ctxt, _parserFeatures, r, _objectCodec, props);
     }
 
     @Override
