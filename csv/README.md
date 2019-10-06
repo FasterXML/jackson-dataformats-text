@@ -236,8 +236,8 @@ Jackson supports the following extension or variations:
     * Linefeed character: when generating content, the default linefeed String used is "`\n`" but this may be changed
 * Null value: by default, null values are serialized as empty Strings (""), but any other String value be configured to be used instead (for example, "null", "N/A" etc)
 * Use of first row as a set of column names: as explained earlier, it is possible to configure `CsvSchema` to indicate that the contents of the first (non-comment) document row is taken to mean the set of column names to use
-* Comments
-    * When enabled (via `CsvSchema`, or enabling `JsonParser.Feature.ALLOW_YAML_COMMENTS`), if a row starts with a `#` character, it will be considered a comment and skipped
+* Comments: when enabled (via `CsvSchema`, or enabling `CsvParser.Feature.ALLOW_COMMENTS`), if a row starts with a `#` character, it will be considered a comment and skipped
+* Blank lines: when enabled (using `CsvParser.Feature.SKIP_BLANK_LINES`) rows that are empty or composed only of whitespaces are skipped 
 
 # Limitations
 

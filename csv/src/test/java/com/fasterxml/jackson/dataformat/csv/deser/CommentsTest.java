@@ -1,14 +1,16 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.util.Map;
-
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.*;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+
+import java.util.Map;
 
 // Tests for [csv#56]
 public class CommentsTest extends ModuleTestBase
 {
-    final String CSV_WITH_COMMENTS = "x,y\n# comment!\na,b\n# another...\n";
+    final String CSV_WITH_COMMENTS = "x,y\n# comment!\na,b\n   # another...\n";
 
     public void testWithoutComments() throws Exception
     {
