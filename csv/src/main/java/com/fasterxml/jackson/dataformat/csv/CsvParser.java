@@ -73,13 +73,13 @@ public class CsvParser
         IGNORE_TRAILING_UNMAPPABLE(false),
 
         /**
-         * Feature that allows skipping input lines that are completely empty, instead
-         * of being decoded as lines of just a single column with empty String value (or,
+         * Feature that allows skipping input lines that are completely empty or blank (composed only of whitespace),
+         * instead of being decoded as lines of just a single column with an empty/blank String value (or,
          * depending on binding, `null`).
          *<p>
          * Feature is disabled by default.
          */
-        SKIP_EMPTY_LINES(false),
+        SKIP_BLANK_LINES(false),
 
         /**
          * Feature that allows there to be a trailing single extraneous data

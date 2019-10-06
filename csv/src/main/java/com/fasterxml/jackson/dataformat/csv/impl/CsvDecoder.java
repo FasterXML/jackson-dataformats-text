@@ -70,7 +70,7 @@ public class CsvDecoder {
 
     protected boolean _allowComments;
 
-    protected boolean _skipEmptyLines;
+    protected boolean _skipBlankLines;
 
     /**
      * Maximum of quote character, linefeeds (\r and \n), escape character.
@@ -269,11 +269,10 @@ public class CsvDecoder {
         _textBuffer = textBuffer;
         _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
         _allowComments = CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
-        _skipEmptyLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
+        _skipBlankLines = CsvParser.Feature.SKIP_BLANK_LINES.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
-        _inputSource = r;
         _tokenInputRow = -1;
         _tokenInputCol = -1;
         setSchema(schema);
@@ -480,7 +479,7 @@ public class CsvDecoder {
     }
 
     public boolean skipLinesWhenNeeded() throws IOException {
-        if (!(_allowComments || _skipEmptyLines)) {
+        if (!(_allowComments || _skipBlankLines)) {
             return hasMoreInput();
         }
         int firstCharacterPtr = _inputPtr;
@@ -493,15 +492,22 @@ public class CsvDecoder {
                 firstCharacterPtr = _inputPtr;
                 continue;
             }
-            if (_skipEmptyLines && ch == ' ') {
-                // skip all blanks
+            if (ch == ' ') {
+                // skip all blanks (in both comments/blanks skip mode)
                 continue;
             }
-            if (_allowComments && _inputBuffer[firstCharacterPtr] == '#') {
-                // this line is commented, skip everything
-                continue;
+            if (_allowComments) {
+                if (_inputBuffer[firstCharacterPtr] == '#') {
+                    // on a commented line, skip everything
+                    continue;
+                }
+                if (ch == '#') {
+                    // we reach this point when whitespaces precedes the hash character
+                    // move the firstCharacterPtr to the '#' location in order to skip the line completely
+                    firstCharacterPtr = _inputPtr-1;
+                    continue;
+                }
             }
-
             // we reached a non skippable character, this line needs to be parsed
             // rollback the input pointer to the beginning of the line
             _inputPtr = firstCharacterPtr;
