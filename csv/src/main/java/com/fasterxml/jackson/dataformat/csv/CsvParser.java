@@ -78,8 +78,10 @@ public class CsvParser
          * depending on binding, `null`).
          *<p>
          * Feature is disabled by default.
+         *
+         * @since 2.10
          */
-        SKIP_BLANK_LINES(false),
+        SKIP_EMPTY_LINES(false),
 
         /**
          * Feature that allows there to be a trailing single extraneous data
