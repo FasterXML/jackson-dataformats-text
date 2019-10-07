@@ -269,7 +269,7 @@ public class CsvDecoder {
         _textBuffer = textBuffer;
         _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
         _allowComments = CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
-        _skipBlankLines = CsvParser.Feature.SKIP_BLANK_LINES.enabledIn(csvFeatures);
+        _skipBlankLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
@@ -478,6 +478,12 @@ public class CsvDecoder {
         return skipLinesWhenNeeded();
     }
 
+    /**
+     * optionally skip lines that are empty or are comments, depending on the feature activated in the parser
+     * @return false if the end of input was reached
+     * @throws IOException
+     * @since 2.10
+     */
     public boolean skipLinesWhenNeeded() throws IOException {
         if (!(_allowComments || _skipBlankLines)) {
             return hasMoreInput();

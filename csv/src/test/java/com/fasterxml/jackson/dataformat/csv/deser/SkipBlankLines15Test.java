@@ -27,7 +27,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithEmptyLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV_WITH_EMPTY_LINE);
         // empty line is skipped
         assertArrayEquals(expected(
@@ -50,7 +50,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV_WITH_BLANK_LINE);
         // blank line is skipped
         assertArrayEquals(expected(
@@ -74,7 +74,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV_WITH_BLANK_LINE_AND_COMMENT);
         // blank/empty lines are skipped
         assertArrayEquals(expected(
@@ -86,7 +86,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureEnabledAndAllowComments() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .with(CsvParser.Feature.ALLOW_COMMENTS)
                 .readValue(CSV_WITH_BLANK_LINE_AND_COMMENT);
         // blank/empty/comment lines are skipped
@@ -109,7 +109,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithFirstBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV_WITH_FIRST_BLANK_LINE);
         // blank line is skipped
         assertArrayEquals(expected(
@@ -133,7 +133,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
 
     public void testCsvWithTrailingBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
-                .with(CsvParser.Feature.SKIP_BLANK_LINES)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readValue(CSV_WITH_FIRST_BLANK_LINE);
         // blank lines are skipped
         assertArrayEquals(expected(
