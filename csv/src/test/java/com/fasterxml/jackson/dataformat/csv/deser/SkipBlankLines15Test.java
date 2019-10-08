@@ -90,6 +90,7 @@ public class SkipBlankLines15Test extends ModuleTestBase {
                 .with(CsvParser.Feature.ALLOW_COMMENTS)
                 .readValue(CSV_WITH_BLANK_LINE_AND_COMMENT);
         // blank/empty/comment lines are skipped
+
         assertArrayEquals(expected(
                 row("1", "xyz"),
                 row("true", "")
