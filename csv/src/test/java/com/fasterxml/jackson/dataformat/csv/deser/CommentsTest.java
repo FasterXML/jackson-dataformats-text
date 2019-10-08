@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.csv.*;
 // Tests for [csv#56]
 public class CommentsTest extends ModuleTestBase
 {
-    final String CSV_WITH_COMMENTS = "x,y\n# comment!\na,b\n# another...\n";
+    final String CSV_WITH_COMMENTS = "x,y\n# comment!\na,b\n   # another...\n";
 
     public void testWithoutComments() throws Exception
     {

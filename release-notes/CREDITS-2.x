@@ -79,3 +79,8 @@ Matti Bickel (wundrian@github)
 Maarten Winkels (mwinkels@github)
 * Contributed fix for #83: Update index of sequence context
  (2.10.0)
+
+Vincent Boulaye (vboulaye@github)
+* Implemented #15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow
+  skipping empty rows
+ (2.10.1)
