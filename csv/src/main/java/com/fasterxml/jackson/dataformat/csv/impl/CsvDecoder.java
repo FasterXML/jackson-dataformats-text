@@ -25,7 +25,7 @@ public class CsvDecoder {
 
     private final static int INT_CR = '\r';
     private final static int INT_LF = '\n';
-    private final static int INT_HASH = '#';
+//    private final static int INT_HASH = '#';
 
     /*
     /**********************************************************************
