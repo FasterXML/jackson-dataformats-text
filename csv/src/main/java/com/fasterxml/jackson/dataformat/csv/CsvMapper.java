@@ -409,9 +409,11 @@ public class CsvMapper extends ObjectMapper
                 return s;
             }
         }
+        // 15-Oct-2019, tatu: Since 3.0, need context for introspection
+        final SerializerProvider ctxt = _serializerProvider();
         final AnnotationIntrospector intr = _deserializationConfig.getAnnotationIntrospector();
         CsvSchema.Builder builder = CsvSchema.builder();
-        _addSchemaProperties(builder, intr, typed, pojoType, null);
+        _addSchemaProperties(ctxt, builder, typed, pojoType, null);
         CsvSchema result = builder.build();
         synchronized (schemas) {
             schemas.put(pojoType, result);
@@ -447,7 +449,7 @@ public class CsvMapper extends ObjectMapper
         return false;
     }
 
-    protected void _addSchemaProperties(CsvSchema.Builder builder, AnnotationIntrospector intr,
+    protected void _addSchemaProperties(SerializerProvider ctxt, CsvSchema.Builder builder,
             boolean typed,
             JavaType pojoType, NameTransformer unwrapper)
     {
@@ -456,7 +458,8 @@ public class CsvMapper extends ObjectMapper
         if (_nonPojoType(pojoType)) {
             return;
         }
-        BeanDescription beanDesc = serializationConfig().introspect(pojoType);
+        BeanDescription beanDesc = ctxt.introspectBeanDescription(pojoType);
+        final AnnotationIntrospector intr = ctxt.getAnnotationIntrospector();
         for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
             // ignore setter-only properties:
             if (!prop.couldSerialize()) {
@@ -471,7 +474,7 @@ public class CsvMapper extends ObjectMapper
                         nextUnwrapper = NameTransformer.chainedTransformer(unwrapper, nextUnwrapper);
                     }
                     JavaType nextType = m.getType();
-                    _addSchemaProperties(builder, intr, typed, nextType, nextUnwrapper);
+                    _addSchemaProperties(ctxt, builder, typed, nextType, nextUnwrapper);
                     continue;
                 }
             }
