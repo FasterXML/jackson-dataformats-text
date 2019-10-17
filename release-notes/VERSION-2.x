@@ -14,6 +14,11 @@ Modules:
   into `null` values
  (contributed by Tyler C-R)
 
+2.10.1 (not yet released)
+
+#15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow skipping empty rows
+ (implemented by Vincent B)
+
 2.10.0 (26-Sep-2019)
 
 #50: (yaml) Empty string serialized without quotes if MINIMIZE_QUOTES is enabled

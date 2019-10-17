@@ -73,13 +73,14 @@ public class CsvParser
         IGNORE_TRAILING_UNMAPPABLE(false),
 
         /**
-         * Feature that allows skipping input lines that are completely empty, instead
+         * Feature that allows skipping input lines that are completely empty or blank (composed only of whitespace),
+         * instead of being decoded as lines of just a single column with an empty/blank String value (or,
          * of being decoded as lines of just a single column with empty String value (or,
          * depending on binding, `null`).
          *<p>
          * Feature is disabled by default.
          *
-         * @since 2.9
+         * @since 2.10
          */
         SKIP_EMPTY_LINES(false),
 
@@ -787,19 +788,19 @@ public class CsvParser
      */
     protected JsonToken _handleStartDoc() throws IOException
     {
-        // also, if comments enabled, may need to skip leading ones
-        _reader.skipLeadingComments();
+        // also, if comments enabled, or skip empty lines, may need to skip leading ones
+        _reader.skipLinesWhenNeeded();
         // First things first: are we expecting header line? If so, read, process
         if (_schema.usesHeader()) {
             _readHeaderLine();
-            _reader.skipLeadingComments();
+            _reader.skipLinesWhenNeeded();
         }
         // and if we are to skip the first data line, skip it
         if (_schema.skipsFirstDataRow()) {
             _reader.skipLine();
-            _reader.skipLeadingComments();
+            _reader.skipLinesWhenNeeded();
         }
-        
+
         // Only one real complication, actually; empty documents (zero bytes).
         // Those have no entries. Should be easy enough to detect like so:
         final boolean wrapAsArray = Feature.WRAP_AS_ARRAY.enabledIn(_formatFeatures);

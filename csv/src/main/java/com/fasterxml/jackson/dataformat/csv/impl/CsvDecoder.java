@@ -65,7 +65,12 @@ public class CsvDecoder
     protected boolean _trimSpaces;
 
     protected boolean _allowComments;
-    
+
+    /**
+     * @since 2.10.1
+     */
+    protected boolean _skipBlankLines; // NOTE: can be final in 3.0, not before
+
     /**
      * Maximum of quote character, linefeeds (\r and \n), escape character.
      */
@@ -111,14 +116,14 @@ public class CsvDecoder
      * needs to be handled (indicates end-of-record).
      */
     protected int _pendingLF = 0;
-    
+
     /**
      * Flag that indicates whether parser is closed or not. Gets
      * set when parser is either closed by explicit call
      * ({@link #close}) or when end-of-input is reached.
      */
     protected boolean _closed;
-    
+
     /*
     /**********************************************************************
     /* Current input location information
@@ -152,7 +157,7 @@ public class CsvDecoder
      * For big (gigabyte-sized) sizes are possible, needs to be long,
      * unlike pointers and sizes related to in-memory buffers.
      */
-    protected long _tokenInputTotal = 0; 
+    protected long _tokenInputTotal = 0;
 
     /**
      * Input row on which current token starts, 1-based
@@ -202,8 +207,7 @@ public class CsvDecoder
 
     final static double MIN_INT_D = Integer.MIN_VALUE;
     final static double MAX_INT_D = Integer.MAX_VALUE;
-    
-    
+
     // Digits, numeric
     final protected static int INT_0 = '0';
     final protected static int INT_1 = '1';
@@ -254,8 +258,8 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    @SuppressWarnings("deprecation")
-    public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema, TextBuffer textBuffer,
+    public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema,
+            TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
     {
         _owner = owner;
@@ -263,9 +267,10 @@ public class CsvDecoder
         _inputSource = r;
         _textBuffer = textBuffer;
         _autoCloseInput =  JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
-        final boolean legacy = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
-        _allowComments = legacy | CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
+        final boolean oldComments = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
+        _allowComments = oldComments | CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
+        _skipBlankLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
         _inputSource = r;
@@ -279,7 +284,9 @@ public class CsvDecoder
         _separatorChar = schema.getColumnSeparator();
         _quoteChar = schema.getQuoteChar();
         _escapeChar = schema.getEscapeChar();
-        _allowComments = _allowComments | schema.allowsComments();
+        if (!_allowComments) {
+            _allowComments = schema.allowsComments();
+        }
         int max = Math.max(_separatorChar, _quoteChar);
         max = Math.max(max, _escapeChar);
         max = Math.max(max, '\r');
@@ -292,6 +299,13 @@ public class CsvDecoder
      */
     public void overrideFormatFeatures(int csvFeatures) {
         _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
+        _skipBlankLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
+
+        // 07-Oct-2019, tatu: not 100% accurate, as we have no access to legacy
+        //     setting. But close enough, fixed in 3.0
+        if (CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures)) {
+            _allowComments = true;
+        }
     }
 
     /*
@@ -482,39 +496,53 @@ public class CsvDecoder
             }
             _handleLF();
         }
-        /* For now, we will only require that there is SOME data
-         * following linefeed -- even spaces will do.
-         * In future we may want to use better heuristics to possibly
-         * skip trailing empty line?
-         */
-        if ((_inputPtr >= _inputEnd) && !loadMore()) {
-            return false;
-        }
-
-        if (_allowComments && _inputBuffer[_inputPtr] == '#') {
-            int i = _skipCommentLines();
-            // end-of-input?
-            if (i < 0) {
-                return false;
-            }
-            // otherwise push last read char back
-            --_inputPtr;
-        }
-        return true;
+        return skipLinesWhenNeeded();
     }
 
-    public void skipLeadingComments() throws IOException
-    {
-        if (_allowComments) {
-            if ((_inputPtr < _inputEnd) || loadMore()) {
-                if (_inputBuffer[_inputPtr] == '#') {
-                    _skipCommentLines();
-                    --_inputPtr;
+    /**
+     * optionally skip lines that are empty or are comments, depending on the feature activated in the parser
+     * @return false if the end of input was reached
+     * @throws IOException
+     * @since 2.10.1
+     */
+    public boolean skipLinesWhenNeeded() throws IOException {
+        if (!(_allowComments || _skipBlankLines)) {
+            return hasMoreInput();
+        }
+        int firstCharacterPtr = _inputPtr;
+        while (hasMoreInput()) {
+            char ch = _inputBuffer[_inputPtr++];
+            if (ch == '\r' || ch == '\n') {
+                _pendingLF = ch;
+                _handleLF();
+                // track the start of the new line
+                firstCharacterPtr = _inputPtr;
+                continue;
+            }
+            if (ch == ' ') {
+                // skip all blanks (in both comments/blanks skip mode)
+                continue;
+            }
+            if (_allowComments) {
+                if (_inputBuffer[firstCharacterPtr] == '#') {
+                    // on a commented line, skip everything
+                    continue;
+                }
+                if (ch == '#') {
+                    // we reach this point when whitespaces precedes the hash character
+                    // move the firstCharacterPtr to the '#' location in order to skip the line completely
+                    firstCharacterPtr = _inputPtr-1;
+                    continue;
                 }
             }
+            // we reached a non skippable character, this line needs to be parsed
+            // rollback the input pointer to the beginning of the line
+            _inputPtr = firstCharacterPtr;
+            return true; // processing can go on
         }
+        return false; // end of input
     }
-    
+
     protected int _skipCommentLines() throws IOException
     {
         while ((_inputPtr < _inputEnd) || loadMore()) {
