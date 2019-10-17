@@ -10,7 +10,9 @@ Modules:
 
 2.11.0 (not yet released)
 
--
+#7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
+  into `null` values
+ (contributed by Tyler C-R)
 
 2.10.0 (26-Sep-2019)
 

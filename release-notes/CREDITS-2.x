@@ -79,3 +79,8 @@ Matti Bickel (wundrian@github)
 Maarten Winkels (mwinkels@github)
 * Contributed fix for #83: Update index of sequence context
  (2.10.0)
+
+Tyler Carpenter-Rivers (tyler2cr@github)
+#7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
+  into `null` values
+ (2.11.0)
