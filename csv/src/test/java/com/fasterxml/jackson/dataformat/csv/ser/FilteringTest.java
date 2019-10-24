@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
@@ -56,7 +57,7 @@ public class FilteringTest extends ModuleTestBase
 
     static class CsvAnnotationIntrospector extends JacksonAnnotationIntrospector {
         @Override
-        public Object findFilterId(Annotated a) {
+        public Object findFilterId(MapperConfig<?> config, Annotated a) {
             return CSV_FILTER_NAME;
         }
     }
