@@ -411,7 +411,6 @@ public class CsvMapper extends ObjectMapper
         }
         // 15-Oct-2019, tatu: Since 3.0, need context for introspection
         final SerializerProvider ctxt = _serializerProvider();
-        final AnnotationIntrospector intr = _deserializationConfig.getAnnotationIntrospector();
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(ctxt, builder, typed, pojoType, null);
         CsvSchema result = builder.build();
@@ -468,7 +467,8 @@ public class CsvMapper extends ObjectMapper
             // [dataformat-csv#15]: handle unwrapped props
             AnnotatedMember m = prop.getPrimaryMember();
             if (m != null) {
-                NameTransformer nextUnwrapper = intr.findUnwrappingNameTransformer(prop.getPrimaryMember());
+                NameTransformer nextUnwrapper = intr.findUnwrappingNameTransformer(ctxt.getConfig(),
+                        prop.getPrimaryMember());
                 if (nextUnwrapper != null) {
                     if (unwrapper != null) {
                         nextUnwrapper = NameTransformer.chainedTransformer(unwrapper, nextUnwrapper);
