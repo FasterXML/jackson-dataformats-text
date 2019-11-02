@@ -1,19 +1,18 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.ParserMinimalBase;
-import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.json.JsonReadContext;
-import com.fasterxml.jackson.core.util.ByteArrayBuilder;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
-import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.util.ByteArrayBuilder;
+import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
+import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
+import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
+import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -277,7 +276,7 @@ public class CsvParser
      * Information about parser context, context in which
      * the next token is to be parsed (root, array, object).
      */
-    protected JsonReadContext _parsingContext;
+    protected SimpleTokenReadContext _parsingContext;
 
     /**
      * Name of column that we exposed most recently, accessible after
@@ -358,10 +357,8 @@ public class CsvParser
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
         _textBuffer =  ioCtxt.csvTextBuffer();
-        DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
-                ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;
-        _parsingContext = JsonReadContext.createRootContext(dups);
+        _parsingContext = SimpleTokenReadContext.createRootContext(null);
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         setSchema(schema);
@@ -594,7 +591,7 @@ public class CsvParser
             }
             // should always be in array, actually... but:
             boolean inArray = _parsingContext.inArray();
-            _parsingContext = _parsingContext.getParent();
+            _parsingContext = _parsingContext.clearAndGetParent();
             return inArray ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;
         default:
             throw new IllegalStateException();
@@ -859,7 +856,7 @@ public class CsvParser
     {
         String next = _reader.nextString();
         if (next == null) { // end of record or input...
-            _parsingContext = _parsingContext.getParent();
+            _parsingContext = _parsingContext.clearAndGetParent();
             if (!_reader.startNewLine()) { // end of whole thing...
                 _state = STATE_DOC_END;
             } else {
@@ -883,7 +880,7 @@ public class CsvParser
     {
         int offset = _arrayValueStart;
         if (offset < 0) { // just returned last value
-            _parsingContext = _parsingContext.getParent();
+            _parsingContext = _parsingContext.clearAndGetParent();
             // no arrays in arrays (at least for now), so must be back to named value
             _state = STATE_NEXT_ENTRY;
              return JsonToken.END_ARRAY;
@@ -898,7 +895,7 @@ public class CsvParser
             if (offset == 0) { // no separator
                 // for now, let's use trimming for checking
                 if (_arrayValue.isEmpty() || _arrayValue.trim().isEmpty()) {
-                    _parsingContext = _parsingContext.getParent();
+                    _parsingContext = _parsingContext.clearAndGetParent();
                     _state = STATE_NEXT_ENTRY;
                     return JsonToken.END_ARRAY;
                 }
@@ -1025,7 +1022,7 @@ public class CsvParser
      */
     protected final JsonToken _handleObjectRowEnd() throws IOException
     {
-        _parsingContext = _parsingContext.getParent();
+        _parsingContext = _parsingContext.clearAndGetParent();
         if (!_reader.startNewLine()) {
             _state = STATE_DOC_END;
         } else {
@@ -1041,7 +1038,7 @@ public class CsvParser
         // But once we hit the end of the logical line, get out
         // NOTE: seems like we should always be within Object, but let's be conservative
         // and check just in case
-        _parsingContext = _parsingContext.getParent();
+        _parsingContext = _parsingContext.clearAndGetParent();
         _state = _reader.startNewLine() ? STATE_RECORD_START : STATE_DOC_END;
         return (_currToken = _parsingContext.inArray()
                 ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);

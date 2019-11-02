@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.JsonReadContext;
+import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -331,12 +331,12 @@ public class CsvDecoder {
         return count;
     }
 
-    public JsonReadContext childArrayContext(JsonReadContext context) {
+    public SimpleTokenReadContext childArrayContext(SimpleTokenReadContext context) {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
         return context.createChildArrayContext(_currInputRow, col);
     }
 
-    public JsonReadContext childObjectContext(JsonReadContext context) {
+    public SimpleTokenReadContext childObjectContext(SimpleTokenReadContext context) {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
         return context.createChildObjectContext(_currInputRow, col);
     }
