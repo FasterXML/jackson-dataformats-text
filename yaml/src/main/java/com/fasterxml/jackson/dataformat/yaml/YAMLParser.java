@@ -6,7 +6,6 @@ import java.math.BigInteger;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.*;
 import org.snakeyaml.engine.v1.api.LoadSettings;
 import org.snakeyaml.engine.v1.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v1.common.Anchor;
@@ -23,10 +22,12 @@ import org.snakeyaml.engine.v1.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.v1.resolver.ScalarResolver;
 import org.snakeyaml.engine.v1.scanner.StreamReader;
 
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.JsonReadContext;
+import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.util.BufferRecycler;
+import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
@@ -112,6 +113,12 @@ public class YAMLParser extends ParserBase
      */
 
     /**
+     * Information about parser context, context in which
+     * the next token is to be parsed (root, array, object).
+     */
+    protected SimpleTokenReadContext _parsingContext;
+
+    /**
      * Keep track of the last event read, to get access to Location info
      */
     protected Event _lastEvent;
@@ -151,19 +158,33 @@ public class YAMLParser extends ParserBase
      */
 
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            BufferRecycler br, int parserFeatures, Reader reader)
+            BufferRecycler br, int streamReadFeatures, Reader reader)
     {
-        super(readCtxt, ioCtxt, parserFeatures);
+        super(readCtxt, ioCtxt, streamReadFeatures);
 //        _formatFeatures = formatFeatures;
         _reader = reader;
         LoadSettings settings = new LoadSettingsBuilder().build();//TODO use parserFeatures
         _yamlParser = new ParserImpl(new StreamReader(reader, settings), settings);
+        DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _parsingContext = SimpleTokenReadContext.createRootContext(dups);
     }
 
+    /*
+    /**********************************************************************
+    /* Versioned                                                                             
+    /**********************************************************************
+     */
+
+    @Override
+    public Version version() {
+        return PackageVersion.VERSION;
+    }
+    
     /*                                                                                       
-    /**********************************************************                              
+    /**********************************************************************
     /* Extended YAML-specific API
-    /**********************************************************                              
+    /**********************************************************************
      */
 
     /**
@@ -183,22 +204,11 @@ public class YAMLParser extends ParserBase
         return _currentAnchor;
     }
     */
-    
-    /*                                                                                       
-    /**********************************************************                              
-    /* Versioned                                                                             
-    /**********************************************************                              
-     */
-
-    @Override
-    public Version version() {
-        return PackageVersion.VERSION;
-    }
 
     /*
-    /**********************************************************                              
+    /**********************************************************************
     /* ParserBase method impls
-    /**********************************************************                              
+    /**********************************************************************
      */
 
     @Override
@@ -220,10 +230,12 @@ public class YAMLParser extends ParserBase
         }
     }
 
+    @Override public TokenStreamContext getParsingContext() { return _parsingContext; }
+
     /*
-    /**********************************************************                              
+    /**********************************************************************
     /* FormatFeature support (none yet)
-    /**********************************************************                              
+    /**********************************************************************
      */
 
     /*
@@ -234,11 +246,11 @@ public class YAMLParser extends ParserBase
     */
 
 //    @Override public CsvSchema getSchema() 
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Location info
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -275,9 +287,9 @@ public class YAMLParser extends ParserBase
     // Note: SHOULD override 'getTokenLineNr', 'getTokenColumnNr', but those are final in 2.0
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -336,7 +348,7 @@ public class YAMLParser extends ParserBase
                     return (_currToken = JsonToken.FIELD_NAME);
                 }
             } else if (_parsingContext.inArray()) {
-                _parsingContext.expectComma();
+                _parsingContext.valueRead();
             }
 
             _currentAnchor = Optional.empty();
@@ -601,7 +613,13 @@ public class YAMLParser extends ParserBase
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentFieldName;
         }
-        return super.currentName();
+        if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
+            SimpleTokenReadContext parent = _parsingContext.getParent();
+            if (parent != null) {
+                return parent.currentName();
+            }
+        }
+        return _parsingContext.currentName();
     }
 
     @Override
@@ -856,7 +874,7 @@ public class YAMLParser extends ParserBase
 
     // Promoted from `ParserBase` in 3.0
     protected void _reportMismatchedEndMarker(int actCh, char expCh) throws JsonParseException {
-        JsonReadContext ctxt = getParsingContext();
+        TokenStreamContext ctxt = getParsingContext();
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
                 (char) actCh, expCh, ctxt.typeDesc(), ctxt.getStartLocation(_getSourceReference())));

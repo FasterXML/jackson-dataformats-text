@@ -556,11 +556,6 @@ public class CsvParser
     }
 
     @Override
-    public void overrideCurrentName(String name) {
-        _currentName = name;
-    }
-
-    @Override
     public JsonToken nextToken() throws IOException
     {
         _binaryValue = null;

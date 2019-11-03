@@ -164,10 +164,12 @@ public class JavaPropsParser extends ParserMinimalBase
         return _readContext;
     }
 
+    /*
     @Override
     public void overrideCurrentName(String name) {
         _readContext.overrideCurrentName(name);
     }
+    */
 
     /*
     /**********************************************************
