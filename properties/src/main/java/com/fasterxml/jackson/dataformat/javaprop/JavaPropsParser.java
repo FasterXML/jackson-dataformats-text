@@ -18,9 +18,9 @@ public class JavaPropsParser extends ParserMinimalBase
     protected final static JavaPropsSchema DEFAULT_SCHEMA = new JavaPropsSchema();
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -42,9 +42,9 @@ public class JavaPropsParser extends ParserMinimalBase
     protected JavaPropsSchema _schema = DEFAULT_SCHEMA;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing state
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected JPropReadContext _readContext;
@@ -52,9 +52,9 @@ public class JavaPropsParser extends ParserMinimalBase
     protected boolean _closed;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Recycled helper objects
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected ByteArrayBuilder _byteArrayBuilder;
@@ -62,9 +62,9 @@ public class JavaPropsParser extends ParserMinimalBase
     protected byte[] _binaryValue;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public JavaPropsParser(ObjectReadContext readCtxt, IOContext ioCtxt,
@@ -124,11 +124,11 @@ public class JavaPropsParser extends ParserMinimalBase
     public boolean isClosed() {
         return _closed;
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API overrides
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -137,9 +137,9 @@ public class JavaPropsParser extends ParserMinimalBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overrides: capability introspection methods
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -154,27 +154,20 @@ public class JavaPropsParser extends ParserMinimalBase
     public boolean canReadTypeId() { return false; }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, structural
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public TokenStreamContext getParsingContext() {
-        return _readContext;
-    }
+    public TokenStreamContext getParsingContext() { return _readContext; }
+    @Override public void setCurrentValue(Object v) { _readContext.setCurrentValue(v); }
+    @Override public Object getCurrentValue() { return _readContext.getCurrentValue(); }
 
     /*
-    @Override
-    public void overrideCurrentName(String name) {
-        _readContext.overrideCurrentName(name);
-    }
-    */
-
-    /*
-    /**********************************************************
+    /**********************************************************************
     /* Main parsing API, textual values
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -291,9 +284,9 @@ System.err.println("\n>>");
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Other accessor overrides
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -312,9 +305,9 @@ System.err.println("\n>>");
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Main parsing API, textual values
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -358,9 +351,9 @@ System.err.println("\n>>");
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal helper methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected <T> T _noNumbers() throws IOException {
