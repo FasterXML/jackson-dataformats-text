@@ -1,28 +1,27 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.fasterxml.jackson.databind.ObjectReader;
+
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+
 import org.junit.Test;
 
-import java.io.IOException;
-
-import static org.junit.Assert.*;
-
 /**
- * Test for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
+ * Test for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}.
  */
-public class EmptyStringAsNullTest {
-
-
+public class EmptyStringAsNullTest extends ModuleTestBase
+{
     @JsonPropertyOrder({"firstName", "middleName", "lastName"})
     static class TestUser {
         public String firstName, middleName, lastName;
     }
 
     @Test
-    public void givenFeatureDisabledByDefault_whenColumnIsEmptyString_thenParseAsEmptyString() throws IOException {
+    public void testEmptyStringAsNullDisabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
@@ -43,7 +42,7 @@ public class EmptyStringAsNullTest {
     }
 
     @Test
-    public void givenFeatureEnabled_whenColumnIsEmptyString_thenParseAsNull() throws IOException {
+    public void testEmptyStringAsNullEnabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
