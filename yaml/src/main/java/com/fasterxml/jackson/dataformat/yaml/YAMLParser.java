@@ -641,7 +641,7 @@ public class YAMLParser extends ParserBase
         return 0;
     }
 
-    @Override // since 2.8
+    @Override
     public int getText(Writer writer) throws IOException
     {
         String str = getText();

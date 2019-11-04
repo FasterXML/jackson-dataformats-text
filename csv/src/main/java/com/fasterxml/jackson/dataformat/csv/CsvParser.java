@@ -95,8 +95,6 @@ public class CsvParser
          * Feature that allows accepting "hash comments" by default, similar to
          * {@link CsvSchema#withAllowComments(boolean)}. If enabled, such comments
          * are by default allowed on all columns of all documents.
-         *
-         * @since 2.10
          */
         ALLOW_COMMENTS(false),
         
