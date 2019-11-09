@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.10.1 (not yet released)
+2.10.1 (09-Nov-2019)
 
 #15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow skipping empty rows
  (implemented by Vincent B)
