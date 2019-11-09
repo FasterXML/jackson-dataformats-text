@@ -84,3 +84,9 @@ Vincent Boulaye (vboulaye@github)
 * Implemented #15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow
   skipping empty rows
  (2.10.1)
+
+Tyler Carpenter-Rivers (tyler2cr@github)
+#7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
+  into `null` values
+ (2.11.0)
+
