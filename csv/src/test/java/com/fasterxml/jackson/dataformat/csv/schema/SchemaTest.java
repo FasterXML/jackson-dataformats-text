@@ -2,6 +2,7 @@ package com.fasterxml.jackson.dataformat.csv.schema;
 
 import java.util.*;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -41,7 +42,17 @@ public class SchemaTest extends ModuleTestBase
         public abstract int getY();
         public abstract int getZ();
     }
-    
+
+    private static class PointWithExplicitIndices {
+        @JsonProperty(required = true, value = "y", index = 1)
+        public int y;
+
+        @JsonProperty(required = true, value = "x", index = 2)
+        public int x;
+
+        public int z;
+    }
+
     /*
     /**********************************************************************
     /* Test methods
@@ -205,5 +216,17 @@ public class SchemaTest extends ModuleTestBase
         assertEquals("firstName", it.next().getName());
         assertEquals("lastName", it.next().getName());
         assertEquals("x", it.next().getName());
+    }
+
+    // For [dataformat-csv#115]: honor JsonProperty index
+    public void testSchemaWithExplicitIndices()
+    {
+        CsvSchema pointSchema = MAPPER.typedSchemaFor(PointWithExplicitIndices.class);
+
+        assertEquals("y", pointSchema.column(0).getName());
+        assertEquals("x", pointSchema.column(1).getName());
+        assertEquals("z", pointSchema.column(2).getName());
+
+        _verifyLinks(pointSchema);
     }
 }

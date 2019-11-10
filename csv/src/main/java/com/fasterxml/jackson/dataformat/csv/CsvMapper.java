@@ -1,6 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv;
 
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
+
 import java.util.Collection;
+import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -459,7 +464,13 @@ public class CsvMapper extends ObjectMapper
         }
         BeanDescription beanDesc = ctxt.introspectBeanDescription(pojoType);
         final AnnotationIntrospector intr = ctxt.getAnnotationIntrospector();
-        for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
+        List<BeanPropertyDefinition> properties = beanDesc.findProperties();
+
+        // soring properties by @JsonProperty index
+        properties.sort(comparing(o -> intr.findPropertyIndex(ctxt.getConfig(), o.getPrimaryMember()),
+                nullsLast(naturalOrder())));
+
+        for (BeanPropertyDefinition prop : properties) {
             // ignore setter-only properties:
             if (!prop.couldSerialize()) {
                 continue;
