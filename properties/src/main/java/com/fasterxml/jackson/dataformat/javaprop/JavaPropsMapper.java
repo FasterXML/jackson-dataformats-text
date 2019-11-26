@@ -165,7 +165,7 @@ public class JavaPropsMapper extends ObjectMapper
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,
             Class<T> valueType) throws IOException
     {
-        DeserializationContext ctxt = createDeserializationContext();
+        DeserializationContext ctxt = _deserializationContext();
         JsonParser p = tokenStreamFactory().createParser(ctxt, schema, props);
         return (T) readValue(p, valueType);
     }
@@ -184,7 +184,7 @@ public class JavaPropsMapper extends ObjectMapper
     public <T> T readPropertiesAs(Properties props, JavaPropsSchema schema,
             JavaType valueType) throws IOException
     {
-        DeserializationContext ctxt = createDeserializationContext();
+        DeserializationContext ctxt = _deserializationContext();
         JsonParser p = tokenStreamFactory().createParser(ctxt, schema, props);
         return (T) readValue(p, valueType);
     }
@@ -228,7 +228,7 @@ public class JavaPropsMapper extends ObjectMapper
     @SuppressWarnings("resource")
     public <T> T readMapAs(Map<String, String> map, JavaPropsSchema schema,
             Class<T> valueType) throws IOException {
-        DeserializationContext ctxt = createDeserializationContext();
+        DeserializationContext ctxt = _deserializationContext();
         JsonParser p = tokenStreamFactory().createParser(ctxt, schema, map);
         return (T) readValue(p, valueType);
     }
@@ -246,7 +246,7 @@ public class JavaPropsMapper extends ObjectMapper
     @SuppressWarnings({ "resource", "unchecked" })
     public <T> T readMapAs(Map<String, String> map, JavaPropsSchema schema,
             JavaType valueType) throws IOException {
-        DeserializationContext ctxt = createDeserializationContext();
+        DeserializationContext ctxt = _deserializationContext();
         JsonParser p = tokenStreamFactory().createParser(ctxt, schema, map);
         return (T) readValue(p, valueType);
     }
