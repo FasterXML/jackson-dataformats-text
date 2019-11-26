@@ -124,7 +124,7 @@ public class CsvParser
          * not exposed as part of the token stream.
          *<p>
          * Note that this feature is only considered if
-         * {@link #INSERT_NULLS_FOR_MISSING_COLUMNS}
+         * {@link #FAIL_ON_MISSING_COLUMNS}
          * is disabled.
          *<p>
          * Feature is disabled by default.
