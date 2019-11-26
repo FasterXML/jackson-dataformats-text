@@ -2,9 +2,10 @@ language: java
 
 jdk:
   - openjdk8
+  - openjdk11
 
 # whitelist
 branches:
   only:
     - master
-    - "2.9"
+    - "2.11"
