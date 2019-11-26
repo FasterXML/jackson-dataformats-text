@@ -3,6 +3,9 @@ package com.fasterxml.jackson.dataformat.csv;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -11,12 +14,55 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 {
     public enum Gender { MALE, FEMALE };
 
+    protected static class Address {
+        private String streetName;
+
+        private String city;
+
+        public Address(String streetName, String city) {
+            this.streetName = streetName;
+            this.city = city;
+        }
+
+        public String getStreetName() {
+            return streetName;
+        }
+
+        public void setStreetName(String streetName) {
+            this.streetName = streetName;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+    }
+
+    protected static class LocalizedValue {
+        private String value;
+
+        public LocalizedValue(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
+
     /**
      * Slightly modified sample class from Jackson tutorial ("JacksonInFiveMinutes")
      */
     @JsonPropertyOrder({"firstName", "lastName", "gender" ,"verified", "userImage"})
-    protected static class FiveMinuteUser {
-
+    protected static class FiveMinuteUser
+    {
         private Gender _gender;
 
         public String firstName, lastName;
@@ -70,6 +116,43 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         }
     }
 
+    public static class TenMinuteUser extends FiveMinuteUser {
+
+        private Address _address;
+
+        public TenMinuteUser(String first, String last, boolean verified, Gender g, byte[] data, Address address)
+        {
+            super(first, last, verified, g, data);
+            _address = address;
+        }
+
+        public Address getAddress() {
+            return _address;
+        }
+
+        public void setAddress(Address address) {
+            this._address = address;
+        }
+    }
+
+    public static class FifteenMinuteUser extends FiveMinuteUser {
+
+        private Map<Locale, LocalizedValue> localizedName;
+
+        public FifteenMinuteUser(String first, String last, boolean verified, Gender g, byte[] data, Map<Locale, LocalizedValue> localizedName) {
+            super(first, last, verified, g, data);
+            this.localizedName = localizedName;
+        }
+
+        public Map<Locale, LocalizedValue> getLocalizedName() {
+            return localizedName;
+        }
+
+        public void setLocalizedName(Map<Locale, LocalizedValue> localizedName) {
+            this.localizedName = localizedName;
+        }
+    }
+
     @JsonPropertyOrder({"id", "desc"})
     protected static class IdDesc {
         public String id, desc;
@@ -80,7 +163,27 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
             this.desc = desc;
         }
     }
-    
+
+    @JsonPropertyOrder({ "x", "y" })
+    protected static class Point {
+        public int x, y;
+
+        protected Point() { }
+        public Point(int x0, int y0) {
+            x = x0;
+            y = y0;
+        }
+    }
+
+    protected static class Points {
+        public List<Point> p;
+
+        protected Points() { }
+        public Points(Point... p0) {
+            p = Arrays.asList(p0);
+        }
+    }
+
     protected ModuleTestBase() { }
 
     /*
