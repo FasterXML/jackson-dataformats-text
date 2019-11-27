@@ -14,6 +14,11 @@ Modules:
   into `null` values
  (contributed by Tyler C-R)
 
+2.10.2 (not yet released)
+
+#166: (csv) Incorrect `JsonParseException` Message for missing separator char
+ (reported by gimiz@github)
+
 2.10.1 (09-Nov-2019)
 
 #15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow skipping empty rows

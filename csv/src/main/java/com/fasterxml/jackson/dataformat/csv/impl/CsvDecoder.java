@@ -822,12 +822,13 @@ public class CsvDecoder {
                 continue;
             }
             _owner._reportUnexpectedCsvChar(ch, String.format(
-                    "Expected separator (%s) or end-of-line", _getCharDesc(_quoteChar)));
+                    "Expected column separator character (%s) or end-of-line", _getCharDesc(_separatorChar)));
         }
         return result;
     }
 
-    protected final void _handleLF() throws IOException {
+    protected final void _handleLF() throws IOException
+    {
         // already skipped past first part; but may get \r\n so skip the other char too?
         if (_pendingLF == INT_CR) {
             if (_inputPtr < _inputEnd || loadMore()) {
