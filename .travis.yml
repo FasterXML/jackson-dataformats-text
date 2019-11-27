@@ -1,8 +1,17 @@
 language: java
 
+git:
+  quiet: true
+  submodules: false
+
 jdk:
   - openjdk8
   - openjdk11
+
+# 2019-11-27, tatu: Let's try caching Maven dependencies
+cache:
+  directories:
+    - $HOME/.m2
 
 # whitelist
 branches:

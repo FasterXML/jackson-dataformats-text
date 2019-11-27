@@ -164,7 +164,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
             value = it.nextValue();
             fail("Should fail");
         } catch (JsonProcessingException e) {
-            verifyException(e, "Expected separator");
+            verifyException(e, "Expected column separator");
         }
 
         // and because of this, synchronization skips the rest of 3rd line...
@@ -209,7 +209,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
             value = it.nextValue();
             fail("Should fail");
         } catch (JsonProcessingException e) {
-            verifyException(e, "Expected separator");
+            verifyException(e, "Expected column separator");
         }
 
         // and this means that since error was encountered on 3rd row, that gets
