@@ -865,7 +865,7 @@ public class CsvDecoder
                 continue;
             }
             _owner._reportUnexpectedCsvChar(ch, String.format(
-                    "Expected separator (%s) or end-of-line", _getCharDesc(_quoteChar)));
+                    "Expected separator (%s) or end-of-line", _getCharDesc(_separatorChar)));
         }
         return result;
     }
