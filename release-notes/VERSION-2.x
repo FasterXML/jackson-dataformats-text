@@ -13,6 +13,8 @@ Modules:
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
  (contributed by Tyler C-R)
+#115: JsonProperty index is not honored by CsvSchema builder
+ -- actually fixed by [databind#2555]
 
 2.10.2 (not yet released)
 
