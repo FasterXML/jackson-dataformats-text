@@ -107,7 +107,6 @@ public class CsvMapper extends ObjectMapper
         this(new CsvFactory());
     }
 
-    @SuppressWarnings("deprecation")
     public CsvMapper(CsvFactory f)
     {
         super(f);
