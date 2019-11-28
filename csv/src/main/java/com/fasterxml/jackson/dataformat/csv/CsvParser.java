@@ -670,7 +670,7 @@ public class CsvParser
 
             a) The schema has been populated.  In this case, build a new
                schema where the order matches the *actual* order in which
-               the given CSV file offers its columns, iif _schema.reordersColumns()
+               the given CSV file offers its columns, if _schema.reordersColumns()
                is set to true; there cases the consumer of the csv file
                knows about the columns but not necessarily the order in
                which they are defined.
