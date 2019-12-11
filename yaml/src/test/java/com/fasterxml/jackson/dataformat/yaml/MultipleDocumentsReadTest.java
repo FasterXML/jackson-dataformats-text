@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 
-public class MultipleRootValuesTest extends ModuleTestBase
+public class MultipleDocumentsReadTest extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = YAMLMapper.shared();
 
