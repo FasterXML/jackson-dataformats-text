@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 // for [dataformat-yaml#26]: not sure if it's an actual bug, but adding for now.
 public class CollectionReadTest extends ModuleTestBase
@@ -15,7 +14,7 @@ public class CollectionReadTest extends ModuleTestBase
     
     public void testSet26() throws Exception
     {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        ObjectMapper mapper = newObjectMapper();
         final String YAML = "---\n"
                 +"sets: !!set\n"
                 +"    ? a\n"
