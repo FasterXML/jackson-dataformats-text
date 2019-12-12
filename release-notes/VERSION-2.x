@@ -18,6 +18,8 @@ Modules:
 
 2.10.2 (not yet released)
 
+#163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
+ (reported by Piyush K)
 #166: (csv) Incorrect `JsonParseException` Message for missing separator char
  (reported by gimiz@github)
 

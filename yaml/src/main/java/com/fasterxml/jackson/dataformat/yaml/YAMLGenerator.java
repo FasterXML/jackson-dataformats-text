@@ -21,6 +21,7 @@ import org.snakeyaml.engine.v1.emitter.Emitter;
 import org.snakeyaml.engine.v1.events.AliasEvent;
 import org.snakeyaml.engine.v1.events.DocumentEndEvent;
 import org.snakeyaml.engine.v1.events.DocumentStartEvent;
+import org.snakeyaml.engine.v1.events.Event;
 import org.snakeyaml.engine.v1.events.ImplicitTuple;
 import org.snakeyaml.engine.v1.events.MappingEndEvent;
 import org.snakeyaml.engine.v1.events.MappingStartEvent;
@@ -216,7 +217,7 @@ public class YAMLGenerator extends GeneratorBase
             "null", "Null", "NULL"
     ));
 
-/*
+    /*
     /**********************************************************************
     /* Configuration
     /**********************************************************************
@@ -225,8 +226,7 @@ public class YAMLGenerator extends GeneratorBase
     final protected IOContext _ioContext;
 
     /**
-     * Bit flag composed of bits that indicate which
-     * {@link YAMLGenerator.Feature}s
+     * Bit flag composed of bits that indicate which {@link YAMLGenerator.Feature}s
      * are enabled.
      */
     protected int _formatWriteFeatures;
@@ -236,6 +236,8 @@ public class YAMLGenerator extends GeneratorBase
     protected DumpSettings _outputOptions;
 
     protected final boolean _cfgMinimizeQuotes;
+
+    protected final SpecVersion _docVersion;
     
     /*
     /**********************************************************************
@@ -262,6 +264,8 @@ public class YAMLGenerator extends GeneratorBase
      */
     protected String _typeId;
 
+    protected int _rootValueCount;
+
     /*
     /**********************************************************************
     /* Life-cycle
@@ -283,19 +287,15 @@ public class YAMLGenerator extends GeneratorBase
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
         _writer = out;
+        _docVersion = version;
 
         _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
 
         _emitter = new Emitter( _outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
-        _emitter.emit(new StreamStartEvent());
-        Map<String,String> noTags = Collections.emptyMap();
 
-        boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(yamlFeatures);
-
-        _emitter.emit(new DocumentStartEvent(startMarker, Optional.empty(),
-                 // for 1.10 was: ((version == null) ? null : version.getArray()),
-                noTags));
+        _emit(new StreamStartEvent());
+        _emitStartDocument();
     }
 
     protected DumpSettings buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
@@ -484,8 +484,10 @@ public class YAMLGenerator extends GeneratorBase
     public void close() throws IOException
     {
         if (!isClosed()) {
-            _emitter.emit(new DocumentEndEvent( false));
-            _emitter.emit(new StreamEndEvent());
+            // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
+            //   but need END_DOCUMENT regardless
+            _emitEndDocument();
+            _emit(new StreamEndEvent());
             super.close();
 
             /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
@@ -523,7 +525,7 @@ public class YAMLGenerator extends GeneratorBase
         if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
+        _emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
                 implicit,  style));
     }
 
@@ -542,7 +544,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _tokenWriteContext = _tokenWriteContext.getParent();
-        _emitter.emit(new SequenceEndEvent());
+        _emit(new SequenceEndEvent());
     }
 
     @Override
@@ -557,7 +559,7 @@ public class YAMLGenerator extends GeneratorBase
         if (anchor.isPresent()) {
             _objectId = null;
         }
-        _emitter.emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
+        _emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
     }
 
     @Override
@@ -575,7 +577,7 @@ public class YAMLGenerator extends GeneratorBase
         // just to make sure we don't "leak" type ids
         _typeId = null;
         _tokenWriteContext = _tokenWriteContext.getParent();
-        _emitter.emit(new MappingEndEvent());
+        _emit(new MappingEndEvent());
     }
 
     /*
@@ -831,7 +833,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("write Object reference");
         AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
-        _emitter.emit(evt);
+        _emit(evt);
     }
 
     @Override
@@ -854,6 +856,15 @@ public class YAMLGenerator extends GeneratorBase
         if (!_tokenWriteContext.writeValue()) {
             _reportError("Can not "+typeMsg+", expecting field name");
         }
+        if (_tokenWriteContext.inRoot()) {
+            // Start-doc emitted when creating generator, but otherwise need it; similarly,
+            // need matching end-document to close earlier open one
+            if (_tokenWriteContext.getCurrentIndex() > 0) {
+                _emitEndDocument();
+                _emitStartDocument();
+            }
+        }
+
     }
 
     @Override
@@ -875,7 +886,7 @@ public class YAMLGenerator extends GeneratorBase
 
     protected void _writeScalar(String value, String type, ScalarStyle style) throws IOException
     {
-        _emitter.emit(_scalarEvent(value, style));
+        _emit(_scalarEvent(value, style));
     }
 
     private void _writeScalarBinary(Base64Variant b64variant,
@@ -888,8 +899,7 @@ public class YAMLGenerator extends GeneratorBase
         }
         final String lf = _lf();
         String encoded = b64variant.encode(data, false, lf);
-        _emitter.emit(new ScalarEvent(Optional.empty(), Optional.ofNullable(TAG_BINARY), EXPLICIT_TAGS, encoded, STYLE_BASE64));
-
+        _emit(new ScalarEvent(Optional.empty(), Optional.ofNullable(TAG_BINARY), EXPLICIT_TAGS, encoded, STYLE_BASE64));
     }
 
     protected ScalarEvent _scalarEvent(String value, ScalarStyle style)
@@ -954,5 +964,25 @@ public class YAMLGenerator extends GeneratorBase
 
     protected String _lf() {
         return _outputOptions.getBestLineBreak();
+    }
+
+    // @since 2.10.2
+    protected void _emitStartDocument() throws IOException
+    {
+        Map<String,String> noTags = Collections.emptyMap();
+        boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
+        _emit(new DocumentStartEvent(startMarker, Optional.empty(),
+                 // for 1.10 was: ((version == null) ? null : version.getArray()),
+                noTags));
+    }
+
+    // @since 2.10.2
+    protected void _emitEndDocument() throws IOException {
+        _emit(new DocumentEndEvent(false));
+    }
+
+    // @since 2.10.2
+    protected final void _emit(Event e) throws IOException {
+        _emitter.emit(e);
     }
 }

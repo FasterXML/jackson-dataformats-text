@@ -1,11 +1,10 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.*;
-
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 // for [dataformats-text#163]
 public class MultipleDocumentsWriteTest extends ModuleTestBase
@@ -26,10 +25,8 @@ public class MultipleDocumentsWriteTest extends ModuleTestBase
         }
         w.close();
 
-        String yaml = w.toString();
-
-        // !!! TODO: actual expected multi-doc contents:
-        assertEquals("foo", yaml);
+        String yaml = w.toString().trim();
+        assertEquals("---\nvalue: 42\n---\nvalue: 28", yaml);
     }
 
     public void testWriteMultipleDocsLists() throws Exception
@@ -37,14 +34,12 @@ public class MultipleDocumentsWriteTest extends ModuleTestBase
         ObjectMapper mapper = newObjectMapper();
         StringWriter w = new StringWriter();
         try (SequenceWriter seqW = mapper.writer().writeValues(w)) {
-            seqW.write(Collections.singleton(42));
+            seqW.write(Arrays.asList(28,12));
             seqW.write(Collections.singleton(28));
         }
         w.close();
 
-        String yaml = w.toString();
-
-        // !!! TODO: actual expected multi-doc contents:
-        assertEquals("foo", yaml);
+        String yaml = w.toString().trim();
+        assertEquals("---\n- 28\n- 12\n---\n- 28", yaml);
     }
 }
