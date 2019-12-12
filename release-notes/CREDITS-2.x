@@ -84,3 +84,7 @@ Vincent Boulaye (vboulaye@github)
 * Implemented #15: Add a `CsvParser.Feature.SKIP_EMPTY_LINES` to allow
   skipping empty rows
  (2.10.1)
+
+Piyush Kumar (piyushkumar13@github)
+* Reported #163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
+ (2.10.2)

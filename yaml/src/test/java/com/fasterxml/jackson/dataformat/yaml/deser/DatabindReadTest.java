@@ -116,7 +116,6 @@ public class DatabindReadTest extends ModuleTestBase
     {
         UUID uuid = new UUID(0, 0);
         String yaml = MAPPER.writeValueAsString(uuid);
-        
         UUID result = MAPPER.readValue(yaml, UUID.class);
         
         assertEquals(uuid, result);
