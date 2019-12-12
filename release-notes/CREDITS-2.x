@@ -85,8 +85,11 @@ Vincent Boulaye (vboulaye@github)
   skipping empty rows
  (2.10.1)
 
+Piyush Kumar (piyushkumar13@github)
+* Reported #163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
+ (2.10.2)
+
 Tyler Carpenter-Rivers (tyler2cr@github)
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
  (2.11.0)
-
