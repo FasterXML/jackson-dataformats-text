@@ -11,7 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-public class GeneratorAutoCloseTest extends ModuleTestBase {
+@SuppressWarnings("resource")
+public class GeneratorAutoCloseTest extends ModuleTestBase
+{
 
     private Pojo pojo = new Pojo("bar");
 

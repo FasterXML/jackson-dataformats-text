@@ -16,7 +16,7 @@ Modules:
 #115: JsonProperty index is not honored by CsvSchema builder
  -- actually fixed by [databind#2555]
 
-2.10.2 (not yet released)
+2.10.2 (05-Jan-2020)
 
 #163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
  (reported by Piyush K)
