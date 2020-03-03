@@ -8,6 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.10.3 (03-Mar-2020)
+
+No changes since 2.10.2
+
 2.10.2 (05-Jan-2020)
 
 #163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
