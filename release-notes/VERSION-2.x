@@ -15,11 +15,11 @@ Modules:
  (contributed by Tyler C-R)
 #115: JsonProperty index is not honored by CsvSchema builder
  -- actually fixed by [databind#2555]
+#178: Upgrade SnakeYAML to 1.26 (from 1.24)
 
 2.10.3 (03-Mar-2020)
 
 No changes since 2.10.2
->>>>>>> 2.10
 
 2.10.2 (05-Jan-2020)
 
