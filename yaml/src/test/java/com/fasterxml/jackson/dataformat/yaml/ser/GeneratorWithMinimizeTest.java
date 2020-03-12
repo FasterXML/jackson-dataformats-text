@@ -91,6 +91,50 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: nuLL", yaml);
     }
 
+    public void testMinimizeQuotesWithStringsContainingSpecialChars() throws Exception {
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("key", "a:b");
+        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a:b\"", yaml);
+
+        content.clear();
+        content.put("key", "a#b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a#b\"", yaml);
+
+        content.clear();
+        content.put("key", "a[b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a[b\"", yaml);
+
+        content.clear();
+        content.put("key", "a]b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a]b\"", yaml);
+
+        content.clear();
+        content.put("key", "a{b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a{b\"", yaml);
+
+        content.clear();
+        content.put("key", "a}b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a}b\"", yaml);
+
+        content.clear();
+        content.put("key", "a,b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: \"a,b\"", yaml);
+    }
+
     public void testLiteralStringsMultiLine() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();
