@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.CloseStateInputStream;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.CloseStateReader;
@@ -30,7 +30,7 @@ public class StreamClosingTest extends ModuleTestBase
         in = CloseStateInputStream.forString("value = 42");
         assertFalse(in.closed);
         result = PROPS_MAPPER.readerFor(Bean179.class)
-                .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .readValue(in);
         assertNotNull(result);
         assertTrue(in.closed);
@@ -49,7 +49,7 @@ public class StreamClosingTest extends ModuleTestBase
         r = CloseStateReader.forString("value = 42");
         assertFalse(r.closed);
         result = PROPS_MAPPER.readerFor(Bean179.class)
-                .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+                .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .readValue(r);
         assertNotNull(result);
         assertTrue(r.closed);
