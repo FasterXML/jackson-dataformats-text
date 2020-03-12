@@ -297,7 +297,7 @@ public class JavaPropsFactory
     {
         Properties props = new Properties();
         // May or may not want to close the reader, so...
-        if (ctxt.isResourceManaged()) {
+        if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
                 props.load(r);
             }

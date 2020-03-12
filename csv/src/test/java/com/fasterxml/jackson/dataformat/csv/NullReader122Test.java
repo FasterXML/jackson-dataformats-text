@@ -17,7 +17,7 @@ public class NullReader122Test extends ModuleTestBase
             /*Object ob =*/ r.readValue((Reader) null);
             fail("Should not pass");
         } catch (IllegalArgumentException e) {
-            verifyException(e, "Argument \"src\" is null");
+            verifyException(e, "Argument \"r\" is null");
         }
     }
 }

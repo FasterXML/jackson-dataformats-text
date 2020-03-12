@@ -96,8 +96,12 @@ public final class Latin1Reader extends Reader
     @Override
     public void close() throws IOException
     {
-        _inputSource = null;
-        freeBuffers();
+        InputStream in = _inputSource;
+        if (in != null) {
+            _inputSource = null;
+            freeBuffers();
+            in.close();
+        }
     }
 
     private char[] _tmpBuffer = null;
