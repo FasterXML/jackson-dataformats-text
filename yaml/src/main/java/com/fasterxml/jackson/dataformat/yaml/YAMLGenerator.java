@@ -196,6 +196,14 @@ public class YAMLGenerator extends GeneratorBase
             "on", "On", "ON", "off", "Off", "OFF",
             "null", "Null", "NULL"
     ));
+
+    /**
+     * As per YAML <a href="https://yaml.org/spec/1.2/spec.html#id2788859">Plain Style</a>unquoted strings are
+     * restriced to a reduced charset and must be quoted in case they contain one of the following characters.
+     */
+    private final static Set<String> SPECIAL_CHARS = new HashSet<>(Arrays.asList(
+            ":", "#", "[", "]", "{", "}", ","
+    ));
     
     /*
     /**********************************************************
@@ -480,7 +488,7 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
-            
+
             _emitEndDocument();
             _emit(new StreamEndEvent(null, null));
             super.close();
@@ -981,6 +989,16 @@ public class YAMLGenerator extends GeneratorBase
         case 'Y': // Y/Yes/YES
             return MUST_QUOTE_VALUES.contains(name);
         }
+        return stringContainsItemFromList(name, SPECIAL_CHARS.toArray(new String[]{}));
+    }
+
+    private static boolean stringContainsItemFromList(String inputStr, String[] items) {
+        for(int i =0; i < items.length; i++) {
+            if (inputStr.contains( items[i] )) {
+                return true;
+            }
+        }
+
         return false;
     }
 
