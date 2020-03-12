@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
+
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.io.Latin1Reader;
@@ -347,7 +348,7 @@ public class JavaPropsFactory extends JsonFactory
     {
         Properties props = new Properties();
         // May or may not want to close the reader, so...
-        if (ctxt.isResourceManaged()) {
+        if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
                 props.load(r);
             }

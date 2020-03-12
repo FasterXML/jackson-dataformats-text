@@ -10,6 +10,9 @@ Modules:
 
 2.10.4 (not yet released)
 
+#179 (properties): `JavaPropsMapper` doesn't close the .properties file
+   properly after reading
+ (reported by Francisco C)
 * (yaml) SnakeYAML 1.24 -> 1.26
 
 2.10.3 (03-Mar-2020)

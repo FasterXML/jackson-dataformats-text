@@ -88,3 +88,8 @@ Vincent Boulaye (vboulaye@github)
 Piyush Kumar (piyushkumar13@github)
 * Reported #163: (yaml) `SequenceWriter` does not create multiple docs in a single yaml file
  (2.10.2)
+
+Francisco Colmenares (fcolmenarez@github)
+* Reported #179 (properties): `JavaPropsMapper` doesn't close the .properties file
+  properly after reading
+ (2.10.4)
