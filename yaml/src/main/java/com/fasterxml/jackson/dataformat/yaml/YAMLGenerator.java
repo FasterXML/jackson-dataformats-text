@@ -486,6 +486,7 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
+
             _emitEndDocument();
             _emit(new StreamEndEvent());
             super.close();
@@ -957,7 +958,32 @@ public class YAMLGenerator extends GeneratorBase
         case 'N': // Null/NULL/N/No/NO
         case 'T': // True/TRUE
         case 'Y': // Y/Yes/YES
-            return MUST_QUOTE_VALUES.contains(name);
+            if (MUST_QUOTE_VALUES.contains(name)) {
+                return true;
+            }
+            break;
+        }
+        return _valueHasQuotableChar(name);
+    }
+
+    /**
+     * As per YAML <a href="https://yaml.org/spec/1.2/spec.html#id2788859">Plain Style</a>unquoted
+     * strings are restricted to a reduced charset and must be quoted in case they contain
+     * one of the following characters.
+     */
+    private static boolean _valueHasQuotableChar(String inputStr) {
+        for (int i = 0, end = inputStr.length(); i < end; ++i) {
+            switch (inputStr.charAt(i)) {
+            case ':':
+            case '#':
+            case '[':
+            case ']':
+            case '{':
+            case '}':
+            case ',':
+                return true;
+            default:
+            }
         }
         return false;
     }
@@ -966,7 +992,6 @@ public class YAMLGenerator extends GeneratorBase
         return _outputOptions.getBestLineBreak();
     }
 
-    // @since 2.10.2
     protected void _emitStartDocument() throws IOException
     {
         Map<String,String> noTags = Collections.emptyMap();
@@ -976,12 +1001,10 @@ public class YAMLGenerator extends GeneratorBase
                 noTags));
     }
 
-    // @since 2.10.2
     protected void _emitEndDocument() throws IOException {
         _emit(new DocumentEndEvent(false));
     }
 
-    // @since 2.10.2
     protected final void _emit(Event e) throws IOException {
         _emitter.emit(e);
     }
