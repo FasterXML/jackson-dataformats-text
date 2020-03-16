@@ -979,7 +979,10 @@ public class YAMLGenerator extends GeneratorBase
         case 'N': // Null/NULL/N/No/NO
         case 'T': // True/TRUE
         case 'Y': // Y/Yes/YES
-            return MUST_QUOTE_VALUES.contains(name);
+            if (MUST_QUOTE_VALUES.contains(name)) {
+                return true;
+            }
+            break;
         }
         return _valueHasQuotableChar(name);
     }

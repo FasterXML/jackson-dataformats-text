@@ -124,10 +124,14 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n" +
                 "key: \"a}b\"", yaml);
 
-        content = Collections.singletonMap("key", "a,b");
-        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "a,b")).trim();
         assertEquals("---\n" +
                 "key: \"a,b\"", yaml);
+
+        // plus also some edge cases (wrt "false" etc checking
+        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "f:off")).trim();
+        assertEquals("---\n" +
+                "key: \"f:off\"", yaml);
     }
 
     public void testLiteralStringsMultiLine() throws Exception
