@@ -92,44 +92,39 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     }
 
     public void testMinimizeQuotesWithStringsContainingSpecialChars() throws Exception {
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "a:b");
+        Map<String, String> content;
+
+        content = Collections.singletonMap("key", "a:b");
         String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a:b\"", yaml);
 
-        content.clear();
-        content.put("key", "a#b");
+        content = Collections.singletonMap("key", "a#b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a#b\"", yaml);
 
-        content.clear();
-        content.put("key", "a[b");
+        content = Collections.singletonMap("key", "a[b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a[b\"", yaml);
 
-        content.clear();
-        content.put("key", "a]b");
+        content = Collections.singletonMap("key", "a]b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a]b\"", yaml);
 
-        content.clear();
-        content.put("key", "a{b");
+        content = Collections.singletonMap("key", "a{b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a{b\"", yaml);
 
-        content.clear();
-        content.put("key", "a}b");
+        content = Collections.singletonMap("key", "a}b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a}b\"", yaml);
 
-        content.clear();
-        content.put("key", "a,b");
+        content = Collections.singletonMap("key", "a,b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
                 "key: \"a,b\"", yaml);

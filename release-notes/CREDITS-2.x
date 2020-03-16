@@ -98,3 +98,7 @@ Tyler Carpenter-Rivers (tyler2cr@github)
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
  (2.11.0)
+
+* Reported, constributed fix for #180: (yaml) YAMLGenerator serializes string with special
+  chars unquoted when using `MINIMIZE_QUOTES` mode
+ (2.11.0)

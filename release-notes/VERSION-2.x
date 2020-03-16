@@ -10,11 +10,14 @@ Modules:
 
 2.11.0 (not yet released)
 
-#7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
+#7: (csv) Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
  (contributed by Tyler C-R)
-#115: JsonProperty index is not honored by CsvSchema builder
+#115: (csv) JsonProperty index is not honored by CsvSchema builder
  -- actually fixed by [databind#2555]
+#180: (yaml) YAMLGenerator serializes string with special chars unquoted when
+  using `MINIMIZE_QUOTES` mode
+ (reported, fix contributed by Timo R)
 
 2.10.4 (not yet released)
 
