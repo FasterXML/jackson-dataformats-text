@@ -156,48 +156,34 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
         YAMLMapper mapper = new YAMLMapper(f);
 
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "20");
-        String yaml = mapper.writeValueAsString(content).trim();
-
+        String yaml = mapper.writeValueAsString(Collections.singletonMap("key", "20")).trim();
         assertEquals("---\n" +
                 "key: \"20\"", yaml);
 
-        content.clear();
-        content.put("key", "2.0");
-        yaml = mapper.writeValueAsString(content).trim();
-
+        yaml = mapper.writeValueAsString(Collections.singletonMap("key", "2.0")).trim();
         assertEquals("---\n" +
                 "key: \"2.0\"", yaml);
 
-        content.clear();
-        content.put("key", "2.0.1.2.3");
-        yaml = mapper.writeValueAsString(content).trim();
-
+        yaml = mapper.writeValueAsString(Collections.singletonMap("key", "2.0.1.2.3")).trim();
         assertEquals("---\n" +
                 "key: 2.0.1.2.3", yaml);
+
+        yaml = mapper.writeValueAsString(Collections.singletonMap("key", "-60")).trim();
+        assertEquals("---\n" +
+                "key: \"-60\"", yaml);
     }
 
     public void testNonQuoteNumberStoredAsString() throws Exception
     {
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("key", "20");
-        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
-
+        String yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "20")).trim();
         assertEquals("---\n" +
                 "key: 20", yaml);
-
-        content.clear();
-        content.put("key", "2.0");
-        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
-
+        
+        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "2.0")).trim();
         assertEquals("---\n" +
                 "key: 2.0", yaml);
 
-        content.clear();
-        content.put("key", "2.0.1.2.3");
-        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
-
+        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "2.0.1.2.3")).trim();
         assertEquals("---\n" +
                 "key: 2.0.1.2.3", yaml);
     }
@@ -205,10 +191,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     // [dataformats-test#50]
     public void testEmptyStringWithMinimizeQuotes() throws Exception
     {
-        Map<String, Object> content = new HashMap<>();
-        content.put("key", "");
-        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
-
+        String yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "")).trim();
         assertEquals("---\nkey: \"\"", yaml);
     }
 

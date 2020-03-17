@@ -168,7 +168,7 @@ public class YAMLGenerator extends GeneratorBase
 
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = (long) Integer.MAX_VALUE;
-    protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[0-9]*(\\.[0-9]*)?");
+    protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("-?[0-9]*(\\.[0-9]*)?");
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
