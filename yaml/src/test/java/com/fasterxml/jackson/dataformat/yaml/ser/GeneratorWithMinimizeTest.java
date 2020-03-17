@@ -133,6 +133,13 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
         assertEquals("---\n" +
                 "key: 2.0.1.2.3", yaml);
+
+        content.clear();
+        content.put("key", "-60");
+        yaml = mapper.writeValueAsString(content).trim();
+
+        assertEquals("---\n" +
+                "key: \"-60\"", yaml);
     }
 
     public void testNonQuoteNumberStoredAsString() throws Exception
