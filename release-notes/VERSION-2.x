@@ -13,6 +13,8 @@ Modules:
 #179 (properties): `JavaPropsMapper` doesn't close the .properties file
    properly after reading
  (reported by Francisco C)
+#182 (yaml): Negative numbers not quoted correctly wrt `ALWAYS_QUOTE_NUMBERS_AS_STRINGS
+ (reported, contributed fix by dpdevin@github)
 * (yaml) SnakeYAML 1.24 -> 1.26
 
 2.10.3 (03-Mar-2020)
