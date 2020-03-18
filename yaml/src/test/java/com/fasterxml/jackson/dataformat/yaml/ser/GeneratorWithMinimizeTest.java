@@ -128,6 +128,10 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         yaml = mapper.writeValueAsString(Collections.singletonMap("key", "-60")).trim();
         assertEquals("---\n" +
                 "key: \"-60\"", yaml);
+
+        yaml = mapper.writeValueAsString(Collections.singletonMap("key", "-60.25")).trim();
+        assertEquals("---\n" +
+                "key: \"-60.25\"", yaml);
     }
 
     public void testNonQuoteNumberStoredAsString() throws Exception
