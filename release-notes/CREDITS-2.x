@@ -94,6 +94,11 @@ Francisco Colmenares (fcolmenarez@github)
   properly after reading
  (2.10.4)
 
+Jason van Zyl (jvanzyl@github)
+* Reported #184 (properties, yaml): ` jackson-databind` should not be optional/provided dependency
+   for Properties, YAML modules
+ (2.10.4)
+
 Tyler Carpenter-Rivers (tyler2cr@github)
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
