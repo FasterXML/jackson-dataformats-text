@@ -20,11 +20,10 @@ configuration files as if there was implied nesting structure (by default using 
   </properties>
 
   <dependencies>
-    <!-- for now let's consider databind somewhat optional... -->
+    <!-- starting with 2.10(.4 patch), not optional but fully required -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <scope>provided</scope>
     </dependency>
 
      <!-- and for testing need annotations; but should be available via `jackson-databind` above -->

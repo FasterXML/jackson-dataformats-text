@@ -93,3 +93,9 @@ Francisco Colmenares (fcolmenarez@github)
 * Reported #179 (properties): `JavaPropsMapper` doesn't close the .properties file
   properly after reading
  (2.10.4)
+
+Jason van Zyl (jvanzyl@github)
+* Reported #184 (properties, yaml): ` jackson-databind` should not be optional/provided dependency
+   for Properties, YAML modules
+ (2.10.4)
+
