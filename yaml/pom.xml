@@ -23,8 +23,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <!-- let's make it possible to avoid databind if only using streaming portion -->
-      <scope>provided</scope>
+      <!-- starting with 2.10(.4 patch), not optional but fully required -->
     </dependency>
 
     <dependency>
