@@ -99,6 +99,11 @@ Jason van Zyl (jvanzyl@github)
    for Properties, YAML modules
  (2.10.4)
 
+Jochen Schalanda (joschi@github)
+* Reported #187: Update to SnakeYAML to 1.26 (from 1.24) to address CVE-2017-18640
+ (2.10.4)
+
+
 Tyler Carpenter-Rivers (tyler2cr@github)
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values

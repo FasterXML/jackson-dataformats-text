@@ -30,7 +30,8 @@ Modules:
 #184 (properties, yaml): ` jackson-databind` should not be optional/provided dependency
    for Properties, YAML modules
  (reported by Jason V-Z)
-* (yaml) SnakeYAML 1.24 -> 1.26
+#187: Update to SnakeYAML to 1.26 (from 1.24) to address CVE-2017-18640
+ (reported by Jochen S)
 
 2.10.3 (03-Mar-2020)
 
