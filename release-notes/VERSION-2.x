@@ -8,6 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.9.10.1 (not released)
+
+#187: Update to SnakeYAML 1.26 to address CVE-2017-18640
+
 2.9.10 (21-Sep-2019)
 
 No changes since 2.9.9
