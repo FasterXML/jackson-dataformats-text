@@ -21,7 +21,6 @@ public class CsvDecoder
 
     private final static int INT_CR = '\r';
     private final static int INT_LF = '\n';
-    private final static int INT_HASH = '#';
 
     /*
     /**********************************************************************
@@ -543,6 +542,10 @@ public class CsvDecoder
         return false; // end of input
     }
 
+    // 12-Apr-2020, tatu: Not used any more (probably replaced by above?)
+    /*
+    private final static int INT_HASH = '#';
+
     protected int _skipCommentLines() throws IOException
     {
         while ((_inputPtr < _inputEnd) || loadMore()) {
@@ -561,6 +564,7 @@ public class CsvDecoder
         }
         return -1; // end of input
     }
+    */
 
     /**
      * Method called to blindly skip a single line of content, without considering
