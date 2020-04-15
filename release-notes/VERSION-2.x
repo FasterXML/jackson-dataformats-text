@@ -18,6 +18,8 @@ Modules:
 #180: (yaml) YAMLGenerator serializes string with special chars unquoted when
   using `MINIMIZE_QUOTES` mode
  (reported, fix contributed by Timo R)
+#191: (csv) `ArrayIndexOutOfBoundsException` when skipping empty lines, comments
+ (reported by f-julian@github)
 
 2.10.4 (not yet released)
 

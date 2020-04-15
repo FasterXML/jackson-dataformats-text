@@ -25,7 +25,6 @@ public class CsvDecoder {
 
     private final static int INT_CR = '\r';
     private final static int INT_LF = '\n';
-//    private final static int INT_HASH = '#';
 
     /*
     /**********************************************************************
@@ -488,41 +487,66 @@ public class CsvDecoder {
      * @since 2.10
      */
     public boolean skipLinesWhenNeeded() throws IOException {
-        if (!(_allowComments || _skipBlankLines)) {
+        if (_allowComments) {
+            return _skipCommentLines();
+        }
+        if (!_skipBlankLines) {
             return hasMoreInput();
         }
-        int firstCharacterPtr = _inputPtr;
+
+        // only need to skip fully empty lines
         while (hasMoreInput()) {
+            char ch = _inputBuffer[_inputPtr];
+            if (ch == '\r' || ch == '\n') {
+                ++_inputPtr;
+                _pendingLF = ch;
+                _handleLF();
+                continue;
+            }
+            if (ch != ' ') {
+                return true; // processing can go on
+            }
+            ++_inputPtr;
+        }
+        return false; // end of input
+    }
+
+    public boolean _skipCommentLines() throws IOException
+    {
+        while ((_inputPtr < _inputEnd) || loadMore()) {
+            char ch = _inputBuffer[_inputPtr];
+            switch (ch) {
+            case '#':
+                ++_inputPtr;
+                _skipCommentContents();
+                continue;
+            case '\r':
+            case '\n':
+                ++_inputPtr;
+                _pendingLF = ch;
+                _handleLF();
+                continue;
+            case ' ':
+                // skip all blanks (in both comments/blanks skip mode)
+                ++_inputPtr;
+                continue;
+            default:
+                return true;
+            }
+        }
+        return false; // end of input
+    }
+
+    private void _skipCommentContents() throws IOException
+    {
+        while ((_inputPtr < _inputEnd) || loadMore()) {
             char ch = _inputBuffer[_inputPtr++];
             if (ch == '\r' || ch == '\n') {
                 _pendingLF = ch;
                 _handleLF();
-                // track the start of the new line
-                firstCharacterPtr = _inputPtr;
-                continue;
+                break;
             }
-            if (ch == ' ') {
-                // skip all blanks (in both comments/blanks skip mode)
-                continue;
-            }
-            if (_allowComments) {
-                if (_inputBuffer[firstCharacterPtr] == '#') {
-                    // on a commented line, skip everything
-                    continue;
-                }
-                if (ch == '#') {
-                    // we reach this point when whitespaces precedes the hash character
-                    // move the firstCharacterPtr to the '#' location in order to skip the line completely
-                    firstCharacterPtr = _inputPtr-1;
-                    continue;
-                }
-            }
-            // we reached a non skippable character, this line needs to be parsed
-            // rollback the input pointer to the beginning of the line
-            _inputPtr = firstCharacterPtr;
-            return true; // processing can go on
         }
-        return false; // end of input
     }
 
     /**
