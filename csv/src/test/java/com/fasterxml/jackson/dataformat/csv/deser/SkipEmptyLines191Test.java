@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.io.Reader;
 import java.io.StringReader;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 // [dataformats-text#191]
-public class ParserSkipEmpty191Test extends ModuleTestBase {
+public class SkipEmptyLines191Test extends ModuleTestBase {
 
     private static String COL_1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     private static String COL_2 = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";

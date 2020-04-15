@@ -9,7 +9,7 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 import static org.junit.Assert.assertArrayEquals;
 
 // for [dataformats-text#15]: Allow skipping of empty lines
-public class SkipBlankLines15Test extends ModuleTestBase {
+public class SkipEmptyLines15Test extends ModuleTestBase {
 
     private static final String CSV_WITH_EMPTY_LINE = "1,\"xyz\"\n\ntrue,\n";
     private static final String CSV_WITH_BLANK_LINE = "1,\"xyz\"\n   \ntrue,\n";
@@ -129,6 +129,8 @@ public class SkipBlankLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    // 14-Apr-2020, tatu: Due to [dataformats-text#191], can not retain leading spaces
+    //   when trimming empty lines and/or comments, so test changed for 2.11
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -136,7 +138,9 @@ public class SkipBlankLines15Test extends ModuleTestBase {
         // blank/empty lines are skipped
         assertArrayEquals(expected(
                 row("1", "xyz"),
-                row("  #comment"),
+                // As per: [dataformats-text#191]
+//                row("  #comment"),
+                row("#comment"),
                 row("true", "")
         ), rows);
     }
