@@ -71,8 +71,8 @@ public class SkipEmptyLines191Test extends ModuleTestBase {
         final String doc = sw.toString();
 
         ObjectReader objectReader = MAPPER
-                .enable(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .readerFor(Row174.class)
+                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
                 .with(MAPPER.schemaFor(Row174.class));
 
         MappingIterator<Row174> iterator = objectReader.readValues(doc);
