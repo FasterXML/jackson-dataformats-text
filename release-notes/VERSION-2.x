@@ -15,6 +15,8 @@ Modules:
  (contributed by Tyler C-R)
 #115: (csv) JsonProperty index is not honored by CsvSchema builder
  -- actually fixed by [databind#2555]
+#174: (csv) `CsvParser.Feature.SKIP_EMPTY_LINES` results in a mapping error
+ (reported by Yohann B)
 #180: (yaml) YAMLGenerator serializes string with special chars unquoted when
   using `MINIMIZE_QUOTES` mode
  (reported, fix contributed by Timo R)

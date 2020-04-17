@@ -23,7 +23,7 @@ Fabrice Delhoste (spifd@github)
 
 Thomas Hauk (thauk-copperleaf@github)
 
-* Contibuted #84 (yaml): Add option to allow use of platform-linefeed
+* Contributed #84 (yaml): Add option to allow use of platform-linefeed
   (`YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS`)
  (2.9.6)
 
@@ -103,7 +103,6 @@ Jochen Schalanda (joschi@github)
 * Reported #187: Update to SnakeYAML to 1.26 (from 1.24) to address CVE-2017-18640
  (2.10.4)
 
-
 Tyler Carpenter-Rivers (tyler2cr@github)
 #7: Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
   into `null` values
@@ -111,4 +110,9 @@ Tyler Carpenter-Rivers (tyler2cr@github)
 
 * Reported, constributed fix for #180: (yaml) YAMLGenerator serializes string with special
   chars unquoted when using `MINIMIZE_QUOTES` mode
+ (2.11.0)
+
+Yohann BONILLO (ybonillo@github)
+
+* Reported #174: (csv) `CsvParser.Feature.SKIP_EMPTY_LINES` results in a mapping error
  (2.11.0)
