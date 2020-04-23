@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.util.NameTransformer;
 import com.fasterxml.jackson.dataformat.csv.impl.LRUMap;
+import com.fasterxml.jackson.databind.util.ViewMatcher;
 
 /**
  * Specialized {@link ObjectMapper}, with extended functionality to
@@ -360,15 +361,27 @@ public class CsvMapper extends ObjectMapper
      * just defined to be exposed as String tokens).
      */
     public CsvSchema schemaFor(JavaType pojoType) {
-        return _schemaFor(pojoType, _untypedSchemas, false);
+        return _schemaFor(pojoType, _untypedSchemas, false, null);
+    }
+
+    public CsvSchema schemaForWithView(JavaType pojoType, Class<?> view) {
+        return _schemaFor(pojoType, _untypedSchemas, false, view);
     }
 
     public final CsvSchema schemaFor(Class<?> pojoType) {
-        return _schemaFor(constructType(pojoType), _untypedSchemas, false);
+        return _schemaFor(constructType(pojoType), _untypedSchemas, false, null);
+    }
+
+    public final CsvSchema schemaForWithView(Class<?> pojoType, Class<?> view) {
+        return _schemaFor(constructType(pojoType), _untypedSchemas, false, view);
     }
 
     public final CsvSchema schemaFor(TypeReference<?> pojoTypeRef) {
-        return _schemaFor(constructType(pojoTypeRef.getType()), _untypedSchemas, false);
+        return _schemaFor(constructType(pojoTypeRef.getType()), _untypedSchemas, false, null);
+    }
+
+    public final CsvSchema schemaForWithView(TypeReference<?> pojoTypeRef, Class<?> view) {
+        return _schemaFor(constructType(pojoTypeRef.getType()), _untypedSchemas, false, view);
     }
 
     /**
@@ -379,15 +392,27 @@ public class CsvMapper extends ObjectMapper
      * (especially for numeric types like java.lang.Integer).
      */
     public CsvSchema typedSchemaFor(JavaType pojoType) {
-        return _schemaFor(pojoType, _typedSchemas, true);
+        return _schemaFor(pojoType, _typedSchemas, true, null);
+    }
+
+    public CsvSchema typedSchemaForWithView(JavaType pojoType, Class<?> view) {
+        return _schemaFor(pojoType, _typedSchemas, true, view);
     }
 
     public final CsvSchema typedSchemaFor(Class<?> pojoType) {
-        return _schemaFor(constructType(pojoType), _typedSchemas, true);
+        return _schemaFor(constructType(pojoType), _typedSchemas, true, null);
+    }
+
+    public final CsvSchema typedSchemaForWithView(Class<?> pojoType, Class<?> view) {
+        return _schemaFor(constructType(pojoType), _typedSchemas, true, view);
     }
 
     public final CsvSchema typedSchemaFor(TypeReference<?> pojoTypeRef) {
-        return _schemaFor(constructType(pojoTypeRef.getType()), _typedSchemas, true);
+        return _schemaFor(constructType(pojoTypeRef.getType()), _typedSchemas, true, null);
+    }
+
+    public final CsvSchema typedSchemaForWithView(TypeReference<?> pojoTypeRef, Class<?> view) {
+        return _schemaFor(constructType(pojoTypeRef.getType()), _typedSchemas, true, view);
     }
 
     /*
@@ -397,7 +422,7 @@ public class CsvMapper extends ObjectMapper
      */
 
     protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas,
-            boolean typed)
+            boolean typed, Class<?> view)
     {
         synchronized (schemas) {
             CsvSchema s = schemas.get(pojoType);
@@ -407,12 +432,17 @@ public class CsvMapper extends ObjectMapper
         }
         final AnnotationIntrospector intr = _deserializationConfig.getAnnotationIntrospector();
         CsvSchema.Builder builder = CsvSchema.builder();
-        _addSchemaProperties(builder, intr, typed, pojoType, null);
+        _addSchemaProperties(builder, intr, typed, pojoType, null, view);
         CsvSchema result = builder.build();
         synchronized (schemas) {
             schemas.put(pojoType, result);
         }
         return result;
+    }
+
+    @Deprecated // since 2.11 (remove from 3.0 at latest)
+    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas, boolean typed) {
+        return _schemaFor(pojoType, schemas, typed, null);
     }
 
     protected boolean _nonPojoType(JavaType t)
@@ -444,8 +474,7 @@ public class CsvMapper extends ObjectMapper
     }
 
     protected void _addSchemaProperties(CsvSchema.Builder builder, AnnotationIntrospector intr,
-            boolean typed,
-            JavaType pojoType, NameTransformer unwrapper)
+            boolean typed, JavaType pojoType, NameTransformer unwrapper, Class<?> view)
     {
         // 09-Aug-2015, tatu: From [dataformat-csv#87], realized that one can not have
         //    real schemas for primitive/wrapper
@@ -455,6 +484,15 @@ public class CsvMapper extends ObjectMapper
         
         BeanDescription beanDesc = getSerializationConfig().introspect(pojoType);
         for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
+            if (view != null) {
+                Class<?>[] views = prop.findViews();
+                if (views == null) {
+                    views = beanDesc.findDefaultViews();
+                }
+                if (!ViewMatcher.construct(views).isVisibleForView(view)) {
+                    continue;
+                }
+            }
             // ignore setter-only properties:
             if (!prop.couldSerialize()) {
                 continue;
@@ -468,7 +506,7 @@ public class CsvMapper extends ObjectMapper
                         nextUnwrapper = NameTransformer.chainedTransformer(unwrapper, nextUnwrapper);
                     }
                     JavaType nextType = m.getType();
-                    _addSchemaProperties(builder, intr, typed, nextType, nextUnwrapper);
+                    _addSchemaProperties(builder, intr, typed, nextType, nextUnwrapper, view);
                     continue;
                 }
             }

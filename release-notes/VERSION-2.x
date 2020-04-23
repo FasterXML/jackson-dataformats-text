@@ -22,6 +22,8 @@ Modules:
  (reported, fix contributed by Timo R)
 #191: (csv) `ArrayIndexOutOfBoundsException` when skipping empty lines, comments
  (reported by f-julian@github)
+#195 (csv) Adds schema creating csv schema with View
+ (contributed by Damian S)
 
 2.10.4 (not yet released)
 

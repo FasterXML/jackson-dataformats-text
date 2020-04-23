@@ -113,6 +113,10 @@ Tyler Carpenter-Rivers (tyler2cr@github)
  (2.11.0)
 
 Yohann BONILLO (ybonillo@github)
-
 * Reported #174: (csv) `CsvParser.Feature.SKIP_EMPTY_LINES` results in a mapping error
  (2.11.0)
+
+Damian Servin (Qnzvna@github)
+* Contributed #195 (csv) Adds schema creating csv schema with View
+ (2.11.0)
+ 
