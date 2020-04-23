@@ -1,15 +1,18 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.FilterExceptFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
 
 public class TestFiltering extends ModuleTestBase
 {
@@ -75,6 +78,41 @@ public class TestFiltering extends ModuleTestBase
         // due to filtering, ought to use default
         assertEquals("2", result.aa);
         assertEquals("7", result.b);
+    }
+
+    public void testSchemaWithJsonViewSerialization() throws Exception
+    {
+        CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
+        String actual = MAPPER.writer(schema).withView(ViewB.class).writeValueAsString(new Bean());
+        MAPPER.writer(schema).withView(ViewB.class);
+
+        BufferedReader br = new BufferedReader(new StringReader(actual.trim()));
+        assertEquals("a,b", br.readLine());
+        assertEquals("1,3", br.readLine());
+        assertNull(br.readLine());
+    }
+
+    public void testSchemaWithJsonViewDeserialization() throws Exception
+    {
+        CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
+        final String input = "a,b\n5,7\n";
+        Bean result = MAPPER.readerFor(Bean.class).with(schema).withView(ViewB.class).readValue(input);
+
+        assertEquals("5", result.a);
+        // due to filtering, ought to use default
+        assertEquals("2", result.aa);
+        assertEquals("7", result.b);
+    }
+
+    public void testSchemaWithJsonViewDeserializationFail() throws Exception
+    {
+        CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
+        final String input = "a,aa,b\n5,6,7\n";
+        try {
+            MAPPER.readerFor(Bean.class).with(schema).withView(ViewB.class).readValue(input);
+            fail();
+        } catch (CsvMappingException ignore) {
+        }
     }
     
     public void testWithJsonFilter() throws Exception
