@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.io.Writer;
 
-import org.snakeyaml.engine.v1.api.StreamDataWriter;
+import org.snakeyaml.engine.v2.api.StreamDataWriter;
 
 public class WriterWrapper implements StreamDataWriter {
     private final Writer _writer;

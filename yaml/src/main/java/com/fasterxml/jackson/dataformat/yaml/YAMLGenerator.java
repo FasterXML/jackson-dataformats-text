@@ -11,26 +11,26 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.snakeyaml.engine.v1.api.DumpSettings;
-import org.snakeyaml.engine.v1.api.DumpSettingsBuilder;
-import org.snakeyaml.engine.v1.common.Anchor;
-import org.snakeyaml.engine.v1.common.FlowStyle;
-import org.snakeyaml.engine.v1.common.ScalarStyle;
-import org.snakeyaml.engine.v1.common.SpecVersion;
-import org.snakeyaml.engine.v1.emitter.Emitter;
-import org.snakeyaml.engine.v1.events.AliasEvent;
-import org.snakeyaml.engine.v1.events.DocumentEndEvent;
-import org.snakeyaml.engine.v1.events.DocumentStartEvent;
-import org.snakeyaml.engine.v1.events.Event;
-import org.snakeyaml.engine.v1.events.ImplicitTuple;
-import org.snakeyaml.engine.v1.events.MappingEndEvent;
-import org.snakeyaml.engine.v1.events.MappingStartEvent;
-import org.snakeyaml.engine.v1.events.ScalarEvent;
-import org.snakeyaml.engine.v1.events.SequenceEndEvent;
-import org.snakeyaml.engine.v1.events.SequenceStartEvent;
-import org.snakeyaml.engine.v1.events.StreamEndEvent;
-import org.snakeyaml.engine.v1.events.StreamStartEvent;
-import org.snakeyaml.engine.v1.nodes.Tag;
+import org.snakeyaml.engine.v2.api.DumpSettings;
+import org.snakeyaml.engine.v2.api.DumpSettingsBuilder;
+import org.snakeyaml.engine.v2.common.Anchor;
+import org.snakeyaml.engine.v2.common.FlowStyle;
+import org.snakeyaml.engine.v2.common.ScalarStyle;
+import org.snakeyaml.engine.v2.common.SpecVersion;
+import org.snakeyaml.engine.v2.emitter.Emitter;
+import org.snakeyaml.engine.v2.events.AliasEvent;
+import org.snakeyaml.engine.v2.events.DocumentEndEvent;
+import org.snakeyaml.engine.v2.events.DocumentStartEvent;
+import org.snakeyaml.engine.v2.events.Event;
+import org.snakeyaml.engine.v2.events.ImplicitTuple;
+import org.snakeyaml.engine.v2.events.MappingEndEvent;
+import org.snakeyaml.engine.v2.events.MappingStartEvent;
+import org.snakeyaml.engine.v2.events.ScalarEvent;
+import org.snakeyaml.engine.v2.events.SequenceEndEvent;
+import org.snakeyaml.engine.v2.events.SequenceStartEvent;
+import org.snakeyaml.engine.v2.events.StreamEndEvent;
+import org.snakeyaml.engine.v2.events.StreamStartEvent;
+import org.snakeyaml.engine.v2.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -301,7 +301,7 @@ public class YAMLGenerator extends GeneratorBase
     protected DumpSettings buildDumperOptions(int streamWriteFeatures, int yamlFeatures,
             SpecVersion version)
     {
-        DumpSettingsBuilder opt = new DumpSettingsBuilder();
+        DumpSettingsBuilder opt = DumpSettings.builder();
         // would we want canonical?
         if (Feature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
             opt.setCanonical(true);
