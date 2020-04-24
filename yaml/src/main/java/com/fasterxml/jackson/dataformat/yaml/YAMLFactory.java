@@ -59,7 +59,6 @@ public class YAMLFactory
         super(0, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
-        //_version = DumperOptions.Version.V1_1;
         _version = null;
     }
 

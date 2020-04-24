@@ -317,9 +317,7 @@ public class StreamingParseTest extends ModuleTestBase
         assertEquals(3, p.getText(w));
         assertEquals("num", w.toString());
 
-        // should be considered a String...
-        assertToken(JsonToken.VALUE_NUMBER_FLOAT, p.nextToken());
-        assertEquals(1000.25, p.getDoubleValue());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
         // let's retain exact representation text however:
         assertEquals("1000.25", p.getText());
         p.close();
