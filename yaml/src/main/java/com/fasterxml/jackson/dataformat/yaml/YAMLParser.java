@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v2.common.Anchor;
 import org.snakeyaml.engine.v2.events.AliasEvent;
 import org.snakeyaml.engine.v2.events.CollectionStartEvent;
