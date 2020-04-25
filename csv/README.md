@@ -218,9 +218,12 @@ For a full description of all configurability, please see [CsvSchema](../../../w
 
 * [Wiki](../../../wiki) (includes javadocs)
 * How-to
-    * [CSV with Jackson 2.0](http://www.cowtowncoder.com/blog/archives/2012/03/entry_468.html)
-    * [Writing CSV using Jackson CSVMapper & Mixin annotations](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/)
-    * [CSV with mix-ins](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/)
+    * [How to read a CSV file with Header in Java using Jackson library](https://www.java67.com/2019/05/how-to-read-csv-file-in-java-using-jackson-library.html) (2019)
+    * [Converting JSON to CSV in Java](https://www.baeldung.com/java-converting-json-to-csv) (2019)
+    * [Writing CSV w/ CSVMapper & Mixin annotations](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/) (2014)
+    * [CSV with Jackson 2.0](http://www.cowtowncoder.com/blog/archives/2012/03/entry_468.html) (2012)
+* Framework-specific
+    * [Read and Write CSV Data with jackson-dataformat-csv](Read and Write CSV Data with jackson-dataformat-csv) (JBeret)
 * Performance
     * [Java CSV parser comparison](https://github.com/uniVocity/csv-parsers-comparison)
 
