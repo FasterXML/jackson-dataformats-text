@@ -8,6 +8,10 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
+2.11.1 (not yet released)
+
+-
+
 2.11.0 (26-Apr-2020)
 
 #7: (csv) Add `CsvParser.Feature.EMPTY_STRING_AS_NULL` to allow coercing empty Strings
