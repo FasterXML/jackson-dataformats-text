@@ -44,7 +44,7 @@ public class JavaPropsFactory
     }
 
     /**
-     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     * Constructors used by {@link JavaPropsFactoryBuilder} for instantiation.
      *
      * @since 3.0
      */

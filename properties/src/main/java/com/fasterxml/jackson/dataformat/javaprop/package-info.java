@@ -4,13 +4,13 @@ Basic API types to use with this module:
   <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory}
  is the {@link com.fasterxml.jackson.core.JsonFactory} implementation used to
  create Java Properties parsers and generators
-    <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsGenerator}
+    </li>
+  <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsGenerator}
  is the matching {@link com.fasterxml.jackson.core.JsonGenerator} implementation to use
       </li>
-    <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsParser}
+  <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsParser}
  is the matching {@link com.fasterxml.jackson.core.JsonParser} implementation to use
-      </li>
-  </li>
+    </li>
   <li>{@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper} is a convenience
  sub-class of {@link com.fasterxml.jackson.databind.ObjectMapper} that is both configured
  to use {@link com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory}, and
