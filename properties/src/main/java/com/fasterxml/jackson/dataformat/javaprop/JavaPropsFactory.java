@@ -40,7 +40,7 @@ public class JavaPropsFactory extends JsonFactory
     }
 
     /**
-     * Constructors used by {@link CsvFactoryBuilder} for instantiation.
+     * Constructors used by {@link JavaPropsFactoryBuilder} for instantiation.
      *
      * @since 2.9
      */

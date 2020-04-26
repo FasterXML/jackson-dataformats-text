@@ -15,7 +15,7 @@ public final class UTF8Reader
     private final static int DEFAULT_BUFFER_SIZE = 8000;
     
     /**
-     * This <code>ThreadLocal</code> contains a {@link java.lang.ref.SoftRerefence}
+     * This <code>ThreadLocal</code> contains a {@link java.lang.ref.SoftReference}
      * to a byte array used for holding content to decode
      */
     final protected static ThreadLocal<SoftReference<byte[][]>> _bufferRecycler
