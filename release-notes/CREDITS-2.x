@@ -120,3 +120,7 @@ Damian Servin (Qnzvna@github)
 * Contributed #195 (csv) Adds schema creating csv schema with View
  (2.11.0)
  
+Rob Spoor (robtimus@github)
+* Reported #51: (yaml) `YAMLParser._locationFor()` does not use index available from
+  `Mark`object of Event
+ (2.11.1)

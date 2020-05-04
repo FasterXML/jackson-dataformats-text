@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
@@ -33,9 +34,21 @@ public class StreamingParseTest extends ModuleTestBase
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getText());
+        JsonLocation loc = p.getTokenLocation();
+        assertEquals(1, loc.getLineNr());
+        assertEquals(9, loc.getColumnNr());
+        assertEquals(8, loc.getCharOffset());
+        assertEquals(-1, loc.getByteOffset());
+
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
         assertEquals("true", p.getText());
+        loc = p.getTokenLocation();
+        assertEquals(2, loc.getLineNr());
+        assertEquals(7, loc.getColumnNr());
+        assertEquals(21, loc.getCharOffset());
+        assertEquals(-1, loc.getByteOffset());
+
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_FALSE, p.nextToken());
         assertEquals("false", p.getText());
