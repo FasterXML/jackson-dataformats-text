@@ -306,7 +306,7 @@ public class StreamingParseTest extends ModuleTestBase
         String YAML;
 
         // '+' cannot start a float for JSON (and YAML 1.2 by default)
-        YAML = "num: 1000.25";
+        YAML = "num: +1000.25";
         JsonParser p = MAPPER.createParser(YAML);
 
         assertToken(JsonToken.START_OBJECT, p.nextToken());
@@ -319,7 +319,7 @@ public class StreamingParseTest extends ModuleTestBase
 
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         // let's retain exact representation text however:
-        assertEquals("1000.25", p.getText());
+        assertEquals("+1000.25", p.getText());
         p.close();
 
         // and then non-number that may be mistaken
