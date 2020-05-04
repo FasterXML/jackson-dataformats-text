@@ -326,7 +326,7 @@ public class YAMLParser extends ParserBase
                     -1, -1, -1);
         }
         return new JsonLocation(_ioContext.getSourceReference(),
-                -1,
+                m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1); // ditto
     }
