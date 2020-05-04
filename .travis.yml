@@ -17,7 +17,7 @@ cache:
 branches:
   only:
     - master
-    - "2.11"
+    - "2.12"
 
 # Below this line is configuration for deploying to the Sonatype OSS repo
 # https://knowm.org/configure-travis-ci-to-deploy-snapshots/
