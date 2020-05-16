@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.fasterxml.jackson.dataformat.csv.*;
 
 // for [dataformat-csv#57]
@@ -119,6 +120,4 @@ public class ArrayReadTest extends ModuleTestBase
         assertEquals(2, v[1]);
         assertEquals(3, v[2]);
     }
-
-
 }
