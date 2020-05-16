@@ -459,7 +459,6 @@ public class CsvFactory extends JsonFactory
         return gen;
     }
 
-    @SuppressWarnings("deprecation")
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
     {
         // default to UTF-8 if encoding missing
