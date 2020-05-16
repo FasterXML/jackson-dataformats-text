@@ -8,6 +8,11 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
+2.12.0 (not yet released)
+
+#199: (csv) Empty Lists can only be String-typed in CSV
+ (reported by Simon L)
+
 2.11.1 (not yet released)
 
 #51: (yaml) `YAMLParser._locationFor()` does not use index available from `Mark`

@@ -124,3 +124,7 @@ Rob Spoor (robtimus@github)
 * Reported #51: (yaml) `YAMLParser._locationFor()` does not use index available from
   `Mark`object of Event
  (2.11.1)
+
+Simon Levermann (sonOfRa@github)
+* Reported #199: (csv) Empty Lists can only be String-typed in CSV
+ (2.12.0)
