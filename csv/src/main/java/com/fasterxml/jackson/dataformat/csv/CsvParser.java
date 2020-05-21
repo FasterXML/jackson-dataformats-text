@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
@@ -27,7 +28,7 @@ public class CsvParser
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
 
-            /**
+    /**
      * Enumeration that defines all togglable features for CSV parsers
      */
     public enum Feature
@@ -397,6 +398,32 @@ public class CsvParser
     }
 
     /*
+    /**********************************************************
+    /* Overrides: capability introspection methods
+    /**********************************************************
+     */
+
+    @Override
+    public boolean canUseSchema(FormatSchema schema) {
+        return (schema instanceof CsvSchema);
+    }
+
+    @Override
+    public boolean requiresCustomCodec() { return false;}
+
+    @Override
+    public boolean canReadObjectId() { return false; }
+
+    @Override
+    public boolean canReadTypeId() { return false; }
+
+    @Override
+    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+        // Defaults are fine
+        return DEFAULT_READ_CAPABILITIES;
+    }
+
+    /*
     /**********************************************************                              
     /* Overridden methods
     /**********************************************************                              
@@ -410,11 +437,6 @@ public class CsvParser
     @Override
     public void setCodec(ObjectCodec c) {
         _objectCodec = c;
-    }
-
-    @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return (schema instanceof CsvSchema);
     }
 
     @Override
