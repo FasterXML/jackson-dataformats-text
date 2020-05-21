@@ -26,6 +26,7 @@ import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.util.BufferRecycler;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
 
 /**
@@ -203,6 +204,28 @@ public class YAMLParser extends ParserBase
         return _currentAnchor;
     }
     */
+
+    /*
+    /**********************************************************************
+    /* Overrides: capability introspection methods
+    /**********************************************************************
+     */
+
+    @Override
+    public boolean canReadObjectId() { // yup
+        return true;
+    }
+
+    @Override
+    public boolean canReadTypeId() {
+        return true; // yes, YAML got 'em
+    }
+
+    @Override
+    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+        // Defaults are fine
+        return DEFAULT_READ_CAPABILITIES;
+    }
 
     /*
     /**********************************************************************
@@ -783,16 +806,6 @@ public class YAMLParser extends ParserBase
     /* Native id (type id) access
     /**********************************************************************
      */
-
-    @Override
-    public boolean canReadObjectId() { // yup
-        return true;
-    }
-
-    @Override
-    public boolean canReadTypeId() {
-        return true; // yes, YAML got 'em
-    }
 
     @Override
     public String getObjectId() throws IOException

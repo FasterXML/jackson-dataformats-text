@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropReadContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.JPropNode;
 import com.fasterxml.jackson.dataformat.javaprop.util.JPropNodeBuilder;
@@ -76,7 +77,7 @@ public class JavaPropsParser extends ParserMinimalBase
         _sourceContent = sourceMap;
         _schema = schema;
     }
-
+    
     @Override
     public Version version() {
         return PackageVersion.VERSION;
@@ -141,7 +142,7 @@ public class JavaPropsParser extends ParserMinimalBase
     /* Overrides: capability introspection methods
     /**********************************************************************
      */
-    
+
     @Override
     public boolean canUseSchema(FormatSchema schema) {
         return schema instanceof JavaPropsSchema;
@@ -152,6 +153,12 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public boolean canReadTypeId() { return false; }
+
+    @Override
+    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+        // Defaults are fine
+        return DEFAULT_READ_CAPABILITIES;
+    }
 
     /*
     /**********************************************************************

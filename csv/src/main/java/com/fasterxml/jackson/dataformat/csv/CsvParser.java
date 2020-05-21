@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
@@ -28,7 +29,7 @@ public class CsvParser
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
 
-            /**
+    /**
      * Enumeration that defines all togglable features for CSV parsers
      */
     public enum Feature
@@ -374,15 +375,33 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************                              
-    /* Overridden methods
-    /**********************************************************                              
+    /**********************************************************
+    /* Overrides: capability introspection methods
+    /**********************************************************
      */
 
     @Override
     public boolean canUseSchema(FormatSchema schema) {
         return (schema instanceof CsvSchema);
     }
+
+    @Override
+    public boolean canReadObjectId() { return false; }
+
+    @Override
+    public boolean canReadTypeId() { return false; }
+
+    @Override
+    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+        // Defaults are fine
+        return DEFAULT_READ_CAPABILITIES;
+    }
+
+    /*
+    /**********************************************************                              
+    /* Overridden methods
+    /**********************************************************                              
+     */
 
     @Override
     public void setSchema(FormatSchema schema)
