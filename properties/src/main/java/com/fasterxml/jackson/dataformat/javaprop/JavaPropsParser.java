@@ -144,6 +144,11 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
+    public int formatReadFeatures() {
+        return 0;
+    }
+    
+    @Override
     public boolean canUseSchema(FormatSchema schema) {
         return schema instanceof JavaPropsSchema;
     }

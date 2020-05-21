@@ -212,6 +212,11 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
+    public int formatReadFeatures() {
+        return 0;
+    }
+
+    @Override
     public boolean canReadObjectId() { // yup
         return true;
     }
