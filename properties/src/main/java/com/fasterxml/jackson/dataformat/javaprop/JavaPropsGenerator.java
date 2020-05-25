@@ -69,7 +69,6 @@ public abstract class JavaPropsGenerator
         _ioContext = ioCtxt;
         _tokenWriteContext = JPropWriteContext.createRootContext();
 
-        // Formerly separate _setSchema(...)
         _schema = schema;
         // Indentation to use?
         if (_tokenWriteContext.inRoot()) {
