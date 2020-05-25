@@ -195,26 +195,11 @@ public class YAMLParser extends ParserBase
         return _currentIsAlias;
     }
 
-    /**
-     * Method that can be used to check if the current token has an
-     * associated anchor (id to reference via Alias)
-     *
-     * deprecated Since 2.3 (was added in 2.1) -- use {@link #getObjectId} instead
-    public String getCurrentAnchor() {
-        return _currentAnchor;
-    }
-    */
-
     /*
     /**********************************************************************
     /* Overrides: capability introspection methods
     /**********************************************************************
      */
-
-    @Override
-    public int formatReadFeatures() {
-        return 0;
-    }
 
     @Override
     public boolean canReadObjectId() { // yup

@@ -430,17 +430,6 @@ public class CsvParser
     @Override
     public void close() throws IOException { _reader.close(); }
 
-    /*                                                                                       
-    /**********************************************************                              
-    /* FormatFeature support                                                                             
-    /**********************************************************                              
-     */
-
-    @Override
-    public int formatReadFeatures() {
-        return _formatFeatures;
-    }
-
     /*
     /***************************************************
     /* Public API, configuration
