@@ -243,8 +243,9 @@ public class BasicParserTest extends ModuleTestBase {
 
         // Create a parser and ensure data is processed in the
         // right order, as per header
-        JsonParser parser = MAPPER.createParser(CSV);
-        parser.setSchema(schemaWithReordering);
+        JsonParser parser = MAPPER.reader()
+                .with(schemaWithReordering)
+                .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
@@ -267,8 +268,8 @@ public class BasicParserTest extends ModuleTestBase {
             reported as per the schema order, not the header.
          */
         CsvSchema schemaWithoutReordering = schemaWithReordering.withColumnReordering(false);
-        parser = MAPPER.createParser(CSV);
-        parser.setSchema(schemaWithoutReordering);
+        parser = MAPPER.reader().
+                with(schemaWithoutReordering).createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
@@ -293,8 +294,9 @@ public class BasicParserTest extends ModuleTestBase {
                 .withUseHeader(false)
                 .withSkipFirstDataRow(true);
 
-        parser = MAPPER.createParser(CSV);
-        parser.setSchema(schemaWithoutHeader);
+        parser = MAPPER.reader()
+                .with(schemaWithoutHeader)
+                .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
@@ -320,8 +322,9 @@ public class BasicParserTest extends ModuleTestBase {
                 .setUseHeader(true)
                 .build();
 
-        parser = MAPPER.createParser(CSV);
-        parser.setSchema(emptySchema);
+        parser = MAPPER.reader()
+                .with(emptySchema)
+                .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
@@ -351,8 +354,9 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = MAPPER.createParser(CSV);
-        parser.setSchema(schema);
+        JsonParser parser = MAPPER.reader()
+                .with(schema)
+                .createParser(CSV);
 
         try {
             parser.nextToken();
@@ -375,8 +379,9 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = MAPPER.createParser(CSV);
-        parser.setSchema(schema);
+        JsonParser parser = MAPPER.reader()
+                .with(schema)
+                .createParser(CSV);
 
         try {
             parser.nextToken();
@@ -399,8 +404,9 @@ public class BasicParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = MAPPER.createParser(CSV);
-        parser.setSchema(schema);
+        JsonParser parser = MAPPER.reader()
+                .with(schema)
+                .createParser(CSV);
 
         try {
             parser.nextToken();

@@ -6,6 +6,7 @@ import java.io.StringWriter;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.SerializedString;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 /**
@@ -157,12 +158,12 @@ public class StreamingReadTest extends ModuleTestBase
         throws IOException
     {
         JsonParser p;
+        ObjectReader r = CSV_MAPPER.reader().with(schema);
         if (useBytes) {
-            p = CSV_MAPPER.createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
+            p = r.createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
         } else {
-            p = CSV_MAPPER.createParser(csv);
+            p = r.createParser(csv);
         }
-        p.setSchema(schema);
         return (CsvParser) p;
     }
 }

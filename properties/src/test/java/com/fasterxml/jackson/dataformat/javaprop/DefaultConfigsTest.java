@@ -50,10 +50,8 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(p.hasTextCharacters());
         assertTrue(p.canUseSchema(JavaPropsSchema.emptySchema()));
 
-        p.setSchema(JavaPropsSchema.emptySchema());
-        assertSame(JavaPropsSchema.emptySchema(), p.getSchema());
         p.close();
-    }    
+    }
 
     private void _verifyVersion(Versioned v) {
         Version v2 = v.version();

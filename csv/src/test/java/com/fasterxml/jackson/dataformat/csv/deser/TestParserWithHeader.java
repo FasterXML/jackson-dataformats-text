@@ -92,9 +92,9 @@ public class TestParserWithHeader extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         CsvParser p = (CsvParser) mapper.reader()
+                .with(schema)
                 .without(CsvParser.Feature.WRAP_AS_ARRAY)
                 .createParser(CSV);
-        p.setSchema(schema);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
         CsvSchema actual = p.getSchema();
@@ -125,9 +125,9 @@ public class TestParserWithHeader extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         CsvParser p = (CsvParser) mapper.reader()
+                .with(schema)
                 .without(CsvParser.Feature.WRAP_AS_ARRAY)
                 .createParser(CSV);
-        p.setSchema(schema);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
         CsvSchema actual = p.getSchema();

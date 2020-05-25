@@ -382,8 +382,6 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
 
-    //@Override public void setSchema(FormatSchema schema)
-
     /*
     /**********************************************************************
     /* Extended API, configuration
