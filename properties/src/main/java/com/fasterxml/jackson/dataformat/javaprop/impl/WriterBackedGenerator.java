@@ -71,6 +71,11 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         return _out;
     }
 
+    @Override
+    public int getOutputBuffered() {
+        return _outputTail;
+    }
+
     /*
     /**********************************************************
     /* Overridden methods: low-level I/O

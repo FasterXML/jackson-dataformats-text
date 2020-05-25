@@ -375,11 +375,6 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public int formatWriteFeatures() {
-        return _formatWriteFeatures;
-    }
-
-    @Override
     public boolean canUseSchema(FormatSchema schema) {
         return false;
     }
@@ -725,10 +720,15 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(int i) throws IOException
+    public void writeNumber(short v) throws IOException {
+        writeNumber((int) v);
+    }
+
+    @Override
+    public void writeNumber(int v) throws IOException
     {
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(i), "int", STYLE_SCALAR);
+        _writeScalar(String.valueOf(v), "int", STYLE_SCALAR);
     }
 
     @Override

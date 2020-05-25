@@ -48,6 +48,9 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
+    public int getOutputBuffered() { return -1; }
+
+    @Override
     public Object getOutputTarget() {
         return _content;
     }

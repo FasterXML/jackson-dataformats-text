@@ -288,26 +288,6 @@ public class CsvGenerator extends GeneratorBase
         return _writer.getOutputBuffered();
     }
 
-    /*
-    @Override
-    public void setSchema(FormatSchema schema)
-    {
-        if (schema instanceof CsvSchema) {
-            if (_schema != schema) {
-                _schema = (CsvSchema) schema;
-                _writer = _writer.withSchema(_schema);
-            }
-        } else {
-            super.setSchema(schema);
-        }
-    }
-    */
-
-    @Override
-    public int formatWriteFeatures() {
-        return _formatFeatures;
-    }
-
     @Override
     public CsvGenerator setCharacterEscapes(CharacterEscapes esc) {
         if (esc != null) {
@@ -772,6 +752,11 @@ public class CsvGenerator extends GeneratorBase
 */
             }
         }
+    }
+
+    @Override
+    public void writeNumber(short v) throws IOException {
+        writeNumber((int) v);
     }
 
     @Override

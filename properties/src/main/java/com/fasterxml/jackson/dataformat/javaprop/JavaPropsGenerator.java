@@ -137,22 +137,6 @@ public abstract class JavaPropsGenerator
     */
 
     @Override
-    public int formatWriteFeatures() {
-        return 0; // none defined yet
-    }
-
-    /*
-    @Override
-    public void setSchema(FormatSchema schema) {
-        if (schema instanceof JavaPropsSchema) {
-            _setSchema((JavaPropsSchema) schema);
-        } else {
-            super.setSchema(schema);
-        }
-    }
-    */
-
-    @Override
     public FormatSchema getSchema() { return _schema; }
 
     /*
@@ -387,6 +371,11 @@ public abstract class JavaPropsGenerator
     {
         _verifyValueWrite("write boolean value");
         _writeUnescapedEntry(state ? "true" : "false");
+    }
+
+    @Override
+    public void writeNumber(short v) throws IOException {
+        writeNumber((int) v);
     }
 
     @Override
