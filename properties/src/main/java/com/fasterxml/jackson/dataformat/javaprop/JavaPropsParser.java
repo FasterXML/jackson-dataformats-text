@@ -83,6 +83,7 @@ public class JavaPropsParser extends ParserMinimalBase
         return PackageVersion.VERSION;
     }
 
+    /*// No need in 3.0
     @Override
     public void setSchema(FormatSchema schema)
     {
@@ -92,6 +93,7 @@ public class JavaPropsParser extends ParserMinimalBase
             super.setSchema(schema);
         }
     }
+    */
 
     @Override
     public JavaPropsSchema getSchema() {

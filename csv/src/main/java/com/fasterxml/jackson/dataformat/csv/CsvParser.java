@@ -360,7 +360,7 @@ public class CsvParser
         _parsingContext = SimpleTokenReadContext.createRootContext(null);
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
-        setSchema(schema);
+        _setSchema(schema);
     }
 
     /*
@@ -402,22 +402,6 @@ public class CsvParser
     /* Overridden methods
     /**********************************************************                              
      */
-
-    @Override
-    public void setSchema(FormatSchema schema)
-    {
-        if (schema instanceof CsvSchema) {
-            _schema = (CsvSchema) schema;
-            String str = _schema.getNullValueString();
-            _nullValue = str;
-        } else if (schema == null) {
-            schema = EMPTY_SCHEMA;
-        } else {
-            super.setSchema(schema);
-        }
-        _columnCount = _schema.size();            
-        _reader.setSchema(_schema);
-    }
 
     @Override
     public int releaseBuffered(Writer out) throws IOException {
@@ -744,7 +728,7 @@ public class CsvParser
             }
         }
         // otherwise we will use what we got
-        setSchema(builder.build());
+        _setSchema(builder.build());
     }
 
     /**
@@ -1220,7 +1204,20 @@ public class CsvParser
     /* Internal methods
     /**********************************************************************
      */
-    
+
+    protected void _setSchema(CsvSchema schema)
+    {
+        if (schema == null) {
+            schema = EMPTY_SCHEMA;
+        } else {
+            _schema = schema;
+            String str = _schema.getNullValueString();
+            _nullValue = str;
+        }
+        _columnCount = _schema.size();            
+        _reader.setSchema(_schema);
+    }
+
     public ByteArrayBuilder _getByteArrayBuilder()
     {
         if (_byteArrayBuilder == null) {
