@@ -35,7 +35,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertTrue(gen.canWriteFormattedNumbers());
         assertFalse(gen.canWriteObjectId());
         assertFalse(gen.canWriteTypeId());
-        assertTrue(gen.canUseSchema(JavaPropsSchema.emptySchema()));
 
         gen.close();
     }
@@ -48,7 +47,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());
         assertFalse(p.hasTextCharacters());
-        assertTrue(p.canUseSchema(JavaPropsSchema.emptySchema()));
 
         p.close();
     }

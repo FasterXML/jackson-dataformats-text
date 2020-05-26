@@ -381,11 +381,6 @@ public class CsvParser
      */
 
     @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return (schema instanceof CsvSchema);
-    }
-
-    @Override
     public boolean canReadObjectId() { return false; }
 
     @Override

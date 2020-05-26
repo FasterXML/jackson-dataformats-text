@@ -143,11 +143,6 @@ public abstract class JavaPropsGenerator
     /* Overrides: capability introspection methods
     /**********************************************************************
      */
-    
-    @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return schema instanceof JavaPropsSchema;
-    }
 
     @Override
     public boolean canWriteObjectId() { return false; }

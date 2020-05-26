@@ -18,7 +18,6 @@ public class FeaturesTest extends ModuleTestBase
         JsonParser p = mapper.createParser("");
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());
-        assertTrue(p.canUseSchema(CsvSchema.emptySchema()));
         p.close();
 
         JsonGenerator g = mapper.createGenerator(new StringWriter());
@@ -27,7 +26,6 @@ public class FeaturesTest extends ModuleTestBase
         assertFalse(g.canWriteObjectId());
         assertFalse(g.canWriteTypeId());
         assertTrue(g.canWriteFormattedNumbers());
-        assertTrue(g.canUseSchema(CsvSchema.emptySchema()));
         g.close();
     }
 }

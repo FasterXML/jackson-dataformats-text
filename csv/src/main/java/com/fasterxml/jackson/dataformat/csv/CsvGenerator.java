@@ -308,11 +308,6 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return (schema instanceof CsvSchema);
-    }
-    
-    @Override
     public boolean canOmitFields() {
         // Nope: CSV requires at least a placeholder
         return false;

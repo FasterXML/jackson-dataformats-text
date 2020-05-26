@@ -146,11 +146,6 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public boolean canUseSchema(FormatSchema schema) {
-        return schema instanceof JavaPropsSchema;
-    }
-
-    @Override
     public boolean canReadObjectId() { return false; }
 
     @Override
