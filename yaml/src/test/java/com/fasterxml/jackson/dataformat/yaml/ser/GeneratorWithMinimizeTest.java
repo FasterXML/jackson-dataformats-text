@@ -94,15 +94,50 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     public void testMinimizeQuotesWithStringsContainingSpecialChars() throws Exception {
         Map<String, String> content;
 
+        String yaml = null;
+
+        /* scenarios with plain scalars */
+
         content = Collections.singletonMap("key", "a:b");
-        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
-                "key: \"a:b\"", yaml);
+                "key: a:b", yaml);
 
         content = Collections.singletonMap("key", "a#b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
-                "key: \"a#b\"", yaml);
+                "key: a#b", yaml);
+
+        content = Collections.singletonMap("key", "a# b");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: a# b", yaml);
+
+        // plus also some edge cases (wrt "false" etc checking
+        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "f:off")).trim();
+        assertEquals("---\n" +
+                "key: f:off", yaml);
+
+
+        /* scenarios with single quoted scalars */
+
+        content = Collections.singletonMap("key", "::");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: '::'", yaml);
+
+        content = Collections.singletonMap("key", "#");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: '#'", yaml);
+
+        content = Collections.singletonMap("key", "#a");
+        yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+        assertEquals("---\n" +
+                "key: '#a'", yaml);
+
+
+        /* scenarios with double quoted scalars */
 
         content = Collections.singletonMap("key", "a[b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
@@ -128,10 +163,6 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n" +
                 "key: \"a,b\"", yaml);
 
-        // plus also some edge cases (wrt "false" etc checking
-        yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "f:off")).trim();
-        assertEquals("---\n" +
-                "key: \"f:off\"", yaml);
     }
 
     public void testLiteralStringsMultiLine() throws Exception
@@ -182,7 +213,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         String yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "20")).trim();
         assertEquals("---\n" +
                 "key: 20", yaml);
-        
+
         yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "2.0")).trim();
         assertEquals("---\n" +
                 "key: 2.0", yaml);
@@ -213,7 +244,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 MINIM_MAPPER.writeValueAsString(stringKeyMap).trim());
 
         // And then true Integer keys
-        
+
         final Map<Integer, String> intKeyMap = Collections.singletonMap(
                 Integer.valueOf(42), "answer");
 
