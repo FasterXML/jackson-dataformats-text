@@ -125,6 +125,11 @@ Rob Spoor (robtimus@github)
   `Mark`object of Event
  (2.11.1)
 
+Francesco Tumanischvili (frantuma@github)
+* Contibuted fix for #201: (yaml) Improve `MINIMIZE_QUOTES` handling to avoid quoting
+  for some uses of `#` and `:`
+ (2.11.1)
+
 Simon Levermann (sonOfRa@github)
 * Reported #199: (csv) Empty Lists can only be String-typed in CSV
  (2.12.0)
