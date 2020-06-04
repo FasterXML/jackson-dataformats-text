@@ -18,6 +18,8 @@ Project: jackson-datatypes-text
 #51: (yaml) `YAMLParser._locationFor()` does not use index available from `Mark`
   object of Event
  (reported by Rob S)
+#201: (yaml) Improve `MINIMIZE_QUOTES` handling to avoid quoting for some use of `#` and `:`
+ (contributed by Francesco T)
 
 2.11.0 (26-Apr-2020)
 

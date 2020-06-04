@@ -195,7 +195,7 @@ public class YAMLGenerator extends GeneratorBase
      * aliases for booleans, and we better quote such values as keys; although Jackson
      * itself has no problems dealing with them, some other tools do have.
      */
-    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out 
+    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out
     //    single letter case (esp so 'y' won't get escaped)
     private final static Set<String> MUST_QUOTE_NAMES = new HashSet<>(Arrays.asList(
 //            "y", "Y", "n", "N",
@@ -935,7 +935,7 @@ public class YAMLGenerator extends GeneratorBase
             return true;
         }
         return false;
-    }    
+    }
 
     private boolean _valueNeedsQuoting(String name) {
         switch (name.charAt(0)) { // caller ensures no empty String
@@ -961,19 +961,28 @@ public class YAMLGenerator extends GeneratorBase
     /**
      * As per YAML <a href="https://yaml.org/spec/1.2/spec.html#id2788859">Plain Style</a>unquoted
      * strings are restricted to a reduced charset and must be quoted in case they contain
-     * one of the following characters.
+     * one of the following characters or character combinations.
      */
     private static boolean _valueHasQuotableChar(String inputStr) {
         for (int i = 0, end = inputStr.length(); i < end; ++i) {
             switch (inputStr.charAt(i)) {
-            case ':':
-            case '#':
             case '[':
             case ']':
             case '{':
             case '}':
             case ',':
                 return true;
+            case '\t':
+            case ' ':
+                if (i < end - 1 && '#' == inputStr.charAt(i + 1)) {
+                    return true;
+                }
+                break;
+            case ':':
+                if (i < end - 1 && (' ' == inputStr.charAt(i + 1) || '\t' == inputStr.charAt(i + 1))) {
+                    return true;
+                }
+                break;
             default:
             }
         }
