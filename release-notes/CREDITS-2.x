@@ -124,3 +124,9 @@ Rob Spoor (robtimus@github)
 * Reported #51: (yaml) `YAMLParser._locationFor()` does not use index available from
   `Mark`object of Event
  (2.11.1)
+
+Francesco Tumanischvili (frantuma@github)
+* Contibuted fix for #201: (yaml) Improve `MINIMIZE_QUOTES` handling to avoid quoting
+  for some uses of `#` and `:`
+ (2.11.1)
+
