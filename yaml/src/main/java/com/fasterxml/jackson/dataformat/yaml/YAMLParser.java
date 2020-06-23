@@ -743,12 +743,12 @@ public class YAMLParser extends ParserBase
     {
         // Int or float?
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            int len = _textValue.length();
+            int len = _cleanedTextValue.length();
             if (_numberNegative) {
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                _numberInt = Integer.parseInt(_textValue);
+                _numberInt = Integer.parseInt(_cleanedTextValue);
                 _numTypesValid = NR_INT;
                 return;
             }
