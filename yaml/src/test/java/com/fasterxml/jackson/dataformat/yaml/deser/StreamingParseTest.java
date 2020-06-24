@@ -2,6 +2,7 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
@@ -299,6 +300,15 @@ public class StreamingParseTest extends ModuleTestBase
         p.close();
     }
 
+    public void testYamlLongWithUnderscores() throws Exception
+    {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        LongHolder longHolder = mapper.readValue("v: 1_000_000", LongHolder.class);
+        assertNotNull(longHolder);
+        assertEquals(LongHolder.class, longHolder.getClass());
+        assertEquals(Long.valueOf(1000000), longHolder.getV());
+    }
+
     // [cbor#4]: accidental recognition as double, with multiple dots
     public void testDoubleParsing() throws Exception
     {
@@ -570,5 +580,20 @@ public class StreamingParseTest extends ModuleTestBase
           assertToken(JsonToken.END_OBJECT, p.nextToken());
           assertNull(p.nextToken());
           p.close();
+    }
+
+    static class LongHolder
+    {
+        private Long v;
+
+        public Long getV()
+        {
+            return v;
+        }
+
+        public void setV(Long v)
+        {
+            this.v = v;
+        }
     }
 }
