@@ -102,3 +102,11 @@ Jason van Zyl (jvanzyl@github)
 Jochen Schalanda (joschi@github)
 * Reported #187: Update to SnakeYAML to 1.26 (from 1.24) to address CVE-2017-18640
  (2.10.4)
+
+Sergey Medelyan (smedelyan@github)
+* Reported #146: Jackson can't handle underscores in numbers
+ (2.10.5)
+
+Conor Ward (conor-ward@github)
+* Contributed fix for #146: Jackson can't handle underscores in numbers
+ (2.10.5)

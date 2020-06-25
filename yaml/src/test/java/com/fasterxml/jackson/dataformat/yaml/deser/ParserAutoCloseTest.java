@@ -13,43 +13,37 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 @SuppressWarnings("resource")
 public class ParserAutoCloseTest extends ModuleTestBase
 {
+    private final ObjectMapper YAML_MAPPER = newObjectMapper();
+
     public void testParseReaderWithAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper();
 
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
-        yamlMapper.readTree(reader);
+        YAML_MAPPER.readTree(reader);
 
         Assert.assertEquals(true, reader.isClosed());
     }
 
     public void testParseStreamWithAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper();
-
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
-        yamlMapper.readTree(stream);
+        YAML_MAPPER.readTree(stream);
 
         Assert.assertEquals(true, stream.isClosed());
     }
 
-    @SuppressWarnings("deprecation")
     public void testParseReaderWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
-
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
-        yamlMapper.readTree(reader);
+        YAML_MAPPER.reader()
+            .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+            .readTree(reader);
 
         Assert.assertEquals(false, reader.isClosed());
     }
 
-
-    @SuppressWarnings("deprecation")
     public void testParseStreamWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper()
-                .disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
-
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
-        yamlMapper.readTree(stream);
+        YAML_MAPPER.reader()
+            .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
+            .readTree(stream);
 
         Assert.assertEquals(false, stream.isClosed());
     }
@@ -71,7 +65,6 @@ public class ParserAutoCloseTest extends ModuleTestBase
             return closed;
         }
     }
-
 
     public static class CloseTrackerOutputStream extends ByteArrayInputStream {
         private boolean closed;

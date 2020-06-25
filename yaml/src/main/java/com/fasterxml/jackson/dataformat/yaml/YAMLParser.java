@@ -885,7 +885,7 @@ public class YAMLParser extends ParserBase
      */
     
     /**
-     * Helper method used to clean up YAML floating-point value so it can be parsed
+     * Helper method used to clean up YAML integer value so it can be parsed
      * using standard JDK classes.
      * Currently this just means stripping out optional underscores.
      */

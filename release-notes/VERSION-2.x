@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.10.5 (not yet released)
+
+#146: Jackson can't handle underscores in numbers
+ (reported by Sergey M; fix contributed by Conor W)
+
 2.10.4 (03-May-2020)
 
 #179 (properties): `JavaPropsMapper` doesn't close the .properties file
