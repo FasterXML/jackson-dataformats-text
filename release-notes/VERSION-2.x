@@ -33,6 +33,11 @@ Project: jackson-datatypes-text
 #195 (csv) Adds schema creating csv schema with View
  (contributed by Damian S)
 
+2.10.5 (not yet released)
+
+#146: Jackson can't handle underscores in numbers
+ (reported by Sergey M; fix contributed by Conor W)
+
 2.10.4 (03-May-2020)
 
 #178: Upgrade SnakeYAML to 1.26 (from 1.24)
