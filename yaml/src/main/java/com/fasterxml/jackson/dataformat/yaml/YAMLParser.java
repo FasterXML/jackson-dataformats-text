@@ -441,9 +441,9 @@ public class YAMLParser extends ParserBase
         // we may get an explicit tag, if so, use for corroborating...
         Optional<String> typeTagOptional = scalar.getTag();
         final int len = value.length();
-
         if (!typeTagOptional.isPresent() || typeTagOptional.get().equals("!")) { // no, implicit
             Tag nodeTag = _yamlResolver.resolve(value, scalar.getImplicit().canOmitTagInPlainScalar());
+
             if (nodeTag == Tag.STR) {
                 return JsonToken.VALUE_STRING;
             }
@@ -700,12 +700,12 @@ public class YAMLParser extends ParserBase
     {
         // Int or float?
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            int len = _textValue.length();
+            int len = _cleanedTextValue.length();
             if (_numberNegative) {
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                _numberInt = Integer.parseInt(_textValue);
+                _numberInt = Integer.parseInt(_cleanedTextValue);
                 _numTypesValid = NR_INT;
                 return;
             }
@@ -833,7 +833,7 @@ public class YAMLParser extends ParserBase
      */
 
     /**
-     * Helper method used to clean up YAML floating-point value so it can be parsed
+     * Helper method used to clean up YAML integer value so it can be parsed
      * using standard JDK classes.
      * Currently this just means stripping out optional underscores.
      */

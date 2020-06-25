@@ -10,35 +10,32 @@ import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
-public class ParserAutoCloseTest extends ModuleTestBase {
+public class ParserAutoCloseTest extends ModuleTestBase
+{
+    private final ObjectMapper YAML_MAPPER = newObjectMapper();
 
     public void testParseReaderWithAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper();
-
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
-        yamlMapper.readTree(reader);
+        YAML_MAPPER.readTree(reader);
 
         Assert.assertEquals(true, reader.isClosed());
         reader.close();
     }
 
     public void testParseStreamWithAutoClose() throws IOException {
-        ObjectMapper yamlMapper = newObjectMapper();
-
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
-        yamlMapper.readTree(stream);
+        YAML_MAPPER.readTree(stream);
 
         Assert.assertEquals(true, stream.isClosed());
         stream.close();
     }
 
     public void testParseReaderWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = mapperBuilder()
-                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
-                .build();
 
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
-        yamlMapper.readTree(reader);
+        YAML_MAPPER.reader()
+            .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
+            .readTree(reader);
 
         Assert.assertEquals(false, reader.isClosed());
         reader.close();
@@ -46,12 +43,10 @@ public class ParserAutoCloseTest extends ModuleTestBase {
 
 
     public void testParseStreamWithoutAutoClose() throws IOException {
-        ObjectMapper yamlMapper = mapperBuilder()
-                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
-                .build();
-
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
-        yamlMapper.readTree(stream);
+        YAML_MAPPER.reader()
+            .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
+            .readTree(stream);
 
         Assert.assertEquals(false, stream.isClosed());
         stream.close();
