@@ -8,7 +8,7 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
-2.11.1 (not yet released)
+2.11.1 (25-Jun-2020)
 
 #51: (yaml) `YAMLParser._locationFor()` does not use index available from `Mark`
   object of Event
