@@ -354,6 +354,11 @@ System.err.println("\n>>");
         return _noNumbers();
     }
 
+    @Override
+    public boolean isNaN() throws IOException {
+        return false;
+    }
+
     /*
     /**********************************************************************
     /* Internal helper methods

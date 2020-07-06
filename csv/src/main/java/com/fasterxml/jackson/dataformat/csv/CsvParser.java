@@ -1156,6 +1156,12 @@ public class CsvParser
         return _reader.getDecimalValue();
     }
 
+    // not yet supported...
+    @Override
+    public boolean isNaN() throws IOException {
+        return false;
+    }
+
     /*
     /**********************************************************************
     /* Helper methods from base class
