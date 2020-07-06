@@ -12,6 +12,7 @@ Project: jackson-datatypes-text
 
 #199: (csv) Empty Lists can only be String-typed in CSV
  (reported by Simon L)
+- Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
 2.11.1 (25-Jun-2020)
 
