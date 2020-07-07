@@ -1,11 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Assert;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
@@ -26,6 +28,42 @@ public class DatabindReadTest extends ModuleTestBase
 
     static class Name {
         public String first, last;
+    }
+
+    // [dataformats-text#205]
+    static class Release205 {
+        public String version;
+        public List<Artifact205> artifacts;
+    }
+
+    static class Artifact205 {
+        @JsonProperty("jira-project")
+        private String jiraProject;
+        private String name;
+        private String version;
+        public String getJiraProject() {
+            return jiraProject;
+        }
+
+        public void setJiraProject(String jiraProject) {
+            this.jiraProject = jiraProject;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
     }
 
     /*
@@ -134,5 +172,21 @@ public class DatabindReadTest extends ModuleTestBase
         }
         yaml = yaml.trim();
         assertEquals("{}", yaml);
+    }
+
+    // [dataformats-text#205]
+    public void testRenamingIssue205() throws Exception
+    {
+        final String YAML =
+"version: 2.3.0.RELEASE\n" +
+"artifacts:\n" +
+" - jira-project: https://issues.redhat.com/projects/EAPSUP/issues\n" +
+"   name: hibernate\n" +
+"   version: 5.0.15";
+
+        Release205 release = MAPPER.readValue(YAML, Release205.class);
+        assertNotNull(release);
+        assertNotNull(release.artifacts);
+        assertEquals(release.artifacts.get(0).getVersion(),"5.0.15");
     }
 }
