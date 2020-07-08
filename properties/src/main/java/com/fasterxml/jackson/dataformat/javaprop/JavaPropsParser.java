@@ -18,6 +18,17 @@ public class JavaPropsParser extends ParserMinimalBase
 {
     protected final static JavaPropsSchema DEFAULT_SCHEMA = new JavaPropsSchema();
 
+    /**
+     * Properties capabilities slightly different from defaults, having
+     * untyped (text-only) scalars
+     *
+     * @since 2.12
+     */
+    protected final static JacksonFeatureSet<StreamReadCapability> STREAM_READ_CAPABILITIES =
+            DEFAULT_READ_CAPABILITIES
+                .with(StreamReadCapability.UNTYPED_SCALARS)
+            ;
+
     /*
     /**********************************************************************
     /* Configuration
@@ -153,8 +164,7 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
-        // Defaults are fine
-        return DEFAULT_READ_CAPABILITIES;
+        return STREAM_READ_CAPABILITIES;
     }
 
     /*

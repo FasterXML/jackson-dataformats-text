@@ -213,7 +213,8 @@ public class YAMLParser extends ParserBase
 
     @Override
     public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
-        // Defaults are fine
+        // Defaults are fine; YAML actually has typed scalars (to a degree)
+        // unlike CSV, Properties and XML
         return DEFAULT_READ_CAPABILITIES;
     }
 

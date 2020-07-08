@@ -170,6 +170,17 @@ public class CsvParser
         EMPTY_SCHEMA = CsvSchema.emptySchema();
     }
 
+    /**
+     * CSV is slightly different from defaults, having essentially untyped
+     * scalars except if indicated by schema
+     *
+     * @since 2.12
+     */
+    protected final static JacksonFeatureSet<StreamReadCapability> STREAM_READ_CAPABILITIES =
+            DEFAULT_READ_CAPABILITIES
+                .with(StreamReadCapability.UNTYPED_SCALARS)
+            ;
+
     /*
     /**********************************************************************
     /* State constants
@@ -388,8 +399,7 @@ public class CsvParser
 
     @Override
     public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
-        // Defaults are fine
-        return DEFAULT_READ_CAPABILITIES;
+        return STREAM_READ_CAPABILITIES;
     }
 
     /*
