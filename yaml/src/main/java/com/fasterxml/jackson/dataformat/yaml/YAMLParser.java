@@ -35,7 +35,7 @@ public class YAMLParser extends ParserBase
 
         final boolean _defaultState;
         final int _mask;
-        
+
         /**
          * Method that calculates bit set (flags) of all features that
          * are enabled by default.
@@ -230,7 +230,8 @@ public class YAMLParser extends ParserBase
 
     @Override
     public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
-        // Defaults are fine
+        // Defaults are fine; YAML actually has typed scalars (to a degree)
+        // unlike CSV, Properties and XML
         return DEFAULT_READ_CAPABILITIES;
     }
 
