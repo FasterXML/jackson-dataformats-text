@@ -19,6 +19,7 @@ import org.yaml.snakeyaml.nodes.Tag;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.JsonWriteContext;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.io.IOContext;
 
 public class YAMLGenerator extends GeneratorBase
@@ -381,7 +382,10 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
 
-    //@Override public void setSchema(FormatSchema schema)
+    @Override // @since 2.12
+    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+        return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
+    }
 
     /*
     /**********************************************************

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
 import com.fasterxml.jackson.dataformat.csv.impl.SimpleTokenWriteContext;
 
@@ -382,6 +383,11 @@ public class CsvGenerator extends GeneratorBase
 
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
+
+    @Override // @since 2.12
+    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+        return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
+    }
 
     /*
     /**********************************************************************
