@@ -8,6 +8,7 @@ import java.util.Arrays;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
@@ -159,6 +160,11 @@ public abstract class JavaPropsGenerator
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
 
+    @Override
+    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+        return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
+    }
+    
     // No Format Features yet
 /*
     

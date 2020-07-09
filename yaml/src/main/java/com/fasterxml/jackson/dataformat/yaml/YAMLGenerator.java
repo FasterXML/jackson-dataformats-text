@@ -35,6 +35,8 @@ import org.snakeyaml.engine.v2.nodes.Tag;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.DupDetector;
+import com.fasterxml.jackson.core.json.JsonWriteContext;
+import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.SimpleTokenWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 
@@ -376,6 +378,11 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
+
+    @Override
+    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+        return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
+    }
 
     /*
     /**********************************************************************
