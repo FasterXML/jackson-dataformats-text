@@ -3,12 +3,13 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 
 public class SimpleParsingTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = mapperForProps();
+    private final ObjectMapper MAPPER = newObjectMapper();
 
-    private final ObjectMapper JSON_MAPPER = new ObjectMapper();
+    private final ObjectMapper JSON_MAPPER = new JsonMapper();
 
     public void testSimpleNonNested() throws Exception {
         _testSimpleNonNested(false);

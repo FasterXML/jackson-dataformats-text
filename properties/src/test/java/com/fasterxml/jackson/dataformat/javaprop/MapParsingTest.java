@@ -10,7 +10,7 @@ public class MapParsingTest extends ModuleTestBase
         public Map<String,String> map;
     }
 
-    private final ObjectMapper MAPPER = mapperForProps();
+    private final ObjectMapper MAPPER = newObjectMapper();
     
     /*
     /**********************************************************************

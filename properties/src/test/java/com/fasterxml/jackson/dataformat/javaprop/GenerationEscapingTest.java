@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class GenerationEscapingTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = mapperForProps();
+    private final ObjectMapper MAPPER = newObjectMapper();
 
     public void testKeyEscaping() throws Exception
     {

@@ -668,7 +668,7 @@ public class CsvParser
             a) The schema has been populated.  In this case, build a new
                schema where the order matches the *actual* order in which
                the given CSV file offers its columns, if _schema.reordersColumns()
-               is set to true; there cases the consumer of the csv file
+               is set to true; there cases the consumer of the CSV file
                knows about the columns but not necessarily the order in
                which they are defined.
 
@@ -679,13 +679,16 @@ public class CsvParser
         if (_schema.size() > 0 && !_schema.reordersColumns()) {
             if (_schema.strictHeaders()) {
                 String name;
+                int ix = 0;
                 for (CsvSchema.Column column : _schema._columns) {
                     name = _reader.nextString();
+                    ++ix;
                     if (name == null) {
-                        _reportError(String.format("Missing header %s", column.getName()));
+                        _reportError(String.format("Missing header column #%d, expecting \"%s\"", ix, column.getName()));
                     } else if (!column.getName().equals(name)) {
-                        _reportError(String.format("Expected header %s, actual header %s", column.getName(), name));
-                    }
+                        _reportError(String.format(
+"Mismatched header column #%d: expected \"%s\", actual \"%s\"", ix, column.getName(), name));
+                }
                 }
                 if ((name = _reader.nextString()) != null) {
                     _reportError(String.format("Extra header %s", name));
