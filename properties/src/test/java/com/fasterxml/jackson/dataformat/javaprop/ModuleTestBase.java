@@ -131,7 +131,12 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         return JavaPropsFactory.builder();
     }
 
+    @Deprecated
     protected JavaPropsMapper mapperForProps() {
+        return mapperBuilder().build();
+    }
+
+    protected JavaPropsMapper newObjectMapper() {
         return mapperBuilder().build();
     }
 

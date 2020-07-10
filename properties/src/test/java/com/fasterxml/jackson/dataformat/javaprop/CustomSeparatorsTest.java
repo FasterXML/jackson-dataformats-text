@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CustomSeparatorsTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = mapperForProps();
+    private final ObjectMapper MAPPER = newObjectMapper();
 
     public void testCustomPathSeparator() throws Exception
     {

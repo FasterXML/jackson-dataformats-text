@@ -359,7 +359,7 @@ public class BasicParserTest extends ModuleTestBase {
             parser.nextToken();
             fail("Should have failed");
         } catch (JsonProcessingException e) {
-            verifyException(e, "Expected header a, actual header b");
+            verifyException(e, "Mismatched header column #1: expected \"a\", actual \"b\"");
         }
         parser.close();
     }

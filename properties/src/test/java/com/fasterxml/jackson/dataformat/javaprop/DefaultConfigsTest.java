@@ -13,7 +13,7 @@ public class DefaultConfigsTest extends ModuleTestBase
     
     public void testMapperBaseConfig()
     {
-        JavaPropsMapper mapper = mapperForProps();
+        JavaPropsMapper mapper = newObjectMapper();
         _verifyVersion(mapper);
         JavaPropsMapper copy = mapper.copy();
         assertNotSame(mapper, copy);

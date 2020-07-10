@@ -28,7 +28,7 @@ public class BinaryParsingTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final JavaPropsMapper MAPPER = mapperForProps();
+    private final JavaPropsMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#74]
     public void testMultipleBinaryFields() throws Exception
