@@ -138,6 +138,10 @@ Francesco Tumanischvili (frantuma@github)
   for some uses of `#` and `:`
  (2.11.1)
 
+Björn Michael (bjmi@github)
+* Reported #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+ (2.11.2)
+
 Simon Levermann (sonOfRa@github)
 * Reported #199: (csv) Empty Lists can only be String-typed in CSV
  (2.12.0)

@@ -1,5 +1,5 @@
 Project: jackson-datatypes-text
-1;95;0cModules:
+Modules:
   jackson-dataformat-csv
   jackson-dataformat-properties
   jackson-dataformat-yaml
@@ -13,6 +13,11 @@ Project: jackson-datatypes-text
 #199: (csv) Empty Lists can only be String-typed in CSV
  (reported by Simon L)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
+
+2.11.2 (not yet released)
+
+#204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+ (reported by Björn M)
 
 2.11.1 (25-Jun-2020)
 
