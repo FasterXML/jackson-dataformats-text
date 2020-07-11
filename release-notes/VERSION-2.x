@@ -10,8 +10,10 @@ Modules:
 
 2.10.5 (not yet released)
 
-#146: Jackson can't handle underscores in numbers
+#146: (yaml) Jackson can't handle underscores in numbers
  (reported by Sergey M; fix contributed by Conor W)
+#204: (csv) `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+ (reported by Björn M)
 
 2.10.4 (03-May-2020)
 
