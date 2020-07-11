@@ -558,6 +558,22 @@ public class CsvSchema
             return this;
         }
 
+        /**
+         * Helper method called to drop the last collected column name if
+         * it is empty: called if {link CsvParser.Feature#ALLOW_TRAILING_COMMA}
+         * enabled to remove the last entry after being added initially.
+         *
+         * @since 2.11.2
+         */
+        public void dropLastColumnIfEmpty() {
+            final int ix = _columns.size() - 1;
+            if (ix >= 0) {
+                if (_columns.get(ix).getName().isEmpty()) {
+                    _columns.remove(ix);
+                }
+            }
+        }
+
         public Builder setColumnType(int index, ColumnType type) {
             _checkIndex(index);
             _columns.set(index, _columns.get(index).withType(type));
@@ -795,7 +811,7 @@ public class CsvSchema
             _nullValue = nvl;
             return this;
         }
-        
+
         public CsvSchema build()
         {
             Column[] cols = _columns.toArray(new Column[_columns.size()]);
@@ -817,7 +833,7 @@ public class CsvSchema
     /* Configuration, construction
     /**********************************************************************
      */
-    
+
     /**
      * Column definitions, needed for optional header and/or mapping
      * of field names to column positions.

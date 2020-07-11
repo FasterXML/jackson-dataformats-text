@@ -137,3 +137,7 @@ Francesco Tumanischvili (frantuma@github)
 * Contibuted fix for #201: (yaml) Improve `MINIMIZE_QUOTES` handling to avoid quoting
   for some uses of `#` and `:`
  (2.11.1)
+
+Björn Michael (bjmi@github)
+* Reported #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+ (2.11.2)

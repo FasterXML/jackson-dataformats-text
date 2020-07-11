@@ -8,6 +8,11 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
+2.11.2 (not yet released)
+
+#204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+ (reported by Björn M)
+
 2.11.1 (25-Jun-2020)
 
 #51: (yaml) `YAMLParser._locationFor()` does not use index available from `Mark`
