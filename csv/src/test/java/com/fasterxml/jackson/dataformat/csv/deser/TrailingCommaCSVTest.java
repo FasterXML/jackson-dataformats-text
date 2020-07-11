@@ -55,8 +55,8 @@ public class TrailingCommaCSVTest extends ModuleTestBase
         final CsvSchema schema = CsvSchema.emptySchema().withHeader();
 
         MappingIterator<Person> persons = MAPPER
-                .enable(CsvParser.Feature.ALLOW_TRAILING_COMMA)
                 .readerFor(Person.class)
+                .with(CsvParser.Feature.ALLOW_TRAILING_COMMA)
                 .with(schema)
                 .<Person> readValues(INPUT);
         assertTrue(persons.hasNextValue());
