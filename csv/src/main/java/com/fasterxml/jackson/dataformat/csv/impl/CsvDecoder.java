@@ -647,11 +647,13 @@ public class CsvDecoder
         _tokenInputCol = _inputPtr - _currInputRowStart - 1;
 
         if (i < 0) { // EOF at this point signifies empty value
+            _textBuffer.resetWithString("");
             return "";
         }
 
         if (i == INT_CR || i == INT_LF) { // end-of-line means end of record; but also need to handle LF later on
             _pendingLF = i;
+            _textBuffer.resetWithString("");
             return "";
         }
         // two modes: quoted, unquoted
@@ -974,10 +976,35 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    public Number getNumberValue() throws IOException
+    /**
+     * Method used by {@link CsvParser#isExpectedNumberIntToken()} to coerce
+     * current token into integer number, if it looks like one.
+     *
+     * @since 2.12
+     */
+    public boolean isExpectedNumberIntToken()
+    {
+        if (_textBuffer.looksLikeInt()) {
+            try {
+                _parseIntValue();
+            } catch (IOException e) {
+                // should not occur but is declared so
+                throw new RuntimeException(e);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param exact Whether we should try to retain maximum precision or not;
+     *    passed as {@code true} by {@code getNumberValueExact()}, and as
+     *    {@code false} by regular {@code getNumberValue)}.
+     */
+    public Number getNumberValue(boolean exact) throws IOException
     {
         if (_numTypesValid == NR_UNKNOWN) {
-            _parseNumericValue(NR_UNKNOWN); // will also check event type
+            _parseNumericValue(exact); // will also check event type
         }
         // Separate types for int types
         if ((_numTypesValid & NR_INT) != 0) {
@@ -1003,7 +1030,7 @@ public class CsvDecoder
     public NumberType getNumberType() throws IOException
     {
         if (_numTypesValid == NR_UNKNOWN) {
-            _parseNumericValue(NR_UNKNOWN); // will also check event type
+            _parseNumericValue(false); // will also check event type
         }
         if ((_numTypesValid & NR_INT) != 0) {
             return NumberType.INT;
@@ -1029,7 +1056,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_INT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) { // not parsed at all
-                _parseNumericValue(NR_INT); // will also check event type
+                _parseNumericValue(false); // will also check event type
             }
             if ((_numTypesValid & NR_INT) == 0) { // wasn't an int natively?
                 convertNumberToInt(); // let's make it so, if possible
@@ -1042,7 +1069,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_LONG) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
-                _parseNumericValue(NR_LONG);
+                _parseNumericValue(false);
             }
             if ((_numTypesValid & NR_LONG) == 0) {
                 convertNumberToLong();
@@ -1055,7 +1082,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_BIGINT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
-                _parseNumericValue(NR_BIGINT);
+                _parseNumericValue(true);
             }
             if ((_numTypesValid & NR_BIGINT) == 0) {
                 convertNumberToBigInteger();
@@ -1075,7 +1102,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_DOUBLE) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
-                _parseNumericValue(NR_DOUBLE);
+                _parseNumericValue(false);
             }
             if ((_numTypesValid & NR_DOUBLE) == 0) {
                 convertNumberToDouble();
@@ -1088,7 +1115,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_BIGDECIMAL) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
-                _parseNumericValue(NR_BIGDECIMAL);
+                _parseNumericValue(true);
             }
             if ((_numTypesValid & NR_BIGDECIMAL) == 0) {
                 convertNumberToBigDecimal();
@@ -1102,68 +1129,22 @@ public class CsvDecoder
     /* Conversion from textual to numeric representation
     /**********************************************************************
      */
-    
+
     /**
      * Method that will parse actual numeric value out of a syntactically
      * valid number value. Type it will parse into depends on whether
      * it is a floating point number, as well as its magnitude: smallest
      * legal type (of ones available) is used for efficiency.
      *
-     * @param expType Numeric type that we will immediately need, if any;
-     *   mostly necessary to optimize handling of floating point numbers
+     * @param exactNumber Whether to try to retain the highest precision for
+     *    floating-point values or not
      */
-    protected void _parseNumericValue(int expType)
+    protected void _parseNumericValue(boolean exactNumber)
         throws IOException
     {
         // Int or float?
         if (_textBuffer.looksLikeInt()) {
-            char[] buf = _textBuffer.getTextBuffer();
-            int offset = _textBuffer.getTextOffset();
-            char c = buf[offset];
-            boolean neg;
-            
-            if (c == '-') {
-                neg = true;
-                ++offset;
-            } else {
-                neg = false;
-                if (c == '+') {
-                    ++offset;
-                }
-            }
-            int len = buf.length - offset;
-            if (len <= 9) { // definitely fits in int
-                int i = NumberInput.parseInt(buf, offset, len);
-                _numberInt = neg ? -i : i;
-                _numTypesValid = NR_INT;
-                return;
-            }
-            if (len <= 18) { // definitely fits AND is easy to parse using 2 int parse calls
-                long l = NumberInput.parseLong(buf, offset, len);
-                if (neg) {
-                    l = -l;
-                }
-                // [JACKSON-230] Could still fit in int, need to check
-                if (len == 10) {
-                    if (neg) {
-                        if (l >= MIN_INT_L) {
-                            _numberInt = (int) l;
-                            _numTypesValid = NR_INT;
-                            return;
-                        }
-                    } else {
-                        if (l <= MAX_INT_L) {
-                            _numberInt = (int) l;
-                            _numTypesValid = NR_INT;
-                            return;
-                        }
-                    }
-                }
-                _numberLong = l;
-                _numTypesValid = NR_LONG;
-                return;
-            }
-            _parseSlowIntValue(expType, buf, offset, len, neg);
+            _parseIntValue();
             return;
         }
         /*
@@ -1173,10 +1154,62 @@ public class CsvDecoder
         }
         _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
         */
-        _parseSlowFloatValue(expType);
+        _parseSlowFloatValue(exactNumber);
+    }
+
+    // @since 2.12
+    protected void _parseIntValue() throws IOException
+    {
+        char[] buf = _textBuffer.getTextBuffer();
+        int offset = _textBuffer.getTextOffset();
+        char c = buf[offset];
+        boolean neg;
+
+        if (c == '-') {
+            neg = true;
+            ++offset;
+        } else {
+            neg = false;
+            if (c == '+') {
+                ++offset;
+            }
+        }
+        int len = buf.length - offset;
+        if (len <= 9) { // definitely fits in int
+            int i = NumberInput.parseInt(buf, offset, len);
+            _numberInt = neg ? -i : i;
+            _numTypesValid = NR_INT;
+            return;
+        }
+        if (len <= 18) { // definitely fits AND is easy to parse using 2 int parse calls
+            long l = NumberInput.parseLong(buf, offset, len);
+            if (neg) {
+                l = -l;
+            }
+            // [JACKSON-230] Could still fit in int, need to check
+            if (len == 10) {
+                if (neg) {
+                    if (l >= MIN_INT_L) {
+                        _numberInt = (int) l;
+                        _numTypesValid = NR_INT;
+                        return;
+                    }
+                } else {
+                    if (l <= MAX_INT_L) {
+                        _numberInt = (int) l;
+                        _numTypesValid = NR_INT;
+                        return;
+                    }
+                }
+            }
+            _numberLong = l;
+            _numTypesValid = NR_LONG;
+            return;
+        }
+        _parseSlowIntValue(buf, offset, len, neg);
     }
     
-    private final void _parseSlowFloatValue(int expType)
+    private final void _parseSlowFloatValue(boolean exactNumber)
         throws IOException
     {
         /* Nope: floating point. Here we need to be careful to get
@@ -1187,7 +1220,7 @@ public class CsvDecoder
          * retain textual representation
          */
         try {
-            if (expType == NR_BIGDECIMAL) {
+            if (exactNumber) {
                 _numberBigDecimal = _textBuffer.contentsAsDecimal();
                 _numTypesValid = NR_BIGDECIMAL;
             } else {
@@ -1200,8 +1233,8 @@ public class CsvDecoder
             throw constructError("Malformed numeric value '"+_textBuffer.contentsAsString()+"'", nex);
         }
     }
-    
-    private final void _parseSlowIntValue(int expType, char[] buf, int offset, int len,
+
+    private final void _parseSlowIntValue(char[] buf, int offset, int len,
             boolean neg)
         throws IOException
     {

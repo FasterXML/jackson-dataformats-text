@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class BasicParserTest extends ModuleTestBase {
+public class BasicCSVParserTest extends ModuleTestBase {
     @JsonPropertyOrder({"x", "y", "z"})
     public static class Point {
         public int x;
