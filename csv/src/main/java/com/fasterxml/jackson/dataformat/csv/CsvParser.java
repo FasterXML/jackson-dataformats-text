@@ -1133,7 +1133,7 @@ public class CsvParser
     public NumberType getNumberType() throws IOException {
         return _reader.getNumberType();
     }
-    
+
     @Override
     public Number getNumberValue() throws IOException {
         return _reader.getNumberValue();
@@ -1143,7 +1143,7 @@ public class CsvParser
     public int getIntValue() throws IOException {
         return _reader.getIntValue();
     }
-    
+
     @Override
     public long getLongValue() throws IOException {
         return _reader.getLongValue();
