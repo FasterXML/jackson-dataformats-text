@@ -545,6 +545,20 @@ public class CsvParser
         return false;
     }
 
+    @Override // since 2.12
+    public boolean isExpectedNumberIntToken()
+    {
+        JsonToken t = _currToken;
+        if (t == JsonToken.VALUE_STRING) {
+            if (_reader.isExpectedNumberIntToken()) {
+                _currToken = JsonToken.VALUE_NUMBER_INT;
+                return true;
+            }
+            return false;
+        }
+        return (t == JsonToken.VALUE_NUMBER_INT);
+    }
+
     @Override
     public String currentName() throws IOException {
         return _currentName;
@@ -1136,7 +1150,12 @@ public class CsvParser
 
     @Override
     public Number getNumberValue() throws IOException {
-        return _reader.getNumberValue();
+        return _reader.getNumberValue(false);
+    }
+
+    @Override
+    public Number getNumberValueExact() throws IOException {
+        return _reader.getNumberValue(true);
     }
 
     @Override

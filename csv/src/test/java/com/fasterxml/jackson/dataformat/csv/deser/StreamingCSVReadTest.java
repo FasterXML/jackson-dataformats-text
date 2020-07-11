@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -14,7 +15,7 @@ import com.fasterxml.jackson.dataformat.csv.*;
  * needed for exercising certain methods that are difficult to
  * trigger via data-binding
  */
-public class StreamingReadTest extends ModuleTestBase
+public class StreamingCSVReadTest extends ModuleTestBase
 {
     private final CsvMapper CSV_MAPPER = mapperForCsv();
 
@@ -50,6 +51,9 @@ public class StreamingReadTest extends ModuleTestBase
     private void _testInts(int a, int b, int c) throws Exception {
         _testInts(false, a, b, c);
         _testInts(true, a, b, c);
+
+        _testIntsExpected(false, a, b, c);
+        _testIntsExpected(true, a, b, c);
     }
 
     private void _testLongs(long a, long b) throws Exception {
@@ -73,7 +77,7 @@ public class StreamingReadTest extends ModuleTestBase
         StringWriter w = new StringWriter();
         assertEquals(1, parser.getText(w));
         assertEquals("a", w.toString());
-        
+
         String numStr = String.valueOf(a);
         assertEquals(numStr, parser.nextTextValue());
         char[] ch = parser.getTextCharacters();
@@ -82,7 +86,7 @@ public class StreamingReadTest extends ModuleTestBase
         w = new StringWriter();
         assertEquals(numStr.length(), parser.getText(w));
         assertEquals(numStr, w.toString());
-        
+
         assertEquals(a, parser.getIntValue());
         assertEquals((long) a, parser.getLongValue());
 
@@ -101,6 +105,38 @@ public class StreamingReadTest extends ModuleTestBase
         assertNull(parser.nextToken());
         
         parser.close();
+    }
+
+    private void _testIntsExpected(boolean useBytes, int a, int b, int c) throws Exception {
+        try (CsvParser parser = _parser(String.format("%d,%d,%d\n", a, b, c), useBytes, ABC_SCHEMA)) {
+            assertToken(JsonToken.START_OBJECT, parser.nextToken());
+
+            assertToken(JsonToken.FIELD_NAME, parser.nextToken());
+            assertEquals("a", parser.currentName());
+
+            // Reported as String BUT may be coerced
+            assertToken(JsonToken.VALUE_STRING, parser.nextToken());
+            assertTrue(parser.isExpectedNumberIntToken());
+            assertEquals(a, parser.getIntValue());
+            assertToken(JsonToken.VALUE_NUMBER_INT, parser.currentToken());
+
+            assertEquals("b", parser.nextFieldName());
+            assertToken(JsonToken.VALUE_STRING, parser.nextToken());
+            assertTrue(parser.isExpectedNumberIntToken());
+            assertEquals(NumberType.INT, parser.getNumberType());
+            assertEquals(b, parser.getIntValue());
+            assertToken(JsonToken.VALUE_NUMBER_INT, parser.currentToken());
+
+            assertEquals("c", parser.nextFieldName());
+            assertToken(JsonToken.VALUE_STRING, parser.nextToken());
+            assertTrue(parser.isExpectedNumberIntToken());
+            assertEquals(NumberType.INT, parser.getNumberType());
+            assertEquals(c, parser.getIntValue());
+            assertToken(JsonToken.VALUE_NUMBER_INT, parser.currentToken());
+
+            assertToken(JsonToken.END_OBJECT, parser.nextToken());
+            assertNull(parser.nextToken());
+        }
     }
 
     private void _testLongs(boolean useBytes, long a, long b) throws Exception
