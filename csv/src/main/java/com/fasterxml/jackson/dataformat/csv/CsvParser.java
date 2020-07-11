@@ -812,7 +812,6 @@ public class CsvParser
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
             name = name.trim();
-
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);
             if (prev != null) {
@@ -823,6 +822,11 @@ public class CsvParser
             if (++count > MAX_COLUMNS) {
                 _reportError("Internal error: reached maximum of "+MAX_COLUMNS+" header columns");
             }
+        }
+
+        // [dataformats-text#204]: Drop trailing empty name if so instructed
+        if (CsvParser.Feature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
+            builder.dropLastColumnIfEmpty();
         }
 
         // Ok: did we get any  columns?
@@ -1051,6 +1055,7 @@ public class CsvParser
                 if (next == null) { // should end of record or input
                     return _handleObjectRowEnd();
                 }
+                System.err.println("... yet we did NOT skip");
             }
         }
         // 21-May-2015, tatu: Need to enter recovery mode, to skip remainder of the line
