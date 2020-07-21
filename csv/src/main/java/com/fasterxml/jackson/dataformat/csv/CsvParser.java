@@ -1006,6 +1006,7 @@ public class CsvParser
                 if (next == null) { // should end of record or input
                     return _handleObjectRowEnd();
                 }
+                System.err.println("... yet we did NOT skip");
             }
         }
         // 21-May-2015, tatu: Need to enter recovery mode, to skip remainder of the line
