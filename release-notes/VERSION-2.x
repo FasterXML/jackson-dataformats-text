@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.10.5 (not yet released)
+2.10.5 (21-Jul-2020)
 
 #146: (yaml) Jackson can't handle underscores in numbers
  (reported by Sergey M; fix contributed by Conor W)
