@@ -8,7 +8,7 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
-2.11.2 (not yet released)
+2.11.2 (02-Aug-2020)
 
 #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (reported by Björn M)
