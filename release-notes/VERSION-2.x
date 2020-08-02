@@ -14,7 +14,7 @@ Modules:
  (reported by Simon L)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
-2.11.2 (not yet released)
+2.11.2 (02-Aug-2020)
 
 #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (reported by Björn M)
