@@ -14,7 +14,7 @@ Modules:
  (reported by Simon L)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
-2.11.2 (not yet released)
+2.11.2 (02-Aug-2020)
 
 #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (reported by Björn M)
@@ -44,7 +44,7 @@ Modules:
 #195 (csv) Adds schema creating csv schema with View
  (contributed by Damian S)
 
-2.10.5 (not yet released)
+2.10.5 (21-Jul-2020)
 
 #146: (yaml) Jackson can't handle underscores in numbers
  (reported by Sergey M; fix contributed by Conor W)
