@@ -255,6 +255,34 @@ public class TestGenerator extends ModuleTestBase
         assertEquals("\"#123\",Foo\n", csv);
     }
 
+    public void testQuotingOfLineSeparator() throws Exception
+    {
+        final CsvMapper mapper = mapperForCsv();
+        final CsvSchema schemaBase = mapper.schemaFor(IdDesc.class);
+
+        // with loose(default) quoting
+        String csv = mapper.writer(schemaBase.withLineSeparator("-"))   // '-' is bigger than max('"', ',')
+                .writeValueAsString(new IdDesc("12-3", "Foo"));
+        assertEquals("\"12-3\",Foo-", csv);
+
+        // with loose(default) quoting and escape char
+        csv = mapper.writer(schemaBase.withLineSeparator("-").withEscapeChar('\\'))
+                .writeValueAsString(new IdDesc("12-3", "Foo"));
+        assertEquals("\"12-3\",Foo-", csv);
+
+        // with strict/optimal
+        csv = mapper.writer(schemaBase)
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc("12\n3", "Foo"));
+        assertEquals("\"12\n3\",Foo\n", csv);
+
+        // with strict/optimal and escape char
+        csv = mapper.writer(schemaBase.withEscapeChar('\\'))
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc("12\n3", "Foo"));
+        assertEquals("\"12\n3\",Foo\n", csv);
+    }
+
     // for [dataformat-csv#98]
     public void testBackslashEscape() throws Exception
     {
