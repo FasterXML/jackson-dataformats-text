@@ -1073,7 +1073,6 @@ public class CsvEncoder
 
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
-        char[] lineSepLenChars = new char[_cfgLineSeparatorLength];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
@@ -1083,11 +1082,13 @@ public class CsvEncoder
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
-                } else if (i + _cfgLineSeparatorLength - 1 < len) {
-                    value.getChars(i, i + _cfgLineSeparatorLength, lineSepLenChars, 0);
-                    if (Arrays.equals(lineSepLenChars, _cfgLineSeparator)) {
-                        return true;
+                } else if (c == _cfgLineSeparator[0] && i + _cfgLineSeparatorLength - 1 < len) {
+                    for (int j = 1; j < _cfgLineSeparatorLength; j++) {
+                        if (value.charAt(i + j) != _cfgLineSeparator[j]) {
+                            continue;
+                        }
                     }
+                    return true;
                 }
             }
         }
@@ -1103,7 +1104,6 @@ public class CsvEncoder
 
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
-        char[] lineSepLenChars = new char[_cfgLineSeparatorLength];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
@@ -1113,11 +1113,13 @@ public class CsvEncoder
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
-                } else if (i + _cfgLineSeparatorLength - 1 < len) {
-                    value.getChars(i, i + _cfgLineSeparatorLength, lineSepLenChars, 0);
-                    if (Arrays.equals(lineSepLenChars, _cfgLineSeparator)) {
-                        return true;
+                } else if (c == _cfgLineSeparator[0] && i + _cfgLineSeparatorLength - 1 < len) {
+                    for (int j = 1; j < _cfgLineSeparatorLength; j++) {
+                        if (value.charAt(i + j) != _cfgLineSeparator[j]) {
+                            continue;
+                        }
                     }
+                    return true;
                 }
             } else if (c == esc) {
                 return true;
