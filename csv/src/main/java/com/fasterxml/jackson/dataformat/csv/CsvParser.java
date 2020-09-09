@@ -276,6 +276,8 @@ public class CsvParser
      */
     protected int _columnCount = 0;
 
+    protected boolean _cfgEmptyStringAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -372,12 +374,13 @@ public class CsvParser
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Versioned                                                                             
-    /**********************************************************                 
+    /**********************************************************************
      */
 
     @Override
@@ -386,9 +389,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overrides: capability introspection methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -403,9 +406,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************                              
+    /**********************************************************************
     /* Overridden methods
-    /**********************************************************                              
+    /**********************************************************************
      */
 
     @Override
@@ -420,9 +423,9 @@ public class CsvParser
     public void close() throws IOException { _reader.close(); }
 
     /*
-    /***************************************************
+    /**********************************************************************
     /* Public API, configuration
-    /***************************************************
+    /**********************************************************************
      */
 
     /**
@@ -432,6 +435,7 @@ public class CsvParser
     public JsonParser enable(Feature f)
     {
         _formatFeatures |= f.getMask();
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -442,6 +446,7 @@ public class CsvParser
     public JsonParser disable(Feature f)
     {
         _formatFeatures &= ~f.getMask();
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -476,11 +481,11 @@ public class CsvParser
     public CsvSchema getSchema() {
         return _schema;
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Location info
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
@@ -502,11 +507,11 @@ public class CsvParser
     public Object getInputSource() {
         return _reader.getInputSource();
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, basic
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -603,9 +608,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, optimized methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -666,9 +671,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, helper methods, regular
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -860,6 +865,9 @@ public class CsvParser
                 return JsonToken.VALUE_NULL;
             }
         }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
+        }
         return JsonToken.VALUE_STRING;
     }
 
@@ -883,6 +891,9 @@ public class CsvParser
             if (_nullValue.equals(next)) {
                 return JsonToken.VALUE_NULL;
             }
+        }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
     }
@@ -926,13 +937,16 @@ public class CsvParser
                 return JsonToken.VALUE_NULL;
             }
         }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
+        }
         return JsonToken.VALUE_STRING;
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, helper methods, extra column(s)
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -969,7 +983,6 @@ public class CsvParser
                 if (next == null) { // should end of record or input
                     return _handleObjectRowEnd();
                 }
-                System.err.println("... yet we did NOT skip");
             }
         }
         // 21-May-2015, tatu: Need to enter recovery mode, to skip remainder of the line
@@ -978,9 +991,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, helper methods, missing column(s)
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -1023,9 +1036,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parsing, helper methods: row end handling, recover
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -1057,9 +1070,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* String value handling
-    /**********************************************************
+    /**********************************************************************
      */
     
     
@@ -1077,9 +1090,8 @@ public class CsvParser
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName;
         }
-        if (_currentValue.equals("")) {
-            return isEnabled(CsvParser.Feature.EMPTY_STRING_AS_NULL) ? null : _currentValue;
-        }
+        // 08-Sep-2020, tatu: Used to check for empty String wrt EMPTY_STRING_AS_NULL
+        //    here, but now demoted to actual "nextToken()" handling
         return _currentValue;
     }
 
@@ -1212,9 +1224,9 @@ public class CsvParser
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, error reporting
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**

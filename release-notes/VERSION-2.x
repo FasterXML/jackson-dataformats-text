@@ -12,6 +12,9 @@ Modules:
 
 #199: (csv) Empty Lists can only be String-typed in CSV
  (reported by Simon L)
+#222: (csv) `JsonParser.Feature.EMPTY_STRING_AS_NULL` does not work when
+  text is parsed as `String[]`
+ (reported by wkwkhautbois@github)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
 2.11.2 (02-Aug-2020)
