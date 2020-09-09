@@ -298,6 +298,11 @@ public class CsvParser
      */
     protected int _columnCount = 0;
 
+    /**
+     * @since 2.12
+     */
+    protected boolean _cfgEmptyStringAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -395,6 +400,7 @@ public class CsvParser
         _parsingContext = JsonReadContext.createRootContext(dups);
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
@@ -495,6 +501,7 @@ public class CsvParser
         if (oldF != newF) {
             _formatFeatures = newF;
             _reader.overrideFormatFeatures(newF);
+            _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         }
         return this;
     }
@@ -512,6 +519,7 @@ public class CsvParser
     public JsonParser enable(Feature f)
     {
         _formatFeatures |= f.getMask();
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -522,6 +530,7 @@ public class CsvParser
     public JsonParser disable(Feature f)
     {
         _formatFeatures &= ~f.getMask();
+        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -944,6 +953,9 @@ public class CsvParser
                 return JsonToken.VALUE_NULL;
             }
         }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
+        }
         return JsonToken.VALUE_STRING;
     }
 
@@ -967,6 +979,9 @@ public class CsvParser
             if (_nullValue.equals(next)) {
                 return JsonToken.VALUE_NULL;
             }
+        }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
     }
@@ -1009,6 +1024,9 @@ public class CsvParser
             if (_nullValue.equals(_currentValue)) {
                 return JsonToken.VALUE_NULL;
             }
+        }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
     }
@@ -1055,7 +1073,6 @@ public class CsvParser
                 if (next == null) { // should end of record or input
                     return _handleObjectRowEnd();
                 }
-                System.err.println("... yet we did NOT skip");
             }
         }
         // 21-May-2015, tatu: Need to enter recovery mode, to skip remainder of the line
@@ -1167,9 +1184,8 @@ public class CsvParser
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName;
         }
-        if (_currentValue.equals("")) {
-            return isEnabled(CsvParser.Feature.EMPTY_STRING_AS_NULL) ? null : _currentValue;
-        }
+        // 08-Sep-2020, tatu: Used to check for empty String wrt EMPTY_STRING_AS_NULL
+        //    here, but now demoted to actual "nextToken()" handling
         return _currentValue;
     }
 

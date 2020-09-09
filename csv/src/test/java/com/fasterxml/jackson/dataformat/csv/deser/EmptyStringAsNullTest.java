@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
@@ -68,5 +68,29 @@ public class EmptyStringAsNullTest
         assertEquals(expectedTestUser.firstName, actualTestUser.firstName);
         assertNull("The column that contains an empty String should be deserialized as null ", actualTestUser.middleName);
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
+    }
+
+    // [dataformats-text#222]
+    public void testEmptyStringAsNullNonPojo() throws Exception
+    {
+        String csv = "Grace,,Hopper";
+
+        ObjectReader r = MAPPER.reader()
+                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL)
+                .with(CsvParser.Feature.WRAP_AS_ARRAY);
+
+        try (MappingIterator<Object[]> it1 =  r.forType(Object[].class).readValues(csv)) {
+            Object[] array1 = it1.next();
+            assertEquals(3, array1.length);
+            assertEquals("Grace", array1[0]);
+            assertEquals("Hopper", array1[2]);
+            assertNull(array1[1]);
+        }
+        try (MappingIterator<String[]> it2 =  r.forType(String[].class).readValues(csv)) {
+            String[] array2 = it2.next();
+            assertEquals("Grace", array2[0]);
+            assertEquals("Hopper", array2[2]);
+            assertNull(array2[1]);
+        }
     }
 }
