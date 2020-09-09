@@ -1,36 +1,41 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import org.junit.Test;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
-
 /**
- * Test for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
+ * Tests for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
+ * ({@code dataformats-text#7}).
  */
-public class EmptyStringAsNullTest {
-
-
+public class EmptyStringAsNullTest
+    extends ModuleTestBase
+{
     @JsonPropertyOrder({"firstName", "middleName", "lastName"})
     static class TestUser {
         public String firstName, middleName, lastName;
     }
 
-    @Test
-    public void givenFeatureDisabledByDefault_whenColumnIsEmptyString_thenParseAsEmptyString() throws IOException {
+    /*
+    /**********************************************************
+    /* Test methods
+    /**********************************************************
+     */
+
+    private final CsvMapper MAPPER = mapperForCsv();
+
+    public void testDefaultParseAsEmptyString() throws IOException {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
         expectedTestUser.middleName = "";
         expectedTestUser.lastName = "Hopper";
-        CsvMapper csvMapper = CsvMapper.builder().build();
-        ObjectReader objectReader = csvMapper.readerFor(TestUser.class).with(csvMapper.schemaFor(TestUser.class));
+        ObjectReader objectReader = MAPPER.readerFor(TestUser.class).with(MAPPER.schemaFor(TestUser.class));
         String csv = "Grace,,Hopper";
 
         // execute
@@ -43,14 +48,16 @@ public class EmptyStringAsNullTest {
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
-    @Test
-    public void givenFeatureEnabled_whenColumnIsEmptyString_thenParseAsNull() throws IOException {
+    public void testSimpleParseEmptyStringAsNull() throws IOException {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
         expectedTestUser.lastName = "Hopper";
-        CsvMapper csvMapper = CsvMapper.builder().enable(CsvParser.Feature.EMPTY_STRING_AS_NULL).build();
-        ObjectReader objectReader = csvMapper.readerFor(TestUser.class).with(csvMapper.schemaFor(TestUser.class));
+
+        ObjectReader objectReader = MAPPER
+                .readerFor(TestUser.class)
+                .with(MAPPER.schemaFor(TestUser.class))
+                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL);
         String csv = "Grace,,Hopper";
 
         // execute
