@@ -8,27 +8,33 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
-import org.junit.Test;
-
 /**
- * Test for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}.
+ * Tests for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
+ * ({@code dataformats-text#7}).
  */
-public class EmptyStringAsNullTest extends ModuleTestBase
+public class EmptyStringAsNullTest
+    extends ModuleTestBase
 {
     @JsonPropertyOrder({"firstName", "middleName", "lastName"})
     static class TestUser {
         public String firstName, middleName, lastName;
     }
 
-    @Test
+    /*
+    /**********************************************************
+    /* Test methods
+    /**********************************************************
+     */
+
+    private final CsvMapper MAPPER = mapperForCsv();
+
     public void testEmptyStringAsNullDisabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
         expectedTestUser.middleName = "";
         expectedTestUser.lastName = "Hopper";
-        CsvMapper csvMapper = CsvMapper.builder().build();
-        ObjectReader objectReader = csvMapper.readerFor(TestUser.class).with(csvMapper.schemaFor(TestUser.class));
+        ObjectReader objectReader = MAPPER.readerFor(TestUser.class).with(MAPPER.schemaFor(TestUser.class));
         String csv = "Grace,,Hopper";
 
         // execute
@@ -41,14 +47,16 @@ public class EmptyStringAsNullTest extends ModuleTestBase
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
-    @Test
     public void testEmptyStringAsNullEnabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
         expectedTestUser.firstName = "Grace";
         expectedTestUser.lastName = "Hopper";
-        CsvMapper csvMapper = CsvMapper.builder().enable(CsvParser.Feature.EMPTY_STRING_AS_NULL).build();
-        ObjectReader objectReader = csvMapper.readerFor(TestUser.class).with(csvMapper.schemaFor(TestUser.class));
+
+        ObjectReader objectReader = MAPPER
+                .readerFor(TestUser.class)
+                .with(MAPPER.schemaFor(TestUser.class))
+                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL);
         String csv = "Grace,,Hopper";
 
         // execute
