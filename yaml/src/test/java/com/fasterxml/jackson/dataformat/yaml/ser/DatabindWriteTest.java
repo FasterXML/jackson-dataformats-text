@@ -1,5 +1,10 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,11 +13,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class DatabindWriteTest extends ModuleTestBase
 {
@@ -58,13 +58,12 @@ public class DatabindWriteTest extends ModuleTestBase
         assertFalse(it.hasNext());
     }
 
-    // Related to [dataformats-test#68], escaping of "reserved" names
-    public void testBasicDatabind2() throws Exception
+    public void testPointSerialization() throws Exception
     {
         String yaml = trimDocMarker(MAPPER.writeValueAsString(new Point(1, 2)));
 
-        // Just verify 'y' will NOT be escaped
-        assertEquals("x: 1\ny: 2", yaml);
+        // 'x' will NOT be escaped, 'y' will be escaped
+        assertEquals("x: 1\n\"y\": 2", yaml);
 
         // Actually let's try reading back, too
         Point p = MAPPER.readValue(yaml, Point.class);

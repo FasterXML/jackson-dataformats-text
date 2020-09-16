@@ -1,25 +1,21 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.json.JsonWriteContext;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.json.JsonWriteContext;
-import com.fasterxml.jackson.core.io.IOContext;
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class YAMLGenerator extends GeneratorBase
 {
@@ -175,10 +171,8 @@ public class YAMLGenerator extends GeneratorBase
      * aliases for booleans, and we better quote such values as keys; although Jackson
      * itself has no problems dealing with them, some other tools do have.
      */
-    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out
-    //    single letter case (esp so 'y' won't get escaped)
     private final static Set<String> MUST_QUOTE_NAMES = new HashSet<>(Arrays.asList(
-//            "y", "Y", "n", "N",
+            "y", "Y", "n", "N",
             "yes", "Yes", "YES", "no", "No", "NO",
             "true", "True", "TRUE", "false", "False", "FALSE",
             "on", "On", "ON", "off", "Off", "OFF"

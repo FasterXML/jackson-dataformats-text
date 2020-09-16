@@ -1,9 +1,10 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
-import java.util.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import java.util.Collections;
+import java.util.Map;
 
 // [dataformats-text#68]: should quote reserved names
 public class ReservedNamesTest extends ModuleTestBase
@@ -16,8 +17,7 @@ public class ReservedNamesTest extends ModuleTestBase
                 "true", "True",
                 "false", "False",
                 "yes", "no",
-                // NOTE: single-letter cases left out on purpose
-//                "y", "Y", "n", "N",
+                "y", "Y", "n", "N",
                 "on", "off",
         }) {
             _testQuotingOfBooleanKeys(value);
