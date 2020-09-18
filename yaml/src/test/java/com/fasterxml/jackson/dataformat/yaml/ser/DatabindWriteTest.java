@@ -58,13 +58,14 @@ public class DatabindWriteTest extends ModuleTestBase
         assertFalse(it.hasNext());
     }
 
-    // Related to [dataformats-test#68], escaping of "reserved" names
+    // Related to [dataformats-text#68], escaping of "reserved" names
     public void testBasicDatabind2() throws Exception
     {
         String yaml = trimDocMarker(MAPPER.writeValueAsString(new Point(1, 2)));
 
         // Just verify 'y' will NOT be escaped
-        assertEquals("x: 1\ny: 2", yaml);
+        // [dataformats-text#226]: ... actually, will be.
+        assertEquals("x: 1\n\"y\": 2", yaml);
 
         // Actually let's try reading back, too
         Point p = MAPPER.readValue(yaml, Point.class);

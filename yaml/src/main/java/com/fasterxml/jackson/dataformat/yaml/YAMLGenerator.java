@@ -193,8 +193,9 @@ public class YAMLGenerator extends GeneratorBase
      */
     // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out
     //    single letter case (esp so 'y' won't get escaped)
+    // 17-Sep-2020, tatu: [dataformats-text#226] No, let's be consistent w/ values
     private final static Set<String> MUST_QUOTE_NAMES = new HashSet<>(Arrays.asList(
-//            "y", "Y", "n", "N",
+            "y", "Y", "n", "N",
             "yes", "Yes", "YES", "no", "No", "NO",
             "true", "True", "TRUE", "false", "False", "FALSE",
             "on", "On", "ON", "off", "Off", "OFF"

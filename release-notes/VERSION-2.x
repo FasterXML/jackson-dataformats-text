@@ -15,6 +15,8 @@ Modules:
 #222: (csv) `JsonParser.Feature.EMPTY_STRING_AS_NULL` does not work when
   text is parsed as `String[]`
  (reported by wkwkhautbois@github)
+#226: Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
+ (requested by pnepywoda@github)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
 2.11.2 (02-Aug-2020)
