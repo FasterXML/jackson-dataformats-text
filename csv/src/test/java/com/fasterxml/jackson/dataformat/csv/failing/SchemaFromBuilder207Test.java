@@ -5,6 +5,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+// Trying to reproduce [dataformats-text#207], with mixed success
 public class SchemaFromBuilder207Test extends ModuleTestBase
 {
     @JsonDeserialize(builder=SimpleBuilderXY.class)
