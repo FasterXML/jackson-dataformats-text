@@ -28,9 +28,11 @@ public class CsvGenerator extends GeneratorBase
          * but when <code>false</code>, a faster but more conservative check
          * is made, and possibly quoting is used for values that might not need it.
          * Trade-offs is basically between optimal/minimal quoting (true), and
-         * faster handling (false).
+         * possibly faster handling (false).
          * Faster check involves only checking first N characters of value, as well
          * as possible looser checks.
+         * However: strict check can also be more efficient in some cases when it
+         * allows omitting quoting, so trade-off is not always simple.
          *<p>
          * Note, however, that regardless setting, all values that need to be quoted
          * will be: it is just that when set to <code>false</code>, other values may
@@ -75,10 +77,10 @@ public class CsvGenerator extends GeneratorBase
 
         /**
          * Feature that determines whether quote characters within quoted String values are escaped
-	 * using configured escape character, instead of being "doubled up" (that is: a quote character
-	 * is written twice in a row).
-	 *<p>
-	 * Default value is false so that quotes are doubled as necessary, not escaped.
+         * using configured escape character, instead of being "doubled up" (that is: a quote character
+         * is written twice in a row).
+         *<p>
+         * Default value is false so that quotes are doubled as necessary, not escaped.
          *
          * @since 2.9.3
          */

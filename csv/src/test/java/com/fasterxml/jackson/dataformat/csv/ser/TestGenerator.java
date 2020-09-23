@@ -43,9 +43,10 @@ public class TestGenerator extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final CsvMapper MAPPER = mapperForCsv();
+
     public void testSimpleExplicit() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("firstName")
             .addColumn("lastName")
@@ -59,7 +60,7 @@ public class TestGenerator extends ModuleTestBase
 
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
-        String csv = mapper.writer(schema).writeValueAsString(user);
+        String csv = MAPPER.writer(schema).writeValueAsString(user);
         assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n", csv);
     }
 
@@ -71,10 +72,9 @@ public class TestGenerator extends ModuleTestBase
 
     public void testWriteHeaders() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        CsvSchema schema = mapper.schemaFor(FiveMinuteUser.class).withHeader();
+        CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class).withHeader();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
-        String result = mapper.writer(schema).writeValueAsString(user);
+        String result = MAPPER.writer(schema).writeValueAsString(user);
         assertEquals("firstName,lastName,gender,verified,userImage\n"
                 +"Barbie,Benton,FEMALE,false,\n", result);
     }
@@ -85,11 +85,10 @@ public class TestGenerator extends ModuleTestBase
      */
     public void testFailedWriteHeaders() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder().setUseHeader(true).build();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
         try {
-            mapper.writer(schema).writeValueAsString(user);
+            MAPPER.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
         } catch (JsonMappingException e) {
             verifyException(e, "contains no column names");
@@ -98,19 +97,17 @@ public class TestGenerator extends ModuleTestBase
 
     public void testExplicitWithDouble() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("amount")
             .build();
 
-        String result = mapper.writer(schema).writeValueAsString(new Entry("abc", 1.25));
+        String result = MAPPER.writer(schema).writeValueAsString(new Entry("abc", 1.25));
         assertEquals("abc,1.25\n", result);
     }
 
     public void testExplicitWithFloat() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("id")
                 .addColumn("amount")
@@ -119,19 +116,18 @@ public class TestGenerator extends ModuleTestBase
         float amount = 1.89f;
         //this value loses precision when converted
         assertFalse(Double.toString((double)amount).equals("1.89"));
-        String result = mapper.writer(schema).writeValueAsString(new Entry2("abc", amount));
+        String result = MAPPER.writer(schema).writeValueAsString(new Entry2("abc", amount));
         assertEquals("abc,1.89\n", result);
     }
 
     public void testExplicitWithQuoted() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("desc")
             .build();
         
-        String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", "Some \"stuff\""));
+        String result = MAPPER.writer(schema).writeValueAsString(new IdDesc("id", "Some \"stuff\""));
         // MUST use doubling for quotes!
         assertEquals("id,\"Some \"\"stuff\"\"\"\n", result);
     }
@@ -139,7 +135,6 @@ public class TestGenerator extends ModuleTestBase
     // [dataformat-csv#14]: String values that cross buffer boundary won't be quoted properly
     public void testLongerWithQuotes() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("desc")
@@ -160,25 +155,24 @@ public class TestGenerator extends ModuleTestBase
         final String inputDesc = sb.toString();
         String expOutputDesc = inputDesc.replace("\"", "\"\"");
         String expOutput = "id,\""+expOutputDesc+"\"";
-        String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", inputDesc)).trim();
+        String result = MAPPER.writer(schema).writeValueAsString(new IdDesc("id", inputDesc)).trim();
         assertEquals(expOutput, result);
     }
 
     public void testWriteInFile() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("firstName")
                 .addColumn("lastName")
                 .build();
 
-        ObjectNode node = mapper.createObjectNode()
+        ObjectNode node = MAPPER.createObjectNode()
                 .put("firstName", "David")
                 .put("lastName", "Douillet");
 
         File file = File.createTempFile("file", ".csv");
         try {
-            mapper.writer(schema.withHeader()).writeValue(file, node);
+            MAPPER.writer(schema.withHeader()).writeValue(file, node);
         } finally {
             file.delete();
         }
@@ -186,18 +180,17 @@ public class TestGenerator extends ModuleTestBase
 
     public void testForcedQuoting60() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                                     .addColumn("id")
                                     .addColumn("amount")
                                     .build();
-        String result = mapper.writer(schema)
+        String result = MAPPER.writer(schema)
                 .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
                 .writeValueAsString(new Entry("abc", 1.25));
         assertEquals("\"abc\",1.25\n", result);
 
         // Also, as per [dataformat-csv#81], should be possible to change dynamically
-        result = mapper.writer(schema)
+        result = MAPPER.writer(schema)
                        .without(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
                        .writeValueAsString(new Entry("xyz", 2.5));
         assertEquals("xyz,2.5\n", result);
@@ -205,13 +198,12 @@ public class TestGenerator extends ModuleTestBase
 
     public void testForcedQuotingWithQuoteEscapedWithBackslash() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                                     .addColumn("id")
                                     .addColumn("amount")
                                     .setEscapeChar('\\')
                                     .build();
-        String result = mapper.writer(schema)
+        String result = MAPPER.writer(schema)
                 .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
                 .with(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
                 .writeValueAsString(new Entry("\"abc\"", 1.25));
@@ -241,14 +233,13 @@ public class TestGenerator extends ModuleTestBase
     public void testQuotingOfCommentChar() throws Exception
     {
         // First, with default quoting
-        CsvMapper mapper = mapperForCsv();
-        final CsvSchema schema = mapper.schemaFor(IdDesc.class);
-        String csv = mapper.writer(schema)
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class);
+        String csv = MAPPER.writer(schema)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("\"#123\",Foo\n", csv);
 
         // then with strict/optimal
-        mapper = mapperForCsv();
+        CsvMapper mapper = mapperForCsv();
         mapper.enable(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING);
         csv = mapper.writer(schema)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
@@ -259,10 +250,9 @@ public class TestGenerator extends ModuleTestBase
     public void testBackslashEscape() throws Exception
     {
         // First, with default quoting
-        CsvMapper mapper = mapperForCsv();
-        final CsvSchema schema = mapper.schemaFor(IdDesc.class)
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class)
                 .withEscapeChar('\\');
-        String csv = mapper.writer(schema)
+        String csv = MAPPER.writer(schema)
                 .writeValueAsString(new IdDesc("123", "a\\b"));
         // Escaping also leads to quoting
         assertEquals("123,\"a\\\\b\"\n", csv);
@@ -325,16 +315,15 @@ public class TestGenerator extends ModuleTestBase
 
     private void _testSimpleWithAutoSchema(boolean wrapAsArray) throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        CsvSchema schema = mapper.schemaFor(FiveMinuteUser.class);
+        CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class);
         FiveMinuteUser user = new FiveMinuteUser("Veltto", "Virtanen", true, Gender.MALE,
                 new byte[] { 3, 1 });
         String result;
         // having virtual root-level array should make no difference:
         if (wrapAsArray) {
-            result = mapper.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });
+            result = MAPPER.writer(schema).writeValueAsString(new FiveMinuteUser[] { user });
         } else {
-            result = mapper.writer(schema).writeValueAsString(user);
+            result = MAPPER.writer(schema).writeValueAsString(user);
         }
         assertEquals("Veltto,Virtanen,MALE,true,AwE=\n", result);
     }
