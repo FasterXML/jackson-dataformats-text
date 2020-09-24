@@ -18,19 +18,19 @@ import java.util.Arrays;
  */
 public class CsvEncoder
 {
-    /*
-     * default set of escaped characters.
-     */
+    // Default set of escaped characters (none)
     private static final int [] sOutputEscapes = new int[0];
 
     final protected static char[] HEX_CHARS = CharTypes.copyHexChars();
 
-    /* As an optimization we try coalescing short writes into
+    /**
+     * As an optimization we try coalescing short writes into
      * buffer; but pass longer directly.
      */
     final protected static int SHORT_WRITE = 32;
 
-    /* Also: only do check for optional quotes for short
+    /**
+     * Also: only do check for optional quotes for short
      * values; longer ones will always be quoted.
      */
     final protected static int MAX_QUOTE_CHECK = 24;
@@ -220,9 +220,9 @@ public class CsvEncoder
         _cfgMaxQuoteCheckChars = MAX_QUOTE_CHECK;
 
         _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
-          _cfgEscapeQuoteCharWithEscapeChar,
-          _cfgQuoteCharacter,
-          _cfgEscapeCharacter
+                _cfgEscapeQuoteCharWithEscapeChar,
+                _cfgQuoteCharacter,
+                _cfgEscapeCharacter
         );
 
         _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
@@ -255,31 +255,31 @@ public class CsvEncoder
         _cfgMinSafeChar = _calcSafeChar();
         _columnCount = newSchema.size();
         _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
-          base._cfgEscapeQuoteCharWithEscapeChar,
-          newSchema.getQuoteChar(),
-          newSchema.getEscapeChar()
+                base._cfgEscapeQuoteCharWithEscapeChar,
+                newSchema.getQuoteChar(),
+                newSchema.getEscapeChar()
         );
         _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
     }
 
     private final char _getQuoteCharEscapeChar(
-        final boolean escapeQuoteCharWithEscapeChar,
-        final int quoteCharacter,
-        final int escapeCharacter) {
+            final boolean escapeQuoteCharWithEscapeChar,
+            final int quoteCharacter,
+            final int escapeCharacter)
+    {
+        final char quoteEscapeChar;
 
-      final char quoteEscapeChar;
+        if (_cfgEscapeQuoteCharWithEscapeChar && _cfgEscapeCharacter > 0) {
+            quoteEscapeChar = (char) _cfgEscapeCharacter;
+        }
+        else if (_cfgQuoteCharacter > 0) {
+            quoteEscapeChar = (char) _cfgQuoteCharacter;
+        }
+        else {
+            quoteEscapeChar = '\\';
+        }
 
-      if (_cfgEscapeQuoteCharWithEscapeChar && _cfgEscapeCharacter > 0) {
-        quoteEscapeChar = (char) _cfgEscapeCharacter;
-      }
-      else if (_cfgQuoteCharacter > 0) {
-        quoteEscapeChar = (char) _cfgQuoteCharacter;
-      }
-      else {
-        quoteEscapeChar = '\\';
-      }
-
-      return quoteEscapeChar;
+        return quoteEscapeChar;
     }
 
     private final int _calcSafeChar()
@@ -288,6 +288,8 @@ public class CsvEncoder
         int min = Math.max(_cfgColumnSeparator, _cfgQuoteCharacter);
         // 06-Nov-2015, tatu: We will NOT apply escape character, because it usually
         //    has higher ascii value (with backslash); better handle separately.
+        // 23-Sep-2020, tatu: Should not actually need to consider anything but the
+        //    first character when checking... but leaving rest for now
         for (int i = 0; i < _cfgLineSeparatorLength; ++i) {
             min = Math.max(min, _cfgLineSeparator[i]);
         }
@@ -311,7 +313,7 @@ public class CsvEncoder
         return this;
     }
 
-    public CsvEncoder setOutputEscapes(int [] esc) {
+    public CsvEncoder setOutputEscapes(int[] esc) {
         _outputEscapes = (esc != null) ? esc : sOutputEscapes;
         return this;
     }
@@ -933,6 +935,7 @@ public class CsvEncoder
         final int len = text.length();
         // NOTE: caller should guarantee quote char is valid (not -1) at this point:
         final char q = (char) _cfgQuoteCharacter;
+        // 23-Sep-2020, tatu: Why was this defined but not used? Commented out in 2.11.3
 //        final char quoteEscape = _cfgEscapeQuoteCharWithEscapeChar ? esc : q;
         for (int i = 0; i < len; ++i) {
             if (_outputTail >= _outputEnd) {
@@ -1062,7 +1065,7 @@ public class CsvEncoder
         }
         return false;
     }
-    
+
     /**
      * @since 2.4
      */
@@ -1072,12 +1075,16 @@ public class CsvEncoder
 
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
+        // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
+        //   leads to quoting
+        final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
                         || (c < escLen && escCodes[c] != 0)
+                        || (c == lfFirst)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;
@@ -1093,15 +1100,18 @@ public class CsvEncoder
     protected boolean _needsQuotingStrict(String value, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
-
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
+        // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
+        //   leads to quoting
+        final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
                         || (c < escLen && escCodes[c] != 0)
+                        || (c == lfFirst)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
                         || (c == '#' && i == 0)) {
                     return true;

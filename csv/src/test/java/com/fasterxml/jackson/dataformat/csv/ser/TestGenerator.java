@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -43,7 +42,7 @@ public class TestGenerator extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final ObjectMapper MAPPER = mapperForCsv();
+    private final CsvMapper MAPPER = mapperForCsv();
     
     public void testSimpleExplicit() throws Exception
     {
@@ -99,19 +98,17 @@ public class TestGenerator extends ModuleTestBase
 
     public void testExplicitWithDouble() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("amount")
             .build();
 
-        String result = mapper.writer(schema).writeValueAsString(new Entry("abc", 1.25));
+        String result = MAPPER.writer(schema).writeValueAsString(new Entry("abc", 1.25));
         assertEquals("abc,1.25\n", result);
     }
 
     public void testExplicitWithFloat() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("id")
                 .addColumn("amount")
@@ -120,19 +117,19 @@ public class TestGenerator extends ModuleTestBase
         float amount = 1.89f;
         //this value loses precision when converted
         assertFalse(Double.toString((double)amount).equals("1.89"));
-        String result = mapper.writer(schema).writeValueAsString(new Entry2("abc", amount));
+        String result = MAPPER.writer(schema).writeValueAsString(new Entry2("abc", amount));
         assertEquals("abc,1.89\n", result);
     }
 
     public void testExplicitWithQuoted() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("desc")
             .build();
         
-        String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", "Some \"stuff\""));
+        String result = MAPPER.writer(schema)
+                    .writeValueAsString(new IdDesc("id", "Some \"stuff\""));
         // MUST use doubling for quotes!
         assertEquals("id,\"Some \"\"stuff\"\"\"\n", result);
     }
@@ -140,7 +137,6 @@ public class TestGenerator extends ModuleTestBase
     // [dataformat-csv#14]: String values that cross buffer boundary won't be quoted properly
     public void testLongerWithQuotes() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
             .addColumn("id")
             .addColumn("desc")
@@ -161,25 +157,24 @@ public class TestGenerator extends ModuleTestBase
         final String inputDesc = sb.toString();
         String expOutputDesc = inputDesc.replace("\"", "\"\"");
         String expOutput = "id,\""+expOutputDesc+"\"";
-        String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", inputDesc)).trim();
+        String result = MAPPER.writer(schema).writeValueAsString(new IdDesc("id", inputDesc)).trim();
         assertEquals(expOutput, result);
     }
 
     public void testWriteInFile() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                 .addColumn("firstName")
                 .addColumn("lastName")
                 .build();
 
-        ObjectNode node = mapper.createObjectNode()
+        ObjectNode node = MAPPER.createObjectNode()
                 .put("firstName", "David")
                 .put("lastName", "Douillet");
 
         File file = File.createTempFile("file", ".csv");
         try {
-            mapper.writer(schema.withHeader()).writeValue(file, node);
+            MAPPER.writer(schema.withHeader()).writeValue(file, node);
         } finally {
             file.delete();
         }
