@@ -19,9 +19,15 @@ Modules:
  (requested by pnepywoda@github)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
+2.11.3 (not yet released)
+
+#217: (csv) Should quote strings with line separator under STRICT_CHECK_FOR_QUOTING
+  mode
+ (reported, fix contributed by wkwkhautbois@github)
+
 2.11.2 (02-Aug-2020)
 
-#204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+#204: (csv) `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (reported by Björn M)
 
 2.11.1 (25-Jun-2020)
