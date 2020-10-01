@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.FormatSchema;
  * a CSV document to read or write.
  * Properties supported currently are:
  *<ul>
- * <li>columns (List of ColumnDef) [default: empty List]: Ordered list of columns (which may be empty, see below).
+ * <li>columns (List of {@link Column}) [default: empty List]: Ordered list of columns (which may be empty, see below).
  *   Each column has name (mandatory)  as well as type (optional; if not
  *   defined, defaults to "String").
  *   Note that
