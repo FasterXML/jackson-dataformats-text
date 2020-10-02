@@ -19,7 +19,7 @@ Modules:
  (requested by pnepywoda@github)
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
-2.11.3 (not yet released)
+2.11.3 (02-Oct-2020)
 
 #217: (csv) Should quote strings with line separator under STRICT_CHECK_FOR_QUOTING
   mode
