@@ -1,5 +1,5 @@
 Project: jackson-datatypes-text
-1;95;0cModules:
+Modules:
   jackson-dataformat-csv
   jackson-dataformat-properties
   jackson-dataformat-yaml
@@ -8,7 +8,7 @@ Project: jackson-datatypes-text
 === Releases ===
 ------------------------------------------------------------------------
 
-2.11.3 (not yet released)
+2.11.3 (02-Oct-2020)
 
 #217: (csv) Should quote strings with line separator under STRICT_CHECK_FOR_QUOTING
   mode
