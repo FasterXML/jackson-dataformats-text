@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 @SuppressWarnings("resource")
 public class YAMLFactory extends JsonFactory
@@ -50,13 +51,21 @@ public class YAMLFactory extends JsonFactory
 
     protected int _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
 
+    /**
+     * Helper object used to determine whether property names, String values
+     * must be quoted or not.
+     *
+     * @since 2.12
+     */
+    protected StringQuotingChecker _quotingChecker;
+
+    protected DumperOptions.Version _version;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
     /**********************************************************************
      */
-
-    protected DumperOptions.Version _version;
     
     /**
      * Default constructor used to create factory instances.
@@ -75,15 +84,15 @@ public class YAMLFactory extends JsonFactory
         super(oc);
         _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
         _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
-        /* 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
-         *   that adds version declaration which looks ugly...
-         */
+        // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
+        //   that adds version declaration which looks ugly...
         //_version = DumperOptions.Version.V1_1;
         _version = null;
+        _quotingChecker = StringQuotingChecker.Default.instance();
     }
 
     /**
-     * @since 2.2.1
+     * @since 2.2
      */
     public YAMLFactory(YAMLFactory src, ObjectCodec oc)
     {
@@ -91,6 +100,7 @@ public class YAMLFactory extends JsonFactory
         _version = src._version;
         _yamlParserFeatures = src._yamlParserFeatures;
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
+        _quotingChecker = src._quotingChecker;
     }
 
     /**
@@ -102,6 +112,7 @@ public class YAMLFactory extends JsonFactory
     {
         super(b, false);
         _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
+        _quotingChecker = b.stringQuotingChecker();
     }
 
     @Override

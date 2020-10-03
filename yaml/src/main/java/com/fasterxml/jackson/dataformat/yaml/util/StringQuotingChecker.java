@@ -14,7 +14,10 @@ import java.util.Set;
  * @since 2.12
  */
 public abstract class StringQuotingChecker
+    implements java.io.Serializable
 {
+    private static final long serialVersionUID = 1L;
+
     /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
      * aliases for booleans, and we better quote such values as keys; although Jackson
      * itself has no problems dealing with them, some other tools do have.
@@ -165,7 +168,10 @@ public abstract class StringQuotingChecker
      */
     public final static class Default
         extends StringQuotingChecker
+        implements java.io.Serializable
     {
+        private static final long serialVersionUID = 1L;
+
         private final static Default INSTANCE = new Default();
 
         public Default() { }
