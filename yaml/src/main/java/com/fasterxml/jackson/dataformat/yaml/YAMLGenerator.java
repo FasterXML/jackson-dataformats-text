@@ -28,11 +28,14 @@ import org.snakeyaml.engine.v2.events.StreamStartEvent;
 import org.snakeyaml.engine.v2.nodes.Tag;
 
 import com.fasterxml.jackson.core.*;
+
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.SimpleTokenWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
+
+import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 public class YAMLGenerator extends GeneratorBase
 {
@@ -186,33 +189,6 @@ public class YAMLGenerator extends GeneratorBase
     private final static ScalarStyle STYLE_BASE64 = STYLE_LITERAL;
 
     private final static ScalarStyle STYLE_PLAIN = ScalarStyle.PLAIN;
-    
-    /* As per <a href="https://yaml.org/type/bool.html">YAML Spec</a> there are a few
-     * aliases for booleans, and we better quote such values as keys; although Jackson
-     * itself has no problems dealing with them, some other tools do have.
-     */
-    // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out
-    //    single letter case (esp so 'y' won't get escaped)
-    // 17-Sep-2020, tatu: [dataformats-text#226] No, let's be consistent w/ values
-    private final static Set<String> MUST_QUOTE_NAMES = new HashSet<>(Arrays.asList(
-            "y", "Y", "n", "N",
-            "yes", "Yes", "YES", "no", "No", "NO",
-            "true", "True", "TRUE", "false", "False", "FALSE",
-            "on", "On", "ON", "off", "Off", "OFF"
-    ));
-
-    /**
-     * As per YAML <a href="https://yaml.org/type/null.html">null</a>
-     * and <a href="https://yaml.org/type/bool.html">boolean</a> type specs,
-     * better retain quoting for some values
-     */
-    private final static Set<String> MUST_QUOTE_VALUES = new HashSet<>(Arrays.asList(
-            "y", "Y", "n", "N",
-            "yes", "Yes", "YES", "no", "No", "NO",
-            "true", "True", "TRUE", "false", "False", "FALSE",
-            "on", "On", "ON", "off", "Off", "OFF",
-            "null", "Null", "NULL"
-    ));
 
     /*
     /**********************************************************************
@@ -263,6 +239,7 @@ public class YAMLGenerator extends GeneratorBase
 
     protected int _rootValueCount;
 
+    protected final StringQuotingChecker _quotingChecker = StringQuotingChecker.Default.instance();
     /*
     /**********************************************************************
     /* Life-cycle
@@ -453,7 +430,7 @@ public class YAMLGenerator extends GeneratorBase
     private final void _writeFieldName(String name) throws IOException
     {
         _writeScalar(name, "string",
-                _nameNeedsQuoting(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
+                _quotingChecker.needToQuoteName(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
     }
 
     /*
@@ -593,7 +570,7 @@ public class YAMLGenerator extends GeneratorBase
         ScalarStyle style;
         if (_cfgMinimizeQuotes) {
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
-            if (_valueNeedsQuoting(text)
+            if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                         && PLAIN_NUMBER_P.matcher(text).matches())
                 ) {
@@ -910,85 +887,6 @@ public class YAMLGenerator extends GeneratorBase
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
-    }
-
-    private boolean _nameNeedsQuoting(String name) {
-        if (name.length() == 0) { // empty String does indeed require quoting
-            return true;
-        }
-        switch (name.charAt(0)) {
-        // First, reserved name starting chars:
-        case 'f': // false
-        case 'o': // on/off
-        case 'n': // no
-        case 't': // true
-        case 'y': // yes
-        case 'F': // False
-        case 'O': // On/Off
-        case 'N': // No
-        case 'T': // True
-        case 'Y': // Yes
-            return MUST_QUOTE_NAMES.contains(name);
-
-            // And then numbers
-        case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-        case '-' : case '+': case '.':
-            return true;
-        }
-        return false;
-    }
-
-    private boolean _valueNeedsQuoting(String name) {
-        switch (name.charAt(0)) { // caller ensures no empty String
-        // First, reserved name starting chars:
-        case 'f': // false
-        case 'o': // on/off
-        case 'n': // null/n/no
-        case 't': // true
-        case 'y': // y/yes
-        case 'F': // False/FALSE
-        case 'O': // On/Off/ON/OFF
-        case 'N': // Null/NULL/N/No/NO
-        case 'T': // True/TRUE
-        case 'Y': // Y/Yes/YES
-            if (MUST_QUOTE_VALUES.contains(name)) {
-                return true;
-            }
-            break;
-        }
-        return _valueHasQuotableChar(name);
-    }
-
-    /**
-     * As per YAML <a href="https://yaml.org/spec/1.2/spec.html#id2788859">Plain Style</a>unquoted
-     * strings are restricted to a reduced charset and must be quoted in case they contain
-     * one of the following characters or character combinations.
-     */
-    private static boolean _valueHasQuotableChar(String inputStr) {
-        for (int i = 0, end = inputStr.length(); i < end; ++i) {
-            switch (inputStr.charAt(i)) {
-            case '[':
-            case ']':
-            case '{':
-            case '}':
-            case ',':
-                return true;
-            case '\t':
-            case ' ':
-                if (i < end - 1 && '#' == inputStr.charAt(i + 1)) {
-                    return true;
-                }
-                break;
-            case ':':
-                if (i < end - 1 && (' ' == inputStr.charAt(i + 1) || '\t' == inputStr.charAt(i + 1))) {
-                    return true;
-                }
-                break;
-            default:
-            }
-        }
-        return false;
     }
 
     protected String _lf() {
