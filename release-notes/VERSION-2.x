@@ -17,6 +17,7 @@ Modules:
  (reported by wkwkhautbois@github)
 #226: Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
  (requested by pnepywoda@github)
+#229: Allow configuring the way "must quote" is determined for property names, String values
 - SnakeYAML 1.26 -> 1.27
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 

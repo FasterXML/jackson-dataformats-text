@@ -9,7 +9,8 @@ import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
  * implementation for constructing {@link YAMLFactory}
  * instances.
  */
-public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFactoryBuilder>
+public class YAMLFactoryBuilder
+    extends DecorableTSFBuilder<YAMLFactory, YAMLFactoryBuilder>
 {
     /*
     /**********************************************************************

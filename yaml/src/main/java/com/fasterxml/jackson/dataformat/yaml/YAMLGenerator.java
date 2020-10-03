@@ -110,20 +110,6 @@ public class YAMLGenerator extends GeneratorBase
         LITERAL_BLOCK_STYLE(false),
 
         /**
-         * Option passed to SnakeYAML that determines if the line breaks used for
-         * serialization should be same as what the default is for current platform.
-         * If disabled, Unix linefeed ({@code \n}) will be used.
-         * <p>
-         * Default value is `false` for backwards compatibility.
-         *
-         * This setting does not do anything. Regardless of its value, SnakeYAML Engine will use the line break defined
-         * in System.getProperty("line.separator")
-         * @deprecated
-         */
-        @Deprecated
-        USE_PLATFORM_LINE_BREAKS(false),
-
-        /**
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
          *<p>
@@ -239,15 +225,16 @@ public class YAMLGenerator extends GeneratorBase
 
     protected int _rootValueCount;
 
-    protected final StringQuotingChecker _quotingChecker = StringQuotingChecker.Default.instance();
+    protected final StringQuotingChecker _quotingChecker;
+
     /*
     /**********************************************************************
     /* Life-cycle
     /**********************************************************************
      */
-
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
             int streamWriteFeatures, int yamlFeatures,
+            StringQuotingChecker quotingChecker,
             Writer out,
             SpecVersion version)
         throws IOException
@@ -260,6 +247,7 @@ public class YAMLGenerator extends GeneratorBase
 
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
+        _quotingChecker = quotingChecker;
         _writer = out;
         _docVersion = version;
 

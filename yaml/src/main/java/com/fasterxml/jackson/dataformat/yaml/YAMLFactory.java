@@ -69,6 +69,7 @@ public class YAMLFactory
     {
         super(src);
         _version = src._version;
+        _quotingChecker = src._quotingChecker;
     }
 
     /**
@@ -79,6 +80,7 @@ public class YAMLFactory
     protected YAMLFactory(YAMLFactoryBuilder b)
     {
         super(b);
+        _quotingChecker = b.stringQuotingChecker();
     }
 
     @Override
@@ -108,9 +110,9 @@ public class YAMLFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Serializable overrides
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -122,9 +124,9 @@ public class YAMLFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Capability introspection
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -143,9 +145,9 @@ public class YAMLFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Format support
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -189,9 +191,9 @@ public class YAMLFactory
     public int getFormatWriteFeatures() { return _formatWriteFeatures; }
     
     /*
-    /******************************************************
+    /**********************************************************************
     /* Factory methods: parsers
-    /******************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -236,9 +238,9 @@ public class YAMLFactory
     }
 
     /*
-    /******************************************************
+    /**********************************************************************
     /* Factory methods: generators
-    /******************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -248,6 +250,7 @@ public class YAMLFactory
         return new YAMLGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
+                _quotingChecker,
                 out, _version);
     }
 
@@ -268,9 +271,9 @@ public class YAMLFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
