@@ -17,6 +17,7 @@ Modules:
  (reported by wkwkhautbois@github)
 #226: Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
  (requested by pnepywoda@github)
+- SnakeYAML 1.26 -> 1.27
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
 2.11.3 (02-Oct-2020)
