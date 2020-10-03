@@ -2,25 +2,31 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import com.fasterxml.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
+import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
+
 /**
  * {@link com.fasterxml.jackson.core.TokenStreamFactory.TSFBuilder}
  * implementation for constructing {@link YAMLFactory}
  * instances.
- *
- * @since 3.0
  */
 public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFactoryBuilder>
 {
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
+    /**
+     * Helper object used to determine whether property names, String values
+     * must be quoted or not.
+     */
+    protected StringQuotingChecker _quotingChecker;
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected YAMLFactoryBuilder() {
@@ -29,6 +35,7 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
 
     public YAMLFactoryBuilder(YAMLFactory base) {
         super(base);
+        _quotingChecker = base._quotingChecker;
     }
 
     // // // Parser features NOT YET defined
@@ -37,7 +44,7 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
 
     public YAMLFactoryBuilder enable(YAMLGenerator.Feature f) {
         _formatWriteFeatures |= f.getMask();
-        return _this();
+        return this;
     }
 
     public YAMLFactoryBuilder enable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
@@ -45,24 +52,38 @@ public class YAMLFactoryBuilder extends DecorableTSFBuilder<YAMLFactory, YAMLFac
         for (YAMLGenerator.Feature f : other) {
             _formatWriteFeatures |= f.getMask();
         }
-        return _this();
+        return this;
     }
 
     public YAMLFactoryBuilder disable(YAMLGenerator.Feature f) {
         _formatWriteFeatures &= ~f.getMask();
-        return _this();
+        return this;
     }
-    
+
     public YAMLFactoryBuilder disable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
         _formatWriteFeatures &= ~first.getMask();
         for (YAMLGenerator.Feature f : other) {
             _formatWriteFeatures &= ~f.getMask();
         }
-        return _this();
+        return this;
     }
 
     public YAMLFactoryBuilder configure(YAMLGenerator.Feature f, boolean state) {
         return state ? enable(f) : disable(f);
+    }
+
+    public YAMLFactoryBuilder stringQuotingChecker(StringQuotingChecker sqc) {
+        _quotingChecker = sqc;
+        return this;
+    }
+
+    // // // Accessors
+
+    public StringQuotingChecker stringQuotingChecker() {
+        if (_quotingChecker != null) {
+            return _quotingChecker;
+        }
+        return StringQuotingChecker.Default.instance();
     }
 
     @Override

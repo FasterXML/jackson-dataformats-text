@@ -8,6 +8,7 @@ import org.snakeyaml.engine.v2.common.SpecVersion;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 @SuppressWarnings("resource")
 public class YAMLFactory
@@ -36,23 +37,24 @@ public class YAMLFactory
     /**********************************************************************
      */
 
+    /**
+     * Helper object used to determine whether property names, String values
+     * must be quoted or not.
+     */
+    protected StringQuotingChecker _quotingChecker;
+
+    protected SpecVersion _version; // enum, is serializable
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
     /**********************************************************************
      */
 
-    protected SpecVersion _version; // enum, is serializable
-    
     /**
-     * Default constructor used to create factory instances.
-     * Creation of a factory instance is a light-weight operation,
-     * but it is still a good idea to reuse limited number of
-     * factory instances (and quite often just a single instance):
-     * factories are used as context for storing some reused
-     * processing objects (such as symbol tables parsers use)
-     * and this reuse only works within context of a single
-     * factory instance.
+     * Default constructor used to create factory instances that may be
+     * used to construct an instance with default settings, instead of
+     * using {@link YAMLFactoryBuilder}.
      */
     public YAMLFactory()
     {
@@ -60,6 +62,7 @@ public class YAMLFactory
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         _version = null;
+        _quotingChecker = StringQuotingChecker.Default.instance();
     }
 
     public YAMLFactory(YAMLFactory src)
