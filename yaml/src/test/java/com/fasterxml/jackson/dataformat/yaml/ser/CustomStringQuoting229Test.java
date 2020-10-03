@@ -26,7 +26,11 @@ public class CustomStringQuoting229Test extends ModuleTestBase
         }
     }
 
-    private final ObjectMapper MINIMIZING_MAPPER = YAMLMapper.builder()
+    private final ObjectMapper MINIMIZING_MAPPER = YAMLMapper.builder(
+            YAMLFactory.builder()
+                // null -> use default:
+                .stringQuotingChecker(null)
+                .build())
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .build();
 

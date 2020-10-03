@@ -1,12 +1,17 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+
+import org.snakeyaml.engine.v2.common.SpecVersion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 public class GeneratorFeatureTest extends ModuleTestBase
 {
@@ -54,4 +59,49 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("- \"second\"", parts[2].trim());
         assertEquals("- \"third\"", parts[3].trim());
     }
+
+    public void testYAMLSpecVersionDefault() throws Exception
+    {
+        ObjectMapper defaultMapper = YAMLMapper.builder().build();
+        final Object inputValue = Collections.singletonMap("key", "value");
+        // no minimization so:
+        assertEquals("---\nkey: \"value\"",
+                _trim(defaultMapper.writeValueAsString(inputValue)));
+    }
+
+    // 03-Oct-2020, tatu: With Jackson 3.0 / Snakeyaml-engine, declared
+    //   version seems to make no difference
+
+    public void testYAMLSpecVersion10() throws Exception
+    {
+        ObjectMapper mapper10 = YAMLMapper.builder(
+                YAMLFactory.builder()
+                .yamlVersionToWrite(new SpecVersion(1, 0))
+                .build())
+        .build();
+        final Object inputValue = Collections.singletonMap("key", "value");
+        assertEquals("%YAML 1.0\n---\nkey: \"value\"",
+                _trim(mapper10.writeValueAsString(inputValue)));
+    }
+
+    // @since 2.12
+    public void testYAMLSpecVersion11() throws Exception
+    {
+        ObjectMapper mapper11 = YAMLMapper.builder(
+                YAMLFactory.builder()
+                .yamlVersionToWrite(new SpecVersion(1, 1))
+                .build())
+        .build();
+        final Object inputValue = Collections.singletonMap("key", "value");
+        assertEquals("%YAML 1.1\n---\nkey: \"value\"",
+                _trim(mapper11.writeValueAsString(inputValue)));
+    }
+
+    private String _trim(String yaml) {
+        yaml = yaml.trim();
+        // linefeeds to replace?
+        yaml = yaml.replace('\r', '\n');
+        return yaml;
+    }
 }
+

@@ -197,7 +197,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final boolean _cfgMinimizeQuotes;
 
     protected final SpecVersion _docVersion;
-    
+
     /*
     /**********************************************************************
     /* Output state
@@ -253,7 +253,7 @@ public class YAMLGenerator extends GeneratorBase
 
         _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
 
-        _emitter = new Emitter( _outputOptions, new WriterWrapper(_writer));
+        _emitter = new Emitter(_outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
 
         _emit(new StreamStartEvent());
@@ -283,6 +283,9 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
         }
+        // 03-Oct-2020, tatu: Specify spec version; however, does not seem to make
+        //   any difference?
+        opt.setYamlDirective(Optional.ofNullable(version));
         return opt.build();
     }
 
@@ -885,7 +888,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         Map<String,String> noTags = Collections.emptyMap();
         boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
-        _emit(new DocumentStartEvent(startMarker, Optional.empty(),
+        _emit(new DocumentStartEvent(startMarker, _outputOptions.getYamlDirective(),
                  // for 1.10 was: ((version == null) ? null : version.getArray()),
                 noTags));
     }

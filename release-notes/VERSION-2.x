@@ -15,9 +15,10 @@ Modules:
 #222: (csv) `JsonParser.Feature.EMPTY_STRING_AS_NULL` does not work when
   text is parsed as `String[]`
  (reported by wkwkhautbois@github)
-#226: Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
+#226: (yaml) Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
  (requested by pnepywoda@github)
-#229: Allow configuring the way "must quote" is determined for property names, String values
+#229: (yaml) Allow configuring the way "must quote" is determined for property names, String values
+- Add configurability of "YAML version generator is to follow" via "YAMLFactory.builder()"
 - SnakeYAML 1.26 -> 1.27
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 

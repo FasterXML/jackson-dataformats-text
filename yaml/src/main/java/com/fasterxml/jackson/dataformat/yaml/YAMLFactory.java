@@ -38,12 +38,15 @@ public class YAMLFactory
      */
 
     /**
+     * YAML version for underlying generator to follow, if specified.
+     */
+    protected final SpecVersion _version;
+
+    /**
      * Helper object used to determine whether property names, String values
      * must be quoted or not.
      */
-    protected StringQuotingChecker _quotingChecker;
-
-    protected SpecVersion _version; // enum, is serializable
+    protected final StringQuotingChecker _quotingChecker;
 
     /*
     /**********************************************************************
@@ -80,6 +83,7 @@ public class YAMLFactory
     protected YAMLFactory(YAMLFactoryBuilder b)
     {
         super(b);
+        _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
     }
 
