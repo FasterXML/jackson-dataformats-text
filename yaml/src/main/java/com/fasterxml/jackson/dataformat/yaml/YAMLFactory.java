@@ -490,7 +490,7 @@ public class YAMLFactory extends JsonFactory
     protected YAMLGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
         int feats = _yamlGeneratorFeatures;
         YAMLGenerator gen = new YAMLGenerator(ctxt, _generatorFeatures, feats,
-                _objectCodec, out, _version);
+                _quotingChecker, _objectCodec, out, _version);
         // any other initializations? No?
         return gen;
     }

@@ -230,7 +230,8 @@ public class YAMLGenerator extends GeneratorBase
 
     protected int _rootValueCount;
 
-    protected final StringQuotingChecker _quotingChecker = StringQuotingChecker.Default.instance();
+    protected final StringQuotingChecker _quotingChecker;
+
     /*
     /**********************************************************
     /* Life-cycle
@@ -238,6 +239,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
+            StringQuotingChecker quotingChecker,
             ObjectCodec codec, Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
@@ -245,6 +247,8 @@ public class YAMLGenerator extends GeneratorBase
         super(jsonFeatures, codec);
         _ioContext = ctxt;
         _formatFeatures = yamlFeatures;
+        _quotingChecker = (quotingChecker == null)
+                ? StringQuotingChecker.Default.instance() : quotingChecker;
         _writer = out;
         _docVersion = version;
 
@@ -254,6 +258,14 @@ public class YAMLGenerator extends GeneratorBase
         // should we start output now, or try to defer?
         _emit(new StreamStartEvent(null, null));
         _emitStartDocument();
+    }
+
+    @Deprecated // since 2.12
+    public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
+            ObjectCodec codec, Writer out,
+            org.yaml.snakeyaml.DumperOptions.Version version) throws IOException {
+        this(ctxt, jsonFeatures, yamlFeatures, null,
+                codec, out, version);
     }
 
     protected DumperOptions buildDumperOptions(int jsonFeatures, int yamlFeatures,
