@@ -52,14 +52,19 @@ public class YAMLFactory extends JsonFactory
     protected int _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
 
     /**
+     * YAML version for underlying generator to follow, if specified.
+     *
+     * @since 2.12
+     */
+    protected final DumperOptions.Version _version;
+
+    /**
      * Helper object used to determine whether property names, String values
      * must be quoted or not.
      *
      * @since 2.12
      */
-    protected StringQuotingChecker _quotingChecker;
-
-    protected DumperOptions.Version _version;
+    protected final StringQuotingChecker _quotingChecker;
 
     /*
     /**********************************************************************
@@ -97,9 +102,9 @@ public class YAMLFactory extends JsonFactory
     public YAMLFactory(YAMLFactory src, ObjectCodec oc)
     {
         super(src, oc);
-        _version = src._version;
         _yamlParserFeatures = src._yamlParserFeatures;
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
+        _version = src._version;
         _quotingChecker = src._quotingChecker;
     }
 
@@ -112,6 +117,7 @@ public class YAMLFactory extends JsonFactory
     {
         super(b, false);
         _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
+        _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
     }
 
