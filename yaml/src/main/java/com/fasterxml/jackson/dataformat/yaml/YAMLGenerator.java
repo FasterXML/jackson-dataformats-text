@@ -116,6 +116,15 @@ public class YAMLGenerator extends GeneratorBase
          * @since 2.9
          */
         INDENT_ARRAYS(false),
+        /**
+         * Feature enabling of which adds indentation with indicator for array entry generation
+         * (default indentation being 2 spaces).
+         *<p>
+         * Default value is `false` for backwards compatibility
+         *
+         * @since 2.12.0
+         */
+        INDENT_ARRAYS_WITH_INDICATOR(false),
 
         /**
          * Option passed to SnakeYAML that determines if the line breaks used for
@@ -290,6 +299,10 @@ public class YAMLGenerator extends GeneratorBase
             // Also looks like all kinds of values do work, except for both being 2... weird.
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
+        }
+        if (Feature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatFeatures)) {
+            opt.setIndicatorIndent(2);
+            opt.setIndentWithIndicator(true);
         }
         // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
         if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
