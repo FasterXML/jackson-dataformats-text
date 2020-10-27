@@ -10,6 +10,8 @@ Modules:
 
 2.12.0 (not yet released)
 
+#175: (yaml) Add `YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR` to indent by 2 spaces
+ (requested by Jesper N; fix contributed by Damian S)
 #199: (csv) Empty Lists can only be String-typed in CSV
  (reported by Simon L)
 #222: (csv) `JsonParser.Feature.EMPTY_STRING_AS_NULL` does not work when

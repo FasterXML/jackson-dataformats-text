@@ -113,9 +113,17 @@ public class YAMLGenerator extends GeneratorBase
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
          *<p>
-         * Default value is `false` for backwards compatibility
+         * Default value is {@code false} for backwards compatibility
          */
         INDENT_ARRAYS(false),
+
+        /**
+         * Feature enabling of which adds indentation with indicator for array entry generation
+         * (default indentation being 2 spaces).
+         *<p>
+         * Default value is {@code false} for backwards compatibility
+         */
+        INDENT_ARRAYS_WITH_INDICATOR(false),
         ;
 
         protected final boolean _defaultState;
@@ -283,6 +291,15 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndicatorIndent(1);
             opt.setIndent(2);
         }
+        // [dataformats-text#175]: further configurability that overrides prev setting
+        if (Feature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatWriteFeatures)) {
+            opt.setIndicatorIndent(2);
+            opt.setIndent(2);
+
+// 26-Oct-2020, tatu: not sure how this setting translates
+//            opt.setIndentWithIndicator(true);
+        }
+
         // 03-Oct-2020, tatu: Specify spec version; however, does not seem to make
         //   any difference?
         opt.setYamlDirective(Optional.ofNullable(version));
