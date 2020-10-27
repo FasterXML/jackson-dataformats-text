@@ -294,7 +294,6 @@ public class YAMLGenerator extends GeneratorBase
         // [dataformats-text#175]: further configurability that overrides prev setting
         if (Feature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatWriteFeatures)) {
             opt.setIndicatorIndent(2);
-            opt.setIndent(2);
 
 // 26-Oct-2020, tatu: not sure how this setting translates
 //            opt.setIndentWithIndicator(true);
