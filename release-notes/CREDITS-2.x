@@ -142,6 +142,16 @@ Björn Michael (bjmi@github)
 * Reported #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (2.11.2)
 
+Jesper Nielsen (jn-asseco@github)
+* Requested #175: (yaml) Add `YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR`
+  to indent by 2 spaces
+ (2.12.0)
+
+Damian Swiecki (dswiecki@github)
+* Contributed fix for #175: (yaml) Add `YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR`
+  to indent by 2 spaces
+ (2.12.0)
+
 Simon Levermann (sonOfRa@github)
 * Reported #199: (csv) Empty Lists can only be String-typed in CSV
  (2.12.0)
