@@ -20,6 +20,9 @@ Modules:
 #226: (yaml) Quote 'y'/'Y'/'n'/'N' as names too (to avoid problems with Boolean keys)
  (requested by pnepywoda@github)
 #229: (yaml) Allow configuring the way "must quote" is determined for property names, String values
+#231: Typed object with anchor throws Already had POJO for id (note: actual
+   fix in `jackson-annotations`)
+ (reported by almson@github)
 - Add configurability of "YAML version generator is to follow" via "YAMLFactory.builder()"
 - SnakeYAML 1.26 -> 1.27
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
