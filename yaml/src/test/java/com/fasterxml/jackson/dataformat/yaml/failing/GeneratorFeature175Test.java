@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.ser;
+package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
@@ -6,7 +6,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import java.util.Map;
 
-public class GeneratorFeature175Test extends ModuleTestBase {
+// 11-Nov-2020, tatu: Failing for 3.x until (and if) `snakeyaml-engine`
+//    adds support ot make feature work.
+public class GeneratorFeature175Test extends ModuleTestBase
+{
     /*
     /**********************************************************
     /* Test methods
