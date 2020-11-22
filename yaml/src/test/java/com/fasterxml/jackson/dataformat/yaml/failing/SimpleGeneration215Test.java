@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
-public class SimpleGeneration215Tests extends ModuleTestBase
+public class SimpleGeneration215Test extends ModuleTestBase
 {
     // [dataformats-text#215]: setting used in constructor
     public void testStartMarkerViaWriter() throws Exception
