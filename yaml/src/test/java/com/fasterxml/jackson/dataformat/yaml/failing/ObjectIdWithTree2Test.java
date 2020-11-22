@@ -8,10 +8,11 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 /**
  * Although native Object Ids work in general, Tree Model currently
- * has issues with it (see [dataformat-yaml#24])
+ * has issues with it (see [dataformats-text#2])
  */
-public class ObjectIdWithTreeTest extends ModuleTestBase
+public class ObjectIdWithTree2Test extends ModuleTestBase
 {
+    // [dataformats-text#2]
     @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
     static class Node
     {
@@ -39,7 +40,7 @@ public class ObjectIdWithTreeTest extends ModuleTestBase
             +"  next: *1"
             ;
 
-    // For issue [#24]
+    // [dataformats-text#2]
     public void testRoundtripViaTree() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
