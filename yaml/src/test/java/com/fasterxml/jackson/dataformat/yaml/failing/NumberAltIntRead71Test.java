@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.deser;
+package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import java.math.BigInteger;
 
@@ -7,6 +7,10 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 // [dataformats-text#71]: hex numbers
 // [dataformats-text#233]: also binary, octal (with/without underscores)
+//
+// 23-Nov-2020, tatu: Alas, snakeyaml_engine does not really support
+//   detecting these variants (maybe wrt YAML 1.1 -> 1.2 changes).
+//   So tests fail. Not sure what to do about this.
 public class NumberAltIntRead71Test extends ModuleTestBase
 {
     static class IntHolder {

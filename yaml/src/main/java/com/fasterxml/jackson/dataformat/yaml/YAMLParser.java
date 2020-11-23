@@ -441,7 +441,6 @@ public class YAMLParser extends ParserBase
         final int len = value.length();
         if (!typeTagOptional.isPresent() || typeTagOptional.get().equals("!")) { // no, implicit
             Tag nodeTag = _yamlResolver.resolve(value, scalar.getImplicit().canOmitTagInPlainScalar());
-
             if (nodeTag == Tag.STR) {
                 return JsonToken.VALUE_STRING;
             }
