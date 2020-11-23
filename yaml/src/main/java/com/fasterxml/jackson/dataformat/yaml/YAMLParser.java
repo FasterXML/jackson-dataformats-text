@@ -3,7 +3,6 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.regex.Pattern;
 
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
@@ -67,12 +66,10 @@ public class YAMLParser extends ParserBase
     // note: does NOT include '0', handled separately
 //    private final static Pattern PATTERN_INT = Pattern.compile("-?[1-9][0-9]*");
 
-    /**
-     * We will use pattern that is bit stricter than YAML definition,
-     * but we will still allow things like extra '_' in there.
-     */
-    private final static Pattern PATTERN_FLOAT = Pattern.compile(
-            "[-+]?([0-9][0-9_]*)?\\.[0-9]*([eE][-+][0-9]+)?");
+    // 22-Nov-2020, tatu: Not needed as of 2.12 since SnakeYAML tags
+    //    doubles correctly
+//    private final static Pattern PATTERN_FLOAT = Pattern.compile(
+//            "[-+]?([0-9][0-9_]*)?\\.[0-9]*([eE][-+][0-9]+)?");
     
     /*
     /**********************************************************************
@@ -603,25 +600,16 @@ public class YAMLParser extends ParserBase
 
     protected JsonToken _decodeNumberScalar(String value, final int len)
     {
-        if ("0".equals(value)) { // special case for regexp (can't take minus etc)
-            _numberNegative = false;
-            _numberInt = 0;
-            _numTypesValid = NR_INT;
-            return JsonToken.VALUE_NUMBER_INT;
-        }
-        /* 05-May-2012, tatu: Turns out this is a hot spot; so let's write it
-         *   out and avoid regexp overhead...
-         */
+        // 05-May-2012, tatu: Turns out this is a hot spot; so let's write it
+        //  out and avoid regexp overhead...
+
         //if (PATTERN_INT.matcher(value).matches()) {
         int i;
-        char sign = value.charAt(0);
-        if (sign == '-') {
+        char ch = value.charAt(0);
+        if (ch == '-') {
             _numberNegative = true;
-            if (len == 1) {
-                return null;
-            }
             i = 1;
-        } else if (sign == '+') {
+        } else if (ch == '+') {
             _numberNegative = false;
             if (len == 1) {
                 return null;
@@ -631,42 +619,177 @@ public class YAMLParser extends ParserBase
             _numberNegative = false;
             i = 0;
         }
-        // !!! 11-Jan-2018, tatu: Should check for binary/octal/hex/sexagesimal
-        //    as per http://yaml.org/type/int.html
+        if (len == i) { // should not occur but play it safe
+            return null;
+        }
+        // Next: either "0" ("-0" and "+0" also accepted), or non-decimal. So:
+        if (value.charAt(i) == '0') {
+            if (++i == len) {
+                // can leave "_numberNegative" as is, does not matter
+                _numberInt = 0;
+                _numTypesValid = NR_INT;
+                return JsonToken.VALUE_NUMBER_INT;
+            }
+            ch = value.charAt(i);
 
-        int underscores = 0;
+            switch (ch) {
+            case 'b': case 'B': // binary
+                return _decodeNumberIntBinary(value, i+1, len, _numberNegative);
+            case 'x': case 'X': // hex
+                return _decodeNumberIntHex(value, i+1, len, _numberNegative);
+            case '0': case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+            case '_':
+                return _decodeNumberIntOctal(value, i, len, _numberNegative);
+            default:
+            }
+            // should never occur, but in abundance of caution, let's not
+            // throw exception but just return as String
+            return JsonToken.VALUE_STRING;
+        }
+        
+        // 23-Nov-2020, tatu: will now check and support all formats EXCEPT
+        //    for 60-base; 60-base is trickier not just because decoding gets
+        //    more involved but also because it can accidentally "detect" values
+        //    that we most likely expressing either Times or IP numbers.
+        
+        boolean underscores = false;
+
         while (true) {
             int c = value.charAt(i);
             if (c > '9' || c < '0') {
-                if (c != '_') {
+                if (c == '_') {
+                    underscores = true;
+                } else {
                     break;
                 }
-                ++underscores;
             }
             if (++i == len) {
                 _numTypesValid = 0;
-                if (underscores > 0) {
-                    return _cleanYamlInt(_textValue);
+                if (underscores) {
+                    return _cleanYamlInt(value);
                 }
                 _cleanedTextValue = _textValue;
                 return JsonToken.VALUE_NUMBER_INT;
             }
         }
-        if (PATTERN_FLOAT.matcher(value).matches()) {
-            _numTypesValid = 0;
-            return _cleanYamlFloat(_textValue);
-        }
+        // 22-Nov-2020, tatu: Should not be needed; SnakeYAML does not
+        //   tag things this way...
+//        if (PATTERN_FLOAT.matcher(value).matches()) {
+//            _numTypesValid = 0;
+//            return _cleanYamlFloat(_textValue);
+//        }
         
         // 25-Aug-2016, tatu: If we can't actually match it to valid number,
-        //    consider String; better than claiming there's not toekn
+        //    consider String; better than claiming there's not token
         return JsonToken.VALUE_STRING;
-    }   
+    }
 
-    protected JsonToken _decodeIntWithUnderscores(String value, final int len)
+    // @since 2.12
+    protected JsonToken _decodeNumberIntBinary(final String value, int i, final int origLen,
+            boolean negative)
     {
+        final String cleansed = _cleanUnderscores(value, i, origLen);
+        int digitLen = cleansed.length();
+
+        if (digitLen <= 31) {
+            int v = Integer.parseInt(cleansed, 2);
+            if (negative) {
+                v = -v;
+            }
+            _numberInt = v;
+            _numTypesValid = NR_INT;
+            return JsonToken.VALUE_NUMBER_INT;
+        }
+        if (digitLen <= 63) {
+            return _decodeFromLong(Long.parseLong(cleansed, 2), negative,
+                    (digitLen == 32));
+        }
+        return _decodeFromBigInteger(new BigInteger(cleansed, 2), negative);
+    }
+
+    // @since 2.12
+    protected JsonToken _decodeNumberIntOctal(final String value, int i, final int origLen,
+            boolean negative)
+    {
+        final String cleansed = _cleanUnderscores(value, i, origLen);
+        int digitLen = cleansed.length();
+
+        if (digitLen <= 10) { // 30 bits
+            int v = Integer.parseInt(cleansed, 8);
+            if (negative) {
+                v = -v;
+            }
+            _numberInt = v;
+            _numTypesValid = NR_INT;
+            return JsonToken.VALUE_NUMBER_INT;
+        }
+        if (digitLen <= 21) { // 63 bits
+            return _decodeFromLong(Long.parseLong(cleansed, 8), negative, false);
+        }
+        return _decodeFromBigInteger(new BigInteger(cleansed, 8), negative);
+    }
+
+    // @since 2.12
+    protected JsonToken _decodeNumberIntHex(final String value, int i, final int origLen,
+            boolean negative)
+    {
+        final String cleansed = _cleanUnderscores(value, i, origLen);
+        int digitLen = cleansed.length();
+
+        if (digitLen <= 7) { // 28 bits
+            int v = Integer.parseInt(cleansed, 16);
+            if (negative) {
+                v = -v;
+            }
+            _numberInt = v;
+            _numTypesValid = NR_INT;
+            return JsonToken.VALUE_NUMBER_INT;
+        }
+        if (digitLen <= 15) { // 60 bits
+            return _decodeFromLong(Long.parseLong(cleansed, 16), negative,
+                    (digitLen == 8));
+        }
+        return _decodeFromBigInteger(new BigInteger(cleansed, 16), negative);
+    }
+
+    private JsonToken _decodeFromLong(long unsignedValue, boolean negative,
+            boolean checkIfInt)
+    {
+        long actualValue;
+
+        if (negative) {
+            actualValue = -unsignedValue;
+            if (checkIfInt && (actualValue >= MIN_INT_L)) {
+                _numberInt = (int) actualValue;
+                _numTypesValid = NR_INT;
+                return JsonToken.VALUE_NUMBER_INT;
+            }
+        } else {
+            if (checkIfInt && (unsignedValue < MAX_INT_L)) {
+                _numberInt = (int) unsignedValue;
+                _numTypesValid = NR_INT;
+                return JsonToken.VALUE_NUMBER_INT;
+            }
+            actualValue = unsignedValue;
+        }
+        _numberLong = actualValue;
+        _numTypesValid = NR_LONG;
         return JsonToken.VALUE_NUMBER_INT;
     }
-    
+
+    private JsonToken _decodeFromBigInteger(BigInteger unsignedValue, boolean negative)
+    {
+        // Should we check for bounds here too? Let's not bother yet
+        if (negative) {
+            _numberBigInt = unsignedValue.negate();
+        } else {
+            _numberBigInt = unsignedValue;
+        }
+        _numTypesValid = NR_BIGINT;
+        return JsonToken.VALUE_NUMBER_INT;
+    }
+
     /*
     /**********************************************************
     /* String value handling
@@ -921,6 +1044,22 @@ public class YAMLParser extends ParserBase
         }
         _cleanedTextValue = sb.toString();
         return JsonToken.VALUE_NUMBER_INT;
+    }
+
+    private String _cleanUnderscores(String str, int i, final int len)
+    {
+        final StringBuilder sb = new StringBuilder(len);
+        for (; i < len; ++i) {
+            char ch = str.charAt(i);
+            if (ch != '_') {
+                sb.append(ch);
+            }
+        }
+        // tiny optimization: if nothing was trimmed, return String
+        if (sb.length() == len) {
+            return str;
+        }
+        return sb.toString();
     }
 
     private JsonToken _cleanYamlFloat(String str)
