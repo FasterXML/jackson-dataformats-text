@@ -1,11 +1,13 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
-public class ReadHexInteger71Test extends ModuleTestBase
+// [dataformats-text#71]: hex numbers
+// [dataformats-text#233]: also binary, octal (with/without underscores)
+public class NumberAltIntRead71Test extends ModuleTestBase
 {
     static class IntHolder {
         public int value;
