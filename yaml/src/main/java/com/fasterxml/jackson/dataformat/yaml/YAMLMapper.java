@@ -47,8 +47,30 @@ public class YAMLMapper extends ObjectMapper
         /******************************************************************
          */
 
-        // No Parser-features yet
-        
+        public Builder enable(YAMLParser.Feature... features) {
+            for (YAMLParser.Feature f : features) {
+                _formatReadFeatures |= f.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(YAMLParser.Feature... features) {
+            for (YAMLParser.Feature f : features) {
+                _formatReadFeatures &= ~f.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(YAMLParser.Feature feature, boolean state)
+        {
+            if (state) {
+                _formatReadFeatures |= feature.getMask();
+            } else {
+                _formatReadFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
+
         public Builder enable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
                 _formatWriteFeatures |= f.getMask();

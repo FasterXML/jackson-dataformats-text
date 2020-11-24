@@ -35,11 +35,20 @@ import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
  */
 public class YAMLParser extends ParserBase
 {
-    // 04-Feb-2018, tatu: None defined yet so...
     /**
      * Enumeration that defines all togglable features for YAML parsers.
+     */
     public enum Feature implements FormatFeature
     {
+        /**
+         * Feature that determines whether an empty {@link String} will be parsed
+         * as {@code null}. Logic is part of YAML 1.1 
+         * <a href="https://yaml.org/type/null.html">Null Language-Independent Type</a>.
+         *<p>
+         * Feature is enabled by default in Jackson 2.12 for backwards-compatibility
+         * reasons.
+         */
+        EMPTY_STRING_AS_NULL(true)
         ;
 
         final boolean _defaultState;
@@ -70,7 +79,6 @@ public class YAMLParser extends ParserBase
         @Override
         public int getMask() { return _mask; }
     }
-    */
 
     // note: does NOT include '0', handled separately
 //    private final static Pattern PATTERN_INT = Pattern.compile("-?[1-9][0-9]*");
@@ -86,7 +94,10 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
-//    protected int _formatFeatures;
+    protected final int _formatFeatures;
+
+    // @since 2.12
+    protected final boolean _cfgEmptyStringsToNull;
 
     /*
     /**********************************************************************
@@ -163,14 +174,15 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
-    public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            BufferRecycler br, int streamReadFeatures, Reader reader)
+    public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
+            int streamReadFeatures, int formatFeatures, Reader reader)
     {
         super(readCtxt, ioCtxt, streamReadFeatures);
-//        _formatFeatures = formatFeatures;
+        _formatFeatures = formatFeatures;
         _reader = reader;
         LoadSettings settings = LoadSettings.builder().build();//TODO use parserFeatures
         _yamlParser = new ParserImpl(new StreamReader(reader, settings), settings);
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _parsingContext = SimpleTokenReadContext.createRootContext(dups);
@@ -257,16 +269,22 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
     /* FormatFeature support (none yet)
     /**********************************************************************
-     */
 
     /*
-    @Override
-    public int getFormatFeatures() {
-        return _formatFeatures;
-    }
-    */
+    /**********************************************************************
+    /* Public API, configuration
+    /**********************************************************************
+     */
 
-//    @Override public CsvSchema getSchema() 
+    /**
+     * Method for checking whether specified CSV {@link Feature}
+     * is enabled.
+     */
+    public boolean isEnabled(YAMLParser.Feature f) {
+        return (_formatFeatures & f.getMask()) != 0;
+    }
+
+//    @Override public XxxSchema getSchema() 
 
     /*
     /**********************************************************************
@@ -457,13 +475,11 @@ public class YAMLParser extends ParserBase
         _textValue = value;
         _cleanedTextValue = null;
 
-        // [dataformats-text#130]: uncomment for 2.13 either as-is, or
-        // behind a new feature
-        /*
-        if (value.isEmpty()) {
+        // [dataformats-text#130]: Allow determining whether empty String is
+        // coerced into null or not
+        if (!_cfgEmptyStringsToNull && value.isEmpty()) {
             return JsonToken.VALUE_STRING;
         }
-        */
 
         // we may get an explicit tag, if so, use for corroborating...
         Optional<String> typeTagOptional = scalar.getTag();

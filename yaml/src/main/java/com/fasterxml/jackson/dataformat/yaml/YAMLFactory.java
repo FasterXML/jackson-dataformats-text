@@ -15,11 +15,11 @@ public class YAMLFactory
     extends TextualTSFactory
     implements java.io.Serializable
 {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	protected final static Charset UTF8 = Charset.forName("UTF-8");
+    protected final static Charset UTF8 = Charset.forName("UTF-8");
 
-	/**
+    /**
      * Name used to identify YAML format.
      * (and returned by {@link #getFormatName()}
      */
@@ -28,7 +28,13 @@ public class YAMLFactory
     /**
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
-     */    
+     */
+    protected final static int DEFAULT_YAML_PARSER_FEATURE_FLAGS = YAMLParser.Feature.collectDefaults();
+
+    /**
+     * Bitfield (set of flags) of all generator features that are enabled
+     * by default.
+     */
     protected final static int DEFAULT_YAML_GENERATOR_FEATURE_FLAGS = YAMLGenerator.Feature.collectDefaults();
 
     /*
@@ -61,7 +67,7 @@ public class YAMLFactory
      */
     public YAMLFactory()
     {
-        super(0, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
+        super(DEFAULT_YAML_PARSER_FEATURE_FLAGS, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         _version = null;
@@ -176,20 +182,17 @@ public class YAMLFactory
         return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
-    // 04-Feb-2018, tatu: None defined yet:
-    /*
     @Override
     public Class<YAMLParser.Feature> getFormatReadFeatureType() {
         return YAMLParser.Feature.class;
     }
 
     public final boolean isEnabled(YAMLParser.Feature f) {
-        return (_formatParserFeatures & f.getMask()) != 0;
+        return (_formatReadFeatures & f.getMask()) != 0;
     }
-    */
 
     @Override
-    public int getFormatReadFeatures() { return 0; }
+    public int getFormatReadFeatures() { return _formatReadFeatures; }
 
     @Override
     public int getFormatWriteFeatures() { return _formatWriteFeatures; }
@@ -206,6 +209,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _createReader(in, null, ioCtxt));
     }
 
@@ -215,6 +219,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(), 
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 r);
     }
 
@@ -224,6 +229,7 @@ public class YAMLFactory
             boolean recyclable) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 new CharArrayReader(data, offset, len));
     }
 
@@ -232,6 +238,7 @@ public class YAMLFactory
             byte[] data, int offset, int len) throws IOException {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _createReader(data, offset, len, null, ioCtxt));
     }
 

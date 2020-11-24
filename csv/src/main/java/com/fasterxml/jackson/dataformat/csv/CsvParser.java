@@ -432,7 +432,7 @@ public class CsvParser
      * Method for enabling specified CSV feature
      * (check {@link Feature} for list of features)
      */
-    public JsonParser enable(Feature f)
+    public JsonParser enable(CsvParser.Feature f)
     {
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
@@ -443,7 +443,7 @@ public class CsvParser
      * Method for disabling specified  CSV feature
      * (check {@link Feature} for list of features)
      */
-    public JsonParser disable(Feature f)
+    public JsonParser disable(CsvParser.Feature f)
     {
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
@@ -454,7 +454,7 @@ public class CsvParser
      * Method for enabling or disabling specified CSV feature
      * (check {@link Feature} for list of features)
      */
-    public JsonParser configure(Feature f, boolean state)
+    public JsonParser configure(CsvParser.Feature f, boolean state)
     {
         if (state) {
             enable(f);
@@ -468,7 +468,7 @@ public class CsvParser
      * Method for checking whether specified CSV {@link Feature}
      * is enabled.
      */
-    public boolean isEnabled(Feature f) {
+    public boolean isEnabled(CsvParser.Feature f) {
         return (_formatFeatures & f.getMask()) != 0;
     }
 
