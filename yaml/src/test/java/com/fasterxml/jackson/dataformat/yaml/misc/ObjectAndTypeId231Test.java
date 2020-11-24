@@ -33,15 +33,21 @@ public class ObjectAndTypeId231Test extends ModuleTestBase
     {
         String yaml = "list:\n" +
                       "    - !Derived &id1\n" +
-                      "        a: foo";
+                      "        a: foo\n"+
+                      "    - !Derived &id2\n" +
+                      "        a: bar\n"+
+                      "";
         Container container = MAPPER.readValue(yaml, Container.class);
         assertNotNull(container);
         assertNotNull(container.list);
-        assertEquals(1, container.list.size());
+        assertEquals(2, container.list.size());
 
         Base item = container.list.get(0);
         assertEquals(Derived.class, item.getClass());
-
         assertEquals("foo", ((Derived) item).a);
+
+        item = container.list.get(1);
+        assertEquals(Derived.class, item.getClass());
+        assertEquals("bar", ((Derived) item).a);
     }
 }

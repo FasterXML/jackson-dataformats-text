@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class ObjectAndTypeId232Test extends ModuleTestBase
         @JsonProperty
         List<Base232> list;
     }
-    
+
     @JsonTypeInfo(use = Id.NAME)
     @JsonSubTypes({@JsonSubTypes.Type(name="Derived", value=Derived232.class)})
     @JsonIdentityInfo(generator = ObjectIdGenerators.StringIdGenerator.class)
@@ -43,12 +43,21 @@ public class ObjectAndTypeId232Test extends ModuleTestBase
     {
         String yaml = "list:\n" +
                       "    - !Derived\n" +
-                      "        a: foo";
+                      "        a: foo\n"+
+                      "    - !Derived\n" +
+                      "        a: bar\n"+
+                      "";
         Container232 container = MAPPER.readValue(yaml, Container232.class);
         assertNotNull(container);
         assertNotNull(container.list);
-        assertEquals(1, container.list.size());
+        assertEquals(2, container.list.size());
+
         assertNotNull(container.list.get(0));
         assertEquals(Derived232.class, container.list.get(0).getClass());
+        assertEquals("foo", ((Derived232) container.list.get(0)).a);
+
+        assertNotNull(container.list.get(1));
+        assertEquals(Derived232.class, container.list.get(1).getClass());
+        assertEquals("bar", ((Derived232) container.list.get(1)).a);
     }
 }

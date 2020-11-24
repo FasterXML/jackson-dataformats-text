@@ -121,6 +121,15 @@ public class YAMLParser extends ParserBase
     protected Event _lastEvent;
 
     /**
+     * To keep track of tags ("type ids"), need to either get tags for all
+     * events, or, keep tag of relevant event that might have it: this is
+     * different from {@code _lastEvent} in some cases.
+     *
+     * @since 2.12
+     */
+    protected Event _lastTagEvent;
+
+    /**
      * We need to keep track of text values.
      */
     protected String _textValue;
@@ -147,7 +156,7 @@ public class YAMLParser extends ParserBase
      * structured types, value whose first token current token is.
      */
     protected Optional<Anchor> _currentAnchor;
-    
+
     /*
     /**********************************************************************
     /* Life-cycle
@@ -323,6 +332,7 @@ public class YAMLParser extends ParserBase
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
                 _currentAnchor = Optional.empty();
+                _lastTagEvent = null;
                 return (_currToken = null);
             }
             _lastEvent = evt;
@@ -333,6 +343,7 @@ public class YAMLParser extends ParserBase
                 if (_currToken != JsonToken.FIELD_NAME) {
                     if (evt.getEventId() != Event.ID.Scalar) {
                         _currentAnchor = Optional.empty();
+                        _lastTagEvent = null;
                         // end is fine
                         if (evt.getEventId() == Event.ID.MappingEnd) {
                             if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
@@ -343,6 +354,7 @@ public class YAMLParser extends ParserBase
                         }
                         _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
                     }
+
                     // 20-Feb-2019, tatu: [dataformats-text#123] Looks like YAML exposes Anchor for Object at point
                     //   where we return START_OBJECT (which makes sense), but, alas, Jackson expects that at point
                     //   after first FIELD_NAME. So we will need to defer clearing of the anchor slightly,
@@ -350,9 +362,15 @@ public class YAMLParser extends ParserBase
                     //  ... not even 100% sure this is correct, or robust, but does appear to work for specific
                     //  test case given.
                     final ScalarEvent scalar = (ScalarEvent) evt;
+                    final boolean firstEntry = (_currToken == JsonToken.START_OBJECT);
                     final Optional<Anchor> newAnchor = scalar.getAnchor();
-                    if (newAnchor.isPresent() || (_currToken != JsonToken.START_OBJECT)) {
+                    if (newAnchor.isPresent() || !firstEntry) {
                         _currentAnchor = scalar.getAnchor();
+                    }
+                    // 23-Nov-2020, tatu: [dataformats-text#232] shows case where ref to type id
+                    //   needs to be similarly deferred...
+                    if (!firstEntry) {
+                        _lastTagEvent = evt;
                     }
                     final String name = scalar.getValue();
                     _currentFieldName = name;
@@ -364,6 +382,7 @@ public class YAMLParser extends ParserBase
             }
 
             _currentAnchor = Optional.empty();
+            _lastTagEvent = evt;
 
             switch (evt.getEventId()) {
                 case Scalar:
@@ -930,11 +949,14 @@ public class YAMLParser extends ParserBase
     public String getTypeId() throws IOException
     {
         Optional<String> tagOpt;
-        if (_lastEvent instanceof CollectionStartEvent) {
-            tagOpt = ((CollectionStartEvent) _lastEvent).getTag();
-        } else if (_lastEvent instanceof ScalarEvent) {
-            tagOpt = ((ScalarEvent) _lastEvent).getTag();
+        if (_lastTagEvent instanceof CollectionStartEvent) {
+            tagOpt = ((CollectionStartEvent) _lastTagEvent).getTag();
+  //System.err.println("getTypeId() at "+currentToken()+", last was collection ("+_lastTagEvent.getClass().getSimpleName()+") -> "+tag);
+        } else if (_lastTagEvent instanceof ScalarEvent) {
+            tagOpt = ((ScalarEvent) _lastTagEvent).getTag();
+          //System.err.println("getTypeId() at "+currentToken()+", last was scalar -> "+tag+", scalar == "+_lastEvent);
         } else {
+//System.err.println("getTypeId(), something else, curr token: "+currentToken());
             return null;
         }
         if (tagOpt.isPresent()) {
