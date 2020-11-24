@@ -6,7 +6,7 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
-// NOTE: works in 3.0, fails in 2.x
+// NOTE: fails only on 2.x (2.12) -- fixed for 3.0
 public class SimpleGeneration215Test extends ModuleTestBase
 {
     // [dataformats-text#215]: setting used in constructor
