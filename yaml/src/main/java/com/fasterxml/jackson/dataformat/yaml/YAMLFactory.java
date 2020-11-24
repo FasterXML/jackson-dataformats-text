@@ -178,9 +178,6 @@ public class YAMLFactory extends JsonFactory
     @Override
     public boolean canUseCharArrays() { return false; }
 
-    // Add these in 2.7:
-
-    /*
     @Override
     public Class<YAMLParser.Feature> getFormatReadFeatureType() {
         return YAMLParser.Feature.class;
@@ -190,8 +187,7 @@ public class YAMLFactory extends JsonFactory
     public Class<YAMLGenerator.Feature> getFormatWriteFeatureType() {
         return YAMLGenerator.Feature.class;
     }
-    */
-    
+
     /*
     /**********************************************************
     /* Format detection functionality
@@ -204,14 +200,13 @@ public class YAMLFactory extends JsonFactory
     }
     
     /**
-     * Sub-classes need to override this method (as of 1.8)
+     * Sub-classes need to override this method
      */
     @Override
     public MatchStrength hasFormat(InputAccessor acc) throws IOException
     {
-        /* Actually quite possible to do, thanks to (optional) "---"
-         * indicator we may be getting...
-         */
+        // Actually quite possible to do, thanks to (optional) "---"
+        // indicator we may be getting...
         if (!acc.hasMoreBytes()) {
             return MatchStrength.INCONCLUSIVE;
         }
@@ -312,7 +307,6 @@ public class YAMLFactory extends JsonFactory
         return this;
     }
 
-
     /**
      * Method for enabling specified generator features
      * (check {@link YAMLGenerator.Feature} for list of features)
@@ -345,7 +339,7 @@ public class YAMLFactory extends JsonFactory
 
     /*
     /**********************************************************
-    /* Overridden parser factory methods (for 2.1)
+    /* Overridden parser factory methods
     /**********************************************************
      */
 
@@ -521,7 +515,6 @@ public class YAMLFactory extends JsonFactory
     /**********************************************************
      */
 
-    @SuppressWarnings("deprecation")
     protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
     {
         if (enc == null) {
