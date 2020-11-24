@@ -453,8 +453,18 @@ public class YAMLParser extends ParserBase
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
     {
         String value = scalar.getValue();
+
         _textValue = value;
         _cleanedTextValue = null;
+
+        // [dataformats-text#130]: uncomment for 2.13 either as-is, or
+        // behind a new feature
+        /*
+        if (value.isEmpty()) {
+            return JsonToken.VALUE_STRING;
+        }
+        */
+
         // we may get an explicit tag, if so, use for corroborating...
         Optional<String> typeTagOptional = scalar.getTag();
         final int len = value.length();
