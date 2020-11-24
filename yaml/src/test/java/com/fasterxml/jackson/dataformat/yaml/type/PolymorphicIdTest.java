@@ -22,6 +22,8 @@ public class PolymorphicIdTest extends ModuleTestBase
         public String value;
     }
 
+    private final ObjectMapper MAPPER = newObjectMapper();
+
     @Test
     public void testPolymorphicType() throws Exception
     {
@@ -29,8 +31,7 @@ public class PolymorphicIdTest extends ModuleTestBase
         String YAML = "nested:\n"
                 +"  type: single\n"
                 +"  value: whatever";
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Wrapper top = mapper.readValue(YAML, Wrapper.class);
+        Wrapper top = MAPPER.readValue(YAML, Wrapper.class);
         assertNotNull(top);
         assertEquals(NestedImpl.class, top.nested.getClass());
         assertEquals("whatever", ((NestedImpl) top.nested).value);
@@ -38,7 +39,7 @@ public class PolymorphicIdTest extends ModuleTestBase
         // then without value
         YAML = "nested:\n"
                 +"  type: single";
-        top = mapper.readValue(YAML, Wrapper.class);
+        top = MAPPER.readValue(YAML, Wrapper.class);
         assertNotNull(top);
         assertEquals(NestedImpl.class, top.nested.getClass());
         assertNull("whatever", ((NestedImpl) top.nested).value);
@@ -49,26 +50,27 @@ public class PolymorphicIdTest extends ModuleTestBase
         String YAML = "nested: !single\n"
                 +"  value: foobar\n"
                 ;
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Wrapper top = mapper.readValue(YAML, Wrapper.class);
+        Wrapper top = MAPPER.readValue(YAML, Wrapper.class);
         assertNotNull(top);
         assertNotNull(top.nested);
         assertEquals(NestedImpl.class, top.nested.getClass());
         assertEquals("foobar", ((NestedImpl) top.nested).value);
 
-        YAML = "nested: !single { }\n";
-        top = mapper.readValue(YAML, Wrapper.class);
+        top = MAPPER.readValue("nested: !single { }\n", Wrapper.class);
         assertNotNull(top);
         assertNotNull(top.nested);
         assertEquals(NestedImpl.class, top.nested.getClass());
+    }
+
+    @Test
+    public void testNativePolymorphicTypeFromEmpty() throws Exception {
         // no value specified, empty
 
         // And third possibility; trickier, since YAML contains empty String,
         // and not Object; so we need to allow coercion
-        ObjectReader r = mapper.readerFor(Wrapper.class)
+        ObjectReader r = MAPPER.readerFor(Wrapper.class)
                 .with(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
-        YAML = "nested: !single\n";
-        top = r.readValue(YAML);
+        Wrapper top = r.readValue("nested: !single\n");
         assertNotNull(top);
 
         // and as a result, get null
