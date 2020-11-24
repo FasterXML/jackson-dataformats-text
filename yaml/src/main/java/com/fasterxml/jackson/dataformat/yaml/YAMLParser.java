@@ -30,6 +30,15 @@ public class YAMLParser extends ParserBase
      */
     public enum Feature implements FormatFeature // in 2.9
     {
+        /**
+         * Feature that determines whether an empty {@link String} will be parsed
+         * as {@code null}. Logic is part of YAML 1.1 
+         * <a href="https://yaml.org/type/null.html">Null Language-Independent Type</a>.
+         *<p>
+         * Feature is enabled by default in Jackson 2.12 for backwards-compatibility
+         * reasons.
+         */
+        EMPTY_STRING_AS_NULL(true)
         ;
 
         final boolean _defaultState;
@@ -83,6 +92,9 @@ public class YAMLParser extends ParserBase
     protected ObjectCodec _objectCodec;
 
     protected int _formatFeatures;
+
+    // @since 2.12
+    protected boolean _cfgEmptyStringsToNull;
 
     /*
     /**********************************************************************
@@ -164,8 +176,8 @@ public class YAMLParser extends ParserBase
         _formatFeatures = formatFeatures;
         _reader = reader;
         _yamlParser = new ParserImpl(new StreamReader(reader));
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
-
 
     @Override
     public ObjectCodec getCodec() {
@@ -260,11 +272,11 @@ public class YAMLParser extends ParserBase
             _reader.close();
         }
     }
-    
+
     /*
-    /**********************************************************                              
+    /**********************************************************
     /* FormatFeature support
-    /**********************************************************                              
+    /**********************************************************
      */
 
     @Override
@@ -275,6 +287,7 @@ public class YAMLParser extends ParserBase
     @Override
     public JsonParser overrideFormatFeatures(int values, int mask) {
         _formatFeatures = (_formatFeatures & ~mask) | (values & mask);
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -291,6 +304,7 @@ public class YAMLParser extends ParserBase
     public JsonParser enable(YAMLParser.Feature f)
     {
         _formatFeatures |= f.getMask();
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -301,6 +315,7 @@ public class YAMLParser extends ParserBase
     public JsonParser disable(YAMLParser.Feature f)
     {
         _formatFeatures &= ~f.getMask();
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -520,13 +535,11 @@ public class YAMLParser extends ParserBase
         _textValue = value;
         _cleanedTextValue = null;
 
-        // [dataformats-text#130]: uncomment for 2.13 either as-is, or
-        // behind a new feature
-        /*
-        if (value.isEmpty()) {
+        // [dataformats-text#130]: Allow determining whether empty String is
+        // coerced into null or not
+        if (!_cfgEmptyStringsToNull && value.isEmpty()) {
             return JsonToken.VALUE_STRING;
         }
-        */
 
         // we may get an explicit tag, if so, use for corroborating...
         String typeTag = scalar.getTag();

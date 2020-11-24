@@ -1,7 +1,8 @@
 package com.fasterxml.jackson.dataformat.yaml.failing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 // [dataformats-text#130]: Easy enough to fix, if we choose to,
 //  but due to timing cannot include in 2.12 (too close to release
@@ -19,13 +20,28 @@ public class NullFromEmptyString130Test extends ModuleTestBase
         }
     }
 
-    private final ObjectMapper MAPPER = newObjectMapper();
+    private final YAMLMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#130]
     public void testEmptyValueToNull130() throws Exception
     {
-        Value130 v = MAPPER.readerFor(Value130.class)
+        // by default, empy Strings are coerced:
+        assertTrue(MAPPER.getFactory().isEnabled(YAMLParser.Feature.EMPTY_STRING_AS_NULL));
+
+        {
+            Value130 v = MAPPER.readValue("value:   \n", Value130.class);
+            assertNull(v.value);
+            v = MAPPER.readerFor(Value130.class)
+                    .readValue("value:   \n");
+            assertNull(v.value);
+        }
+
+        // but can change that:
+        {
+            Value130 v = MAPPER.readerFor(Value130.class)
+                .without(YAMLParser.Feature.EMPTY_STRING_AS_NULL)
                 .readValue("value:   \n");
-        assertEquals("", v.value);
+            assertEquals("", v.value);
+        }
     }
 }

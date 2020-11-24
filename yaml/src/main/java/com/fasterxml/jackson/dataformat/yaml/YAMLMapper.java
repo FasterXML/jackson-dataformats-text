@@ -31,8 +31,30 @@ public class YAMLMapper extends ObjectMapper
         /******************************************************************
          */
 
-        // No Parser-features yet
-        
+        public Builder enable(YAMLParser.Feature... features) {
+            for (YAMLParser.Feature f : features) {
+                _mapper.enable(f);
+            }
+            return this;
+        }
+
+        public Builder disable(YAMLParser.Feature... features) {
+            for (YAMLParser.Feature f : features) {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
+        public Builder configure(YAMLParser.Feature f, boolean state)
+        {
+            if (state) {
+                _mapper.enable(f);
+            } else {
+                _mapper.disable(f);
+            }
+            return this;
+        }
+
         public Builder enable(YAMLGenerator.Feature... features) {
             for (YAMLGenerator.Feature f : features) {
                 _mapper.enable(f);
@@ -71,7 +93,6 @@ public class YAMLMapper extends ObjectMapper
         super(base);
     }
 
-    @SuppressWarnings("unchecked")
     public static YAMLMapper.Builder builder() {
         return new YAMLMapper.Builder(new YAMLMapper());
     }

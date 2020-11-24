@@ -11,6 +11,8 @@ Modules:
 2.12.0 (not yet released)
 
 #71: (yaml) Hex number as an entry of an Object causing problem(s) with binding to POJO
+#130: (yaml) Empty String deserialized as `null` instead of empty string
+ (reported by iulianrosca@github)
 #175: (yaml) Add `YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR` to indent by 2 spaces
  (requested by Jesper N; fix contributed by Damian S)
 #199: (csv) Empty Lists can only be String-typed in CSV
