@@ -5,7 +5,6 @@ import org.junit.Test;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class PolymorphicIdTest extends ModuleTestBase
 {

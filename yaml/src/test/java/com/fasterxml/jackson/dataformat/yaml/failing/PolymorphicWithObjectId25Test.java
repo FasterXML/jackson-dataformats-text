@@ -46,7 +46,7 @@ public class PolymorphicWithObjectId25Test extends ModuleTestBase
                 +"type: \"node\"\n"
                 +"next:\n"
                 +"  &id2 name: \"second\"\n"
-                +"  next: *id1"
+                +"  next: *id1\n"
            ;
 
         NodeWithStringId node = MAPPER.readValue(yml, NodeWithStringId.class);

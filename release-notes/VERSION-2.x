@@ -24,6 +24,8 @@ Modules:
 #231: (yaml) Typed object with anchor throws Already had POJO for id (note: actual
    fix in `jackson-annotations`)
  (reported by almson@github)
+#232: (yaml) Typed object throws "Missing type id" when annotated with @JsonIdentityInfo
+ (reported by almson@github)
 #233: (yaml) Support decoding Binary, Octal and Hex numbers as integers
 - Add configurability of "YAML version generator is to follow" via "YAMLFactory.builder()"
 - SnakeYAML 1.26 -> 1.27
