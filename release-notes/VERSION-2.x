@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.12.0 (not yet released)
+2.12.0 (29-Nov-2020)
 
 #71: (yaml) Hex number as an entry of an Object causing problem(s) with binding to POJO
 #130: (yaml) Empty String deserialized as `null` instead of empty string
