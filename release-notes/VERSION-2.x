@@ -33,6 +33,10 @@ Modules:
 - SnakeYAML 1.26 -> 1.27
 - Add Gradle Module Metadata (https://blog.gradle.org/alignment-with-gradle-module-metadata)
 
+2.11.4 (12-Dec-2020)
+
+No changes since 2.11.3
+
 2.11.3 (02-Oct-2020)
 
 #217: (csv) Should quote strings with line separator under STRICT_CHECK_FOR_QUOTING
