@@ -36,18 +36,16 @@ public class CoerceToBooleanTest
     private final ObjectMapper DEFAULT_MAPPER = newPropertiesMapper();
 
     private final ObjectMapper MAPPER_STRING_TO_BOOLEAN_FAIL
-        = propertiesMapperBuilder().build();
-    {
-        MAPPER_STRING_TO_BOOLEAN_FAIL.coercionConfigFor(LogicalType.Boolean)
-            .setCoercion(CoercionInputShape.String, CoercionAction.Fail);
-    }
+        = propertiesMapperBuilder()
+            .withCoercionConfig(LogicalType.Boolean, cfg ->
+                cfg.setCoercion(CoercionInputShape.String, CoercionAction.Fail))
+            .build();
 
     private final ObjectMapper MAPPER_EMPTY_TO_BOOLEAN_FAIL
-        = propertiesMapperBuilder().build();
-    {
-        MAPPER_EMPTY_TO_BOOLEAN_FAIL.coercionConfigFor(LogicalType.Boolean)
-            .setCoercion(CoercionInputShape.EmptyString, CoercionAction.Fail);
-    }
+        = propertiesMapperBuilder()
+                .withCoercionConfig(LogicalType.Boolean, cfg ->
+                cfg.setCoercion(CoercionInputShape.EmptyString, CoercionAction.Fail))
+            .build();
 
     /*
     /**********************************************************
