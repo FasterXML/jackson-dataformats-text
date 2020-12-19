@@ -15,8 +15,8 @@ public class StreamingDecoratorsTest extends ModuleTestBase
     public void testInputDecorators() throws IOException
     {
         final byte[] DOC = utf8("secret=mum\n");
-        final ObjectMapper mapper = mapperBuilder(
-                streamFactoryBuilder().inputDecorator(new PrefixInputDecorator(DOC))
+        final ObjectMapper mapper = propertiesMapperBuilder(
+                propertiesFactoryBuilder().inputDecorator(new PrefixInputDecorator(DOC))
                 .build())
                 .build();
         Map<String,Object> value = mapper.readValue(utf8("value=foo\n"), Map.class);
@@ -35,8 +35,8 @@ public class StreamingDecoratorsTest extends ModuleTestBase
     public void testOutputDecorators() throws IOException
     {
         final byte[] DOC = utf8("prefix=p\n");
-        final ObjectMapper mapper = mapperBuilder(
-                streamFactoryBuilder().outputDecorator(new PrefixOutputDecorator(DOC))
+        final ObjectMapper mapper = propertiesMapperBuilder(
+                propertiesFactoryBuilder().outputDecorator(new PrefixOutputDecorator(DOC))
                 .build())
                 .build();
         final Map<String, Object> input = new LinkedHashMap<>();

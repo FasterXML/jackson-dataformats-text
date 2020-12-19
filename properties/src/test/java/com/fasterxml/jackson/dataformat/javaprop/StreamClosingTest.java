@@ -15,7 +15,7 @@ public class StreamClosingTest extends ModuleTestBase
         @Override public String toString() { return "[value: "+value+"]"; }
     }
 
-    private final ObjectMapper PROPS_MAPPER = newObjectMapper();
+    private final ObjectMapper PROPS_MAPPER = newPropertiesMapper();
 
     public void testInputStreamClosing() throws Exception
     {

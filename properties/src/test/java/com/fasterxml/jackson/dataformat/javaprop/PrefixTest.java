@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class PrefixTest extends ModuleTestBase
 {
-    private final JavaPropsMapper MAPPER = newObjectMapper();
+    private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     public void testPrefixParsing() throws Exception {
         final String INPUT = "org.o1.firstName=Bob\n"

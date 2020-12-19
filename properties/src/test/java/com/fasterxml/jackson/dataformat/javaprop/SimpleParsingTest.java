@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 
 public class SimpleParsingTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = newObjectMapper();
+    private final ObjectMapper MAPPER = newPropertiesMapper();
 
     private final ObjectMapper JSON_MAPPER = new JsonMapper();
 

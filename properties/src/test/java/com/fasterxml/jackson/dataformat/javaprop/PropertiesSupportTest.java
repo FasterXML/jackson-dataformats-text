@@ -18,7 +18,7 @@ public class PropertiesSupportTest extends ModuleTestBase
         }
     }
 
-    private final JavaPropsMapper MAPPER = newObjectMapper();
+    private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     public void testSimpleEmployeeFromProperties() throws Exception
     {

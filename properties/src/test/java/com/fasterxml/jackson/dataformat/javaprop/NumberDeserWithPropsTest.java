@@ -54,12 +54,12 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final JavaPropsMapper MAPPER = newObjectMapper();
+    private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     // [databind#2644]
     public void testBigDecimalSubtypes() throws Exception
     {
-        ObjectMapper mapper = mapperBuilder()
+        ObjectMapper mapper = propertiesMapperBuilder()
                 .registerSubtypes(NodeParent2644.class)
                 .build();
         NodeRoot2644 root = mapper.readValue(

@@ -5,7 +5,7 @@ import java.util.Properties;
 
 public class SimpleGenerationTest extends ModuleTestBase
 {
-    private final JavaPropsMapper MAPPER = newObjectMapper();
+    private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     public void testSimpleEmployee() throws Exception
     {
