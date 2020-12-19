@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 
 public class ArrayGenerationTest extends ModuleTestBase
 {
-    private final JavaPropsMapper MAPPER = newObjectMapper();
+    private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     public void testPointListSimple() throws Exception
     {

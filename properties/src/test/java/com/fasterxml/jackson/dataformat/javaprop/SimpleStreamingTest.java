@@ -18,7 +18,7 @@ import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 
 public class SimpleStreamingTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = newObjectMapper();
+    private final ObjectMapper MAPPER = newPropertiesMapper();
 
     private final JavaPropsFactory F = new JavaPropsFactory();
 

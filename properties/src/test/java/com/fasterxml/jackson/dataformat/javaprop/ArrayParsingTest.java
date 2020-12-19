@@ -55,7 +55,7 @@ public class ArrayParsingTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final ObjectMapper MAPPER = newObjectMapper();
+    private final ObjectMapper MAPPER = newPropertiesMapper();
 
     public void testArrayWithBranch() throws Exception
     {
