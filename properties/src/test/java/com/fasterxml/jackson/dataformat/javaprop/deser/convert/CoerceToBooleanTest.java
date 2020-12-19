@@ -15,12 +15,24 @@ import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 public class CoerceToBooleanTest
     extends ModuleTestBase
 {
-    static class BooleanPOJO {
+    static class BooleanPrimitivePOJO {
         public boolean value;
 
         public void setValue(boolean v) { value = v; }
     }
 
+    static class BooleanWrapperPOJO {
+        public Boolean value;
+
+        public void setValue(Boolean v) { value = v; }
+    }
+
+    static class AtomicBooleanWrapper {
+        public AtomicBoolean value;
+
+        public void setValue(AtomicBoolean v) { value = v; }
+    }
+    
     private final ObjectMapper DEFAULT_MAPPER = newPropertiesMapper();
 
     private final ObjectMapper MAPPER_STRING_TO_BOOLEAN_FAIL; {
@@ -45,9 +57,9 @@ public class CoerceToBooleanTest
     public void testEmptyStringFailForBooleanPrimitive() throws IOException
     {
         final ObjectReader reader = MAPPER_EMPTY_TO_BOOLEAN_FAIL
-                .readerFor(BooleanPOJO.class);
+                .readerFor(BooleanPrimitivePOJO.class);
         try {
-            reader.readValue("<BooleanPOJO><value></value></BooleanPOJO>");
+            reader.readValue("value:\n");
             fail("Expected failure for boolean + empty String");
         } catch (JsonMappingException e) {
             verifyException(e, "Cannot coerce empty String");
@@ -77,32 +89,33 @@ public class CoerceToBooleanTest
 
     public void _verifyStringToBooleanOk(ObjectMapper mapper) throws Exception
     {
-        // first successful coercions, basic types:
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "true"), Boolean.TYPE, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "false"), Boolean.TYPE, Boolean.FALSE);
+        // first successful coercions, basic types, some variants
 
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "true"), Boolean.class, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "false"), Boolean.class, Boolean.FALSE);
+        assertEquals(true,
+                _verifyCoerceSuccess(mapper, "value: true", BooleanPrimitivePOJO.class).value);
+        assertEquals(false,
+                _verifyCoerceSuccess(mapper, "value: false", BooleanPrimitivePOJO.class).value);
+        assertEquals(true,
+                _verifyCoerceSuccess(mapper, "value: True", BooleanPrimitivePOJO.class).value);
+        assertEquals(false,
+                _verifyCoerceSuccess(mapper, "value: False", BooleanPrimitivePOJO.class).value);
 
-        // and then allowed variants:
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "True"), Boolean.TYPE, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "True"), Boolean.class, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "TRUE"), Boolean.TYPE, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "TRUE"), Boolean.class, Boolean.TRUE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "False"), Boolean.TYPE, Boolean.FALSE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "False"), Boolean.class, Boolean.FALSE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("boolean", "FALSE"), Boolean.TYPE, Boolean.FALSE);
-        _verifyCoerceSuccess(mapper, _xmlWrapped("Boolean", "FALSE"), Boolean.class, Boolean.FALSE);
+        assertEquals(Boolean.TRUE,
+                _verifyCoerceSuccess(mapper, "value: true", BooleanWrapperPOJO.class).value);
+        assertEquals(Boolean.FALSE,
+                _verifyCoerceSuccess(mapper, "value: false", BooleanWrapperPOJO.class).value);
+        assertEquals(Boolean.TRUE,
+                _verifyCoerceSuccess(mapper, "value: True", BooleanWrapperPOJO.class).value);
+        assertEquals(Boolean.FALSE,
+                _verifyCoerceSuccess(mapper, "value: False", BooleanWrapperPOJO.class).value);
 
         // and then Special boolean derivatives:
-        // Alas, AtomicBoolean.equals() does not work so...
-        final ObjectReader r = mapper.readerFor(AtomicBoolean.class);
 
-        AtomicBoolean ab = r.readValue(_xmlWrapped("AtomicBoolean", "true"));
-        assertTrue(ab.get());
+        AtomicBooleanWrapper abw = _verifyCoerceSuccess(mapper, "value: true", AtomicBooleanWrapper.class);
+        assertTrue(abw.value.get());
 
-        ab = r.readValue(_xmlWrapped("AtomicBoolean", "false"));
-        assertFalse(ab.get());
+        abw = _verifyCoerceSuccess(mapper, "value: false", AtomicBooleanWrapper.class);
+        assertFalse(abw.value.get());
     }
 
     /*
@@ -111,16 +124,10 @@ public class CoerceToBooleanTest
     /**********************************************************
      */
 
-    private String _xmlWrapped(String element, String value) {
-        return String.format("<%s>%s</%s>", element, value, element);
-    }
-
-    private void _verifyCoerceSuccess(ObjectMapper mapper,
-            String input, Class<?> type, Object exp) throws IOException
+    private <T> T _verifyCoerceSuccess(ObjectMapper mapper,
+            String input, Class<T> type) throws IOException
     {
-        Object result = mapper.readerFor(type)
+        return mapper.readerFor(type)
                 .readValue(input);
-        assertEquals(exp.getClass(), result.getClass());
-        assertEquals(exp, result);
     }
 }
