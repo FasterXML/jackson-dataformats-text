@@ -168,8 +168,6 @@ public final class Latin1Reader extends Reader
      */
 
     /**
-     * @param available Number of "unused" bytes in the input buffer
-     *
      * @return True, if enough bytes were read to allow decoding of at least
      *   one full character; false if EOF was encountered instead.
      */

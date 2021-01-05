@@ -1,7 +1,7 @@
 Project: jackson-datatypes-text
 Modules:
   jackson-dataformat-csv
-  jackson-dataformat-properties
+  jackson-dataformat-properties (since 2.8)
   jackson-dataformat-yaml
 
 ------------------------------------------------------------------------
