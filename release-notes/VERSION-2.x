@@ -8,6 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.12.1 (08-Jan-2021)
+
+No changes since 2.12.0
+
 2.12.0 (29-Nov-2020)
 
 #71: (yaml) Hex number as an entry of an Object causing problem(s) with binding to POJO
