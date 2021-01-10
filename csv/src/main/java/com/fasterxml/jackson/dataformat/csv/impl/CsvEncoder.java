@@ -69,6 +69,8 @@ public class CsvEncoder
     final protected int _cfgEscapeCharacter;
     
     final protected char[] _cfgLineSeparator;
+    
+    final protected boolean _cfgEndingLineSeparator;
 
     /**
      * @since 2.5
@@ -210,6 +212,7 @@ public class CsvEncoder
         _cfgEscapeCharacter = schema.getEscapeChar();
         _cfgLineSeparator = schema.getLineSeparator();
         _cfgLineSeparatorLength = (_cfgLineSeparator == null) ? 0 : _cfgLineSeparator.length;
+        _cfgEndingLineSeparator = schema.getEndingLineSeparator();
         _cfgNullValue = schema.getNullValueOrEmpty();
 
         _columnCount = schema.size();
@@ -251,6 +254,7 @@ public class CsvEncoder
         _cfgEscapeCharacter = newSchema.getEscapeChar();
         _cfgLineSeparator = newSchema.getLineSeparator();
         _cfgLineSeparatorLength = _cfgLineSeparator.length;
+        _cfgEndingLineSeparator = newSchema.getEndingLineSeparator();
         _cfgNullValue = newSchema.getNullValueOrEmpty();
         _cfgMinSafeChar = _calcSafeChar();
         _columnCount = newSchema.size();
@@ -515,6 +519,14 @@ public class CsvEncoder
         }
         System.arraycopy(_cfgLineSeparator, 0, _outputBuffer, _outputTail, _cfgLineSeparatorLength);
         _outputTail += _cfgLineSeparatorLength;
+    }
+    
+    /**
+     * 
+     */
+    public void removeEndingLineSeparator() {
+    
+      _outputTail -= _cfgLineSeparatorLength;
     }
     
     /*
@@ -986,6 +998,9 @@ public class CsvEncoder
 
     public void close(boolean autoClose, boolean flushStream) throws IOException
     {
+        if (!_cfgEndingLineSeparator) {
+          removeEndingLineSeparator();
+        }
         _flushBuffer();
         if (autoClose) {
             _out.close();

@@ -417,6 +417,9 @@ public class CsvSchema
         protected int _escapeChar = DEFAULT_ESCAPE_CHAR;
         
         protected char[] _lineSeparator = DEFAULT_LINEFEED;
+        
+        /** CSV ends with a line separator ? Default is <code>true</code> */
+        protected boolean _endingLineSeparator = true;
 
         /**
          * @since 2.5
@@ -440,6 +443,7 @@ public class CsvSchema
             _quoteChar = src._quoteChar;
             _escapeChar = src._escapeChar;
             _lineSeparator = src._lineSeparator;
+            _endingLineSeparator = true;
             _nullValue = src._nullValue;
             _anyPropertyName = src._anyPropertyName;
         }
@@ -802,6 +806,11 @@ public class CsvSchema
             _lineSeparator = new char[] { lf };
             return this;
         }
+        
+        public Builder setEndingLineSeparator(boolean elf) {
+            _endingLineSeparator = elf;
+            return this;
+        }
 
         public Builder setNullValue(String nvl) {
             return setNullValue((nvl == null) ? null : nvl.toCharArray());
@@ -817,7 +826,7 @@ public class CsvSchema
             Column[] cols = _columns.toArray(new Column[_columns.size()]);
             return new CsvSchema(cols, _encodingFeatures,
                     _columnSeparator, _quoteChar, _escapeChar,
-                    _lineSeparator, _arrayElementSeparator,
+                    _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                     _nullValue, _anyPropertyName);
         }
 
@@ -858,6 +867,9 @@ public class CsvSchema
     protected final int _escapeChar;
     
     protected final char[] _lineSeparator;
+    
+    /** CSV ends with a line separator ? Default is <code>true</code> */
+    protected final boolean _endingLineSeparator;
 
     /**
      * @since 2.5
@@ -887,7 +899,7 @@ public class CsvSchema
         char columnSeparator, int quoteChar, int escapeChar,
         char[] lineSeparator, int arrayElementSeparator,
         char[] nullValue) {
-        this(columns, features, columnSeparator, quoteChar, escapeChar, lineSeparator,
+        this(columns, features, columnSeparator, quoteChar, escapeChar, lineSeparator, true,
             arrayElementSeparator == -1 ? "" : Character.toString((char) arrayElementSeparator), nullValue,
                     DEFAULT_ANY_PROPERTY_NAME);
     }
@@ -897,7 +909,7 @@ public class CsvSchema
      */
     public CsvSchema(Column[] columns, int features,
             char columnSeparator, int quoteChar, int escapeChar,
-            char[] lineSeparator, String arrayElementSeparator,
+            char[] lineSeparator, boolean endingLineSeparator, String arrayElementSeparator,
             char[] nullValue, String anyPropertyName)
     {
         if (columns == null) {
@@ -912,6 +924,7 @@ public class CsvSchema
         _quoteChar = quoteChar;
         _escapeChar = escapeChar;
         _lineSeparator = lineSeparator;
+        _endingLineSeparator = endingLineSeparator;
         _nullValue = nullValue;
         _anyPropertyName = anyPropertyName;
 
@@ -932,7 +945,7 @@ public class CsvSchema
      */
     protected CsvSchema(Column[] columns, int features,
             char columnSeparator, int quoteChar, int escapeChar,
-            char[] lineSeparator, String arrayElementSeparator,
+            char[] lineSeparator, boolean endingLineSeparator, String arrayElementSeparator,
             char[] nullValue,
             Map<String,Column> columnsByName, String anyPropertyName)
     {
@@ -942,6 +955,7 @@ public class CsvSchema
         _quoteChar = quoteChar;
         _escapeChar = escapeChar;
         _lineSeparator = lineSeparator;
+        _endingLineSeparator = endingLineSeparator;
         _arrayElementSeparator = arrayElementSeparator;
         _nullValue = nullValue;
         _columnsByName = columnsByName;
@@ -960,6 +974,7 @@ public class CsvSchema
         _quoteChar = base._quoteChar;
         _escapeChar = base._escapeChar;
         _lineSeparator = base._lineSeparator;
+        _endingLineSeparator = base._endingLineSeparator;
         _arrayElementSeparator = base._arrayElementSeparator;
         _nullValue = base._nullValue;
         _anyPropertyName = base._anyPropertyName;
@@ -987,6 +1002,7 @@ public class CsvSchema
         _quoteChar = base._quoteChar;
         _escapeChar = base._escapeChar;
         _lineSeparator = base._lineSeparator;
+        _endingLineSeparator = base._endingLineSeparator;
         _arrayElementSeparator = base._arrayElementSeparator;
         _nullValue = base._nullValue;
         _anyPropertyName = base._anyPropertyName;
@@ -1138,35 +1154,35 @@ public class CsvSchema
     public CsvSchema withColumnSeparator(char sep) {
         return (_columnSeparator == sep) ? this :
             new CsvSchema(_columns, _features,
-                    sep, _quoteChar, _escapeChar, _lineSeparator, _arrayElementSeparator,
+                    sep, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                     _nullValue, _columnsByName, _anyPropertyName);
     }
 
     public CsvSchema withQuoteChar(char c) {
         return (_quoteChar == c) ? this :
             new CsvSchema(_columns, _features,
-                    _columnSeparator, c, _escapeChar, _lineSeparator,_arrayElementSeparator,
+                    _columnSeparator, c, _escapeChar, _lineSeparator, _endingLineSeparator,_arrayElementSeparator,
                     _nullValue, _columnsByName, _anyPropertyName);
     }
 
     public CsvSchema withoutQuoteChar() {
         return (_quoteChar == -1) ? this :
             new CsvSchema(_columns, _features,
-                    _columnSeparator, -1, _escapeChar, _lineSeparator, _arrayElementSeparator,
+                    _columnSeparator, -1, _escapeChar, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                     _nullValue, _columnsByName, _anyPropertyName);
     }
 
     public CsvSchema withEscapeChar(char c) {
         return (_escapeChar == c) ? this
                 : new CsvSchema(_columns, _features,
-                        _columnSeparator, _quoteChar, c, _lineSeparator, _arrayElementSeparator,
+                        _columnSeparator, _quoteChar, c, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                         _nullValue, _columnsByName, _anyPropertyName);
     }
 
     public CsvSchema withoutEscapeChar() {
         return (_escapeChar == -1) ? this
                 : new CsvSchema(_columns, _features,
-                        _columnSeparator, _quoteChar, -1, _lineSeparator, _arrayElementSeparator,
+                        _columnSeparator, _quoteChar, -1, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                         _nullValue, _columnsByName, _anyPropertyName);
     }
 
@@ -1185,7 +1201,7 @@ public class CsvSchema
     public CsvSchema withArrayElementSeparator(String separator) {
         String sep = separator == null ? "" : separator;
         return (_arrayElementSeparator.equals(sep)) ? this : new CsvSchema(_columns, _features,
-            _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, separator,
+            _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator, separator,
             _nullValue, _columnsByName, _anyPropertyName);
     }
 
@@ -1196,14 +1212,34 @@ public class CsvSchema
     public CsvSchema withoutArrayElementSeparator() {
         return (_arrayElementSeparator.isEmpty()) ? this
                 : new CsvSchema(_columns, _features,
-                        _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, "",
+                        _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator, "",
                         _nullValue, _columnsByName, _anyPropertyName);
     }
     
     public CsvSchema withLineSeparator(String sep) {
         return new CsvSchema(_columns, _features,
-                _columnSeparator, _quoteChar, _escapeChar, sep.toCharArray(),
+                _columnSeparator, _quoteChar, _escapeChar, sep.toCharArray(), _endingLineSeparator,
                 _arrayElementSeparator, _nullValue, _columnsByName, _anyPropertyName);
+    }
+    
+    /**
+     * @return
+     */
+    public CsvSchema withEndingLineSeparator() {
+      
+      return new CsvSchema(_columns, _features,
+          _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, true,
+          _arrayElementSeparator, _nullValue, _columnsByName, _anyPropertyName);
+    }
+
+    /**
+     * @return
+     */
+    public CsvSchema withoutEndingLineSeparator() {
+      
+      return new CsvSchema(_columns, _features,
+          _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, false,
+          _arrayElementSeparator, _nullValue, _columnsByName, _anyPropertyName);
     }
 
     /**
@@ -1211,7 +1247,7 @@ public class CsvSchema
      */
     public CsvSchema withNullValue(String nvl) {
         return new CsvSchema(_columns, _features,
-                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator,
+                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator,
                 _arrayElementSeparator,
                 (nvl == null) ? null : nvl.toCharArray(),
                 _columnsByName, _anyPropertyName);
@@ -1219,7 +1255,7 @@ public class CsvSchema
 
     public CsvSchema withoutColumns() {
         return new CsvSchema(NO_COLUMNS, _features,
-                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _arrayElementSeparator,
+                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                 _nullValue, _columnsByName, _anyPropertyName);
     }
 
@@ -1255,7 +1291,7 @@ public class CsvSchema
      */
     public CsvSchema withAnyPropertyName(String name) {
         return new CsvSchema(_columns, _features,
-                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _arrayElementSeparator,
+                _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, _endingLineSeparator, _arrayElementSeparator,
                 _nullValue, _columnsByName, name);
     }
     
@@ -1344,6 +1380,7 @@ public class CsvSchema
     public int getEscapeChar() { return _escapeChar; }
 
     public char[] getLineSeparator() { return _lineSeparator; }
+    public boolean getEndingLineSeparator() { return _endingLineSeparator; }
 
     /**
      * @return Null value defined, as char array, if one is defined to be recognized; Java null
