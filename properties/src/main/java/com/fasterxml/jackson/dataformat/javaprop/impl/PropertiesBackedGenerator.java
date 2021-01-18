@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.javaprop.impl;
 
-import java.io.*;
 import java.util.Map;
 import java.util.Properties;
 
@@ -62,10 +61,10 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    public void close() throws IOException { }
+    public void close() { }
 
     @Override
-    public void flush() throws IOException { }
+    public void flush() { }
 
     /*
     /**********************************************************
@@ -89,18 +88,18 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    protected void _writeEscapedEntry(char[] text, int offset, int len) throws IOException {
+    protected void _writeEscapedEntry(char[] text, int offset, int len) throws JacksonException {
         _writeEscapedEntry(new String(text, offset, len));
     }
     
     @Override
-    protected void _writeEscapedEntry(String value) throws IOException
+    protected void _writeEscapedEntry(String value) throws JacksonException
     {
         _content.put(_basePath.toString(), value);
     }
 
     @Override
-    protected void _writeUnescapedEntry(String value) throws IOException
+    protected void _writeUnescapedEntry(String value) throws JacksonException
     {
         _content.put(_basePath.toString(), value);
     }
@@ -118,30 +117,30 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
     
     @Override
-    protected void _writeRaw(char c) throws IOException
+    protected void _writeRaw(char c) throws JacksonException
     {
     }
 
     @Override
-    protected void _writeRaw(String text) throws IOException
+    protected void _writeRaw(String text) throws JacksonException
     {
     }
 
     @Override
-    protected void _writeRaw(StringBuilder text) throws IOException
+    protected void _writeRaw(StringBuilder text) throws JacksonException
     {
     }
 
     @Override
-    protected void _writeRaw(char[] text, int offset, int len) throws IOException
+    protected void _writeRaw(char[] text, int offset, int len) throws JacksonException
     {
     }
 
-    protected void _writeRawLong(String text) throws IOException
+    protected void _writeRawLong(String text) throws JacksonException
     {
     }
 
-    protected void _writeRawLong(StringBuilder text) throws IOException
+    protected void _writeRawLong(StringBuilder text) throws JacksonException
     {
     }
 }

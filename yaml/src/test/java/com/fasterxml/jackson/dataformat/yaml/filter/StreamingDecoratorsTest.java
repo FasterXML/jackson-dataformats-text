@@ -31,7 +31,6 @@ public class StreamingDecoratorsTest extends ModuleTestBase
         assertEquals("mum", value.get("secret"));
     }
 
-    @SuppressWarnings("unchecked")
     public void testOutputDecorators() throws IOException
     {
         final String PREFIX = "///////";

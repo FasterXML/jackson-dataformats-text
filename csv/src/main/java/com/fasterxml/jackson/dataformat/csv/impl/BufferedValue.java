@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import java.io.IOException;
+import com.fasterxml.jackson.core.JacksonException;
 
 /**
  * Helper class used for holding values for a while until output
@@ -10,7 +10,7 @@ public abstract class BufferedValue
 {
     protected BufferedValue() { }
 
-    public abstract void write(CsvEncoder w) throws IOException;
+    public abstract void write(CsvEncoder w) throws JacksonException;
 
     public static BufferedValue buffered(String v) { return new TextValue(v); }
     public static BufferedValue bufferedRaw(String v) { return new RawValue(v); }
@@ -32,7 +32,7 @@ public abstract class BufferedValue
         public TextValue(String v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
         }
     }
@@ -47,7 +47,7 @@ public abstract class BufferedValue
         public RawValue(String v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendRawValue(_value);
         }
     }
@@ -59,7 +59,7 @@ public abstract class BufferedValue
         public IntValue(int v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
         }
     }
@@ -71,7 +71,7 @@ public abstract class BufferedValue
         public LongValue(long v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
         }
     }
@@ -83,7 +83,7 @@ public abstract class BufferedValue
         public DoubleValue(double v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
         }
     }
@@ -98,7 +98,7 @@ public abstract class BufferedValue
         public BooleanValue(boolean v) { _value = v; }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
         }
     }
@@ -109,7 +109,7 @@ public abstract class BufferedValue
         private NullValue() { }
 
         @Override
-        public void write(CsvEncoder w) throws IOException {
+        public void write(CsvEncoder w) throws JacksonException {
             w.appendNull();
         }
     }

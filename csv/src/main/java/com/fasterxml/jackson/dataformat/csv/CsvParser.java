@@ -26,7 +26,7 @@ import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
 public class CsvParser
     extends ParserMinimalBase
 {
-    // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
+    // Just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
 
     /**
@@ -412,15 +412,25 @@ public class CsvParser
      */
 
     @Override
-    public int releaseBuffered(Writer out) throws IOException {
-        return _reader.releaseBuffered(out);
+    public int releaseBuffered(Writer out) {
+        try {
+            return _reader.releaseBuffered(out);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
     @Override
     public boolean isClosed() { return _reader.isClosed(); }
 
     @Override
-    public void close() throws IOException { _reader.close(); }
+    public void close() {
+        try {
+            _reader.close();
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
+    }
 
     /*
     /**********************************************************************
@@ -565,12 +575,12 @@ public class CsvParser
     }
 
     @Override
-    public String currentName() throws IOException {
+    public String currentName() {
         return _currentName;
     }
 
     @Override
-    public JsonToken nextToken() throws IOException
+    public JsonToken nextToken() throws JacksonException
     {
         _binaryValue = null;
         switch (_state) {
@@ -594,7 +604,11 @@ public class CsvParser
         case STATE_MISSING_VALUE:
             return (_currToken = _handleMissingValue());
         case STATE_DOC_END:
-            _reader.close();
+            try {
+                _reader.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
             if (_parsingContext.inRoot()) {
                 return null;
             }
@@ -614,7 +628,7 @@ public class CsvParser
      */
 
     @Override
-    public boolean nextFieldName(SerializableString str) throws IOException {
+    public boolean nextFieldName(SerializableString str) throws JacksonException {
         // Optimize for expected case of getting FIELD_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
@@ -630,7 +644,7 @@ public class CsvParser
     }
 
     @Override
-    public String nextFieldName() throws IOException
+    public String nextFieldName() throws JacksonException
     {
         // Optimize for expected case of getting FIELD_NAME:
         if (_state == STATE_NEXT_ENTRY) {
@@ -647,7 +661,7 @@ public class CsvParser
     }
 
     @Override
-    public String nextTextValue() throws IOException
+    public String nextTextValue() throws JacksonException
     {
         _binaryValue = null;
         JsonToken t;
@@ -679,7 +693,7 @@ public class CsvParser
     /**
      * Method called to process the expected header line
      */
-    protected void _readHeaderLine() throws IOException {
+    protected void _readHeaderLine() throws JacksonException {
         /*
             When the header line is present and the settings ask for it
             to be processed, two different options are possible:
@@ -766,7 +780,7 @@ public class CsvParser
      * Method called to handle details of initializing things to return
      * the very first token.
      */
-    protected JsonToken _handleStartDoc() throws IOException
+    protected JsonToken _handleStartDoc() throws JacksonException
     {
         // also, if comments enabled, or skip empty lines, may need to skip leading ones
         _reader.skipLinesWhenNeeded();
@@ -804,7 +818,7 @@ public class CsvParser
         return _handleRecordStart();
     }
 
-    protected JsonToken _handleRecordStart() throws IOException
+    protected JsonToken _handleRecordStart() throws JacksonException
     {
         _columnIndex = 0;
         if (_columnCount == 0) { // no schema; exposed as an array
@@ -818,14 +832,14 @@ public class CsvParser
         return JsonToken.START_OBJECT;
     }
 
-    protected JsonToken _handleNextEntry() throws IOException
+    protected JsonToken _handleNextEntry() throws JacksonException
     {
         // NOTE: only called when we do have real Schema
         String next;
 
         try {
             next = _reader.nextString();
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             // 12-Oct-2015, tatu: Need to resync here as well...
             _state = STATE_SKIP_EXTRA_COLUMNS;
             throw e;
@@ -847,7 +861,7 @@ public class CsvParser
         return JsonToken.FIELD_NAME;
     }
 
-    protected JsonToken _handleNamedValue() throws IOException
+    protected JsonToken _handleNamedValue() throws JacksonException
     {
         // 06-Oct-2015, tatu: During recovery, may get past all regular columns,
         //    but we also need to allow access past... sort of.
@@ -871,7 +885,7 @@ public class CsvParser
         return JsonToken.VALUE_STRING;
     }
 
-    protected JsonToken _handleUnnamedValue() throws IOException
+    protected JsonToken _handleUnnamedValue() throws JacksonException
     {
         String next = _reader.nextString();
         if (next == null) { // end of record or input...
@@ -898,7 +912,7 @@ public class CsvParser
         return JsonToken.VALUE_STRING;
     }
 
-    protected JsonToken _handleArrayValue() throws IOException
+    protected JsonToken _handleArrayValue() throws JacksonException
     {
         int offset = _arrayValueStart;
         if (offset < 0) { // just returned last value
@@ -955,7 +969,7 @@ public class CsvParser
      * main choices: ignore value (and rest of line); expose extra value
      * as "any property" using configured name, or throw an exception.
      */
-    protected JsonToken _handleExtraColumn(String value) throws IOException
+    protected JsonToken _handleExtraColumn(String value) throws JacksonException
     {
         // If "any properties" enabled, expose as such
         String anyProp = _schema.getAnyPropertyName();
@@ -1000,7 +1014,7 @@ public class CsvParser
      * Helper method called when end of row occurs before finding values for
      * all schema-specified columns.
      */
-    protected JsonToken _handleMissingColumns() throws IOException
+    protected JsonToken _handleMissingColumns() throws JacksonException
     {
         if (Feature.FAIL_ON_MISSING_COLUMNS.enabledIn(_formatFeatures)) {
             // First: to allow recovery, set states to expose next line, if any
@@ -1018,7 +1032,7 @@ public class CsvParser
         return _handleObjectRowEnd();
     }
 
-    protected JsonToken _handleMissingName() throws IOException
+    protected JsonToken _handleMissingName() throws JacksonException
     {
         if (++_columnIndex < _columnCount) {
             _state = STATE_MISSING_VALUE;
@@ -1029,7 +1043,7 @@ public class CsvParser
         return _handleObjectRowEnd();
     }
 
-    protected JsonToken _handleMissingValue() throws IOException
+    protected JsonToken _handleMissingValue() throws JacksonException
     {
         _state = STATE_MISSING_NAME;
         return JsonToken.VALUE_NULL;
@@ -1045,7 +1059,7 @@ public class CsvParser
      * Helper method called to handle details of state update when end of logical
      * record occurs.
      */
-    protected final JsonToken _handleObjectRowEnd() throws IOException
+    protected final JsonToken _handleObjectRowEnd() throws JacksonException
     {
         _parsingContext = _parsingContext.clearAndGetParent();
         if (!_reader.startNewLine()) {
@@ -1056,7 +1070,7 @@ public class CsvParser
         return JsonToken.END_OBJECT;
     }
 
-    protected final JsonToken _skipUntilEndOfLine() throws IOException
+    protected final JsonToken _skipUntilEndOfLine() throws JacksonException
     {
         while (_reader.nextString() != null) { }
 
@@ -1086,7 +1100,7 @@ public class CsvParser
     }
 
     @Override
-    public String getText() throws IOException {
+    public String getText() throws JacksonException {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName;
         }
@@ -1096,7 +1110,7 @@ public class CsvParser
     }
 
     @Override
-    public char[] getTextCharacters() throws IOException {
+    public char[] getTextCharacters() throws JacksonException {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName.toCharArray();
         }
@@ -1104,7 +1118,7 @@ public class CsvParser
     }
 
     @Override
-    public int getTextLength() throws IOException {
+    public int getTextLength() throws JacksonException {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentName.length();
         }
@@ -1112,18 +1126,22 @@ public class CsvParser
     }
 
     @Override
-    public int getTextOffset() throws IOException {
+    public int getTextOffset() throws JacksonException {
         return 0;
     }
 
     @Override
-    public int getText(Writer w) throws IOException {
+    public int getText(Writer w) throws JacksonException {
         String value = (_currToken == JsonToken.FIELD_NAME) ?
                 _currentName : _currentValue;
         if (value == null) {
             return 0;
         }
-        w.write(value);
+        try {
+            w.write(value);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
         return value.length();
     }
     
@@ -1134,14 +1152,14 @@ public class CsvParser
      */
 
     @Override
-    public Object getEmbeddedObject() throws IOException {
+    public Object getEmbeddedObject() throws JacksonException {
         // in theory may access binary data using this method so...
         return _binaryValue;
     }
 
     @SuppressWarnings("resource")
     @Override
-    public byte[] getBinaryValue(Base64Variant variant) throws IOException
+    public byte[] getBinaryValue(Base64Variant variant) throws JacksonException
     {
         if (_binaryValue == null) {
             if (_currToken != JsonToken.VALUE_STRING) {
@@ -1161,53 +1179,53 @@ public class CsvParser
      */
 
     @Override
-    public NumberType getNumberType() throws IOException {
+    public NumberType getNumberType() throws JacksonException {
         return _reader.getNumberType();
     }
 
     @Override
-    public Number getNumberValue() throws IOException {
+    public Number getNumberValue() throws JacksonException {
         return _reader.getNumberValue(false);
     }
 
     @Override
-    public Number getNumberValueExact() throws IOException {
+    public Number getNumberValueExact() throws JacksonException {
         return _reader.getNumberValue(true);
     }
 
     @Override
-    public int getIntValue() throws IOException {
+    public int getIntValue() throws JacksonException {
         return _reader.getIntValue();
     }
 
     @Override
-    public long getLongValue() throws IOException {
+    public long getLongValue() throws JacksonException {
         return _reader.getLongValue();
     }
 
     @Override
-    public BigInteger getBigIntegerValue() throws IOException {
+    public BigInteger getBigIntegerValue() throws JacksonException {
         return _reader.getBigIntegerValue();
     }
 
     @Override
-    public float getFloatValue() throws IOException {
+    public float getFloatValue() throws JacksonException {
         return _reader.getFloatValue();
     }
 
     @Override
-    public double getDoubleValue() throws IOException {
+    public double getDoubleValue() throws JacksonException {
         return _reader.getDoubleValue();
     }
 
     @Override
-    public BigDecimal getDecimalValue() throws IOException {
+    public BigDecimal getDecimalValue() throws JacksonException {
         return _reader.getDecimalValue();
     }
 
     // not yet supported...
     @Override
-    public boolean isNaN() throws IOException {
+    public boolean isNaN() {
         return false;
     }
 
@@ -1247,6 +1265,11 @@ public class CsvParser
 
     public void _reportUnexpectedCsvChar(int ch, String msg)  throws JsonProcessingException {
         super._reportUnexpectedChar(ch, msg);
+    }
+
+    @Override // just to make visible to decode
+    public JacksonException _wrapIOFailure(IOException e)  {
+        return super._wrapIOFailure(e);
     }
 
     /*

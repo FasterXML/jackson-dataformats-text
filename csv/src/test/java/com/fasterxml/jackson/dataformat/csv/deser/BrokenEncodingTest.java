@@ -1,10 +1,10 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.io.ByteArrayOutputStream;
-import java.io.CharConversionException;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.exc.WrappedIOException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.*;
 
@@ -49,7 +49,7 @@ public class BrokenEncodingTest extends ModuleTestBase
         try {
             parser.nextToken();
             fail("Should trigger exception for invalid UTF-8 char");
-        } catch (CharConversionException e) {
+        } catch (WrappedIOException e) {
             verifyException(e, "Invalid UTF-8 start byte");
             verifyException(e, "0xA0");
         }
@@ -83,7 +83,7 @@ public class BrokenEncodingTest extends ModuleTestBase
             assertEquals("b", parser.currentName());
             parser.nextToken();
             fail("Should trigger exception for invalid UTF-8 char");
-        } catch (CharConversionException e) {
+        } catch (WrappedIOException e) {
             verifyException(e, "Invalid UTF-8 middle byte");
             verifyException(e, "0x41");
        }

@@ -114,7 +114,7 @@ public class JavaPropsParser extends ParserMinimalBase
     // we do not take byte-based input, so base impl would be fine
     /*
     @Override
-    public int releaseBuffered(OutputStream out) throws IOException {
+    public int releaseBuffered(OutputStream out) {
         return -1;
     }
     */
@@ -123,13 +123,13 @@ public class JavaPropsParser extends ParserMinimalBase
     // see the input so:
     /*
     @Override
-    public int releaseBuffered(Writer w) throws IOException {
+    public int releaseBuffered(Writer w) {
         return -1;
     }
     */
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         _closed = true;
         _readContext = null;
     }
@@ -185,11 +185,10 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public String currentName() throws IOException {
+    public String currentName() {
         if (_readContext == null) {
             return null;
         }
-        // [JACKSON-395]: start markers require information from parent
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
             JPropReadContext parent = _readContext.getParent();
             if (parent != null) {
@@ -200,7 +199,7 @@ public class JavaPropsParser extends ParserMinimalBase
     }
 
     @Override
-    public JsonToken nextToken() throws IOException {
+    public JsonToken nextToken() throws JacksonException {
         _binaryValue = null;
         if (_readContext == null) {
             if (_closed) {
@@ -227,7 +226,7 @@ System.err.println("\n>>");
     }
 
     @Override
-    public String getText() throws IOException {
+    public String getText() throws JacksonException {
         JsonToken t = _currToken;
         if (t == JsonToken.VALUE_STRING) {
             return _readContext.getCurrentText();
@@ -245,36 +244,40 @@ System.err.println("\n>>");
     }
     
     @Override
-    public char[] getTextCharacters() throws IOException {
+    public char[] getTextCharacters() throws JacksonException {
         String text = getText();
         return (text == null) ? null : text.toCharArray();
     }
 
     @Override
-    public int getTextLength() throws IOException {
+    public int getTextLength() throws JacksonException {
         String text = getText();
         return (text == null) ? 0 : text.length();
     }
 
     @Override
-    public int getTextOffset() throws IOException {
+    public int getTextOffset() throws JacksonException {
         return 0;
     }
 
-    @Override // since 2.8
-    public int getText(Writer writer) throws IOException
+    @Override
+    public int getText(Writer writer) throws JacksonException
     {
         String str = getText();
         if (str == null) {
             return 0;
         }
-        writer.write(str);
+        try {
+            writer.write(str);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
         return str.length();
     }
 
     @SuppressWarnings("resource")
     @Override
-    public byte[] getBinaryValue(Base64Variant variant) throws IOException
+    public byte[] getBinaryValue(Base64Variant variant) throws JacksonException
     {
         if (_binaryValue == null) {
             if (_currToken != JsonToken.VALUE_STRING) {
@@ -304,7 +307,7 @@ System.err.println("\n>>");
      */
 
     @Override
-    public Object getEmbeddedObject() throws IOException {
+    public Object getEmbeddedObject() throws JacksonException {
         return null;
     }
     
@@ -325,47 +328,47 @@ System.err.println("\n>>");
      */
     
     @Override
-    public Number getNumberValue() throws IOException {
+    public Number getNumberValue() throws JacksonException {
         return _noNumbers();
     }
     
     @Override
-    public NumberType getNumberType() throws IOException {
+    public NumberType getNumberType() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public int getIntValue() throws IOException {
+    public int getIntValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public long getLongValue() throws IOException {
+    public long getLongValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public BigInteger getBigIntegerValue() throws IOException {
+    public BigInteger getBigIntegerValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public float getFloatValue() throws IOException {
+    public float getFloatValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public double getDoubleValue() throws IOException {
+    public double getDoubleValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public BigDecimal getDecimalValue() throws IOException {
+    public BigDecimal getDecimalValue() throws JacksonException {
         return _noNumbers();
     }
 
     @Override
-    public boolean isNaN() throws IOException {
+    public boolean isNaN() {
         return false;
     }
 
@@ -375,7 +378,7 @@ System.err.println("\n>>");
     /**********************************************************************
      */
 
-    protected <T> T _noNumbers() throws IOException {
+    protected <T> T _noNumbers() throws JacksonException {
         _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
         return null;
     }

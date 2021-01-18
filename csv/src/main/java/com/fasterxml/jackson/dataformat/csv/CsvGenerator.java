@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
@@ -122,9 +123,9 @@ public class CsvGenerator extends GeneratorBase
     protected final static long MAX_INT_AS_LONG = Integer.MAX_VALUE;
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     private final static CsvSchema EMPTY_SCHEMA = CsvSchema.emptySchema();
@@ -201,9 +202,9 @@ public class CsvGenerator extends GeneratorBase
     protected SimpleTokenWriteContext _skipWithin;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
@@ -239,9 +240,9 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************                              
+    /**********************************************************************
     /* Versioned                                                                             
-    /**********************************************************                              
+    /**********************************************************************
      */
 
     @Override
@@ -303,9 +304,9 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, capability introspection methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -333,7 +334,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeFieldName(String name) throws IOException
+    public final void writeFieldName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
@@ -342,13 +343,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeFieldId(long id) throws IOException {
+    public void writeFieldId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
         writeFieldName(Long.toString(id));
     }
 
     @Override
-    public final void writeFieldName(SerializableString name) throws IOException
+    public final void writeFieldName(SerializableString name) throws JacksonException
     {
         // Object is a value, need to verify it's allowed
         if (!_tokenWriteContext.writeFieldName(name.getValue())) {
@@ -357,7 +358,7 @@ public class CsvGenerator extends GeneratorBase
         _writeFieldName(name.getValue());
     }
 
-    private final void _writeFieldName(String name) throws IOException
+    private final void _writeFieldName(String name) throws JacksonException
     {
         // just find the matching index -- must have schema for that
         if (_schema == null) {
@@ -386,9 +387,9 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Extended API, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     public final boolean isEnabled(Feature f) {
@@ -415,18 +416,22 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: low-level I/O
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public final void flush() throws IOException {
-        _writer.flush(isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
+    public final void flush() {
+        try {
+            _writer.flush(isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
     
     @Override
-    public void close() throws IOException
+    public void close()
     {
         super.close();
 
@@ -437,18 +442,22 @@ public class CsvGenerator extends GeneratorBase
         if (_handleFirstLine) {
             _handleFirstLine();
         }
-        _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
-                isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
+        try {
+            _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
+                    isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: structural output
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public final void writeStartArray() throws IOException
+    public final void writeStartArray() throws JacksonException
     {
         _verifyValueWrite("start an array");
         // Ok to create root-level array to contain Objects/Arrays, but
@@ -491,13 +500,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartArray(Object currValue) throws IOException {
+    public final void writeStartArray(Object currValue) throws JacksonException {
         writeStartArray();
         setCurrentValue(currValue);
     }
 
     @Override
-    public final void writeEndArray() throws IOException
+    public final void writeEndArray() throws JacksonException
     {
         if (!_tokenWriteContext.inArray()) {
             _reportError("Current context not Array but "+_tokenWriteContext.typeDesc());
@@ -522,7 +531,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartObject() throws IOException
+    public final void writeStartObject() throws JacksonException
     {
         _verifyValueWrite("start an object");
         // No nesting for objects; can write Objects inside logical root-level arrays.
@@ -542,13 +551,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartObject(Object currValue) throws IOException {
+    public final void writeStartObject(Object currValue) throws JacksonException {
         writeStartObject();
         setCurrentValue(currValue);
     }
 
     @Override
-    public final void writeEndObject() throws IOException
+    public final void writeEndObject() throws JacksonException
     {
         if (!_tokenWriteContext.inObject()) {
             _reportError("Current context not Object but "+_tokenWriteContext.typeDesc());
@@ -566,13 +575,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, textual
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public void writeString(String text) throws IOException
+    public void writeString(String text) throws JacksonException
     {
         if (text == null) {
             writeNull();
@@ -589,7 +598,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws IOException
+    public void writeString(char[] text, int offset, int len) throws JacksonException
     {
         _verifyValueWrite("write String value");
         if (!_skipValue) {
@@ -602,7 +611,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeString(SerializableString sstr) throws IOException
+    public final void writeString(SerializableString sstr) throws JacksonException
     {
         _verifyValueWrite("write String value");
         if (!_skipValue) {
@@ -615,43 +624,43 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len) throws IOException {
+    public void writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int len) throws IOException {
-        writeString(new String(text, offset, len, "UTF-8"));
+    public void writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
+        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, unprocessed ("raw")
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public void writeRaw(String text) throws IOException {
+    public void writeRaw(String text) throws JacksonException {
         _writer.writeRaw(text);
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws IOException {
+    public void writeRaw(String text, int offset, int len) throws JacksonException {
         _writer.writeRaw(text, offset, len);
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws IOException {
+    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
         _writer.writeRaw(text, offset, len);
     }
 
     @Override
-    public void writeRaw(char c) throws IOException {
+    public void writeRaw(char c) throws JacksonException {
         _writer.writeRaw(c);
     }
 
     @Override
-    public void writeRawValue(String text) throws IOException {
+    public void writeRawValue(String text) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
@@ -660,7 +669,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeRawValue(String text, int offset, int len) throws IOException {
+    public void writeRawValue(String text, int offset, int len) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
@@ -669,7 +678,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeRawValue(char[] text, int offset, int len) throws IOException {
+    public void writeRawValue(char[] text, int offset, int len) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
@@ -678,13 +687,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, base64-encoded binary
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws IOException, JsonGenerationException
+    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws JacksonException, JsonGenerationException
     {
         if (data == null) {
             writeNull();
@@ -707,13 +716,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, primitive
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public void writeBoolean(boolean state) throws IOException
+    public void writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         if (!_skipValue) {
@@ -726,7 +735,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNull() throws IOException
+    public void writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
 
@@ -756,12 +765,12 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(short v) throws IOException {
+    public void writeNumber(short v) throws JacksonException {
         writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int v) throws IOException
+    public void writeNumber(int v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -774,7 +783,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(long v) throws IOException
+    public void writeNumber(long v) throws JacksonException
     {
         // First: maybe 32 bits is enough?
         if (v <= MAX_INT_AS_LONG && v >= MIN_INT_AS_LONG) {
@@ -792,7 +801,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws IOException
+    public void writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
             writeNull();
@@ -810,7 +819,7 @@ public class CsvGenerator extends GeneratorBase
     }
     
     @Override
-    public void writeNumber(double v) throws IOException
+    public void writeNumber(double v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -823,7 +832,7 @@ public class CsvGenerator extends GeneratorBase
     }    
 
     @Override
-    public void writeNumber(float v) throws IOException
+    public void writeNumber(float v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -836,7 +845,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(BigDecimal v) throws IOException
+    public void writeNumber(BigDecimal v) throws JacksonException
     {
         if (v == null) {
             writeNull();
@@ -855,7 +864,7 @@ public class CsvGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws IOException
+    public void writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
             writeNull();
@@ -872,13 +881,13 @@ public class CsvGenerator extends GeneratorBase
     }
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overrides for field methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public void writeOmittedField(String fieldName) throws IOException
+    public void writeOmittedField(String fieldName) throws JacksonException
     {
         // Hmmh. Should we require a match? Actually, let's use logic: if field found,
         // assumption is we must add a placeholder; if not, we can merely ignore
@@ -899,13 +908,13 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
     
     @Override
-    protected final void _verifyValueWrite(String typeMsg) throws IOException
+    protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         if (!_tokenWriteContext.writeValue()) {
             _reportError("Can not "+typeMsg+", expecting field name");
@@ -921,9 +930,9 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, error reporting
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -937,9 +946,9 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, other
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected final int _columnIndex()
@@ -956,13 +965,13 @@ public class CsvGenerator extends GeneratorBase
      * will flush possibly buffered column values, append linefeed
      * and reset state appropriately.
      */
-    protected void finishRow() throws IOException
+    protected void finishRow() throws JacksonException
     {
         _writer.endRow();
         _nextColumnByName = -1;
     }
 
-    protected void _handleFirstLine() throws IOException
+    protected void _handleFirstLine() throws JacksonException
     {
         _handleFirstLine = false;
         if (_schema.usesHeader()) {

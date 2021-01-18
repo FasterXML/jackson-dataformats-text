@@ -113,9 +113,9 @@ public class CsvFactory
     }
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Serializable overrides
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -128,9 +128,9 @@ public class CsvFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Capability introspection
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -155,9 +155,9 @@ public class CsvFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Format support
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -201,9 +201,9 @@ public class CsvFactory
     }
 
     /*
-    /******************************************************
+    /**********************************************************************
     /* Factory methods: parsers
-    /******************************************************
+    /**********************************************************************
      */
 
     /**
@@ -211,7 +211,8 @@ public class CsvFactory
      */
     @Override
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            InputStream in) throws IOException {
+            InputStream in)
+    {
         return new CsvParserBootstrapper(ioCtxt, in)
             .constructParser(readCtxt,
                     readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -221,7 +222,8 @@ public class CsvFactory
 
     @Override
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            byte[] data, int offset, int len) throws IOException {
+            byte[] data, int offset, int len)
+    {
         return new CsvParserBootstrapper(ioCtxt, data, offset, len)
                .constructParser(readCtxt,
                        readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -234,7 +236,8 @@ public class CsvFactory
      */
     @Override
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            Reader r) throws IOException {
+            Reader r)
+    {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
@@ -245,7 +248,7 @@ public class CsvFactory
     @Override
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             char[] data, int offset, int len,
-            boolean recyclable) throws IOException
+            boolean recyclable)
     {
         return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -256,7 +259,8 @@ public class CsvFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            DataInput input) throws IOException {
+            DataInput input)
+    {
         return _unsupported();
     }
 
@@ -269,14 +273,14 @@ public class CsvFactory
     }
     
     /*
-    /******************************************************
+    /**********************************************************************
     /* Factory methods: generators
-    /******************************************************
+    /**********************************************************************
      */
     
     @Override
     protected CsvGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, Writer out) throws IOException
+            IOContext ioCtxt, Writer out)
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
@@ -287,7 +291,7 @@ public class CsvFactory
     @SuppressWarnings("resource")
     @Override
     protected CsvGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, OutputStream out) throws IOException
+            IOContext ioCtxt, OutputStream out)
     {
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
@@ -305,9 +309,9 @@ public class CsvFactory
     }
 
     /*
-    /**********************************************************
-    /* Internal methods
-    /**********************************************************
+    /**********************************************************************
+    /* Factory methods: context creation
+    /**********************************************************************
      */
 
     @Override

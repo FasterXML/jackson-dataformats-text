@@ -83,18 +83,22 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         super.close();
         _flushBuffer();
         _outputTail = 0; // just to ensure we don't think there's anything buffered
 
         if (_out != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                _out.close();
-            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                // If we can't close it, we should at least flush
-                _out.flush();
+            try {
+                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                    _out.close();
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    // If we can't close it, we should at least flush
+                    _out.flush();
+                }
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
             }
         }
         // Internal buffer(s) generator has can now be released as well
@@ -102,12 +106,16 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    public void flush() throws IOException
+    public void flush()
     {
         _flushBuffer();
         if (_out != null) {
             if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                _out.flush();
+                try {
+                    _out.flush();
+                } catch (IOException e) {
+                    throw _wrapIOFailure(e);
+                }
             }
         }
     }
@@ -128,10 +136,14 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         }
     }
 
-    protected void _flushBuffer() throws IOException
+    protected void _flushBuffer() throws JacksonException
     {
         if (_outputTail > 0) {
-            _out.write(_outputBuffer, 0, _outputTail);
+            try {
+                _out.write(_outputBuffer, 0, _outputTail);
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
             _outputTail = 0;
         }
     }
@@ -150,7 +162,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    protected void _writeEscapedEntry(String value) throws IOException
+    protected void _writeEscapedEntry(String value) throws JacksonException
     {
         // note: key has been already escaped so:
         _writeRaw(_basePath);
@@ -161,7 +173,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _writeEscapedEntry(char[] text, int offset, int len) throws IOException
+    protected void _writeEscapedEntry(char[] text, int offset, int len) throws JacksonException
     {
         // note: key has been already escaped so:
         _writeRaw(_basePath);
@@ -172,7 +184,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _writeUnescapedEntry(String value) throws IOException
+    protected void _writeUnescapedEntry(String value) throws JacksonException
     {
         // note: key has been already escaped so:
         _writeRaw(_basePath);
@@ -182,7 +194,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         _writeLinefeed();
     }
 
-    protected void _writeEscaped(String value) throws IOException
+    protected void _writeEscaped(String value) throws JacksonException
     {
         StringBuilder sb = JPropEscapes.appendValue(value);
         if (sb == null) {
@@ -192,12 +204,12 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         }
     }
 
-    protected void _writeEscaped(char[] text, int offset, int len) throws IOException
+    protected void _writeEscaped(char[] text, int offset, int len) throws JacksonException
     {
         _writeEscaped(new String(text, offset, len));
     }
 
-    protected void _writeLinefeed() throws IOException
+    protected void _writeLinefeed() throws JacksonException
     {
         _writeRaw(_schema.lineEnding());
     }
@@ -209,7 +221,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    protected void _writeRaw(char c) throws IOException
+    protected void _writeRaw(char c) throws JacksonException
     {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
@@ -218,7 +230,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _writeRaw(String text) throws IOException
+    protected void _writeRaw(String text) throws JacksonException
     {
         // Nothing to check, can just output as is
         int len = text.length();
@@ -238,7 +250,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _writeRaw(StringBuilder text) throws IOException
+    protected void _writeRaw(StringBuilder text) throws JacksonException
     {
         // Nothing to check, can just output as is
         int len = text.length();
@@ -258,7 +270,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _writeRaw(char[] text, int offset, int len) throws IOException
+    protected void _writeRaw(char[] text, int offset, int len) throws JacksonException
     {
         // Only worth buffering if it's a short write?
         if (len < SHORT_WRITE) {
@@ -272,10 +284,14 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         }
         // Otherwise, better just pass through:
         _flushBuffer();
-        _out.write(text, offset, len);
+        try {
+            _out.write(text, offset, len);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
-    protected void _writeRawLong(String text) throws IOException
+    protected void _writeRawLong(String text) throws JacksonException
     {
         int room = _outputEnd - _outputTail;
         text.getChars(0, room, _outputBuffer, _outputTail);
@@ -297,7 +313,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         _outputTail = len;
     }
 
-    protected void _writeRawLong(StringBuilder text) throws IOException
+    protected void _writeRawLong(StringBuilder text) throws JacksonException
     {
         int room = _outputEnd - _outputTail;
         text.getChars(0, room, _outputBuffer, _outputTail);

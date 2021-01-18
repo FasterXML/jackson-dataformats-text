@@ -1,8 +1,8 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
@@ -184,9 +184,9 @@ public abstract class JavaPropsGenerator
      */
 
 // varies between impls so:
-//    @Override public void writeFieldName(String name) throws IOException
+//    @Override public void writeFieldName(String name) throws JacksonException
     @Override
-    public void writeFieldName(String name) throws IOException
+    public void writeFieldName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
@@ -213,7 +213,7 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public void writeFieldId(long id) throws IOException {
+    public void writeFieldId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
         writeFieldName(Long.toString(id));
     }
@@ -227,21 +227,21 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeStartArray() throws IOException {
+    public void writeStartArray() throws JacksonException {
         _verifyValueWrite("start an array");
         _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null,
                 _basePath.length());
     }
 
     @Override
-    public void writeStartArray(Object currValue) throws IOException {
+    public void writeStartArray(Object currValue) throws JacksonException {
         _verifyValueWrite("start an array");
         _tokenWriteContext = _tokenWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
     }
     
     @Override
-    public void writeEndArray() throws IOException {
+    public void writeEndArray() throws JacksonException {
         if (!_tokenWriteContext.inArray()) {
             _reportError("Current context not an Array but "+_tokenWriteContext.typeDesc());
         }
@@ -249,19 +249,19 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public void writeStartObject() throws IOException {
+    public void writeStartObject() throws JacksonException {
         _verifyValueWrite("start an object");
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null, _basePath.length());
     }
 
     @Override
-    public void writeStartObject(Object forValue) throws IOException {
+    public void writeStartObject(Object forValue) throws JacksonException {
         _verifyValueWrite("start an object");
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(forValue, _basePath.length());
     }
 
     @Override
-    public void writeEndObject() throws IOException
+    public void writeEndObject() throws JacksonException
     {
         if (!_tokenWriteContext.inObject()) {
             _reportError("Current context not an Ibject but "+_tokenWriteContext.typeDesc());
@@ -276,7 +276,7 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeString(String text) throws IOException
+    public void writeString(String text) throws JacksonException
     {
         if (text == null) {
             writeNull();
@@ -288,22 +288,22 @@ public abstract class JavaPropsGenerator
 
     @Override
     public void writeString(char[] text, int offset, int len)
-        throws IOException
+        throws JacksonException
     {
         _verifyValueWrite("write String value");
         _writeEscapedEntry(text, offset, len);
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len)throws IOException
+    public void writeRawUTF8String(byte[] text, int offset, int len)throws JacksonException
     {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int len) throws IOException
+    public void writeUTF8String(byte[] text, int offset, int len) throws JacksonException
     {
-        writeString(new String(text, offset, len, "UTF-8"));
+        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -313,27 +313,27 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeRaw(String text) throws IOException {
+    public void writeRaw(String text) throws JacksonException {
         _writeRaw(text);
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws IOException {
+    public void writeRaw(String text, int offset, int len) throws JacksonException {
         _writeRaw(text.substring(offset, offset+len));
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws IOException {
+    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
         _writeRaw(text, offset, len);
     }
 
     @Override
-    public void writeRaw(char c) throws IOException {
+    public void writeRaw(char c) throws JacksonException {
         _writeRaw(c);
     }
 
     @Override
-    public void writeRaw(SerializableString text) throws IOException, JsonGenerationException {
+    public void writeRaw(SerializableString text) throws JacksonException, JsonGenerationException {
         writeRaw(text.toString());
     }
 
@@ -345,7 +345,7 @@ public abstract class JavaPropsGenerator
     
     @Override
     public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
-            throws IOException
+            throws JacksonException
     {
         if (data == null) {
             writeNull();
@@ -367,33 +367,33 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeBoolean(boolean state) throws IOException
+    public void writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         _writeUnescapedEntry(state ? "true" : "false");
     }
 
     @Override
-    public void writeNumber(short v) throws IOException {
+    public void writeNumber(short v) throws JacksonException {
         writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int i) throws IOException
+    public void writeNumber(int i) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(i));
     }
 
     @Override
-    public void writeNumber(long l) throws IOException
+    public void writeNumber(long l) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(l));
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws IOException
+    public void writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
             writeNull();
@@ -404,21 +404,21 @@ public abstract class JavaPropsGenerator
     }
     
     @Override
-    public void writeNumber(double d) throws IOException
+    public void writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(d));
     }    
 
     @Override
-    public void writeNumber(float f) throws IOException
+    public void writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(f));
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws IOException
+    public void writeNumber(BigDecimal dec) throws JacksonException
     {
         if (dec == null) {
             writeNull();
@@ -430,7 +430,7 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws IOException
+    public void writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
             writeNull();
@@ -441,7 +441,7 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public void writeNull() throws IOException
+    public void writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
         _writeUnescapedEntry("");
@@ -455,10 +455,10 @@ public abstract class JavaPropsGenerator
 
 //    protected void _releaseBuffers()
 
-//    protected void _flushBuffer() throws IOException
+//    protected void _flushBuffer() throws JacksonException
 
     @Override
-    protected void _verifyValueWrite(String typeMsg) throws IOException
+    protected void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         // first, check that name/value cadence works
         if (!_tokenWriteContext.writeValue()) {
@@ -494,15 +494,15 @@ public abstract class JavaPropsGenerator
     /**********************************************************************
      */
     
-    protected abstract void _writeEscapedEntry(String value) throws IOException;
+    protected abstract void _writeEscapedEntry(String value) throws JacksonException;
 
-    protected abstract void _writeEscapedEntry(char[] text, int offset, int len) throws IOException;
+    protected abstract void _writeEscapedEntry(char[] text, int offset, int len) throws JacksonException;
 
-    protected abstract void _writeUnescapedEntry(String value) throws IOException;
+    protected abstract void _writeUnescapedEntry(String value) throws JacksonException;
 
-    protected abstract void _writeRaw(char c) throws IOException;
-    protected abstract void _writeRaw(String text) throws IOException;
-    protected abstract void _writeRaw(StringBuilder text) throws IOException;
-    protected abstract void _writeRaw(char[] text, int offset, int len) throws IOException;
+    protected abstract void _writeRaw(char c) throws JacksonException;
+    protected abstract void _writeRaw(String text) throws JacksonException;
+    protected abstract void _writeRaw(StringBuilder text) throws JacksonException;
+    protected abstract void _writeRaw(char[] text, int offset, int len) throws JacksonException;
     
 }
