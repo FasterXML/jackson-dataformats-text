@@ -332,7 +332,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public JsonToken nextToken() throws IOException
+    public JsonToken nextToken() throws JacksonException
     {
         _currentIsAlias = false;
         _binaryValue = null;
@@ -468,7 +468,7 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
+    protected JsonToken _decodeScalar(ScalarEvent scalar) throws JacksonException
     {
         String value = scalar.getValue();
 
@@ -772,7 +772,7 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public String getText() throws IOException
+    public String getText() throws JacksonException
     {
         if (_currToken == JsonToken.VALUE_STRING) {
             return _textValue;
@@ -790,7 +790,7 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public String currentName() throws IOException
+    public String currentName() throws JacksonException
     {
         if (_currToken == JsonToken.FIELD_NAME) {
             return _currentFieldName;
@@ -805,30 +805,34 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public char[] getTextCharacters() throws IOException {
+    public char[] getTextCharacters() throws JacksonException {
         String text = getText();
         return (text == null) ? null : text.toCharArray();
     }
 
     @Override
-    public int getTextLength() throws IOException {
+    public int getTextLength() throws JacksonException {
         String text = getText();
         return (text == null) ? 0 : text.length();
     }
 
     @Override
-    public int getTextOffset() throws IOException {
+    public int getTextOffset() throws JacksonException {
         return 0;
     }
 
     @Override
-    public int getText(Writer writer) throws IOException
+    public int getText(Writer writer) throws JacksonException
     {
         String str = getText();
         if (str == null) {
             return 0;
         }
-        writer.write(str);
+        try {
+            writer.write(str);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
         return str.length();
     }
 
@@ -839,7 +843,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public Object getEmbeddedObject() throws IOException {
+    public Object getEmbeddedObject() throws JacksonException {
         if (_currToken == JsonToken.VALUE_EMBEDDED_OBJECT) {
             return _binaryValue;
         }
@@ -847,13 +851,17 @@ public class YAMLParser extends ParserBase
     }
 
     // Base impl from `ParserBase` works fine here:
-//    public byte[] getBinaryValue(Base64Variant variant) throws IOException
+//    public byte[] getBinaryValue(Base64Variant variant) throws JacksonException
 
     @Override
-    public int readBinaryValue(Base64Variant b64variant, OutputStream out) throws IOException
+    public int readBinaryValue(Base64Variant b64variant, OutputStream out) throws JacksonException
     {
         byte[] b = getBinaryValue(b64variant);
-        out.write(b);
+        try {
+            out.write(b);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
         return b.length;
     }
 
@@ -864,7 +872,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    protected void _parseNumericValue(int expType) throws IOException
+    protected void _parseNumericValue(int expType) throws JacksonException
     {
         // Int or float?
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
@@ -914,7 +922,9 @@ public class YAMLParser extends ParserBase
             } catch (NumberFormatException nex) {
                 // NOTE: pass non-cleaned variant for error message
                 // Can this ever occur? Due to overflow, maybe?
-                _wrapError("Malformed numeric value '" + _textValue + "'", nex);
+                throw _constructReadException(String.format(
+                        "Malformed numeric value '%s: (%s) %s",
+                        _textValue, nex.getClass().getName(), nex.getMessage()));
             }
         }
         if (_currToken == JsonToken.VALUE_NUMBER_FLOAT) {
@@ -932,7 +942,9 @@ public class YAMLParser extends ParserBase
             } catch (NumberFormatException nex) {
                 // Can this ever occur? Due to overflow, maybe?
                 // NOTE: pass non-cleaned variant for error message
-                _wrapError("Malformed numeric value '" + _textValue + "'", nex);
+                throw _constructReadException(String.format(
+                        "Malformed numeric value '%s: (%s) %s",
+                        _textValue, nex.getClass().getName(), nex.getMessage()));
             }
             return;
         }
@@ -940,7 +952,7 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    protected int _parseIntValue() throws IOException
+    protected int _parseIntValue() throws JacksonException
     {
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             int len = _cleanedTextValue.length();
@@ -966,13 +978,13 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public String getObjectId() throws IOException
+    public String getObjectId() throws JacksonException
     {
         return _currentAnchor.map(a -> a.getValue()).orElse(null);
     }
 
     @Override
-    public String getTypeId() throws IOException
+    public String getTypeId() throws JacksonException
     {
         Optional<String> tagOpt;
         if (_lastTagEvent instanceof CollectionStartEvent) {

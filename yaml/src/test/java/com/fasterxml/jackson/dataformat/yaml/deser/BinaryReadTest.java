@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -31,7 +30,7 @@ public class BinaryReadTest extends ModuleTestBase
         JsonNode bean = null;
         try {
             bean = MAPPER.readTree(DOC);
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             fail("Should have decoded properly, instead got "+e);
         }
         final JsonNode picture = bean.get("picture");

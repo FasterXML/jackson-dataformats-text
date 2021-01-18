@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.exc.WrappedIOException;
 import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.io.IOContext;
@@ -47,9 +49,9 @@ public class CsvEncoder
     protected int[] _outputEscapes = sOutputEscapes;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     final protected IOContext _ioContext;
@@ -63,16 +65,10 @@ public class CsvEncoder
 
     final protected int _cfgQuoteCharacter;
 
-    /**
-     * @since 2.7
-     */
     final protected int _cfgEscapeCharacter;
     
     final protected char[] _cfgLineSeparator;
 
-    /**
-     * @since 2.5
-     */
     final protected char[] _cfgNullValue;
     
     final protected int _cfgLineSeparatorLength;
@@ -90,41 +86,27 @@ public class CsvEncoder
     /**
      * Marker flag used to determine if to do optimal (aka "strict") quoting
      * checks or not (looser conservative check)
-     * 
-     * @since 2.4
      */
     protected boolean _cfgOptimalQuoting;
 
-    /**
-     * @since 2.4
-     */
     protected boolean _cfgIncludeMissingTail;
 
-    /**
-     * @since 2.5
-     */
     protected boolean _cfgAlwaysQuoteStrings;
 
     protected boolean _cfgAlwaysQuoteEmptyStrings;
 
     protected boolean _cfgEscapeQuoteCharWithEscapeChar;
 
-    /**
-     * @since 2.9.9
-     */
     protected boolean _cfgEscapeControlCharWithEscapeChar;
 
     protected final char _cfgQuoteCharEscapeChar;
 
-    /**
-     * @since 2.9.9
-     */
     protected final char _cfgControlCharEscapeChar;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output state
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected int _columnCount;
@@ -144,11 +126,11 @@ public class CsvEncoder
      * Index of the last buffered value
      */
     protected int _lastBuffered = -1;
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output buffering, low-level
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -183,9 +165,9 @@ public class CsvEncoder
     protected int _charsWritten;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Construction, (re)configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema,
@@ -319,9 +301,9 @@ public class CsvEncoder
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Read-access to output state
-    /**********************************************************
+    /**********************************************************************
      */
 
     public Object getOutputTarget() {
@@ -342,12 +324,12 @@ public class CsvEncoder
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Writer API, writes from generator
-    /**********************************************************
+    /**********************************************************************
      */
 
-    public final void write(int columnIndex, String value) throws IOException
+    public final void write(int columnIndex, String value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -374,13 +356,13 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    public final void write(int columnIndex, char[] ch, int offset, int len) throws IOException
+    public final void write(int columnIndex, char[] ch, int offset, int len) throws JacksonException
     {
         // !!! TODO: optimize
         write(columnIndex, new String(ch, offset, len));
     }
 
-    public final void write(int columnIndex, int value) throws IOException
+    public final void write(int columnIndex, int value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -399,7 +381,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    public final void write(int columnIndex, long value) throws IOException
+    public final void write(int columnIndex, long value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -418,7 +400,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    public final void write(int columnIndex, float value) throws IOException
+    public final void write(int columnIndex, float value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -429,7 +411,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    public final void write(int columnIndex, double value) throws IOException
+    public final void write(int columnIndex, double value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -440,7 +422,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    public final void write(int columnIndex, boolean value) throws IOException
+    public final void write(int columnIndex, boolean value) throws JacksonException
     {
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
@@ -451,10 +433,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
-    /**
-     * @since 2.5
-     */
-    public final void writeNonEscaped(int columnIndex, String rawValue) throws IOException
+    public final void writeNonEscaped(int columnIndex, String rawValue) throws JacksonException
     {
         if (columnIndex == _nextColumnToWrite) {
             appendRawValue(rawValue);
@@ -464,7 +443,7 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.bufferedRaw(rawValue));
     }
         
-    public final void writeNull(int columnIndex) throws IOException
+    public final void writeNull(int columnIndex) throws JacksonException
     {
         if (columnIndex == _nextColumnToWrite) {
             appendNull();
@@ -474,13 +453,13 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.bufferedNull());
     }
 
-    public final void writeColumnName(String name) throws IOException
+    public final void writeColumnName(String name) throws JacksonException
     {
         appendValue(name);
         ++_nextColumnToWrite;
     }
 
-    public void endRow() throws IOException
+    public void endRow() throws JacksonException
     {
         // First things first; any buffered?
         if (_lastBuffered >= 0) {
@@ -516,14 +495,14 @@ public class CsvEncoder
         System.arraycopy(_cfgLineSeparator, 0, _outputBuffer, _outputTail, _cfgLineSeparatorLength);
         _outputTail += _cfgLineSeparatorLength;
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Writer API, writes via buffered values
-    /**********************************************************
+    /**********************************************************************
      */
 
-    protected void appendValue(String value) throws IOException
+    protected void appendValue(String value) throws JacksonException
     {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
@@ -531,9 +510,8 @@ public class CsvEncoder
         if (_nextColumnToWrite > 0) {
             appendColumnSeparator();
         }
-        /* First: determine if we need quotes; simple heuristics;
-         * only check for short Strings, stop if something found
-         */
+        // First: determine if we need quotes; simple heuristics;
+        // only check for short Strings, stop if something found
         final int len = value.length();
         if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len)) {
             if (_cfgEscapeCharacter > 0) {
@@ -546,7 +524,7 @@ public class CsvEncoder
         }
     }
 
-    protected void appendRawValue(String value) throws IOException
+    protected void appendRawValue(String value) throws JacksonException
     {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
@@ -557,7 +535,7 @@ public class CsvEncoder
         writeRaw(value);
     }
 
-    protected void appendValue(int value) throws IOException
+    protected void appendValue(int value) throws JacksonException
     {
         // up to 10 digits and possible minus sign, leading comma
         if ((_outputTail + 12) > _outputEnd) {
@@ -569,7 +547,7 @@ public class CsvEncoder
         _outputTail = NumberOutput.outputInt(value, _outputBuffer, _outputTail);
     }
 
-    protected void appendValue(long value) throws IOException
+    protected void appendValue(long value) throws JacksonException
     {
         // up to 20 digits, minus sign, leading comma
         if ((_outputTail + 22) > _outputEnd) {
@@ -581,7 +559,7 @@ public class CsvEncoder
         _outputTail = NumberOutput.outputLong(value, _outputBuffer, _outputTail);
     }
 
-    protected void appendValue(float value) throws IOException
+    protected void appendValue(float value) throws JacksonException
     {
         String str = NumberOutput.toString(value);
         final int len = str.length();
@@ -594,7 +572,7 @@ public class CsvEncoder
         writeRaw(str);
     }
 
-    protected void appendValue(double value) throws IOException
+    protected void appendValue(double value) throws JacksonException
     {
         String str = NumberOutput.toString(value);
         final int len = str.length();
@@ -607,15 +585,15 @@ public class CsvEncoder
         writeRaw(str);
     }
 
-    protected void appendValue(boolean value) throws IOException {
+    protected void appendValue(boolean value) throws JacksonException {
         _append(value ? TRUE_CHARS : FALSE_CHARS);
     }
 
-    protected void appendNull() throws IOException {
+    protected void appendNull() throws JacksonException {
         _append(_cfgNullValue);
     }
 
-    protected void _append(char[] ch) throws IOException {
+    protected void _append(char[] ch) throws JacksonException {
         final int len = ch.length;
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -629,7 +607,7 @@ public class CsvEncoder
         _outputTail += len;
     }
     
-    protected void appendColumnSeparator() throws IOException {
+    protected void appendColumnSeparator() throws JacksonException {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
         }
@@ -637,12 +615,12 @@ public class CsvEncoder
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output methods, unprocessed ("raw")
-    /**********************************************************
+    /**********************************************************************
      */
     
-    public void writeRaw(String text) throws IOException
+    public void writeRaw(String text) throws JacksonException
     {
         // Nothing to check, can just output as is
         int len = text.length();
@@ -661,7 +639,7 @@ public class CsvEncoder
         }
     }
 
-    public void writeRaw(String text, int start, int len) throws IOException
+    public void writeRaw(String text, int start, int len) throws JacksonException
     {
         // Nothing to check, can just output as is
         int room = _outputEnd - _outputTail;
@@ -679,7 +657,7 @@ public class CsvEncoder
         }
     }
 
-    public void writeRaw(char[] text, int offset, int len) throws IOException
+    public void writeRaw(char[] text, int offset, int len) throws JacksonException
     {
         // Only worth buffering if it's a short write?
         if (len < SHORT_WRITE) {
@@ -693,10 +671,14 @@ public class CsvEncoder
         }
         // Otherwise, better just pass through:
         _flushBuffer();
-        _out.write(text, offset, len);
+        try {
+            _out.write(text, offset, len);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
-    public void writeRaw(char c) throws IOException
+    public void writeRaw(char c) throws JacksonException
     {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
@@ -704,7 +686,7 @@ public class CsvEncoder
         _outputBuffer[_outputTail++] = c;
     }
 
-    private void writeRawLong(String text) throws IOException
+    private void writeRawLong(String text) throws JacksonException
     {
         int room = _outputEnd - _outputTail;
         // If not, need to do it by looping
@@ -728,12 +710,12 @@ public class CsvEncoder
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output methods, with quoting and escaping
-    /**********************************************************
+    /**********************************************************************
      */
 
-    public void _writeQuoted(String text) throws IOException
+    public void _writeQuoted(String text) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -778,7 +760,7 @@ public class CsvEncoder
         }
     }
 
-    protected void _writeQuoted(String text, char q, int i) throws IOException
+    protected void _writeQuoted(String text, char q, int i) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -814,7 +796,7 @@ public class CsvEncoder
         buf[_outputTail++] = q;
     }
 
-    private final void _writeLongQuoted(String text, char q) throws IOException
+    private final void _writeLongQuoted(String text, char q) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -847,7 +829,7 @@ public class CsvEncoder
         _outputBuffer[_outputTail++] = q;
     }
 
-    public void _writeQuotedAndEscaped(String text, char esc) throws IOException
+    public void _writeQuotedAndEscaped(String text, char esc) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -884,7 +866,7 @@ public class CsvEncoder
         }
     }
 
-    protected void _writeQuotedAndEscaped(String text, char q, char esc, int i) throws IOException
+    protected void _writeQuotedAndEscaped(String text, char q, char esc, int i) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -927,7 +909,7 @@ public class CsvEncoder
         buf[_outputTail++] = q;
     }
     
-    private final void _writeLongQuotedAndEscaped(String text, char esc) throws IOException
+    private final void _writeLongQuotedAndEscaped(String text, char esc) throws JacksonException
     {
         final int[] escCodes = _outputEscapes;
         final int escLen = escCodes.length;
@@ -971,9 +953,9 @@ public class CsvEncoder
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Writer API, state changes
-    /**********************************************************
+    /**********************************************************************
      */
     
     public void flush(boolean flushStream) throws IOException
@@ -996,11 +978,11 @@ public class CsvEncoder
         // Internal buffer(s) generator has can now be released as well
         _releaseBuffers();
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -1066,9 +1048,6 @@ public class CsvEncoder
         return false;
     }
 
-    /**
-     * @since 2.4
-     */
     protected boolean _needsQuotingStrict(String value)
     {
         final int minSafe = _cfgMinSafeChar;
@@ -1094,9 +1073,6 @@ public class CsvEncoder
         return false;
     }
 
-    /**
-     * @since 2.7
-     */
     protected boolean _needsQuotingStrict(String value, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
@@ -1132,11 +1108,15 @@ public class CsvEncoder
         _buffered[index] = v;
     }
 
-    protected void _flushBuffer() throws IOException
+    protected void _flushBuffer() throws JacksonException
     {
         if (_outputTail > 0) {
             _charsWritten += _outputTail;
-            _out.write(_outputBuffer, 0, _outputTail);
+            try {
+                _out.write(_outputBuffer, 0, _outputTail);
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
             _outputTail = 0;
         }
     }
@@ -1154,7 +1134,8 @@ public class CsvEncoder
      * Method called to append escape sequence for given character, at the
      * end of standard output buffer; or if not possible, write out directly.
      */
-    private void _appendCharacterEscape(char ch, int escCode) throws IOException
+    private void _appendCharacterEscape(char ch, int escCode)
+        throws JacksonException
     {
         if (escCode >= 0) { // \\N (2 char)
             if ((_outputTail + 2) > _outputEnd) {
@@ -1186,5 +1167,11 @@ public class CsvEncoder
         buf[ptr++] = HEX_CHARS[ch & 0xF];
         _outputTail = ptr;
         return;
+    }
+
+    // @since 3.0: defined by basic JsonParser/JsonGenerator but since we are
+    //   not extending need to copy here
+    protected JacksonException _wrapIOFailure(IOException e) {
+        return WrappedIOException.construct(e);
     }
 }

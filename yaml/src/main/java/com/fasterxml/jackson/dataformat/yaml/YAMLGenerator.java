@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -245,7 +246,6 @@ public class YAMLGenerator extends GeneratorBase
             StringQuotingChecker quotingChecker,
             Writer out,
             SpecVersion version)
-        throws IOException
     {
         super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
@@ -401,7 +401,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeFieldName(String name) throws IOException
+    public final void writeFieldName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
@@ -411,7 +411,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public final void writeFieldName(SerializableString name)
-        throws IOException
+        throws JacksonException
     {
         // Object is a value, need to verify it's allowed
         if (!_tokenWriteContext.writeFieldName(name.getValue())) {
@@ -421,7 +421,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeFieldId(long id) throws IOException {
+    public void writeFieldId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
         if (!_tokenWriteContext.writeFieldName(idStr)) {
@@ -432,7 +432,7 @@ public class YAMLGenerator extends GeneratorBase
         _writeScalar(idStr, "int", STYLE_SCALAR);
     }
 
-    private final void _writeFieldName(String name) throws IOException
+    private final void _writeFieldName(String name) throws JacksonException
     {
         _writeScalar(name, "string",
                 _quotingChecker.needToQuoteName(name) ? STYLE_QUOTED : STYLE_UNQUOTED_NAME);
@@ -445,15 +445,19 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void flush() throws IOException
+    public final void flush()
     {
         if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-            _writer.flush();
+            try {
+                _writer.flush();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
         }
     }
 
     @Override
-    public void close() throws IOException
+    public void close()
     {
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
@@ -469,11 +473,15 @@ public class YAMLGenerator extends GeneratorBase
              *   may not be properly recycled if we don't close the writer.
              */
             if (_writer != null) {
-                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                    _writer.close();
-                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    // If we can't close it, we should at least flush
-                    _writer.flush();
+                try {
+                    if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                        _writer.close();
+                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        // If we can't close it, we should at least flush
+                        _writer.flush();
+                    }
+                } catch (IOException e) {
+                    throw _wrapIOFailure(e);
                 }
             }
         }
@@ -486,7 +494,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeStartArray() throws IOException
+    public final void writeStartArray() throws JacksonException
     {
         _verifyValueWrite("start an array");
         _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
@@ -502,13 +510,13 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartArray(Object currValue) throws IOException {
+    public final void writeStartArray(Object currValue) throws JacksonException {
         writeStartArray();
         setCurrentValue(currValue);
     }
 
     @Override
-    public final void writeEndArray() throws IOException
+    public final void writeEndArray() throws JacksonException
     {
         if (!_tokenWriteContext.inArray()) {
             _reportError("Current context not Array but "+_tokenWriteContext.typeDesc());
@@ -520,7 +528,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartObject() throws IOException
+    public final void writeStartObject() throws JacksonException
     {
         _verifyValueWrite("start an object");
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
@@ -535,13 +543,13 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public final void writeStartObject(Object currValue) throws IOException {
+    public final void writeStartObject(Object currValue) throws JacksonException {
         writeStartObject();
         setCurrentValue(currValue);
     }
 
     @Override
-    public final void writeEndObject() throws IOException
+    public final void writeEndObject() throws JacksonException
     {
         if (!_tokenWriteContext.inObject()) {
             _reportError("Current context not Object but "+_tokenWriteContext.typeDesc());
@@ -559,7 +567,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws IOException,JsonGenerationException
+    public void writeString(String text) throws JacksonException,JsonGenerationException
     {
         if (text == null) {
             writeNull();
@@ -596,30 +604,30 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws IOException
+    public void writeString(char[] text, int offset, int len) throws JacksonException
     {
         writeString(new String(text, offset, len));
     }
 
     @Override
     public final void writeString(SerializableString sstr)
-        throws IOException
+        throws JacksonException
     {
         writeString(sstr.toString());
     }
 
     @Override
     public void writeRawUTF8String(byte[] text, int offset, int len)
-        throws IOException
+        throws JacksonException
     {
         _reportUnsupportedOperation();
     }
 
     @Override
     public final void writeUTF8String(byte[] text, int offset, int len)
-        throws IOException
+        throws JacksonException
     {
-        writeString(new String(text, offset, len, "UTF-8"));
+        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -629,37 +637,37 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeRaw(String text) throws IOException {
+    public void writeRaw(String text) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws IOException {
+    public void writeRaw(String text, int offset, int len) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws IOException {
+    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(char c) throws IOException {
+    public void writeRaw(char c) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(String text) throws IOException {
+    public void writeRawValue(String text) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(String text, int offset, int len) throws IOException {
+    public void writeRawValue(String text, int offset, int len) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(char[] text, int offset, int len) throws IOException {
+    public void writeRawValue(char[] text, int offset, int len) throws JacksonException {
         _reportUnsupportedOperation();
     }
 
@@ -670,7 +678,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws IOException
+    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws JacksonException
     {
         if (data == null) {
             writeNull();
@@ -690,26 +698,26 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBoolean(boolean state) throws IOException
+    public void writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         _writeScalar(state ? "true" : "false", "bool", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(short v) throws IOException {
+    public void writeNumber(short v) throws JacksonException {
         writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int v) throws IOException
+    public void writeNumber(int v) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(v), "int", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(long l) throws IOException
+    public void writeNumber(long l) throws JacksonException
     {
         // First: maybe 32 bits is enough?
         if (l <= MAX_INT_AS_LONG && l >= MIN_INT_AS_LONG) {
@@ -721,7 +729,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws IOException
+    public void writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
             writeNull();
@@ -732,21 +740,21 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(double d) throws IOException
+    public void writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(float f) throws IOException
+    public void writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws IOException
+    public void writeNumber(BigDecimal dec) throws JacksonException
     {
         if (dec == null) {
             writeNull();
@@ -758,7 +766,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws IOException,JsonGenerationException, UnsupportedOperationException
+    public void writeNumber(String encodedValue) throws JacksonException,JsonGenerationException, UnsupportedOperationException
     {
         if (encodedValue == null) {
             writeNull();
@@ -769,7 +777,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNull() throws IOException
+    public void writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
         // no real type for this, is there?
@@ -798,7 +806,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public void writeTypeId(Object id)
-        throws IOException
+        throws JacksonException
     {
         // should we verify there's no preceding type id?
         _typeId = String.valueOf(id);
@@ -806,7 +814,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public void writeObjectRef(Object id)
-        throws IOException
+        throws JacksonException
     {
         _verifyValueWrite("write Object reference");
         AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
@@ -815,7 +823,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public void writeObjectId(Object id)
-        throws IOException
+        throws JacksonException
     {
         // should we verify there's no preceding id?
         _objectId = (id == null) ? null : String.valueOf(id);
@@ -828,7 +836,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    protected final void _verifyValueWrite(String typeMsg) throws IOException
+    protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         if (!_tokenWriteContext.writeValue()) {
             _reportError("Can not "+typeMsg+", expecting field name");
@@ -861,13 +869,13 @@ public class YAMLGenerator extends GeneratorBase
     // ... and sometimes we specifically DO want explicit tag:
     private final static ImplicitTuple EXPLICIT_TAGS = new ImplicitTuple(false, false);
 
-    protected void _writeScalar(String value, String type, ScalarStyle style) throws IOException
+    protected void _writeScalar(String value, String type, ScalarStyle style) throws JacksonException
     {
         _emit(_scalarEvent(value, style));
     }
 
     private void _writeScalarBinary(Base64Variant b64variant,
-            byte[] data) throws IOException
+            byte[] data) throws JacksonException
     {
         // 15-Dec-2017, tatu: as per [dataformats-text#62], can not use SnakeYAML's internal
         //    codec. Also: force use of linefeed variant if using default
@@ -898,7 +906,7 @@ public class YAMLGenerator extends GeneratorBase
         return _outputOptions.getBestLineBreak();
     }
 
-    protected void _emitStartDocument() throws IOException
+    protected void _emitStartDocument() throws JacksonException
     {
         Map<String,String> noTags = Collections.emptyMap();
         boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
@@ -907,11 +915,11 @@ public class YAMLGenerator extends GeneratorBase
                 noTags));
     }
 
-    protected void _emitEndDocument() throws IOException {
+    protected void _emitEndDocument() throws JacksonException {
         _emit(new DocumentEndEvent(false));
     }
 
-    protected final void _emit(Event e) throws IOException {
+    protected final void _emit(Event e) {
         _emitter.emit(e);
     }
 }

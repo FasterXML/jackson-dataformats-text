@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 import java.io.*;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.exc.WrappedIOException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.MergedStream;
 import com.fasterxml.jackson.core.io.UTF32Reader;
@@ -26,17 +27,17 @@ public final class CsvParserBootstrapper
     final static byte UTF8_BOM_3 = (byte) 0xBF;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected final IOContext _context;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Input buffering
-    /**********************************************************
+    /**********************************************************************
      */
     
     protected final InputStream _in;
@@ -48,9 +49,9 @@ public final class CsvParserBootstrapper
     private int _inputEnd;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Input location
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -63,9 +64,9 @@ public final class CsvParserBootstrapper
     protected int _inputProcessed;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Data gathered
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected boolean _bigEndian = true;
@@ -73,9 +74,9 @@ public final class CsvParserBootstrapper
     protected int _bytesPerChar = 0; // 0 means "dunno yet"
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public CsvParserBootstrapper(IOContext ctxt, InputStream in)
@@ -100,14 +101,15 @@ public final class CsvParserBootstrapper
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API
-    /**********************************************************
+    /**********************************************************************
      */
 
     public CsvParser constructParser(ObjectReadContext readCtxt,
             int parserFeatures, int csvFeatures,
-            CsvSchema schema) throws IOException
+            CsvSchema schema)
+        throws JacksonException
     {
         boolean foundEncoding = false;
 
@@ -161,7 +163,8 @@ public final class CsvParserBootstrapper
     }
 
     @SuppressWarnings("resource")
-    private Reader _createReader(JsonEncoding enc, boolean autoClose) throws IOException
+    private Reader _createReader(JsonEncoding enc, boolean autoClose)
+        throws JacksonException
     {
         switch (enc) { 
         case UTF32_BE:
@@ -184,7 +187,11 @@ public final class CsvParserBootstrapper
                         in = new MergedStream(_context, in, _inputBuffer, _inputPtr, _inputEnd);
                     }
                 }
-                return new InputStreamReader(in, enc.getJavaName());
+                try {
+                    return new InputStreamReader(in, enc.getJavaName());
+                } catch (IOException e) {
+                    throw _wrapIOFailure(e);
+                }
             }
         case UTF8:
             // Important: do not pass context, if we got byte[], nothing to release
@@ -196,16 +203,16 @@ public final class CsvParserBootstrapper
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, parsing
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
      * @return True if a BOM was successfully found, and encoding
      *   thereby recognized.
      */
-    private boolean handleBOM(int quad) throws IOException
+    private boolean handleBOM(int quad) throws JacksonException
     {
         // Handling of (usually) optional BOM (required for
         // multi-byte formats); first 32-bit charsets:
@@ -249,7 +256,7 @@ public final class CsvParserBootstrapper
         return false;
     }
 
-    private boolean checkUTF32(int quad) throws IOException
+    private boolean checkUTF32(int quad) throws JacksonException
     {
         /* Handling of (usually) optional BOM (required for
          * multi-byte formats); first 32-bit charsets:
@@ -288,22 +295,22 @@ public final class CsvParserBootstrapper
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, problem reporting
-    /**********************************************************
+    /**********************************************************************
      */
 
-    private void reportWeirdUCS4(String type) throws IOException {
-        throw new CharConversionException("Unsupported UCS-4 endianness ("+type+") detected");
+    private void reportWeirdUCS4(String type) throws JacksonException {
+        throw _createIOFailure("Unsupported UCS-4 endianness ("+type+") detected");
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods, raw input access
-    /**********************************************************
+    /**********************************************************************
      */
 
-    protected boolean ensureLoaded(int minimum) throws IOException
+    protected boolean ensureLoaded(int minimum) throws JacksonException
     {
         /* Let's assume here buffer has enough room -- this will always
          * be true for the limited used this method gets
@@ -315,7 +322,11 @@ public final class CsvParserBootstrapper
             if (_in == null) { // block source
                 count = -1;
             } else {
-                count = _in.read(_inputBuffer, _inputEnd, _inputBuffer.length - _inputEnd);
+                try {
+                    count = _in.read(_inputBuffer, _inputEnd, _inputBuffer.length - _inputEnd);
+                } catch (IOException e) {
+                    throw _wrapIOFailure(e);
+                }
             }
             if (count < 1) {
                 return false;
@@ -324,6 +335,23 @@ public final class CsvParserBootstrapper
             gotten += count;
         }
         return true;
+    }
+
+    /*
+    /**********************************************************************
+    /* Internal methods, exception handling
+    /**********************************************************************
+     */
+
+    private static JacksonException _createIOFailure(String msg) throws JacksonException {
+        // 12-Jan-2021, tatu: Couple of alternatives, but since this is before
+        //    actual parser created, seems best to simply fake this was "true"
+        //    IOException
+        return _wrapIOFailure(new IOException(msg));
+    }
+
+    private static JacksonException _wrapIOFailure(IOException e) throws JacksonException {
+        return WrappedIOException.construct(e);
     }
 }
 

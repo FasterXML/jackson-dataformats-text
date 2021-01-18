@@ -28,9 +28,9 @@ public class JavaPropsFactory
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Factory construction, configuration
-    /**********************************************************
+    /**********************************************************************
      */
     
     public JavaPropsFactory() {
@@ -188,7 +188,7 @@ public class JavaPropsFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            InputStream in) throws IOException
+            InputStream in)
     {
         Properties props = _loadProperties(in, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
@@ -199,7 +199,7 @@ public class JavaPropsFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            Reader r) throws IOException {
+            Reader r) {
         Properties props = _loadProperties(r, ioCtxt);
         return new JavaPropsParser(readCtxt, ioCtxt,
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -210,21 +210,21 @@ public class JavaPropsFactory
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             char[] data, int offset, int len,
-            boolean recyclable) throws IOException
+            boolean recyclable)
     {
         return _createParser(readCtxt, ioCtxt, new CharArrayReader(data, offset, len));
     }
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            byte[] data, int offset, int len) throws IOException
+            byte[] data, int offset, int len)
     {
         return _createParser(readCtxt, ioCtxt, new Latin1Reader(data, offset, len));
     }
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt,
-            DataInput input) throws IOException {
+            DataInput input) {
         return _unsupported();
     }
 
@@ -244,7 +244,7 @@ public class JavaPropsFactory
     
     @Override
     protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, Writer out) throws IOException
+            IOContext ioCtxt, Writer out)
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
@@ -254,7 +254,7 @@ public class JavaPropsFactory
 
     @Override
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, OutputStream out) throws IOException
+            IOContext ioCtxt, OutputStream out)
     {
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
@@ -263,11 +263,15 @@ public class JavaPropsFactory
     }
 
     @Override
-    protected Writer _createWriter(IOContext ctioCtxtxt, OutputStream out, JsonEncoding enc) throws IOException
+    protected Writer _createWriter(IOContext ctioCtxtxt, OutputStream out, JsonEncoding enc)
     {
         // 27-Jan-2016, tatu: Properties javadoc is quite clear on Latin-1 (ISO-8859-1) being
         //    the default, so let's actually override
-        return new OutputStreamWriter(out, CHARSET_ID_LATIN1);
+        try {
+            return new OutputStreamWriter(out, CHARSET_ID_LATIN1);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
     private final JavaPropsSchema _getSchema(ObjectWriteContext ctxt) {
@@ -286,23 +290,26 @@ public class JavaPropsFactory
      */
 
     protected Properties _loadProperties(InputStream in, IOContext ctxt)
-        throws IOException
     {
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
         return _loadProperties(new Latin1Reader(ctxt, in), ctxt);
     }
 
-    protected Properties _loadProperties(Reader r0, IOContext ctxt) throws IOException
+    protected Properties _loadProperties(Reader r0, IOContext ctxt)
     {
         Properties props = new Properties();
         // May or may not want to close the reader, so...
-        if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
-            try (Reader r = r0) {
-                props.load(r);
+        try {
+            if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+                try (Reader r = r0) {
+                    props.load(r);
+                }
+            } else {
+                props.load(r0);
             }
-        } else {
-            props.load(r0);
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
         return props;
     }

@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser.NumberType;
@@ -20,7 +21,8 @@ import java.math.BigInteger;
  * Low-level helper class that handles actual reading of CSV,
  * purely based on indexes given without worrying about reordering etc.
  */
-public class CsvDecoder {
+public class CsvDecoder
+{
     private final static int INT_SPACE = 0x0020;
 
     private final static int INT_CR = '\r';
@@ -392,7 +394,7 @@ public class CsvDecoder {
         return (col < 0) ? col : (col + 1);
     }
 
-    protected void releaseBuffers() throws IOException {
+    protected void releaseBuffers() throws JacksonException {
         _textBuffer.releaseBuffers();
         char[] buf = _inputBuffer;
         if (buf != null) {
@@ -419,25 +421,24 @@ public class CsvDecoder {
         }
     }
 
-    protected final boolean loadMore() throws IOException {
+    protected final boolean loadMore() throws JacksonException {
         _currInputProcessed += _inputEnd;
         _currInputRowStart -= _inputEnd;
 
-        if (_inputSource != null) {
-            int count = _inputSource.read(_inputBuffer, 0, _inputBuffer.length);
-            _inputEnd = count;
-            if (count > 0) {
-                _inputPtr = 0;
-                return true;
+        try {
+            if (_inputSource != null) {
+                int count = _inputSource.read(_inputBuffer, 0, _inputBuffer.length);
+                _inputEnd = count;
+                if (count > 0) {
+                    _inputPtr = 0;
+                    return true;
+                }
+                // End of input; close here --  but note, do NOT yet call releaseBuffers()
+                // as there may be buffered input to handle
+                _closeInput();
             }
-            /* End of input; close here --  but note, do NOT yet call releaseBuffers()
-             * as there may be buffered input to handle
-             */
-            _closeInput();
-            // Should never return 0, so let's fail
-            if (count == 0) {
-                throw new IOException("InputStream.read() returned 0 characters when trying to read " + _inputBuffer.length + " bytes");
-            }
+        } catch (IOException e) {
+            throw _owner._wrapIOFailure(e);
         }
         return false;
     }
@@ -456,7 +457,7 @@ public class CsvDecoder {
      * Method that can be called to see if there is at least one more
      * character to be parsed.
      */
-    public boolean hasMoreInput() throws IOException {
+    public boolean hasMoreInput() throws JacksonException {
         if (_inputPtr < _inputEnd) {
             return true;
         }
@@ -469,7 +470,7 @@ public class CsvDecoder {
      *
      * @return True if there is a new data line to handle; false if not
      */
-    public boolean startNewLine() throws IOException {
+    public boolean startNewLine() throws JacksonException {
         // first: if pending LF, skip it
         if (_pendingLF != 0) {
             if (_inputSource == null) {
@@ -483,10 +484,10 @@ public class CsvDecoder {
     /**
      * optionally skip lines that are empty or are comments, depending on the feature activated in the parser
      * @return false if the end of input was reached
-     * @throws IOException
+     * @throws JacksonException
      * @since 2.10
      */
-    public boolean skipLinesWhenNeeded() throws IOException {
+    public boolean skipLinesWhenNeeded() throws JacksonException {
         if (_allowComments) {
             return _skipCommentLines();
         }
@@ -511,7 +512,7 @@ public class CsvDecoder {
         return false; // end of input
     }
 
-    public boolean _skipCommentLines() throws IOException
+    public boolean _skipCommentLines() throws JacksonException
     {
         while ((_inputPtr < _inputEnd) || loadMore()) {
             char ch = _inputBuffer[_inputPtr];
@@ -537,7 +538,7 @@ public class CsvDecoder {
         return false; // end of input
     }
 
-    private void _skipCommentContents() throws IOException
+    private void _skipCommentContents() throws JacksonException
     {
         while ((_inputPtr < _inputEnd) || loadMore()) {
             char ch = _inputBuffer[_inputPtr++];
@@ -554,7 +555,7 @@ public class CsvDecoder {
      * aspects like quoting or escaping. Used currently simply to skip the first
      * line of input document, if instructed to do so.
      */
-    public boolean skipLine() throws IOException {
+    public boolean skipLine() throws JacksonException {
         if (_pendingLF != 0) {
             if (_inputSource == null) {
                 return false;
@@ -581,7 +582,7 @@ public class CsvDecoder {
      * @return Column value if more found; null to indicate end of line
      * of input
      */
-    public String nextString() throws IOException {
+    public String nextString() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
 
         if (_pendingLF > 0) { // either pendingLF, or closed
@@ -672,7 +673,7 @@ public class CsvDecoder {
         return _nextUnquotedString(outBuf, outPtr);
     }
 
-    public JsonToken nextStringOrLiteral() throws IOException {
+    public JsonToken nextStringOrLiteral() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -682,7 +683,7 @@ public class CsvDecoder {
         return JsonToken.VALUE_STRING;
     }
 
-    public JsonToken nextNumber() throws IOException {
+    public JsonToken nextNumber() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -692,7 +693,7 @@ public class CsvDecoder {
         return JsonToken.VALUE_STRING;
     }
 
-    public JsonToken nextNumberOrString() throws IOException {
+    public JsonToken nextNumberOrString() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
         // !!! TODO: implement properly
         String value = nextString();
@@ -708,7 +709,7 @@ public class CsvDecoder {
     /**********************************************************************
      */
 
-    protected String _nextUnquotedString(char[] outBuf, int outPtr) throws IOException {
+    protected String _nextUnquotedString(char[] outBuf, int outPtr) throws JacksonException {
         int c;
         final char[] inputBuffer = _inputBuffer;
 
@@ -753,7 +754,7 @@ public class CsvDecoder {
         return _textBuffer.finishAndReturn(outPtr, _trimSpaces);
     }
 
-    protected String _nextQuotedString() throws IOException {
+    protected String _nextQuotedString() throws JacksonException {
         char[] outBuf = _textBuffer.emptyAndGetCurrentSegment();
         int outPtr = 0;
 
@@ -853,7 +854,7 @@ public class CsvDecoder {
         return result;
     }
 
-    protected final void _handleLF() throws IOException
+    protected final void _handleLF() throws JacksonException
     {
         // already skipped past first part; but may get \r\n so skip the other char too?
         if (_pendingLF == INT_CR) {
@@ -868,7 +869,7 @@ public class CsvDecoder {
         _currInputRowStart = _inputPtr;
     }
 
-    protected char _unescape() throws IOException {
+    protected char _unescape() throws JacksonException {
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
                 _reportError("Unexpected EOF in escaped character");
@@ -890,7 +891,7 @@ public class CsvDecoder {
         return c;
     }
 
-    protected final int _nextChar() throws IOException {
+    protected final int _nextChar() throws JacksonException {
         if (_inputPtr >= _inputEnd) {
             if (!loadMore()) {
                 return -1;
@@ -899,7 +900,7 @@ public class CsvDecoder {
         return _inputBuffer[_inputPtr++];
     }
 
-    protected final int _skipLeadingSpace() throws IOException {
+    protected final int _skipLeadingSpace() throws JacksonException {
         final int sep = _separatorChar;
         while (true) {
             if (_inputPtr >= _inputEnd) {
@@ -932,12 +933,7 @@ public class CsvDecoder {
     public boolean isExpectedNumberIntToken()
     {
         if (_textBuffer.looksLikeInt()) {
-            try {
-                _parseIntValue();
-            } catch (IOException e) {
-                // should not occur but is declared so
-                throw new RuntimeException(e);
-            }
+            _parseIntValue();
             return true;
         }
         return false;
@@ -948,7 +944,7 @@ public class CsvDecoder {
      *    passed as {@code true} by {@code getNumberValueExact()}, and as
      *    {@code false} by regular {@code getNumberValue)}.
      */
-    public Number getNumberValue(boolean exact) throws IOException
+    public Number getNumberValue(boolean exact) throws JacksonException
     {
         if (_numTypesValid == NR_UNKNOWN) {
             _parseNumericValue(exact); // will also check event type
@@ -974,7 +970,7 @@ public class CsvDecoder {
         return Double.valueOf(_numberDouble);
     }
 
-    public NumberType getNumberType() throws IOException {
+    public NumberType getNumberType() throws JacksonException {
         if (_numTypesValid == NR_UNKNOWN) {
             _parseNumericValue(false); // will also check event type
         }
@@ -998,7 +994,7 @@ public class CsvDecoder {
         return NumberType.DOUBLE;
     }
 
-    public int getIntValue() throws IOException {
+    public int getIntValue() throws JacksonException {
         if ((_numTypesValid & NR_INT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) { // not parsed at all
                 _parseNumericValue(false); // will also check event type
@@ -1010,7 +1006,7 @@ public class CsvDecoder {
         return _numberInt;
     }
 
-    public long getLongValue() throws IOException {
+    public long getLongValue() throws JacksonException {
         if ((_numTypesValid & NR_LONG) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(false);
@@ -1022,7 +1018,7 @@ public class CsvDecoder {
         return _numberLong;
     }
 
-    public BigInteger getBigIntegerValue() throws IOException {
+    public BigInteger getBigIntegerValue() throws JacksonException {
         if ((_numTypesValid & NR_BIGINT) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(true);
@@ -1034,13 +1030,13 @@ public class CsvDecoder {
         return _numberBigInt;
     }
 
-    public float getFloatValue() throws IOException {
+    public float getFloatValue() throws JacksonException {
         double value = getDoubleValue();
         // Bounds/range checks would be tricky here, so let's not bother...
         return (float) value;
     }
 
-    public double getDoubleValue() throws IOException {
+    public double getDoubleValue() throws JacksonException {
         if ((_numTypesValid & NR_DOUBLE) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(false);
@@ -1052,7 +1048,7 @@ public class CsvDecoder {
         return _numberDouble;
     }
 
-    public BigDecimal getDecimalValue() throws IOException {
+    public BigDecimal getDecimalValue() throws JacksonException {
         if ((_numTypesValid & NR_BIGDECIMAL) == 0) {
             if (_numTypesValid == NR_UNKNOWN) {
                 _parseNumericValue(true);
@@ -1080,7 +1076,7 @@ public class CsvDecoder {
      *    floating-point values or not
      */
     protected void _parseNumericValue(boolean exactNumber)
-        throws IOException
+        throws JacksonException
     {
         // Int or float?
         if (_textBuffer.looksLikeInt()) {
@@ -1097,7 +1093,7 @@ public class CsvDecoder {
         _parseSlowFloatValue(exactNumber);
     }
 
-    protected void _parseIntValue() throws IOException
+    protected void _parseIntValue() throws JacksonException
     {
         char[] buf = _textBuffer.getTextBuffer();
         int offset = _textBuffer.getTextOffset();
@@ -1149,7 +1145,7 @@ public class CsvDecoder {
     }
 
     private final void _parseSlowFloatValue(boolean exactNumber)
-        throws IOException
+        throws JacksonException
     {
         /* Nope: floating point. Here we need to be careful to get
          * optimal parsing strategy: choice is between accurate but
@@ -1175,7 +1171,7 @@ public class CsvDecoder {
 
     private final void _parseSlowIntValue(char[] buf, int offset, int len,
             boolean neg)
-        throws IOException
+        throws JacksonException
     {
         String numStr = _textBuffer.contentsAsString();
         try {
@@ -1200,7 +1196,7 @@ public class CsvDecoder {
     /**********************************************************************
      */
 
-    protected void convertNumberToInt() throws IOException {
+    protected void convertNumberToInt() throws JacksonException {
         // First, converting from long ought to be easy
         if ((_numTypesValid & NR_LONG) != 0) {
             // Let's verify it's lossless conversion by simple roundtrip
@@ -1231,7 +1227,7 @@ public class CsvDecoder {
         _numTypesValid |= NR_INT;
     }
 
-    protected void convertNumberToLong() throws IOException {
+    protected void convertNumberToLong() throws JacksonException {
         if ((_numTypesValid & NR_INT) != 0) {
             _numberLong = _numberInt;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
@@ -1257,7 +1253,7 @@ public class CsvDecoder {
     }
 
     protected void convertNumberToBigInteger()
-            throws IOException {
+            throws JacksonException {
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             // here it'll just get truncated, no exceptions thrown
             _numberBigInt = _numberBigDecimal.toBigInteger();
@@ -1274,7 +1270,7 @@ public class CsvDecoder {
     }
 
     protected void convertNumberToDouble()
-            throws IOException {
+            throws JacksonException {
         /* 05-Aug-2008, tatus: Important note: this MUST start with
          *   more accurate representations, since we don't know which
          *   value is the original one (others get generated when
@@ -1296,7 +1292,7 @@ public class CsvDecoder {
         _numTypesValid |= NR_DOUBLE;
     }
 
-    protected void convertNumberToBigDecimal() throws IOException {
+    protected void convertNumberToBigDecimal() throws JacksonException {
         if ((_numTypesValid & NR_DOUBLE) != 0) {
             /* Let's actually parse from String representation, to avoid
              * rounding errors that non-decimal floating operations could incur
@@ -1333,11 +1329,11 @@ public class CsvDecoder {
         _reportError("Invalid numeric value: " + msg);
     }
 
-    protected void reportOverflowInt() throws IOException {
+    protected void reportOverflowInt() throws JacksonException {
         _reportError("Numeric value (" + getText() + ") out of range of int (" + Integer.MIN_VALUE + " - " + Integer.MAX_VALUE + ")");
     }
 
-    protected void reportOverflowLong() throws IOException {
+    protected void reportOverflowLong() throws JacksonException {
         _reportError("Numeric value (" + getText() + ") out of range of long (" + Long.MIN_VALUE + " - " + Long.MAX_VALUE + ")");
     }
 

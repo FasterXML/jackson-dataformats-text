@@ -205,7 +205,7 @@ public class YAMLFactory
 
     @Override
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            InputStream in) throws IOException {
+            InputStream in) {
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -215,7 +215,7 @@ public class YAMLFactory
 
     @Override
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            Reader r) throws IOException {
+            Reader r) {
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(), 
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
@@ -226,7 +226,7 @@ public class YAMLFactory
     @Override
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             char[] data, int offset, int len,
-            boolean recyclable) throws IOException {
+            boolean recyclable) {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
@@ -235,7 +235,7 @@ public class YAMLFactory
 
     @Override
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            byte[] data, int offset, int len) throws IOException {
+            byte[] data, int offset, int len) {
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
@@ -244,7 +244,7 @@ public class YAMLFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
-            DataInput input) throws IOException {
+            DataInput input) {
         return _unsupported();
     }
 
@@ -256,7 +256,7 @@ public class YAMLFactory
 
     @Override
     protected YAMLGenerator _createGenerator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, Writer out) throws IOException
+            IOContext ioCtxt, Writer out)
     {
         return new YAMLGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
@@ -267,18 +267,22 @@ public class YAMLFactory
 
     @Override
     protected YAMLGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
-            IOContext ioCtxt, OutputStream out) throws IOException
+            IOContext ioCtxt, OutputStream out)
     {
         return _createGenerator(writeCtxt, ioCtxt,
                 _createWriter(ioCtxt, out, JsonEncoding.UTF8));
     }
 
     @Override
-    protected Writer _createWriter(IOContext ioCtxt, OutputStream out, JsonEncoding enc) throws IOException {
+    protected Writer _createWriter(IOContext ioCtxt, OutputStream out, JsonEncoding enc) {
         if (enc == JsonEncoding.UTF8) {
             return new UTF8Writer(out);
         }
-        return new OutputStreamWriter(out, enc.getJavaName());
+        try {
+            return new OutputStreamWriter(out, enc.getJavaName());
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
     /*
@@ -287,7 +291,7 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-    protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt) throws IOException
+    protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt)
     {
         if (enc == null) {
             enc = JsonEncoding.UTF8;
@@ -298,11 +302,15 @@ public class YAMLFactory
             return new UTF8Reader(in, autoClose);
 //          return new InputStreamReader(in, UTF8);
         }
-        return new InputStreamReader(in, enc.getJavaName());
+        try {
+            return new InputStreamReader(in, enc.getJavaName());
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 
     protected Reader _createReader(byte[] data, int offset, int len,
-            JsonEncoding enc, IOContext ctxt) throws IOException
+            JsonEncoding enc, IOContext ctxt)
     {
         if (enc == null) {
             enc = JsonEncoding.UTF8;
@@ -312,6 +320,10 @@ public class YAMLFactory
             return new UTF8Reader(data, offset, len, true);
         }
         ByteArrayInputStream in = new ByteArrayInputStream(data, offset, len);
-        return new InputStreamReader(in, enc.getJavaName());
+        try {
+            return new InputStreamReader(in, enc.getJavaName());
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
+        }
     }
 }

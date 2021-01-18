@@ -9,8 +9,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 /**
- * Tests for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
- * ({@code dataformats-text#7}).
+ * Tests for {@code CsvParser.Feature.EMPTY_STRING_AS_NULL}
+ * (see {@code dataformats-text#7}).
  */
 public class EmptyStringAsNullTest
     extends ModuleTestBase
