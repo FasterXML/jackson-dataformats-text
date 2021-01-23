@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+
 /**
  * Format-specific exception used to indicate problems regarding low-level
  * decoding/parsing issues specific to CSV content;
@@ -8,20 +10,22 @@ package com.fasterxml.jackson.dataformat.csv;
  * In Jackson 2.x this type extends
  * {@link com.fasterxml.jackson.databind.DatabindException}, but for Jackson 3.0
  * will become streaming-level exception
- *
- * @since 2.13
  */
-@SuppressWarnings("deprecation")
 public class CsvReadException
-    extends CsvMappingException
+    extends StreamReadException
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3L;
+
+    protected final CsvSchema _schema;
 
     public CsvReadException(CsvParser p, String msg, CsvSchema schema) {
-        super(p, msg, schema);
+        super(p, msg);
+        _schema = schema;
     }
 
     public static CsvReadException from(CsvParser p, String msg, CsvSchema schema) {
         return new CsvReadException(p, msg, schema);
     }
+
+    public CsvSchema getSchema() { return _schema; }
 }

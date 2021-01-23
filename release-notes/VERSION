@@ -18,6 +18,10 @@ implementations)
 
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 
+CSV:
+
+- Remove `CsvMappingException` (replaced by `CsvRead-/-WriteException`)
+
 YAML:
 
 #106: Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)

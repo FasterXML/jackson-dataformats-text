@@ -4,8 +4,9 @@ import java.io.StringWriter;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.StreamWriteFeature;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvWriteException;
@@ -77,9 +78,16 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
         try {
             mapper.writer(schema).writeValue(sw, myClass);
             fail("Should not pass");
-        } catch (CsvWriteException e) {
-            verifyException(e, "CSV generator does not support");
+        } catch (JacksonException e) {
+            assertTrue(e instanceof DatabindException);
+            // 23-Jan-2021, tatu: Not ideal that this gets wrapped, but let's verify contents
+            verifyException(e,  "CSV generator does not support");
             verifyException(e, "nested Objects");
+
+            // and that there's linked root cause
+            Throwable rootCause = e.getCause();
+            assertTrue(rootCause instanceof CsvWriteException);
+            verifyException(rootCause, "nested Objects");
         }
     }
 }
