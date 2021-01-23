@@ -1,13 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+
+import com.fasterxml.jackson.dataformat.csv.*;
 
 /**
  * Tests for cases where one more of schema-declared columns is
@@ -113,7 +111,7 @@ public class MissingColumnsTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not pass");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Not enough column values");
             verifyException(e, "expected 3, found 2");
         }
@@ -126,7 +124,7 @@ public class MissingColumnsTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not pass");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Not enough column values");
             verifyException(e, "expected 3, found 1");
         }

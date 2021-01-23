@@ -765,7 +765,7 @@ public class CsvDecoder
             int ptr = _inputPtr;
             if (ptr >= _inputEnd) {
                 if (!loadMore()) { // not ok, missing end quote
-                    _owner._reportParsingError("Missing closing quote for value"); // should indicate start position?
+                    _owner._reportError("Missing closing quote for value"); // should indicate start position?
                 }
                 ptr = _inputPtr;
                 if (checkLF && inputBuffer[ptr] == '\n') {

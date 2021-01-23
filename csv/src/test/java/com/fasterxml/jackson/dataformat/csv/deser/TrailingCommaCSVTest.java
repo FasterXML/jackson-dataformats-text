@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.MappingIterator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvReadException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
@@ -38,7 +38,7 @@ public class TrailingCommaCSVTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not have passed");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries: expected at most 2 (value #2 (0 chars) \"\")");
         }
 

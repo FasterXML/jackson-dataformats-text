@@ -73,7 +73,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Shouldn't have passed");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries");
         }
 
@@ -127,7 +127,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             entry = it.nextValue();
             fail("Should fail");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries");
         }
         // this SHOULD skip 7,8,, entry

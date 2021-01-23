@@ -91,7 +91,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         try {
             mapper.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
-        } catch (CsvMappingException e) {
+        } catch (CsvWriteException e) {
             verifyException(e, "contains no column names");
         }
     }

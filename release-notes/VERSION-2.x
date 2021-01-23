@@ -10,7 +10,7 @@ Modules:
 
 2.13.0 (not yet released)
 
-No changes since 2.12
+#240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
 
 2.12.1 (08-Jan-2021)
 

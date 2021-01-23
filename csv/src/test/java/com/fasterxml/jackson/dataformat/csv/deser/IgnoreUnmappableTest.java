@@ -32,7 +32,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not have passed");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries");
         }
 
@@ -45,7 +45,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not have passed");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries");
         }
         it.close();

@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.*;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
+import com.fasterxml.jackson.dataformat.csv.CsvReadException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
@@ -54,7 +54,7 @@ public class TestParserWorkarounds extends ModuleTestBase
         try {
             result = it.nextValue();
             fail("Expected an error");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries");
         }
         it.close();
@@ -83,7 +83,7 @@ public class TestParserWorkarounds extends ModuleTestBase
         try {
             result = it.nextValue();
             fail("Should have failed");
-        } catch (CsvMappingException e) {
+        } catch (CsvReadException e) {
             verifyException(e, "Too many entries: expected at most 2");
         }
         it.close();

@@ -363,7 +363,7 @@ public class CsvGenerator extends GeneratorBase
         // just find the matching index -- must have schema for that
         if (_schema == null) {
             // not a low-level error, so:
-            _reportMappingError("Unrecognized column '"+name+"', can not resolve without CsvSchema");
+            _reportCsvWriteError("Unrecognized column '"+name+"', can not resolve without CsvSchema");
         }
         if (_skipWithin != null) { // new in 2.7
             _skipValue = true;
@@ -379,7 +379,7 @@ public class CsvGenerator extends GeneratorBase
                 return;
             }
             // not a low-level error, so:
-            _reportMappingError("Unrecognized column '"+name+"': known columns: "+_schema.getColumnDesc());
+            _reportCsvWriteError("Unrecognized column '"+name+"': known columns: "+_schema.getColumnDesc());
         }
         _skipValue = false;
         // and all we do is just note index to use for following value write
@@ -543,7 +543,7 @@ public class CsvGenerator extends GeneratorBase
                 if (_skipValue && isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
                     _skipWithin = _tokenWriteContext;
                 } else {
-                    _reportMappingError("CSV generator does not support Object values for properties (nested Objects)");
+                    _reportCsvWriteError("CSV generator does not support Object values for properties (nested Objects)");
                 }
             }
         }
@@ -941,8 +941,8 @@ public class CsvGenerator extends GeneratorBase
      * (compared to a low-level generation); if so, should be surfaced
      * as 
      */
-    protected void _reportMappingError(String msg) throws JacksonException {
-        throw CsvMappingException.from(this, msg, _schema);
+    protected void _reportCsvWriteError(String msg) throws JacksonException {
+        throw CsvWriteException.from(this, msg, _schema);
     }
 
     /*
@@ -977,7 +977,7 @@ public class CsvGenerator extends GeneratorBase
         if (_schema.usesHeader()) {
             int count = _schema.size();
             if (count == 0) { 
-                _reportMappingError("Schema specified that header line is to be written; but contains no column names");
+                _reportCsvWriteError("Schema specified that header line is to be written; but contains no column names");
             }
             for (CsvSchema.Column column : _schema) {
                 _writer.writeColumnName(column.getName());
