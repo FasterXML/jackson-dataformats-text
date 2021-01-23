@@ -122,8 +122,6 @@ public class CsvSchema
     /**
      * By default no "any properties" (properties for 'extra' columns; ones
      * not specified in schema) are used, so <code>null</code> is used as marker.
-     *
-     * @since 2.7
      */
     public final static String DEFAULT_ANY_PROPERTY_NAME = null;
     
@@ -135,9 +133,6 @@ public class CsvSchema
      * coerce Strings into Java nulls).
      * To use automatic coercion on reading, null value must be set explicitly
      * to empty String ("").
-     *<p>
-     * NOTE: before 2.6, this value default to empty <code>char[]</code>; changed
-     * to Java null in 2.6.
      */
     public final static char[] DEFAULT_NULL_VALUE = null;
     
