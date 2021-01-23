@@ -6,7 +6,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.cfg.CoercionAction;
 import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.type.LogicalType;
+
 import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 
 // 2020-12-18, tatu: Modified from "jackson-databind" version: XML
@@ -61,7 +63,7 @@ public class CoerceToBooleanTest
         try {
             reader.readValue("value:\n");
             fail("Expected failure for boolean + empty String");
-        } catch (JsonMappingException e) {
+        } catch (InvalidFormatException e) {
             verifyException(e, "Cannot coerce empty String");
             verifyException(e, "to `boolean` value");
         }

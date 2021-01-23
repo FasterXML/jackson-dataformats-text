@@ -7,12 +7,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.fasterxml.jackson.dataformat.csv.*;
 
-public class TestGenerator extends ModuleTestBase
+public class CSVGeneratorTest extends ModuleTestBase
 {
     @JsonPropertyOrder({"id", "amount"})
     static class Entry {
@@ -91,7 +91,7 @@ public class TestGenerator extends ModuleTestBase
         try {
             mapper.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
-        } catch (JsonMappingException e) {
+        } catch (CsvMappingException e) {
             verifyException(e, "contains no column names");
         }
     }

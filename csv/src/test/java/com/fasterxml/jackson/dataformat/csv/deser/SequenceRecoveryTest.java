@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -59,7 +58,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Shouldn't have passed");
-        } catch (JsonMappingException e) {
+        } catch (InvalidFormatException e) {
             verifyException(e, "not a valid `int` value");
             verifyException(e, "from String \"invalid\"");
         }

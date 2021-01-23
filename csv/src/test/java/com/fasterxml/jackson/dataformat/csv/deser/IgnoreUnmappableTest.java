@@ -2,7 +2,6 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -33,7 +32,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not have passed");
-        } catch (JsonMappingException e) {
+        } catch (CsvMappingException e) {
             verifyException(e, "Too many entries");
         }
 
@@ -46,7 +45,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Should not have passed");
-        } catch (JsonMappingException e) {
+        } catch (CsvMappingException e) {
             verifyException(e, "Too many entries");
         }
         it.close();
