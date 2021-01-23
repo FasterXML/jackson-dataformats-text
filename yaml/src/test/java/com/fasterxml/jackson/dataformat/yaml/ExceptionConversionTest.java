@@ -17,7 +17,7 @@ public class ExceptionConversionTest extends ModuleTestBase
         } catch (org.snakeyaml.engine.v2.exceptions.ScannerException e) {
             fail("Internal exception type: "+e);
         } catch (JacksonYAMLParseException e) { // as of 2.8, this is the type to expect
-            // (subtype of JsonParseException)
+            // (subtype of StreamReadException)
             verifyException(e, "mapping values are not allowed here");
         } catch (Exception e) {
             fail("Unknown exception: "+e);

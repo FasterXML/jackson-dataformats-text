@@ -1076,7 +1076,7 @@ public class YAMLParser extends ParserBase
     }
 
     // Promoted from `ParserBase` in 3.0
-    protected void _reportMismatchedEndMarker(int actCh, char expCh) throws JsonParseException {
+    protected void _reportMismatchedEndMarker(int actCh, char expCh) throws JacksonException {
         TokenStreamContext ctxt = getParsingContext();
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",

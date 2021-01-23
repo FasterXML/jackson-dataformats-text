@@ -9,10 +9,11 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TokenStreamContext;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.io.SerializedString;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 
@@ -20,7 +21,7 @@ public class SimpleStreamingTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newPropertiesMapper();
 
-    public void testParsing() throws Exception
+    public void testParsing()
     {
         JsonParser p = MAPPER.createParser("foo = bar");
         Object src = p.getInputSource();
@@ -53,19 +54,19 @@ public class SimpleStreamingTest extends ModuleTestBase
         try {
             p.getBinaryValue();
             fail("Should not pass");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "can not access as binary");
         }
         try {
             p.getDoubleValue();
             fail("Should not pass");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "can not use numeric");
         }
         p.close();
     }
 
-    public void testStreamingGeneration() throws Exception
+    public void testStreamingGeneration()
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
@@ -113,7 +114,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("10", stuff.get("long"));
     }
 
-    public void testStreamingGenerationRaw() throws Exception
+    public void testStreamingGenerationRaw()
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
@@ -140,7 +141,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("true", stuff.get("enabled"));
     }        
 
-    public void testStreamingLongRaw() throws Exception
+    public void testStreamingLongRaw()
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);

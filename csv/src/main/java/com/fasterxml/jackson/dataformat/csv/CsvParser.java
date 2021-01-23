@@ -8,6 +8,7 @@ import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
@@ -1236,7 +1237,7 @@ public class CsvParser
      */
 
     @Override
-    protected void _handleEOF() throws JsonParseException {
+    protected void _handleEOF() throws StreamReadException {
         // I don't think there's problem with EOFs usually; except maybe in quoted stuff?
         _reportInvalidEOF(": expected closing quote character", null);
     }
@@ -1252,22 +1253,22 @@ public class CsvParser
      * (compared to a low-level generation); if so, should be surfaced as
      * {@link CsvMappingException}
      */
-    public <T> T _reportCsvMappingError(String msg, Object... args) throws JsonProcessingException {
+    public <T> T _reportCsvMappingError(String msg, Object... args) throws JacksonException {
         if (args.length > 0) {
             msg = String.format(msg, args);
         }
         throw CsvMappingException.from(this, msg, _schema);
     }
 
-    public void _reportParsingError(String msg)  throws JsonProcessingException {
+    public void _reportParsingError(String msg)  throws JacksonException {
         super._reportError(msg);
     }
 
-    public void _reportUnexpectedCsvChar(int ch, String msg)  throws JsonProcessingException {
+    public void _reportUnexpectedCsvChar(int ch, String msg)  throws JacksonException {
         super._reportUnexpectedChar(ch, msg);
     }
 
-    @Override // just to make visible to decode
+    @Override // just to make visible to decoder
     public JacksonException _wrapIOFailure(IOException e)  {
         return super._wrapIOFailure(e);
     }

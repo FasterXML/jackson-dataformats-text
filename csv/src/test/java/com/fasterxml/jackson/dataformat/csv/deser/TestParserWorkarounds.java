@@ -2,10 +2,10 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 
 import com.fasterxml.jackson.databind.*;
-
+import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
@@ -84,7 +84,7 @@ public class TestParserWorkarounds extends ModuleTestBase
         try {
             result = it.nextValue();
             fail("Should have failed");
-        } catch (JsonProcessingException e) {
+        } catch (CsvMappingException e) {
             verifyException(e, "Too many entries: expected at most 2");
         }
         it.close();

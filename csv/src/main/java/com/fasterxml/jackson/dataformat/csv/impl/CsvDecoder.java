@@ -1,21 +1,20 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser.NumberType;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonParser.NumberType;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
+
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 /**
  * Low-level helper class that handles actual reading of CSV,
@@ -1165,7 +1164,7 @@ public class CsvDecoder
             }
         } catch (NumberFormatException nex) {
             // Can this ever occur? Due to overflow, maybe?
-            throw constructError("Malformed numeric value '" + _textBuffer.contentsAsString() + "'", nex);
+            throw _constructReadException(nex, "Malformed numeric value '" + _textBuffer.contentsAsString() + "'");
         }
     }
 
@@ -1186,7 +1185,7 @@ public class CsvDecoder
             }
         } catch (NumberFormatException nex) {
             // Can this ever occur? Due to overflow, maybe?
-            throw constructError("Malformed numeric value '" + numStr + "'", nex);
+            throw _constructReadException(nex, "Malformed numeric value '" + numStr + "'");
         }
     }
 
@@ -1317,7 +1316,8 @@ public class CsvDecoder
      */
 
     protected void reportUnexpectedNumberChar(int ch, String comment)
-            throws JsonParseException {
+        throws StreamReadException
+    {
         String msg = "Unexpected character (" + _getCharDesc(ch) + ") in numeric value";
         if (comment != null) {
             msg += ": " + comment;
@@ -1325,20 +1325,20 @@ public class CsvDecoder
         _reportError(msg);
     }
 
-    protected void reportInvalidNumber(String msg) throws JsonParseException {
+    protected void reportInvalidNumber(String msg) throws StreamReadException {
         _reportError("Invalid numeric value: " + msg);
     }
 
-    protected void reportOverflowInt() throws JacksonException {
+    protected void reportOverflowInt() throws StreamReadException {
         _reportError("Numeric value (" + getText() + ") out of range of int (" + Integer.MIN_VALUE + " - " + Integer.MAX_VALUE + ")");
     }
 
-    protected void reportOverflowLong() throws JacksonException {
+    protected void reportOverflowLong() throws StreamReadException {
         _reportError("Numeric value (" + getText() + ") out of range of long (" + Long.MIN_VALUE + " - " + Long.MAX_VALUE + ")");
     }
 
-    protected final JsonParseException constructError(String msg, Throwable t) {
-        return new JsonParseException(_owner, msg, t);
+    protected final StreamReadException _constructReadException(Throwable t, String msg) {
+        return new StreamReadException(_owner, msg, t);
     }
 
     protected final static String _getCharDesc(int ch) {
@@ -1359,7 +1359,7 @@ public class CsvDecoder
     /**
      * Method for reporting low-level decoding (parsing) problems
      */
-    protected final void _reportError(String msg) throws JsonParseException {
-        throw new JsonParseException(_owner, msg);
+    protected final void _reportError(String msg) throws StreamReadException {
+        throw new StreamReadException(_owner, msg);
     }
 }

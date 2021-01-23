@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 /**
  * Format-specific exception used to indicate problems regarding handling of CSV
  * content above minimal decoding, based on {@link CsvSchema}.
- *
- * @since 2.9
  */
 public class CsvMappingException extends JsonMappingException
 {

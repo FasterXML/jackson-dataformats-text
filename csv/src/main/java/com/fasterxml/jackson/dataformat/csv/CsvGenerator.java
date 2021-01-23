@@ -693,7 +693,8 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws JacksonException, JsonGenerationException
+    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
+        throws JacksonException
     {
         if (data == null) {
             writeNull();
@@ -940,9 +941,8 @@ public class CsvGenerator extends GeneratorBase
      * (compared to a low-level generation); if so, should be surfaced
      * as 
      */
-    protected void _reportMappingError(String msg) throws JsonProcessingException {
+    protected void _reportMappingError(String msg) throws JacksonException {
         throw CsvMappingException.from(this, msg, _schema);
-//        throw new JsonGenerationException(msg, this);
     }
 
     /*

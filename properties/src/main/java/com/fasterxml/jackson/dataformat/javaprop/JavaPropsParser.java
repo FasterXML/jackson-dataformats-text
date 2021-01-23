@@ -7,6 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
@@ -378,13 +379,13 @@ System.err.println("\n>>");
     /**********************************************************************
      */
 
-    protected <T> T _noNumbers() throws JacksonException {
+    protected <T> T _noNumbers() throws StreamReadException {
         _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
         return null;
     }
 
     @Override
-    protected void _handleEOF() throws JsonParseException {
+    protected void _handleEOF() throws StreamReadException {
         if ((_readContext != null) && !_readContext.inRoot()) {
             _reportInvalidEOF(": expected close marker for "+_readContext.typeDesc(), null);
         }

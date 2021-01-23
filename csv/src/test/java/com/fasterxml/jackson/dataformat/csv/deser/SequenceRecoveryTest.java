@@ -1,10 +1,12 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.JsonProcessingException;
+
+import com.fasterxml.jackson.core.exc.StreamReadException;
+
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
-
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 public class SequenceRecoveryTest extends ModuleTestBase
@@ -72,8 +74,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Shouldn't have passed");
-        } catch (JsonProcessingException e) {
-            // !!! TODO, maybe: Would be nicer to get a JsonMappingException?
+        } catch (CsvMappingException e) {
             verifyException(e, "Too many entries");
         }
 
@@ -88,7 +89,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             it.nextValue();
             fail("Shouldn't have passed");
-        } catch (JsonMappingException e) {
+        } catch (InvalidFormatException e) {
             verifyException(e, "not a valid `int` value");
             verifyException(e, "from String \"garbage\"");
         }
@@ -127,7 +128,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             entry = it.nextValue();
             fail("Should fail");
-        } catch (JsonProcessingException e) {
+        } catch (CsvMappingException e) {
             verifyException(e, "Too many entries");
         }
         // this SHOULD skip 7,8,, entry
@@ -164,7 +165,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             value = it.nextValue();
             fail("Should fail");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Expected column separator");
         }
 
@@ -209,7 +210,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         try {
             value = it.nextValue();
             fail("Should fail");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Expected column separator");
         }
 

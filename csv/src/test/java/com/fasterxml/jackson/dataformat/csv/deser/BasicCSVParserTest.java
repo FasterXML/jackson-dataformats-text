@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.exc.StreamReadException;
+
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 import com.google.common.collect.Lists;
@@ -354,20 +356,18 @@ public class BasicCSVParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = MAPPER.reader()
+        try (JsonParser parser = MAPPER.reader()
                 .with(schema)
-                .createParser(CSV);
-
-        try {
+                .createParser(CSV)) {
             parser.nextToken();
             fail("Should have failed");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Mismatched header column #1: expected \"a\", actual \"b\"");
         }
-        parser.close();
     }
 
-    public void testColumnFailsOnTooFew() throws IOException {
+    public void testColumnFailsOnTooFew()
+    {
         String CSV = "a,b\nvb,va,vc\n";
 
         CsvSchema schema = CsvSchema.builder()
@@ -379,17 +379,14 @@ public class BasicCSVParserTest extends ModuleTestBase {
                 .setStrictHeaders(true)
                 .build();
 
-        JsonParser parser = MAPPER.reader()
+        try (JsonParser parser = MAPPER.reader()
                 .with(schema)
-                .createParser(CSV);
-
-        try {
+                .createParser(CSV)) {
             parser.nextToken();
             fail("Should have failed");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Missing header c");
         }
-        parser.close();
     }
 
     public void testColumnFailsOnTooMany() throws IOException {
@@ -411,13 +408,14 @@ public class BasicCSVParserTest extends ModuleTestBase {
         try {
             parser.nextToken();
             fail("Should have failed");
-        } catch (JsonProcessingException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Extra header d");
         }
         parser.close();
     }
 
-    public void testStrictColumnReturnsExpectedData() throws IOException {
+    public void testStrictColumnReturnsExpectedData()
+    {
         CsvSchema schema = MAPPER.schemaFor(Point.class).withHeader().withStrictHeaders(true);
 
         String CSV = "x,y,z\n1,2,3\n4,5,6\n7,8,9";

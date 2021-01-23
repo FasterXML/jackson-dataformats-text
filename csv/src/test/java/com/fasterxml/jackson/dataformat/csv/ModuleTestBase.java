@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -257,7 +256,6 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
      * returning them
      */
     protected String getAndVerifyText(JsonParser jp)
-        throws IOException, JsonParseException
     {
         // Ok, let's verify other accessors
         int actLen = jp.getTextLength();
@@ -274,14 +272,12 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     }
 
     protected void verifyFieldName(JsonParser p, String expName)
-        throws IOException
     {
         assertEquals(expName, p.getText());
         assertEquals(expName, p.currentName());
     }
     
     protected void verifyIntValue(JsonParser jp, long expValue)
-        throws IOException
     {
         // First, via textual
         assertEquals(String.valueOf(expValue), jp.getText());

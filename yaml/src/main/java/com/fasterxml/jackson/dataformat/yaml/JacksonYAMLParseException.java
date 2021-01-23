@@ -1,12 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 
-/**
- * @since 2.8
- */
-public class JacksonYAMLParseException extends JsonParseException
+public class JacksonYAMLParseException extends StreamReadException
 {
     private static final long serialVersionUID = 1L;
 

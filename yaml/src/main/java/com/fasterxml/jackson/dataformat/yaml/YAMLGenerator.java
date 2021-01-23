@@ -567,7 +567,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws JacksonException,JsonGenerationException
+    public void writeString(String text) throws JacksonException
     {
         if (text == null) {
             writeNull();
@@ -766,7 +766,7 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws JacksonException,JsonGenerationException, UnsupportedOperationException
+    public void writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
             writeNull();

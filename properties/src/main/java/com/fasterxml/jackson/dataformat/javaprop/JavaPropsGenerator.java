@@ -333,7 +333,7 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public void writeRaw(SerializableString text) throws JacksonException, JsonGenerationException {
+    public void writeRaw(SerializableString text) throws JacksonException {
         writeRaw(text.toString());
     }
 
@@ -345,7 +345,7 @@ public abstract class JavaPropsGenerator
     
     @Override
     public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
-            throws JacksonException
+        throws JacksonException
     {
         if (data == null) {
             writeNull();

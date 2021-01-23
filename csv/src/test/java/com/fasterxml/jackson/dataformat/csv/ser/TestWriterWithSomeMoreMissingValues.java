@@ -1,8 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import com.fasterxml.jackson.databind.ObjectWriter;
+
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
@@ -11,7 +10,7 @@ import com.google.common.collect.ImmutableMap;
 
 public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
 
-    public void testWithAStringAndAUuid() throws JsonProcessingException {
+    public void testWithAStringAndAUuid() {
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
                 .addColumn("string2", CsvSchema.ColumnType.STRING)
@@ -27,7 +26,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithTwoStringsAndAUuid() throws JsonProcessingException {
+    public void testWithTwoStringsAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -46,7 +45,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithANullAStringAndAUuid() throws JsonProcessingException {
+    public void testWithANullAStringAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -64,7 +63,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals(",world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithAStringANullAndAUuid() throws JsonProcessingException {
+    public void testWithAStringANullAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -82,7 +81,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithThreeStringsAndAUuid() throws JsonProcessingException {
+    public void testWithThreeStringsAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -103,7 +102,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,dear,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithANullAStringAStringAndAUuid() throws JsonProcessingException {
+    public void testWithANullAStringAStringAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -123,7 +122,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals(",hello,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithAStringANullAStringAndAUuid() throws JsonProcessingException {
+    public void testWithAStringANullAStringAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -143,7 +142,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithTwoStringsANullAndAUuid() throws JsonProcessingException {
+    public void testWithTwoStringsANullAndAUuid() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -163,7 +162,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
         assertEquals("hello,world,,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
-    public void testWithTwoStringsANullAndAString() throws JsonProcessingException {
+    public void testWithTwoStringsANullAndAString() {
 
         final CsvSchema schema = new CsvSchema.Builder()
                 .addColumn("string1", CsvSchema.ColumnType.STRING)
@@ -184,7 +183,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase {
     }
 
     // [Issue#45]
-    public void testWriteNullThirdColumn() throws JsonProcessingException {
+    public void testWriteNullThirdColumn() {
         final CsvSchema.Builder csvSchemaBuilder = new CsvSchema.Builder();
         csvSchemaBuilder.addColumn("timestamp", CsvSchema.ColumnType.STRING);
         csvSchemaBuilder.addColumn("value", CsvSchema.ColumnType.NUMBER);

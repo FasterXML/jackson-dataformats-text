@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -22,7 +21,7 @@ public class TestWriterWithMissingValues extends ModuleTestBase
     final ObjectWriter WRITER = new CsvMapper().writer().with(SCHEMA);
     
     @Test
-    public void testWrite_NoNulls() throws JsonProcessingException {
+    public void testWrite_NoNulls() {
         final String csv = WRITER.writeValueAsString(
                 ImmutableMap.of("timestamp", "2014-03-10T23:32:47+00:00",
                         "value", 42, "id", "hello"));
@@ -31,14 +30,14 @@ public class TestWriterWithMissingValues extends ModuleTestBase
     }
 
     @Test
-    public void testWrite_NullFirstColumn() throws JsonProcessingException {
+    public void testWrite_NullFirstColumn() {
         final String csv = WRITER.writeValueAsString(
                 ImmutableMap.of("value", 42, "id", "hello"));
         assertEquals(",42,hello\n", csv);
     }
 
     @Test
-    public void testWrite_NullSecondColumn() throws JsonProcessingException {
+    public void testWrite_NullSecondColumn() {
         final String csv = WRITER.writeValueAsString(
                 ImmutableMap.of("timestamp", "2014-03-10T23:32:47+00:00",
                         "id", "hello"));
@@ -47,7 +46,7 @@ public class TestWriterWithMissingValues extends ModuleTestBase
     }
 
     @Test
-    public void testWrite_NullThirdColumn() throws JsonProcessingException
+    public void testWrite_NullThirdColumn()
     {
         CsvMapper mapper = new CsvMapper();
         assertFalse(mapper.tokenStreamFactory().isEnabled(CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS));
