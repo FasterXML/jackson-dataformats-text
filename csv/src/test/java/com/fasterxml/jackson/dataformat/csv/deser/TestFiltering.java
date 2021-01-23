@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter.FilterEx
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
+import com.fasterxml.jackson.dataformat.csv.CsvReadException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
@@ -114,7 +114,8 @@ public class TestFiltering extends ModuleTestBase
         try {
             MAPPER.readerFor(Bean.class).with(schema).withView(ViewB.class).readValue(input);
             fail();
-        } catch (CsvMappingException ignore) {
+        } catch (CsvReadException e) {
+            verifyException(e, "Too many entries: expected at most 2");
         }
     }
     

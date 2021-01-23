@@ -104,11 +104,11 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     /**
      * Method for specifying either custom {@link StringQuotingChecker}
      * to use instead of default one, or, that default one (see
-     * {@link StringQuotingChecker.Default#instance()}) is to be used
+     * {@code StringQuotingChecker.Default.instance()}) is to be used
      * (when passing {@code null}
      *
      * @param sqc Checker to use (if non-null), or {@code null} to use the
-     *   default one (see {@link StringQuotingChecker.Default#instance()})
+     *   default one (see {@code StringQuotingChecker.Default.instance()})
      *
      * @return This builder instance, to allow chaining
      */

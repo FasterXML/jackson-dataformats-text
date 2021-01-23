@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMappingException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.dataformat.csv.CsvWriteException;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
@@ -77,7 +77,7 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
         try {
             mapper.writer(schema).writeValue(sw, myClass);
             fail("Should not pass");
-        } catch (CsvMappingException e) {
+        } catch (CsvWriteException e) {
             verifyException(e, "CSV generator does not support");
             verifyException(e, "nested Objects");
         }

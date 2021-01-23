@@ -104,7 +104,7 @@ public class CsvParser
         ALLOW_COMMENTS(false),
         
         /**
-         * Feature that allows failing (with a {@link CsvMappingException}) in cases
+         * Feature that allows failing (with a {@link CsvReadException}) in cases
          * where number of column values encountered is less than number of columns
          * declared in active schema ("missing columns").
          *<p>
@@ -1324,11 +1324,11 @@ public class CsvParser
      *
      * @since 2.9
      */
-    public <T> T _reportCsvMappingError(String msg, Object... args) throws JsonProcessingException {
+    public <T> T _reportCsvMappingError(String msg, Object... args) throws IOException {
         if (args.length > 0) {
             msg = String.format(msg, args);
         }
-        throw CsvMappingException.from(this, msg, _schema);
+        throw CsvReadException.from(this, msg, _schema);
     }
 
     public void _reportParsingError(String msg)  throws JsonProcessingException {

@@ -979,9 +979,8 @@ public class CsvGenerator extends GeneratorBase
      *
      * @since 2.7
      */
-    protected void _reportMappingError(String msg) throws JsonProcessingException {
-        throw CsvMappingException.from(this, msg, _schema);
-//        throw new JsonGenerationException(msg, this);
+    protected void _reportMappingError(String msg) throws IOException {
+        throw CsvWriteException.from(this, msg, _schema);
     }
 
     /*
