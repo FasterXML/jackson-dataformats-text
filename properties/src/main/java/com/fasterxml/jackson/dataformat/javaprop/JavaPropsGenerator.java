@@ -111,13 +111,13 @@ public abstract class JavaPropsGenerator
     }
 
     @Override
-    public Object getCurrentValue() {
-        return _tokenWriteContext.getCurrentValue();
+    public Object currentValue() {
+        return _tokenWriteContext.currentValue();
     }
 
     @Override
-    public void setCurrentValue(Object v) {
-        _tokenWriteContext.setCurrentValue(v);
+    public void assignCurrentValue(Object v) {
+        _tokenWriteContext.assignCurrentValue(v);
     }
 
     /*

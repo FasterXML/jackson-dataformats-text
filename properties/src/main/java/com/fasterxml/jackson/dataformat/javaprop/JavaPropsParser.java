@@ -176,8 +176,8 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public TokenStreamContext getParsingContext() { return _readContext; }
-    @Override public void setCurrentValue(Object v) { _readContext.setCurrentValue(v); }
-    @Override public Object getCurrentValue() { return _readContext.getCurrentValue(); }
+    @Override public void assignCurrentValue(Object v) { _readContext.assignCurrentValue(v); }
+    @Override public Object currentValue() { return _readContext.currentValue(); }
 
     /*
     /**********************************************************************

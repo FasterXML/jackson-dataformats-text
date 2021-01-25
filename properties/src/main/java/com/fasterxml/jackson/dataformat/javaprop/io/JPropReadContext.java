@@ -62,9 +62,9 @@ public abstract class JPropReadContext
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* TokenStreamContext impl
-    /**********************************************************
+    /**********************************************************************
      */
 
     // note: co-variant return type
@@ -81,19 +81,19 @@ public abstract class JPropReadContext
     }
 
     @Override
-    public java.lang.Object getCurrentValue() {
+    public Object currentValue() {
         return _currentValue;
     }
 
     @Override
-    public void setCurrentValue(java.lang.Object v) {
+    public void assignCurrentValue(Object v) {
         _currentValue = v;
     }
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Extended API
-    /**********************************************************
+    /**********************************************************************
      */
 
     public abstract JsonToken nextToken();
@@ -120,9 +120,9 @@ public abstract class JPropReadContext
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Concrete implementations
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**

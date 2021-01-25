@@ -19,7 +19,7 @@ public class CsvWriteException
     protected final CsvSchema _schema;
 
     public CsvWriteException(CsvGenerator gen, String msg, CsvSchema schema) {
-        super(msg, gen);
+        super(gen, msg);
         _schema = schema;
     }
 

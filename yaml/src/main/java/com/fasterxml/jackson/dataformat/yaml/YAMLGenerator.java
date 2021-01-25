@@ -324,13 +324,13 @@ public class YAMLGenerator extends GeneratorBase
     public final TokenStreamContext getOutputContext() { return _tokenWriteContext; }
 
     @Override
-    public final Object getCurrentValue() {
-        return _tokenWriteContext.getCurrentValue();
+    public final Object currentValue() {
+        return _tokenWriteContext.currentValue();
     }
 
     @Override
-    public final void setCurrentValue(Object v) {
-        _tokenWriteContext.setCurrentValue(v);
+    public final void assignCurrentValue(Object v) {
+        _tokenWriteContext.assignCurrentValue(v);
     }
 
     /*
@@ -512,7 +512,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeStartArray(Object currValue) throws JacksonException {
         writeStartArray();
-        setCurrentValue(currValue);
+        assignCurrentValue(currValue);
     }
 
     @Override
@@ -545,7 +545,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeStartObject(Object currValue) throws JacksonException {
         writeStartObject();
-        setCurrentValue(currValue);
+        assignCurrentValue(currValue);
     }
 
     @Override
