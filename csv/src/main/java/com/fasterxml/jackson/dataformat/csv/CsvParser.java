@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.base.ParserMinimalBase;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
+import com.fasterxml.jackson.core.util.SimpleStreamReadContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
@@ -289,7 +289,7 @@ public class CsvParser
      * Information about parser context, context in which
      * the next token is to be parsed (root, array, object).
      */
-    protected SimpleTokenReadContext _streamReadContext;
+    protected SimpleStreamReadContext _streamReadContext;
 
     /**
      * Name of column that we exposed most recently, accessible after
@@ -371,7 +371,7 @@ public class CsvParser
         }
         _textBuffer =  ioCtxt.csvTextBuffer();
         _formatFeatures = csvFeatures;
-        _streamReadContext = SimpleTokenReadContext.createRootContext(null);
+        _streamReadContext = SimpleStreamReadContext.createRootContext(null);
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);

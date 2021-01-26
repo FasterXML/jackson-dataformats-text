@@ -33,7 +33,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleTokenWriteContext;
+import com.fasterxml.jackson.core.util.SimpleStreamWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
@@ -216,7 +216,7 @@ public class YAMLGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected SimpleTokenWriteContext _streamWriteContext;
+    protected SimpleStreamWriteContext _streamWriteContext;
 
     protected Emitter _emitter;
 
@@ -251,7 +251,7 @@ public class YAMLGenerator extends GeneratorBase
         _ioContext = ioCtxt;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
 
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);

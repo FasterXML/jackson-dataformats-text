@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
 import com.fasterxml.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.util.SimpleTokenWriteContext;
+import com.fasterxml.jackson.core.util.SimpleStreamWriteContext;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
@@ -156,7 +156,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected SimpleTokenWriteContext _streamWriteContext;
+    protected SimpleStreamWriteContext _streamWriteContext;
 
     /**
      * Flag that indicates that we need to write header line, if
@@ -199,7 +199,7 @@ public class CsvGenerator extends GeneratorBase
      * When skipping output (for "unknown" output), outermost write context
      * where skipping should occur
      */
-    protected SimpleTokenWriteContext _skipWithin;
+    protected SimpleStreamWriteContext _skipWithin;
 
     /*
     /**********************************************************************
@@ -216,7 +216,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
         _schema = schema;
 
         if (characterEscapes == null) {
@@ -234,7 +234,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
         _schema = EMPTY_SCHEMA;
         _writer = csvWriter;
     }

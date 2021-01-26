@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleTokenReadContext;
+import com.fasterxml.jackson.core.util.SimpleStreamReadContext;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
@@ -124,7 +124,7 @@ public class YAMLParser extends ParserBase
      * Information about parser context, context in which
      * the next token is to be parsed (root, array, object).
      */
-    protected SimpleTokenReadContext _streamReadContext;
+    protected SimpleStreamReadContext _streamReadContext;
 
     /**
      * Keep track of the last event read, to get access to Location info
@@ -135,8 +135,6 @@ public class YAMLParser extends ParserBase
      * To keep track of tags ("type ids"), need to either get tags for all
      * events, or, keep tag of relevant event that might have it: this is
      * different from {@code _lastEvent} in some cases.
-     *
-     * @since 2.12
      */
     protected Event _lastTagEvent;
 
@@ -185,7 +183,7 @@ public class YAMLParser extends ParserBase
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _streamReadContext = SimpleTokenReadContext.createRootContext(dups);
+        _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
     }
 
     /*
@@ -796,7 +794,7 @@ public class YAMLParser extends ParserBase
             return _currentName;
         }
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
-            SimpleTokenReadContext parent = _streamReadContext.getParent();
+            SimpleStreamReadContext parent = _streamReadContext.getParent();
             if (parent != null) {
                 return parent.currentName();
             }
