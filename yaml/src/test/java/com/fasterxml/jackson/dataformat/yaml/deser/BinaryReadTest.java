@@ -54,14 +54,14 @@ public class BinaryReadTest extends ModuleTestBase
 
         try (JsonGenerator gen =  MAPPER.createGenerator(os)) {
             gen.writeStartObject();
-            gen.writeBinaryField("data", data);
+            gen.writeBinaryProperty("data", data);
             gen.writeEndObject();
             gen.close();
         }
 
         try (JsonParser parser = MAPPER.createParser(os.toByteArray())) {
             assertEquals(JsonToken.START_OBJECT, parser.nextToken());
-            assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+            assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
             assertEquals("data", parser.currentName());
             assertEquals(JsonToken.VALUE_EMBEDDED_OBJECT, parser.nextToken());
             Assert.assertArrayEquals(data, parser.getBinaryValue());

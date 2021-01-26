@@ -249,15 +249,15 @@ public class BasicCSVParserTest extends ModuleTestBase {
                 .with(schemaWithReordering)
                 .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vb", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a",parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("va", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("c", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vc", parser.getValueAsString());
@@ -273,15 +273,15 @@ public class BasicCSVParserTest extends ModuleTestBase {
         parser = MAPPER.reader().
                 with(schemaWithoutReordering).createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vb", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("va", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("c", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vc", parser.getValueAsString());
@@ -300,15 +300,15 @@ public class BasicCSVParserTest extends ModuleTestBase {
                 .with(schemaWithoutHeader)
                 .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vb", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("va", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("c", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vc", parser.getValueAsString());
@@ -328,15 +328,15 @@ public class BasicCSVParserTest extends ModuleTestBase {
                 .with(emptySchema)
                 .createParser(CSV);
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vb", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("va", parser.getValueAsString());
-        assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
+        assertEquals(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("c", parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vc", parser.getValueAsString());

@@ -53,7 +53,7 @@ public class ParserDupHandlingTest extends ModuleTestBase
         try {
             _stream(p);
         } catch (StreamReadException e) {
-            verifyException(e, "Duplicate field 'first'");
+            verifyException(e, "Duplicate Object property \"first\"");
         }
         p.close();
     }

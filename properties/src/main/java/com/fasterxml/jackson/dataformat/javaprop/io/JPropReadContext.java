@@ -211,7 +211,7 @@ public abstract class JPropReadContext
             case STATE_BRANCH_KEY:
                 _currentName = "";
                 _state = STATE_BRANCH_VALUE;
-                return JsonToken.FIELD_NAME;
+                return JsonToken.PROPERTY_NAME;
             case STATE_BRANCH_VALUE:
                 _currentText = _branchText;
                 _state = STATE_CONTENT_KEY;
@@ -226,7 +226,7 @@ public abstract class JPropReadContext
                 _currentName = entry.getKey();
                 _nextNode = entry.getValue();
                 _state = STATE_CONTENT_VALUE;
-                return JsonToken.FIELD_NAME;
+                return JsonToken.PROPERTY_NAME;
             case STATE_CONTENT_VALUE:
                 _state = STATE_CONTENT_KEY;
                 // Simple textual leaf?

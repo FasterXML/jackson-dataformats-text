@@ -30,7 +30,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertNull(p.getEmbeddedObject());
         assertNotNull(p.getCurrentLocation()); // N/A
         assertNotNull(p.getTokenLocation()); // N/A
-        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("foo", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         StringWriter sw = new StringWriter();
@@ -50,7 +50,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         // one more thing, verify handling of non-binary
         p = MAPPER.createParser("foo = bar");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        assertToken(JsonToken.FIELD_NAME, p.nextToken());
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         try {
             p.getBinaryValue();
             fail("Should not pass");
@@ -75,22 +75,22 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertTrue(target instanceof Writer);
         
         gen.writeStartObject();
-        gen.writeBooleanField("flagTrue", true);
-        gen.writeBooleanField("flagFalse", false);
-        gen.writeNullField("null");
-        gen.writeNumberField("long", 10L);
-        gen.writeNumberField("int", 10);
-        gen.writeNumberField("double", 0.25);
-        gen.writeNumberField("float", 0.5f);
-        gen.writeNumberField("decimal", BigDecimal.valueOf(0.125));
-        gen.writeFieldName(new SerializedString("bigInt"));
+        gen.writeBooleanProperty("flagTrue", true);
+        gen.writeBooleanProperty("flagFalse", false);
+        gen.writeNullProperty("null");
+        gen.writeNumberProperty("long", 10L);
+        gen.writeNumberProperty("int", 10);
+        gen.writeNumberProperty("double", 0.25);
+        gen.writeNumberProperty("float", 0.5f);
+        gen.writeNumberProperty("decimal", BigDecimal.valueOf(0.125));
+        gen.writeName(new SerializedString("bigInt"));
         gen.writeNumber(BigInteger.valueOf(123));
-        gen.writeFieldName("numString");
+        gen.writeName("numString");
         gen.writeNumber("123.0");
-        gen.writeFieldName("charString");
+        gen.writeName("charString");
         gen.writeString(new char[] { 'a', 'b', 'c' }, 1, 2);
 
-        gen.writeFieldName("arr");
+        gen.writeName("arr");
         gen.writeStartArray();
 
         TokenStreamContext ctxt = gen.getOutputContext();
@@ -127,7 +127,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         gen.writeRaw('\n');
 
         gen.writeStartObject();
-        gen.writeBooleanField("enabled", true);
+        gen.writeBooleanProperty("enabled", true);
         gen.writeEndObject();
         
         gen.close();

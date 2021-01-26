@@ -76,7 +76,7 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     protected void _releaseBuffers() { }
 
     @Override
-    protected void _appendFieldName(StringBuilder path, String name) {
+    protected void _appendPropertyName(StringBuilder path, String name) {
         // No escaping should be applied
         path.append(name);
     }

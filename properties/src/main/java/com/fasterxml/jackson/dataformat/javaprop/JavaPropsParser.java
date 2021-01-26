@@ -232,7 +232,7 @@ System.err.println("\n>>");
         if (t == JsonToken.VALUE_STRING) {
             return _readContext.getCurrentText();
         }
-        if (t == JsonToken.FIELD_NAME) {
+        if (t == JsonToken.PROPERTY_NAME) {
             return _readContext.currentName();
         }
         // shouldn't have non-String scalar values so:

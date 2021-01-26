@@ -202,7 +202,7 @@ public class CsvParser
 
     /**
      * State in which next entry will be available, returning
-     * either {@link JsonToken#FIELD_NAME} or value
+     * either {@link JsonToken#PROPERTY_NAME} or value
      * (depending on whether entries are expressed as
      * Objects or just Arrays); or
      * matching close marker.
@@ -293,7 +293,7 @@ public class CsvParser
 
     /**
      * Name of column that we exposed most recently, accessible after
-     * {@link JsonToken#FIELD_NAME} as well as value tokens immediately
+     * {@link JsonToken#PROPERTY_NAME} as well as value tokens immediately
      * following field name.
      */
     protected String _currentName;
@@ -536,7 +536,7 @@ public class CsvParser
             return false;
         }
         switch (_currToken.id()) {
-        case JsonTokenId.ID_FIELD_NAME:
+        case JsonTokenId.ID_PROPERTY_NAME:
         case JsonTokenId.ID_START_OBJECT:
         case JsonTokenId.ID_END_OBJECT:
         case JsonTokenId.ID_END_ARRAY:
@@ -630,35 +630,35 @@ public class CsvParser
 
     @Override
     public boolean nextFieldName(SerializableString str) throws JacksonException {
-        // Optimize for expected case of getting FIELD_NAME:
+        // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
             JsonToken t = _handleNextEntry();
             _currToken = t;
-            if (t == JsonToken.FIELD_NAME) {
+            if (t == JsonToken.PROPERTY_NAME) {
                 return str.getValue().equals(_currentName);
             }
             return false;
         }
         // unlikely, but verify just in case
-        return (nextToken() == JsonToken.FIELD_NAME) && str.getValue().equals(currentName());
+        return (nextToken() == JsonToken.PROPERTY_NAME) && str.getValue().equals(currentName());
     }
 
     @Override
     public String nextFieldName() throws JacksonException
     {
-        // Optimize for expected case of getting FIELD_NAME:
+        // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
             JsonToken t = _handleNextEntry();
             _currToken = t;
-            if (t == JsonToken.FIELD_NAME) {
+            if (t == JsonToken.PROPERTY_NAME) {
                 return _currentName;
             }
             return null;
         }
         // unlikely, but verify just in case
-        return (nextToken() == JsonToken.FIELD_NAME) ? currentName() : null;
+        return (nextToken() == JsonToken.PROPERTY_NAME) ? currentName() : null;
     }
 
     @Override
@@ -859,7 +859,7 @@ public class CsvParser
         }
         _state = STATE_NAMED_VALUE;
         _currentName = _schema.columnName(_columnIndex);
-        return JsonToken.FIELD_NAME;
+        return JsonToken.PROPERTY_NAME;
     }
 
     protected JsonToken _handleNamedValue() throws JacksonException
@@ -977,7 +977,7 @@ public class CsvParser
         if (anyProp != null) {
             _currentName = anyProp;
             _state = STATE_NAMED_VALUE;
-            return JsonToken.FIELD_NAME;
+            return JsonToken.PROPERTY_NAME;
         }
         _currentName = null;
         // With [dataformat-csv#95] we'll simply ignore extra
@@ -1028,7 +1028,7 @@ public class CsvParser
             _state = STATE_MISSING_VALUE;
             _currentName = _schema.columnName(_columnIndex);
             _currentValue = null;
-            return JsonToken.FIELD_NAME;
+            return JsonToken.PROPERTY_NAME;
         }
         return _handleObjectRowEnd();
     }
@@ -1039,7 +1039,7 @@ public class CsvParser
             _state = STATE_MISSING_VALUE;
             _currentName = _schema.columnName(_columnIndex);
             // _currentValue already set to null earlier
-            return JsonToken.FIELD_NAME;
+            return JsonToken.PROPERTY_NAME;
         }
         return _handleObjectRowEnd();
     }
@@ -1094,7 +1094,7 @@ public class CsvParser
     // For now we do not store char[] representation...
     @Override
     public boolean hasTextCharacters() {
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return false;
         }
         return _textBuffer.hasTextAsCharacters();
@@ -1102,7 +1102,7 @@ public class CsvParser
 
     @Override
     public String getText() throws JacksonException {
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName;
         }
         // 08-Sep-2020, tatu: Used to check for empty String wrt EMPTY_STRING_AS_NULL
@@ -1112,7 +1112,7 @@ public class CsvParser
 
     @Override
     public char[] getTextCharacters() throws JacksonException {
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName.toCharArray();
         }
         return _textBuffer.contentsAsArray();
@@ -1120,7 +1120,7 @@ public class CsvParser
 
     @Override
     public int getTextLength() throws JacksonException {
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName.length();
         }
         return _textBuffer.size();
@@ -1133,7 +1133,7 @@ public class CsvParser
 
     @Override
     public int getText(Writer w) throws JacksonException {
-        String value = (_currToken == JsonToken.FIELD_NAME) ?
+        String value = (_currToken == JsonToken.PROPERTY_NAME) ?
                 _currentName : _currentValue;
         if (value == null) {
             return 0;

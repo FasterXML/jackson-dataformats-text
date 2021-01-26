@@ -71,7 +71,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
-        assertToken(JsonToken.FIELD_NAME, parser.nextToken());
+        assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
 
         StringWriter w = new StringWriter();
@@ -111,7 +111,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         try (CsvParser parser = _parser(String.format("%d,%d,%d\n", a, b, c), useBytes, ABC_SCHEMA)) {
             assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
-            assertToken(JsonToken.FIELD_NAME, parser.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
             assertEquals("a", parser.currentName());
 
             // Reported as String BUT may be coerced
@@ -145,7 +145,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
-        assertToken(JsonToken.FIELD_NAME, parser.nextToken());
+        assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
         assertEquals(""+a, parser.nextTextValue());
         assertEquals(a, parser.getLongValue());
@@ -167,7 +167,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
-        assertToken(JsonToken.FIELD_NAME, parser.nextToken());
+        assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
         assertEquals(""+a, parser.nextTextValue());
         assertEquals(a, parser.getDoubleValue());

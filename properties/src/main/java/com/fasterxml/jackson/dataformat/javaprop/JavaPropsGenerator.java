@@ -155,7 +155,7 @@ public abstract class JavaPropsGenerator
     public boolean canWriteBinaryNatively() { return false; }
 
     @Override
-    public boolean canOmitFields() { return true; }
+    public boolean canOmitProperties() { return true; }
 
     @Override
     public boolean canWriteFormattedNumbers() { return true; }
@@ -184,9 +184,9 @@ public abstract class JavaPropsGenerator
      */
 
 // varies between impls so:
-//    @Override public void writeFieldName(String name) throws JacksonException
+//    @Override public void writeName(String name) throws JacksonException
     @Override
-    public void writeFieldName(String name) throws JacksonException
+    public void writeName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeFieldName(name)) {
             _reportError("Can not write a field name, expecting a value");
@@ -209,16 +209,16 @@ public abstract class JavaPropsGenerator
                 _basePath.append(sep);
             }
         }
-        _appendFieldName(_basePath, name);
+        _appendPropertyName(_basePath, name);
     }
 
     @Override
-    public void writeFieldId(long id) throws JacksonException {
+    public void writePropertyId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
-        writeFieldName(Long.toString(id));
+        writeName(Long.toString(id));
     }
 
-    protected abstract void _appendFieldName(StringBuilder path, String name);
+    protected abstract void _appendPropertyName(StringBuilder path, String name);
 
     /*
     /**********************************************************************

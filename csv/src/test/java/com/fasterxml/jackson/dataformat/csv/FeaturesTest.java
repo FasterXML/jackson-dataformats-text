@@ -21,7 +21,7 @@ public class FeaturesTest extends ModuleTestBase
         p.close();
 
         JsonGenerator g = mapper.createGenerator(new StringWriter());
-        assertFalse(g.canOmitFields());
+        assertFalse(g.canOmitProperties());
         assertFalse(g.canWriteBinaryNatively());
         assertFalse(g.canWriteObjectId());
         assertFalse(g.canWriteTypeId());

@@ -48,7 +48,7 @@ public class MediaItem
             throw new IOException("Need START_OBJECT for MediaItem");
         }
         MediaItem item = new MediaItem();
-        while (p.nextToken() == JsonToken.FIELD_NAME) {
+        while (p.nextToken() == JsonToken.PROPERTY_NAME) {
             String name = p.currentName();
             if (name == "images") {
                 item._photos = deserializeImages(p);
@@ -78,27 +78,27 @@ public class MediaItem
     }
     
     // Custom serializer
-    public void serialize(JsonGenerator jgen) throws IOException
+    public void serialize(JsonGenerator g) throws IOException
     {
-        jgen.writeStartObject();
+        g.writeStartObject();
 
-        jgen.writeFieldName("content");
+        g.writeName("content");
         if (_content == null) {
-            jgen.writeNull();
+            g.writeNull();
         } else {
-            _content.serialize(jgen);
+            _content.serialize(g);
         }
         if (_photos == null) {
-            jgen.writeNullField("images");
+            g.writeNullProperty("images");
         } else {
-            jgen.writeArrayFieldStart("images");
+            g.writeArrayPropertyStart("images");
             for (Photo photo : _photos) {
-                photo.serialize(jgen);
+                photo.serialize(g);
             }
-            jgen.writeEndArray();
+            g.writeEndArray();
         }
 
-        jgen.writeEndObject();
+        g.writeEndObject();
     }
     
     /*
@@ -169,7 +169,7 @@ public class MediaItem
       public static Photo deserialize(JsonParser p) throws IOException
       {
           Photo photo = new Photo();
-          while (p.nextToken() == JsonToken.FIELD_NAME) {
+          while (p.nextToken() == JsonToken.PROPERTY_NAME) {
               String name = p.currentName();
               p.nextToken();
               Integer I = sFields.get(name);
@@ -200,15 +200,15 @@ public class MediaItem
           return photo;
       }
       
-      public void serialize(JsonGenerator jgen) throws IOException
+      public void serialize(JsonGenerator g) throws IOException
       {
-          jgen.writeStartObject();
-          jgen.writeStringField("uri", _uri);
-          jgen.writeStringField("title", _title);
-          jgen.writeNumberField("width", _width);
-          jgen.writeNumberField("height", _height);
-          jgen.writeStringField("size", (_size == null) ? null : _size.name());
-          jgen.writeEndObject();
+          g.writeStartObject();
+          g.writeStringProperty("uri", _uri);
+          g.writeStringProperty("title", _title);
+          g.writeNumberProperty("width", _width);
+          g.writeNumberProperty("height", _height);
+          g.writeStringProperty("size", (_size == null) ? null : _size.name());
+          g.writeEndObject();
       }          
     }
 
@@ -305,7 +305,7 @@ public class MediaItem
             }
             Content content = new Content();
 
-            while (p.nextToken() == JsonToken.FIELD_NAME) {
+            while (p.nextToken() == JsonToken.PROPERTY_NAME) {
                 String name = p.currentName();
                 p.nextToken();
                 Integer I = sFields.get(name);
@@ -368,29 +368,29 @@ public class MediaItem
             return persons;
         }
         
-        public void serialize(JsonGenerator jgen) throws IOException
+        public void serialize(JsonGenerator g) throws IOException
         {
-            jgen.writeStartObject();
-            jgen.writeStringField("player", (_player == null) ? null : _player.name());
-            jgen.writeStringField("uri", _uri);
-            jgen.writeStringField("title", _title);
-            jgen.writeNumberField("width", _width);
-            jgen.writeNumberField("height", _height);
-            jgen.writeStringField("format", _format);
-            jgen.writeNumberField("duration", _duration);
-            jgen.writeNumberField("size", _size);
-            jgen.writeNumberField("bitrate", _bitrate);
-            jgen.writeStringField("copyright", _copyright);
+            g.writeStartObject();
+            g.writeStringProperty("player", (_player == null) ? null : _player.name());
+            g.writeStringProperty("uri", _uri);
+            g.writeStringProperty("title", _title);
+            g.writeNumberProperty("width", _width);
+            g.writeNumberProperty("height", _height);
+            g.writeStringProperty("format", _format);
+            g.writeNumberProperty("duration", _duration);
+            g.writeNumberProperty("size", _size);
+            g.writeNumberProperty("bitrate", _bitrate);
+            g.writeStringProperty("copyright", _copyright);
             if (_persons == null) {
-                jgen.writeNullField("persons");
+                g.writeNullProperty("persons");
             } else {
-                jgen.writeArrayFieldStart("persons");
+                g.writeArrayPropertyStart("persons");
                 for (String p : _persons) {
-                    jgen.writeString(p);
+                    g.writeString(p);
                 }
-                jgen.writeEndArray();
+                g.writeEndArray();
             }
-            jgen.writeEndObject();
+            g.writeEndObject();
         }          
     }
 }

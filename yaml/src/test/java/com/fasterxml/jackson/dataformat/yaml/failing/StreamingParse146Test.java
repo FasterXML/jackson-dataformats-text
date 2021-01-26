@@ -16,7 +16,7 @@ public class StreamingParse146Test extends ModuleTestBase
     {
         try (JsonParser p = MAPPER.createParser("v: 1_000_000")) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
-            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
             assertEquals("v", p.currentName());
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(1000000, p.getIntValue());

@@ -40,7 +40,7 @@ public class BinaryWriteTest extends ModuleTestBase
         
         try (JsonGenerator gen = MAPPER.createGenerator(w)) {
             gen.writeStartObject();
-            gen.writeBinaryField("array", data);
+            gen.writeBinaryProperty("array", data);
             gen.writeEndObject();
             gen.close();
         }

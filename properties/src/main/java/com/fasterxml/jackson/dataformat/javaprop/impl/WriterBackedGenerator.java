@@ -11,20 +11,20 @@ import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;
 public class WriterBackedGenerator extends JavaPropsGenerator
 {
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
      * Underlying {@link Writer} used for output.
      */
-    final protected Writer _out;
+    protected final Writer _out;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output buffering
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -45,9 +45,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     protected final int _outputEnd;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     public WriterBackedGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
@@ -61,9 +61,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -77,9 +77,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods: low-level I/O
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -121,9 +121,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -149,16 +149,16 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     @Override
-    protected void _appendFieldName(StringBuilder path, String name) {
+    protected void _appendPropertyName(StringBuilder path, String name) {
         // Note that escaping needs to be applied now...
         JPropEscapes.appendKey(_basePath, name);
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods; escaping writes
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -215,9 +215,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods; raw writes
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override

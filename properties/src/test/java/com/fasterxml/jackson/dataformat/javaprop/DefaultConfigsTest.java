@@ -30,7 +30,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         JavaPropsFactory f = new JavaPropsFactory();
         JsonGenerator gen = f.createGenerator(ObjectWriteContext.empty(), new StringWriter());
         _verifyVersion(gen);
-        assertTrue(gen.canOmitFields());
+        assertTrue(gen.canOmitProperties());
         assertFalse(gen.canWriteBinaryNatively());
         assertTrue(gen.canWriteFormattedNumbers());
         assertFalse(gen.canWriteObjectId());

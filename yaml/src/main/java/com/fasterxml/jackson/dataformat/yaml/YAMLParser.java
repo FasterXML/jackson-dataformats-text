@@ -358,7 +358,7 @@ public class YAMLParser extends ParserBase
             // in Object context; they are just ScalarEvents (but separate and NOT just tagged
             // on values)
             if (_parsingContext.inObject()) {
-                if (_currToken != JsonToken.FIELD_NAME) {
+                if (_currToken != JsonToken.PROPERTY_NAME) {
                     if (evt.getEventId() != Event.ID.Scalar) {
                         _currentAnchor = Optional.empty();
                         _lastTagEvent = null;
@@ -375,7 +375,7 @@ public class YAMLParser extends ParserBase
 
                     // 20-Feb-2019, tatu: [dataformats-text#123] Looks like YAML exposes Anchor for Object at point
                     //   where we return START_OBJECT (which makes sense), but, alas, Jackson expects that at point
-                    //   after first FIELD_NAME. So we will need to defer clearing of the anchor slightly,
+                    //   after first PROPERTY_NAME. So we will need to defer clearing of the anchor slightly,
                     //   just for the very first entry; and only if no anchor for name found.
                     //  ... not even 100% sure this is correct, or robust, but does appear to work for specific
                     //  test case given.
@@ -393,7 +393,7 @@ public class YAMLParser extends ParserBase
                     final String name = scalar.getValue();
                     _currentFieldName = name;
                     _parsingContext.setCurrentName(name);
-                    return (_currToken = JsonToken.FIELD_NAME);
+                    return (_currToken = JsonToken.PROPERTY_NAME);
                 }
             } else if (_parsingContext.inArray()) {
                 _parsingContext.valueRead();
@@ -777,7 +777,7 @@ public class YAMLParser extends ParserBase
         if (_currToken == JsonToken.VALUE_STRING) {
             return _textValue;
         }
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentFieldName;
         }
         if (_currToken != null) {
@@ -792,7 +792,7 @@ public class YAMLParser extends ParserBase
     @Override
     public String currentName() throws JacksonException
     {
-        if (_currToken == JsonToken.FIELD_NAME) {
+        if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentFieldName;
         }
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {

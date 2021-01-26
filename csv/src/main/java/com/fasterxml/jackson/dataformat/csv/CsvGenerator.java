@@ -310,7 +310,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public boolean canOmitFields() {
+    public boolean canOmitProperties() {
         // Nope: CSV requires at least a placeholder
         return false;
     }
@@ -334,25 +334,25 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeFieldName(String name) throws JacksonException
+    public final void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeFieldName(name)) {
+        if (!_tokenWriteContext.writeName(name)) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name);
     }
 
     @Override
-    public void writeFieldId(long id) throws JacksonException {
+    public void writePropertyId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
-        writeFieldName(Long.toString(id));
+        writeName(Long.toString(id));
     }
 
     @Override
-    public final void writeFieldName(SerializableString name) throws JacksonException
+    public final void writeName(SerializableString name) throws JacksonException
     {
         // Object is a value, need to verify it's allowed
-        if (!_tokenWriteContext.writeFieldName(name.getValue())) {
+        if (!_tokenWriteContext.writeName(name.getValue())) {
             _reportError("Can not write a field name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -888,16 +888,16 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeOmittedField(String fieldName) throws JacksonException
+    public void writeOmittedProperty(String propName) throws JacksonException
     {
         // Hmmh. Should we require a match? Actually, let's use logic: if field found,
         // assumption is we must add a placeholder; if not, we can merely ignore
-        CsvSchema.Column col = _schema.column(fieldName);
+        CsvSchema.Column col = _schema.column(propName);
         if (col == null) {
             // assumed to have been removed from schema too
         } else {
-            // basically combination of "writeFieldName()" and "writeNull()"
-            if (!_tokenWriteContext.writeFieldName(fieldName)) {
+            // basically combination of "writeName()" and "writeNull()"
+            if (!_tokenWriteContext.writeName(propName)) {
                 _reportError("Can not skip a field, expecting a value");
             }
             // and all we do is just note index to use for following value write

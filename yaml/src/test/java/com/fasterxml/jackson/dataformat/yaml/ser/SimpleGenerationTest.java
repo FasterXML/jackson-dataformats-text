@@ -48,7 +48,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         JsonGenerator gen = MAPPER.createGenerator(w);
 
         gen.writeStartObject();
-        gen.writeFieldName("ob");
+        gen.writeName("ob");
         gen.writeStartArray();
         gen.writeString("a");
         gen.writeString("b");
@@ -131,12 +131,12 @@ public class SimpleGenerationTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private void _writeBradDoc(JsonGenerator gen) throws IOException
+    private void _writeBradDoc(JsonGenerator g) throws IOException
     {
-        gen.writeStartObject();
-        gen.writeStringField("name", "Brad");
-        gen.writeNumberField("age", 39);
-        gen.writeEndObject();
-        gen.close();
+        g.writeStartObject();
+        g.writeStringProperty("name", "Brad");
+        g.writeNumberProperty("age", 39);
+        g.writeEndObject();
+        g.close();
     }
 }

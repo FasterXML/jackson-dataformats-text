@@ -401,31 +401,31 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeFieldName(String name) throws JacksonException
+    public final void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeFieldName(name)) {
-            _reportError("Can not write a field name, expecting a value");
+        if (!_tokenWriteContext.writeName(name)) {
+            _reportError("Can not write a property name, expecting a value");
         }
         _writeFieldName(name);
     }
 
     @Override
-    public final void writeFieldName(SerializableString name)
+    public final void writeName(SerializableString name)
         throws JacksonException
     {
         // Object is a value, need to verify it's allowed
-        if (!_tokenWriteContext.writeFieldName(name.getValue())) {
-            _reportError("Can not write a field name, expecting a value");
+        if (!_tokenWriteContext.writeName(name.getValue())) {
+            _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
     }
 
     @Override
-    public void writeFieldId(long id) throws JacksonException {
+    public void writePropertyId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
-        if (!_tokenWriteContext.writeFieldName(idStr)) {
-            _reportError("Can not write a field id, expecting a value");
+        if (!_tokenWriteContext.writeName(idStr)) {
+            _reportError("Cannot write a property id, expecting a value");
         }
         // to avoid quoting
 //        _writeFieldName(idStr);
