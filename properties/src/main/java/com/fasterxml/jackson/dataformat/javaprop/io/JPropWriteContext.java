@@ -107,7 +107,7 @@ public class JPropWriteContext
     /**********************************************************************
      */
 
-    public boolean writeFieldName(String name)
+    public boolean writeName(String name)
     {
         if (_gotName) {
             return false;

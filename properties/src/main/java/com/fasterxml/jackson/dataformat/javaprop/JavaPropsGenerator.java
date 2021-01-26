@@ -17,7 +17,7 @@ public abstract class JavaPropsGenerator
 {
     // As an optimization we try coalescing short writes into
     // buffer; but pass longer directly.
-    final protected static int SHORT_WRITE = 100;
+    protected final static int SHORT_WRITE = 100;
 
     /*
     /**********************************************************************
@@ -25,13 +25,13 @@ public abstract class JavaPropsGenerator
     /**********************************************************************
      */
 
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
 
     /**
      * Definition of mapping of logically structured property names into actual
      * flattened property names.
      */
-    final protected JavaPropsSchema _schema;
+    protected final JavaPropsSchema _schema;
 
     /*
     /**********************************************************************
@@ -164,32 +164,18 @@ public abstract class JavaPropsGenerator
     public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }
-    
-    // No Format Features yet
-/*
-    
-    @Override
-    public int getFormatFeatures() {
-        return _formatFeatures;
-    }
-
-    @Override
-    public JsonGenerator overrideFormatFeatures(int values, int mask) { }
-*/
 
     /*
     /**********************************************************************
-    /* Overridden methods; writing field names
+    /* Overridden methods; writing property names
     /**********************************************************************
      */
 
-// varies between impls so:
-//    @Override public void writeName(String name) throws JacksonException
     @Override
     public void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeFieldName(name)) {
-            _reportError("Can not write a field name, expecting a value");
+        if (!_tokenWriteContext.writeName(name)) {
+            _reportError("Cannot write a property name, expecting a value");
         }
         // also, may need to output header if this would be first write
         if (!_headerChecked) {
@@ -201,7 +187,7 @@ public abstract class JavaPropsGenerator
         }
 
         // Ok; append to base path at this point.
-        // First: ensure possibly preceding field name is removed:
+        // First: ensure possibly preceding property name is removed:
         _tokenWriteContext.truncatePath(_basePath);
         if (_basePath.length() > _indentLength) {
             String sep = _schema.pathSeparator();
@@ -462,7 +448,7 @@ public abstract class JavaPropsGenerator
     {
         // first, check that name/value cadence works
         if (!_tokenWriteContext.writeValue()) {
-            _reportError("Can not "+typeMsg+", expecting field name");
+            _reportError("Cannot "+typeMsg+", expecting a property name");
         }
         // and if so, update path if we are in array
         if (_tokenWriteContext.inArray()) {

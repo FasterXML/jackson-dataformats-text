@@ -167,7 +167,7 @@ public class CsvGenerator extends GeneratorBase
     
     /**
      * Index of column that we will be getting next, based on
-     * field name call that was made.
+     * the property name call that was made.
      */
     protected int _nextColumnByName = -1;
 
@@ -325,7 +325,7 @@ public class CsvGenerator extends GeneratorBase
 
     /*
     /**********************************************************************
-    /* Overridden methods; writing field names
+    /* Overridden methods; writing property names
     /**********************************************************************
      */
     
@@ -337,7 +337,7 @@ public class CsvGenerator extends GeneratorBase
     public final void writeName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeName(name)) {
-            _reportError("Can not write a field name, expecting a value");
+            _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
     }
@@ -353,7 +353,7 @@ public class CsvGenerator extends GeneratorBase
     {
         // Object is a value, need to verify it's allowed
         if (!_tokenWriteContext.writeName(name.getValue())) {
-            _reportError("Can not write a field name, expecting a value");
+            _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
     }
@@ -524,7 +524,7 @@ public class CsvGenerator extends GeneratorBase
             _writer.write(_columnIndex(), _arrayContents.toString());
         }
         // 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
-        //    is now done. But not if writing such an array field, so:
+        //    is now done. But not if writing such an array property, so:
         if (!_tokenWriteContext.inObject()) {
             finishRow();
         }
@@ -883,14 +883,14 @@ public class CsvGenerator extends GeneratorBase
     
     /*
     /**********************************************************************
-    /* Overrides for field methods
+    /* Overrides for property write methods
     /**********************************************************************
      */
 
     @Override
     public void writeOmittedProperty(String propName) throws JacksonException
     {
-        // Hmmh. Should we require a match? Actually, let's use logic: if field found,
+        // Hmmh. Should we require a match? Actually, let's use logic: if property found,
         // assumption is we must add a placeholder; if not, we can merely ignore
         CsvSchema.Column col = _schema.column(propName);
         if (col == null) {
@@ -898,7 +898,7 @@ public class CsvGenerator extends GeneratorBase
         } else {
             // basically combination of "writeName()" and "writeNull()"
             if (!_tokenWriteContext.writeName(propName)) {
-                _reportError("Can not skip a field, expecting a value");
+                _reportError("Cannot skip a property, expecting a value");
             }
             // and all we do is just note index to use for following value write
             _nextColumnByName = col.getIndex();
@@ -918,7 +918,7 @@ public class CsvGenerator extends GeneratorBase
     protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         if (!_tokenWriteContext.writeValue()) {
-            _reportError("Can not "+typeMsg+", expecting field name");
+            _reportError("Cannot "+typeMsg+", expecting a property name");
         }
         if (_handleFirstLine) {
             _handleFirstLine();

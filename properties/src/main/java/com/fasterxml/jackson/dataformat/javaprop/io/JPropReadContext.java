@@ -19,7 +19,7 @@ public abstract class JPropReadContext
     protected final JPropReadContext _parent;
 
     /**
-     * Current field name
+     * Current property name
      */
     protected String _currentName;
 

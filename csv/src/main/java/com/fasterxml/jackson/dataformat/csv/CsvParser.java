@@ -210,7 +210,7 @@ public class CsvParser
     protected final static int STATE_NEXT_ENTRY = 2;
 
     /**
-     * State in which value matching field name will
+     * State in which value matching property name will
      * be returned.
      */
     protected final static int STATE_NAMED_VALUE = 3;
@@ -294,7 +294,7 @@ public class CsvParser
     /**
      * Name of column that we exposed most recently, accessible after
      * {@link JsonToken#PROPERTY_NAME} as well as value tokens immediately
-     * following field name.
+     * following property name.
      */
     protected String _currentName;
 

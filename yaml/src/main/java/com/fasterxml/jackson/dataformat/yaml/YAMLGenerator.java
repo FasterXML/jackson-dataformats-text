@@ -169,7 +169,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("-?[0-9]*(\\.[0-9]*)?");
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
-    // for field names, leave out quotes
+    // for property names, leave out quotes
     private final static ScalarStyle STYLE_UNQUOTED_NAME = ScalarStyle.PLAIN;
 
     // numbers, booleans, should use implicit
@@ -392,7 +392,7 @@ public class YAMLGenerator extends GeneratorBase
 
     /*
     /**********************************************************************
-    /* Overridden methods; writing field names
+    /* Overridden methods; writing property names
     /**********************************************************************
      */
 
@@ -404,7 +404,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeName(String name) throws JacksonException
     {
         if (!_tokenWriteContext.writeName(name)) {
-            _reportError("Can not write a property name, expecting a value");
+            _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
     }
@@ -415,7 +415,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         // Object is a value, need to verify it's allowed
         if (!_tokenWriteContext.writeName(name.getValue())) {
-            _reportError("Cannot write a property name, expecting a value");
+            _reportError("Cannotwrite a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
     }
@@ -839,7 +839,7 @@ public class YAMLGenerator extends GeneratorBase
     protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         if (!_tokenWriteContext.writeValue()) {
-            _reportError("Can not "+typeMsg+", expecting field name");
+            _reportError("Cannot "+typeMsg+", expecting a property name");
         }
         if (_tokenWriteContext.inRoot()) {
             // Start-doc emitted when creating generator, but otherwise need it; similarly,

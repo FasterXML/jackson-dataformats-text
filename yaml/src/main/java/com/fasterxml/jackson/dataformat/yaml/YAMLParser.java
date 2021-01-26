@@ -152,9 +152,9 @@ public class YAMLParser extends ParserBase
     protected String _cleanedTextValue;
 
     /**
-     * Let's also have a local copy of the current field name
+     * Let's also have a local copy of the current property name
      */
-    protected String _currentFieldName;
+    protected String _currentName;
 
     /**
      * Flag that is set when current token was derived from an Alias
@@ -354,7 +354,7 @@ public class YAMLParser extends ParserBase
                 return (_currToken = null);
             }
             _lastEvent = evt;
-            // One complication: field names are only inferred from the fact that we are
+            // One complication: property names are only inferred from the fact that we are
             // in Object context; they are just ScalarEvents (but separate and NOT just tagged
             // on values)
             if (_parsingContext.inObject()) {
@@ -370,7 +370,7 @@ public class YAMLParser extends ParserBase
                             _parsingContext = _parsingContext.getParent();
                             return (_currToken = JsonToken.END_OBJECT);
                         }
-                        _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
+                        _reportError("Expected a property name (Scalar value in YAML), got this instead: "+evt);
                     }
 
                     // 20-Feb-2019, tatu: [dataformats-text#123] Looks like YAML exposes Anchor for Object at point
@@ -391,7 +391,7 @@ public class YAMLParser extends ParserBase
                         _lastTagEvent = evt;
                     }
                     final String name = scalar.getValue();
-                    _currentFieldName = name;
+                    _currentName = name;
                     _parsingContext.setCurrentName(name);
                     return (_currToken = JsonToken.PROPERTY_NAME);
                 }
@@ -778,7 +778,7 @@ public class YAMLParser extends ParserBase
             return _textValue;
         }
         if (_currToken == JsonToken.PROPERTY_NAME) {
-            return _currentFieldName;
+            return _currentName;
         }
         if (_currToken != null) {
             if (_currToken.isScalarValue()) {
@@ -793,7 +793,7 @@ public class YAMLParser extends ParserBase
     public String currentName() throws JacksonException
     {
         if (_currToken == JsonToken.PROPERTY_NAME) {
-            return _currentFieldName;
+            return _currentName;
         }
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
             SimpleTokenReadContext parent = _parsingContext.getParent();
