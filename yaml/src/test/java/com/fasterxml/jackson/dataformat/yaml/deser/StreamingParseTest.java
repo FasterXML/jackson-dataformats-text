@@ -462,10 +462,10 @@ public class StreamingParseTest extends ModuleTestBase
         assertEquals("strings", p.currentName());
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals(0, p.getParsingContext().getCurrentIndex());
+        assertEquals(0, p.streamReadContext().getCurrentIndex());
         assertEquals("true", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals(1, p.getParsingContext().getCurrentIndex());
+        assertEquals(1, p.streamReadContext().getCurrentIndex());
         assertEquals("false", p.getText());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -536,10 +536,10 @@ public class StreamingParseTest extends ModuleTestBase
 
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals(0, p.getParsingContext().getCurrentIndex());
+        assertEquals(0, p.streamReadContext().getCurrentIndex());
         assertEquals("Foo Bar", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals(1, p.getParsingContext().getCurrentIndex());
+        assertEquals(1, p.streamReadContext().getCurrentIndex());
         assertEquals("Max Power", p.getText());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 

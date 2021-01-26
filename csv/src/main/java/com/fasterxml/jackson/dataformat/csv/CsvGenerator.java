@@ -156,7 +156,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected SimpleTokenWriteContext _tokenWriteContext;
+    protected SimpleTokenWriteContext _streamWriteContext;
 
     /**
      * Flag that indicates that we need to write header line, if
@@ -216,7 +216,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
         _schema = schema;
 
         if (characterEscapes == null) {
@@ -234,7 +234,7 @@ public class CsvGenerator extends GeneratorBase
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
         _schema = EMPTY_SCHEMA;
         _writer = csvWriter;
     }
@@ -257,16 +257,16 @@ public class CsvGenerator extends GeneratorBase
      */
     
     @Override
-    public final TokenStreamContext getOutputContext() { return _tokenWriteContext; }
+    public final TokenStreamContext streamWriteContext() { return _streamWriteContext; }
 
     @Override
     public final Object currentValue() {
-        return _tokenWriteContext.currentValue();
+        return _streamWriteContext.currentValue();
     }
 
     @Override
     public final void assignCurrentValue(Object v) {
-        _tokenWriteContext.assignCurrentValue(v);
+        _streamWriteContext.assignCurrentValue(v);
     }
 
     /*
@@ -319,7 +319,7 @@ public class CsvGenerator extends GeneratorBase
     public boolean canWriteFormattedNumbers() { return true; }
 
     @Override // @since 2.12
-    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+    public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }
 
@@ -336,7 +336,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeName(name)) {
+        if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
@@ -352,7 +352,7 @@ public class CsvGenerator extends GeneratorBase
     public final void writeName(SerializableString name) throws JacksonException
     {
         // Object is a value, need to verify it's allowed
-        if (!_tokenWriteContext.writeName(name.getValue())) {
+        if (!_streamWriteContext.writeName(name.getValue())) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -462,10 +462,10 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("start an array");
         // Ok to create root-level array to contain Objects/Arrays, but
         // can not nest arrays in objects
-        if (_tokenWriteContext.inObject()) {
+        if (_streamWriteContext.inObject()) {
             if ((_skipWithin == null)
                     && _skipValue && isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
-                _skipWithin = _tokenWriteContext;
+                _skipWithin = _streamWriteContext;
             } else if (!_skipValue) {
                 // First: column may have its own separator
                 String sep;
@@ -495,7 +495,7 @@ public class CsvGenerator extends GeneratorBase
                 _reportError("CSV generator does not support nested Array values");
             }
         }
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
+        _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
         // and that's about it, really
     }
 
@@ -508,13 +508,13 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeEndArray() throws JacksonException
     {
-        if (!_tokenWriteContext.inArray()) {
-            _reportError("Current context not Array but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inArray()) {
+            _reportError("Current context not Array but "+_streamWriteContext.typeDesc());
         }
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
         // 14-Dec-2015, tatu: To complete skipping of ignored structured value, need this:
         if (_skipWithin != null) {
-            if (_tokenWriteContext == _skipWithin) {
+            if (_streamWriteContext == _skipWithin) {
                 _skipWithin = null;
             }
             return;
@@ -525,7 +525,7 @@ public class CsvGenerator extends GeneratorBase
         }
         // 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
         //    is now done. But not if writing such an array property, so:
-        if (!_tokenWriteContext.inObject()) {
+        if (!_streamWriteContext.inObject()) {
             finishRow();
         }
     }
@@ -536,18 +536,18 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("start an object");
         // No nesting for objects; can write Objects inside logical root-level arrays.
         // 14-Dec-2015, tatu: ... except, should be fine if we are ignoring the property
-        if (_tokenWriteContext.inObject() ||
+        if (_streamWriteContext.inObject() ||
                 // 07-Nov-2017, tatu: But we may actually be nested indirectly; so check
-                (_tokenWriteContext.inArray() && !_tokenWriteContext.getParent().inRoot())) {
+                (_streamWriteContext.inArray() && !_streamWriteContext.getParent().inRoot())) {
             if (_skipWithin == null) { // new in 2.7
                 if (_skipValue && isEnabled(StreamWriteFeature.IGNORE_UNKNOWN)) {
-                    _skipWithin = _tokenWriteContext;
+                    _skipWithin = _streamWriteContext;
                 } else {
                     _reportCsvWriteError("CSV generator does not support Object values for properties (nested Objects)");
                 }
             }
         }
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
     }
 
     @Override
@@ -559,13 +559,13 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public final void writeEndObject() throws JacksonException
     {
-        if (!_tokenWriteContext.inObject()) {
-            _reportError("Current context not Object but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inObject()) {
+            _reportError("Current context not Object but "+_streamWriteContext.typeDesc());
         }
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
         // 14-Dec-2015, tatu: To complete skipping of ignored structured value, need this:
         if (_skipWithin != null) {
-            if (_tokenWriteContext == _skipWithin) {
+            if (_streamWriteContext == _skipWithin) {
                 _skipWithin = null;
             }
             return;
@@ -743,16 +743,16 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(_schema.getNullValueOrEmpty());
-            } else if (_tokenWriteContext.inObject()) {
+            } else if (_streamWriteContext.inObject()) {
                 _writer.writeNull(_columnIndex());
-            } else if (_tokenWriteContext.inArray()) {
+            } else if (_streamWriteContext.inArray()) {
                 // [dataformat-csv#106]: Need to make sure we don't swallow nulls in arrays either
                 // 04-Jan-2016, tatu: but check for case of array-wrapping, in which case null stands for absence
                 //   of Object. In this case, could either add an empty row, or skip -- for now, we'll
                 //   just skip; can change, if so desired, to expose "root null" as empty rows, possibly
                 //   based on either schema property, or CsvGenerator.Feature.
                 //  Note: if nulls are to be written that way, would need to call `finishRow()` right after `writeNull()`
-                if (!_tokenWriteContext.getParent().inRoot()) {
+                if (!_streamWriteContext.getParent().inRoot()) {
                     _writer.writeNull(_columnIndex());
                 }
 
@@ -897,7 +897,7 @@ public class CsvGenerator extends GeneratorBase
             // assumed to have been removed from schema too
         } else {
             // basically combination of "writeName()" and "writeNull()"
-            if (!_tokenWriteContext.writeName(propName)) {
+            if (!_streamWriteContext.writeName(propName)) {
                 _reportError("Cannot skip a property, expecting a value");
             }
             // and all we do is just note index to use for following value write
@@ -917,7 +917,7 @@ public class CsvGenerator extends GeneratorBase
     @Override
     protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
-        if (!_tokenWriteContext.writeValue()) {
+        if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot "+typeMsg+", expecting a property name");
         }
         if (_handleFirstLine) {

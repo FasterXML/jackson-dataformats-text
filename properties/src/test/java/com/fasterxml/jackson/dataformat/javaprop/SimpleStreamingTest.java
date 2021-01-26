@@ -28,7 +28,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertTrue(src instanceof Reader);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertNull(p.getEmbeddedObject());
-        assertNotNull(p.getCurrentLocation()); // N/A
+        assertNotNull(p.currentLocation()); // N/A
         assertNotNull(p.getTokenLocation()); // N/A
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("foo", p.getText());
@@ -42,9 +42,9 @@ public class SimpleStreamingTest extends ModuleTestBase
         // and then some other accessors
         p = MAPPER.createParser("foo = bar");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        assertEquals("foo", p.nextFieldName());
+        assertEquals("foo", p.nextName());
         assertEquals("bar", p.nextTextValue());
-        assertNull(p.nextFieldName());
+        assertNull(p.nextName());
         p.close();
 
         // one more thing, verify handling of non-binary
@@ -93,7 +93,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         gen.writeName("arr");
         gen.writeStartArray();
 
-        TokenStreamContext ctxt = gen.getOutputContext();
+        TokenStreamContext ctxt = gen.streamWriteContext();
         String path = ctxt.toString();
         assertTrue(ctxt instanceof JPropWriteContext);
         // Note: this context gives full path, unlike many others

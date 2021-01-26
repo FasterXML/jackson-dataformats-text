@@ -90,12 +90,12 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertEquals(a, parser.getIntValue());
         assertEquals((long) a, parser.getLongValue());
 
-        assertEquals("b", parser.nextFieldName());
+        assertEquals("b", parser.nextName());
         assertEquals(""+b, parser.nextTextValue());
         assertEquals((long) b, parser.getLongValue());
         assertEquals(b, parser.getIntValue());
 
-        assertTrue(parser.nextFieldName(new SerializedString("c")));
+        assertTrue(parser.nextName(new SerializedString("c")));
 
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals(c, parser.getIntValue());
@@ -120,14 +120,14 @@ public class StreamingCSVReadTest extends ModuleTestBase
             assertEquals(a, parser.getIntValue());
             assertToken(JsonToken.VALUE_NUMBER_INT, parser.currentToken());
 
-            assertEquals("b", parser.nextFieldName());
+            assertEquals("b", parser.nextName());
             assertToken(JsonToken.VALUE_STRING, parser.nextToken());
             assertTrue(parser.isExpectedNumberIntToken());
             assertEquals(NumberType.INT, parser.getNumberType());
             assertEquals(b, parser.getIntValue());
             assertToken(JsonToken.VALUE_NUMBER_INT, parser.currentToken());
 
-            assertEquals("c", parser.nextFieldName());
+            assertEquals("c", parser.nextName());
             assertToken(JsonToken.VALUE_STRING, parser.nextToken());
             assertTrue(parser.isExpectedNumberIntToken());
             assertEquals(NumberType.INT, parser.getNumberType());
@@ -150,7 +150,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertEquals(""+a, parser.nextTextValue());
         assertEquals(a, parser.getLongValue());
 
-        assertEquals("b", parser.nextFieldName());
+        assertEquals("b", parser.nextName());
         assertEquals(""+b, parser.nextTextValue());
         assertEquals(b, parser.getLongValue());
 
@@ -173,12 +173,12 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertEquals(a, parser.getDoubleValue());
         assertEquals((float) a, parser.getFloatValue());
 
-        assertEquals("b", parser.nextFieldName());
+        assertEquals("b", parser.nextName());
         assertEquals(""+b, parser.nextTextValue());
         assertEquals((float) b, parser.getFloatValue());
         assertEquals(b, parser.getDoubleValue());
 
-        assertTrue(parser.nextFieldName(new SerializedString("c")));
+        assertTrue(parser.nextName(new SerializedString("c")));
 
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals(c, parser.getDoubleValue());

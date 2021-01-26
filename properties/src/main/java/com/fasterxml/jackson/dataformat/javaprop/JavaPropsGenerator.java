@@ -43,7 +43,7 @@ public abstract class JavaPropsGenerator
      * Current context, in form we can use it (GeneratorBase has
      * untyped reference; left as null)
      */
-    protected JPropWriteContext _tokenWriteContext;
+    protected JPropWriteContext _streamWriteContext;
 
     /*
     /**********************************************************************
@@ -68,17 +68,17 @@ public abstract class JavaPropsGenerator
     {
         super(writeCtxt, stdFeatures);
         _ioContext = ioCtxt;
-        _tokenWriteContext = JPropWriteContext.createRootContext();
+        _streamWriteContext = JPropWriteContext.createRootContext();
 
         _schema = schema;
         // Indentation to use?
-        if (_tokenWriteContext.inRoot()) {
+        if (_streamWriteContext.inRoot()) {
             String indent = _schema.lineIndentation();
             _indentLength = (indent == null) ? 0 : indent.length();
             if (_indentLength > 0) {
                 _basePath.setLength(0);
                 _basePath.append(indent);
-                _tokenWriteContext = JPropWriteContext.createRootContext(_indentLength);
+                _streamWriteContext = JPropWriteContext.createRootContext(_indentLength);
             }
             // [dataformats-text#100]: Allow use of optional prefix
             final String prefix = _schema.prefix();
@@ -106,18 +106,18 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public TokenStreamContext getOutputContext() {
-        return _tokenWriteContext;
+    public TokenStreamContext streamWriteContext() {
+        return _streamWriteContext;
     }
 
     @Override
     public Object currentValue() {
-        return _tokenWriteContext.currentValue();
+        return _streamWriteContext.currentValue();
     }
 
     @Override
     public void assignCurrentValue(Object v) {
-        _tokenWriteContext.assignCurrentValue(v);
+        _streamWriteContext.assignCurrentValue(v);
     }
 
     /*
@@ -161,7 +161,7 @@ public abstract class JavaPropsGenerator
     public boolean canWriteFormattedNumbers() { return true; }
 
     @Override
-    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+    public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }
 
@@ -174,7 +174,7 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeName(name)) {
+        if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
         // also, may need to output header if this would be first write
@@ -188,7 +188,7 @@ public abstract class JavaPropsGenerator
 
         // Ok; append to base path at this point.
         // First: ensure possibly preceding property name is removed:
-        _tokenWriteContext.truncatePath(_basePath);
+        _streamWriteContext.truncatePath(_basePath);
         if (_basePath.length() > _indentLength) {
             String sep = _schema.pathSeparator();
             if (!sep.isEmpty()) {
@@ -215,44 +215,44 @@ public abstract class JavaPropsGenerator
     @Override
     public void writeStartArray() throws JacksonException {
         _verifyValueWrite("start an array");
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null,
+        _streamWriteContext = _streamWriteContext.createChildArrayContext(null,
                 _basePath.length());
     }
 
     @Override
     public void writeStartArray(Object currValue) throws JacksonException {
         _verifyValueWrite("start an array");
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(currValue,
+        _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
     }
     
     @Override
     public void writeEndArray() throws JacksonException {
-        if (!_tokenWriteContext.inArray()) {
-            _reportError("Current context not an Array but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inArray()) {
+            _reportError("Current context not an Array but "+_streamWriteContext.typeDesc());
         }
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
     }
 
     @Override
     public void writeStartObject() throws JacksonException {
         _verifyValueWrite("start an object");
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null, _basePath.length());
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(null, _basePath.length());
     }
 
     @Override
     public void writeStartObject(Object forValue) throws JacksonException {
         _verifyValueWrite("start an object");
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(forValue, _basePath.length());
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
     }
 
     @Override
     public void writeEndObject() throws JacksonException
     {
-        if (!_tokenWriteContext.inObject()) {
-            _reportError("Current context not an Ibject but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inObject()) {
+            _reportError("Current context not an Ibject but "+_streamWriteContext.typeDesc());
         }
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
     }
 
     /*
@@ -447,14 +447,14 @@ public abstract class JavaPropsGenerator
     protected void _verifyValueWrite(String typeMsg) throws JacksonException
     {
         // first, check that name/value cadence works
-        if (!_tokenWriteContext.writeValue()) {
+        if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot "+typeMsg+", expecting a property name");
         }
         // and if so, update path if we are in array
-        if (_tokenWriteContext.inArray()) {
+        if (_streamWriteContext.inArray()) {
             // remove possible path remnants from an earlier sibling
-            _tokenWriteContext.truncatePath(_basePath);
-            int ix = _tokenWriteContext.getCurrentIndex() + _schema.firstArrayOffset();
+            _streamWriteContext.truncatePath(_basePath);
+            int ix = _streamWriteContext.getCurrentIndex() + _schema.firstArrayOffset();
             if (_schema.writeIndexUsingMarkers()) {
                 Markers m = _schema.indexMarker();
                 // no leading path separator, if using enclosed indexes

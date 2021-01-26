@@ -289,7 +289,7 @@ public class CsvParser
      * Information about parser context, context in which
      * the next token is to be parsed (root, array, object).
      */
-    protected SimpleTokenReadContext _parsingContext;
+    protected SimpleTokenReadContext _streamReadContext;
 
     /**
      * Name of column that we exposed most recently, accessible after
@@ -371,7 +371,7 @@ public class CsvParser
         }
         _textBuffer =  ioCtxt.csvTextBuffer();
         _formatFeatures = csvFeatures;
-        _parsingContext = SimpleTokenReadContext.createRootContext(null);
+        _streamReadContext = SimpleTokenReadContext.createRootContext(null);
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);
@@ -402,7 +402,7 @@ public class CsvParser
     public boolean canReadTypeId() { return false; }
 
     @Override
-    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+    public JacksonFeatureSet<StreamReadCapability> streamReadCapabilities() {
         return STREAM_READ_CAPABILITIES;
     }
 
@@ -498,11 +498,11 @@ public class CsvParser
     /* Location info
     /**********************************************************************
      */
-    
+
     @Override
-    public TokenStreamContext getParsingContext() { return _parsingContext; }
-    @Override public void assignCurrentValue(Object v) { _parsingContext.assignCurrentValue(v); }
-    @Override public Object currentValue() { return _parsingContext.currentValue(); }
+    public TokenStreamContext streamReadContext() { return _streamReadContext; }
+    @Override public void assignCurrentValue(Object v) { _streamReadContext.assignCurrentValue(v); }
+    @Override public Object currentValue() { return _streamReadContext.currentValue(); }
 
     @Override
     public JsonLocation getTokenLocation() {
@@ -510,7 +510,7 @@ public class CsvParser
     }
 
     @Override
-    public JsonLocation getCurrentLocation() {
+    public JsonLocation currentLocation() {
         return _reader.getCurrentLocation();
     }
 
@@ -610,12 +610,12 @@ public class CsvParser
             } catch (IOException e) {
                 throw _wrapIOFailure(e);
             }
-            if (_parsingContext.inRoot()) {
+            if (_streamReadContext.inRoot()) {
                 return null;
             }
             // should always be in array, actually... but:
-            boolean inArray = _parsingContext.inArray();
-            _parsingContext = _parsingContext.clearAndGetParent();
+            boolean inArray = _streamReadContext.inArray();
+            _streamReadContext = _streamReadContext.clearAndGetParent();
             return inArray ? JsonToken.END_ARRAY : JsonToken.END_OBJECT;
         default:
             throw new IllegalStateException();
@@ -629,7 +629,8 @@ public class CsvParser
      */
 
     @Override
-    public boolean nextFieldName(SerializableString str) throws JacksonException {
+    public boolean nextName(SerializableString str) throws JacksonException
+    {
         // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
@@ -645,7 +646,7 @@ public class CsvParser
     }
 
     @Override
-    public String nextFieldName() throws JacksonException
+    public String nextName() throws JacksonException
     {
         // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
@@ -804,14 +805,14 @@ public class CsvParser
             _state = STATE_DOC_END;
             // but even empty sequence must still be wrapped in logical array
             if (wrapAsArray) {
-                _parsingContext = _reader.childArrayContext(_parsingContext);
+                _streamReadContext = _reader.childArrayContext(_streamReadContext);
                 return JsonToken.START_ARRAY;
             }
             return null;
         }
         
         if (wrapAsArray) {
-            _parsingContext = _reader.childArrayContext(_parsingContext);
+            _streamReadContext = _reader.childArrayContext(_streamReadContext);
             _state = STATE_RECORD_START;
             return JsonToken.START_ARRAY;
         }
@@ -824,11 +825,11 @@ public class CsvParser
         _columnIndex = 0;
         if (_columnCount == 0) { // no schema; exposed as an array
             _state = STATE_UNNAMED_VALUE;
-            _parsingContext = _reader.childArrayContext(_parsingContext);
+            _streamReadContext = _reader.childArrayContext(_streamReadContext);
             return JsonToken.START_ARRAY;
         }
         // otherwise, exposed as an Object
-        _parsingContext = _reader.childObjectContext(_parsingContext);
+        _streamReadContext = _reader.childObjectContext(_streamReadContext);
         _state = STATE_NEXT_ENTRY;
         return JsonToken.START_OBJECT;
     }
@@ -890,7 +891,7 @@ public class CsvParser
     {
         String next = _reader.nextString();
         if (next == null) { // end of record or input...
-            _parsingContext = _parsingContext.clearAndGetParent();
+            _streamReadContext = _streamReadContext.clearAndGetParent();
             if (!_reader.startNewLine()) { // end of whole thing...
                 _state = STATE_DOC_END;
             } else {
@@ -917,7 +918,7 @@ public class CsvParser
     {
         int offset = _arrayValueStart;
         if (offset < 0) { // just returned last value
-            _parsingContext = _parsingContext.clearAndGetParent();
+            _streamReadContext = _streamReadContext.clearAndGetParent();
             // no arrays in arrays (at least for now), so must be back to named value
             _state = STATE_NEXT_ENTRY;
              return JsonToken.END_ARRAY;
@@ -932,7 +933,7 @@ public class CsvParser
             if (offset == 0) { // no separator
                 // for now, let's use trimming for checking
                 if (_arrayValue.isEmpty() || _arrayValue.trim().isEmpty()) {
-                    _parsingContext = _parsingContext.clearAndGetParent();
+                    _streamReadContext = _streamReadContext.clearAndGetParent();
                     _state = STATE_NEXT_ENTRY;
                     return JsonToken.END_ARRAY;
                 }
@@ -1062,7 +1063,7 @@ public class CsvParser
      */
     protected final JsonToken _handleObjectRowEnd() throws JacksonException
     {
-        _parsingContext = _parsingContext.clearAndGetParent();
+        _streamReadContext = _streamReadContext.clearAndGetParent();
         if (!_reader.startNewLine()) {
             _state = STATE_DOC_END;
         } else {
@@ -1078,9 +1079,9 @@ public class CsvParser
         // But once we hit the end of the logical line, get out
         // NOTE: seems like we should always be within Object, but let's be conservative
         // and check just in case
-        _parsingContext = _parsingContext.clearAndGetParent();
+        _streamReadContext = _streamReadContext.clearAndGetParent();
         _state = _reader.startNewLine() ? STATE_RECORD_START : STATE_DOC_END;
-        return (_currToken = _parsingContext.inArray()
+        return (_currToken = _streamReadContext.inArray()
                 ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
     }
 
@@ -1305,7 +1306,7 @@ public class CsvParser
     protected void _startArray(CsvSchema.Column column)
     {
         _currToken = JsonToken.START_ARRAY;
-        _parsingContext = _parsingContext.createChildArrayContext(_reader.getCurrentRow(),
+        _streamReadContext = _streamReadContext.createChildArrayContext(_reader.getCurrentRow(),
                 _reader.getCurrentColumn());
         _state = STATE_IN_ARRAY;
         _arrayValueStart = 0;

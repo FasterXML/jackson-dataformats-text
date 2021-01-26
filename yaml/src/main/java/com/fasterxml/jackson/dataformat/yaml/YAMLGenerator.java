@@ -216,7 +216,7 @@ public class YAMLGenerator extends GeneratorBase
     /**
      * Object that keeps track of the current contextual state of the generator.
      */
-    protected SimpleTokenWriteContext _tokenWriteContext;
+    protected SimpleTokenWriteContext _streamWriteContext;
 
     protected Emitter _emitter;
 
@@ -251,7 +251,7 @@ public class YAMLGenerator extends GeneratorBase
         _ioContext = ioCtxt;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _tokenWriteContext = SimpleTokenWriteContext.createRootContext(dups);
+        _streamWriteContext = SimpleTokenWriteContext.createRootContext(dups);
 
         _formatWriteFeatures = yamlFeatures;
         _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
@@ -321,16 +321,16 @@ public class YAMLGenerator extends GeneratorBase
      */
     
     @Override
-    public final TokenStreamContext getOutputContext() { return _tokenWriteContext; }
+    public final TokenStreamContext streamWriteContext() { return _streamWriteContext; }
 
     @Override
     public final Object currentValue() {
-        return _tokenWriteContext.currentValue();
+        return _streamWriteContext.currentValue();
     }
 
     @Override
     public final void assignCurrentValue(Object v) {
-        _tokenWriteContext.assignCurrentValue(v);
+        _streamWriteContext.assignCurrentValue(v);
     }
 
     /*
@@ -357,7 +357,7 @@ public class YAMLGenerator extends GeneratorBase
     public boolean canWriteFormattedNumbers() { return true; }
 
     @Override
-    public JacksonFeatureSet<StreamWriteCapability> getWriteCapabilities() {
+    public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }
 
@@ -403,7 +403,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeName(String name) throws JacksonException
     {
-        if (!_tokenWriteContext.writeName(name)) {
+        if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
@@ -414,7 +414,7 @@ public class YAMLGenerator extends GeneratorBase
         throws JacksonException
     {
         // Object is a value, need to verify it's allowed
-        if (!_tokenWriteContext.writeName(name.getValue())) {
+        if (!_streamWriteContext.writeName(name.getValue())) {
             _reportError("Cannotwrite a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
@@ -424,7 +424,7 @@ public class YAMLGenerator extends GeneratorBase
     public void writePropertyId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
-        if (!_tokenWriteContext.writeName(idStr)) {
+        if (!_streamWriteContext.writeName(idStr)) {
             _reportError("Cannot write a property id, expecting a value");
         }
         // to avoid quoting
@@ -497,7 +497,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartArray() throws JacksonException
     {
         _verifyValueWrite("start an array");
-        _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
+        _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -518,12 +518,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndArray() throws JacksonException
     {
-        if (!_tokenWriteContext.inArray()) {
-            _reportError("Current context not Array but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inArray()) {
+            _reportError("Current context not Array but "+_streamWriteContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
         _emit(new SequenceEndEvent());
     }
 
@@ -531,7 +531,7 @@ public class YAMLGenerator extends GeneratorBase
     public final void writeStartObject() throws JacksonException
     {
         _verifyValueWrite("start an object");
-        _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -551,12 +551,12 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void writeEndObject() throws JacksonException
     {
-        if (!_tokenWriteContext.inObject()) {
-            _reportError("Current context not Object but "+_tokenWriteContext.typeDesc());
+        if (!_streamWriteContext.inObject()) {
+            _reportError("Current context not Object but "+_streamWriteContext.typeDesc());
         }
         // just to make sure we don't "leak" type ids
         _typeId = null;
-        _tokenWriteContext = _tokenWriteContext.getParent();
+        _streamWriteContext = _streamWriteContext.getParent();
         _emit(new MappingEndEvent());
     }
 
@@ -838,13 +838,13 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     protected final void _verifyValueWrite(String typeMsg) throws JacksonException
     {
-        if (!_tokenWriteContext.writeValue()) {
+        if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot "+typeMsg+", expecting a property name");
         }
-        if (_tokenWriteContext.inRoot()) {
+        if (_streamWriteContext.inRoot()) {
             // Start-doc emitted when creating generator, but otherwise need it; similarly,
             // need matching end-document to close earlier open one
-            if (_tokenWriteContext.getCurrentIndex() > 0) {
+            if (_streamWriteContext.getCurrentIndex() > 0) {
                 _emitEndDocument();
                 _emitStartDocument();
             }

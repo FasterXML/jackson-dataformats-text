@@ -124,7 +124,7 @@ public class YAMLParser extends ParserBase
      * Information about parser context, context in which
      * the next token is to be parsed (root, array, object).
      */
-    protected SimpleTokenReadContext _parsingContext;
+    protected SimpleTokenReadContext _streamReadContext;
 
     /**
      * Keep track of the last event read, to get access to Location info
@@ -185,7 +185,7 @@ public class YAMLParser extends ParserBase
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _parsingContext = SimpleTokenReadContext.createRootContext(dups);
+        _streamReadContext = SimpleTokenReadContext.createRootContext(dups);
     }
 
     /*
@@ -230,7 +230,7 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+    public JacksonFeatureSet<StreamReadCapability> streamReadCapabilities() {
         // Defaults are fine; YAML actually has typed scalars (to a degree)
         // unlike CSV, Properties and XML
         return DEFAULT_READ_CAPABILITIES;
@@ -261,9 +261,9 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    @Override public TokenStreamContext getParsingContext() { return _parsingContext; }
-    @Override public void assignCurrentValue(Object v) { _parsingContext.assignCurrentValue(v); }
-    @Override public Object currentValue() { return _parsingContext.currentValue(); }
+    @Override public TokenStreamContext streamReadContext() { return _streamReadContext; }
+    @Override public void assignCurrentValue(Object v) { _streamReadContext.assignCurrentValue(v); }
+    @Override public Object currentValue() { return _streamReadContext.currentValue(); }
 
     /*
     /**********************************************************************
@@ -302,7 +302,7 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public JsonLocation getCurrentLocation() {
+    public JsonLocation currentLocation() {
         // can assume we are at the end of token now...
         if (_lastEvent == null) {
             return JsonLocation.NA;
@@ -357,17 +357,17 @@ public class YAMLParser extends ParserBase
             // One complication: property names are only inferred from the fact that we are
             // in Object context; they are just ScalarEvents (but separate and NOT just tagged
             // on values)
-            if (_parsingContext.inObject()) {
+            if (_streamReadContext.inObject()) {
                 if (_currToken != JsonToken.PROPERTY_NAME) {
                     if (evt.getEventId() != Event.ID.Scalar) {
                         _currentAnchor = Optional.empty();
                         _lastTagEvent = null;
                         // end is fine
                         if (evt.getEventId() == Event.ID.MappingEnd) {
-                            if (!_parsingContext.inObject()) { // sanity check is optional, but let's do it for now
+                            if (!_streamReadContext.inObject()) { // sanity check is optional, but let's do it for now
                                 _reportMismatchedEndMarker('}', ']');
                             }
-                            _parsingContext = _parsingContext.getParent();
+                            _streamReadContext = _streamReadContext.getParent();
                             return (_currToken = JsonToken.END_OBJECT);
                         }
                         _reportError("Expected a property name (Scalar value in YAML), got this instead: "+evt);
@@ -392,11 +392,11 @@ public class YAMLParser extends ParserBase
                     }
                     final String name = scalar.getValue();
                     _currentName = name;
-                    _parsingContext.setCurrentName(name);
+                    _streamReadContext.setCurrentName(name);
                     return (_currToken = JsonToken.PROPERTY_NAME);
                 }
-            } else if (_parsingContext.inArray()) {
-                _parsingContext.valueRead();
+            } else if (_streamReadContext.inArray()) {
+                _streamReadContext.valueRead();
             }
 
             _currentAnchor = Optional.empty();
@@ -413,7 +413,7 @@ public class YAMLParser extends ParserBase
                     Optional<Mark> m = evt.getStartMark();
                     MappingStartEvent map = (MappingStartEvent) evt;
                     _currentAnchor = map.getAnchor();
-                    _parsingContext = _parsingContext.createChildObjectContext(
+                    _streamReadContext = _streamReadContext.createChildObjectContext(
                             m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
                     return (_currToken = JsonToken.START_OBJECT);
 
@@ -424,15 +424,15 @@ public class YAMLParser extends ParserBase
                 case SequenceStart:
                     Optional<Mark> mrk = evt.getStartMark();
                     _currentAnchor = ((NodeEvent) evt).getAnchor();
-                    _parsingContext = _parsingContext.createChildArrayContext(
+                    _streamReadContext = _streamReadContext.createChildArrayContext(
                             mrk.map(mark -> mark.getLine()).orElse(0), mrk.map(mark -> mark.getColumn()).orElse(0));
                     return (_currToken = JsonToken.START_ARRAY);
 
                 case SequenceEnd:
-                    if (!_parsingContext.inArray()) { // sanity check is optional, but let's do it for now
+                    if (!_streamReadContext.inArray()) { // sanity check is optional, but let's do it for now
                         _reportMismatchedEndMarker(']', '}');
                     }
-                    _parsingContext = _parsingContext.getParent();
+                    _streamReadContext = _streamReadContext.getParent();
                     return (_currToken = JsonToken.END_ARRAY);
 
                 // after this, less common tokens:
@@ -796,12 +796,12 @@ public class YAMLParser extends ParserBase
             return _currentName;
         }
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
-            SimpleTokenReadContext parent = _parsingContext.getParent();
+            SimpleTokenReadContext parent = _streamReadContext.getParent();
             if (parent != null) {
                 return parent.currentName();
             }
         }
-        return _parsingContext.currentName();
+        return _streamReadContext.currentName();
     }
 
     @Override
@@ -1077,7 +1077,7 @@ public class YAMLParser extends ParserBase
 
     // Promoted from `ParserBase` in 3.0
     protected void _reportMismatchedEndMarker(int actCh, char expCh) throws JacksonException {
-        TokenStreamContext ctxt = getParsingContext();
+        TokenStreamContext ctxt = streamReadContext();
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
                 (char) actCh, expCh, ctxt.typeDesc(), ctxt.getStartLocation(_getSourceReference())));

@@ -60,7 +60,7 @@ public class JavaPropsParser extends ParserMinimalBase
     /**********************************************************************
      */
 
-    protected JPropReadContext _readContext;
+    protected JPropReadContext _streamReadContext;
 
     protected boolean _closed;
 
@@ -132,7 +132,7 @@ public class JavaPropsParser extends ParserMinimalBase
     @Override
     public void close() {
         _closed = true;
-        _readContext = null;
+        _streamReadContext = null;
     }
 
     @Override
@@ -164,7 +164,7 @@ public class JavaPropsParser extends ParserMinimalBase
     public boolean canReadTypeId() { return false; }
 
     @Override
-    public JacksonFeatureSet<StreamReadCapability> getReadCapabilities() {
+    public JacksonFeatureSet<StreamReadCapability> streamReadCapabilities() {
         return STREAM_READ_CAPABILITIES;
     }
 
@@ -175,9 +175,9 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public TokenStreamContext getParsingContext() { return _readContext; }
-    @Override public void assignCurrentValue(Object v) { _readContext.assignCurrentValue(v); }
-    @Override public Object currentValue() { return _readContext.currentValue(); }
+    public TokenStreamContext streamReadContext() { return _streamReadContext; }
+    @Override public void assignCurrentValue(Object v) { _streamReadContext.assignCurrentValue(v); }
+    @Override public Object currentValue() { return _streamReadContext.currentValue(); }
 
     /*
     /**********************************************************************
@@ -187,28 +187,28 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public String currentName() {
-        if (_readContext == null) {
+        if (_streamReadContext == null) {
             return null;
         }
         if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
-            JPropReadContext parent = _readContext.getParent();
+            JPropReadContext parent = _streamReadContext.getParent();
             if (parent != null) {
                 return parent.currentName();
             }
         }
-        return _readContext.currentName();
+        return _streamReadContext.currentName();
     }
 
     @Override
     public JsonToken nextToken() throws JacksonException {
         _binaryValue = null;
-        if (_readContext == null) {
+        if (_streamReadContext == null) {
             if (_closed) {
                 return null;
             }
             _closed = true;
             JPropNode root = JPropNodeBuilder.build(_sourceContent, _schema);
-            _readContext = JPropReadContext.create(root);
+            _streamReadContext = JPropReadContext.create(root);
 
             // 30-Mar-2016, tatu: For debugging can be useful:
             /*
@@ -217,9 +217,9 @@ System.err.println("SOURCE: ("+root.getClass().getName()+") <<\n"+new ObjectMapp
 System.err.println("\n>>");
 */
         }
-        while ((_currToken = _readContext.nextToken()) == null) {
-            _readContext = _readContext.nextContext();
-            if (_readContext == null) { // end of content
+        while ((_currToken = _streamReadContext.nextToken()) == null) {
+            _streamReadContext = _streamReadContext.nextContext();
+            if (_streamReadContext == null) { // end of content
                 return null;
             }
         }
@@ -230,10 +230,10 @@ System.err.println("\n>>");
     public String getText() throws JacksonException {
         JsonToken t = _currToken;
         if (t == JsonToken.VALUE_STRING) {
-            return _readContext.getCurrentText();
+            return _streamReadContext.getCurrentText();
         }
         if (t == JsonToken.PROPERTY_NAME) {
-            return _readContext.currentName();
+            return _streamReadContext.currentName();
         }
         // shouldn't have non-String scalar values so:
         return (t == null) ? null : t.asString();
@@ -318,7 +318,7 @@ System.err.println("\n>>");
     }
 
     @Override
-    public JsonLocation getCurrentLocation() {
+    public JsonLocation currentLocation() {
         return JsonLocation.NA;
     }
 
@@ -386,8 +386,8 @@ System.err.println("\n>>");
 
     @Override
     protected void _handleEOF() throws StreamReadException {
-        if ((_readContext != null) && !_readContext.inRoot()) {
-            _reportInvalidEOF(": expected close marker for "+_readContext.typeDesc(), null);
+        if ((_streamReadContext != null) && !_streamReadContext.inRoot()) {
+            _reportInvalidEOF(": expected close marker for "+_streamReadContext.typeDesc(), null);
         }
     }
 }
