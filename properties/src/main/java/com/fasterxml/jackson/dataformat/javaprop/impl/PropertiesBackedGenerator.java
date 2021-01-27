@@ -47,7 +47,7 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    public Object streamWriteTarget() {
+    public Object streamWriteOutputTarget() {
         return _content;
     }
 

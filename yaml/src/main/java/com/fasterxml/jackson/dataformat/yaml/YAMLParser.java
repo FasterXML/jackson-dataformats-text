@@ -241,7 +241,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public Reader streamReadSource() {
+    public Reader streamReadInputSource() {
         return _reader;
     }
 

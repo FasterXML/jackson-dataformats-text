@@ -24,7 +24,7 @@ public class SimpleStreamingTest extends ModuleTestBase
     public void testParsing()
     {
         JsonParser p = MAPPER.createParser("foo = bar");
-        Object src = p.streamReadSource();
+        Object src = p.streamReadInputSource();
         assertTrue(src instanceof Reader);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertNull(p.getEmbeddedObject());
@@ -71,7 +71,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
 
-        Object target = gen.streamWriteTarget();
+        Object target = gen.streamWriteOutputTarget();
         assertTrue(target instanceof Writer);
         
         gen.writeStartObject();

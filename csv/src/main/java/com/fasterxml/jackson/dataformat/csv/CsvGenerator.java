@@ -276,7 +276,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public Object streamWriteTarget() {
+    public Object streamWriteOutputTarget() {
         return _writer.getOutputTarget();
     }
 

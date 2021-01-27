@@ -67,7 +67,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    public Object streamWriteTarget() {
+    public Object streamWriteOutputTarget() {
         return _out;
     }
 

@@ -515,7 +515,7 @@ public class CsvParser
     }
 
     @Override
-    public Object streamReadSource() {
+    public Object streamReadInputSource() {
         return _reader.getInputSource();
     }
 
