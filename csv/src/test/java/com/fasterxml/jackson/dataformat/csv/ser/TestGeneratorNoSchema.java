@@ -29,13 +29,13 @@ public class TestGeneratorNoSchema extends ModuleTestBase
                 .with(SCHEMA)
                 .createGenerator(sw);
 
-        assertEquals(0, gen.getOutputBuffered());
+        assertEquals(0, gen.streamWriteOutputBuffered());
         
         gen.writeStartArray();
         gen.writeString("foo");
 
         // this will be buffered because we output in correct order, so:
-        assertEquals(3, gen.getOutputBuffered());
+        assertEquals(3, gen.streamWriteOutputBuffered());
         
         gen.writeNumber(1234567890L);
         gen.writeBoolean(true);
@@ -48,7 +48,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
         gen.writeEndArray();
 
         gen.close();
-        assertEquals(0, gen.getOutputBuffered());
+        assertEquals(0, gen.streamWriteOutputBuffered());
         
         String csv = sw.toString();
 

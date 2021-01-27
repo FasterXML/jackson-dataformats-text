@@ -35,7 +35,7 @@ public class StreamingParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getText());
-        JsonLocation loc = p.getTokenLocation();
+        JsonLocation loc = p.currentTokenLocation();
         assertEquals(1, loc.getLineNr());
         assertEquals(9, loc.getColumnNr());
         assertEquals(8, loc.getCharOffset());
@@ -44,7 +44,7 @@ public class StreamingParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
         assertEquals("true", p.getText());
-        loc = p.getTokenLocation();
+        loc = p.currentTokenLocation();
         assertEquals(2, loc.getLineNr());
         assertEquals(7, loc.getColumnNr());
         assertEquals(21, loc.getCharOffset());

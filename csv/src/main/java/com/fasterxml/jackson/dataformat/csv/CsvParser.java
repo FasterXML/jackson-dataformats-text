@@ -505,7 +505,7 @@ public class CsvParser
     @Override public Object currentValue() { return _streamReadContext.currentValue(); }
 
     @Override
-    public JsonLocation getTokenLocation() {
+    public JsonLocation currentTokenLocation() {
         return _reader.getTokenLocation();
     }
 
@@ -515,7 +515,7 @@ public class CsvParser
     }
 
     @Override
-    public Object getInputSource() {
+    public Object streamReadSource() {
         return _reader.getInputSource();
     }
 

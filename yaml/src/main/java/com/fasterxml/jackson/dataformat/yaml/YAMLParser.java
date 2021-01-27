@@ -241,7 +241,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public Reader getInputSource() {
+    public Reader streamReadSource() {
         return _reader;
     }
 
@@ -291,7 +291,7 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public JsonLocation getTokenLocation()
+    public JsonLocation currentTokenLocation()
     {
         if (_lastEvent == null) {
             return JsonLocation.NA;

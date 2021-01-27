@@ -340,7 +340,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public Object getOutputTarget() {
+    public Object streamWriteTarget() {
         return _writer;
     }
 
@@ -349,7 +349,7 @@ public class YAMLGenerator extends GeneratorBase
      * <code>-1</code> from here
      */
     @Override
-    public int getOutputBuffered() {
+    public int streamWriteOutputBuffered() {
         return -1;
     }
 

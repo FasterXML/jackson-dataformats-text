@@ -147,7 +147,7 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     @Override
-    public Object getInputSource() {
+    public Object streamReadSource() {
         return _inputSource;
     }
 
@@ -313,7 +313,7 @@ System.err.println("\n>>");
     }
     
     @Override
-    public JsonLocation getTokenLocation() {
+    public JsonLocation currentTokenLocation() {
         return JsonLocation.NA;
     }
 

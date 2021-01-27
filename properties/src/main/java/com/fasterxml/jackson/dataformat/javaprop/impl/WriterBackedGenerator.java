@@ -67,12 +67,12 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
 
     @Override
-    public Object getOutputTarget() {
+    public Object streamWriteTarget() {
         return _out;
     }
 
     @Override
-    public int getOutputBuffered() {
+    public int streamWriteOutputBuffered() {
         return _outputTail;
     }
 

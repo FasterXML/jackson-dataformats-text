@@ -11,21 +11,21 @@ import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 public class PropertiesBackedGenerator extends JavaPropsGenerator
 {
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
      * Underlying {@link Properties} that we will update with logical
      * properties written out.
      */
-    final protected Map<String, Object> _content;
+    protected final Map<String, Object> _content;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
     @SuppressWarnings("unchecked")
@@ -41,23 +41,23 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
-    public int getOutputBuffered() { return -1; }
-
-    @Override
-    public Object getOutputTarget() {
+    public Object streamWriteTarget() {
         return _content;
     }
 
+    @Override
+    public int streamWriteOutputBuffered() { return -1; }
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods: low-level I/O
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -67,9 +67,9 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     public void flush() { }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -82,9 +82,9 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     }
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods; escaping writes
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -105,9 +105,9 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods; raw writes
-    /**********************************************************
+    /**********************************************************************
      */
 
     /* 02-Jun-2016, tatu: no way to support raw writes, so two things we

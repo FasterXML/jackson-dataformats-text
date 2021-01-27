@@ -24,12 +24,12 @@ public class SimpleStreamingTest extends ModuleTestBase
     public void testParsing()
     {
         JsonParser p = MAPPER.createParser("foo = bar");
-        Object src = p.getInputSource();
+        Object src = p.streamReadSource();
         assertTrue(src instanceof Reader);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertNull(p.getEmbeddedObject());
         assertNotNull(p.currentLocation()); // N/A
-        assertNotNull(p.getTokenLocation()); // N/A
+        assertNotNull(p.currentTokenLocation()); // N/A
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("foo", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
@@ -71,7 +71,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
 
-        Object target = gen.getOutputTarget();
+        Object target = gen.streamWriteTarget();
         assertTrue(target instanceof Writer);
         
         gen.writeStartObject();
