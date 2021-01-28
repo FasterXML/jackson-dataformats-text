@@ -80,9 +80,19 @@ public abstract class JavaPropsGenerator extends GeneratorBase
         _jpropContext = JPropWriteContext.createRootContext();
     }
 
+    @Override // since 2.13
+    public Object currentValue() {
+        return _jpropContext.getCurrentValue();
+    }
+
     @Override
     public Object getCurrentValue() {
         return _jpropContext.getCurrentValue();
+    }
+
+    @Override // since 2.13
+    public void assignCurrentValue(Object v) {
+        _jpropContext.setCurrentValue(v);
     }
 
     @Override
