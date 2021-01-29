@@ -39,14 +39,13 @@ public class TestVersions extends ModuleTestBase
         assertTrue(g.canWriteFormattedNumbers());
         assertTrue(g.canWriteObjectId());
         assertTrue(g.canWriteTypeId());
-        assertFalse(g.canWriteBinaryNatively());
         // note: do not try to close it, no content, exception
     }
     
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Helper methods
-    /**********************************************************
+    /**********************************************************************
      */
     
     private void assertVersion(Versioned vers)

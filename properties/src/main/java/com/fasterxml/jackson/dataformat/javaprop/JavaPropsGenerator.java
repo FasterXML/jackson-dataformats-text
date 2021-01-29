@@ -152,9 +152,6 @@ public abstract class JavaPropsGenerator
     public boolean canWriteTypeId() { return false; }
 
     @Override
-    public boolean canWriteBinaryNatively() { return false; }
-
-    @Override
     public boolean canOmitProperties() { return true; }
 
     @Override
