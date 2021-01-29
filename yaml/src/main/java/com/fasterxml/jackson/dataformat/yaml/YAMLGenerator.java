@@ -354,9 +354,6 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public boolean canWriteFormattedNumbers() { return true; }
-
-    @Override
     public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }

@@ -24,7 +24,6 @@ public class FeaturesTest extends ModuleTestBase
         assertFalse(g.canOmitProperties());
         assertFalse(g.canWriteObjectId());
         assertFalse(g.canWriteTypeId());
-        assertTrue(g.canWriteFormattedNumbers());
         g.close();
     }
 }

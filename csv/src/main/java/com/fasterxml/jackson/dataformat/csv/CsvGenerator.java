@@ -315,9 +315,6 @@ public class CsvGenerator extends GeneratorBase
         return false;
     }
 
-    @Override
-    public boolean canWriteFormattedNumbers() { return true; }
-
     @Override // @since 2.12
     public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;

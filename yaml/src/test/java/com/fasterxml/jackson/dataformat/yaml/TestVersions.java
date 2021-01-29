@@ -36,7 +36,6 @@ public class TestVersions extends ModuleTestBase
 
         JsonGenerator g = MAPPER.createGenerator(new StringWriter());
         assertTrue(g.canOmitProperties());
-        assertTrue(g.canWriteFormattedNumbers());
         assertTrue(g.canWriteObjectId());
         assertTrue(g.canWriteTypeId());
         // note: do not try to close it, no content, exception

@@ -155,9 +155,6 @@ public abstract class JavaPropsGenerator
     public boolean canOmitProperties() { return true; }
 
     @Override
-    public boolean canWriteFormattedNumbers() { return true; }
-
-    @Override
     public JacksonFeatureSet<StreamWriteCapability> streamWriteCapabilities() {
         return DEFAULT_TEXTUAL_WRITE_CAPABILITIES;
     }

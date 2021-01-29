@@ -31,7 +31,6 @@ public class DefaultConfigsTest extends ModuleTestBase
         JsonGenerator gen = f.createGenerator(ObjectWriteContext.empty(), new StringWriter());
         _verifyVersion(gen);
         assertTrue(gen.canOmitProperties());
-        assertTrue(gen.canWriteFormattedNumbers());
         assertFalse(gen.canWriteObjectId());
         assertFalse(gen.canWriteTypeId());
 
