@@ -61,7 +61,7 @@ CsvSchema schema = CsvSchema.builder()
 // NOTE: reads schema and uses it for binding
 CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader();
 ObjectMapper mapper = new CsvMapper();
-mapper.readerFor(Pojo.class).with(bootstrapSchema).readValue(json);
+mapper.readerFor(Pojo.class).with(bootstrapSchema).readValue(csv);
 ```
 
 It is important to note that the schema object is needed to ensure correct ordering of columns; schema instances are immutable and fully reusable (as are `ObjectWriter` instances).
