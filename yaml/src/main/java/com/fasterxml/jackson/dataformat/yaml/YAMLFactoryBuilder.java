@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.TSFBuilder;
@@ -34,6 +35,13 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     protected StringQuotingChecker _quotingChecker;
 
     /**
+     * Helper object used to determine node styles of objects and arrays.
+     *
+     * @since 2.13
+     */
+    protected NodeStyleResolver _nodeStyleResolver;
+
+    /**
      * YAML version for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
      * whatever default settings {@code SnakeYAML} deems best).
@@ -55,6 +63,7 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         _formatGeneratorFeatures = base._yamlGeneratorFeatures;
         _version = base._version;
         _quotingChecker = base._quotingChecker;
+        _nodeStyleResolver = base._nodeStyleResolver;
     }
 
     // // // Parser features NOT YET defined
@@ -117,6 +126,12 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return this;
     }
 
+
+    public YAMLFactoryBuilder nodeStyleResolver(NodeStyleResolver nodeStyleResolver) {
+        _nodeStyleResolver = nodeStyleResolver;
+        return this;
+    }
+
     /**
      * Method for specifying YAML version for generator to use (to produce
      * compliant output); if {@code null} passed, will let {@code SnakeYAML}
@@ -150,6 +165,10 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
             return _quotingChecker;
         }
         return StringQuotingChecker.Default.instance();
+    }
+
+    public NodeStyleResolver nodeStyleResolver() {
+        return _nodeStyleResolver;
     }
 
     @Override

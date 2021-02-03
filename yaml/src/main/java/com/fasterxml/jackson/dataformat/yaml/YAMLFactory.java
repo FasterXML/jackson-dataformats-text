@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.URL;
 import java.nio.charset.Charset;
 
+import com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.*;
@@ -66,6 +67,13 @@ public class YAMLFactory extends JsonFactory
      */
     protected final StringQuotingChecker _quotingChecker;
 
+    /**
+     * Helper object used to determine node styles of objects and arrays.
+     *
+     * @since 2.13
+     */
+    protected final NodeStyleResolver _nodeStyleResolver;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -94,6 +102,7 @@ public class YAMLFactory extends JsonFactory
         //_version = DumperOptions.Version.V1_1;
         _version = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
+        _nodeStyleResolver = NodeStyleResolver.DEFAULT_INSTANCE;
     }
 
     /**
@@ -106,6 +115,7 @@ public class YAMLFactory extends JsonFactory
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
         _version = src._version;
         _quotingChecker = src._quotingChecker;
+        _nodeStyleResolver = src._nodeStyleResolver;
     }
 
     /**
@@ -119,6 +129,7 @@ public class YAMLFactory extends JsonFactory
         _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
+        _nodeStyleResolver = b.nodeStyleResolver();
     }
 
     @Override
@@ -490,7 +501,7 @@ public class YAMLFactory extends JsonFactory
     protected YAMLGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
         int feats = _yamlGeneratorFeatures;
         YAMLGenerator gen = new YAMLGenerator(ctxt, _generatorFeatures, feats,
-                _quotingChecker, _objectCodec, out, _version);
+                _quotingChecker, _nodeStyleResolver, _objectCodec, out, _version);
         // any other initializations? No?
         return gen;
     }
