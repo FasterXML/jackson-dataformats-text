@@ -120,13 +120,23 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      *   default one (see {@code StringQuotingChecker.Default.instance()})
      *
      * @return This builder instance, to allow chaining
+     *
+     * @since 2.12
      */
     public YAMLFactoryBuilder stringQuotingChecker(StringQuotingChecker sqc) {
         _quotingChecker = sqc;
         return this;
     }
 
-
+    /**
+     * Method to specify a custom {@link NodeStyleResolver} to specify custom
+     * {@link com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver.NodeStyle}s
+     * while serializing YAML objects and arrays.
+     *
+     * @return This builder instance, to allow chaining
+     *
+     * @since 2.13
+     */
     public YAMLFactoryBuilder nodeStyleResolver(NodeStyleResolver nodeStyleResolver) {
         _nodeStyleResolver = nodeStyleResolver;
         return this;
@@ -160,6 +170,9 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return _version;
     }
 
+    /**
+     * @since 2.12
+     */
     public StringQuotingChecker stringQuotingChecker() {
         if (_quotingChecker != null) {
             return _quotingChecker;
@@ -167,6 +180,9 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return StringQuotingChecker.Default.instance();
     }
 
+    /**
+     * @since 2.13
+     */
     public NodeStyleResolver nodeStyleResolver() {
         return _nodeStyleResolver;
     }

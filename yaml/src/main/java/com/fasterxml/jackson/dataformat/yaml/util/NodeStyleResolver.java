@@ -3,7 +3,10 @@ package com.fasterxml.jackson.dataformat.yaml.util;
 import org.yaml.snakeyaml.DumperOptions;
 
 /**
- * Helper interface to customize note styles of object and arrays while exporting YAML objects.
+ * Helper interface to customize node styles of object and arrays while exporting YAML objects.
+ *
+ * @see NodeStyle
+ * @see #resolveStyle(String)
  */
 public interface NodeStyleResolver {
 
