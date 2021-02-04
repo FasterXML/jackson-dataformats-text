@@ -10,8 +10,8 @@ import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import com.fasterxml.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.std.SimpleFilterProvider;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 @SuppressWarnings("serial")

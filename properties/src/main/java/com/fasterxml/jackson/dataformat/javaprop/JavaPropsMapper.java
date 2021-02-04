@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
-import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import com.fasterxml.jackson.databind.ser.SerializationContextExt;
 
 public class JavaPropsMapper extends ObjectMapper
 {
@@ -348,7 +348,7 @@ public class JavaPropsMapper extends ObjectMapper
         if (target == null) {
             throw new IllegalArgumentException("Can not pass `null` target");
         }
-        DefaultSerializerProvider prov = _serializerProvider();
+        SerializationContextExt prov = _serializerProvider();
         try (JavaPropsGenerator g = tokenStreamFactory().createGenerator(prov, null, target)) {
             writeValue(g, value);
         }
@@ -364,7 +364,7 @@ public class JavaPropsMapper extends ObjectMapper
         if (target == null) {
             throw new IllegalArgumentException("Can not pass `null` target");
         }
-        DefaultSerializerProvider prov = _serializerProvider();
+        SerializationContextExt prov = _serializerProvider();
         try (JavaPropsGenerator g = tokenStreamFactory().createGenerator(prov, schema, target)) {
             writeValue(g, value);
         }
