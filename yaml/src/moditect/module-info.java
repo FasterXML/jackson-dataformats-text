@@ -7,6 +7,7 @@ module com.fasterxml.jackson.dataformat.yaml {
     requires org.yaml.snakeyaml;
 
     exports com.fasterxml.jackson.dataformat.yaml;
+    exports com.fasterxml.jackson.dataformat.yaml.util;
 
     provides com.fasterxml.jackson.core.TokenStreamFactory with
         com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
