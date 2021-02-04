@@ -9,6 +9,8 @@ module com.fasterxml.jackson.dataformat.yaml {
     exports com.fasterxml.jackson.dataformat.yaml;
     // probably need to expose this for 2.x?
     exports com.fasterxml.jackson.dataformat.yaml.snakeyaml.error;
+    // added in 2.12.
+    exports com.fasterxml.jackson.dataformat.yaml.util;
 
     provides com.fasterxml.jackson.core.JsonFactory with
         com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
