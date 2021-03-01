@@ -255,5 +255,5 @@ Jackson supports the following extension or variations:
 Areas that are planned to be improved include things like:
 
 * Optimizations to make number handling as efficient as from JSON (but note: even with existing code, performance is typically limited by I/O and NOT parsing or generation)
-    * Although, as per [Java CSV parser comparison](https://github.com/uniVocity/csv-parsers-comparison), this module is actually performing quite well already (at 2.4)
+    * Although, as per [Java CSV parser comparison](https://github.com/uniVocity/csv-parsers-comparison), this module is actually performing quite well already
 * Mapping of nested POJOs using dotted notation (similar to `@JsonUnwrapped`, but without requiring its use -- note that `@JsonUnwrapped` is already supported)
