@@ -22,8 +22,8 @@ sub-classes) in Jackson 3.0.
 `master` branch is for developing the next major Jackson version -- 3.0 -- but there
 are active maintenance branches in which much of development happens:
 
-* `2.11` is for developing the next minor 2.x version
-* `2.10` is for backported fixes for 2.10 patch version
+* `2.13` is for developing the next minor 2.x version
+* `2.12` is for backported fixes for 2.12 patch versions
 
 Older branches are usually not changed but are available for historic reasons.
 All released versions have matching git tags (`jackson-dataformats-text-2.9.4`).
@@ -60,7 +60,7 @@ To use these format backends Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-[FORMAT]</artifactId>
-  <version>2.9.9</version>
+  <version>2.12.1</version>
 </dependency>
 ```
 
