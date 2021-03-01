@@ -1,6 +1,6 @@
 # Overview
 
-[Jackson](../../../jackson) data format module for reading and writing [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) encoded data, either as "raw" data (sequence of String arrays), or via data binding to/from Java Objects (POJOs).
+[Jackson](https://github.com/FasterXML/jackson) data format module for reading and writing [CSV](http://en.wikipedia.org/wiki/Comma-separated_values) encoded data, either as "raw" data (sequence of String arrays), or via data binding to/from Java Objects (POJOs).
 
 Project is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
 
@@ -10,7 +10,7 @@ Since version 2.3 this module is considered complete and production ready.
 All Jackson layers (streaming, databind, tree model) are supported.
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/)
-[![Javadoc](https://javadoc-emblem.rhcloud.com/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-csv/badge.svg)](http://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-csv)
+[![Javadoc](https://javadoc.io/badge/com.fasterxml.jackson.dataformat/jackson-dataformat-csv.svg)](http://www.javadoc.io/doc/com.fasterxml.jackson.dataformat/jackson-dataformat-csv)
 
 ## Maven dependency
 
@@ -18,11 +18,13 @@ To use this extension on Maven-based projects, use following dependency:
 
 ```xml
 <dependency>
-  <groupId>com.fasterxml.jackson.dataformat</groupId>
-  <artifactId>jackson-dataformat-csv</artifactId>
-  <version>2.8.8</version>
+    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <artifactId>jackson-dataformat-csv</artifactId>
+    <version>2.12.1</version>
 </dependency>
 ```
+
+(with whatever is the latest version)
 
 # Usage
 
@@ -61,7 +63,7 @@ CsvSchema schema = CsvSchema.builder()
 // NOTE: reads schema and uses it for binding
 CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader();
 ObjectMapper mapper = new CsvMapper();
-mapper.readerFor(Pojo.class).with(bootstrapSchema).readValue(json);
+mapper.readerFor(Pojo.class).with(bootstrapSchema).readValue(csv);
 ```
 
 It is important to note that the schema object is needed to ensure correct ordering of columns; schema instances are immutable and fully reusable (as are `ObjectWriter` instances).
@@ -97,7 +99,7 @@ List<Pojo> all = it.readAll();
 
 But even if you do not know (or care) about column names you can read/write CSV documents. The main difference is that in this case data is exposed as a sequence of ("JSON") Arrays, not Objects, as "raw" tabular data.
 
-So let's consider following CSV input:
+So let's consider the following CSV input:
 
 ```
 a,b
@@ -105,7 +107,7 @@ c,d
 e,f
 ```
 
-By default, Jackson `CsvParser` would see it as equivalent to following JSON:
+By default, Jackson `CsvParser` would see it as equivalent to the following JSON:
 
 ```json
 ["a","b"]
@@ -114,7 +116,7 @@ By default, Jackson `CsvParser` would see it as equivalent to following JSON:
 ```
 
 
-This is easy to use; in fact, if you ignore everything to do with Schema from above examples, you get working code. For example:
+This is easy to use; in fact, if you ignore everything to do with Schema from the above examples, you get working code. For example:
 
 ```java
 CsvMapper mapper = new CsvMapper();
@@ -140,9 +142,10 @@ Billy,28
 Barbara,36
 ```
 
-we could use following code:
+we could use the following code:
 
 ```java
+File csvFile = new File(fileName);
 CsvMapper mapper = new CsvMapper();
 CsvSchema schema = CsvSchema.emptySchema().withHeader(); // use first row as header; otherwise defaults are fine
 MappingIterator<Map<String,String>> it = mapper.readerFor(Map.class)
@@ -195,7 +198,7 @@ This is useful if functionality expects a single ("JSON") Array; this was the ca
 ## Configuring `CsvSchema`
 
 Besides defining how CSV columns are mapped to and from Java Object properties, `CsvSchema` also
-defines low-level encoding details. These are details be changed by using various `withXxx()` and
+defines low-level encoding details. These are details that can be changed by using various `withXxx()` and
 `withoutXxx` methods (or through associated `CsvSchema.Builder` object); for example:
 
 ```java
@@ -211,36 +214,39 @@ ObjectReader r = mapper.readerFor(Pojo.class).with(schema);
 Pojo value = r.readValue(csvInput);
 ```
 
-For full description of all configurability, please see [CsvSchema](../../../wiki/CsvSchema).
+For a full description of all configurability, please see [CsvSchema](../../../wiki/CsvSchema).
 
 # Documentation
 
 * [Wiki](../../../wiki) (includes javadocs)
 * How-to
-    * [CSV with Jackson 2.0](http://www.cowtowncoder.com/blog/archives/2012/03/entry_468.html)
-    * [Writing CSV using Jackson CSVMapper & Mixin annotations](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/)
-    * [CSV with mix-ins](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/)
+    * [How to read a CSV file with Header in Java using Jackson library](https://www.java67.com/2019/05/how-to-read-csv-file-in-java-using-jackson-library.html) (2019)
+    * [Converting JSON to CSV in Java](https://www.baeldung.com/java-converting-json-to-csv) (2019)
+    * [Writing CSV w/ CSVMapper & Mixin annotations](http://demeranville.com/writing-csv-using-jackson-csvmapper-mixin-annotations/) (2014)
+    * [CSV with Jackson 2.0](http://www.cowtowncoder.com/blog/archives/2012/03/entry_468.html) (2012)
+* Framework-specific
+    * [Read and Write CSV Data with jackson-dataformat-csv](Read and Write CSV Data with jackson-dataformat-csv) (JBeret)
 * Performance
     * [Java CSV parser comparison](https://github.com/uniVocity/csv-parsers-comparison)
 
 # CSV Compatibility
 
 Since CSV is a very loose "standard", there are many extensions to basic functionality.
-Jackson supports following extension or variations:
+Jackson supports the following extension or variations:
 
 * Customizable delimiters (through `CsvSchema`)
     * Default separator is comma (`,`), but any other character can be specified as well
-    * Default text quoting is done using double-quote (`"`), may be changed
+    * Default text quoting is done using double-quote (`"`), and may be changed
     * It is possible to enable use of an "escape character" (by default, not enabled): some variations use `\` for escaping. If enabled, character immediately followed will be used as-is, except for a small set of "well-known" escapes (`\n`, `\r`, `\t`, `\0`)
     * Linefeed character: when generating content, the default linefeed String used is "`\n`" but this may be changed
-* Null value: by default, null values are serialized as empty Strings (""), but any other String value be configured to be used instead (like, say, "null", "N/A" etc)
-* Use of first row as set of column names: as explained earlier, it is possible to configure `CsvSchema` to indicate that the contents of the first (non-comment) document row is taken to mean set of column names to use
-* Comments
-    * When enabled (via `CsvSchema`, or enabling `JsonParser.Feature.ALLOW_YAML_COMMENTS`), if a row starts with a `#` character, it will be considered a comment and skipped
+* Null value: by default, null values are serialized as empty Strings (""), but any other String value be configured to be used instead (for example, "null", "N/A" etc)
+* Use of first row as a set of column names: as explained earlier, it is possible to configure `CsvSchema` to indicate that the contents of the first (non-comment) document row is taken to mean the set of column names to use
+* Comments: when enabled (via `CsvSchema`, or enabling `CsvParser.Feature.ALLOW_COMMENTS`), if a row starts with a `#` character, it will be considered a comment and skipped
+* Blank lines: when enabled (using `CsvParser.Feature.SKIP_BLANK_LINES`) rows that are empty or composed only of whitespaces are skipped 
 
 # Limitations
 
-* Due to tabular nature of `CSV` format, deeply nested data structures are not well supported.
+* Due to the tabular nature of `CSV` format, deeply nested data structures are not well supported.
     * You can use `@JsonUnwrapped` to get around this
 * Use of Tree Model (`JsonNode`) is supported, but only within limitations of `CSV` format.
 
