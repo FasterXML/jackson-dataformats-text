@@ -8,7 +8,7 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.12.2 (not yet released)
+2.12.2 (03-Mar-2021)
 
 - Need to export "com.fasterxml.jackson.dataformat.yaml.util" in `module-info.java`
 
