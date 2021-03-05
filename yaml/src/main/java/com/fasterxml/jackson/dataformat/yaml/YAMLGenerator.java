@@ -591,13 +591,13 @@ public class YAMLGenerator extends GeneratorBase
         DumperOptions.ScalarStyle style;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures)) {
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
-            if (_quotingChecker.needToQuoteValue(text)
+            if (text.indexOf('\n') >= 0) {
+                style = STYLE_LITERAL;
+            } else if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
                         && PLAIN_NUMBER_P.matcher(text).matches())
                 ) {
                 style = STYLE_QUOTED;
-            } else if (text.indexOf('\n') >= 0) {
-                style = STYLE_LITERAL;
             } else {
                 style = STYLE_PLAIN;
             }

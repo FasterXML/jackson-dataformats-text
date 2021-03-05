@@ -175,6 +175,16 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: |-\n  first\n  second\n  third", yaml);
     }
 
+    public void testMinimizeQuotesWithStringsContainingSpecialCharsMultiLine() throws Exception
+    {
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("key", "first\nsecond: third");
+        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+
+        assertEquals("---\n" +
+                "key: |-\n  first\n  second: third", yaml);
+    }
+
     public void testQuoteNumberStoredAsString() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
