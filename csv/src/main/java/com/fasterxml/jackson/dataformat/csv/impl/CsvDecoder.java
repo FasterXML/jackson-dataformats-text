@@ -43,8 +43,10 @@ public class CsvDecoder
      * Input stream that can be used for reading more content, if one
      * in use. May be null, if input comes just as a full buffer,
      * or if the stream has been closed.
+     *<p>
+     * NOTE: renamed in 2.13 from {@code _inputSource}.
      */
-    protected Reader _inputSource;
+    protected Reader _inputReader;
 
     /**
      * Flag that indicates whether the input buffer is recycable (and
@@ -263,7 +265,7 @@ public class CsvDecoder
     {
         _owner = owner;
         _ioContext = ctxt;
-        _inputSource = r;
+        _inputReader = r;
         _textBuffer = textBuffer;
         _autoCloseInput =  JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
         final boolean oldComments = JsonParser.Feature.ALLOW_YAML_COMMENTS.enabledIn(stdFeatures);
@@ -272,7 +274,7 @@ public class CsvDecoder
         _skipBlankLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
-        _inputSource = r;
+        _inputReader = r;
         _tokenInputRow = -1;
         _tokenInputCol = -1;
         setSchema(schema);
@@ -314,7 +316,7 @@ public class CsvDecoder
      */
     
     public Object getInputSource() {
-        return _inputSource;
+        return _inputReader;
     }
 
     public boolean isClosed() { return _closed; }
@@ -359,7 +361,8 @@ public class CsvDecoder
     
     public JsonLocation getTokenLocation()
     {
-        return new JsonLocation(_inputSource, getTokenCharacterOffset(),
+        return new JsonLocation(_ioContext.sourceReference(),
+                getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
 
@@ -373,7 +376,7 @@ public class CsvDecoder
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_inputSource,
+        return new JsonLocation(_ioContext.sourceReference(),
                 _currInputProcessed + ptr - 1, _currInputRow, col);
     }
 
@@ -426,11 +429,11 @@ public class CsvDecoder
          *   Reader (granted, we only do that for UTF-32...) this
          *   means that buffer recycling won't work correctly.
          */
-        if (_inputSource != null) {
+        if (_inputReader != null) {
             if (_autoCloseInput || _ioContext.isResourceManaged()) {
-                _inputSource.close();
+                _inputReader.close();
             }
-            _inputSource = null;
+            _inputReader = null;
         }
     }
     
@@ -439,8 +442,8 @@ public class CsvDecoder
         _currInputProcessed += _inputEnd;
         _currInputRowStart -= _inputEnd;
         
-        if (_inputSource != null) {
-            int count = _inputSource.read(_inputBuffer, 0, _inputBuffer.length);
+        if (_inputReader != null) {
+            int count = _inputReader.read(_inputBuffer, 0, _inputBuffer.length);
             _inputEnd = count;
             if (count > 0) {
                 _inputPtr = 0;
@@ -490,7 +493,7 @@ public class CsvDecoder
     {
         // first: if pending LF, skip it
         if (_pendingLF != 0) {
-            if (_inputSource == null) {
+            if (_inputReader == null) {
                 return false;
             }
             _handleLF();
@@ -599,7 +602,7 @@ public class CsvDecoder
     public boolean skipLine() throws IOException
     {
         if (_pendingLF != 0) {
-            if (_inputSource == null) {
+            if (_inputReader == null) {
                 return false;
             }
             _handleLF();
@@ -629,7 +632,7 @@ public class CsvDecoder
         _numTypesValid = NR_UNKNOWN;
         
         if (_pendingLF > 0) { // either pendingLF, or closed
-            if (_inputSource != null) { // if closed, we just need to return null
+            if (_inputReader != null) { // if closed, we just need to return null
                 _handleLF();
             }
             return null; // end of line without new value
