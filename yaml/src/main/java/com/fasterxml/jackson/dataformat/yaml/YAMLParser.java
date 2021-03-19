@@ -370,10 +370,10 @@ public class YAMLParser extends ParserBase
     protected JsonLocation _locationFor(Mark m)
     {
         if (m == null) {
-            return new JsonLocation(_ioContext.getSourceReference(),
+            return new JsonLocation(_ioContext.sourceReference(),
                     -1, -1, -1);
         }
-        return new JsonLocation(_ioContext.getSourceReference(),
+        return new JsonLocation(_ioContext.sourceReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1); // ditto
