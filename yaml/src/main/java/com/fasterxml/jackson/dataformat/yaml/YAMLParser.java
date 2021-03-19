@@ -1078,6 +1078,6 @@ public class YAMLParser extends ParserBase
         TokenStreamContext ctxt = streamReadContext();
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
-                (char) actCh, expCh, ctxt.typeDesc(), ctxt.getStartLocation(_getSourceReference())));
+                (char) actCh, expCh, ctxt.typeDesc(), ctxt.startLocation(_sourceReference())));
     }
 }
