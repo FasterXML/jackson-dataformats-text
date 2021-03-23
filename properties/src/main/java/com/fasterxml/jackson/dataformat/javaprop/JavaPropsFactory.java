@@ -151,7 +151,8 @@ public class JavaPropsFactory
      */
     public JavaPropsParser createParser(ObjectReadContext readCtxt,
             JavaPropsSchema schema, Map<?,?> content) {
-        return new JavaPropsParser(readCtxt, _createContext(content, true),
+        return new JavaPropsParser(readCtxt,
+                _createContext(_createContentReference(content), true),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 schema, content, content);
     }
@@ -168,7 +169,7 @@ public class JavaPropsFactory
             schema = EMPTY_SCHEMA;
         }
         return new PropertiesBackedGenerator(writeCtxt,
-                _createContext(target, true),
+                _createContext(_createContentReference(target), true),
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 schema, target);
     }

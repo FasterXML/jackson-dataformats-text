@@ -316,9 +316,7 @@ public class CsvFactory
      */
 
     @Override
-    protected IOContext _createContext(Object srcRef, boolean resourceManaged) {
-        return new CsvIOContext(_getBufferRecycler(),
-                InputSourceReference.rawSource(srcRef),
-                resourceManaged);
+    protected IOContext _createContext(InputSourceReference contentRef, boolean resourceManaged) {
+        return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
     }
 }
