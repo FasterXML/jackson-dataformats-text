@@ -154,19 +154,19 @@ public class JavaPropsFactory extends JsonFactory
      * @since 2.10
      */
     public JavaPropsParser createParser(Map<?,?> content) {
-        return new JavaPropsParser(_createContext(content, true),
+        return new JavaPropsParser(_createContext(_createContentReference(content), true),
                 _parserFeatures, content, _objectCodec, content);
     }
 
     @Deprecated // since 2.10
     public JavaPropsParser createParser(Properties props) {
-        return new JavaPropsParser(_createContext(props, true),
+        return new JavaPropsParser(_createContext(_createContentReference(props), true),
                 _parserFeatures, props, _objectCodec, props);
     }
 
     @Deprecated // since 2.10
     public JavaPropsGenerator createGenerator(Properties props) {
-        IOContext ctxt = _createContext(props, true);
+        IOContext ctxt = _createContext(_createContentReference(props), true);
         return new PropertiesBackedGenerator(ctxt,
                 props, _generatorFeatures, _objectCodec);
     }
@@ -179,7 +179,7 @@ public class JavaPropsFactory extends JsonFactory
      * @since 2.10
      */
     public JavaPropsGenerator createGenerator(Map<?,?> target, JavaPropsSchema schema) {
-        IOContext ctxt = _createContext(target, true);
+        IOContext ctxt = _createContext(_createContentReference(target), true);
         return new PropertiesBackedGenerator(ctxt,
                 target, _generatorFeatures, _objectCodec);
     }
@@ -192,25 +192,25 @@ public class JavaPropsFactory extends JsonFactory
 
     @Override
     public JsonParser createParser(File f) throws IOException {
-        IOContext ctxt = _createContext(f, true);
+        IOContext ctxt = _createContext(_createContentReference(f), true);
         return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(URL url) throws IOException {
-        IOContext ctxt = _createContext(url, true);
+        IOContext ctxt = _createContext(_createContentReference(url), true);
         return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(InputStream in) throws IOException {
-        IOContext ctxt = _createContext(in, false);
+        IOContext ctxt = _createContext(_createContentReference(in), false);
         return _createParser(_decorate(in, ctxt), ctxt);
     }
 
     @Override
     public JsonParser createParser(byte[] data) throws IOException {
-        IOContext ctxt = _createContext(data, true);
+        IOContext ctxt = _createContext(_createContentReference(data), true);
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
             if (in != null) {
@@ -222,7 +222,8 @@ public class JavaPropsFactory extends JsonFactory
 
     @Override
     public JsonParser createParser(byte[] data, int offset, int len) throws IOException {
-        IOContext ctxt = _createContext(data, true);
+        IOContext ctxt = _createContext(_createContentReference(data, offset, len),
+                true);
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
             if (in != null) {
@@ -240,7 +241,7 @@ public class JavaPropsFactory extends JsonFactory
 
     @Override
     public JsonGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException {
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         ctxt.setEncoding(enc);
         return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec,
                 _decorate(out, ctxt));
@@ -255,7 +256,7 @@ public class JavaPropsFactory extends JsonFactory
      */
     @Override
     public JsonGenerator createGenerator(OutputStream out) throws IOException {
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         return _createJavaPropsGenerator(ctxt, _generatorFeatures, _objectCodec,
                 _decorate(out, ctxt));
     }

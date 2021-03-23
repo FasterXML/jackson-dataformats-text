@@ -350,34 +350,34 @@ public class YAMLFactory extends JsonFactory
 
     @Override
     public YAMLParser createParser(File f) throws IOException {
-        IOContext ctxt = _createContext(f, true);
+        IOContext ctxt = _createContext(_createContentReference(f), true);
         return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
     }
 
     @Override
     public YAMLParser createParser(URL url) throws IOException
     {
-        IOContext ctxt = _createContext(url, true);
+        IOContext ctxt = _createContext(_createContentReference(url), true);
         return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
     }
 
     @Override
     public YAMLParser createParser(InputStream in) throws IOException
     {
-        IOContext ctxt = _createContext(in, false);
+        IOContext ctxt = _createContext(_createContentReference(in), false);
         return _createParser(_decorate(in, ctxt), ctxt);
     }
 
     @Override
     public YAMLParser createParser(Reader r) throws IOException
     {
-        IOContext ctxt = _createContext(r, false);
+        IOContext ctxt = _createContext(_createContentReference(r), false);
         return _createParser(_decorate(r, ctxt), ctxt);
     }
 
     @Override // since 2.4
     public YAMLParser createParser(char[] data) throws IOException {
-        return createParser(new CharArrayReader(data, 0, data.length));
+        return createParser(data, 0, data.length);
     }
     
     @Override // since 2.4
@@ -388,7 +388,7 @@ public class YAMLFactory extends JsonFactory
     @Override
     public YAMLParser createParser(byte[] data) throws IOException
     {
-        IOContext ctxt = _createContext(data, true);
+        IOContext ctxt = _createContext(_createContentReference(data), true);
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, 0, data.length);
             if (in != null) {
@@ -401,7 +401,7 @@ public class YAMLFactory extends JsonFactory
     @Override
     public YAMLParser createParser(byte[] data, int offset, int len) throws IOException
     {
-        IOContext ctxt = _createContext(data, true);
+        IOContext ctxt = _createContext(_createContentReference(data, offset, len), true);
         if (_inputDecorator != null) {
             InputStream in = _inputDecorator.decorate(ctxt, data, offset, len);
             if (in != null) {
@@ -421,7 +421,7 @@ public class YAMLFactory extends JsonFactory
     public YAMLGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException
     {
         // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         ctxt.setEncoding(enc);
         return _createGenerator(_createWriter(_decorate(out, ctxt), enc, ctxt), ctxt);
     }
@@ -430,7 +430,7 @@ public class YAMLFactory extends JsonFactory
     public YAMLGenerator createGenerator(OutputStream out) throws IOException
     {
         // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         return _createGenerator(_createWriter(_decorate(out, ctxt),
                 JsonEncoding.UTF8, ctxt), ctxt);
     }
@@ -438,7 +438,7 @@ public class YAMLFactory extends JsonFactory
     @Override
     public YAMLGenerator createGenerator(Writer out) throws IOException
     {
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         return _createGenerator(_decorate(out, ctxt), ctxt);
     }
 
@@ -447,7 +447,7 @@ public class YAMLFactory extends JsonFactory
     {
         OutputStream out = new FileOutputStream(f);
         // true -> yes, we have to manage the stream since we created it
-        IOContext ctxt = _createContext(f, true);
+        IOContext ctxt = _createContext(_createContentReference(f), true);
         ctxt.setEncoding(enc);
         return _createGenerator(_createWriter(_decorate(out, ctxt), enc, ctxt), ctxt);
     }    

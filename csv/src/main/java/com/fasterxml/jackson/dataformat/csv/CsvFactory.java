@@ -297,25 +297,25 @@ public class CsvFactory extends JsonFactory
 
     @Override
     public CsvParser createParser(File f) throws IOException {
-        IOContext ctxt =  _createContext(f, true);
+        IOContext ctxt =  _createContext(_createContentReference(f), true);
         return _createParser(_decorate(new FileInputStream(f), ctxt), ctxt);
     }
 
     @Override
     public CsvParser createParser(URL url) throws IOException {
-        IOContext ctxt =  _createContext(url, true);
+        IOContext ctxt =  _createContext(_createContentReference(url), true);
         return _createParser(_decorate(_optimizedStreamFromURL(url), ctxt), ctxt);
     }
 
     @Override
     public CsvParser createParser(InputStream in) throws IOException {
-        IOContext ctxt =  _createContext(in, false);
+        IOContext ctxt =  _createContext(_createContentReference(in), false);
         return _createParser(_decorate(in, ctxt), ctxt);
     }
 
     @Override
     public CsvParser createParser(Reader r) throws IOException {
-        IOContext ctxt =  _createContext(r, false);
+        IOContext ctxt =  _createContext(_createContentReference(r), false);
         return _createParser(_decorate(r, ctxt), ctxt);
     }
 
@@ -354,7 +354,7 @@ public class CsvFactory extends JsonFactory
     public CsvGenerator createGenerator(OutputStream out, JsonEncoding enc) throws IOException
     {
         // false -> we won't manage the stream unless explicitly directed to
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         ctxt.setEncoding(enc);
         return _createGenerator(ctxt, _createWriter(_decorate(out, ctxt), JsonEncoding.UTF8, ctxt));
     }
@@ -369,7 +369,7 @@ public class CsvFactory extends JsonFactory
 
     @Override
     public CsvGenerator createGenerator(Writer out) throws IOException {
-        IOContext ctxt = _createContext(out, false);
+        IOContext ctxt = _createContext(_createContentReference(out), false);
         return _createGenerator(_decorate(out, ctxt), ctxt);
     }
 
@@ -377,7 +377,7 @@ public class CsvFactory extends JsonFactory
     public CsvGenerator createGenerator(File f, JsonEncoding enc) throws IOException {
         OutputStream out = new FileOutputStream(f);
         // Important: make sure that we always auto-close stream we create:
-        IOContext ctxt = _createContext(out, true);
+        IOContext ctxt = _createContext(_createContentReference(out), true);
         ctxt.setEncoding(enc);
         return _createGenerator(ctxt,
                 _createWriter(_decorate(out, ctxt), enc, ctxt));
@@ -483,10 +483,9 @@ public class CsvFactory extends JsonFactory
         return new InputStreamReader(in, enc.getJavaName());
     }
 
-    @Override
-    protected IOContext _createContext(Object srcRef, boolean resourceManaged) {
-        return new CsvIOContext(_getBufferRecycler(),
-                InputSourceReference.rawSource(srcRef),
-                resourceManaged);
+    @Override // since 2.13
+    protected IOContext _createContext(InputSourceReference contentRef, boolean resourceManaged)
+    {
+        return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
     }
 }
