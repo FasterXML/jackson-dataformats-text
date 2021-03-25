@@ -32,25 +32,24 @@ package com.fasterxml.jackson.dataformat.toml;
       }
   }
 
-  private void appendUnicodeEscape() {
-      int length = zzMarkedPos - zzStartRead;
-      if (length == 6) {
-          int value = (Character.digit(yycharat(2), 16) << 12) |
-                       (Character.digit(yycharat(3), 16) << 8) |
-                       (Character.digit(yycharat(4), 16) << 4) |
-                       Character.digit(yycharat(5), 16);
-          stringBuilder.append((char) value);
-      } else if (length == 8) {
-           int value = (Character.digit(yycharat(2), 16) << 20) |
-                       (Character.digit(yycharat(3), 16) << 16) |
-                       (Character.digit(yycharat(4), 16) << 12) |
-                       (Character.digit(yycharat(5), 16) << 8) |
-                       (Character.digit(yycharat(6), 16) << 4) |
-                       Character.digit(yycharat(7), 16);
-           stringBuilder.appendCodePoint(value);
-       } else {
-          throw new AssertionError();
-       }
+  private void appendUnicodeEscapeShort() {
+      int value = (Character.digit(yycharat(2), 16) << 12) |
+                   (Character.digit(yycharat(3), 16) << 8) |
+                   (Character.digit(yycharat(4), 16) << 4) |
+                   Character.digit(yycharat(5), 16);
+      stringBuilder.append((char) value);
+  }
+
+  private void appendUnicodeEscapeLong() {
+     int value = (Character.digit(yycharat(2), 16) << 28) |
+                 (Character.digit(yycharat(3), 16) << 24) |
+                 (Character.digit(yycharat(4), 16) << 20) |
+                 (Character.digit(yycharat(5), 16) << 16) |
+                 (Character.digit(yycharat(6), 16) << 12) |
+                 (Character.digit(yycharat(7), 16) << 8) |
+                 (Character.digit(yycharat(8), 16) << 4) |
+                 Character.digit(yycharat(9), 16);
+     stringBuilder.appendCodePoint(value);
   }
 
   String positionString() {
@@ -92,7 +91,8 @@ QuotationMark = "\""
 // exclude control chars (tab is allowed, " and \)
 //BasicUnescaped = [^\u0000-\u0008\u0009-\u001f\u007f\\\"]
 //Escaped = "\\" ([\"\\bfnrt]|"u" {HexDig} {HexDig} {HexDig} {HexDig} ({HexDig} {HexDig} {HexDig} {HexDig})?)
-UnicodeEscape = "\\u" {HexDig} {HexDig} {HexDig} {HexDig} ({HexDig} {HexDig} {HexDig} {HexDig})?
+UnicodeEscapeShort = "\\u" {HexDig} {HexDig} {HexDig} {HexDig}
+UnicodeEscapeLong = "\\U" {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig}
 
 //MlBasicString = {MlBasicStringDelim} {NewLine}? {MlBasicBody} {MlBasicStringDelim}
 MlBasicStringDelim = "\"\"\""
@@ -287,7 +287,8 @@ HexDig = [0-9A-Fa-f]
     \\n { stringBuilder.append('\n'); }
     \\r { stringBuilder.append('\r'); }
     \\t { stringBuilder.append('\t'); }
-    {UnicodeEscape} { appendUnicodeEscape(); }
+    {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
+    {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
 }
 
 <ML_BASIC_STRING> {
@@ -321,7 +322,8 @@ HexDig = [0-9A-Fa-f]
     \\n { stringBuilder.append('\n'); }
     \\r { stringBuilder.append('\r'); }
     \\t { stringBuilder.append('\t'); }
-    {UnicodeEscape} { appendUnicodeEscape(); }
+    {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
+    {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
 }
 
 <LITERAL_STRING> {

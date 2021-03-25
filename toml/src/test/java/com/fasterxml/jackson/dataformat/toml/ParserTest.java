@@ -818,4 +818,13 @@ public class ParserTest {
         toml("foo = {bar = 'baz',\n" +
                 "a = 'b'}");
     }
+
+    @Test
+    public void extendedUnicodeEscape() throws IOException {
+        // 🆒
+        Assert.assertEquals(
+                json("{\"foo\": \"\\uD83C\\uDD92\"}"),
+                toml("foo = \"\\U0001f192\"")
+        );
+    }
 }
