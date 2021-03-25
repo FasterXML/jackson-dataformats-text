@@ -535,7 +535,7 @@ public class ParserTest {
         );
     }
 
-    // @Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void duplicateTable() throws IOException {
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
@@ -603,7 +603,7 @@ public class ParserTest {
         );
     }
 
-    //@Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void dottedCollisionRoot() throws IOException {
         toml("fruit.apple.color = \"red\"\n" +
                 "# Defines a table named fruit\n" +
@@ -614,7 +614,7 @@ public class ParserTest {
                 " = \"bar\"");
     }
 
-    //@Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void dottedCollisionNest() throws IOException {
         toml("[fruit]\n" +
                 "apple.color = \"red\"\n" +
@@ -651,14 +651,14 @@ public class ParserTest {
         );
     }
 
-    //@Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void inlineTableSelfContained() throws IOException {
         toml("[product]\n" +
                 "type = { name = \"Nail\" }\n" +
                 "type.edible = false  # INVALID");
     }
 
-    //@Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void inlineTableSelfContained2() throws IOException {
         toml("[product]\n" +
                 "type.name = \"Nail\"\n" +
@@ -689,7 +689,7 @@ public class ParserTest {
         );
     }
 
-    // @Test todo
+    @Test
     public void arrayTableDotted() throws IOException {
         Assert.assertEquals(
                 json("{\n" +
@@ -747,7 +747,7 @@ public class ParserTest {
                 "name = \"apple\"");
     }
 
-    // @Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void arrayInlineAndTable() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "fruits = []\n" +
@@ -755,7 +755,7 @@ public class ParserTest {
                 "[[fruits]] # Not allowed");
     }
 
-    // @Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void arrayCollision1() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
@@ -769,7 +769,7 @@ public class ParserTest {
                 "name = \"granny smith\"");
     }
 
-    // @Test(expected = JacksonException.class) todo
+    @Test(expected = JacksonException.class)
     public void arrayCollision2() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +

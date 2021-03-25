@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.Temporal;
 
 class Parser {
-    private static final JsonNodeFactory factory = JsonNodeFactory.instance;
+    private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
     private final Lexer lexer;
 
@@ -71,22 +71,29 @@ class Parser {
     }
 
     public ObjectNode parse() throws IOException {
-        ObjectNode root = factory.objectNode();
-        ObjectNode currentTable = root;
+        TomlObjectNode root = (TomlObjectNode) factory.objectNode();
+        TomlObjectNode currentTable = root;
         while (next != null) {
             TomlToken token = peek();
             if (token == TomlToken.UNQUOTED_KEY || token == TomlToken.STRING) {
                 parseKeyVal(currentTable, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.STD_TABLE_OPEN) {
                 pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_KEY);
-                FieldRef fieldRef = parseAndEnterKey(root);
+                FieldRef fieldRef = parseAndEnterKey(root, true);
                 currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
+                if (currentTable.defined) {
+                    throw parseException("Table redefined");
+                }
+                currentTable.defined = true;
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
                 pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_KEY);
-                FieldRef fieldRef = parseAndEnterKey(root);
-                ArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
-                currentTable = array.addObject();
+                FieldRef fieldRef = parseAndEnterKey(root, true);
+                TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
+                if (array.closed) {
+                    throw parseException("Array already finished");
+                }
+                currentTable = (TomlObjectNode) array.addObject();
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else {
                 throw unexpectedToken(token, "key or table");
@@ -100,9 +107,21 @@ class Parser {
         return root;
     }
 
-    private FieldRef parseAndEnterKey(ObjectNode outer) throws IOException {
-        ObjectNode node = outer;
+    private FieldRef parseAndEnterKey(
+            TomlObjectNode outer,
+            boolean forTable
+    ) throws IOException {
+        TomlObjectNode node = outer;
         while (true) {
+            if (node.closed) {
+                throw parseException("Object already closed");
+            }
+            if (!forTable) {
+                /* "Dotted keys create and define a table for each key part before the last one, provided that such
+                 * tables were not previously created." */
+                node.defined = true;
+            }
+
             TomlToken partToken = peek();
             String part;
             if (partToken == TomlToken.STRING) {
@@ -116,8 +135,30 @@ class Parser {
             if (peek() != TomlToken.DOT_SEP) {
                 return new FieldRef(node, part);
             }
-            node = getOrCreateObject(node, part);
             pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_KEY);
+
+            JsonNode existing = node.get(part);
+            if (existing == null) {
+                node = (TomlObjectNode) node.putObject(part);
+            } else if (existing.isObject()) {
+                node = (TomlObjectNode) existing;
+            } else if (existing.isArray()) {
+                /* "Any reference to an array of tables points to the most recently defined table element of the array.
+                 * This allows you to define sub-tables, and even sub-arrays of tables, inside the most recent table."
+                 *
+                 * I interpret this somewhat broadly: I accept such references even if there were unrelated tables
+                 * in between, and I accept them for simple dotted keys as well (not just for tables). These cases don't
+                 * seem to be covered by the specification.
+                 */
+                TomlArrayNode array = (TomlArrayNode) existing;
+                if (array.closed) {
+                    throw parseException("Array already closed");
+                }
+                // Only arrays declared by array tables are not closed, and those are always arrays of objects.
+                node = (TomlObjectNode) array.get(array.size() - 1);
+            } else {
+                throw parseException("Path into existing non-object value at " + lexer.positionString() + ": " + node.getNodeType());
+            }
         }
     }
 
@@ -209,7 +250,7 @@ class Parser {
         // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
         // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
         pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_KEY);
-        ObjectNode node = factory.objectNode();
+        TomlObjectNode node = (TomlObjectNode) factory.objectNode();
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.INLINE_TABLE_CLOSE) {
@@ -226,6 +267,8 @@ class Parser {
             }
         }
         pollExpected(TomlToken.INLINE_TABLE_CLOSE, nextState);
+        node.closed = true;
+        node.defined = true;
         return node;
     }
 
@@ -234,7 +277,7 @@ class Parser {
         // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
         // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
         pollExpected(TomlToken.ARRAY_OPEN, Lexer.EXPECT_VALUE);
-        ArrayNode node = factory.arrayNode();
+        TomlArrayNode node = (TomlArrayNode) factory.arrayNode();
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.ARRAY_CLOSE) {
@@ -252,12 +295,13 @@ class Parser {
             }
         }
         pollExpected(TomlToken.ARRAY_CLOSE, nextState);
+        node.closed = true;
         return node;
     }
 
-    private void parseKeyVal(ObjectNode target, int nextState) throws IOException {
+    private void parseKeyVal(TomlObjectNode target, int nextState) throws IOException {
         // keyval = key keyval-sep val
-        FieldRef fieldRef = parseAndEnterKey(target);
+        FieldRef fieldRef = parseAndEnterKey(target, false);
         pollExpected(TomlToken.KEY_VAL_SEP, Lexer.EXPECT_VALUE);
         JsonNode value = parseValue(nextState);
         if (fieldRef.object.has(fieldRef.key)) {
@@ -266,35 +310,73 @@ class Parser {
         fieldRef.object.set(fieldRef.key, value);
     }
 
-    private ObjectNode getOrCreateObject(ObjectNode node, String field) throws IOException {
+    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws IOException {
         JsonNode existing = node.get(field);
         if (existing == null) {
-            return node.putObject(field);
+            return (TomlObjectNode) node.putObject(field);
         } else if (existing.isObject()) {
-            return (ObjectNode) existing;
+            return (TomlObjectNode) existing;
         } else {
             throw parseException("Path into existing non-object value at " + lexer.positionString() + ": " + node.getNodeType());
         }
     }
 
-    private ArrayNode getOrCreateArray(ObjectNode node, String field) throws IOException {
+    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws IOException {
         JsonNode existing = node.get(field);
         if (existing == null) {
-            return node.putArray(field);
+            return (TomlArrayNode) node.putArray(field);
         } else if (existing.isArray()) {
-            return (ArrayNode) existing;
+            return (TomlArrayNode) existing;
         } else {
             throw parseException("Path into existing non-array value at " + lexer.positionString() + ": " + node.getNodeType());
         }
     }
 
     private static class FieldRef {
-        final ObjectNode object;
+        final TomlObjectNode object;
         final String key;
 
-        FieldRef(ObjectNode object, String key) {
+        FieldRef(TomlObjectNode object, String key) {
             this.object = object;
             this.key = key;
+        }
+    }
+
+    private static class TomlObjectNode extends ObjectNode {
+        boolean closed = false;
+        boolean defined = false;
+
+        TomlObjectNode(JsonNodeFactory nc) {
+            super(nc);
+        }
+    }
+
+    private static class TomlArrayNode extends ArrayNode {
+        boolean closed = false;
+
+        TomlArrayNode(JsonNodeFactory nf) {
+            super(nf);
+        }
+
+        TomlArrayNode(JsonNodeFactory nf, int capacity) {
+            super(nf, capacity);
+        }
+    }
+
+    private static class JsonNodeFactoryImpl extends JsonNodeFactory {
+        @Override
+        public ArrayNode arrayNode() {
+            return new TomlArrayNode(this);
+        }
+
+        @Override
+        public ArrayNode arrayNode(int capacity) {
+            return new TomlArrayNode(this, capacity);
+        }
+
+        @Override
+        public ObjectNode objectNode() {
+            return new TomlObjectNode(this);
         }
     }
 }
