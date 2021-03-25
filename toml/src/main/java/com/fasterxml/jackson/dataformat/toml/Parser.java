@@ -20,17 +20,19 @@ import java.time.temporal.Temporal;
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
+    private final ParserOptions options;
     private final Lexer lexer;
 
     private TomlToken next;
 
-    private Parser(Reader reader) throws IOException {
+    private Parser(ParserOptions options, Reader reader) throws IOException {
+        this.options = options;
         this.lexer = new Lexer(reader);
         this.next = lexer.yylex();
     }
 
-    public static ObjectNode parse(Reader reader) throws IOException {
-        return new Parser(reader).parse();
+    public static ObjectNode parse(ParserOptions options, Reader reader) throws IOException {
+        return new Parser(options, reader).parse();
     }
 
     private TomlToken peek() throws IOException {
@@ -196,42 +198,64 @@ class Parser {
     private JsonNode parseDateTime(int nextState) throws IOException {
         String text = lexer.yytext();
         TomlToken token = poll(nextState);
-        Temporal value;
-        if (token == TomlToken.LOCAL_DATE) {
-            value = LocalDate.parse(text);
-        } else if (token == TomlToken.LOCAL_TIME) {
-            value = LocalTime.parse(text);
-        } else {
-            // the time-delim index can be [Tt ]. java.time supports only [Tt]
-            if (text.charAt(10) == ' ') {
-                text = text.substring(0, 10) + 'T' + text.substring(11);
-            }
-            if (token == TomlToken.LOCAL_DATE_TIME) {
-                value = LocalDateTime.parse(text);
-            } else if (token == TomlToken.OFFSET_DATE_TIME) {
-                value = OffsetDateTime.parse(text);
-            } else {
-                throw new AssertionError();
-            }
+        // the time-delim index can be [Tt ]. java.time supports only [Tt]
+        if ((token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) && text.charAt(10) == ' ') {
+            text = text.substring(0, 10) + 'T' + text.substring(11);
         }
-        // TODO
-        return factory.pojoNode(value);
+
+        if (options.parseTemporalAsJavaTime) {
+            // todo: test
+            Temporal value;
+            if (token == TomlToken.LOCAL_DATE) {
+                value = LocalDate.parse(text);
+            } else if (token == TomlToken.LOCAL_TIME) {
+                value = LocalTime.parse(text);
+            } else {
+                if (token == TomlToken.LOCAL_DATE_TIME) {
+                    value = LocalDateTime.parse(text);
+                } else if (token == TomlToken.OFFSET_DATE_TIME) {
+                    value = OffsetDateTime.parse(text);
+                } else {
+                    throw new AssertionError();
+                }
+            }
+            // TODO
+            return factory.pojoNode(value);
+        } else {
+            return factory.textNode(text);
+        }
     }
 
     private JsonNode parseInt(int nextState) throws IOException {
         String text = lexer.yytext().replace("_", "");
-        BigInteger v;
-        if (text.startsWith("0x") || text.startsWith("0X")) {
-            v = new BigInteger(text.substring(2), 16);
-        } else if (text.startsWith("0o") || text.startsWith("0O")) {
-            v = new BigInteger(text.substring(2), 8);
-        } else if (text.startsWith("0b") || text.startsWith("0B")) {
-            v = new BigInteger(text.substring(2), 2);
-        } else {
-            v = new BigInteger(text);
-        }
         pollExpected(TomlToken.INTEGER, nextState);
-        return factory.numberNode(v);
+        if (options.bigNumericTypes) {
+            BigInteger v;
+            if (text.startsWith("0x") || text.startsWith("0X")) {
+                v = new BigInteger(text.substring(2), 16);
+            } else if (text.startsWith("0o") || text.startsWith("0O")) {
+                v = new BigInteger(text.substring(2), 8);
+            } else if (text.startsWith("0b") || text.startsWith("0B")) {
+                v = new BigInteger(text.substring(2), 2);
+            } else {
+                v = new BigInteger(text);
+            }
+            return factory.numberNode(v);
+        } else {
+            // "Arbitrary 64-bit signed integers (from −2^63 to 2^63−1) should be accepted and handled losslessly."
+            // todo: test
+            long v;
+            if (text.startsWith("0x") || text.startsWith("0X")) {
+                v = Long.parseLong(text.substring(2), 16);
+            } else if (text.startsWith("0o") || text.startsWith("0O")) {
+                v = Long.parseLong(text.substring(2), 8);
+            } else if (text.startsWith("0b") || text.startsWith("0B")) {
+                v = Long.parseLong(text.substring(2), 2);
+            } else {
+                v = Long.parseLong(text);
+            }
+            return factory.numberNode(v);
+        }
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
@@ -242,7 +266,11 @@ class Parser {
         } else if (text.endsWith("inf")) {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
-            return factory.numberNode(new BigDecimal(text));
+            if (options.bigNumericTypes) {
+                return factory.numberNode(new BigDecimal(text));
+            } else {
+                return factory.numberNode(Double.parseDouble(text));
+            }
         }
     }
 

@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 public class ParserTest {
+    private final ParserOptions options = new ParserOptions(false, true);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
@@ -26,7 +27,7 @@ public class ParserTest {
     }
 
     private ObjectNode toml(@Language("toml") String toml) throws IOException {
-        return Parser.parse(new StringReader(toml));
+        return Parser.parse(options, new StringReader(toml));
     }
 
     @Test(expected = JacksonException.class)
@@ -396,7 +397,7 @@ public class ParserTest {
         );
     }
 
-    // @Test todo
+    @Test
     public void odt() throws IOException {
         Assert.assertEquals(
                 json("{\"odt1\": \"1979-05-27T07:32:00Z\", \"odt2\": \"1979-05-27T00:32:00-07:00\", \"odt3\": \"1979-05-27T00:32:00.999999-07:00\", \"odt4\": \"1979-05-27T07:32:00Z\"}"),
@@ -407,7 +408,7 @@ public class ParserTest {
         );
     }
 
-    // @Test todo
+    @Test
     public void ldt() throws IOException {
         Assert.assertEquals(
                 json("{\"ldt1\": \"1979-05-27T07:32:00\", \"ldt2\": \"1979-05-27T00:32:00.999999\"}"),
@@ -416,7 +417,7 @@ public class ParserTest {
         );
     }
 
-    // @Test todo
+    @Test
     public void ld() throws IOException {
         Assert.assertEquals(
                 json("{\"ld1\": \"1979-05-27\"}"),
@@ -424,7 +425,7 @@ public class ParserTest {
         );
     }
 
-    // @Test todo
+    @Test
     public void lt() throws IOException {
         Assert.assertEquals(
                 json("{\"lt1\": \"07:32:00\", \"lt2\": \"00:32:00.999999\"}"),
