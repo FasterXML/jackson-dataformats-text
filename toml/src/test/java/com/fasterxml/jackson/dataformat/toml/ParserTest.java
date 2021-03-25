@@ -796,4 +796,26 @@ public class ParserTest {
                         "           { x = 2, y = 4, z = 8 } ]")
         );
     }
+
+    // from the manual END
+    // following are our tests :)
+
+    @Test(expected = JacksonException.class)
+    public void inlineTableTrailingComma() throws IOException {
+        toml("foo = {bar = 'baz',}");
+    }
+
+    @Test
+    public void inlineTableEmpty() throws IOException {
+        Assert.assertEquals(
+                json("{\"foo\": {}}"),
+                toml("foo = {}")
+        );
+    }
+
+    @Test(expected = JacksonException.class)
+    public void inlineTableNl() throws IOException {
+        toml("foo = {bar = 'baz',\n" +
+                "a = 'b'}");
+    }
 }

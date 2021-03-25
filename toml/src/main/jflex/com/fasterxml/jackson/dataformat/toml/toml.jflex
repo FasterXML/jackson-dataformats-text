@@ -59,7 +59,7 @@ package com.fasterxml.jackson.dataformat.toml;
 %}
 
 %init{
-yybegin(EXPECT_KEY);
+yybegin(EXPECT_EXPRESSION);
 %init}
 
 Ws = [ \t]*
@@ -145,7 +145,7 @@ LocalTime = {PartialTime}
 ArrayOpen = "["
 ArrayClose = "]"
 //ArrayValues = {WsCommentNewline} {Val} {WsCommentNewline} ("," {ArrayValues} | ","?)
-ArraySep = ","
+Comma = ","
 WsCommentNewlineNonEmpty = ([\t ] | {Comment}? {NewLine})+
 
 //Table = {StdTable} | {ArrayTable}
@@ -165,7 +165,8 @@ ArrayTableClose = {Ws} "]]"
 
 HexDig = [0-9A-Fa-f]
 
-%state EXPECT_KEY
+%state EXPECT_EXPRESSION
+%state EXPECT_INLINE_KEY
 %state EXPECT_VALUE
 %state EXPECT_EOL
 %state EXPECT_ARRAY_SEP
@@ -178,7 +179,7 @@ HexDig = [0-9A-Fa-f]
 
 %%
 
-<EXPECT_KEY> {
+<EXPECT_EXPRESSION> {
     {UnquotedKey} {return TomlToken.UNQUOTED_KEY;}
     {DotSep} {return TomlToken.DOT_SEP;}
     // quoted-key = basic-string / literal-string
@@ -191,18 +192,34 @@ HexDig = [0-9A-Fa-f]
           startString();
       }
     {StdTableOpen} {return TomlToken.STD_TABLE_OPEN;}
-    {StdTableClose} {return TomlToken.STD_TABLE_CLOSE;}
     {ArrayTableOpen} {return TomlToken.ARRAY_TABLE_OPEN;}
-    {ArrayTableClose} {return TomlToken.ARRAY_TABLE_CLOSE;}
     {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
-    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
     {NewLine} {}
     {Comment} {}
     {WsNonEmpty} {}
 }
 
+<EXPECT_INLINE_KEY> {
+    {UnquotedKey} {return TomlToken.UNQUOTED_KEY;}
+    {DotSep} {return TomlToken.DOT_SEP;}
+    // quoted-key = basic-string / literal-string
+    {QuotationMark} {
+          yybegin(BASIC_STRING);
+          startString();
+      }
+    {Apostrophe} {
+          yybegin(LITERAL_STRING);
+          startString();
+      }
+    {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
+    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
+    {StdTableClose} {return TomlToken.STD_TABLE_CLOSE;}
+    {ArrayTableClose} {return TomlToken.ARRAY_TABLE_CLOSE;}
+    {WsNonEmpty} {}
+}
+
 <EXPECT_EOL> {
-    {NewLine} {yybegin(EXPECT_KEY);}
+    {NewLine} {yybegin(EXPECT_EXPRESSION);}
     {Comment} {}
     {WsNonEmpty} {}
 }
@@ -238,23 +255,22 @@ HexDig = [0-9A-Fa-f]
 
     // inline array / table
     {ArrayOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_OPEN;}
-    {InlineTableOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.INLINE_TABLE_OPEN;}
+    {InlineTableOpen} {return TomlToken.INLINE_TABLE_OPEN;}
 
     // array / table end just after comma
     {WsCommentNewlineNonEmpty}* {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
-    {WsCommentNewlineNonEmpty}* {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
+    {Ws} {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
 }
 
 <EXPECT_ARRAY_SEP> {
-    {ArraySep} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_SEP;}
+    {Comma} {WsCommentNewlineNonEmpty}* {return TomlToken.COMMA;}
     {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
     {WsCommentNewlineNonEmpty} {} // always allowed here
 }
 
 <EXPECT_TABLE_SEP> {
-    {ArraySep} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_SEP;}
+    {Comma} {return TomlToken.COMMA;}
     {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
-    {WsCommentNewlineNonEmpty} {} // always allowed here
 }
 
 <BASIC_STRING> {

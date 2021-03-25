@@ -21,7 +21,7 @@ enum TomlToken {
     ARRAY_OPEN,
     ARRAY_CLOSE,
     KEY_VAL_SEP,
-    ARRAY_SEP,
+    COMMA,
     /**
      * Whitespace token that is only permitted in arrays
      */

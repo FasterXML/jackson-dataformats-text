@@ -80,7 +80,7 @@ class Parser {
             if (token == TomlToken.UNQUOTED_KEY || token == TomlToken.STRING) {
                 parseKeyVal(currentTable, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.STD_TABLE_OPEN) {
-                pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_KEY);
+                pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
                 FieldRef fieldRef = parseAndEnterKey(root, true);
                 currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
                 if (currentTable.defined) {
@@ -89,7 +89,7 @@ class Parser {
                 currentTable.defined = true;
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
-                pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_KEY);
+                pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
                 FieldRef fieldRef = parseAndEnterKey(root, true);
                 TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
                 if (array.closed) {
@@ -103,7 +103,7 @@ class Parser {
         }
         assert lexer.yyatEOF();
         int eofState = lexer.yystate();
-        if (eofState != Lexer.EXPECT_KEY && eofState != Lexer.EXPECT_EOL) {
+        if (eofState != Lexer.EXPECT_EXPRESSION && eofState != Lexer.EXPECT_EOL) {
             throw parseException("EOF in wrong state");
         }
         return root;
@@ -133,11 +133,11 @@ class Parser {
             } else {
                 throw unexpectedToken(partToken, "quoted or unquoted key");
             }
-            pollExpected(partToken, Lexer.EXPECT_KEY);
+            pollExpected(partToken, Lexer.EXPECT_INLINE_KEY);
             if (peek() != TomlToken.DOT_SEP) {
                 return new FieldRef(node, part);
             }
-            pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_KEY);
+            pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_INLINE_KEY);
 
             JsonNode existing = node.get(part);
             if (existing == null) {
@@ -277,19 +277,25 @@ class Parser {
     private ObjectNode parseInlineTable(int nextState) throws IOException {
         // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
         // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
-        pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_KEY);
+        pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
         TomlObjectNode node = (TomlObjectNode) factory.objectNode();
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.INLINE_TABLE_CLOSE) {
-                break;
+                if (node.isEmpty()) {
+                    break;
+                } else {
+                    // "A terminating comma (also called trailing comma) is not permitted after the last key/value pair
+                    // in an inline table."
+                    throw parseException("");
+                }
             }
             parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.INLINE_TABLE_CLOSE) {
                 break;
-            } else if (sepToken == TomlToken.ARRAY_SEP) {
-                pollExpected(TomlToken.ARRAY_SEP, Lexer.EXPECT_KEY);
+            } else if (sepToken == TomlToken.COMMA) {
+                pollExpected(TomlToken.COMMA, Lexer.EXPECT_INLINE_KEY);
             } else {
                 throw unexpectedToken(sepToken, "comma or table end");
             }
@@ -316,8 +322,8 @@ class Parser {
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.ARRAY_CLOSE) {
                 break;
-            } else if (sepToken == TomlToken.ARRAY_SEP) {
-                pollExpected(TomlToken.ARRAY_SEP, Lexer.EXPECT_VALUE);
+            } else if (sepToken == TomlToken.COMMA) {
+                pollExpected(TomlToken.COMMA, Lexer.EXPECT_VALUE);
             } else {
                 throw unexpectedToken(sepToken, "comma or array end");
             }
