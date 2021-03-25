@@ -167,6 +167,10 @@ HexDig = [0-9A-Fa-f]
 
 %state EXPECT_KEY
 %state EXPECT_VALUE
+%state EXPECT_EOL
+%state EXPECT_ARRAY_SEP
+%state EXPECT_TABLE_SEP
+
 %state ML_BASIC_STRING
 %state BASIC_STRING
 %state ML_LITERAL_STRING
@@ -190,23 +194,21 @@ HexDig = [0-9A-Fa-f]
     {StdTableClose} {return TomlToken.STD_TABLE_CLOSE;}
     {ArrayTableOpen} {return TomlToken.ARRAY_TABLE_OPEN;}
     {ArrayTableClose} {return TomlToken.ARRAY_TABLE_CLOSE;}
-    {KeyValSep} {
-          yybegin(EXPECT_VALUE);
-          return TomlToken.KEY_VAL_SEP;
-      }
-    {ArraySep} {
-          // yybegin is handled by the parser
-          return TomlToken.ARRAY_SEP;
-      }
-    {InlineTableClose} {
-          return TomlToken.INLINE_TABLE_CLOSE;
-      }
+    {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
+    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
     {NewLine} {}
     {Comment} {}
     {WsNonEmpty} {}
 }
 
+<EXPECT_EOL> {
+    {NewLine} {yybegin(EXPECT_KEY);}
+    {Comment} {}
+    {WsNonEmpty} {}
+}
+
 <EXPECT_VALUE> {
+    // strings
     {QuotationMark} {
           yybegin(BASIC_STRING);
           startString();
@@ -223,62 +225,43 @@ HexDig = [0-9A-Fa-f]
           yybegin(ML_LITERAL_STRING);
           startString();
       }
-    true {
-          yybegin(EXPECT_KEY);
-          return TomlToken.TRUE;
-      }
-    false {
-          yybegin(EXPECT_KEY);
-          return TomlToken.FALSE;
-      }
-    {ArrayOpen} {
-          return TomlToken.ARRAY_OPEN;
-      }
-    {ArrayClose} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.ARRAY_CLOSE;
-      }
-    {WsCommentNewlineNonEmpty} {
-          return TomlToken.ARRAY_WS_COMMENT_NEWLINE;
-      }
-    {InlineTableOpen} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.INLINE_TABLE_OPEN;
-      }
-    {OffsetDateTime} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.OFFSET_DATE_TIME;
-      }
-    {LocalDateTime} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.LOCAL_DATE_TIME;
-      }
-    {LocalDate} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.LOCAL_DATE;
-      }
-    {LocalTime} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.LOCAL_TIME;
-      }
-    {Float} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.FLOAT;
-      }
-    {Integer} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.INTEGER;
-      }
+
+    // scalar values
+    true {return TomlToken.TRUE;}
+    false {return TomlToken.FALSE;}
+    {OffsetDateTime} {return TomlToken.OFFSET_DATE_TIME;}
+    {LocalDateTime} {return TomlToken.LOCAL_DATE_TIME;}
+    {LocalDate} {return TomlToken.LOCAL_DATE;}
+    {LocalTime} {return TomlToken.LOCAL_TIME;}
+    {Float} {return TomlToken.FLOAT;}
+    {Integer} {return TomlToken.INTEGER;}
+
+    // inline array / table
+    {ArrayOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_OPEN;}
+    {InlineTableOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.INLINE_TABLE_OPEN;}
+
+    // array / table end just after comma
+    {WsCommentNewlineNonEmpty}* {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
+    {WsCommentNewlineNonEmpty}* {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
+}
+
+<EXPECT_ARRAY_SEP> {
+    {ArraySep} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_SEP;}
+    {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
+    {WsCommentNewlineNonEmpty} {} // always allowed here
+}
+
+<EXPECT_TABLE_SEP> {
+    {ArraySep} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_SEP;}
+    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
+    {WsCommentNewlineNonEmpty} {} // always allowed here
 }
 
 <BASIC_STRING> {
     // basic-string = quotation-mark *basic-char quotation-mark
     // basic-char = basic-unescaped / escaped
     // basic-unescaped = wschar / %x21 / %x23-5B / %x5D-7E / non-ascii
-    {QuotationMark} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.STRING;
-      }
+    {QuotationMark} {return TomlToken.STRING;}
 
     [^\u0000-\u0008\u000a-\u001f\u007f\\\"]+ { appendNormalTextToken(); }
     \\\" { stringBuilder.append('"'); }
@@ -297,22 +280,17 @@ HexDig = [0-9A-Fa-f]
     // mlb-content = mlb-char / newline / mlb-escaped-nl
     // mlb-char = mlb-unescaped / escaped
     // mlb-quotes = 1*2quotation-mark
-    {MlBasicStringDelim} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.STRING;
-      }
+    {MlBasicStringDelim} {return TomlToken.STRING;}
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mlb-quotes: inline
     \" { stringBuilder.append('"'); }
     // mlb-quotes: at the end
     \" {MlBasicStringDelim} {
           stringBuilder.append('"');
-          yybegin(EXPECT_KEY);
           return TomlToken.STRING;
       }
     \"\" {MlBasicStringDelim} {
           stringBuilder.append("\"\"");
-          yybegin(EXPECT_KEY);
           return TomlToken.STRING;
       }
     // mlb-escaped-nl
@@ -332,10 +310,7 @@ HexDig = [0-9A-Fa-f]
 
 <LITERAL_STRING> {
     // literal-string = apostrophe *literal-char apostrophe
-    {Apostrophe} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.STRING;
-      }
+    {Apostrophe} {return TomlToken.STRING;}
     [^\u0000-\u0008\u000a-\u001f']+ { appendNormalTextToken(); }
 }
 
@@ -343,10 +318,7 @@ HexDig = [0-9A-Fa-f]
     // ml-literal-string = ml-literal-string-delim [ newline ] ml-literal-body ml-literal-string-delim
     // ml-literal-body = *mll-content *( mll-quotes 1*mll-content ) [ mll-quotes ]
     // mll-quotes = 1*2apostrophe
-    {MlLiteralStringDelim} {
-          yybegin(EXPECT_KEY);
-          return TomlToken.STRING;
-      }
+    {MlLiteralStringDelim} {return TomlToken.STRING;}
     [^\u0000-\u0008\u000a-\u001f']+ { appendNormalTextToken(); }
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mll-quotes: inline
@@ -354,18 +326,16 @@ HexDig = [0-9A-Fa-f]
     // mll-quotes: at the end
     {Apostrophe} {MlLiteralStringDelim} {
           stringBuilder.append('\'');
-          yybegin(EXPECT_KEY);
           return TomlToken.STRING;
       }
     {Apostrophe}{Apostrophe} {MlLiteralStringDelim} {
           stringBuilder.append("''");
-          yybegin(EXPECT_KEY);
           return TomlToken.STRING;
       }
 }
 
 [^] {
-  throw new com.fasterxml.jackson.core.JacksonException("Unknown token at " + positionString()) {
+  throw new com.fasterxml.jackson.core.JacksonException("Unknown token at " + positionString() + " (lexer state " + yystate() + ")") {
       @Override public Object processor() {
     return null; // TODO
     }

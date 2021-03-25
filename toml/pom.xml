@@ -11,7 +11,7 @@
         <artifactId>jackson-dataformats-text</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>jackson-dataformat-yaml</artifactId>
+    <artifactId>jackson-dataformat-toml</artifactId>
     <packaging>bundle</packaging>
     <name>Jackson-dataformat-TOML</name>
     <description>Support for reading and writing TOML-encoded data via Jackson abstractions.
@@ -68,6 +68,7 @@
                 </executions>
                 <configuration>
                     <backup>false</backup>
+                    <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
                 </configuration>
             </plugin>
         </plugins>

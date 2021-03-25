@@ -42,14 +42,15 @@ class Parser {
     /**
      * Note: Polling also lexes the next token, so methods like {@link Lexer#yytext()} will not work afterwards
      */
-    private TomlToken poll() throws IOException {
+    private TomlToken poll(int nextState) throws IOException {
         TomlToken here = peek();
+        lexer.yybegin(nextState);
         next = lexer.yylex();
         return here;
     }
 
-    private void pollExpected(TomlToken expected) throws IOException {
-        TomlToken actual = poll();
+    private void pollExpected(TomlToken expected, int nextState) throws IOException {
+        TomlToken actual = poll(nextState);
         if (actual != expected) {
             throw unexpectedToken(actual, expected.toString());
         }
@@ -75,24 +76,25 @@ class Parser {
         while (next != null) {
             TomlToken token = peek();
             if (token == TomlToken.UNQUOTED_KEY || token == TomlToken.STRING) {
-                parseKeyVal(currentTable);
+                parseKeyVal(currentTable, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.STD_TABLE_OPEN) {
-                pollExpected(TomlToken.STD_TABLE_OPEN);
+                pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_KEY);
                 FieldRef fieldRef = parseAndEnterKey(root);
                 currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
-                pollExpected(TomlToken.STD_TABLE_CLOSE);
+                pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
-                pollExpected(TomlToken.ARRAY_TABLE_OPEN);
+                pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_KEY);
                 FieldRef fieldRef = parseAndEnterKey(root);
                 ArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
                 currentTable = array.addObject();
-                pollExpected(TomlToken.ARRAY_TABLE_CLOSE);
+                pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else {
                 throw unexpectedToken(token, "key or table");
             }
         }
         assert lexer.yyatEOF();
-        if (lexer.yystate() != Lexer.EXPECT_KEY) {
+        int eofState = lexer.yystate();
+        if (eofState != Lexer.EXPECT_KEY && eofState != Lexer.EXPECT_EOL) {
             throw parseException("EOF in wrong state");
         }
         return root;
@@ -110,49 +112,49 @@ class Parser {
             } else {
                 throw unexpectedToken(partToken, "quoted or unquoted key");
             }
-            pollExpected(partToken);
+            pollExpected(partToken, Lexer.EXPECT_KEY);
             if (peek() != TomlToken.DOT_SEP) {
                 return new FieldRef(node, part);
             }
             node = getOrCreateObject(node, part);
-            pollExpected(TomlToken.DOT_SEP);
+            pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_KEY);
         }
     }
 
-    private JsonNode parseValue() throws IOException {
+    private JsonNode parseValue(int nextState) throws IOException {
         TomlToken firstToken = peek();
         switch (firstToken) {
             case STRING:
                 String text = lexer.stringBuilder.toString();
-                pollExpected(TomlToken.STRING);
+                pollExpected(TomlToken.STRING, nextState);
                 return factory.textNode(text);
             case TRUE:
-                pollExpected(TomlToken.TRUE);
+                pollExpected(TomlToken.TRUE, nextState);
                 return factory.booleanNode(true);
             case FALSE:
-                pollExpected(TomlToken.FALSE);
+                pollExpected(TomlToken.FALSE, nextState);
                 return factory.booleanNode(false);
             case OFFSET_DATE_TIME:
             case LOCAL_DATE_TIME:
             case LOCAL_DATE:
             case LOCAL_TIME:
-                return parseDateTime();
+                return parseDateTime(nextState);
             case FLOAT:
-                return parseFloat();
+                return parseFloat(nextState);
             case INTEGER:
-                return parseInt();
+                return parseInt(nextState);
             case ARRAY_OPEN:
-                return parseArray();
+                return parseArray(nextState);
             case INLINE_TABLE_OPEN:
-                return parseInlineTable();
+                return parseInlineTable(nextState);
             default:
                 throw unexpectedToken(firstToken, "value");
         }
     }
 
-    private JsonNode parseDateTime() throws IOException {
+    private JsonNode parseDateTime(int nextState) throws IOException {
         String text = lexer.yytext();
-        TomlToken token = poll();
+        TomlToken token = poll(nextState);
         Temporal value;
         if (token == TomlToken.LOCAL_DATE) {
             value = LocalDate.parse(text);
@@ -175,7 +177,7 @@ class Parser {
         return factory.pojoNode(value);
     }
 
-    private JsonNode parseInt() throws IOException {
+    private JsonNode parseInt(int nextState) throws IOException {
         String text = lexer.yytext().replace("_", "");
         BigInteger v;
         if (text.startsWith("0x") || text.startsWith("0X")) {
@@ -187,13 +189,13 @@ class Parser {
         } else {
             v = new BigInteger(text);
         }
-        pollExpected(TomlToken.INTEGER);
+        pollExpected(TomlToken.INTEGER, nextState);
         return factory.numberNode(v);
     }
 
-    private JsonNode parseFloat() throws IOException {
+    private JsonNode parseFloat(int nextState) throws IOException {
         String text = lexer.yytext().replace("_", "");
-        pollExpected(TomlToken.FLOAT);
+        pollExpected(TomlToken.FLOAT, nextState);
         if (text.endsWith("nan")) {
             return factory.numberNode(Double.NaN);
         } else if (text.endsWith("inf")) {
@@ -203,70 +205,61 @@ class Parser {
         }
     }
 
-    private ObjectNode parseInlineTable() throws IOException {
+    private ObjectNode parseInlineTable(int nextState) throws IOException {
         // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
         // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
-        pollExpected(TomlToken.INLINE_TABLE_OPEN);
+        pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_KEY);
         ObjectNode node = factory.objectNode();
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.INLINE_TABLE_CLOSE) {
-                pollExpected(TomlToken.INLINE_TABLE_CLOSE);
-                return node;
+                break;
             }
-            parseKeyVal(node);
+            parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.INLINE_TABLE_CLOSE) {
-                pollExpected(TomlToken.INLINE_TABLE_CLOSE);
-                return node;
+                break;
             } else if (sepToken == TomlToken.ARRAY_SEP) {
-                lexer.yybegin(Lexer.EXPECT_KEY);
-                pollExpected(TomlToken.ARRAY_SEP);
+                pollExpected(TomlToken.ARRAY_SEP, Lexer.EXPECT_KEY);
             } else {
                 throw unexpectedToken(sepToken, "comma or table end");
             }
         }
+        pollExpected(TomlToken.INLINE_TABLE_CLOSE, nextState);
+        return node;
     }
 
-    private ArrayNode parseArray() throws IOException {
+    private ArrayNode parseArray(int nextState) throws IOException {
         // array = array-open [ array-values ] ws-comment-newline array-close
         // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
         // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
-        pollExpected(TomlToken.ARRAY_OPEN);
+        pollExpected(TomlToken.ARRAY_OPEN, Lexer.EXPECT_VALUE);
         ArrayNode node = factory.arrayNode();
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.ARRAY_CLOSE) {
-                pollExpected(TomlToken.ARRAY_CLOSE);
-                return node;
+                break;
             }
-            if (token == TomlToken.ARRAY_WS_COMMENT_NEWLINE) {
-                // whitespace permitted here
-                pollExpected(TomlToken.ARRAY_WS_COMMENT_NEWLINE);
-                continue;
-            }
-            JsonNode value = parseValue();
+            JsonNode value = parseValue(Lexer.EXPECT_ARRAY_SEP);
             node.add(value);
-            // here, we're just after a value, and thus in the EXPECT_KEY state. In that state we don't need to worry
-            // about whitespace, and the closing bracket is always a STD_TABLE_CLOSE.
             TomlToken sepToken = peek();
-            if (sepToken == TomlToken.STD_TABLE_CLOSE) {
-                pollExpected(TomlToken.STD_TABLE_CLOSE);
-                return node;
+            if (sepToken == TomlToken.ARRAY_CLOSE) {
+                break;
             } else if (sepToken == TomlToken.ARRAY_SEP) {
-                lexer.yybegin(Lexer.EXPECT_VALUE);
-                pollExpected(TomlToken.ARRAY_SEP);
+                pollExpected(TomlToken.ARRAY_SEP, Lexer.EXPECT_VALUE);
             } else {
                 throw unexpectedToken(sepToken, "comma or array end");
             }
         }
+        pollExpected(TomlToken.ARRAY_CLOSE, nextState);
+        return node;
     }
 
-    private void parseKeyVal(ObjectNode target) throws IOException {
+    private void parseKeyVal(ObjectNode target, int nextState) throws IOException {
         // keyval = key keyval-sep val
         FieldRef fieldRef = parseAndEnterKey(target);
-        pollExpected(TomlToken.KEY_VAL_SEP);
-        JsonNode value = parseValue();
+        pollExpected(TomlToken.KEY_VAL_SEP, Lexer.EXPECT_VALUE);
+        JsonNode value = parseValue(nextState);
         if (fieldRef.object.has(fieldRef.key)) {
             throw parseException("Duplicate key");
         }

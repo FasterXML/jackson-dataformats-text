@@ -48,7 +48,7 @@ public class ParserTest {
         toml("key =");
     }
 
-    // @Test(expected = JacksonException.class) TODO
+    @Test(expected = JacksonException.class)
     public void singleLine() throws IOException {
         toml("first = \"Tom\" last = \"Preston-Werner\"");
     }
