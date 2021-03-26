@@ -8,7 +8,8 @@ import com.fasterxml.jackson.core.FormatFeature;
 public enum TomlReadFeature
         implements FormatFeature {
     USE_BIG_INTEGER_FOR_INTS(false),
-    USE_BIG_DECIMAL_FOR_FLOATS(false);
+    USE_BIG_DECIMAL_FOR_FLOATS(false),
+    PARSE_JAVA_TIME(false);
 
     final boolean _defaultState;
     final int _mask;
