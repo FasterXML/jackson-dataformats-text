@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -20,19 +19,21 @@ import java.time.temporal.Temporal;
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
+    private final JacksonTomlParseException.ErrorContext errorContext;
     private final ParserOptions options;
     private final Lexer lexer;
 
     private TomlToken next;
 
-    private Parser(ParserOptions options, Reader reader) throws IOException {
+    private Parser(JacksonTomlParseException.ErrorContext errorContext, ParserOptions options, Reader reader) throws IOException {
+        this.errorContext = errorContext;
         this.options = options;
-        this.lexer = new Lexer(reader);
+        this.lexer = new Lexer(reader, errorContext);
         this.next = lexer.yylex();
     }
 
-    public static ObjectNode parse(ParserOptions options, Reader reader) throws IOException {
-        return new Parser(options, reader).parse();
+    public static ObjectNode parse(JacksonTomlParseException.ErrorContext errorContext, ParserOptions options, Reader reader) throws IOException {
+        return new Parser(errorContext, options, reader).parse();
     }
 
     private TomlToken peek() throws IOException {
@@ -54,22 +55,8 @@ class Parser {
     private void pollExpected(TomlToken expected, int nextState) throws IOException {
         TomlToken actual = poll(nextState);
         if (actual != expected) {
-            throw unexpectedToken(actual, expected.toString());
+            throw errorContext.atPosition(lexer).unexpectedToken(actual, expected.toString());
         }
-    }
-
-    private JacksonException parseException(String msg) {
-        return new JacksonException(msg) {
-            @Override
-            public Object processor() {
-                return Parser.this; // TODO
-            }
-        };
-    }
-
-    private JacksonException unexpectedToken(TomlToken actual, String expected) {
-        return parseException(
-                "Unexpected token at " + lexer.positionString() + ": Got " + actual + ", expected " + expected);
     }
 
     public ObjectNode parse() throws IOException {
@@ -84,7 +71,7 @@ class Parser {
                 FieldRef fieldRef = parseAndEnterKey(root, true);
                 currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
                 if (currentTable.defined) {
-                    throw parseException("Table redefined");
+                    throw errorContext.atPosition(lexer).generic("Table redefined");
                 }
                 currentTable.defined = true;
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
@@ -93,18 +80,18 @@ class Parser {
                 FieldRef fieldRef = parseAndEnterKey(root, true);
                 TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
                 if (array.closed) {
-                    throw parseException("Array already finished");
+                    throw errorContext.atPosition(lexer).generic("Array already finished");
                 }
                 currentTable = (TomlObjectNode) array.addObject();
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else {
-                throw unexpectedToken(token, "key or table");
+                throw errorContext.atPosition(lexer).unexpectedToken(token, "key or table");
             }
         }
         assert lexer.yyatEOF();
         int eofState = lexer.yystate();
         if (eofState != Lexer.EXPECT_EXPRESSION && eofState != Lexer.EXPECT_EOL) {
-            throw parseException("EOF in wrong state");
+            throw errorContext.atPosition(lexer).generic("EOF in wrong state");
         }
         return root;
     }
@@ -116,7 +103,7 @@ class Parser {
         TomlObjectNode node = outer;
         while (true) {
             if (node.closed) {
-                throw parseException("Object already closed");
+                throw errorContext.atPosition(lexer).generic("Object already closed");
             }
             if (!forTable) {
                 /* "Dotted keys create and define a table for each key part before the last one, provided that such
@@ -131,7 +118,7 @@ class Parser {
             } else if (partToken == TomlToken.UNQUOTED_KEY) {
                 part = lexer.yytext();
             } else {
-                throw unexpectedToken(partToken, "quoted or unquoted key");
+                throw errorContext.atPosition(lexer).unexpectedToken(partToken, "quoted or unquoted key");
             }
             pollExpected(partToken, Lexer.EXPECT_INLINE_KEY);
             if (peek() != TomlToken.DOT_SEP) {
@@ -154,12 +141,12 @@ class Parser {
                  */
                 TomlArrayNode array = (TomlArrayNode) existing;
                 if (array.closed) {
-                    throw parseException("Array already closed");
+                    throw errorContext.atPosition(lexer).generic("Array already closed");
                 }
                 // Only arrays declared by array tables are not closed, and those are always arrays of objects.
                 node = (TomlObjectNode) array.get(array.size() - 1);
             } else {
-                throw parseException("Path into existing non-object value at " + lexer.positionString() + ": " + node.getNodeType());
+                throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + node.getNodeType());
             }
         }
     }
@@ -191,7 +178,7 @@ class Parser {
             case INLINE_TABLE_OPEN:
                 return parseInlineTable(nextState);
             default:
-                throw unexpectedToken(firstToken, "value");
+                throw errorContext.atPosition(lexer).unexpectedToken(firstToken, "value");
         }
     }
 
@@ -286,7 +273,7 @@ class Parser {
                 } else {
                     // "A terminating comma (also called trailing comma) is not permitted after the last key/value pair
                     // in an inline table."
-                    throw parseException("");
+                    throw errorContext.atPosition(lexer).generic("Trailing comma not permitted for inline tables");
                 }
             }
             parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
@@ -296,7 +283,7 @@ class Parser {
             } else if (sepToken == TomlToken.COMMA) {
                 pollExpected(TomlToken.COMMA, Lexer.EXPECT_INLINE_KEY);
             } else {
-                throw unexpectedToken(sepToken, "comma or table end");
+                throw errorContext.atPosition(lexer).unexpectedToken(sepToken, "comma or table end");
             }
         }
         pollExpected(TomlToken.INLINE_TABLE_CLOSE, nextState);
@@ -324,7 +311,7 @@ class Parser {
             } else if (sepToken == TomlToken.COMMA) {
                 pollExpected(TomlToken.COMMA, Lexer.EXPECT_VALUE);
             } else {
-                throw unexpectedToken(sepToken, "comma or array end");
+                throw errorContext.atPosition(lexer).unexpectedToken(sepToken, "comma or array end");
             }
         }
         pollExpected(TomlToken.ARRAY_CLOSE, nextState);
@@ -338,7 +325,7 @@ class Parser {
         pollExpected(TomlToken.KEY_VAL_SEP, Lexer.EXPECT_VALUE);
         JsonNode value = parseValue(nextState);
         if (fieldRef.object.has(fieldRef.key)) {
-            throw parseException("Duplicate key");
+            throw errorContext.atPosition(lexer).generic("Duplicate key");
         }
         fieldRef.object.set(fieldRef.key, value);
     }
@@ -350,7 +337,7 @@ class Parser {
         } else if (existing.isObject()) {
             return (TomlObjectNode) existing;
         } else {
-            throw parseException("Path into existing non-object value at " + lexer.positionString() + ": " + node.getNodeType());
+            throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + node.getNodeType());
         }
     }
 
@@ -361,7 +348,7 @@ class Parser {
         } else if (existing.isArray()) {
             return (TomlArrayNode) existing;
         } else {
-            throw parseException("Path into existing non-array value at " + lexer.positionString() + ": " + node.getNodeType());
+            throw errorContext.atPosition(lexer).generic("Path into existing non-array value of type " + node.getNodeType());
         }
     }
 

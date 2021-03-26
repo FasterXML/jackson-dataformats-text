@@ -7,9 +7,19 @@ package com.fasterxml.jackson.dataformat.toml;
 %unicode
 %line
 %column
+%char
 //%caseless todo: what is case insensitive?
 
+%ctorarg JacksonTomlParseException.ErrorContext errorContext
+
+%init{
+this.errorContext = errorContext;
+yybegin(EXPECT_EXPRESSION);
+%init}
+
 %{
+  private final JacksonTomlParseException.ErrorContext errorContext;
+
   private boolean trimmedNewline;
   StringBuilder stringBuilder = new StringBuilder();
 
@@ -52,14 +62,10 @@ package com.fasterxml.jackson.dataformat.toml;
      stringBuilder.appendCodePoint(value);
   }
 
-  String positionString() {
-      return "line " + (yyline + 1) + " column " + yycolumn;
-  }
+  int getLine() { return yyline; }
+  int getColumn() { return yycolumn; }
+  long getCharPos() { return yychar; }
 %}
-
-%init{
-yybegin(EXPECT_EXPRESSION);
-%init}
 
 Ws = [ \t]*
 WsNonEmpty = [ \t]+
@@ -388,9 +394,5 @@ HexDig = [0-9A-Fa-f]
 }
 
 [^] {
-  throw new com.fasterxml.jackson.core.JacksonException("Unknown token at " + positionString() + " (lexer state " + yystate() + ")") {
-      @Override public Object processor() {
-    return null; // TODO
-    }
-  };
+  throw errorContext.atPosition(this).unknownToken();
 }

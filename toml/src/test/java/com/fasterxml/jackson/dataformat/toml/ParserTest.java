@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +19,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 public class ParserTest {
-    private final ParserOptions options = new ParserOptions(false, true);
+    private final ParserOptions testOptions = new ParserOptions(false, true);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
@@ -32,10 +31,14 @@ public class ParserTest {
     }
 
     private ObjectNode toml(@Language("toml") String toml) throws IOException {
-        return Parser.parse(options, new StringReader(toml));
+        return toml(testOptions, toml);
     }
 
-    @Test(expected = JacksonException.class)
+    private ObjectNode toml(ParserOptions opts, @Language("toml") String toml) throws IOException {
+        return Parser.parse(new JacksonTomlParseException.ErrorContext(null, null), opts, new StringReader(toml));
+    }
+
+    @Test(expected = JacksonTomlParseException.class)
     public void unclosed() throws IOException {
         toml("\"abc");
     }
@@ -54,7 +57,7 @@ public class ParserTest {
         toml("key =");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void singleLine() throws IOException {
         toml("first = \"Tom\" last = \"Preston-Werner\"");
     }
@@ -89,7 +92,7 @@ public class ParserTest {
                         "'quoted \"value\"' = \"value\""));
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void bareKeyNonEmpty() throws IOException {
         toml("= \"no key name\"");
     }
@@ -128,13 +131,13 @@ public class ParserTest {
                         "fruit . flavor = \"banana\"   # same as fruit.flavor"));
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void collision() throws IOException {
         toml("name = \"Tom\"\n" +
                 "name = \"Pradyun\"");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void collisionQuoted() throws IOException {
         toml("spelling = \"favorite\"\n" +
                 "\"spelling\" = \"favourite\"");
@@ -152,7 +155,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void collisionNested() throws IOException {
         toml("# This defines the value of fruit.apple to be an integer.\n" +
                 "fruit.apple = 1\n" +
@@ -253,7 +256,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void missingQuotesEscape() throws IOException {
         toml("str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\"");
     }
@@ -353,17 +356,17 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void invalidFloat1() throws IOException {
         toml("invalid_float_1 = .7");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void invalidFloat2() throws IOException {
         toml("invalid_float_2 = 7.");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void invalidFloat3() throws IOException {
         toml("invalid_float_3 = 3.e+20");
     }
@@ -541,7 +544,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void duplicateTable() throws IOException {
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
@@ -550,7 +553,7 @@ public class ParserTest {
                 "orange = \"orange\"");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void mixedTable() throws IOException {
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
@@ -609,7 +612,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void dottedCollisionRoot() throws IOException {
         toml("fruit.apple.color = \"red\"\n" +
                 "# Defines a table named fruit\n" +
@@ -620,7 +623,7 @@ public class ParserTest {
                 " = \"bar\"");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void dottedCollisionNest() throws IOException {
         toml("[fruit]\n" +
                 "apple.color = \"red\"\n" +
@@ -657,14 +660,14 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void inlineTableSelfContained() throws IOException {
         toml("[product]\n" +
                 "type = { name = \"Nail\" }\n" +
                 "type.edible = false  # INVALID");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void inlineTableSelfContained2() throws IOException {
         toml("[product]\n" +
                 "type.name = \"Nail\"\n" +
@@ -741,7 +744,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void arrayTableStillMissing() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "[fruit.physical]  # subtable, but to which parent element should it belong?\n" +
@@ -753,7 +756,7 @@ public class ParserTest {
                 "name = \"apple\"");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void arrayInlineAndTable() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "fruits = []\n" +
@@ -761,7 +764,7 @@ public class ParserTest {
                 "[[fruits]] # Not allowed");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void arrayCollision1() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
@@ -775,7 +778,7 @@ public class ParserTest {
                 "name = \"granny smith\"");
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void arrayCollision2() throws IOException {
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
@@ -805,7 +808,7 @@ public class ParserTest {
     // from the manual END
     // following are our tests :)
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void inlineTableTrailingComma() throws IOException {
         toml("foo = {bar = 'baz',}");
     }
@@ -818,7 +821,7 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void inlineTableNl() throws IOException {
         toml("foo = {bar = 'baz',\n" +
                 "a = 'b'}");
@@ -839,7 +842,7 @@ public class ParserTest {
         Assert.assertEquals(
                 JsonMapper.builder().build()
                         .readTree("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
-                Parser.parse(new ParserOptions(false, false), new StringReader("# fractional\n" +
+                toml(new ParserOptions(false, false), "# fractional\n" +
                         "flt1 = +1.0\n" +
                         "flt2 = 3.1415\n" +
                         "flt3 = -0.01\n" +
@@ -850,7 +853,7 @@ public class ParserTest {
                         "flt6 = -2E-2\n" +
                         "\n" +
                         "# both\n" +
-                        "flt7 = 6.626e-34"))
+                        "flt7 = 6.626e-34")
         );
     }
 
@@ -862,10 +865,10 @@ public class ParserTest {
                         .put("int2", 42L)
                         .put("int3", 0L)
                         .put("int4", -17L),
-                Parser.parse(new ParserOptions(false, false), new StringReader("int1 = +99\n" +
+                toml(new ParserOptions(false, false), "int1 = +99\n" +
                         "int2 = 42\n" +
                         "int3 = 0\n" +
-                        "int4 = -17"))
+                        "int4 = -17")
         );
     }
 
@@ -879,7 +882,7 @@ public class ParserTest {
                         .put("oct1", 342391L)
                         .put("oct2", 493L)
                         .put("bin1", 0b11010110L),
-                Parser.parse(new ParserOptions(false, false), new StringReader("# hexadecimal with prefix `0x`\n" +
+                toml(new ParserOptions(false, false), "# hexadecimal with prefix `0x`\n" +
                         "hex1 = 0xDEADBEEF\n" +
                         "hex2 = 0xdeadbeef\n" +
                         "hex3 = 0xdead_beef\n" +
@@ -889,7 +892,7 @@ public class ParserTest {
                         "oct2 = 0o755 # useful for Unix file permissions\n" +
                         "\n" +
                         "# binary with prefix `0b`\n" +
-                        "bin1 = 0b11010110"))
+                        "bin1 = 0b11010110")
         );
     }
 
@@ -904,32 +907,32 @@ public class ParserTest {
                         .set("odt2", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00-07:00")))
                         .set("odt3", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00.999999-07:00")))
                         .set("odt4", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T07:32:00Z"))),
-                Parser.parse(options, new StringReader(
+                toml(options,
                         "odt1 = 1979-05-27T07:32:00Z\n" +
                                 "odt2 = 1979-05-27T00:32:00-07:00\n" +
                                 "odt3 = 1979-05-27T00:32:00.999999-07:00\n" +
-                                "odt4 = 1979-05-27 07:32:00Z"))
+                                "odt4 = 1979-05-27 07:32:00Z")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("ldt1", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T07:32:00")))
                         .set("ldt2", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T00:32:00.999999"))),
-                Parser.parse(options, new StringReader(
+                toml(options,
                         "ldt1 = 1979-05-27T07:32:00\n" +
-                                "ldt2 = 1979-05-27T00:32:00.999999"))
+                                "ldt2 = 1979-05-27T00:32:00.999999")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("ld1", JsonNodeFactory.instance.pojoNode(LocalDate.parse("1979-05-27"))),
-                Parser.parse(options, new StringReader("ld1 = 1979-05-27"))
+                toml(options, "ld1 = 1979-05-27")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("lt1", JsonNodeFactory.instance.pojoNode(LocalTime.parse("07:32:00")))
                         .set("lt2", JsonNodeFactory.instance.pojoNode(LocalTime.parse("00:32:00.999999"))),
-                Parser.parse(options, new StringReader(
+                toml(options,
                         "lt1 = 07:32:00\n" +
-                                "lt2 = 00:32:00.999999"))
+                                "lt2 = 00:32:00.999999")
         );
     }
 }
