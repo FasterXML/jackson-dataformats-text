@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.intellij.lang.annotations.Language;
 import org.junit.Assert;
@@ -13,6 +14,10 @@ import org.junit.Test;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.StringReader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 
 public class ParserTest {
     private final ParserOptions options = new ParserOptions(false, true);
@@ -825,6 +830,106 @@ public class ParserTest {
         Assert.assertEquals(
                 json("{\"foo\": \"\\uD83C\\uDD92\"}"),
                 toml("foo = \"\\U0001f192\"")
+        );
+    }
+
+    @Test
+    public void doubles() throws IOException {
+        // this is the same test as above, except with doubles instead of BigDecimals
+        Assert.assertEquals(
+                JsonMapper.builder().build()
+                        .readTree("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
+                Parser.parse(new ParserOptions(false, false), new StringReader("# fractional\n" +
+                        "flt1 = +1.0\n" +
+                        "flt2 = 3.1415\n" +
+                        "flt3 = -0.01\n" +
+                        "\n" +
+                        "# exponent\n" +
+                        "flt4 = 5e+22\n" +
+                        "flt5 = 1e06\n" +
+                        "flt6 = -2E-2\n" +
+                        "\n" +
+                        "# both\n" +
+                        "flt7 = 6.626e-34"))
+        );
+    }
+
+    @Test
+    public void longs() throws IOException {
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("int1", 99L)
+                        .put("int2", 42L)
+                        .put("int3", 0L)
+                        .put("int4", -17L),
+                Parser.parse(new ParserOptions(false, false), new StringReader("int1 = +99\n" +
+                        "int2 = 42\n" +
+                        "int3 = 0\n" +
+                        "int4 = -17"))
+        );
+    }
+
+    @Test
+    public void longsBase() throws IOException {
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("hex1", 0xDEADBEEFL)
+                        .put("hex2", 0xdeadbeefL)
+                        .put("hex3", 0xdead_beefL)
+                        .put("oct1", 342391L)
+                        .put("oct2", 493L)
+                        .put("bin1", 0b11010110L),
+                Parser.parse(new ParserOptions(false, false), new StringReader("# hexadecimal with prefix `0x`\n" +
+                        "hex1 = 0xDEADBEEF\n" +
+                        "hex2 = 0xdeadbeef\n" +
+                        "hex3 = 0xdead_beef\n" +
+                        "\n" +
+                        "# octal with prefix `0o`\n" +
+                        "oct1 = 0o01234567\n" +
+                        "oct2 = 0o755 # useful for Unix file permissions\n" +
+                        "\n" +
+                        "# binary with prefix `0b`\n" +
+                        "bin1 = 0b11010110"))
+        );
+    }
+
+    @Test
+    public void javaTimeDeser() throws IOException {
+        // this is the same test as above, except with explicit java.time deserialization
+        ParserOptions options = new ParserOptions(true, false);
+
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .set("odt1", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T07:32:00Z")))
+                        .set("odt2", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00-07:00")))
+                        .set("odt3", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00.999999-07:00")))
+                        .set("odt4", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T07:32:00Z"))),
+                Parser.parse(options, new StringReader(
+                        "odt1 = 1979-05-27T07:32:00Z\n" +
+                                "odt2 = 1979-05-27T00:32:00-07:00\n" +
+                                "odt3 = 1979-05-27T00:32:00.999999-07:00\n" +
+                                "odt4 = 1979-05-27 07:32:00Z"))
+        );
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .set("ldt1", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T07:32:00")))
+                        .set("ldt2", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T00:32:00.999999"))),
+                Parser.parse(options, new StringReader(
+                        "ldt1 = 1979-05-27T07:32:00\n" +
+                                "ldt2 = 1979-05-27T00:32:00.999999"))
+        );
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .set("ld1", JsonNodeFactory.instance.pojoNode(LocalDate.parse("1979-05-27"))),
+                Parser.parse(options, new StringReader("ld1 = 1979-05-27"))
+        );
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .set("lt1", JsonNodeFactory.instance.pojoNode(LocalTime.parse("07:32:00")))
+                        .set("lt2", JsonNodeFactory.instance.pojoNode(LocalTime.parse("00:32:00.999999"))),
+                Parser.parse(options, new StringReader(
+                        "lt1 = 07:32:00\n" +
+                                "lt2 = 00:32:00.999999"))
         );
     }
 }

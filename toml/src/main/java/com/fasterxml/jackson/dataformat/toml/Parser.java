@@ -204,7 +204,6 @@ class Parser {
         }
 
         if (options.parseTemporalAsJavaTime) {
-            // todo: test
             Temporal value;
             if (token == TomlToken.LOCAL_DATE) {
                 value = LocalDate.parse(text);
@@ -219,7 +218,7 @@ class Parser {
                     throw new AssertionError();
                 }
             }
-            // TODO
+            // todo: is pojoNode right here, or can we use rawValueNode?
             return factory.pojoNode(value);
         } else {
             return factory.textNode(text);
@@ -243,7 +242,6 @@ class Parser {
             return factory.numberNode(v);
         } else {
             // "Arbitrary 64-bit signed integers (from −2^63 to 2^63−1) should be accepted and handled losslessly."
-            // todo: test
             long v;
             if (text.startsWith("0x") || text.startsWith("0X")) {
                 v = Long.parseLong(text.substring(2), 16);
@@ -254,6 +252,7 @@ class Parser {
             } else {
                 v = Long.parseLong(text);
             }
+            // todo: should we use smaller int types where possible?
             return factory.numberNode(v);
         }
     }
