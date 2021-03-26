@@ -78,7 +78,7 @@ KeyValSep = {Ws} "=" {Ws}
 UnquotedKey = [A-Za-z0-9\-_]+
 //QuotedKey = {BasicString} | {LiteralString}
 //DottedKey = {SimpleKey} ({Ws} "." {Ws} {SimpleKey})+
-DotSep = "."
+DotSep = {Ws} "." {Ws}
 
 // grammar rule
 // Val = {String} | {Boolean} | {Array} | {InlineTable} | {DateTime} | {Float} | {Integer}
@@ -180,8 +180,22 @@ HexDig = [0-9A-Fa-f]
 %%
 
 <EXPECT_EXPRESSION> {
+    // this state matches until the *first* simple-key of a key, or until the -open token of a table.
+
+    // toml = expression *( newline expression )
+    // expression =  ws [ comment ]
+
+    // expression =/ ws keyval ws [ comment ]
+    // keyval = key keyval-sep val
+    // key = simple-key / dotted-key
+    // simple-key = quoted-key / unquoted-key
+
+    // expression =/ ws table ws [ comment ]
+    // table = std-table / array-table
+    // std-table = std-table-open key std-table-close
+    // array-table = array-table-open key array-table-close
+
     {UnquotedKey} {return TomlToken.UNQUOTED_KEY;}
-    {DotSep} {return TomlToken.DOT_SEP;}
     // quoted-key = basic-string / literal-string
     {QuotationMark} {
           yybegin(BASIC_STRING);
@@ -200,6 +214,12 @@ HexDig = [0-9A-Fa-f]
 }
 
 <EXPECT_INLINE_KEY> {
+    // this state matches a possibly dotted key, until a following token (keyval-sep, std-table-close, array-table-close)
+
+    // key = simple-key / dotted-key
+    // dotted-key = simple-key 1*( dot-sep simple-key )
+    // simple-key = quoted-key / unquoted-key
+
     {UnquotedKey} {return TomlToken.UNQUOTED_KEY;}
     {DotSep} {return TomlToken.DOT_SEP;}
     // quoted-key = basic-string / literal-string
@@ -215,16 +235,27 @@ HexDig = [0-9A-Fa-f]
     {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
     {StdTableClose} {return TomlToken.STD_TABLE_CLOSE;}
     {ArrayTableClose} {return TomlToken.ARRAY_TABLE_CLOSE;}
-    {WsNonEmpty} {}
 }
 
 <EXPECT_EOL> {
+    // this matches the remainder after a keyval or table in an expression.
+
+    // expression =  ws [ comment ]
+    // expression =/ ws keyval ws [ comment ]
+    // expression =/ ws table ws [ comment ]
+
     {NewLine} {yybegin(EXPECT_EXPRESSION);}
     {Comment} {}
     {WsNonEmpty} {}
 }
 
 <EXPECT_VALUE> {
+    // val = string / boolean / array / inline-table / date-time / float / integer
+    // used by:
+    // keyval = key keyval-sep val
+    // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
+    // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
+
     // strings
     {QuotationMark} {
           yybegin(BASIC_STRING);
@@ -257,19 +288,23 @@ HexDig = [0-9A-Fa-f]
     {ArrayOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_OPEN;}
     {InlineTableOpen} {return TomlToken.INLINE_TABLE_OPEN;}
 
-    // array / table end just after comma
+    // array end just after comma
     {WsCommentNewlineNonEmpty}* {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
-    {Ws} {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
 }
 
 <EXPECT_ARRAY_SEP> {
+    // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
+    // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
     {Comma} {WsCommentNewlineNonEmpty}* {return TomlToken.COMMA;}
     {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
     {WsCommentNewlineNonEmpty} {} // always allowed here
 }
 
 <EXPECT_TABLE_SEP> {
-    {Comma} {return TomlToken.COMMA;}
+    // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
+    // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
+
+    {Ws} {Comma} {Ws} {return TomlToken.COMMA;}
     {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
 }
 
