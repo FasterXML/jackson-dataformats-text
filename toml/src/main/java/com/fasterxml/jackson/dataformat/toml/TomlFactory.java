@@ -14,6 +14,18 @@ public final class TomlFactory extends TextualTSFactory {
 
     public final static String FORMAT_NAME_TOML = "toml";
 
+    /**
+     * Bitfield (set of flags) of all generator features that are enabled
+     * by default.
+     */
+    final static int DEFAULT_TOML_PARSER_FEATURE_FLAGS = TomlReadFeature.collectDefaults();
+
+    /**
+     * Bitfield (set of flags) of all generator features that are enabled
+     * by default.
+     */
+    final static int DEFAULT_TOML_GENERATOR_FEATURE_FLAGS = 0;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -22,7 +34,7 @@ public final class TomlFactory extends TextualTSFactory {
 
     public TomlFactory() {
         // No format-specific features yet so:
-        super(0, 0);
+        super(DEFAULT_TOML_PARSER_FEATURE_FLAGS, DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 
     TomlFactory(TomlFactory src) {
@@ -118,12 +130,12 @@ public final class TomlFactory extends TextualTSFactory {
 
     @Override
     public int getFormatReadFeatures() {
-        return 0;
+        return _formatReadFeatures;
     }
 
     @Override
     public int getFormatWriteFeatures() {
-        return 0;
+        return _formatWriteFeatures;
     }
 
     /*
@@ -140,7 +152,7 @@ public final class TomlFactory extends TextualTSFactory {
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) throws JacksonException {
-        ObjectNode node = parse(r, ctxt);
+        ObjectNode node = parse(readCtxt, ctxt, r);
         return new TreeTraversingParser(node, readCtxt);
     }
 
@@ -187,9 +199,14 @@ public final class TomlFactory extends TextualTSFactory {
     /**********************************************************************
      */
 
-    private ObjectNode parse(Reader r0, IOContext ctxt) {
+    private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
         JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.sourceReference(), null);
-        ParserOptions options = ParserOptions.DEFAULT;
+        int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
+        ParserOptions options = new ParserOptions(
+                false,
+                TomlReadFeature.USE_BIG_INTEGER_FOR_INTS.enabledIn(readFeatures),
+                TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS.enabledIn(readFeatures)
+        );
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 try (Reader r = r0) {

@@ -26,6 +26,36 @@ public class TomlMapper extends ObjectMapper {
             return new StateImpl(this);
         }
 
+        /*
+        /******************************************************************
+        /* Format features
+        /******************************************************************
+         */
+
+        public Builder enable(TomlReadFeature... features) {
+            for (TomlReadFeature f : features) {
+                _formatReadFeatures |= f.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(TomlReadFeature... features) {
+            for (TomlReadFeature f : features) {
+                _formatReadFeatures &= ~f.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(TomlReadFeature feature, boolean state)
+        {
+            if (state) {
+                _formatReadFeatures |= feature.getMask();
+            } else {
+                _formatReadFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
+
         protected static class StateImpl extends MapperBuilderState
                 implements java.io.Serializable // important!
         {

@@ -1,11 +1,14 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.intellij.lang.annotations.Language;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
@@ -39,6 +42,45 @@ public class TomlMapperTest {
     @Test
     public void reader() {
         Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(new StringReader(TEST_STRING), TestClass.class));
+    }
+
+    @Test(expected = JacksonTomlParseException.class)
+    public void longOutOfBounds() {
+        TomlMapper.shared().readTree("abc = 0xffffffffffffffffffff");
+    }
+
+    @Test
+    public void bigInteger() {
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("abc", new BigInteger("ffffffffffffffffffff", 16)),
+                TomlMapper.builder()
+                        .enable(TomlReadFeature.USE_BIG_INTEGER_FOR_INTS)
+                        .build()
+                        .readTree("abc = 0xffffffffffffffffffff")
+        );
+    }
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    @Test
+    public void bigDecimal() {
+        BigDecimal testValue = BigDecimal.valueOf(Double.MIN_VALUE).divide(BigDecimal.valueOf(2));
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("abc", testValue),
+                TomlMapper.builder()
+                        .enable(TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                        .build()
+                        .readTree("abc = " + testValue.toString())
+        );
+        // without the flag, it's truncated
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("abc", 0.0D),
+                TomlMapper.builder()
+                        .build()
+                        .readTree("abc = " + testValue.toString())
+        );
     }
 
     public static class TestClass {

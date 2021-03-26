@@ -10,6 +10,10 @@ public class JacksonTomlParseException extends StreamReadException {
         super(p, msg, loc);
     }
 
+    private JacksonTomlParseException(String msg, JsonLocation loc, Throwable rootCause) {
+        super(msg, loc, rootCause);
+    }
+
     static class ErrorContext {
         private final InputSourceReference inputSourceReference;
         private final JsonParser parser;
@@ -50,6 +54,12 @@ public class JacksonTomlParseException extends StreamReadException {
 
             JacksonTomlParseException generic(String message) {
                 return new JacksonTomlParseException(parser, message, location);
+            }
+
+            JacksonTomlParseException outOfBounds(NumberFormatException cause) {
+                JacksonTomlParseException parseException = new JacksonTomlParseException("Number out of bounds", location, cause);
+                parseException._processor = parser;
+                return parseException;
             }
         }
     }

@@ -11,7 +11,7 @@ import com.fasterxml.jackson.core.base.DecorableTSFactory;
  */
 public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<TomlFactory, TomlFactoryBuilder> {
     TomlFactoryBuilder() {
-        super(0, 0);
+        super(TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 
     TomlFactoryBuilder(TomlFactory base) {
@@ -21,5 +21,41 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
     @Override
     public TomlFactory build() {
         return new TomlFactory(this);
+    }
+
+    /*
+    /**********************************************************
+    /* Parser feature setting
+    /**********************************************************
+     */
+
+    public TomlFactoryBuilder enable(TomlReadFeature f) {
+        _formatReadFeatures |= f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder enable(TomlReadFeature first, TomlReadFeature... other) {
+        _formatReadFeatures |= first.getMask();
+        for (TomlReadFeature f : other) {
+            _formatReadFeatures |= f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlReadFeature f) {
+        _formatReadFeatures &= ~f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlReadFeature first, TomlReadFeature... other) {
+        _formatReadFeatures &= ~first.getMask();
+        for (TomlReadFeature f : other) {
+            _formatReadFeatures &= ~f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder configure(TomlReadFeature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
 }

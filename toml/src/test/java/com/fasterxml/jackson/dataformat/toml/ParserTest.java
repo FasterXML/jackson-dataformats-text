@@ -19,7 +19,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
 public class ParserTest {
-    private final ParserOptions testOptions = new ParserOptions(false, true);
+    private final ParserOptions testOptions = new ParserOptions(false, true, true);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
@@ -842,7 +842,7 @@ public class ParserTest {
         Assert.assertEquals(
                 JsonMapper.builder().build()
                         .readTree("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
-                toml(new ParserOptions(false, false), "# fractional\n" +
+                toml(new ParserOptions(false, false, false), "# fractional\n" +
                         "flt1 = +1.0\n" +
                         "flt2 = 3.1415\n" +
                         "flt3 = -0.01\n" +
@@ -865,7 +865,7 @@ public class ParserTest {
                         .put("int2", 42L)
                         .put("int3", 0L)
                         .put("int4", -17L),
-                toml(new ParserOptions(false, false), "int1 = +99\n" +
+                toml(new ParserOptions(false, false, false), "int1 = +99\n" +
                         "int2 = 42\n" +
                         "int3 = 0\n" +
                         "int4 = -17")
@@ -882,7 +882,7 @@ public class ParserTest {
                         .put("oct1", 342391L)
                         .put("oct2", 493L)
                         .put("bin1", 0b11010110L),
-                toml(new ParserOptions(false, false), "# hexadecimal with prefix `0x`\n" +
+                toml(new ParserOptions(false, false, false), "# hexadecimal with prefix `0x`\n" +
                         "hex1 = 0xDEADBEEF\n" +
                         "hex2 = 0xdeadbeef\n" +
                         "hex3 = 0xdead_beef\n" +
@@ -899,7 +899,7 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        ParserOptions options = new ParserOptions(true, false);
+        ParserOptions options = new ParserOptions(true, false, false);
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()

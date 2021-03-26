@@ -215,7 +215,7 @@ class Parser {
     private JsonNode parseInt(int nextState) throws IOException {
         String text = lexer.yytext().replace("_", "");
         pollExpected(TomlToken.INTEGER, nextState);
-        if (options.bigNumericTypes) {
+        if (options.bigInteger) {
             BigInteger v;
             if (text.startsWith("0x") || text.startsWith("0X")) {
                 v = new BigInteger(text.substring(2), 16);
@@ -230,14 +230,19 @@ class Parser {
         } else {
             // "Arbitrary 64-bit signed integers (from −2^63 to 2^63−1) should be accepted and handled losslessly."
             long v;
-            if (text.startsWith("0x") || text.startsWith("0X")) {
-                v = Long.parseLong(text.substring(2), 16);
-            } else if (text.startsWith("0o") || text.startsWith("0O")) {
-                v = Long.parseLong(text.substring(2), 8);
-            } else if (text.startsWith("0b") || text.startsWith("0B")) {
-                v = Long.parseLong(text.substring(2), 2);
-            } else {
-                v = Long.parseLong(text);
+            try {
+                if (text.startsWith("0x") || text.startsWith("0X")) {
+                    v = Long.parseLong(text.substring(2), 16);
+                } else if (text.startsWith("0o") || text.startsWith("0O")) {
+                    v = Long.parseLong(text.substring(2), 8);
+                } else if (text.startsWith("0b") || text.startsWith("0B")) {
+                    v = Long.parseLong(text.substring(2), 2);
+                } else {
+                    v = Long.parseLong(text);
+                }
+            } catch (NumberFormatException e) {
+                // *should* only happen for out of bounds, any other errors *should* be caught by the lexer
+                throw errorContext.atPosition(lexer).outOfBounds(e);
             }
             // todo: should we use smaller int types where possible?
             return factory.numberNode(v);
@@ -252,7 +257,7 @@ class Parser {
         } else if (text.endsWith("inf")) {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
-            if (options.bigNumericTypes) {
+            if (options.bigDecimal) {
                 return factory.numberNode(new BigDecimal(text));
             } else {
                 return factory.numberNode(Double.parseDouble(text));
