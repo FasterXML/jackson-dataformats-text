@@ -108,14 +108,6 @@ public class TomlMapperTest {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("abc", testValue),
-                TomlMapper.builder()
-                        .enable(TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-                        .build()
-                        .readTree("abc = " + testValue.toString())
-        );
-        // without the flag, it's truncated
-        Assert.assertEquals(
-                JsonNodeFactory.instance.objectNode().put("abc", 0.0D),
                 TomlMapper.shared().readTree("abc = " + testValue.toString())
         );
     }

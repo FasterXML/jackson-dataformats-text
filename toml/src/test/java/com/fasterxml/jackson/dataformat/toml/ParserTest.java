@@ -22,7 +22,7 @@ import java.time.OffsetDateTime;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
-    private final ParserOptions testOptions = new ParserOptions(false, true);
+    private final ParserOptions testOptions = new ParserOptions(false);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -890,34 +890,13 @@ public class ParserTest {
     }
 
     @Test
-    public void doubles() throws IOException {
-        // this is the same test as above, except with doubles instead of BigDecimals
-        Assert.assertEquals(
-                JsonMapper.builder().build()
-                        .readTree("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
-                toml(new ParserOptions(false, false), "# fractional\n" +
-                        "flt1 = +1.0\n" +
-                        "flt2 = 3.1415\n" +
-                        "flt3 = -0.01\n" +
-                        "\n" +
-                        "# exponent\n" +
-                        "flt4 = 5e+22\n" +
-                        "flt5 = 1e06\n" +
-                        "flt6 = -2E-2\n" +
-                        "\n" +
-                        "# both\n" +
-                        "flt7 = 6.626e-34")
-        );
-    }
-
-    @Test
     public void intTypes() throws IOException {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("int1", 99)
                         .put("int2", 4242424242L)
                         .put("int3", new BigInteger("171717171717171717171717")),
-                toml(new ParserOptions(false, false), "int1 = +99\n" +
+                toml(new ParserOptions(false), "int1 = +99\n" +
                         "int2 = 4242424242\n" +
                         "int3 = 171717171717171717171717")
         );
@@ -932,7 +911,7 @@ public class ParserTest {
                         .put("hex3", 0xddead_beefL)
                         .put("oct1", 01234567777777L)
                         .put("bin1", 0b11010110101010101010101010101010101010L),
-                toml(new ParserOptions(false, false), "hex1 = 0xdDEADBEEF\n" +
+                toml(new ParserOptions(false), "hex1 = 0xdDEADBEEF\n" +
                         "hex2 = 0xddeadbeef\n" +
                         "hex3 = 0xddead_beef\n" +
                         "oct1 = 0o1234567777777\n" +
@@ -949,7 +928,7 @@ public class ParserTest {
                         .put("hex3", new BigInteger("DDEADBEEFDDEADBEEF", 16))
                         .put("oct1", new BigInteger("12345677777771234567777777", 8))
                         .put("bin1", new BigInteger("1101011010101010101010101010101010101011010110101010101010101010101010101010", 2)),
-                toml(new ParserOptions(false, false), "hex1 = 0xDDEADBEEFDDEADBEEF\n" +
+                toml(new ParserOptions(false), "hex1 = 0xDDEADBEEFDDEADBEEF\n" +
                         "hex2 = 0xddeadbeefddeadbeef\n" +
                         "hex3 = 0xddead_beefddead_beef\n" +
                         "oct1 = 0o12345677777771234567777777\n" +
@@ -960,7 +939,7 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        ParserOptions options = new ParserOptions(true, false);
+        ParserOptions options = new ParserOptions(true);
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()

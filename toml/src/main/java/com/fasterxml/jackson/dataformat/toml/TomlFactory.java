@@ -202,8 +202,7 @@ public final class TomlFactory extends TextualTSFactory {
         JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.sourceReference(), null);
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
         ParserOptions options = new ParserOptions(
-                TomlReadFeature.PARSE_JAVA_TIME.enabledIn(readFeatures),
-                TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS.enabledIn(readFeatures)
+                TomlReadFeature.PARSE_JAVA_TIME.enabledIn(readFeatures)
         );
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {

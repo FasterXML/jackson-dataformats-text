@@ -307,11 +307,8 @@ class Parser {
         } else if (text.endsWith("inf")) {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
-            if (options.bigDecimal) {
-                return factory.numberNode(new BigDecimal(text));
-            } else {
-                return factory.numberNode(Double.parseDouble(text));
-            }
+            BigDecimal dec = new BigDecimal(text);
+            return factory.numberNode(dec);
         }
     }
 
@@ -439,6 +436,10 @@ class Parser {
     }
 
     private static class JsonNodeFactoryImpl extends JsonNodeFactory {
+        public JsonNodeFactoryImpl() {
+            super(true); // exact bigdecimals
+        }
+
         @Override
         public ArrayNode arrayNode() {
             return new TomlArrayNode(this);
