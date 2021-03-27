@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.util.VersionUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -201,6 +202,7 @@ class Parser {
                 } else if (token == TomlToken.OFFSET_DATE_TIME) {
                     value = OffsetDateTime.parse(text);
                 } else {
+                    VersionUtil.throwInternal();
                     throw new AssertionError();
                 }
             }

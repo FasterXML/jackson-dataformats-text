@@ -107,7 +107,7 @@ public class TomlMapper extends ObjectMapper {
      */
 
     /**
-     * Accessor method for getting globally shared "default" {@link JavaPropsMapper}
+     * Accessor method for getting globally shared "default" {@link TomlMapper}
      * instance: one that has default configuration, no modules registered, no
      * config overrides. Usable mostly when dealing "untyped" or Tree-style
      * content reading and writing.

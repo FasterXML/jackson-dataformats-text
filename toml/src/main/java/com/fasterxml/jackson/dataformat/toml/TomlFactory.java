@@ -33,7 +33,6 @@ public final class TomlFactory extends TextualTSFactory {
      */
 
     public TomlFactory() {
-        // No format-specific features yet so:
         super(DEFAULT_TOML_PARSER_FEATURE_FLAGS, DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 
@@ -120,7 +119,7 @@ public final class TomlFactory extends TextualTSFactory {
 
     @Override
     public Class<? extends FormatFeature> getFormatReadFeatureType() {
-        return null;
+        return TomlReadFeature.class;
     }
 
     @Override
