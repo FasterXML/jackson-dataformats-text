@@ -52,7 +52,7 @@ public class ParserTest {
                 toml("key = \"value\""));
     }
 
-    @Test(expected = EOFException.class)
+    @Test(expected = JacksonTomlParseException.class)
     public void unspecified() throws IOException {
         toml("key =");
     }
@@ -836,6 +836,11 @@ public class ParserTest {
         );
     }
 
+    @Test(expected = JacksonTomlParseException.class)
+    public void extendedUnicodeEscapeInvalid() throws IOException {
+        toml("foo = \"\\Uffffffff\"");
+    }
+
     @Test
     public void doubles() throws IOException {
         // this is the same test as above, except with doubles instead of BigDecimals
@@ -934,5 +939,17 @@ public class ParserTest {
                         "lt1 = 07:32:00\n" +
                                 "lt2 = 00:32:00.999999")
         );
+    }
+
+    @Test(expected = JacksonTomlParseException.class)
+    public void controlCharInComment() throws IOException {
+        // https://github.com/toml-lang/toml/pull/812
+        toml("a = \"0x7f\" # \u007F");
+    }
+
+    @Test(expected = JacksonTomlParseException.class)
+    public void controlCharInLiteralString() throws IOException {
+        // Not explicit in spec, but only in the abnf
+        toml("a = '\u007F'");
     }
 }

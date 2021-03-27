@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -36,9 +35,9 @@ class Parser {
         return new Parser(errorContext, options, reader).parse();
     }
 
-    private TomlToken peek() throws IOException {
+    private TomlToken peek() {
         TomlToken here = this.next;
-        if (here == null) throw new EOFException();
+        if (here == null) throw errorContext.atPosition(lexer).generic("Premature end of file");
         return here;
     }
 
@@ -335,7 +334,7 @@ class Parser {
         fieldRef.object.set(fieldRef.key, value);
     }
 
-    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws IOException {
+    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlObjectNode) node.putObject(field);
@@ -346,7 +345,7 @@ class Parser {
         }
     }
 
-    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws IOException {
+    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlArrayNode) node.putArray(field);

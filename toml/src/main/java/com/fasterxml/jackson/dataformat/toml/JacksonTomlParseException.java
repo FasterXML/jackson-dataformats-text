@@ -40,10 +40,6 @@ public class JacksonTomlParseException extends StreamReadException {
                 );
             }
 
-            JacksonTomlParseException unknownToken() {
-                return generic("Unknown token");
-            }
-
             JacksonTomlParseException unexpectedToken(TomlToken actual, String expected) {
                 return new JacksonTomlParseException(
                         parser,

@@ -59,7 +59,11 @@ yybegin(EXPECT_EXPRESSION);
                  (Character.digit(yycharat(7), 16) << 8) |
                  (Character.digit(yycharat(8), 16) << 4) |
                  Character.digit(yycharat(9), 16);
-     stringBuilder.appendCodePoint(value);
+     if (Character.isValidCodePoint(value)) {
+         stringBuilder.appendCodePoint(value);
+     } else {
+         throw errorContext.atPosition(this).generic("Invalid code point  " + Integer.toHexString(value));
+     }
   }
 
   int getLine() { return yyline; }
@@ -71,7 +75,7 @@ Ws = [ \t]*
 WsNonEmpty = [ \t]+
 NewLine = \n|\r\n
 CommentStartSymbol = "#"
-NonEol = \u0009|[\u0020-\U10ffff]
+NonEol = [^\u0000-\u0008\u000a-\u001f\u007f]
 
 //Expression = {Ws} (({KeyVal}|{Table}) {Ws}) {Comment}?
 Comment = {CommentStartSymbol} {NonEol}*
@@ -370,7 +374,7 @@ HexDig = [0-9A-Fa-f]
 <LITERAL_STRING> {
     // literal-string = apostrophe *literal-char apostrophe
     {Apostrophe} {return TomlToken.STRING;}
-    [^\u0000-\u0008\u000a-\u001f']+ { appendNormalTextToken(); }
+    [^\u0000-\u0008\u000a-\u001f\u007f']+ { appendNormalTextToken(); }
 }
 
 <ML_LITERAL_STRING> {
@@ -378,7 +382,7 @@ HexDig = [0-9A-Fa-f]
     // ml-literal-body = *mll-content *( mll-quotes 1*mll-content ) [ mll-quotes ]
     // mll-quotes = 1*2apostrophe
     {MlLiteralStringDelim} {return TomlToken.STRING;}
-    [^\u0000-\u0008\u000a-\u001f']+ { appendNormalTextToken(); }
+    [^\u0000-\u0008\u000a-\u001f\u007f']+ { appendNormalTextToken(); }
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mll-quotes: inline
     {Apostrophe} { stringBuilder.append('\''); }
@@ -394,5 +398,5 @@ HexDig = [0-9A-Fa-f]
 }
 
 [^] {
-  throw errorContext.atPosition(this).unknownToken();
+  throw errorContext.atPosition(this).generic("Unknown token");
 }
