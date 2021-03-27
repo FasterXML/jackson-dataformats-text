@@ -276,7 +276,7 @@ public class ParserTest {
     @Test
     public void missingQuotesEscape() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\"");
     }
 
@@ -385,14 +385,14 @@ public class ParserTest {
     @Test
     public void invalidFloat2() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_2 = 7.");
     }
 
     @Test
     public void invalidFloat3() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_3 = 3.e+20");
     }
 
@@ -871,7 +871,7 @@ public class ParserTest {
     @Test
     public void inlineTableNl() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("Newline not permitted here");
         toml("foo = {bar = 'baz',\n" +
                 "a = 'b'}");
     }
@@ -995,7 +995,7 @@ public class ParserTest {
     @Test
     public void controlCharInComment() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("Illegal control character");
         // https://github.com/toml-lang/toml/pull/812
         toml("a = \"0x7f\" # \u007F");
     }
@@ -1003,8 +1003,36 @@ public class ParserTest {
     @Test
     public void controlCharInLiteralString() throws IOException {
         expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("Unknown token");
+        expectedException.expectMessage("Illegal control character");
         // Not explicit in spec, but only in the abnf
         toml("a = '\u007F'");
+    }
+
+    @Test
+    public void zeroPrefixedInt() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Zero-prefixed ints are not valid");
+        toml("foo = 01");
+    }
+
+    @Test
+    public void signedBase() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
+        toml("foo = +0b1");
+    }
+
+    @Test
+    public void illegalComment() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Comment not permitted here");
+        toml("foo = # bar");
+    }
+
+    @Test
+    public void unknownEscape() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown escape sequence");
+        toml("foo = \"\\k\"");
     }
 }

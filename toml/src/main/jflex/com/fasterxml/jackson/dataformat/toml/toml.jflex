@@ -293,6 +293,9 @@ HexDig = [0-9A-Fa-f]
     {LocalTime} {return TomlToken.LOCAL_TIME;}
     {Float} {return TomlToken.FLOAT;}
     {Integer} {return TomlToken.INTEGER;}
+    [+-]? [0-9]+ {
+        throw errorContext.atPosition(this).generic("Zero-prefixed ints are not valid. If you want an octal literal, use the prefix '0o'");
+      }
 
     // inline array / table
     {ArrayOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_OPEN;}
@@ -323,17 +326,6 @@ HexDig = [0-9A-Fa-f]
     // basic-char = basic-unescaped / escaped
     // basic-unescaped = wschar / %x21 / %x23-5B / %x5D-7E / non-ascii
     {QuotationMark} {return TomlToken.STRING;}
-
-    [^\u0000-\u0008\u000a-\u001f\u007f\\\"]+ { appendNormalTextToken(); }
-    \\\" { stringBuilder.append('"'); }
-    \\\\ { stringBuilder.append('\\'); }
-    \\b { stringBuilder.append('\b'); }
-    \\f { stringBuilder.append('\f'); }
-    \\n { stringBuilder.append('\n'); }
-    \\r { stringBuilder.append('\r'); }
-    \\t { stringBuilder.append('\t'); }
-    {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
-    {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
 }
 
 <ML_BASIC_STRING> {
@@ -358,7 +350,9 @@ HexDig = [0-9A-Fa-f]
     // mlb-escaped-nl
     // ignore, but disable newline trimming after it
     \\ {Ws} {NewLine} ([ \t] | {NewLine})* { trimmedNewline = true; }
-    // mlb-char
+}
+
+<BASIC_STRING, ML_BASIC_STRING> {
     [^\u0000-\u0008\u000a-\u001f\u007f\\\"]+ { appendNormalTextToken(); }
     \\\" { stringBuilder.append('"'); }
     \\\\ { stringBuilder.append('\\'); }
@@ -369,6 +363,7 @@ HexDig = [0-9A-Fa-f]
     \\t { stringBuilder.append('\t'); }
     {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
     {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
+    \\ { throw errorContext.atPosition(this).generic("Unknown escape sequence"); }
 }
 
 <LITERAL_STRING> {
@@ -397,6 +392,19 @@ HexDig = [0-9A-Fa-f]
       }
 }
 
+// catchall error rules. Must never match more than one character, so that they cannot take precedent over other rules.
+[\r\n] {
+  throw errorContext.atPosition(this).generic("Newline not permitted here");
+}
+[\u0000-\u001f\u007f] {
+  throw errorContext.atPosition(this).generic("Illegal control character");
+}
+\# {
+  throw errorContext.atPosition(this).generic("Comment not permitted here");
+}
+<EXPECT_EOL, EXPECT_ARRAY_SEP, EXPECT_TABLE_SEP> [^] {
+  throw errorContext.atPosition(this).generic("More data after value has already ended. Invalid value preceding this position?");
+}
 [^] {
   throw errorContext.atPosition(this).generic("Unknown token");
 }
