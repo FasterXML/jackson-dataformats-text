@@ -178,12 +178,12 @@ public final class TomlFactory extends TextualTSFactory {
 
     @Override
     protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt, Writer out) throws JacksonException {
-        return _unsupported(); // TODO
+        return new TomlGenerator(writeCtxt, ioCtxt, writeCtxt.getStreamWriteFeatures(_streamWriteFeatures), out);
     }
 
     @Override
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt, IOContext ioCtxt, OutputStream out) throws JacksonException {
-        return _unsupported(); // TODO
+        return _createGenerator(writeCtxt, ioCtxt, new UTF8Writer(ioCtxt, out));
     }
 
     @Override
