@@ -8,7 +8,6 @@ package com.fasterxml.jackson.dataformat.toml;
 %line
 %column
 %char
-//%caseless todo: what is case insensitive?
 
 %ctorarg JacksonTomlParseException.ErrorContext errorContext
 
