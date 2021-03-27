@@ -62,7 +62,7 @@ yybegin(EXPECT_EXPRESSION);
      if (Character.isValidCodePoint(value)) {
          stringBuilder.appendCodePoint(value);
      } else {
-         throw errorContext.atPosition(this).generic("Invalid code point  " + Integer.toHexString(value));
+         throw errorContext.atPosition(this).generic("Invalid code point " + Integer.toHexString(value));
      }
   }
 

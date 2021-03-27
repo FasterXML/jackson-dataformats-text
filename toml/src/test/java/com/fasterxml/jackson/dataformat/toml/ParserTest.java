@@ -5,12 +5,17 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.hamcrest.CoreMatchers;
 import org.intellij.lang.annotations.Language;
+import org.intellij.lang.annotations.RegExp;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
+import org.junit.rules.ExpectedException;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.time.LocalDate;
@@ -38,8 +43,14 @@ public class ParserTest {
         return Parser.parse(new JacksonTomlParseException.ErrorContext(null, null), opts, new StringReader(toml));
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @SuppressWarnings("deprecation")
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
+
+    @Test
     public void unclosed() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("EOF");
         toml("\"abc");
     }
 
@@ -131,14 +142,18 @@ public class ParserTest {
                         "fruit . flavor = \"banana\"   # same as fruit.flavor"));
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void collision() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Duplicate key");
         toml("name = \"Tom\"\n" +
                 "name = \"Pradyun\"");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void collisionQuoted() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Duplicate key");
         toml("spelling = \"favorite\"\n" +
                 "\"spelling\" = \"favourite\"");
     }
@@ -155,8 +170,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void collisionNested() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Path into existing non-object value of type NUMBER");
         toml("# This defines the value of fruit.apple to be an integer.\n" +
                 "fruit.apple = 1\n" +
                 "\n" +
@@ -256,8 +273,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void missingQuotesEscape() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         toml("str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\"");
     }
 
@@ -356,18 +375,24 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void invalidFloat1() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         toml("invalid_float_1 = .7");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void invalidFloat2() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         toml("invalid_float_2 = 7.");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void invalidFloat3() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         toml("invalid_float_3 = 3.e+20");
     }
 
@@ -544,8 +569,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void duplicateTable() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
                 "\n" +
@@ -553,8 +580,10 @@ public class ParserTest {
                 "orange = \"orange\"");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void mixedTable() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Path into existing non-object value of type STRING");
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
                 "\n" +
@@ -612,8 +641,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void dottedCollisionRoot() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Table redefined");
         toml("fruit.apple.color = \"red\"\n" +
                 "# Defines a table named fruit\n" +
                 "# Defines a table named fruit.apple\n" +
@@ -623,8 +654,10 @@ public class ParserTest {
                 " = \"bar\"");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void dottedCollisionNest() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
                 "apple.color = \"red\"\n" +
                 "apple.taste.sweet = true\n" +
@@ -660,15 +693,19 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void inlineTableSelfContained() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Object already closed");
         toml("[product]\n" +
                 "type = { name = \"Nail\" }\n" +
                 "type.edible = false  # INVALID");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void inlineTableSelfContained2() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Duplicate key");
         toml("[product]\n" +
                 "type.name = \"Nail\"\n" +
                 "type = { edible = false }  # INVALID");
@@ -744,8 +781,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void arrayTableStillMissing() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
                 "[fruit.physical]  # subtable, but to which parent element should it belong?\n" +
                 "color = \"red\"\n" +
@@ -756,16 +795,20 @@ public class ParserTest {
                 "name = \"apple\"");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void arrayInlineAndTable() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Array already finished");
         toml("# INVALID TOML DOC\n" +
                 "fruits = []\n" +
                 "\n" +
                 "[[fruits]] # Not allowed");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void arrayCollision1() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Path into existing non-object value of type ARRAY");
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
                 "name = \"apple\"\n" +
@@ -778,8 +821,10 @@ public class ParserTest {
                 "name = \"granny smith\"");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void arrayCollision2() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
                 "name = \"apple\"\n" +
@@ -808,8 +853,10 @@ public class ParserTest {
     // from the manual END
     // following are our tests :)
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void inlineTableTrailingComma() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Trailing comma not permitted for inline tables");
         toml("foo = {bar = 'baz',}");
     }
 
@@ -821,8 +868,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void inlineTableNl() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         toml("foo = {bar = 'baz',\n" +
                 "a = 'b'}");
     }
@@ -836,8 +885,10 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void extendedUnicodeEscapeInvalid() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Invalid code point ffffffff");
         toml("foo = \"\\Uffffffff\"");
     }
 
@@ -941,14 +992,18 @@ public class ParserTest {
         );
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void controlCharInComment() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         // https://github.com/toml-lang/toml/pull/812
         toml("a = \"0x7f\" # \u007F");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void controlCharInLiteralString() throws IOException {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("Unknown token");
         // Not explicit in spec, but only in the abnf
         toml("a = '\u007F'");
     }

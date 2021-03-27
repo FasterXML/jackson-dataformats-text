@@ -1,11 +1,17 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.exc.WrappedIOException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -14,6 +20,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class TomlMapperTest {
+    @SuppressWarnings("deprecation")
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
+
     @Language("toml")
     private static final String TEST_STRING = "foo = 'bar'\n[nested]\nfoo = 4";
     private static final TestClass TEST_OBJECT;
@@ -80,8 +90,10 @@ public class TomlMapperTest {
         }
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test
     public void longOutOfBounds() {
+        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expectMessage("out of bounds");
         TomlMapper.shared().readTree("abc = 0xffffffffffffffffffff");
     }
 
@@ -133,5 +145,19 @@ public class TomlMapperTest {
 
     public static class ObjectField {
         public Object foo;
+    }
+
+    @Test
+    public void testIoException() {
+        Assert.assertThrows(WrappedIOException.class, () -> TomlMapper.shared().readTree(new Reader() {
+            @Override
+            public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
+                throw new IOException("Test");
+            }
+
+            @Override
+            public void close() throws IOException {
+            }
+        }));
     }
 }

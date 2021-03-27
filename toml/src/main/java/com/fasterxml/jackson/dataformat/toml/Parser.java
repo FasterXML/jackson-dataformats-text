@@ -146,7 +146,7 @@ class Parser {
                 // Only arrays declared by array tables are not closed, and those are always arrays of objects.
                 node = (TomlObjectNode) array.get(array.size() - 1);
             } else {
-                throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + node.getNodeType());
+                throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + existing.getNodeType());
             }
         }
     }
@@ -206,7 +206,6 @@ class Parser {
                     throw new AssertionError();
                 }
             }
-            // todo: is pojoNode right here, or can we use rawValueNode?
             return factory.pojoNode(value);
         } else {
             return factory.textNode(text);
@@ -343,7 +342,7 @@ class Parser {
         } else if (existing.isObject()) {
             return (TomlObjectNode) existing;
         } else {
-            throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + node.getNodeType());
+            throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + existing.getNodeType());
         }
     }
 
