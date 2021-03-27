@@ -4,9 +4,8 @@ module com.fasterxml.jackson.dataformat.toml {
 
     exports com.fasterxml.jackson.dataformat.toml;
 
-    // TODO
-    /*provides com.fasterxml.jackson.core.TokenStreamFactory with
-        com.fasterxml.jackson.dataformat.toml.JavaPropsFactory;
+    provides com.fasterxml.jackson.core.TokenStreamFactory with
+            com.fasterxml.jackson.dataformat.toml.TomlFactory;
     provides com.fasterxml.jackson.databind.ObjectMapper with
-        com.fasterxml.jackson.dataformat.toml.JavaPropsMapper;*/
+            com.fasterxml.jackson.dataformat.toml.TomlMapper;
 }
