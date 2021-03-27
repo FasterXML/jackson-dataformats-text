@@ -68,6 +68,10 @@ yybegin(EXPECT_EXPRESSION);
   int getLine() { return yyline; }
   int getColumn() { return yycolumn; }
   long getCharPos() { return yychar; }
+
+  char[] getTextBuffer() { return zzBuffer; };
+  int getTextBufferStart() { return zzStartRead; };
+  int getTextBufferEnd() { return zzMarkedPos; };
 %}
 
 Ws = [ \t]*

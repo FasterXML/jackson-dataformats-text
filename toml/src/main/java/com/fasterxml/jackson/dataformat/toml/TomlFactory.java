@@ -203,7 +203,6 @@ public final class TomlFactory extends TextualTSFactory {
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
         ParserOptions options = new ParserOptions(
                 TomlReadFeature.PARSE_JAVA_TIME.enabledIn(readFeatures),
-                TomlReadFeature.USE_BIG_INTEGER_FOR_INTS.enabledIn(readFeatures),
                 TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS.enabledIn(readFeatures)
         );
         try {

@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.VersionUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -213,40 +214,89 @@ class Parser {
     }
 
     private JsonNode parseInt(int nextState) throws IOException {
-        String text = lexer.yytext().replace("_", "");
+        char[] buffer = lexer.getTextBuffer();
+        int start = lexer.getTextBufferStart();
+        int length = lexer.getTextBufferEnd() - lexer.getTextBufferStart();
+        for (int i = 0; i < length; i++) {
+            if (buffer[start + i] == '_') {
+                // slow path to remove underscores
+                buffer = new String(buffer, start, length).replace("_", "").toCharArray();
+                start = 0;
+                length = buffer.length;
+                break;
+            }
+        }
+
         pollExpected(TomlToken.INTEGER, nextState);
-        if (options.bigInteger) {
-            BigInteger v;
-            if (text.startsWith("0x") || text.startsWith("0X")) {
-                v = new BigInteger(text.substring(2), 16);
-            } else if (text.startsWith("0o") || text.startsWith("0O")) {
-                v = new BigInteger(text.substring(2), 8);
-            } else if (text.startsWith("0b") || text.startsWith("0B")) {
-                v = new BigInteger(text.substring(2), 2);
-            } else {
-                v = new BigInteger(text);
-            }
-            return factory.numberNode(v);
-        } else {
-            // "Arbitrary 64-bit signed integers (from −2^63 to 2^63−1) should be accepted and handled losslessly."
-            long v;
-            try {
-                if (text.startsWith("0x") || text.startsWith("0X")) {
-                    v = Long.parseLong(text.substring(2), 16);
-                } else if (text.startsWith("0o") || text.startsWith("0O")) {
-                    v = Long.parseLong(text.substring(2), 8);
-                } else if (text.startsWith("0b") || text.startsWith("0B")) {
-                    v = Long.parseLong(text.substring(2), 2);
-                } else {
-                    v = Long.parseLong(text);
+        if (length > 2) {
+            char baseChar = buffer[start + 1];
+            if (baseChar == 'x' || baseChar == 'o' || baseChar == 'b') {
+                start += 2;
+                length -= 2;
+                String text = new String(buffer, start, length);
+                // note: we parse all these as unsigned. Hence the weird int limits.
+                // hex
+                if (baseChar == 'x') {
+                    if (length <= 31 / 4) {
+                        return factory.numberNode(Integer.parseInt(text, 16));
+                    } else if (length <= 63 / 4) {
+                        return factory.numberNode(Long.parseLong(text, 16));
+                    } else {
+                        return factory.numberNode(new BigInteger(text, 16));
+                    }
                 }
-            } catch (NumberFormatException e) {
-                // *should* only happen for out of bounds, any other errors *should* be caught by the lexer
-                throw errorContext.atPosition(lexer).outOfBounds(e);
+                // octal
+                if (baseChar == 'o') {
+                    // this is a bit conservative, but who uses octal anyway?
+                    if (length <= 31 / 3) {
+                        return factory.numberNode(Integer.parseInt(text, 8));
+                    } else if (text.length() <= 63 / 3) {
+                        return factory.numberNode(Long.parseLong(text, 8));
+                    } else {
+                        return factory.numberNode(new BigInteger(text, 8));
+                    }
+                }
+                // binary
+                assert baseChar == 'b';
+                if (length <= 31) {
+                    return factory.numberNode(Integer.parseUnsignedInt(text, 2));
+                } else if (length <= 63) {
+                    return factory.numberNode(Long.parseUnsignedLong(text, 2));
+                } else {
+                    return factory.numberNode(new BigInteger(text, 2));
+                }
             }
-            // todo: should we use smaller int types where possible?
+        }
+        // decimal
+        boolean negative;
+        if (buffer[start] == '-') {
+            start++;
+            length--;
+            negative = true;
+        } else if (buffer[start] == '+') {
+            start++;
+            length--;
+            negative = false;
+        } else {
+            negative = false;
+        }
+        // adapted from JsonParserBase
+        if (length <= 9) {
+            int v = NumberInput.parseInt(buffer, start, length);
+            if (negative) v = -v;
             return factory.numberNode(v);
         }
+        if (length <= 18 || NumberInput.inLongRange(buffer, start, length, negative)) {
+            long v = NumberInput.parseLong(buffer, start, length);
+            if (negative) v = -v;
+            // Might still fit in int, need to check
+            if ((int) v == v) {
+                return factory.numberNode((int) v);
+            } else {
+                return factory.numberNode(v);
+            }
+        }
+        return factory.numberNode(new BigInteger(new String(buffer, start, length)));
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {

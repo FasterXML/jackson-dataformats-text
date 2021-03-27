@@ -91,19 +91,11 @@ public class TomlMapperTest {
     }
 
     @Test
-    public void longOutOfBounds() {
-        expectedException.expect(JacksonTomlParseException.class);
-        expectedException.expectMessage("out of bounds");
-        TomlMapper.shared().readTree("abc = 0xffffffffffffffffffff");
-    }
-
-    @Test
     public void bigInteger() {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("abc", new BigInteger("ffffffffffffffffffff", 16)),
                 TomlMapper.builder()
-                        .enable(TomlReadFeature.USE_BIG_INTEGER_FOR_INTS)
                         .build()
                         .readTree("abc = 0xffffffffffffffffffff")
         );

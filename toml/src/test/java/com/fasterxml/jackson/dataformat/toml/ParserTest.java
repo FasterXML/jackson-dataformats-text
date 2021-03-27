@@ -5,28 +5,25 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.hamcrest.CoreMatchers;
 import org.intellij.lang.annotations.Language;
-import org.intellij.lang.annotations.RegExp;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.function.ThrowingRunnable;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 
+@SuppressWarnings("OctalInteger")
 public class ParserTest {
-    private final ParserOptions testOptions = new ParserOptions(false, true, true);
+    private final ParserOptions testOptions = new ParserOptions(false, true);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
-            .enable(DeserializationFeature.USE_BIG_INTEGER_FOR_INTS)
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
             .build();
@@ -898,7 +895,7 @@ public class ParserTest {
         Assert.assertEquals(
                 JsonMapper.builder().build()
                         .readTree("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
-                toml(new ParserOptions(false, false, false), "# fractional\n" +
+                toml(new ParserOptions(false, false), "# fractional\n" +
                         "flt1 = +1.0\n" +
                         "flt2 = 3.1415\n" +
                         "flt3 = -0.01\n" +
@@ -914,48 +911,56 @@ public class ParserTest {
     }
 
     @Test
-    public void longs() throws IOException {
+    public void intTypes() throws IOException {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
-                        .put("int1", 99L)
-                        .put("int2", 42L)
-                        .put("int3", 0L)
-                        .put("int4", -17L),
-                toml(new ParserOptions(false, false, false), "int1 = +99\n" +
-                        "int2 = 42\n" +
-                        "int3 = 0\n" +
-                        "int4 = -17")
+                        .put("int1", 99)
+                        .put("int2", 4242424242L)
+                        .put("int3", new BigInteger("171717171717171717171717")),
+                toml(new ParserOptions(false, false), "int1 = +99\n" +
+                        "int2 = 4242424242\n" +
+                        "int3 = 171717171717171717171717")
         );
     }
 
     @Test
-    public void longsBase() throws IOException {
+    public void longBase() throws IOException {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
-                        .put("hex1", 0xDEADBEEFL)
-                        .put("hex2", 0xdeadbeefL)
-                        .put("hex3", 0xdead_beefL)
-                        .put("oct1", 342391L)
-                        .put("oct2", 493L)
-                        .put("bin1", 0b11010110L),
-                toml(new ParserOptions(false, false, false), "# hexadecimal with prefix `0x`\n" +
-                        "hex1 = 0xDEADBEEF\n" +
-                        "hex2 = 0xdeadbeef\n" +
-                        "hex3 = 0xdead_beef\n" +
-                        "\n" +
-                        "# octal with prefix `0o`\n" +
-                        "oct1 = 0o01234567\n" +
-                        "oct2 = 0o755 # useful for Unix file permissions\n" +
-                        "\n" +
-                        "# binary with prefix `0b`\n" +
-                        "bin1 = 0b11010110")
+                        .put("hex1", 0xDDEADBEEFL)
+                        .put("hex2", 0xddeadbeefL)
+                        .put("hex3", 0xddead_beefL)
+                        .put("oct1", 01234567777777L)
+                        .put("bin1", 0b11010110101010101010101010101010101010L),
+                toml(new ParserOptions(false, false), "hex1 = 0xdDEADBEEF\n" +
+                        "hex2 = 0xddeadbeef\n" +
+                        "hex3 = 0xddead_beef\n" +
+                        "oct1 = 0o1234567777777\n" +
+                        "bin1 = 0b11010110101010101010101010101010101010")
+        );
+    }
+
+    @Test
+    public void bigintBase() throws IOException {
+        Assert.assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("hex1", new BigInteger("DDEADBEEFDDEADBEEF", 16))
+                        .put("hex2", new BigInteger("DDEADBEEFDDEADBEEF", 16))
+                        .put("hex3", new BigInteger("DDEADBEEFDDEADBEEF", 16))
+                        .put("oct1", new BigInteger("12345677777771234567777777", 8))
+                        .put("bin1", new BigInteger("1101011010101010101010101010101010101011010110101010101010101010101010101010", 2)),
+                toml(new ParserOptions(false, false), "hex1 = 0xDDEADBEEFDDEADBEEF\n" +
+                        "hex2 = 0xddeadbeefddeadbeef\n" +
+                        "hex3 = 0xddead_beefddead_beef\n" +
+                        "oct1 = 0o12345677777771234567777777\n" +
+                        "bin1 = 0b1101011010101010101010101010101010101011010110101010101010101010101010101010")
         );
     }
 
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        ParserOptions options = new ParserOptions(true, false, false);
+        ParserOptions options = new ParserOptions(true, false);
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()

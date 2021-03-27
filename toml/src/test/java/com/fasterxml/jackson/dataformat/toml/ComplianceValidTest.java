@@ -74,7 +74,6 @@ public class ComplianceValidTest {
         JsonNode actual = TomlMapper.builder()
                 .enable(TomlReadFeature.PARSE_JAVA_TIME)
                 .enable(TomlReadFeature.USE_BIG_DECIMAL_FOR_FLOATS)
-                .enable(TomlReadFeature.USE_BIG_INTEGER_FOR_INTS)
                 .build().readTree(path);
         Assert.assertEquals(mapFromComplianceNode(expected), actual);
     }
