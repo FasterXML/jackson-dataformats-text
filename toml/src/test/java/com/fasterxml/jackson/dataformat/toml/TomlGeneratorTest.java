@@ -225,4 +225,16 @@ public class TomlGeneratorTest {
         }
         Assert.assertEquals("abc = [2021-03-27, 18:40:15.123456789, 2021-03-27T18:40:15.123456789, 2021-03-27T18:40:15.123456789+01:23]\n", w.toString());
     }
+
+    @Test
+    public void complexKey() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = TomlMapper.shared().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("foo bar");
+            generator.writeNumber(123);
+            generator.writeEndObject();
+        }
+        Assert.assertEquals("'foo bar' = 123\n", w.toString());
+    }
 }
