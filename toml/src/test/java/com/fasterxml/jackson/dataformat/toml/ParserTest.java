@@ -22,7 +22,6 @@ import java.time.OffsetDateTime;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
-    private final ParserOptions testOptions = new ParserOptions(false);
     private final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -33,10 +32,10 @@ public class ParserTest {
     }
 
     private ObjectNode toml(@Language("toml") String toml) throws IOException {
-        return toml(testOptions, toml);
+        return toml(0, toml);
     }
 
-    private ObjectNode toml(ParserOptions opts, @Language("toml") String toml) throws IOException {
+    private ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
         return Parser.parse(new JacksonTomlParseException.ErrorContext(null, null), opts, new StringReader(toml));
     }
 
@@ -896,7 +895,7 @@ public class ParserTest {
                         .put("int1", 99)
                         .put("int2", 4242424242L)
                         .put("int3", new BigInteger("171717171717171717171717")),
-                toml(new ParserOptions(false), "int1 = +99\n" +
+                toml("int1 = +99\n" +
                         "int2 = 4242424242\n" +
                         "int3 = 171717171717171717171717")
         );
@@ -911,7 +910,7 @@ public class ParserTest {
                         .put("hex3", 0xddead_beefL)
                         .put("oct1", 01234567777777L)
                         .put("bin1", 0b11010110101010101010101010101010101010L),
-                toml(new ParserOptions(false), "hex1 = 0xdDEADBEEF\n" +
+                toml("hex1 = 0xdDEADBEEF\n" +
                         "hex2 = 0xddeadbeef\n" +
                         "hex3 = 0xddead_beef\n" +
                         "oct1 = 0o1234567777777\n" +
@@ -928,7 +927,7 @@ public class ParserTest {
                         .put("hex3", new BigInteger("DDEADBEEFDDEADBEEF", 16))
                         .put("oct1", new BigInteger("12345677777771234567777777", 8))
                         .put("bin1", new BigInteger("1101011010101010101010101010101010101011010110101010101010101010101010101010", 2)),
-                toml(new ParserOptions(false), "hex1 = 0xDDEADBEEFDDEADBEEF\n" +
+                toml("hex1 = 0xDDEADBEEFDDEADBEEF\n" +
                         "hex2 = 0xddeadbeefddeadbeef\n" +
                         "hex3 = 0xddead_beefddead_beef\n" +
                         "oct1 = 0o12345677777771234567777777\n" +
@@ -939,7 +938,7 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        ParserOptions options = new ParserOptions(true);
+        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()

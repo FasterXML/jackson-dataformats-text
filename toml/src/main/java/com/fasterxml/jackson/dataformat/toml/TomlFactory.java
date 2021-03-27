@@ -201,16 +201,13 @@ public final class TomlFactory extends TextualTSFactory {
     private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
         JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.sourceReference(), null);
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
-        ParserOptions options = new ParserOptions(
-                TomlReadFeature.PARSE_JAVA_TIME.enabledIn(readFeatures)
-        );
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 try (Reader r = r0) {
-                    return Parser.parse(errorContext, options, r);
+                    return Parser.parse(errorContext, readFeatures, r);
                 }
             } else {
-                return Parser.parse(errorContext, options, r0);
+                return Parser.parse(errorContext, readFeatures, r0);
             }
         } catch (IOException e) {
             throw _wrapIOFailure(e);

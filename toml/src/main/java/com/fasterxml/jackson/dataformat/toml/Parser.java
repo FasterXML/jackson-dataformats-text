@@ -21,19 +21,19 @@ class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
     private final JacksonTomlParseException.ErrorContext errorContext;
-    private final ParserOptions options;
+    private final int options;
     private final Lexer lexer;
 
     private TomlToken next;
 
-    private Parser(JacksonTomlParseException.ErrorContext errorContext, ParserOptions options, Reader reader) throws IOException {
+    private Parser(JacksonTomlParseException.ErrorContext errorContext, int options, Reader reader) throws IOException {
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, errorContext);
         this.next = lexer.yylex();
     }
 
-    public static ObjectNode parse(JacksonTomlParseException.ErrorContext errorContext, ParserOptions options, Reader reader) throws IOException {
+    public static ObjectNode parse(JacksonTomlParseException.ErrorContext errorContext, int options, Reader reader) throws IOException {
         return new Parser(errorContext, options, reader).parse();
     }
 
@@ -191,7 +191,7 @@ class Parser {
             text = text.substring(0, 10) + 'T' + text.substring(11);
         }
 
-        if (options.parseTemporalAsJavaTime) {
+        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)) {
             Temporal value;
             if (token == TomlToken.LOCAL_DATE) {
                 value = LocalDate.parse(text);
