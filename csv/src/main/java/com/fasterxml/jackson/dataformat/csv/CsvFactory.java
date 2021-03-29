@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.InputSourceReference;
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader;
@@ -484,7 +484,7 @@ public class CsvFactory extends JsonFactory
     }
 
     @Override // since 2.13
-    protected IOContext _createContext(InputSourceReference contentRef, boolean resourceManaged)
+    protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
     {
         return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
     }
