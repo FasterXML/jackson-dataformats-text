@@ -4,7 +4,7 @@ import java.io.*;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
-import com.fasterxml.jackson.core.io.InputSourceReference;
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
@@ -316,7 +316,8 @@ public class CsvFactory
      */
 
     @Override
-    protected IOContext _createContext(InputSourceReference contentRef, boolean resourceManaged) {
+    protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
+    {
         return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
     }
 }

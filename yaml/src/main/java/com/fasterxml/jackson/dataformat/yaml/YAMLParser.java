@@ -311,11 +311,11 @@ public class YAMLParser extends ParserBase
     protected JsonLocation _locationFor(Optional<Mark> option)
     {
         if (!option.isPresent()) {
-            return new JsonLocation(_ioContext.sourceReference(),
+            return new JsonLocation(_ioContext.contentReference(),
                     -1, -1, -1);
         }
         Mark m = option.get();
-        return new JsonLocation(_ioContext.sourceReference(),
+        return new JsonLocation(_ioContext.contentReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1); // ditto

@@ -343,8 +343,9 @@ public class CsvDecoder
         return context.createChildObjectContext(_currInputRow, col);
     }
 
-    public JsonLocation getTokenLocation() {
-        return new JsonLocation(_ioContext.sourceReference(),
+    public JsonLocation getTokenLocation()
+    {
+        return new JsonLocation(_ioContext.contentReference(),
                 getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
@@ -358,7 +359,7 @@ public class CsvDecoder
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_ioContext.sourceReference(),
+        return new JsonLocation(_ioContext.contentReference(),
                 _currInputProcessed + ptr - 1, _currInputRow, col);
     }
 
