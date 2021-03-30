@@ -1,8 +1,8 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.TokenStreamContext;
+import com.fasterxml.jackson.core.JsonStreamContext;
 
-final class TomlWriteContext extends TokenStreamContext {
+final class TomlWriteContext extends JsonStreamContext {
     /**
      * Parent context for this context; null for root context.
      */
@@ -152,17 +152,17 @@ final class TomlWriteContext extends TokenStreamContext {
     public final TomlWriteContext getParent() { return _parent; }
 
     @Override
-    public String currentName() {
+    public String getCurrentName() {
         return _currentName;
     }
 
     @Override
-    public Object currentValue() {
+    public Object getCurrentValue() {
         return _currentValue;
     }
 
     @Override
-    public void assignCurrentValue(Object v) {
+    public void setCurrentValue(Object v) {
         _currentValue = v;
     }
 

@@ -1,16 +1,32 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.TextualTSFactory;
+import com.fasterxml.jackson.core.FormatFeature;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.format.InputAccessor;
+import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.UTF8Writer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
-
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-public final class TomlFactory extends TextualTSFactory {
+public final class TomlFactory extends JsonFactory {
 
     public final static String FORMAT_NAME_TOML = "toml";
 
@@ -28,16 +44,26 @@ public final class TomlFactory extends TextualTSFactory {
 
     /*
     /**********************************************************************
+    /* Configuration
+    /**********************************************************************
+     */
+
+    protected int _tomlParserFeatures = DEFAULT_TOML_PARSER_FEATURE_FLAGS;
+    protected int _tomlGeneratorFeatures = DEFAULT_TOML_GENERATOR_FEATURE_FLAGS;
+
+    /*
+    /**********************************************************************
     /* Factory construction, configuration
     /**********************************************************************
      */
 
     public TomlFactory() {
-        super(DEFAULT_TOML_PARSER_FEATURE_FLAGS, DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 
-    TomlFactory(TomlFactory src) {
-        super(src);
+    TomlFactory(TomlFactory src, ObjectCodec oc) {
+        super(src, oc);
+        _tomlGeneratorFeatures = src._tomlGeneratorFeatures;
+        _tomlParserFeatures = src._tomlParserFeatures;
     }
 
     /**
@@ -46,7 +72,9 @@ public final class TomlFactory extends TextualTSFactory {
      * @since 3.0
      */
     TomlFactory(TomlFactoryBuilder b) {
-        super(b);
+        super(b, false);
+        _tomlGeneratorFeatures = b._formatGeneratorFeatures;
+        _tomlParserFeatures = b._formatParserFeatures;
     }
 
     @Override
@@ -64,15 +92,8 @@ public final class TomlFactory extends TextualTSFactory {
 
     @Override
     public TomlFactory copy() {
-        return new TomlFactory(this);
-    }
-
-    /**
-     * Instances are immutable so just return `this`
-     */
-    @Override
-    public TokenStreamFactory snapshot() {
-        return this;
+        _checkInvalidCopy(TomlFactory.class);
+        return new TomlFactory(this, null);
     }
 
     /*
@@ -128,13 +149,60 @@ public final class TomlFactory extends TextualTSFactory {
     }
 
     @Override
-    public int getFormatReadFeatures() {
-        return _formatReadFeatures;
+    public MatchStrength hasFormat(InputAccessor acc) throws IOException {
+        return MatchStrength.INCONCLUSIVE;
+    }
+
+
+
+    /*
+    /**********************************************************
+    /* Configuration, parser settings
+    /**********************************************************
+     */
+
+    /**
+     * Method for enabling or disabling specified parser feature
+     * (check {@link TomlReadFeature} for list of features)
+     */
+    public final TomlFactory configure(TomlReadFeature f, boolean state)
+    {
+        if (state) {
+            enable(f);
+        } else {
+            disable(f);
+        }
+        return this;
+    }
+
+    /**
+     * Method for enabling specified parser feature
+     * (check {@link TomlReadFeature} for list of features)
+     */
+    public TomlFactory enable(TomlReadFeature f) {
+        _tomlParserFeatures |= f.getMask();
+        return this;
+    }
+
+    /**
+     * Method for disabling specified parser features
+     * (check {@link TomlReadFeature} for list of features)
+     */
+    public TomlFactory disable(TomlReadFeature f) {
+        _tomlParserFeatures &= ~f.getMask();
+        return this;
+    }
+
+    /**
+     * Checked whether specified parser feature is enabled.
+     */
+    public final boolean isEnabled(TomlReadFeature f) {
+        return (_tomlParserFeatures & f.getMask()) != 0;
     }
 
     @Override
-    public int getFormatWriteFeatures() {
-        return _formatWriteFeatures;
+    public int getFormatParserFeatures() {
+        return _tomlParserFeatures;
     }
 
     /*
@@ -144,30 +212,25 @@ public final class TomlFactory extends TextualTSFactory {
      */
 
     @Override
-    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, InputStream in) throws JacksonException {
+    public JsonParser _createParser(InputStream in, IOContext ctxt) throws IOException {
         // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        return _createParser(readCtxt, ctxt, new InputStreamReader(in, StandardCharsets.UTF_8));
+        return _createParser(new InputStreamReader(in, StandardCharsets.UTF_8), ctxt);
     }
 
     @Override
-    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) throws JacksonException {
-        ObjectNode node = parse(readCtxt, ctxt, r);
-        return new TreeTraversingParser(node, readCtxt);
+    public JsonParser _createParser(Reader r, IOContext ctxt) throws IOException {
+        ObjectNode node = parse(ctxt, r);
+        return new TreeTraversingParser(node); // don't pass our _objectCodec, this part shouldn't be customized
     }
 
     @Override
-    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, byte[] data, int offset, int len) throws JacksonException {
-        return _createParser(readCtxt, ctxt, new ByteArrayInputStream(data, offset, len));
+    public JsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
+        return _createParser(new ByteArrayInputStream(data, offset, len), ctxt);
     }
 
     @Override
-    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, char[] data, int offset, int len, boolean recyclable) throws JacksonException {
-        return _createParser(readCtxt, ctxt, new CharArrayReader(data, offset, len));
-    }
-
-    @Override
-    protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, DataInput input) throws JacksonException {
-        return _unsupported();
+    protected JsonParser _createParser(char[] data, int offset, int len, IOContext ctxt, boolean recyclable) throws IOException {
+        return _createParser(new CharArrayReader(data, offset, len), ctxt);
     }
 
     /*
@@ -177,19 +240,15 @@ public final class TomlFactory extends TextualTSFactory {
      */
 
     @Override
-    protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt, Writer out) throws JacksonException {
-        return new TomlGenerator(writeCtxt, ioCtxt, writeCtxt.getStreamWriteFeatures(_streamWriteFeatures), out);
+    public JsonGenerator createGenerator(Writer out) throws JacksonException {
+        IOContext ctxt = _createContext(_createContentReference(out), false);
+        return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, out);
     }
 
     @Override
-    protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt, IOContext ioCtxt, OutputStream out) throws JacksonException {
-        return _createGenerator(writeCtxt, ioCtxt, new UTF8Writer(ioCtxt, out));
-    }
-
-    @Override
-    protected Writer _createWriter(IOContext ioCtxt, OutputStream out, JsonEncoding enc) throws JacksonException {
-        // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        return new UTF8Writer(ioCtxt, out);
+    public JsonGenerator createGenerator(OutputStream out) throws JacksonException {
+        IOContext ctxt = _createContext(_createContentReference(out), false);
+        return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, new UTF8Writer(ctxt, out));
     }
 
     /*
@@ -198,19 +257,14 @@ public final class TomlFactory extends TextualTSFactory {
     /**********************************************************************
      */
 
-    private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
+    private ObjectNode parse(IOContext ctxt, Reader r0) throws IOException {
         JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.contentReference(), null);
-        int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
-        try {
-            if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
-                try (Reader r = r0) {
-                    return Parser.parse(errorContext, readFeatures, r);
-                }
-            } else {
-                return Parser.parse(errorContext, readFeatures, r0);
+        if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            try (Reader r = r0) {
+                return Parser.parse(errorContext, _tomlParserFeatures, r);
             }
-        } catch (IOException e) {
-            throw _wrapIOFailure(e);
+        } else {
+            return Parser.parse(errorContext, _tomlParserFeatures, r0);
         }
     }
 }

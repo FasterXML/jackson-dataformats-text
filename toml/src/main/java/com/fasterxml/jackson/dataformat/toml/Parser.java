@@ -37,7 +37,7 @@ class Parser {
         return new Parser(errorContext, options, reader).parse();
     }
 
-    private TomlToken peek() {
+    private TomlToken peek() throws JacksonTomlParseException {
         TomlToken here = this.next;
         if (here == null) throw errorContext.atPosition(lexer).generic("Premature end of file");
         return here;
@@ -382,7 +382,7 @@ class Parser {
         fieldRef.object.set(fieldRef.key, value);
     }
 
-    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) {
+    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws JacksonTomlParseException {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlObjectNode) node.putObject(field);
@@ -393,7 +393,7 @@ class Parser {
         }
     }
 
-    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) {
+    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws JacksonTomlParseException {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlArrayNode) node.putArray(field);

@@ -1,17 +1,31 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.base.DecorableTSFactory;
+import com.fasterxml.jackson.core.TSFBuilder;
 
 /**
- * {@link com.fasterxml.jackson.core.TokenStreamFactory.TSFBuilder}
+ * {@link com.fasterxml.jackson.core.TSFBuilder}
  * implementation for constructing {@link TomlFactory}
  * instances.
  *
  * @since 3.0
  */
-public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<TomlFactory, TomlFactoryBuilder> {
+public class TomlFactoryBuilder extends TSFBuilder<TomlFactory, TomlFactoryBuilder> {/*
+    /**********************************************************
+    /* Configuration
+    /**********************************************************
+     */
+
+    protected int _formatParserFeatures = TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS;
+    protected int _formatGeneratorFeatures = TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS;
+
+    /*
+    /**********************************************************
+    /* Life cycle
+    /**********************************************************
+     */
+
     TomlFactoryBuilder() {
-        super(TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
+        super();
     }
 
     TomlFactoryBuilder(TomlFactory base) {
@@ -30,27 +44,27 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
      */
 
     public TomlFactoryBuilder enable(TomlReadFeature f) {
-        _formatReadFeatures |= f.getMask();
+        _formatParserFeatures |= f.getMask();
         return this;
     }
 
     public TomlFactoryBuilder enable(TomlReadFeature first, TomlReadFeature... other) {
-        _formatReadFeatures |= first.getMask();
+        _formatParserFeatures |= first.getMask();
         for (TomlReadFeature f : other) {
-            _formatReadFeatures |= f.getMask();
+            _formatParserFeatures |= f.getMask();
         }
         return this;
     }
 
     public TomlFactoryBuilder disable(TomlReadFeature f) {
-        _formatReadFeatures &= ~f.getMask();
+        _formatParserFeatures &= ~f.getMask();
         return this;
     }
 
     public TomlFactoryBuilder disable(TomlReadFeature first, TomlReadFeature... other) {
-        _formatReadFeatures &= ~first.getMask();
+        _formatParserFeatures &= ~first.getMask();
         for (TomlReadFeature f : other) {
-            _formatReadFeatures &= ~f.getMask();
+            _formatParserFeatures &= ~f.getMask();
         }
         return this;
     }

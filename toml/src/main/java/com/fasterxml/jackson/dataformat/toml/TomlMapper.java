@@ -3,27 +3,12 @@ package com.fasterxml.jackson.dataformat.toml;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
-import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 
 public class TomlMapper extends ObjectMapper {
-    public static class Builder extends MapperBuilder<TomlMapper, Builder>
-    {
-        public Builder(TomlFactory f) {
-            super(f);
-        }
+    public static class Builder extends MapperBuilder<TomlMapper, Builder> {
 
-        public Builder(StateImpl state) {
-            super(state);
-        }
-
-        @Override
-        public TomlMapper build() {
-            return new TomlMapper(this);
-        }
-
-        @Override
-        protected MapperBuilderState _saveState() {
-            return new StateImpl(this);
+        Builder(TomlMapper mapper) {
+            super(mapper);
         }
 
         /*
@@ -33,44 +18,23 @@ public class TomlMapper extends ObjectMapper {
          */
 
         public Builder enable(TomlReadFeature... features) {
-            for (TomlReadFeature f : features) {
-                _formatReadFeatures |= f.getMask();
+            for (TomlReadFeature feature : features) {
+                _mapper.enable(feature);
             }
             return this;
         }
 
         public Builder disable(TomlReadFeature... features) {
-            for (TomlReadFeature f : features) {
-                _formatReadFeatures &= ~f.getMask();
+            for (TomlReadFeature feature : features) {
+                _mapper.disable(feature);
             }
             return this;
         }
 
         public Builder configure(TomlReadFeature feature, boolean state)
         {
-            if (state) {
-                _formatReadFeatures |= feature.getMask();
-            } else {
-                _formatReadFeatures &= ~feature.getMask();
-            }
+            _mapper.configure(feature, state);
             return this;
-        }
-
-        protected static class StateImpl extends MapperBuilderState
-                implements java.io.Serializable // important!
-        {
-            private static final long serialVersionUID = 3L;
-
-            public StateImpl(Builder src) {
-                super(src);
-            }
-
-            // We also need actual instance of state as base class can not implement logic
-            // for reinstating mapper (via mapper builder) from state.
-            @Override
-            protected Object readResolve() {
-                return new Builder(this).build();
-            }
         }
     }
 
@@ -79,59 +43,44 @@ public class TomlMapper extends ObjectMapper {
     }
 
     public TomlMapper(TomlFactory f) {
-        this(new Builder(f));
-    }
-
-    private TomlMapper(Builder b) {
-        super(b);
+        super(f);
     }
 
     public static Builder builder() {
-        return new Builder(new TomlFactory());
+        return new Builder(new TomlMapper());
     }
 
     public static Builder builder(TomlFactory streamFactory) {
-        return new Builder(streamFactory);
+        return new Builder(new TomlMapper(streamFactory));
     }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Builder rebuild() {
-        return new Builder((Builder.StateImpl) _savedBuilderState);
-    }
-
-    /*
-    /**********************************************************************
-    /* Life-cycle, shared "vanilla" (default configuration) instance
-    /**********************************************************************
-     */
 
     /**
-     * Accessor method for getting globally shared "default" {@link TomlMapper}
-     * instance: one that has default configuration, no modules registered, no
-     * config overrides. Usable mostly when dealing "untyped" or Tree-style
-     * content reading and writing.
+     * @since 2.5
      */
-    public static TomlMapper shared() {
-        return SharedWrapper.wrapped();
+    @Override
+    public TomlMapper copy() {
+        _checkInvalidCopy(TomlMapper.class);
+        return new TomlMapper(tokenStreamFactory().copy());
     }
 
     /*
     /**********************************************************************
-    /* Life-cycle: JDK serialization support
+    /* Configuration
     /**********************************************************************
      */
 
-    // 27-Feb-2018, tatu: Not sure why but it seems base class definitions
-    //   are not sufficient alone; sub-classes must re-define.
-    @Override
-    protected Object writeReplace() {
-        return _savedBuilderState;
+    public TomlMapper configure(TomlReadFeature f, boolean state) {
+        return state ? enable(f) : disable(f);
     }
 
-    @Override
-    protected Object readResolve() {
-        throw new IllegalStateException("Should never deserialize `"+getClass().getName()+"` directly");
+    public TomlMapper enable(TomlReadFeature f) {
+        ((TomlFactory) _jsonFactory).enable(f);
+        return this;
+    }
+
+    public TomlMapper disable(TomlReadFeature f) {
+        ((TomlFactory) _jsonFactory).disable(f);
+        return this;
     }
 
     /*
@@ -147,7 +96,7 @@ public class TomlMapper extends ObjectMapper {
 
     @Override
     public TomlFactory tokenStreamFactory() {
-        return (TomlFactory) _streamFactory;
+        return (TomlFactory) _jsonFactory;
     }
 
     /*

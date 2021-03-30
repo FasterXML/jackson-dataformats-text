@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.ContentReference;
+import com.fasterxml.jackson.core.util.RequestPayload;
 
 public class JacksonTomlParseException extends StreamReadException {
     private JacksonTomlParseException(JsonParser p, String msg, JsonLocation loc) {
@@ -12,6 +13,18 @@ public class JacksonTomlParseException extends StreamReadException {
 
     private JacksonTomlParseException(String msg, JsonLocation loc, Throwable rootCause) {
         super(msg, loc, rootCause);
+    }
+
+    @Override
+    public JacksonTomlParseException withParser(JsonParser p) {
+        this._processor = p;
+        return this;
+    }
+
+    @Override
+    public JacksonTomlParseException withRequestPayload(RequestPayload p) {
+        this._requestPayload = p;
+        return this;
     }
 
     static class ErrorContext {

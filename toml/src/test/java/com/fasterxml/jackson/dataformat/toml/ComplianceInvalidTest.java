@@ -33,7 +33,7 @@ public class ComplianceInvalidTest {
     }
 
     @Test(expected = JacksonTomlParseException.class)
-    public void test() {
-        TomlMapper.shared().readTree(path);
+    public void test() throws IOException {
+        new TomlMapper().readTree(path.toFile());
     }
 }

@@ -1,23 +1,20 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.exc.WrappedIOException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Objects;
+import org.intellij.lang.annotations.Language;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TomlMapperTest {
     @SuppressWarnings("deprecation")
@@ -36,23 +33,23 @@ public class TomlMapperTest {
     }
 
     @Test
-    public void string() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(TEST_STRING, TestClass.class));
+    public void string() throws JsonProcessingException {
+        Assert.assertEquals(TEST_OBJECT, new TomlMapper().readValue(TEST_STRING, TestClass.class));
     }
 
     @Test
-    public void bytes() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(TEST_STRING.getBytes(StandardCharsets.UTF_8), TestClass.class));
+    public void bytes() throws IOException {
+        Assert.assertEquals(TEST_OBJECT, new TomlMapper().readValue(TEST_STRING.getBytes(StandardCharsets.UTF_8), TestClass.class));
     }
 
     @Test
-    public void stream() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(new ByteArrayInputStream(TEST_STRING.getBytes(StandardCharsets.UTF_8)), TestClass.class));
+    public void stream() throws IOException {
+        Assert.assertEquals(TEST_OBJECT, new TomlMapper().readValue(new ByteArrayInputStream(TEST_STRING.getBytes(StandardCharsets.UTF_8)), TestClass.class));
     }
 
     @Test
-    public void reader() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(new StringReader(TEST_STRING), TestClass.class));
+    public void reader() throws IOException {
+        Assert.assertEquals(TEST_OBJECT, new TomlMapper().readValue(new StringReader(TEST_STRING), TestClass.class));
     }
 
     public static class TestClass {
@@ -91,7 +88,7 @@ public class TomlMapperTest {
     }
 
     @Test
-    public void bigInteger() {
+    public void bigInteger() throws JsonProcessingException {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("abc", new BigInteger("ffffffffffffffffffff", 16)),
@@ -103,17 +100,17 @@ public class TomlMapperTest {
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     @Test
-    public void bigDecimal() {
+    public void bigDecimal() throws JsonProcessingException {
         BigDecimal testValue = BigDecimal.valueOf(Double.MIN_VALUE).divide(BigDecimal.valueOf(2));
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("abc", testValue),
-                TomlMapper.shared().readTree("abc = " + testValue.toString())
+                new TomlMapper().readTree("abc = " + testValue.toString())
         );
     }
 
     @Test
-    public void temporalFieldFlag() {
+    public void temporalFieldFlag() throws JsonProcessingException {
         Assert.assertEquals(
                 LocalDate.of(2021, 3, 26),
                 TomlMapper.builder()
@@ -123,25 +120,11 @@ public class TomlMapperTest {
         );
         Assert.assertEquals(
                 "2021-03-26",
-                TomlMapper.shared().readValue("foo = 2021-03-26", ObjectField.class).foo
+                new TomlMapper().readValue("foo = 2021-03-26", ObjectField.class).foo
         );
     }
 
     public static class ObjectField {
         public Object foo;
-    }
-
-    @Test
-    public void testIoException() {
-        Assert.assertThrows(WrappedIOException.class, () -> TomlMapper.shared().readTree(new Reader() {
-            @Override
-            public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
-                throw new IOException("Test");
-            }
-
-            @Override
-            public void close() throws IOException {
-            }
-        }));
     }
 }
