@@ -18,7 +18,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     /**
      * Underlying {@link Writer} used for output.
      */
-    final protected Writer _out;
+    protected final Writer _out;
 
     /*
     /**********************************************************
