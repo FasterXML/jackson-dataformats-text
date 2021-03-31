@@ -12,7 +12,6 @@ import com.fasterxml.jackson.core.exc.StreamReadException;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
-import com.google.common.collect.Lists;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -40,13 +39,15 @@ public class BasicCSVParserTest extends ModuleTestBase {
 
     final CsvMapper MAPPER = mapperForCsv();
 
-    public void testSimpleExplicit() throws Exception {
+    public void testSimpleExplicit() throws Exception
+    {
         ObjectReader r = MAPPER.reader(SIMPLE_SCHEMA);
         _testSimpleExplicit(r, false);
         _testSimpleExplicit(r, true);
     }
 
-    private void _testSimpleExplicit(ObjectReader r, boolean useBytes) throws Exception {
+    private void _testSimpleExplicit(ObjectReader r, boolean useBytes) throws Exception
+    {
         r = r.forType(FiveMinuteUser.class);
         FiveMinuteUser user;
         final String INPUT = "Bob,Robertson,MALE,AQIDBAU=,false\n";
@@ -421,7 +422,7 @@ public class BasicCSVParserTest extends ModuleTestBase {
         String CSV = "x,y,z\n1,2,3\n4,5,6\n7,8,9";
 
         final MappingIterator<Point> iter = MAPPER.readerFor(Point.class).with(schema).readValues(CSV);
-        final ArrayList<Point> values = Lists.newArrayList(iter);
+        final List<Point> values = iter.readAll(new ArrayList<Point>());
         assertEquals(3, values.size());
         assertEquals(1, values.get(0).x);
         assertEquals(2, values.get(0).y.intValue());

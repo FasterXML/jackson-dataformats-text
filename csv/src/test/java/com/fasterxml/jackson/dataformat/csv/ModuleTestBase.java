@@ -2,6 +2,7 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -227,6 +228,15 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
 
     protected String aposToQuotes(String json) {
         return json.replace("'", "\"");
+    }
+
+    protected static Map<String, Object> mapOf(Object...strings)
+    {
+        final Map<String, Object> map = new LinkedHashMap<>();
+        for (int i = 0, end = strings.length; i < end; i += 2) {
+            map.put(strings[i].toString(), strings[i+1]);
+        }
+        return map;
     }
 
     protected void assertToken(JsonToken expToken, JsonToken actToken) {

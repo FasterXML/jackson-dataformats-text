@@ -41,13 +41,6 @@ abstractions.
       <artifactId>jackson-annotations</artifactId>
     </dependency>
 
-    <!-- and for testing -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>27.1-jre</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>
