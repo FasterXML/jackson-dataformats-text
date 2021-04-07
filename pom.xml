@@ -17,6 +17,7 @@
     <module>csv</module>
     <module>properties</module>
     <module>yaml</module>
+    <module>toml</module>
   </modules>
 
   <url>https://github.com/FasterXML/jackson-dataformats-text</url>
