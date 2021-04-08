@@ -155,3 +155,12 @@ Damian Swiecki (dswiecki@github)
 Simon Levermann (sonOfRa@github)
 * Reported #199: (csv) Empty Lists can only be String-typed in CSV
  (2.12.0)
+
+Suminda Sirinath Salpitikorala Dharmasena (sirinath@github)
+* Requested #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
+ (2.13.0)
+
+Jonas Konrad (yawkat@github)
+* Contributed #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
+ (2.13.0)
+

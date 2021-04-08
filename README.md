@@ -37,6 +37,7 @@ Currently included backends are:
 
 * [CSV](csv/)
 * [Properties](properties/)
+* [TOML](toml/) (since 2.13)
 * [YAML](yaml/)
 
 Standard supported formats that are not yet included here (but are likely added
@@ -60,11 +61,11 @@ To use these format backends Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-[FORMAT]</artifactId>
-  <version>2.12.1</version>
+  <version>2.12.2</version>
 </dependency>
 ```
 
-where `[FORMAT]` is one of supported modules (`csv`, `properties`, `yaml`)
+where `[FORMAT]` is one of supported modules (`csv`, `properties`, `toml`, `yaml`)
 
 ## More
 
