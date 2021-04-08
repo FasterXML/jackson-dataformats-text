@@ -32,7 +32,7 @@ public class ComplianceInvalidTest {
         this.path = path;
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test(expected = TomlStreamReadException.class)
     public void test() throws IOException {
         new TomlMapper().readTree(path.toFile());
     }

@@ -55,17 +55,17 @@ final class TomlGenerator extends GeneratorBase {
 
     /**
      * Intermediate buffer in which contents are buffered before
-     * being written using {@link #_out}.
+     * being written using {@code _out}.
      */
     protected char[] _outputBuffer;
 
     /**
-     * Pointer to the next available location in {@link #_outputBuffer}
+     * Pointer to the next available location in {@code _outputBuffer}
      */
     protected int _outputTail = 0;
 
     /**
-     * Offset to index after the last valid index in {@link #_outputBuffer}.
+     * Offset to index after the last valid index in {@code _outputBuffer}.
      * Typically same as length of the buffer.
      */
     protected final int _outputEnd;

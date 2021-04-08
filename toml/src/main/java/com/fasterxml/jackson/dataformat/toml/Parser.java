@@ -20,24 +20,24 @@ import java.time.temporal.Temporal;
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
-    private final JacksonTomlParseException.ErrorContext errorContext;
+    private final TomlStreamReadException.ErrorContext errorContext;
     private final int options;
     private final Lexer lexer;
 
     private TomlToken next;
 
-    private Parser(JacksonTomlParseException.ErrorContext errorContext, int options, Reader reader) throws IOException {
+    private Parser(TomlStreamReadException.ErrorContext errorContext, int options, Reader reader) throws IOException {
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, errorContext);
         this.next = lexer.yylex();
     }
 
-    public static ObjectNode parse(JacksonTomlParseException.ErrorContext errorContext, int options, Reader reader) throws IOException {
+    public static ObjectNode parse(TomlStreamReadException.ErrorContext errorContext, int options, Reader reader) throws IOException {
         return new Parser(errorContext, options, reader).parse();
     }
 
-    private TomlToken peek() throws JacksonTomlParseException {
+    private TomlToken peek() throws TomlStreamReadException {
         TomlToken here = this.next;
         if (here == null) throw errorContext.atPosition(lexer).generic("Premature end of file");
         return here;
@@ -382,7 +382,7 @@ class Parser {
         fieldRef.object.set(fieldRef.key, value);
     }
 
-    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws JacksonTomlParseException {
+    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws TomlStreamReadException {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlObjectNode) node.putObject(field);
@@ -393,7 +393,7 @@ class Parser {
         }
     }
 
-    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws JacksonTomlParseException {
+    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws TomlStreamReadException {
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlArrayNode) node.putArray(field);
@@ -414,6 +414,7 @@ class Parser {
         }
     }
 
+    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
     private static class TomlObjectNode extends ObjectNode {
         boolean closed = false;
         boolean defined = false;
@@ -423,6 +424,7 @@ class Parser {
         }
     }
 
+    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
     private static class TomlArrayNode extends ArrayNode {
         boolean closed = false;
 
@@ -435,6 +437,7 @@ class Parser {
         }
     }
 
+    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
     private static class JsonNodeFactoryImpl extends JsonNodeFactory {
         public JsonNodeFactoryImpl() {
             super(true); // exact bigdecimals

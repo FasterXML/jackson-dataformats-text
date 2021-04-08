@@ -1,21 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.FormatFeature;
-import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.format.InputAccessor;
-import com.fasterxml.jackson.core.format.MatchStrength;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.UTF8Writer;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TreeTraversingParser;
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.IOException;
@@ -26,7 +10,25 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
-public final class TomlFactory extends JsonFactory {
+import com.fasterxml.jackson.core.FormatFeature;
+import com.fasterxml.jackson.core.FormatSchema;
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.format.InputAccessor;
+import com.fasterxml.jackson.core.format.MatchStrength;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.io.UTF8Writer;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TreeTraversingParser;
+
+public final class TomlFactory extends JsonFactory
+{
+    private static final long serialVersionUID = 1L;
 
     public final static String FORMAT_NAME_TOML = "toml";
 
@@ -258,7 +260,7 @@ public final class TomlFactory extends JsonFactory {
      */
 
     private ObjectNode parse(IOContext ctxt, Reader r0) throws IOException {
-        JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.contentReference(), null);
+        TomlStreamReadException.ErrorContext errorContext = new TomlStreamReadException.ErrorContext(ctxt.contentReference(), null);
         if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
                 return Parser.parse(errorContext, _tomlParserFeatures, r);

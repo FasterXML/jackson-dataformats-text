@@ -4,7 +4,10 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 
-public class TomlMapper extends ObjectMapper {
+public class TomlMapper extends ObjectMapper
+{
+    private static final long serialVersionUID = 1L;
+
     public static class Builder extends MapperBuilder<TomlMapper, Builder> {
 
         Builder(TomlMapper mapper) {
@@ -54,9 +57,6 @@ public class TomlMapper extends ObjectMapper {
         return new Builder(new TomlMapper(streamFactory));
     }
 
-    /**
-     * @since 2.5
-     */
     @Override
     public TomlMapper copy() {
         _checkInvalidCopy(TomlMapper.class);
@@ -100,18 +100,19 @@ public class TomlMapper extends ObjectMapper {
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Helper class(es)
-    /**********************************************************
+    /**********************************************************************
      */
 
+    // To be added in 3.0
     /**
      * Helper class to contain dynamically constructed "shared" instance of
      * mapper, should one be needed via {@link #shared}.
-     */
     private final static class SharedWrapper {
         private final static TomlMapper MAPPER = TomlMapper.builder().build();
 
         public static TomlMapper wrapped() { return MAPPER; }
     }
+     */
 }

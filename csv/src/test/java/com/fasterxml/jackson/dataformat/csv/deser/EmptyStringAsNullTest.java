@@ -10,7 +10,7 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 import java.io.IOException;
 
 /**
- * Tests for {@link CsvParser.Feature#EMPTY_STRING_AS_NULL}
+ * Tests for {@code CsvParser.Feature.EMPTY_STRING_AS_NULL}
  * ({@code dataformats-text#7}).
  */
 public class EmptyStringAsNullTest
