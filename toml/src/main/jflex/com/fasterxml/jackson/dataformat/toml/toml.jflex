@@ -9,7 +9,7 @@ package com.fasterxml.jackson.dataformat.toml;
 %column
 %char
 
-%ctorarg JacksonTomlParseException.ErrorContext errorContext
+%ctorarg TomlStreamReadException.ErrorContext errorContext
 
 %init{
 this.errorContext = errorContext;
@@ -17,7 +17,7 @@ yybegin(EXPECT_EXPRESSION);
 %init}
 
 %{
-  private final JacksonTomlParseException.ErrorContext errorContext;
+  private final TomlStreamReadException.ErrorContext errorContext;
 
   private boolean trimmedNewline;
   StringBuilder stringBuilder = new StringBuilder();
