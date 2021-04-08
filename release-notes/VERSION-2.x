@@ -2,6 +2,7 @@ Project: jackson-datatypes-text
 Modules:
   jackson-dataformat-csv
   jackson-dataformat-properties (since 2.8)
+  jackson-dataformat-toml (since 2.13)
   jackson-dataformat-yaml
 
 ------------------------------------------------------------------------
@@ -10,6 +11,8 @@ Modules:
 
 2.13.0 (not yet released)
 
+#219: (toml) Add TOML (https://en.wikipedia.org/wiki/TOML) support
+ (requested by Suminda S; contributed by Jonas K)
 #240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
 
 2.12.2 (03-Mar-2021)
