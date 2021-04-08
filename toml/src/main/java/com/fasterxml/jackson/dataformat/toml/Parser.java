@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.Temporal;
 
+@SuppressWarnings("serial")
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 

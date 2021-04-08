@@ -3,10 +3,11 @@ package com.fasterxml.jackson.dataformat.toml;
 import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.util.RequestPayload;
 
 public class JacksonTomlParseException extends StreamReadException {
+    private static final long serialVersionUID = 1L;
+
     private JacksonTomlParseException(JsonParser p, String msg, JsonLocation loc) {
         super(p, msg, loc);
     }
@@ -28,10 +29,11 @@ public class JacksonTomlParseException extends StreamReadException {
     }
 
     static class ErrorContext {
-        private final ContentReference ContentReference;
+        private final Object ContentReference;
         private final JsonParser parser;
 
-        ErrorContext(ContentReference ContentReference, JsonParser parser) {
+        // (in 2.12.3 preview, no typed ContentReference)
+        ErrorContext(Object ContentReference, JsonParser parser) {
             this.ContentReference = ContentReference;
             this.parser = parser;
         }
@@ -43,7 +45,7 @@ public class JacksonTomlParseException extends StreamReadException {
         class ErrorBuilder {
             private final JsonLocation location;
 
-            private ErrorBuilder(Lexer lexer) {
+            ErrorBuilder(Lexer lexer) {
                 this.location = new JsonLocation(
                         ContentReference,
                         -1,

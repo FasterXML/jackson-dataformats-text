@@ -215,10 +215,10 @@ public class TomlGeneratorTest {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartArray();
-            generator.writePOJO(LocalDate.of(2021, 3, 27));
-            generator.writePOJO(LocalTime.of(18, 40, 15, 123456789));
-            generator.writePOJO(LocalDateTime.of(2021, 3, 27, 18, 40, 15, 123456789));
-            generator.writePOJO(OffsetDateTime.of(2021, 3, 27, 18, 40, 15, 123456789, ZoneOffset.ofHoursMinutes(1, 23)));
+            generator.writeObject(LocalDate.of(2021, 3, 27));
+            generator.writeObject(LocalTime.of(18, 40, 15, 123456789));
+            generator.writeObject(LocalDateTime.of(2021, 3, 27, 18, 40, 15, 123456789));
+            generator.writeObject(OffsetDateTime.of(2021, 3, 27, 18, 40, 15, 123456789, ZoneOffset.ofHoursMinutes(1, 23)));
             generator.writeEndArray();
             generator.writeEndObject();
         }

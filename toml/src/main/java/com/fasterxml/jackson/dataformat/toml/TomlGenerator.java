@@ -268,12 +268,12 @@ final class TomlGenerator extends GeneratorBase {
      */
 
     @Override
-    public Object currentValue() {
+    public Object getCurrentValue() {
         return _streamWriteContext.getCurrentValue();
     }
 
     @Override
-    public void assignCurrentValue(Object v) {
+    public void setCurrentValue(Object v) {
         _streamWriteContext.setCurrentValue(v);
     }
 
@@ -714,7 +714,7 @@ final class TomlGenerator extends GeneratorBase {
      */
 
     @Override
-    public void writePOJO(Object value) throws IOException {
+    public void writeObject(Object value) throws IOException {
         if (value == null) {
             // important: call method that does check value write:
             writeNull();

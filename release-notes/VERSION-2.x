@@ -8,6 +8,11 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.12.3 (not yet released)
+
+- PREVIEW of new `jackson-dataformat-toml` module: will be officially included
+  in 2.13.0 release
+
 2.12.2 (03-Mar-2021)
 
 - Need to export "com.fasterxml.jackson.dataformat.yaml.util" in `module-info.java`

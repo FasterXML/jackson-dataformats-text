@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.FormatSchema;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -27,6 +26,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 public final class TomlFactory extends JsonFactory {
+    private static final long serialVersionUID = 1L;
 
     public final static String FORMAT_NAME_TOML = "toml";
 
@@ -241,13 +241,13 @@ public final class TomlFactory extends JsonFactory {
 
     @Override
     public JsonGenerator createGenerator(Writer out) throws JacksonException {
-        IOContext ctxt = _createContext(_createContentReference(out), false);
+        IOContext ctxt = _createContext(out, false);
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, out);
     }
 
     @Override
     public JsonGenerator createGenerator(OutputStream out) throws JacksonException {
-        IOContext ctxt = _createContext(_createContentReference(out), false);
+        IOContext ctxt = _createContext(out, false);
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, new UTF8Writer(ctxt, out));
     }
 
@@ -258,7 +258,7 @@ public final class TomlFactory extends JsonFactory {
      */
 
     private ObjectNode parse(IOContext ctxt, Reader r0) throws IOException {
-        JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.contentReference(), null);
+        JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.getSourceReference(), null);
         if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
                 return Parser.parse(errorContext, _tomlParserFeatures, r);
