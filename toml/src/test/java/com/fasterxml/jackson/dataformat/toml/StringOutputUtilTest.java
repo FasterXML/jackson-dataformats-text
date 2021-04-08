@@ -12,7 +12,7 @@ public class StringOutputUtilTest {
         // this test attempts single-character writes for *all* code points, and sees whether they're read back
         // correctly.
 
-        JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(null, null);
+        TomlStreamReadException.ErrorContext errorContext = new TomlStreamReadException.ErrorContext(null, null);
 
         // reused for performance
         StringBuilder builder = new StringBuilder();

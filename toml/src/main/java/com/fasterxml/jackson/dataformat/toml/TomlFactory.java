@@ -1,16 +1,19 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
+
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.UTF8Writer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-
-public final class TomlFactory extends TextualTSFactory {
+public final class TomlFactory extends TextualTSFactory
+{
+    private static final long serialVersionUID = 1L;
 
     public final static String FORMAT_NAME_TOML = "toml";
 
@@ -199,7 +202,7 @@ public final class TomlFactory extends TextualTSFactory {
      */
 
     private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
-        JacksonTomlParseException.ErrorContext errorContext = new JacksonTomlParseException.ErrorContext(ctxt.contentReference(), null);
+        TomlStreamReadException.ErrorContext errorContext = new TomlStreamReadException.ErrorContext(ctxt.contentReference(), null);
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {

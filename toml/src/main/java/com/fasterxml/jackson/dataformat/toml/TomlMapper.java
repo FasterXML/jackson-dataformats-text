@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 
-public class TomlMapper extends ObjectMapper {
+public class TomlMapper extends ObjectMapper
+{
+    private static final long serialVersionUID = 1L;
+
     public static class Builder extends MapperBuilder<TomlMapper, Builder>
     {
         public Builder(TomlFactory f) {
@@ -82,7 +85,7 @@ public class TomlMapper extends ObjectMapper {
         this(new Builder(f));
     }
 
-    private TomlMapper(Builder b) {
+    TomlMapper(Builder b) {
         super(b);
     }
 
@@ -151,9 +154,9 @@ public class TomlMapper extends ObjectMapper {
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Helper class(es)
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**

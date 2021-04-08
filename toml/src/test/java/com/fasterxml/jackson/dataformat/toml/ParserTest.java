@@ -36,7 +36,7 @@ public class ParserTest {
     }
 
     private ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
-        return Parser.parse(new JacksonTomlParseException.ErrorContext(null, null), opts, new StringReader(toml));
+        return Parser.parse(new TomlStreamReadException.ErrorContext(null, null), opts, new StringReader(toml));
     }
 
     @SuppressWarnings("deprecation")
@@ -45,7 +45,7 @@ public class ParserTest {
 
     @Test
     public void unclosed() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("EOF");
         toml("\"abc");
     }
@@ -59,12 +59,12 @@ public class ParserTest {
                 toml("key = \"value\""));
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test(expected = TomlStreamReadException.class)
     public void unspecified() throws IOException {
         toml("key =");
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test(expected = TomlStreamReadException.class)
     public void singleLine() throws IOException {
         toml("first = \"Tom\" last = \"Preston-Werner\"");
     }
@@ -99,7 +99,7 @@ public class ParserTest {
                         "'quoted \"value\"' = \"value\""));
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test(expected = TomlStreamReadException.class)
     public void bareKeyNonEmpty() throws IOException {
         toml("= \"no key name\"");
     }
@@ -140,7 +140,7 @@ public class ParserTest {
 
     @Test
     public void collision() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("name = \"Tom\"\n" +
                 "name = \"Pradyun\"");
@@ -148,7 +148,7 @@ public class ParserTest {
 
     @Test
     public void collisionQuoted() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("spelling = \"favorite\"\n" +
                 "\"spelling\" = \"favourite\"");
@@ -168,7 +168,7 @@ public class ParserTest {
 
     @Test
     public void collisionNested() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type NUMBER");
         toml("# This defines the value of fruit.apple to be an integer.\n" +
                 "fruit.apple = 1\n" +
@@ -271,7 +271,7 @@ public class ParserTest {
 
     @Test
     public void missingQuotesEscape() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\"");
     }
@@ -373,21 +373,21 @@ public class ParserTest {
 
     @Test
     public void invalidFloat1() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown token");
         toml("invalid_float_1 = .7");
     }
 
     @Test
     public void invalidFloat2() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_2 = 7.");
     }
 
     @Test
     public void invalidFloat3() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_3 = 3.e+20");
     }
@@ -567,7 +567,7 @@ public class ParserTest {
 
     @Test
     public void duplicateTable() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
@@ -578,7 +578,7 @@ public class ParserTest {
 
     @Test
     public void mixedTable() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type STRING");
         toml("[fruit]\n" +
                 "apple = \"red\"\n" +
@@ -639,7 +639,7 @@ public class ParserTest {
 
     @Test
     public void dottedCollisionRoot() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("fruit.apple.color = \"red\"\n" +
                 "# Defines a table named fruit\n" +
@@ -652,7 +652,7 @@ public class ParserTest {
 
     @Test
     public void dottedCollisionNest() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
                 "apple.color = \"red\"\n" +
@@ -691,7 +691,7 @@ public class ParserTest {
 
     @Test
     public void inlineTableSelfContained() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Object already closed");
         toml("[product]\n" +
                 "type = { name = \"Nail\" }\n" +
@@ -700,7 +700,7 @@ public class ParserTest {
 
     @Test
     public void inlineTableSelfContained2() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("[product]\n" +
                 "type.name = \"Nail\"\n" +
@@ -779,7 +779,7 @@ public class ParserTest {
 
     @Test
     public void arrayTableStillMissing() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
                 "[fruit.physical]  # subtable, but to which parent element should it belong?\n" +
@@ -793,7 +793,7 @@ public class ParserTest {
 
     @Test
     public void arrayInlineAndTable() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Array already finished");
         toml("# INVALID TOML DOC\n" +
                 "fruits = []\n" +
@@ -803,7 +803,7 @@ public class ParserTest {
 
     @Test
     public void arrayCollision1() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type ARRAY");
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
@@ -819,7 +819,7 @@ public class ParserTest {
 
     @Test
     public void arrayCollision2() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
                 "[[fruits]]\n" +
@@ -851,7 +851,7 @@ public class ParserTest {
 
     @Test
     public void inlineTableTrailingComma() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Trailing comma not permitted for inline tables");
         toml("foo = {bar = 'baz',}");
     }
@@ -866,7 +866,7 @@ public class ParserTest {
 
     @Test
     public void inlineTableNl() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Newline not permitted here");
         toml("foo = {bar = 'baz',\n" +
                 "a = 'b'}");
@@ -883,7 +883,7 @@ public class ParserTest {
 
     @Test
     public void extendedUnicodeEscapeInvalid() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Invalid code point ffffffff");
         toml("foo = \"\\Uffffffff\"");
     }
@@ -977,7 +977,7 @@ public class ParserTest {
 
     @Test
     public void controlCharInComment() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Illegal control character");
         // https://github.com/toml-lang/toml/pull/812
         toml("a = \"0x7f\" # \u007F");
@@ -985,7 +985,7 @@ public class ParserTest {
 
     @Test
     public void controlCharInLiteralString() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Illegal control character");
         // Not explicit in spec, but only in the abnf
         toml("a = '\u007F'");
@@ -993,28 +993,28 @@ public class ParserTest {
 
     @Test
     public void zeroPrefixedInt() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Zero-prefixed ints are not valid");
         toml("foo = 01");
     }
 
     @Test
     public void signedBase() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("foo = +0b1");
     }
 
     @Test
     public void illegalComment() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Comment not permitted here");
         toml("foo = # bar");
     }
 
     @Test
     public void unknownEscape() throws IOException {
-        expectedException.expect(JacksonTomlParseException.class);
+        expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown escape sequence");
         toml("foo = \"\\k\"");
     }

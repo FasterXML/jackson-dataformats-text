@@ -1,9 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,6 +7,10 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
 public class ComplianceInvalidTest {
@@ -32,7 +32,7 @@ public class ComplianceInvalidTest {
         this.path = path;
     }
 
-    @Test(expected = JacksonTomlParseException.class)
+    @Test(expected = TomlStreamReadException.class)
     public void test() {
         TomlMapper.shared().readTree(path);
     }

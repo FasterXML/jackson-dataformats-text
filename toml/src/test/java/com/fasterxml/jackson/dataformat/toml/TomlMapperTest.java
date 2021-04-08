@@ -1,14 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.exc.WrappedIOException;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import org.intellij.lang.annotations.Language;
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
@@ -18,6 +9,15 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Objects;
+
+import com.fasterxml.jackson.core.exc.WrappedIOException;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TomlMapperTest {
     @SuppressWarnings("deprecation")
