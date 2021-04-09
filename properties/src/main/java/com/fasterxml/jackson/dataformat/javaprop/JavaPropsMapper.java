@@ -9,8 +9,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
 
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.CoercionAction;
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 import com.fasterxml.jackson.databind.ser.SerializationContextExt;
@@ -29,6 +32,14 @@ public class JavaPropsMapper extends ObjectMapper
     {
         public Builder(JavaPropsFactory f) {
             super(f);
+            // 09-Apr-2021, tatu: [dataformats-text#255]: take empty String to
+            //    mean `null` where applicable; also accept Blank same way
+            enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+
+            _coercionConfigs.defaultCoercions()
+                .setAcceptBlankAsEmpty(Boolean.TRUE)
+                .setCoercion(CoercionInputShape.EmptyString, CoercionAction.AsEmpty)
+            ;
         }
 
         public Builder(StateImpl state) {

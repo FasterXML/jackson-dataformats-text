@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.type.LogicalType;
 
 import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 
-// 2020-12-18, tatu: Modified from "jackson-databind" version: XML
+// 2020-12-18, tatu: Modified from "jackson-databind" version: Properties
 //   backend MUST NOT prevent coercion from String since Properties
 //   values are fundamentally textual and only have String values
 public class CoerceToBooleanTest
@@ -34,7 +34,7 @@ public class CoerceToBooleanTest
 
         public void setValue(AtomicBoolean v) { value = v; }
     }
-    
+
     private final ObjectMapper DEFAULT_MAPPER = newPropertiesMapper();
 
     private final ObjectMapper MAPPER_STRING_TO_BOOLEAN_FAIL

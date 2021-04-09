@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public abstract class ModuleTestBase extends junit.framework.TestCase
 {
     @JsonPropertyOrder({ "topLeft", "bottomRight" })
-    static class Rectangle {
+    protected static class Rectangle {
         public Point topLeft;
         public Point bottomRight;
 
@@ -28,7 +28,7 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     }
 
     @JsonPropertyOrder({ "x", "y" })
-    static class Point {
+    protected static class Point {
         public int x, y;
         
         protected Point() { }
@@ -38,7 +38,7 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         }
     }
 
-    static class Points {
+    protected static class Points {
         public List<Point> p;
 
         protected Points() { }
