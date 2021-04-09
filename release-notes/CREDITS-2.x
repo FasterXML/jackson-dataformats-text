@@ -4,7 +4,12 @@ text dataformats project, version 2.x
 
 (note: for older credits, check out release notes for 1.x versions)
 
-Tatu Saloranta, tatu.saloranta@iki.fi: author
+* Jonas Konrad (@yawkat): author of TOML module
+* Tatu Saloranta, tatu.saloranta@iki.fi: author of CSV, Properties and YAML modules
+
+--------------------------------------------------------------------------------
+Credits for specific contributions
+--------------------------------------------------------------------------------
 
 Simone Locci (pimuzzo@github)
 

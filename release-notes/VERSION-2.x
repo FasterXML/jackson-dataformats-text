@@ -5,6 +5,11 @@ Modules:
   jackson-dataformat-toml (since 2.13)
   jackson-dataformat-yaml
 
+Active Maintainers:
+
+* Jonas Konrad (@yawkat): author of TOML module
+* Tatu Saloranta, tatu.saloranta@iki.fi: author of CSV, Properties and YAML modules
+
 ------------------------------------------------------------------------
 === Releases ===
 ------------------------------------------------------------------------
