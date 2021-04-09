@@ -181,7 +181,10 @@ public final class TomlFactory extends TextualTSFactory
 
     @Override
     protected JsonGenerator _createGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt, Writer out) throws JacksonException {
-        return new TomlGenerator(writeCtxt, ioCtxt, writeCtxt.getStreamWriteFeatures(_streamWriteFeatures), out);
+        return new TomlGenerator(writeCtxt, ioCtxt,
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
+                out);
     }
 
     @Override
