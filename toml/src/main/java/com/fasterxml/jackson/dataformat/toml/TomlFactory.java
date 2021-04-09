@@ -242,12 +242,14 @@ public final class TomlFactory extends JsonFactory
 
     @Override
     protected JsonGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
-        return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, out);
+        return new TomlGenerator(ctxt, _generatorFeatures, _tomlGeneratorFeatures,
+                _objectCodec, out);
     }
 
     @Override
     protected JsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
-        return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, new UTF8Writer(ctxt, out));
+        return new TomlGenerator(ctxt, _generatorFeatures, _tomlGeneratorFeatures,
+                _objectCodec, new UTF8Writer(ctxt, out));
     }
 
     /*
