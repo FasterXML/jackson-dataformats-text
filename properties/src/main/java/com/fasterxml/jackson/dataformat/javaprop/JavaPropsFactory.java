@@ -363,7 +363,6 @@ public class JavaPropsFactory extends JsonFactory
     {
         return new WriterBackedGenerator(ctxt, _createWriter(out, null, ctxt),
                 stdFeat, _objectCodec);
-                
     }
 
     /*

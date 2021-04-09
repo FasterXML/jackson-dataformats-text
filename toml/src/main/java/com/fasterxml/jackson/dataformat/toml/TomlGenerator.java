@@ -34,7 +34,6 @@ final class TomlGenerator extends GeneratorBase {
      */
     protected final Writer _out;
 
-
     /*
     /**********************************************************************
     /* Output state
@@ -78,8 +77,9 @@ final class TomlGenerator extends GeneratorBase {
     /**********************************************************************
      */
 
-    public TomlGenerator(IOContext ioCtxt, int stdFeatures, ObjectCodec codec, Writer out) {
-        super(stdFeatures, codec);
+    public TomlGenerator(IOContext ioCtxt, int stdReadFeatures, int tomlReadFeatures,
+            ObjectCodec codec, Writer out) {
+        super(stdReadFeatures, codec);
         _ioContext = ioCtxt;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
@@ -377,7 +377,7 @@ final class TomlGenerator extends GeneratorBase {
     @Override
     public void writeEndObject() throws IOException {
         if (!_streamWriteContext.inObject()) {
-            _reportError("Current context not an Ibject but " + _streamWriteContext.typeDesc());
+            _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
         if (_streamWriteContext._inline) {
             writeRaw('}');

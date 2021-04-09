@@ -1,6 +1,9 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -235,5 +238,39 @@ public class TomlGeneratorTest {
             generator.writeEndObject();
         }
         Assert.assertEquals("'foo bar' = 123\n", w.toString());
+    }
+
+    // [dataformats-text#258]: byte-backed output not flushing?
+    @Test
+    public void nestedObjectValues() throws IOException {
+        final ObjectMapper mapper = new TomlMapper();
+        final String EXP_TOML = "point.x = 19\n"
+                +"point.y = 72\n";
+
+        // Try both String-/char- and byte-backed variants
+
+        StringWriter sw = new StringWriter();
+        try (JsonGenerator tomlG = mapper.createGenerator(sw)) {
+            _writeNested(tomlG);
+        }
+        Assert.assertEquals(EXP_TOML, sw.toString());
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (JsonGenerator tomlG = mapper.createGenerator(bytes)) {
+            _writeNested(tomlG);
+        }
+        Assert.assertEquals(EXP_TOML, bytes.toString("UTF-8"));
+    }
+
+    private void _writeNested(JsonGenerator g) throws IOException {
+        g.writeStartObject();
+        g.writeFieldName("point");
+        g.writeStartObject();
+        g.writeFieldName("x");
+        g.writeNumber(19);
+        g.writeFieldName("y");
+        g.writeNumber(72);
+        g.writeEndObject();
+        g.writeEndObject();
     }
 }
