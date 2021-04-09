@@ -17,7 +17,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
 {
     // As an optimization we try coalescing short writes into
     // buffer; but pass longer directly.
-    final protected static int SHORT_WRITE = 100;
+    protected final static int SHORT_WRITE = 100;
 
     /**
      * Since our context object does NOT implement standard write context, need
@@ -36,7 +36,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
 
     /**
      * Definition of columns being written, if available.
