@@ -266,4 +266,15 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n42: answer",
                 MINIM_MAPPER.writeValueAsString(intKeyMap).trim());
     }
+
+    // [dataformats-text#246]
+    public void testMinimizeQuotesSpecialCharsMultiLine() throws Exception
+    {
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("key", "first\nsecond: third");
+        String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
+
+        assertEquals("---\n" +
+                "key: |-\n  first\n  second: third", yaml);
+    }
 }

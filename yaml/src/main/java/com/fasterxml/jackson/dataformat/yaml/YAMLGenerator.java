@@ -102,7 +102,8 @@ public class YAMLGenerator extends GeneratorBase
         ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
 
         /**
-         * Whether for string containing newlines a <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
+         * Whether for string containing newlines a
+         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
          * should be used. This automatically enabled when {@link #MINIMIZE_QUOTES} is set.
          * <p>
          * The content of such strings is limited to printable characters according to the rules of
@@ -213,9 +214,6 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    /**
-     * Object that keeps track of the current contextual state of the generator.
-     */
     protected SimpleStreamWriteContext _streamWriteContext;
 
     protected Emitter _emitter;
@@ -364,6 +362,12 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
+    public final boolean isEnabled(Feature f) {
+        return (_formatWriteFeatures & f.getMask()) != 0;
+    }
+
+    // Should not be needed in 3.0
+/*    
     public YAMLGenerator enable(Feature f) {
         _formatWriteFeatures |= f.getMask();
         return this;
@@ -374,11 +378,7 @@ public class YAMLGenerator extends GeneratorBase
         return this;
     }
 
-    public final boolean isEnabled(Feature f) {
-        return (_formatWriteFeatures & f.getMask()) != 0;
-    }
-
-    public YAMLGenerator configure(Feature f, boolean state) {
+    public YAMLGenerator configure(YAMLGenerator.Feature f, boolean state) {
         if (state) {
             enable(f);
         } else {
@@ -386,6 +386,7 @@ public class YAMLGenerator extends GeneratorBase
         }
         return this;
     }
+*/
 
     /*
     /**********************************************************************
@@ -393,9 +394,7 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    /* And then methods overridden to make final, streamline some
-     * aspects...
-     */
+    // And then methods overridden to make final, streamline some aspects...
 
     @Override
     public final void writeName(String name) throws JacksonException
@@ -577,21 +576,23 @@ public class YAMLGenerator extends GeneratorBase
             _writeScalar(text, "string", STYLE_QUOTED);
             return;
         }
+
         ScalarStyle style;
         if (_cfgMinimizeQuotes) {
+            if (text.indexOf('\n') >= 0) {
+                style = STYLE_LITERAL;
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
-            if (_quotingChecker.needToQuoteValue(text)
+            } else if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                         && PLAIN_NUMBER_P.matcher(text).matches())
                 ) {
                 style = STYLE_QUOTED;
-            } else if (text.indexOf('\n') >= 0) {
-                style = STYLE_LITERAL;
             } else {
                 style = STYLE_PLAIN;
             }
         } else {
-            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures) && text.indexOf('\n') >= 0) {
+            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures)
+                    && text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
             } else {
                 style = STYLE_QUOTED;

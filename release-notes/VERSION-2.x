@@ -15,6 +15,11 @@ Modules:
  (requested by Suminda S; contributed by Jonas K)
 #240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
 
+2.12.3 (not yet released)
+
+#246: (yaml) Special characters shouldn't force double quoting for multi-line strings
+ (fix proposed by Alex H)
+
 2.12.2 (03-Mar-2021)
 
 - Need to export "com.fasterxml.jackson.dataformat.yaml.util" in `module-info.java`
