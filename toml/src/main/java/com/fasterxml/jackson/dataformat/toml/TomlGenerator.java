@@ -413,8 +413,7 @@ final class TomlGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len)
-            throws IOException {
+    public void writeString(char[] text, int offset, int len) throws IOException {
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
         writeValueEnd();

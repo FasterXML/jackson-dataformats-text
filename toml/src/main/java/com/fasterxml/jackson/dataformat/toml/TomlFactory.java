@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.FormatFeature;
 import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -242,14 +241,12 @@ public final class TomlFactory extends JsonFactory
      */
 
     @Override
-    public JsonGenerator createGenerator(Writer out) throws JacksonException {
-        IOContext ctxt = _createContext(_createContentReference(out), false);
+    protected JsonGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, out);
     }
 
     @Override
-    public JsonGenerator createGenerator(OutputStream out) throws JacksonException {
-        IOContext ctxt = _createContext(_createContentReference(out), false);
+    protected JsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, new UTF8Writer(ctxt, out));
     }
 
