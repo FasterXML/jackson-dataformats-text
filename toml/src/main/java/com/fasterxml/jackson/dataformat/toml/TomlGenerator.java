@@ -1,10 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.VersionUtil;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
@@ -16,7 +11,13 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-final class TomlGenerator extends GeneratorBase {
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.base.GeneratorBase;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.VersionUtil;
+
+final class TomlGenerator extends GeneratorBase
+{
     // As an optimization we try coalescing short writes into
     // buffer; but pass longer directly.
     protected final static int SHORT_WRITE = 100;
@@ -420,7 +421,7 @@ final class TomlGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
+    public void writeRawUTF8String(byte[] text, int offset, int len) throws IOException {
         _reportUnsupportedOperation();
     }
 
@@ -569,7 +570,7 @@ final class TomlGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeNull() throws JacksonException {
+    public void writeNull() throws IOException {
         throw new UnsupportedOperationException("Nulls are not supported by TOML");
     }
 

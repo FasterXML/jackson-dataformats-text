@@ -6,7 +6,8 @@ import com.fasterxml.jackson.core.FormatFeature;
  * Enumeration that defines all togglable features for TOML parsers.
  */
 public enum TomlReadFeature
-        implements FormatFeature {
+    implements FormatFeature
+{
     PARSE_JAVA_TIME(false);
 
     final boolean _defaultState;
