@@ -153,8 +153,6 @@ public final class TomlFactory extends JsonFactory {
         return MatchStrength.INCONCLUSIVE;
     }
 
-
-
     /*
     /**********************************************************
     /* Configuration, parser settings
@@ -203,6 +201,56 @@ public final class TomlFactory extends JsonFactory {
     @Override
     public int getFormatParserFeatures() {
         return _tomlParserFeatures;
+    }
+
+    /*
+    /**********************************************************
+    /* Configuration, generator settings
+    /**********************************************************
+     */
+
+    /**
+     * Method for enabling or disabling specified generator feature
+     * (check {@link TomlWriteFeature} for list of features)
+     */
+    public final TomlFactory configure(TomlWriteFeature f, boolean state)
+    {
+        if (state) {
+            enable(f);
+        } else {
+            disable(f);
+        }
+        return this;
+    }
+
+    /**
+     * Method for enabling specified generator feature
+     * (check {@link TomlWriteFeature} for list of features)
+     */
+    public TomlFactory enable(TomlWriteFeature f) {
+        _tomlGeneratorFeatures |= f.getMask();
+        return this;
+    }
+
+    /**
+     * Method for disabling specified generator features
+     * (check {@link TomlWriteFeature} for list of features)
+     */
+    public TomlFactory disable(TomlWriteFeature f) {
+        _tomlGeneratorFeatures &= ~f.getMask();
+        return this;
+    }
+
+    /**
+     * Checked whether specified generator feature is enabled.
+     */
+    public final boolean isEnabled(TomlWriteFeature f) {
+        return (_tomlGeneratorFeatures & f.getMask()) != 0;
+    }
+
+    @Override
+    public int getFormatGeneratorFeatures() {
+        return _tomlGeneratorFeatures;
     }
 
     /*
