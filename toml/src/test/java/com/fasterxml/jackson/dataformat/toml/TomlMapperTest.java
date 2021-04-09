@@ -7,9 +7,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import org.intellij.lang.annotations.Language;
@@ -128,5 +131,30 @@ public class TomlMapperTest {
 
     public static class ObjectField {
         public Object foo;
+    }
+
+    @Test
+    public void nullCoercion() throws JsonProcessingException {
+        Assert.assertNull(TomlMapper.builder().build().readValue("foo = ''", ComplexField.class).foo);
+    }
+
+    public static class ComplexField {
+        public ComplexField foo;
+    }
+
+    @Test
+    public void nullEnabledDefault() throws JsonProcessingException {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder().build().writeValueAsString(cf));
+    }
+
+    @Test(expected = JsonMappingException.class)
+    public void nullDisable() throws JsonProcessingException {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder()
+                .enable(TomlWriteFeature.FAIL_ON_NULL_WRITE)
+                .build().writeValueAsString(cf));
     }
 }

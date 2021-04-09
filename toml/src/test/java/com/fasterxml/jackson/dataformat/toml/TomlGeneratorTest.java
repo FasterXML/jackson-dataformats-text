@@ -236,4 +236,27 @@ public class TomlGeneratorTest {
         }
         Assert.assertEquals("'foo bar' = 123\n", w.toString());
     }
+
+    @Test
+    public void nullEnabledDefault() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("foo");
+            generator.writeNull();
+            generator.writeEndObject();
+        }
+        Assert.assertEquals("foo = ''\n", w.toString());
+    }
+
+    @Test(expected = TomlStreamWriteException.class)
+    public void nullDisable() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = new TomlMapper().enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("foo");
+            generator.writeNull();
+            generator.writeEndObject();
+        }
+    }
 }
