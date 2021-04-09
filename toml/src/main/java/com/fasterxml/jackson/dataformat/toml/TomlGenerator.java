@@ -55,17 +55,17 @@ final class TomlGenerator extends GeneratorBase {
 
     /**
      * Intermediate buffer in which contents are buffered before
-     * being written using {@link #_out}.
+     * being written using {@code _out}.
      */
     protected char[] _outputBuffer;
 
     /**
-     * Pointer to the next available location in {@link #_outputBuffer}
+     * Pointer to the next available location in {@code _outputBuffer}
      */
     protected int _outputTail = 0;
 
     /**
-     * Offset to index after the last valid index in {@link #_outputBuffer}.
+     * Offset to index after the last valid index in {@code _outputBuffer}.
      * Typically same as length of the buffer.
      */
     protected final int _outputEnd;
@@ -412,15 +412,14 @@ final class TomlGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len)
-            throws IOException {
+    public void writeString(char[] text, int offset, int len) throws IOException {
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
         writeValueEnd();
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
+    public void writeRawUTF8String(byte[] text, int offset, int len) throws IOException {
         _reportUnsupportedOperation();
     }
 
@@ -569,7 +568,7 @@ final class TomlGenerator extends GeneratorBase {
     }
 
     @Override
-    public void writeNull() throws JacksonException {
+    public void writeNull() throws IOException {
         throw new UnsupportedOperationException("Nulls are not supported by TOML");
     }
 

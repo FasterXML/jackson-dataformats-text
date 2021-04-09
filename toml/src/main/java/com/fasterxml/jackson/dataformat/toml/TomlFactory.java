@@ -1,8 +1,17 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+
 import com.fasterxml.jackson.core.FormatFeature;
 import com.fasterxml.jackson.core.FormatSchema;
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -15,15 +24,6 @@ import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.UTF8Writer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 
 public final class TomlFactory extends JsonFactory {
     private static final long serialVersionUID = 1L;
@@ -240,14 +240,12 @@ public final class TomlFactory extends JsonFactory {
      */
 
     @Override
-    public JsonGenerator createGenerator(Writer out) throws JacksonException {
-        IOContext ctxt = _createContext(out, false);
+    protected JsonGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, out);
     }
 
     @Override
-    public JsonGenerator createGenerator(OutputStream out) throws JacksonException {
-        IOContext ctxt = _createContext(out, false);
+    protected JsonGenerator _createUTF8Generator(OutputStream out, IOContext ctxt) throws IOException {
         return new TomlGenerator(ctxt, _tomlGeneratorFeatures, _objectCodec, new UTF8Writer(ctxt, out));
     }
 
