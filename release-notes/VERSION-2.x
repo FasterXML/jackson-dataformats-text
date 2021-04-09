@@ -19,6 +19,8 @@ Active Maintainers:
 #219: (toml) Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (requested by Suminda S; contributed by Jonas K)
 #240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
+#255: (properties) Ensure that empty String to null/empty works by default
+  for Properties format
 
 2.12.3 (not yet released)
 
