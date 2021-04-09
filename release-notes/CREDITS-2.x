@@ -155,3 +155,9 @@ Damian Swiecki (dswiecki@github)
 Simon Levermann (sonOfRa@github)
 * Reported #199: (csv) Empty Lists can only be String-typed in CSV
  (2.12.0)
+
+Alex Heneveld (ahgittin@github)
+* Reported and proposed fix for #246: (yaml) Special characters shouldn't force double quoting
+   for multi-line strings
+ (2.12.3)
+

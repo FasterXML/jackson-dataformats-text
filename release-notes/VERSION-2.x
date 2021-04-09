@@ -10,6 +10,8 @@ Modules:
 
 2.12.3 (not yet released)
 
+#246: (yaml) Special characters shouldn't force double quoting for multi-line strings
+ (fix proposed by Alex H)
 - PREVIEW of new `jackson-dataformat-toml` module: will be officially included
   in 2.13.0 release
 

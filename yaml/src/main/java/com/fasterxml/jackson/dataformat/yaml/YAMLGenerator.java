@@ -97,7 +97,8 @@ public class YAMLGenerator extends GeneratorBase
         ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
 
         /**
-         * Whether for string containing newlines a <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
+         * Whether for string containing newlines a
+         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
          * should be used. This automatically enabled when {@link #MINIMIZE_QUOTES} is set.
          * <p>
          * The content of such strings is limited to printable characters according to the rules of
@@ -170,9 +171,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal constants
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
@@ -181,9 +182,9 @@ public class YAMLGenerator extends GeneratorBase
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     final protected IOContext _ioContext;
@@ -218,9 +219,9 @@ public class YAMLGenerator extends GeneratorBase
     private final static DumperOptions.ScalarStyle STYLE_PLAIN = DumperOptions.ScalarStyle.PLAIN;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output state
-    /**********************************************************
+    /**********************************************************************
      */
 
     protected Emitter _emitter;
@@ -313,9 +314,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Versioned
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -324,9 +325,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Overridden methods, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -388,26 +389,26 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Extended API, configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
-    public YAMLGenerator enable(Feature f) {
+    public YAMLGenerator enable(YAMLGenerator.Feature f) {
         _formatFeatures |= f.getMask();
         return this;
     }
 
-    public YAMLGenerator disable(Feature f) {
+    public YAMLGenerator disable(YAMLGenerator.Feature f) {
         _formatFeatures &= ~f.getMask();
         return this;
     }
 
-    public final boolean isEnabled(Feature f) {
+    public final boolean isEnabled(YAMLGenerator.Feature f) {
         return (_formatFeatures & f.getMask()) != 0;
     }
 
-    public YAMLGenerator configure(Feature f, boolean state) {
+    public YAMLGenerator configure(YAMLGenerator.Feature f, boolean state) {
         if (state) {
             enable(f);
         } else {
@@ -465,9 +466,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: low-level I/O
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -507,9 +508,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API: structural output
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -569,9 +570,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, textual
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -590,19 +591,20 @@ public class YAMLGenerator extends GeneratorBase
         }
         DumperOptions.ScalarStyle style;
         if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures)) {
+            if (text.indexOf('\n') >= 0) {
+                style = STYLE_LITERAL;
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
-            if (_quotingChecker.needToQuoteValue(text)
+            } else if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
                         && PLAIN_NUMBER_P.matcher(text).matches())
                 ) {
                 style = STYLE_QUOTED;
-            } else if (text.indexOf('\n') >= 0) {
-                style = STYLE_LITERAL;
             } else {
                 style = STYLE_PLAIN;
             }
         } else {
-            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures) && text.indexOf('\n') >= 0) {
+            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures)
+                    && text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
             } else {
                 style = STYLE_QUOTED;
@@ -639,9 +641,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, unprocessed ("raw")
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -680,9 +682,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, base64-encoded binary
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -700,9 +702,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Output method implementations, scalars
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -788,9 +790,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, write methods, Native Ids
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -833,9 +835,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Implementations for methods from base class
-    /**********************************************************
+    /**********************************************************************
      */
 
     @Override
@@ -863,9 +865,9 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Internal methods
-    /**********************************************************
+    /**********************************************************************
      */
 
     // Implicit means that (type) tags won't be shown, right?
