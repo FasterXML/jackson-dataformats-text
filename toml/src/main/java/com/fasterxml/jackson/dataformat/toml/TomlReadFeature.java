@@ -8,6 +8,14 @@ import com.fasterxml.jackson.core.FormatFeature;
 public enum TomlReadFeature
     implements FormatFeature
 {
+    /**
+     * TOML has special syntax for time types corresponding to {@link java.time.LocalDate}, {@link java.time.LocalTime},
+     * {@link java.time.LocalDateTime} and {@link java.time.OffsetDateTime}. By default, the TOML parser just returns
+     * them as strings.
+     * <p>
+     * When this option is set, these time types will be parsed to their proper {@code java.time} counterparts and
+     * appear as {@link com.fasterxml.jackson.core.JsonToken#VALUE_EMBEDDED_OBJECT} tokens.
+     */
     PARSE_JAVA_TIME(false);
 
     final boolean _defaultState;
