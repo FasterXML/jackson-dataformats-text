@@ -126,7 +126,7 @@ public final class TomlFactory extends TextualTSFactory
 
     @Override
     public Class<? extends FormatFeature> getFormatWriteFeatureType() {
-        return null;
+        return TomlWriteFeature.class;
     }
 
     @Override
