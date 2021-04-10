@@ -1,0 +1,452 @@
+package com.fasterxml.jackson.dataformat.toml;
+
+import java.io.*;
+
+import com.fasterxml.jackson.core.io.IOContext;
+
+/**
+ * Optimized Reader that reads UTF-8 encoded content from an input stream.
+ * Content may come either from a static {@code byte[]} buffer or
+ * {@link java.io.InputStream}.
+ */
+public final class UTF8Reader
+    extends Reader
+{
+    /**
+     * IO context to use for returning input buffer, iff
+     * buffer is to be recycled when input ends.
+     */
+    private final IOContext _ioContext;
+
+    private InputStream _inputSource;
+
+    private final boolean _autoClose;
+
+    private byte[] _inputBuffer;
+
+    /**
+     * Pointer to the next available byte (if any), iff less than
+     * <code>mByteBufferEnd</code>
+     */
+    private int _inputPtr;
+
+    /**
+     * Pointed to the end marker, that is, position one after the last
+     * valid available byte.
+     */
+    private int _inputEnd;
+
+    /**
+     * Decoded first character of a surrogate pair, if one needs to be buffered
+     */
+    private int _surrogate = -1;
+
+    /**
+     * Total read character count; used for error reporting purposes
+     */
+    private int _charCount = 0;
+
+    /**
+     * Total read byte count; used for error reporting purposes
+     */
+    private int _byteCount = 0;
+
+    /*
+    /**********************************************************************
+    /* Life-cycle
+    /**********************************************************************
+     */
+
+    // Constructor used when caller gives us
+    private UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose,
+            byte[] buf, int ptr, int end)
+    {
+        super((in == null) ? buf : in);
+        _ioContext = ctxt;
+        _inputSource = in;
+        _inputBuffer = buf;
+        _inputPtr = ptr;
+        _inputEnd = end;
+        _autoClose = autoClose;
+    }
+
+    // Factory method used when dealing with InputStream; will need
+    // to allocate and manage processing buffers
+    public static UTF8Reader construct(IOContext ctxt, InputStream in, boolean autoClose)
+    {
+        final byte[] buf = ctxt.allocReadIOBuffer();
+        return new UTF8Reader(ctxt, in, autoClose, buf, 0, 0);
+    }
+
+    // Factory method used when user passes us input in static pre-filled
+    // input buffer: no InputStream nor buffer recycling used
+    public static UTF8Reader construct(byte[] buf, int ptr, int len)
+    {
+        return new UTF8Reader(null, null, true, buf, ptr, ptr+len);
+    }
+
+    /**
+     * This method should be called along with (or instead of) normal
+     * close. After calling this method, no further reads should be tried.
+     * Method will try to recycle read buffers (if any).
+     */
+    private void freeBuffers()
+    {
+        if (_ioContext != null) {
+            byte[] buf = _inputBuffer;
+            if (buf != null) {
+                _inputBuffer = null;
+                _ioContext.releaseReadIOBuffer(buf);
+            }
+        }
+    }
+
+    /*
+    /**********************************************************************
+    /* Reader API
+    /**********************************************************************
+     */
+
+    @Override
+    public void close() throws IOException
+    {
+        InputStream in = _inputSource;
+        if (in != null) {
+            _inputSource = null;
+            if (_autoClose) {
+                in.close();
+            }
+        }
+        freeBuffers();
+    }
+
+    private char[] _tmpBuffer = null;
+
+    // This method is implemented by the base class, AND it should
+    //never be called by our code. But let's still implement it bit more
+    // efficiently just in case
+    @Override
+    public int read() throws IOException
+    {
+        if (_tmpBuffer == null) {
+            _tmpBuffer = new char[1];
+        }
+        if (read(_tmpBuffer, 0, 1) < 1) {
+            return -1;
+        }
+        return _tmpBuffer[0];
+    }
+
+    @Override
+    public int read(char[] cbuf) throws IOException {
+        return read(cbuf, 0, cbuf.length);
+    }
+
+    @Override
+    public int read(char[] cbuf, int start, int len) throws IOException
+    {
+        // Already EOF?
+        if (_inputBuffer == null) {
+            return -1;
+        }
+        len += start;
+        int outPtr = start;
+
+        // Ok, first; do we have a surrogate from last round?
+        if (_surrogate >= 0) {
+            cbuf[outPtr++] = (char) _surrogate;
+            _surrogate = -1;
+            // No need to load more, already got one char
+            // 05-Apr-2021, tatu: but if at the end must return:
+            if (_inputPtr >= _inputEnd) {
+                _charCount += 1;
+                return 1;
+            }
+        } else {
+            // To prevent unnecessary blocking (esp. with network streams),
+            // we'll only require decoding of a single char
+            int left = (_inputEnd - _inputPtr);
+
+            // 09-Apr-2021, tatu: Not 100% sure this is valid logic for cases
+            //   where content ends with UTF-8 multibyte characters... but
+            //   this has existed in multiple incarnations for over a decade
+            //   so... maybe I thought it all through?
+            if (left < 4) {
+                // Need to load more?
+                if (left < 1 || _inputBuffer[_inputPtr] < 0) {
+                    if (!loadMore(left)) { // (legal) EOF?
+                        return -1;
+                    }
+                }
+            }
+        }
+        final byte[] buf = _inputBuffer;
+        int inPtr = _inputPtr;
+        final int inBufLen = _inputEnd;
+
+        main_loop:
+        while (outPtr < len) {
+            // At this point we have at least one byte available
+            int c = (int) buf[inPtr++];
+
+            // Let's first do the quickie loop for common case; 7-bit ASCII
+            if (c >= 0) { // ASCII? can probably loop, then
+                cbuf[outPtr++] = (char) c; // ok since MSB is never on
+
+                // Ok, how many such chars could we safely process without overruns?
+                // (will combine 2 in-loop comparisons into just one)
+                int outMax = (len - outPtr); // max output
+                int inMax = (inBufLen - inPtr); // max input
+                int inEnd = inPtr + ((inMax < outMax) ? inMax : outMax);
+
+                ascii_loop:
+                while (true) {
+                    if (inPtr >= inEnd) {
+                        break main_loop;
+                    }
+                    c = buf[inPtr++];
+                    if (c < 0) { // or multi-byte
+                        break ascii_loop;
+                    }
+                    cbuf[outPtr++] = (char) c;
+                }
+            }
+
+            int needed;
+
+            // Ok; if we end here, we got multi-byte combination
+            if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF)
+                c = (c & 0x1F);
+                needed = 1;
+            } else if ((c & 0xF0) == 0xE0) { // 3 bytes (0x0800 - 0xFFFF)
+                c = (c & 0x0F);
+                needed = 2;
+            } else if ((c & 0xF8) == 0xF0) {
+                // 4 bytes; double-char BS, with surrogates and all...
+                c = (c & 0x0F);
+                needed = 3;
+            } else {
+                reportInvalidInitial(c & 0xFF, outPtr-start);
+                // never gets here...
+                needed = 1;
+            }
+            // Do we have enough bytes? If not, let's just push back the
+            // byte and leave, since we have already gotten at least one
+            // char decoded. This way we will only block (with read from
+            // input stream) when absolutely necessary.
+            if ((inBufLen - inPtr) < needed) {
+                --inPtr;
+                break main_loop;
+            }
+
+            int d = (int) buf[inPtr++];
+            if ((d & 0xC0) != 0x080) {
+                reportInvalidOther(d & 0xFF, outPtr-start);
+            }
+            c = (c << 6) | (d & 0x3F);
+
+            if (needed > 1) { // needed == 1 means 2 bytes total
+                d = buf[inPtr++]; // 3rd byte
+                if ((d & 0xC0) != 0x080) {
+                    reportInvalidOther(d & 0xFF, outPtr-start);
+                }
+                c = (c << 6) | (d & 0x3F);
+                if (needed > 2) { // 4 bytes? (need surrogates)
+                    d = buf[inPtr++];
+                    if ((d & 0xC0) != 0x080) {
+                        reportInvalidOther(d & 0xFF, outPtr-start);
+                    }
+                    c = (c << 6) | (d & 0x3F);
+                    /* Ugh. Need to mess with surrogates. Ok; let's inline them
+                     * there, then, if there's room: if only room for one,
+                     * need to save the surrogate for the rainy day...
+                     */
+                    c -= 0x10000; // to normalize it starting with 0x0
+                    cbuf[outPtr++] = (char) (0xD800 + (c >> 10));
+                    // hmmh. can this ever be 0? (not legal, at least?)
+                    c = (0xDC00 | (c & 0x03FF));
+
+                    // Room for second part?
+                    if (outPtr >= len) { // nope
+                        _surrogate = c;
+                        break main_loop;
+                    }
+                    // sure, let's fall back to normal processing:
+                }
+                // Otherwise, should we check that 3-byte chars are
+                // legal ones (should not expand to surrogates?
+                // For now, let's not...
+                /*
+                else {
+                    if (c >= 0xD800 && c < 0xE000) {
+                        reportInvalid(c, outPtr-start, "(a surrogate character) ");
+                    }
+                }
+                */
+            }
+            cbuf[outPtr++] = (char) c;
+            if (inPtr >= inBufLen) {
+                break main_loop;
+            }
+        }
+
+        _inputPtr = inPtr;
+        len = outPtr - start;
+        _charCount += len;
+        return len;
+    }
+
+    /*
+    /**********************************************************************
+    /* Internal methods: loading more input
+    /**********************************************************************
+     */
+
+    /**
+     * @param available Number of "unused" bytes in the input buffer
+     *
+     * @return True, if enough bytes were read to allow decoding of at least
+     *   one full character; false if EOF was encountered instead.
+     */
+    private boolean loadMore(int available) throws IOException
+    {
+        if (_inputSource == null) {
+            return false;
+        }
+
+        _byteCount += (_inputEnd - available);
+
+        // Bytes that need to be moved to the beginning of buffer?
+        if (available > 0) {
+            if (_inputPtr > 0) {
+                for (int i = 0; i < available; ++i) {
+                    _inputBuffer[i] = _inputBuffer[_inputPtr+i];
+                }
+                _inputPtr = 0;
+                _inputEnd = available;
+            }
+        } else {
+            // Ok; here we can actually reasonably expect an EOF,
+            // so let's do a separate read right away:
+            int count = readBytes();
+            if (count < 1) {
+                freeBuffers(); // recycle eagerly
+                if (count < 0) { // -1
+                    return false;
+                }
+                // 0 count is no good; let's err out
+                reportStrangeStream();
+            }
+        }
+
+        // We now have at least one byte... and that allows us to
+        // calculate exactly how many bytes we need!
+        @SuppressWarnings("cast")
+        int c = (int) _inputBuffer[_inputPtr];
+        if (c >= 0) { // single byte (ascii) char... cool, can return
+            return true;
+        }
+
+        // Ok, a multi-byte char, let's check how many bytes we'll need:
+        int needed;
+        if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF)
+            needed = 2;
+        } else if ((c & 0xF0) == 0xE0) { // 3 bytes (0x0800 - 0xFFFF)
+            needed = 3;
+        } else if ((c & 0xF8) == 0xF0) {
+            // 4 bytes; double-char BS, with surrogates and all...
+            needed = 4;
+        } else {
+            reportInvalidInitial(c & 0xFF, 0);
+            // never gets here... but compiler whines without this:
+            needed = 1;
+        }
+
+        // And then we'll just need to load up to that many bytes;
+        // if an EOF is hit, that'll be an error. But we need not do
+        // actual decoding here, just load enough bytes.
+        while ((_inputPtr + needed) > _inputEnd) {
+            int count = readBytesAt(_inputEnd);
+            if (count < 1) {
+                if (count < 0) { // -1, EOF... no good!
+                    freeBuffers();
+                    reportUnexpectedEOF(_inputEnd, needed);
+                }
+                // 0 count is no good; let's err out
+                reportStrangeStream();
+            }
+        }
+        return true;
+    }
+
+    protected final int readBytes() throws IOException
+    {
+        _inputPtr = 0;
+        _inputEnd = 0;
+        if (_inputSource != null) {
+            int count = _inputSource.read(_inputBuffer, 0, _inputBuffer.length);
+            if (count > 0) {
+                _inputEnd = count;
+            }
+            return count;
+        }
+        return -1;
+    }
+
+    protected final int readBytesAt(int offset) throws IOException
+    {
+        // shouldn't modify mBytePtr, assumed to be 'offset'
+        if (_inputSource != null) {
+            int count = _inputSource.read(_inputBuffer, offset, _inputBuffer.length - offset);
+            if (count > 0) {
+                _inputEnd += count;
+            }
+            return count;
+        }
+        return -1;
+    }
+
+    /*
+    /**********************************************************************
+    /* Internal methods: error reporting
+    /**********************************************************************
+     */
+
+    private void reportInvalidInitial(int mask, int offset) throws IOException
+    {
+        // input (byte) ptr has been advanced by one, by now:
+        int bytePos = _byteCount + _inputPtr - 1;
+        int charPos = _charCount + offset + 1;
+
+        throw new CharConversionException("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask)
+                +" (at char #"+charPos+", byte #"+bytePos+")");
+    }
+
+    private void reportInvalidOther(int mask, int offset)
+        throws IOException
+    {
+        int bytePos = _byteCount + _inputPtr - 1;
+        int charPos = _charCount + offset;
+
+        throw new CharConversionException("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask)
+                +" (at char #"+charPos+", byte #"+bytePos+")");
+    }
+
+    private void reportUnexpectedEOF(int gotBytes, int needed)
+        throws IOException
+    {
+        int bytePos = _byteCount + gotBytes;
+        int charPos = _charCount;
+
+        throw new CharConversionException("Unexpected EOF in the middle of a multi-byte char: got "
+                +gotBytes+", needed "+needed +", at char #"+charPos+", byte #"+bytePos+")");
+    }
+
+    protected void reportBounds(char[] cbuf, int start, int len) throws IOException {
+        throw new ArrayIndexOutOfBoundsException("read(buf,"+start+","+len+"), cbuf["+cbuf.length+"]");
+    }
+
+    protected void reportStrangeStream() throws IOException {
+        throw new IOException("Strange I/O stream, returned 0 bytes on read");
+    }
+}

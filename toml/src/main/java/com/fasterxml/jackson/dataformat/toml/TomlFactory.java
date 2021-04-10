@@ -215,7 +215,9 @@ public final class TomlFactory extends JsonFactory
     @Override
     public JsonParser _createParser(InputStream in, IOContext ctxt) throws IOException {
         // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        return _createParser(new InputStreamReader(in, StandardCharsets.UTF_8), ctxt);
+        boolean autoClose = ctxt.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE);
+        return _createParser(UTF8Reader.construct(ctxt, in, autoClose),
+                ctxt);
     }
 
     @Override
@@ -226,7 +228,7 @@ public final class TomlFactory extends JsonFactory
 
     @Override
     public JsonParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return _createParser(new ByteArrayInputStream(data, offset, len), ctxt);
+        return _createParser(UTF8Reader.construct(data, offset, len), ctxt);
     }
 
     @Override
