@@ -18,6 +18,7 @@ this.ioContext = ioContext;
 this.errorContext = errorContext;
 yybegin(EXPECT_EXPRESSION);
 this.zzBuffer = ioContext.allocTokenBuffer();
+this.textBuffer = ioContext.constructTextBuffer();
 %init}
 
 %{
@@ -28,7 +29,7 @@ this.zzBuffer = ioContext.allocTokenBuffer();
   private boolean releaseTokenBuffer = true;
 
   private boolean trimmedNewline;
-  StringBuilder stringBuilder = new StringBuilder();
+  final com.fasterxml.jackson.core.util.TextBuffer textBuffer;
 
   private void requestLargerBuffer() throws JacksonTomlParseException {
       if (prohibitInternalBufferAllocate) {
@@ -50,20 +51,22 @@ this.zzBuffer = ioContext.allocTokenBuffer();
           ioContext.releaseTokenBuffer(zzBuffer);
           zzBuffer = null;
       }
+      textBuffer.releaseBuffers();
   }
 
   private void startString() {
-      stringBuilder.setLength(0);
+      // resetWithEmpty does not set _currentSegment, so we need this variant to be able to append further data
+      textBuffer.emptyAndGetCurrentSegment();
       trimmedNewline = false;
   }
 
   private void appendNormalTextToken() {
-      // equivalent to stringBuilder.append(yytext()), without the roundtrip through the String constructor
-      stringBuilder.append(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead);
+      // equivalent to append(yytext()), without the roundtrip through the String constructor
+      textBuffer.append(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead);
   }
 
   private void appendNewlineWithPossibleTrim() {
-      if (!trimmedNewline && stringBuilder.length() == 0) {
+      if (!trimmedNewline && textBuffer.size() == 0) {
           trimmedNewline = true;
       } else {
           // \n or \r\n todo: "TOML parsers should feel free to normalize newline to whatever makes sense for their platform."
@@ -76,7 +79,7 @@ this.zzBuffer = ioContext.allocTokenBuffer();
                    (Character.digit(yycharat(3), 16) << 8) |
                    (Character.digit(yycharat(4), 16) << 4) |
                    Character.digit(yycharat(5), 16);
-      stringBuilder.append((char) value);
+      textBuffer.append((char) value);
   }
 
   private void appendUnicodeEscapeLong() throws java.io.IOException {
@@ -89,7 +92,13 @@ this.zzBuffer = ioContext.allocTokenBuffer();
                  (Character.digit(yycharat(8), 16) << 4) |
                  Character.digit(yycharat(9), 16);
      if (Character.isValidCodePoint(value)) {
-         stringBuilder.appendCodePoint(value);
+         // "Such code points can be represented using a single char."
+         if (value <= Character.MAX_VALUE) {
+             textBuffer.append((char) value);
+         } else {
+             textBuffer.append(Character.highSurrogate(value));
+             textBuffer.append(Character.lowSurrogate(value));
+         }
      } else {
          throw errorContext.atPosition(this).generic("Invalid code point " + Integer.toHexString(value));
      }
@@ -370,14 +379,15 @@ HexDig = [0-9A-Fa-f]
     {MlBasicStringDelim} {return TomlToken.STRING;}
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mlb-quotes: inline
-    \" { stringBuilder.append('"'); }
+    \" { textBuffer.append('"'); }
     // mlb-quotes: at the end
     \" {MlBasicStringDelim} {
-          stringBuilder.append('"');
+          textBuffer.append('"');
           return TomlToken.STRING;
       }
     \"\" {MlBasicStringDelim} {
-          stringBuilder.append("\"\"");
+          textBuffer.append('"');
+          textBuffer.append('"');
           return TomlToken.STRING;
       }
     // mlb-escaped-nl
@@ -387,13 +397,13 @@ HexDig = [0-9A-Fa-f]
 
 <BASIC_STRING, ML_BASIC_STRING> {
     [^\u0000-\u0008\u000a-\u001f\u007f\\\"]+ { appendNormalTextToken(); }
-    \\\" { stringBuilder.append('"'); }
-    \\\\ { stringBuilder.append('\\'); }
-    \\b { stringBuilder.append('\b'); }
-    \\f { stringBuilder.append('\f'); }
-    \\n { stringBuilder.append('\n'); }
-    \\r { stringBuilder.append('\r'); }
-    \\t { stringBuilder.append('\t'); }
+    \\\" { textBuffer.append('"'); }
+    \\\\ { textBuffer.append('\\'); }
+    \\b { textBuffer.append('\b'); }
+    \\f { textBuffer.append('\f'); }
+    \\n { textBuffer.append('\n'); }
+    \\r { textBuffer.append('\r'); }
+    \\t { textBuffer.append('\t'); }
     {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
     {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
     \\ { throw errorContext.atPosition(this).generic("Unknown escape sequence"); }
@@ -413,14 +423,15 @@ HexDig = [0-9A-Fa-f]
     [^\u0000-\u0008\u000a-\u001f\u007f']+ { appendNormalTextToken(); }
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mll-quotes: inline
-    {Apostrophe} { stringBuilder.append('\''); }
+    {Apostrophe} { textBuffer.append('\''); }
     // mll-quotes: at the end
     {Apostrophe} {MlLiteralStringDelim} {
-          stringBuilder.append('\'');
+          textBuffer.append('\'');
           return TomlToken.STRING;
       }
     {Apostrophe}{Apostrophe} {MlLiteralStringDelim} {
-          stringBuilder.append("''");
+          textBuffer.append('\'');
+          textBuffer.append('\'');
           return TomlToken.STRING;
       }
 }

@@ -50,7 +50,7 @@ public class StringOutputUtilTest {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
 
@@ -65,7 +65,7 @@ public class StringOutputUtilTest {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
 
@@ -85,7 +85,7 @@ public class StringOutputUtilTest {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
         }

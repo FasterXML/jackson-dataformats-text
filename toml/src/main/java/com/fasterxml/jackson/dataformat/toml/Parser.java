@@ -130,7 +130,7 @@ class Parser {
             TomlToken partToken = peek();
             String part;
             if (partToken == TomlToken.STRING) {
-                part = lexer.stringBuilder.toString();
+                part = lexer.textBuffer.contentsAsString();
             } else if (partToken == TomlToken.UNQUOTED_KEY) {
                 part = lexer.yytext();
             } else {
@@ -171,7 +171,7 @@ class Parser {
         TomlToken firstToken = peek();
         switch (firstToken) {
             case STRING:
-                String text = lexer.stringBuilder.toString();
+                String text = lexer.textBuffer.contentsAsString();
                 pollExpected(TomlToken.STRING, nextState);
                 return factory.textNode(text);
             case TRUE:
