@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 import org.junit.Test;
@@ -72,6 +74,18 @@ public class POJOReadWriteTest
 
         public PointWrapper(Point p) { point = p; }
         protected PointWrapper() { }
+    }
+
+    @JsonPropertyOrder({ "ids", "points" })
+    protected static class PointListBean {
+        public List<String> ids;
+        public List<Point> points;
+
+        protected PointListBean() { }
+        protected PointListBean(List<String> ids, List<Point> points) {
+            this.ids = ids;
+            this.points = points;
+        }
     }
 
     public enum Gender { MALE, FEMALE };
@@ -201,5 +215,22 @@ public class POJOReadWriteTest
         assertNotNull(result.bottomRight);
 
         assertEquals(input, result);
+    }
+
+    // Check to see if Objects in Arrays work wrt generation or not
+    @Test
+    public void testPOJOListBean() throws Exception
+    {
+        final PointListBean input = new PointListBean(
+                Arrays.asList("a", "b"),
+                Arrays.asList(new Point(1, 2),
+                        new Point(3, 4))
+        );
+
+        final String toml = MAPPER.writeValueAsString(input);
+        PointListBean result = MAPPER.readerFor(PointListBean.class)
+                .readValue(toml);
+        assertNotNull(result.points);
+        assertEquals(input.points, result.points);
     }
 }
