@@ -129,4 +129,29 @@ public class TomlMapperTest {
     public static class ObjectField {
         public Object foo;
     }
+
+    @Test
+    public void nullCoercion() throws JsonProcessingException {
+        Assert.assertNull(TomlMapper.builder().build().readValue("foo = ''", ComplexField.class).foo);
+    }
+
+    public static class ComplexField {
+        public ComplexField foo;
+    }
+
+    @Test
+    public void nullEnabledDefault() throws JsonProcessingException {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder().build().writeValueAsString(cf));
+    }
+
+    @Test(expected = JsonProcessingException.class)
+    public void nullDisable() throws JsonProcessingException {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder()
+                .enable(TomlWriteFeature.FAIL_ON_NULL_WRITE)
+                .build().writeValueAsString(cf));
+    }
 }

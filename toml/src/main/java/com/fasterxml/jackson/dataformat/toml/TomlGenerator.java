@@ -35,6 +35,9 @@ final class TomlGenerator extends GeneratorBase
      */
     protected final Writer _out;
 
+    private final int _tomlFeatures;
+
+
     /*
     /**********************************************************************
     /* Output state
@@ -78,10 +81,10 @@ final class TomlGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    public TomlGenerator(IOContext ioCtxt, int stdReadFeatures, int tomlReadFeatures,
-            ObjectCodec codec, Writer out) {
-        super(stdReadFeatures, codec);
+    public TomlGenerator(IOContext ioCtxt, int stdFeatures, int tomlFeatures, ObjectCodec codec, Writer out) {
+        super(stdFeatures, codec);
         _ioContext = ioCtxt;
+        _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
         _outputBuffer = ioCtxt.allocConcatBuffer();
@@ -570,7 +573,12 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeNull() throws IOException {
-        throw new UnsupportedOperationException("Nulls are not supported by TOML");
+        if (TomlWriteFeature.FAIL_ON_NULL_WRITE.enabledIn(_tomlFeatures)) {
+            throw new TomlStreamWriteException("TOML null writing disabled (TomlWriteFeature.FAIL_ON_NULL_WRITE)", this);
+        }
+        _verifyValueWrite("write null value");
+        _writeStringImpl(StringOutputUtil.MASK_STRING, "");
+        writeValueEnd();
     }
 
     /*

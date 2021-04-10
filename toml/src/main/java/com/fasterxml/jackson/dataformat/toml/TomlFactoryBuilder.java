@@ -72,4 +72,40 @@ public class TomlFactoryBuilder extends TSFBuilder<TomlFactory, TomlFactoryBuild
     public TomlFactoryBuilder configure(TomlReadFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
+
+    /*
+    /**********************************************************
+    /* Generator feature setting
+    /**********************************************************
+     */
+
+    public TomlFactoryBuilder enable(TomlWriteFeature f) {
+        _formatGeneratorFeatures |= f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder enable(TomlWriteFeature first, TomlWriteFeature... other) {
+        _formatGeneratorFeatures |= first.getMask();
+        for (TomlWriteFeature f : other) {
+            _formatGeneratorFeatures |= f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlWriteFeature f) {
+        _formatGeneratorFeatures &= ~f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlWriteFeature first, TomlWriteFeature... other) {
+        _formatGeneratorFeatures &= ~first.getMask();
+        for (TomlWriteFeature f : other) {
+            _formatGeneratorFeatures &= ~f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder configure(TomlWriteFeature f, boolean state) {
+        return state ? enable(f) : disable(f);
+    }
 }
