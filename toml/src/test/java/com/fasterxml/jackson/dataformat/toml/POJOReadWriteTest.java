@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -208,12 +209,20 @@ public class POJOReadWriteTest
                 +"bottomRight.y = 10\n"
                 , new String(toml, StandardCharsets.UTF_8));
 
-        Rectangle result = MAPPER.readerFor(Rectangle.class)
-                .readValue(toml);
+        Rectangle result;
 
+        // Read first from static byte[]
+        result = MAPPER.readerFor(Rectangle.class)
+                .readValue(toml);
         assertNotNull(result.topLeft);
         assertNotNull(result.bottomRight);
+        assertEquals(input, result);
 
+        // and then via InputStream
+        result = MAPPER.readerFor(Rectangle.class)
+                .readValue(new ByteArrayInputStream(toml));
+        assertNotNull(result.topLeft);
+        assertNotNull(result.bottomRight);
         assertEquals(input, result);
     }
 
