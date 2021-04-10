@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Objects;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.exc.WrappedIOException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.intellij.lang.annotations.Language;
@@ -143,5 +144,30 @@ public class TomlMapperTest {
             public void close() throws IOException {
             }
         }));
+    }
+
+    @Test
+    public void nullCoercion() {
+        Assert.assertNull(TomlMapper.builder().build().readValue("foo = ''", ComplexField.class).foo);
+    }
+
+    public static class ComplexField {
+        public ComplexField foo;
+    }
+
+    @Test
+    public void nullEnabledDefault() {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder().build().writeValueAsString(cf));
+    }
+
+    @Test(expected = JacksonException.class)
+    public void nullDisable() {
+        ComplexField cf = new ComplexField();
+        cf.foo = null;
+        Assert.assertEquals("foo = ''\n", TomlMapper.builder()
+                .enable(TomlWriteFeature.FAIL_ON_NULL_WRITE)
+                .build().writeValueAsString(cf));
     }
 }

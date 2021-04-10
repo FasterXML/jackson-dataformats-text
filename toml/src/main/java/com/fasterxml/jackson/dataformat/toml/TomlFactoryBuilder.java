@@ -58,4 +58,40 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
     public TomlFactoryBuilder configure(TomlReadFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
+
+    /*
+    /**********************************************************
+    /* Generator feature setting
+    /**********************************************************
+     */
+
+    public TomlFactoryBuilder enable(TomlWriteFeature f) {
+        _formatWriteFeatures |= f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder enable(TomlWriteFeature first, TomlWriteFeature... other) {
+        _formatWriteFeatures |= first.getMask();
+        for (TomlWriteFeature f : other) {
+            _formatWriteFeatures |= f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlWriteFeature f) {
+        _formatWriteFeatures &= ~f.getMask();
+        return this;
+    }
+
+    public TomlFactoryBuilder disable(TomlWriteFeature first, TomlWriteFeature... other) {
+        _formatWriteFeatures &= ~first.getMask();
+        for (TomlWriteFeature f : other) {
+            _formatWriteFeatures &= ~f.getMask();
+        }
+        return this;
+    }
+
+    public TomlFactoryBuilder configure(TomlWriteFeature f, boolean state) {
+        return state ? enable(f) : disable(f);
+    }
 }

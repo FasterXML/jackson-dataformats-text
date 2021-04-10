@@ -1,7 +1,10 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.cfg.CoercionAction;
+import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
 
@@ -13,6 +16,9 @@ public class TomlMapper extends ObjectMapper
     {
         public Builder(TomlFactory f) {
             super(f);
+
+            enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
+            _coercionConfigs.defaultCoercions().setCoercion(CoercionInputShape.EmptyString, CoercionAction.AsNull);
         }
 
         public Builder(StateImpl state) {
@@ -55,6 +61,30 @@ public class TomlMapper extends ObjectMapper
                 _formatReadFeatures |= feature.getMask();
             } else {
                 _formatReadFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
+
+        public Builder enable(TomlWriteFeature... features) {
+            for (TomlWriteFeature feature : features) {
+                _formatWriteFeatures |= feature.getMask();
+            }
+            return this;
+        }
+
+        public Builder disable(TomlWriteFeature... features) {
+            for (TomlWriteFeature feature : features) {
+                _formatWriteFeatures &= ~feature.getMask();
+            }
+            return this;
+        }
+
+        public Builder configure(TomlWriteFeature feature, boolean state)
+        {
+            if (state) {
+                _formatWriteFeatures |= feature.getMask();
+            } else {
+                _formatWriteFeatures &= ~feature.getMask();
             }
             return this;
         }

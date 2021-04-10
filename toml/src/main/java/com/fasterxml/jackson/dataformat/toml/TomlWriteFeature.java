@@ -1,21 +1,19 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.FormatFeature;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
- * Enumeration that defines all togglable features for TOML parsers.
+ * Enumeration that defines all togglable features for TOML generators.
  */
-public enum TomlReadFeature
-        implements FormatFeature {
+public enum TomlWriteFeature implements FormatFeature {
     /**
-     * TOML has special syntax for time types corresponding to {@link java.time.LocalDate}, {@link java.time.LocalTime},
-     * {@link java.time.LocalDateTime} and {@link java.time.OffsetDateTime}. By default, the TOML parser just returns
-     * them as strings.
+     * The TOML spec does not allow null values. We instead write an empty string when
+     * {@link JsonGenerator#writeNull()} by default.
      * <p>
-     * When this option is set, these time types will be parsed to their proper {@code java.time} counterparts and
-     * appear as {@link com.fasterxml.jackson.core.JsonToken#VALUE_EMBEDDED_OBJECT} tokens.
+     * When this option is set, any attempt to write a null value will error instead.
      */
-    PARSE_JAVA_TIME(false);
+    FAIL_ON_NULL_WRITE(false);
 
     final boolean _defaultState;
     final int _mask;
@@ -25,7 +23,7 @@ public enum TomlReadFeature
     public static int collectDefaults()
     {
         int flags = 0;
-        for (TomlReadFeature f : values()) {
+        for (TomlWriteFeature f : values()) {
             if (f.enabledByDefault()) {
                 flags |= f.getMask();
             }
@@ -33,7 +31,7 @@ public enum TomlReadFeature
         return flags;
     }
 
-    private TomlReadFeature(boolean defaultState) {
+    private TomlWriteFeature(boolean defaultState) {
         _defaultState = defaultState;
         _mask = (1 << ordinal());
     }
