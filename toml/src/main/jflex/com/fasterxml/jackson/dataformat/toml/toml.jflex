@@ -8,6 +8,7 @@ package com.fasterxml.jackson.dataformat.toml;
 %line
 %column
 %char
+%buffer 4000
 
 %ctorarg TomlStreamReadException.ErrorContext errorContext
 

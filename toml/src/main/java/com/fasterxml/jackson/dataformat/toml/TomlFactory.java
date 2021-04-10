@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
@@ -149,7 +148,8 @@ public final class TomlFactory extends TextualTSFactory
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, InputStream in) throws JacksonException {
         // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        return _createParser(readCtxt, ctxt, new InputStreamReader(in, StandardCharsets.UTF_8));
+        boolean autoClose = ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE);
+        return _createParser(readCtxt, ctxt, UTF8Reader.construct(ctxt, in, autoClose));
     }
 
     @Override
@@ -160,7 +160,7 @@ public final class TomlFactory extends TextualTSFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, byte[] data, int offset, int len) throws JacksonException {
-        return _createParser(readCtxt, ctxt, new ByteArrayInputStream(data, offset, len));
+        return _createParser(readCtxt, ctxt, UTF8Reader.construct(data, offset, len));
     }
 
     @Override
