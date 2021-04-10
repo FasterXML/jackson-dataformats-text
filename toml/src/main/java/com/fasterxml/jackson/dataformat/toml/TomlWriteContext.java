@@ -10,8 +10,7 @@ final class TomlWriteContext extends TokenStreamContext {
 
     /*
     /**********************************************************************
-    /* Simple instance reuse slots; speed up things
-    /* a bit (10-15%) for docs with lots of small arrays/objects
+    /* Simple instance reuse slots; speed up things a bit
     /**********************************************************************
      */
 
@@ -52,7 +51,7 @@ final class TomlWriteContext extends TokenStreamContext {
      */
 
     TomlWriteContext(int type, TomlWriteContext parent,
-                                Object currValue, int basePathLength)
+            Object currValue, int basePathLength)
     {
         super();
         _type = type;
@@ -60,7 +59,7 @@ final class TomlWriteContext extends TokenStreamContext {
         _basePathLength = basePathLength;
         _index = -1;
         _currentValue = currValue;
-        _inline = (parent != null && parent._inline) || type == TYPE_ARRAY;
+        _inline = (type == TYPE_ARRAY) || (parent != null && parent._inline);
     }
 
     private void reset(int type, Object currValue, int basePathLength) {
@@ -69,6 +68,8 @@ final class TomlWriteContext extends TokenStreamContext {
         _currentValue = null;
         _index = -1;
         _currentValue = currValue;
+        // 09-Apr-2021, tatu: [dataformats-text#260]: must reset this flag as well
+        _inline = (type == TYPE_ARRAY) || (_parent != null && _parent._inline);
     }
 
     // // // Factory methods
