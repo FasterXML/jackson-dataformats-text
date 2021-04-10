@@ -309,13 +309,12 @@ public final class TomlFactory extends JsonFactory
      */
 
     private ObjectNode parse(IOContext ctxt, Reader r0) throws IOException {
-        TomlStreamReadException.ErrorContext errorContext = new TomlStreamReadException.ErrorContext(ctxt.contentReference(), null);
         if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
-                return Parser.parse(errorContext, _tomlParserFeatures, r);
+                return Parser.parse(ctxt, _tomlParserFeatures, r);
             }
         } else {
-            return Parser.parse(errorContext, _tomlParserFeatures, r0);
+            return Parser.parse(ctxt, _tomlParserFeatures, r0);
         }
     }
 }

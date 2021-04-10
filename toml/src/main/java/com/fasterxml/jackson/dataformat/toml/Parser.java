@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.VersionUtil;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,15 +27,28 @@ class Parser {
 
     private TomlToken next;
 
-    private Parser(TomlStreamReadException.ErrorContext errorContext, int options, Reader reader) throws IOException {
+    private Parser(
+            IOContext ioContext,
+            TomlStreamReadException.ErrorContext errorContext,
+            int options,
+            Reader reader
+    ) throws IOException {
         this.errorContext = errorContext;
         this.options = options;
-        this.lexer = new Lexer(reader, errorContext);
+        this.lexer = new Lexer(reader, ioContext, errorContext);
+        lexer.prohibitInternalBufferAllocate = (options & TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE) != 0;
         this.next = lexer.yylex();
     }
 
-    public static ObjectNode parse(TomlStreamReadException.ErrorContext errorContext, int options, Reader reader) throws IOException {
-        return new Parser(errorContext, options, reader).parse();
+    public static ObjectNode parse(
+            IOContext ioContext,
+            int options,
+            Reader reader
+    ) throws IOException {
+        Parser parser = new Parser(ioContext, new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
+        ObjectNode node = parser.parse();
+        parser.lexer.releaseBuffers();
+        return node;
     }
 
     private TomlToken peek() throws TomlStreamReadException {
@@ -115,7 +129,7 @@ class Parser {
             TomlToken partToken = peek();
             String part;
             if (partToken == TomlToken.STRING) {
-                part = lexer.stringBuilder.toString();
+                part = lexer.textBuffer.contentsAsString();
             } else if (partToken == TomlToken.UNQUOTED_KEY) {
                 part = lexer.yytext();
             } else {
@@ -156,7 +170,7 @@ class Parser {
         TomlToken firstToken = peek();
         switch (firstToken) {
             case STRING:
-                String text = lexer.stringBuilder.toString();
+                String text = lexer.textBuffer.contentsAsString();
                 pollExpected(TomlToken.STRING, nextState);
                 return factory.textNode(text);
             case TRUE:
