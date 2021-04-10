@@ -15,6 +15,11 @@ public enum TomlWriteFeature implements FormatFeature {
      */
     FAIL_ON_NULL_WRITE(false);
 
+    /**
+     * Internal option for unit tests: Prohibit allocating internal buffers, except through the buffer recycler
+     */
+    static final int INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE = 0x80000000;
+
     final boolean _defaultState;
     final int _mask;
 

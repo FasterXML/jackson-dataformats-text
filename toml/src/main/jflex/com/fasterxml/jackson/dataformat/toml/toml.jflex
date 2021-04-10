@@ -10,18 +10,47 @@ package com.fasterxml.jackson.dataformat.toml;
 %char
 %buffer 4000
 
+%ctorarg com.fasterxml.jackson.core.io.IOContext ioContext
 %ctorarg JacksonTomlParseException.ErrorContext errorContext
 
 %init{
+this.ioContext = ioContext;
 this.errorContext = errorContext;
 yybegin(EXPECT_EXPRESSION);
+this.zzBuffer = ioContext.allocTokenBuffer();
 %init}
 
 %{
+  private final com.fasterxml.jackson.core.io.IOContext ioContext;
   private final JacksonTomlParseException.ErrorContext errorContext;
+
+  boolean prohibitInternalBufferAllocate = false;
+  private boolean releaseTokenBuffer = true;
 
   private boolean trimmedNewline;
   StringBuilder stringBuilder = new StringBuilder();
+
+  private void requestLargerBuffer() throws JacksonTomlParseException {
+      if (prohibitInternalBufferAllocate) {
+          throw errorContext.atPosition(this).generic("Token too long, but buffer resizing prohibited");
+      }
+
+      // todo: use recycler
+      char[] newBuffer = new char[zzBuffer.length * 2];
+      System.arraycopy(zzBuffer, 0, newBuffer, 0, zzBuffer.length);
+      if (releaseTokenBuffer) {
+          ioContext.releaseTokenBuffer(zzBuffer);
+          releaseTokenBuffer = false;
+      }
+      zzBuffer = newBuffer;
+  }
+
+  public void releaseBuffers() {
+      if (releaseTokenBuffer) {
+          ioContext.releaseTokenBuffer(zzBuffer);
+          zzBuffer = null;
+      }
+  }
 
   private void startString() {
       stringBuilder.setLength(0);

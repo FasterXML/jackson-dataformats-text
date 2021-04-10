@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.BufferRecyclers;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +18,6 @@ public class StringOutputUtilTest {
 
         // reused for performance
         StringBuilder builder = new StringBuilder();
-        Lexer lexer = new Lexer(null, errorContext);
 
         int nUnquoted = 0;
         int nLiteral = 0;
@@ -32,9 +33,10 @@ public class StringOutputUtilTest {
             if ((cats & StringOutputUtil.UNQUOTED_KEY) != 0) {
                 nUnquoted++;
 
-                lexer.yyreset(new StringReader(rawString));
+                Lexer lexer = new Lexer(new StringReader(rawString), new IOContext(BufferRecyclers.getBufferRecycler(), rawString, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_INLINE_KEY);
                 Assert.assertEquals(TomlToken.UNQUOTED_KEY, lexer.yylex());
+                lexer.releaseBuffers();
             }
 
             if ((cats & StringOutputUtil.LITERAL_STRING) != 0) {
@@ -45,10 +47,11 @@ public class StringOutputUtilTest {
                 builder.appendCodePoint(c);
                 builder.append('\'');
 
-                lexer.yyreset(new StringReader(builder.toString()));
+                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                lexer.releaseBuffers();
             }
 
             if ((cats & StringOutputUtil.BASIC_STRING_NO_ESCAPE) != 0) {
@@ -59,10 +62,11 @@ public class StringOutputUtilTest {
                 builder.appendCodePoint(c);
                 builder.append('"');
 
-                lexer.yyreset(new StringReader(builder.toString()));
+                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                lexer.releaseBuffers();
             }
 
             if ((cats & StringOutputUtil.BASIC_STRING) != 0 && c < 0x10000) {
@@ -78,10 +82,11 @@ public class StringOutputUtilTest {
                 }
                 builder.append('"');
 
-                lexer.yyreset(new StringReader(builder.toString()));
+                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), builder, false), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.stringBuilder.toString());
+                lexer.releaseBuffers();
             }
         }
 
