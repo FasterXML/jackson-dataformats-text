@@ -146,7 +146,7 @@ public final class TomlFactory extends JsonFactory
 
     @Override
     public Class<? extends FormatFeature> getFormatWriteFeatureType() {
-        return null;
+        return TomlWriteFeature.class;
     }
 
     @Override
