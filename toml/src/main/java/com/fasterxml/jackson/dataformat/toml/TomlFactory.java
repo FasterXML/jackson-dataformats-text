@@ -1,14 +1,11 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.core.FormatFeature;
 import com.fasterxml.jackson.core.FormatSchema;
@@ -40,7 +37,7 @@ public final class TomlFactory extends JsonFactory {
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
      */
-    final static int DEFAULT_TOML_GENERATOR_FEATURE_FLAGS = 0;
+    final static int DEFAULT_TOML_GENERATOR_FEATURE_FLAGS = TomlWriteFeature.collectDefaults();
 
     /*
     /**********************************************************************
@@ -48,8 +45,8 @@ public final class TomlFactory extends JsonFactory {
     /**********************************************************************
      */
 
-    protected int _tomlParserFeatures = DEFAULT_TOML_PARSER_FEATURE_FLAGS;
-    protected int _tomlGeneratorFeatures = DEFAULT_TOML_GENERATOR_FEATURE_FLAGS;
+    protected int _tomlParserFeatures;
+    protected int _tomlGeneratorFeatures;
 
     /*
     /**********************************************************************
@@ -58,6 +55,8 @@ public final class TomlFactory extends JsonFactory {
      */
 
     public TomlFactory() {
+        _tomlParserFeatures = DEFAULT_TOML_PARSER_FEATURE_FLAGS;
+        _tomlGeneratorFeatures = DEFAULT_TOML_GENERATOR_FEATURE_FLAGS;
     }
 
     TomlFactory(TomlFactory src, ObjectCodec oc) {
@@ -154,9 +153,9 @@ public final class TomlFactory extends JsonFactory {
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration, parser settings
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -204,9 +203,9 @@ public final class TomlFactory extends JsonFactory {
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration, generator settings
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
