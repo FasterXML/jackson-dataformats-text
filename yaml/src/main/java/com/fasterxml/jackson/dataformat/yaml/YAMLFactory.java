@@ -171,24 +171,13 @@ public class YAMLFactory
     }
 
     @Override
-    public Class<YAMLGenerator.Feature> getFormatWriteFeatureType() {
-        return YAMLGenerator.Feature.class;
-    }
-
-    /**
-     * Check whether specified generator feature is enabled.
-     */
-    public final boolean isEnabled(YAMLGenerator.Feature f) {
-        return (_formatWriteFeatures & f.getMask()) != 0;
-    }
-
-    @Override
     public Class<YAMLParser.Feature> getFormatReadFeatureType() {
         return YAMLParser.Feature.class;
     }
 
-    public final boolean isEnabled(YAMLParser.Feature f) {
-        return (_formatReadFeatures & f.getMask()) != 0;
+    @Override
+    public Class<YAMLGenerator.Feature> getFormatWriteFeatureType() {
+        return YAMLGenerator.Feature.class;
     }
 
     @Override
@@ -196,7 +185,15 @@ public class YAMLFactory
 
     @Override
     public int getFormatWriteFeatures() { return _formatWriteFeatures; }
-    
+
+    public boolean isEnabled(YAMLParser.Feature f) {
+        return (_formatReadFeatures & f.getMask()) != 0;
+    }
+
+    public boolean isEnabled(YAMLGenerator.Feature f) {
+        return (_formatWriteFeatures & f.getMask()) != 0;
+    }
+
     /*
     /**********************************************************************
     /* Factory methods: parsers

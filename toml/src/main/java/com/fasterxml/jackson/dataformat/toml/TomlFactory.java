@@ -4,9 +4,9 @@ import java.io.*;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.TextualTSFactory;
-
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.UTF8Writer;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
 
@@ -26,7 +26,7 @@ public final class TomlFactory extends TextualTSFactory
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
      */
-    final static int DEFAULT_TOML_GENERATOR_FEATURE_FLAGS = 0;
+    final static int DEFAULT_TOML_GENERATOR_FEATURE_FLAGS = TomlWriteFeature.collectDefaults();
 
     /*
     /**********************************************************************
@@ -79,7 +79,21 @@ public final class TomlFactory extends TextualTSFactory
 
     /*
     /**********************************************************************
-    /* Introspection
+    /* Serializable overrides
+    /**********************************************************************
+     */
+
+    /**
+     * Method that we need to override to actually make restoration go
+     * through constructors etc.
+     */
+    protected Object readResolve() {
+        return new TomlFactory(this);
+    }
+
+    /*
+    /**********************************************************************
+    /* Capability introspection
     /**********************************************************************
      */
 
@@ -137,6 +151,14 @@ public final class TomlFactory extends TextualTSFactory
     @Override
     public int getFormatWriteFeatures() {
         return _formatWriteFeatures;
+    }
+
+    public boolean isEnabled(TomlReadFeature f) {
+        return (_formatReadFeatures & f.getMask()) != 0;
+    }
+
+    public boolean isEnabled(TomlWriteFeature f) {
+        return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
     /*

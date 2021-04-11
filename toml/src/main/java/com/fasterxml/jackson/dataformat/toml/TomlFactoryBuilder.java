@@ -6,10 +6,15 @@ import com.fasterxml.jackson.core.base.DecorableTSFactory;
  * {@link com.fasterxml.jackson.core.TokenStreamFactory.TSFBuilder}
  * implementation for constructing {@link TomlFactory}
  * instances.
- *
- * @since 3.0
  */
-public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<TomlFactory, TomlFactoryBuilder> {
+public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<TomlFactory, TomlFactoryBuilder>
+{
+    /*
+    /**********************************************************************
+    /* Life cycle
+    /**********************************************************************
+     */
+
     TomlFactoryBuilder() {
         super(TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
@@ -24,9 +29,9 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Parser feature setting
-    /**********************************************************
+    /**********************************************************************
      */
 
     public TomlFactoryBuilder enable(TomlReadFeature f) {
@@ -60,9 +65,9 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
     }
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Generator feature setting
-    /**********************************************************
+    /**********************************************************************
      */
 
     public TomlFactoryBuilder enable(TomlWriteFeature f) {
