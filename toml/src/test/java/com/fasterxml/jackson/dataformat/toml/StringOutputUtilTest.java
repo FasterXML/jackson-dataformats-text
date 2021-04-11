@@ -33,8 +33,7 @@ public class StringOutputUtilTest {
 
             if ((cats & StringOutputUtil.UNQUOTED_KEY) != 0) {
                 nUnquoted++;
-
-                Lexer lexer = new Lexer(new StringReader(rawString), new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.construct(true, rawString), false), errorContext);
+                Lexer lexer = new Lexer(new StringReader(rawString), _ioContext(builder), errorContext);
                 lexer.yybegin(Lexer.EXPECT_INLINE_KEY);
                 Assert.assertEquals(TomlToken.UNQUOTED_KEY, lexer.yylex());
                 lexer.releaseBuffers();
@@ -48,7 +47,8 @@ public class StringOutputUtilTest {
                 builder.appendCodePoint(c);
                 builder.append('\'');
 
-                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.construct(true, builder), false), errorContext);
+                Lexer lexer = new Lexer(new StringReader(builder.toString()), _ioContext(builder), errorContext);
+
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
@@ -63,7 +63,8 @@ public class StringOutputUtilTest {
                 builder.appendCodePoint(c);
                 builder.append('"');
 
-                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.construct(true, builder), false), errorContext);
+                Lexer lexer = new Lexer(new StringReader(builder.toString()), _ioContext(builder), errorContext);
+
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
@@ -83,7 +84,8 @@ public class StringOutputUtilTest {
                 }
                 builder.append('"');
 
-                Lexer lexer = new Lexer(new StringReader(builder.toString()), new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.construct(true, builder), false), errorContext);
+                Lexer lexer = new Lexer(new StringReader(builder.toString()),
+                        _ioContext(builder), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
                 Assert.assertEquals(TomlToken.STRING, lexer.yylex());
                 Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
@@ -95,5 +97,10 @@ public class StringOutputUtilTest {
         Assert.assertTrue(nBasic > 10000);
         Assert.assertTrue(nBasicNoEscape > 10000);
         Assert.assertTrue(nLiteral > 10000);
+    }
+
+    private IOContext _ioContext(CharSequence toml) {
+        return new IOContext(BufferRecyclers.getBufferRecycler(),
+                ContentReference.construct(true, toml), false);
     }
 }
