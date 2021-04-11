@@ -9,7 +9,9 @@ import com.fasterxml.jackson.core.TSFBuilder;
  *
  * @since 3.0
  */
-public class TomlFactoryBuilder extends TSFBuilder<TomlFactory, TomlFactoryBuilder> {/*
+public class TomlFactoryBuilder extends TSFBuilder<TomlFactory, TomlFactoryBuilder>
+{
+    /*
     /**********************************************************
     /* Configuration
     /**********************************************************
