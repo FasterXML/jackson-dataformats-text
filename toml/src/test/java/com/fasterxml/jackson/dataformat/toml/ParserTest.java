@@ -1,6 +1,9 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.core.util.BufferRecyclers;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -22,21 +25,25 @@ import java.time.OffsetDateTime;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
-    private final ObjectMapper jsonMapper = JsonMapper.builder()
+    private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
             .build();
 
-    private ObjectNode json(@Language("json") String json) {
+    static ObjectNode json(@Language("json") String json) {
         return (ObjectNode) jsonMapper.readTree(json);
     }
 
-    private ObjectNode toml(@Language("toml") String toml) throws IOException {
+    static ObjectNode toml(@Language("toml") String toml) throws IOException {
         return toml(0, toml);
     }
 
-    private ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
-        return Parser.parse(new TomlStreamReadException.ErrorContext(null, null), opts, new StringReader(toml));
+    static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
+        return Parser.parse(
+                new IOContext(BufferRecyclers.getBufferRecycler(), toml, false),
+                opts,
+                new StringReader(toml)
+        );
     }
 
     @SuppressWarnings("deprecation")

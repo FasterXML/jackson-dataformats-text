@@ -69,6 +69,7 @@
                 <configuration>
                     <backup>false</backup>
                     <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                    <skeleton>${project.basedir}/src/main/jflex/skeleton-toml</skeleton>
                 </configuration>
             </plugin>
         </plugins>

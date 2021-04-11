@@ -205,15 +205,14 @@ public final class TomlFactory extends TextualTSFactory
      */
 
     private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
-        TomlStreamReadException.ErrorContext errorContext = new TomlStreamReadException.ErrorContext(ctxt.contentReference(), null);
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 try (Reader r = r0) {
-                    return Parser.parse(errorContext, readFeatures, r);
+                    return Parser.parse(ctxt, readFeatures, r);
                 }
             } else {
-                return Parser.parse(errorContext, readFeatures, r0);
+                return Parser.parse(ctxt, readFeatures, r0);
             }
         } catch (IOException e) {
             throw _wrapIOFailure(e);
