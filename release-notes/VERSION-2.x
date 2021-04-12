@@ -22,7 +22,7 @@ Active Maintainers:
 #255: (properties) Ensure that empty String to null/empty works by default
   for Properties format
 
-2.12.3 (not yet released)
+2.12.3 (12-Apr-2021)
 
 #246: (yaml) Special characters shouldn't force double quoting for multi-line strings
  (fix proposed by Alex H)
