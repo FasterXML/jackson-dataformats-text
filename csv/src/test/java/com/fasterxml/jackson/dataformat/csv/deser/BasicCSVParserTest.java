@@ -14,7 +14,8 @@ import com.fasterxml.jackson.dataformat.csv.*;
 
 import static org.junit.Assert.assertArrayEquals;
 
-public class BasicCSVParserTest extends ModuleTestBase {
+public class BasicCSVParserTest extends ModuleTestBase
+{
     @JsonPropertyOrder({"x", "y", "z"})
     public static class Point {
         public int x;
