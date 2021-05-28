@@ -21,6 +21,9 @@ Active Maintainers:
 #240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
 #255: (properties) Ensure that empty String to null/empty works by default
   for Properties format
+#270: Should not quote with strict quoting when line starts with `#` but comments
+  are disabled
+ (contributed by Krzysztof D)
 
 2.12.3 (12-Apr-2021)
 

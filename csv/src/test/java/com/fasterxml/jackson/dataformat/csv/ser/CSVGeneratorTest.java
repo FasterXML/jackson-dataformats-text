@@ -233,32 +233,61 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals(",2.5\n", result);
     }
 
-    // Must comment '#', at least if it starts the line
-    public void testQuotingOfCommentChar() throws Exception
+    // Must quote '#' when it starts the line
+    public void testQuotingOfCommentCharForFirstColumn() throws Exception
     {
         // First, with default quoting
-        CsvMapper mapper = mapperForCsv();
-        final CsvSchema schema = mapper.schemaFor(IdDesc.class);
-        String csv = mapper.writer(schema)
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class).withComments();
+        String csv = MAPPER.writer(schema)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("\"#123\",Foo\n", csv);
 
         // then with strict/optimal
-        mapper = mapperForCsv();
-        csv = mapper.writer(schema)
+        csv = MAPPER.writer(schema)
                 .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("\"#123\",Foo\n", csv);
+    }
+
+    // In strict mode when the second column starts with '#', does not have to quote it
+    public void testQuotingOfCommentCharForSecondColumn() throws Exception
+    {
+        // First, with default quoting
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class).withComments();
+        String csv = MAPPER.writer(schema)
+                .writeValueAsString(new IdDesc("123", "#Foo"));
+        assertEquals("123,\"#Foo\"\n", csv);
+
+        // then with strict/optimal
+        csv = MAPPER.writer(schema)
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc("123", "#Foo"));
+        assertEquals("123,#Foo\n", csv);
+    }
+
+    // In strict mode when comments are disabled, does not have to quote '#'
+    public void testQuotingOfCommentCharWhenCommentsAreDisabled() throws Exception
+    {
+        // First, with default quoting
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class).withoutComments();
+        String csv = MAPPER.writer(schema)
+                .writeValueAsString(new IdDesc("#123", "Foo"));
+        assertEquals("\"#123\",Foo\n", csv);
+
+        // then with strict/optimal
+        csv = MAPPER.writer(schema)
+                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc("#123", "Foo"));
+        assertEquals("#123,Foo\n", csv);
     }
 
     // for [dataformat-csv#98]
     public void testBackslashEscape() throws Exception
     {
         // First, with default quoting
-        CsvMapper mapper = mapperForCsv();
-        final CsvSchema schema = mapper.schemaFor(IdDesc.class)
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class)
                 .withEscapeChar('\\');
-        String csv = mapper.writer(schema)
+        String csv = MAPPER.writer(schema)
                 .writeValueAsString(new IdDesc("123", "a\\b"));
         // Escaping also leads to quoting
         assertEquals("123,\"a\\\\b\"\n", csv);

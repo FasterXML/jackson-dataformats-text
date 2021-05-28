@@ -174,3 +174,7 @@ Jonas Konrad (yawkat@github)
 * Contributed #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (2.13.0)
 
+Krzysztof Debski (kdebski85@github)
+* Contributed #270: Should not quote with strict quoting when line starts with `#` but comments
+  are disabled
+ (2.13.0)
