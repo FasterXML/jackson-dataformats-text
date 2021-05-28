@@ -74,11 +74,9 @@ public class CsvEncoder
      */
     final protected char[] _cfgNullValue;
 
-    final protected boolean _cfgAllowsComments;
-
     final protected int _cfgLineSeparatorLength;
 
-    protected int _cfgMaxQuoteCheckChars;
+    final protected int _cfgMaxQuoteCheckChars;
     
     /**
      * Lowest-valued character that is safe to output without using
@@ -95,6 +93,9 @@ public class CsvEncoder
      * @since 2.4
      */
     protected boolean _cfgOptimalQuoting;
+
+    // @since 2.13
+    final protected boolean _cfgAllowsComments;
 
     /**
      * @since 2.4
@@ -534,9 +535,8 @@ public class CsvEncoder
         if (_nextColumnToWrite > 0) {
             appendColumnSeparator();
         }
-        /* First: determine if we need quotes; simple heuristics;
-         * only check for short Strings, stop if something found
-         */
+        // First: determine if we need quotes; simple heuristics;
+        // only check for short Strings, stop if something found
         final int len = value.length();
         if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len, _nextColumnToWrite)) {
             if (_cfgEscapeCharacter > 0) {
@@ -1018,10 +1018,16 @@ public class CsvEncoder
         }
         // may skip checks unless we want exact checking
         if (_cfgOptimalQuoting) {
-            if (_cfgEscapeCharacter > 0) {
-                return _needsQuotingStrict(value, columnIndex, _cfgEscapeCharacter);
+            // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
+            // 28-May-2021, tatu: As per [dataformats-text#270] only check if first column
+            if (_cfgAllowsComments && (columnIndex == 0)
+                && (length > 0) && (value.charAt(0) == '#')) {
+                return true;
             }
-            return _needsQuotingStrict(value, columnIndex);
+            if (_cfgEscapeCharacter > 0) {
+                return _needsQuotingStrict(value, _cfgEscapeCharacter);
+            }
+            return _needsQuotingStrict(value);
         }
         if (length > _cfgMaxQuoteCheckChars) {
             return true;
@@ -1036,10 +1042,6 @@ public class CsvEncoder
     }
 
     /**
-     *<p>
-     * NOTE: final since checking is not expected to be changed here; override
-     * calling method (<code>_mayNeedQuotes</code>) instead, if necessary.
-     * 
      * @since 2.4
      */
     protected final boolean _needsQuotingLoose(String value)
@@ -1072,7 +1074,7 @@ public class CsvEncoder
     /**
      * @since 2.4
      */
-    protected boolean _needsQuotingStrict(String value, int columnIndex)
+    protected boolean _needsQuotingStrict(String value)
     {
         final int minSafe = _cfgMinSafeChar;
 
@@ -1087,9 +1089,7 @@ public class CsvEncoder
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
                         || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
-                        || (columnIndex == 0 && _cfgAllowsComments && c == '#' && i == 0)) {
+                        || (c == lfFirst)) {
                     return true;
                 }
             }
@@ -1100,7 +1100,7 @@ public class CsvEncoder
     /**
      * @since 2.7
      */
-    protected boolean _needsQuotingStrict(String value, int columnIndex, int esc)
+    protected boolean _needsQuotingStrict(String value, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
@@ -1114,9 +1114,7 @@ public class CsvEncoder
             if (c < minSafe) {
                 if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
                         || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
-                        || (columnIndex == 0 && _cfgAllowsComments && c == '#' && i == 0)) {
+                        || (c == lfFirst)) {
                     return true;
                 }
             } else if (c == esc) {
