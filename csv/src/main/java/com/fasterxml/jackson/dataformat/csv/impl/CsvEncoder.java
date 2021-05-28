@@ -73,7 +73,9 @@ public class CsvEncoder
      * @since 2.5
      */
     final protected char[] _cfgNullValue;
-    
+
+    final protected boolean _cfgAllowsComments;
+
     final protected int _cfgLineSeparatorLength;
 
     protected int _cfgMaxQuoteCheckChars;
@@ -89,7 +91,7 @@ public class CsvEncoder
     /**
      * Marker flag used to determine if to do optimal (aka "strict") quoting
      * checks or not (looser conservative check)
-     * 
+     *
      * @since 2.4
      */
     protected boolean _cfgOptimalQuoting;
@@ -146,7 +148,7 @@ public class CsvEncoder
      * Index of the last buffered value
      */
     protected int _lastBuffered = -1;
-    
+
     /*
     /**********************************************************
     /* Output buffering, low-level
@@ -212,7 +214,7 @@ public class CsvEncoder
         _cfgLineSeparator = schema.getLineSeparator();
         _cfgLineSeparatorLength = (_cfgLineSeparator == null) ? 0 : _cfgLineSeparator.length;
         _cfgNullValue = schema.getNullValueOrEmpty();
-        
+        _cfgAllowsComments = schema.allowsComments();
         _columnCount = schema.size();
 
         _cfgMinSafeChar = _calcSafeChar();
@@ -252,6 +254,7 @@ public class CsvEncoder
         _cfgLineSeparator = newSchema.getLineSeparator();
         _cfgLineSeparatorLength = _cfgLineSeparator.length;
         _cfgNullValue = newSchema.getNullValueOrEmpty();
+        _cfgAllowsComments = newSchema.allowsComments();
         _cfgMinSafeChar = _calcSafeChar();
         _columnCount = newSchema.size();
         _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
@@ -359,7 +362,7 @@ public class CsvEncoder
                 appendColumnSeparator();
             }
             final int len = value.length();
-            if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len)) {
+            if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len, columnIndex)) {
                 if (_cfgEscapeCharacter > 0) {
                     _writeQuotedAndEscaped(value, (char) _cfgEscapeCharacter);
                 } else {
@@ -516,7 +519,7 @@ public class CsvEncoder
         System.arraycopy(_cfgLineSeparator, 0, _outputBuffer, _outputTail, _cfgLineSeparatorLength);
         _outputTail += _cfgLineSeparatorLength;
     }
-    
+
     /*
     /**********************************************************
     /* Writer API, writes via buffered values
@@ -535,7 +538,7 @@ public class CsvEncoder
          * only check for short Strings, stop if something found
          */
         final int len = value.length();
-        if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len)) {
+        if (_cfgAlwaysQuoteStrings || _mayNeedQuotes(value, len, _nextColumnToWrite)) {
             if (_cfgEscapeCharacter > 0) {
                 _writeQuotedAndEscaped(value, (char) _cfgEscapeCharacter);
             } else {
@@ -996,7 +999,7 @@ public class CsvEncoder
         // Internal buffer(s) generator has can now be released as well
         _releaseBuffers();
     }
-    
+
     /*
     /**********************************************************
     /* Internal methods
@@ -1007,7 +1010,7 @@ public class CsvEncoder
      * Helper method that determines whether given String is likely
      * to require quoting; check tries to optimize for speed.
      */
-    protected boolean _mayNeedQuotes(String value, int length)
+    protected boolean _mayNeedQuotes(String value, int length, int columnIndex)
     {
         // 21-Mar-2014, tatu: If quoting disabled, don't quote
         if (_cfgQuoteCharacter < 0) {
@@ -1016,9 +1019,9 @@ public class CsvEncoder
         // may skip checks unless we want exact checking
         if (_cfgOptimalQuoting) {
             if (_cfgEscapeCharacter > 0) {
-                return _needsQuotingStrict(value, _cfgEscapeCharacter);
+                return _needsQuotingStrict(value, columnIndex, _cfgEscapeCharacter);
             }
-            return _needsQuotingStrict(value);
+            return _needsQuotingStrict(value, columnIndex);
         }
         if (length > _cfgMaxQuoteCheckChars) {
             return true;
@@ -1069,7 +1072,7 @@ public class CsvEncoder
     /**
      * @since 2.4
      */
-    protected boolean _needsQuotingStrict(String value)
+    protected boolean _needsQuotingStrict(String value, int columnIndex)
     {
         final int minSafe = _cfgMinSafeChar;
 
@@ -1086,7 +1089,7 @@ public class CsvEncoder
                         || (c < escLen && escCodes[c] != 0)
                         || (c == lfFirst)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
-                        || (c == '#' && i == 0)) {
+                        || (columnIndex == 0 && _cfgAllowsComments && c == '#' && i == 0)) {
                     return true;
                 }
             }
@@ -1097,7 +1100,7 @@ public class CsvEncoder
     /**
      * @since 2.7
      */
-    protected boolean _needsQuotingStrict(String value, int esc)
+    protected boolean _needsQuotingStrict(String value, int columnIndex, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
@@ -1113,7 +1116,7 @@ public class CsvEncoder
                         || (c < escLen && escCodes[c] != 0)
                         || (c == lfFirst)
                         // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
-                        || (c == '#' && i == 0)) {
+                        || (columnIndex == 0 && _cfgAllowsComments && c == '#' && i == 0)) {
                     return true;
                 }
             } else if (c == esc) {
