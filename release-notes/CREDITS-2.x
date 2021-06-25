@@ -161,3 +161,7 @@ Alex Heneveld (ahgittin@github)
    for multi-line strings
  (2.12.3)
 
+James Wynn (jameswynn@github)
+* Reported #274: YAMLGenerator does not quote tilde (~) characters when MINIMIZE_QUOTES
+  is enabled
+ (2.12.4)

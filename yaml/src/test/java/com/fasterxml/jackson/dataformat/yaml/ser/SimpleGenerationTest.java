@@ -125,6 +125,20 @@ public class SimpleGenerationTest extends ModuleTestBase
                      "text: \"Hello World\"", yaml);
     }
 
+    public void testSimpleNullProperty() throws Exception
+    {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator gen = YAML_F.createGenerator(w)) {
+            gen.writeStartObject();
+            gen.writeFieldName("nullable");
+            gen.writeNull();
+            gen.writeEndObject();
+        }
+        // By default we'll get `null`, although tilde is a legal alternative
+        assertEquals("---\n" +
+                "nullable: null", w.toString().trim());
+    }
+
     /*
     /**********************************************************************
     /* Helper methods

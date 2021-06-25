@@ -8,6 +8,12 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.12.4 (not yet released)
+
+#274: YAMLGenerator does not quote tilde (~) characters when MINIMIZE_QUOTES
+  is enabled
+ (reported by James W)
+
 2.12.3 (12-Apr-2021)
 
 #246: (yaml) Special characters shouldn't force double quoting for multi-line strings
