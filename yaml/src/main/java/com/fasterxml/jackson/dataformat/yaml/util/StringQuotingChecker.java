@@ -95,6 +95,8 @@ public abstract class StringQuotingChecker
         case 'T': // True
         case 'Y': // Yes/Y
             return RESERVED_KEYWORDS.contains(name);
+        case '~': // null alias (see [dataformats-text#274])
+            return true;
         }
         return false;
     }
