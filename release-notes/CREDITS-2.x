@@ -166,6 +166,11 @@ Alex Heneveld (ahgittin@github)
    for multi-line strings
  (2.12.3)
 
+James Wynn (jameswynn@github)
+* Reported #274: YAMLGenerator does not quote tilde (~) characters when MINIMIZE_QUOTES
+  is enabled
+ (2.12.4)
+
 Suminda Sirinath Salpitikorala Dharmasena (sirinath@github)
 * Requested #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (2.13.0)

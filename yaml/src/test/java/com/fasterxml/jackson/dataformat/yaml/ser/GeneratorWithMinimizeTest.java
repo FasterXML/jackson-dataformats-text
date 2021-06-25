@@ -277,4 +277,21 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n" +
                 "key: |-\n  first\n  second: third", yaml);
     }
+
+    // [dataformats-text#274]: tilde is an alias for null values, must quote
+    // if written as String. Was already quoted by default but also must be quoted
+    // in minimized mode
+    public void testQuotingOfTilde() throws Exception
+    {
+        Map<String, Object> content = new HashMap<String, Object>();
+        content.put("key", "~");
+
+        assertEquals("---\n" +
+                "key: \"~\"",
+                VANILLA_MAPPER.writeValueAsString(content).trim());
+
+        assertEquals("---\n" +
+                "key: \"~\"",
+                MINIM_MAPPER.writeValueAsString(content).trim());
+    }
 }
