@@ -128,9 +128,9 @@ public class SimpleGenerationTest extends ModuleTestBase
     public void testSimpleNullProperty() throws Exception
     {
         StringWriter w = new StringWriter();
-        try (JsonGenerator gen = YAML_F.createGenerator(w)) {
+        try (JsonGenerator gen = MAPPER.createGenerator(w)) {
             gen.writeStartObject();
-            gen.writeFieldName("nullable");
+            gen.writeName("nullable");
             gen.writeNull();
             gen.writeEndObject();
         }
