@@ -8,17 +8,6 @@ jdk:
   - openjdk8
   - openjdk11
 
-# 2019-11-27, tatu: Let's try caching Maven dependencies
-cache:
-  directories:
-    - $HOME/.m2
+# 2021-06-25, tatu: Stop snapshot builds via Travis, only check for fails
 
-# Below this line is configuration for deploying to the Sonatype OSS repo
-# https://knowm.org/configure-travis-ci-to-deploy-snapshots/
-before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
-after_success: "mvn deploy --settings target/travis/settings.xml"
-
-env:
-  global:
-    - secure: "SwGExPDhEwniyRqp7mrOCHQEJHY2S6bPpD7khnQ0s6KCysuyepYnwcPSM4fddh0iNuoqL+0rNnIL910mIedohB3CPijY6669fSUg7GdFNKZCBnU2vCuh/E4qPMQjXvX8jEp5pnVScOsBR+U1x7Y3Tycz1/fqBCVm0TTtR8nlHNdI196RulU8w1upYdjGQ+0eXbfEmbNDz3T+Fxa26bgZrJnotZGh5u3RzSdbTK/wywJ9ss9XTft/lHIGxw9IQB8xyGDEn7Rc6Gm8aPWhKs04LiRdMVFn4HJG1zo7gN7OYz/DQInjJVoDC72KBnO+oSbdgmR2qY4bIdamex/uTmohKC1zYKKWnw5kdj217ISulu/ympzdCWAnQYskmNRMwqVPYysYXl+vUZlzaU3hga4bYt9atcFzRe9kO2hXBcqZMGe4Lx4b8x1BCJWJ7bVrmbHOtljb9Pvjx2Hdm5+nLFhrCcx9Jw8fURuPDJKWl4qiWMBkj2uqB7XGFFHzvLWpXA6HBXsEi0MVplFnMSVglcTOmzPEC8TeM1MSFA+3Iq/VoQVIH/VwMmVGWgA9JTouu4lyYaNyXwkzqAUARDhDI7SleJBQMXxi4dQ3vvseUlzkhtbesMj5yCXtZdy9/A3r9WniCmvSh3LRVKjippGotSQzja7LI4cZTn9HcgYypYJisZ8="
-    - secure: "TFZTuG+lhXYh4rN+iDMBbngYLZkSDq4vcfu5d7oeuUkP2QvJpbS+mPwRmLiMeedb4r/9MAxkPih+5ki00BI2r+lL4N/3jQsoAIRWPfg9DemlfqJK9+UlWkxprprGtaRKy4naUKduSVf+1AuHUrgRWx7KUy5ThNOpGPr6YaYC0M3VLQsrHerfxj6pHLwKIp9d+ye/L1P+4IX0LyZEk8uypFC4pRl0k5mU2WkY4u4121xBrAFO9+UuukgSjLvkBYUrTDAMCApW7nJONF+DS3+XmGclundaSeDJ2Xqt++WaGNElCpc7nTfmkGcVlXlCgn5Q1QSfRxg5j4ogTyRFx1TZKEbDhtDgkagFEQv8hEAI5spQFnhyFDD12j8zjtNdxyq3xl1/UcZVQwqeRlEx7hMRBAiMzAp/Yhv/2O6wwT58nAwdMBuWOneNmh9AYzteSxrK25hLU4Ya7i3OiUGPBr87hvPJmzhyZKlkHHI3vv+M3hE0iYLgjWi432LplNygaSJL3f/6kpRo4i9KoZ3lhIxqSX/Hlk0eS0JcLt91NoVHCsX6o+m9o+uSNhf0Wawr89hSWtEy6kjQ4CZrtR+yUfcrOuL5wpIQpk0lJ9lqT7kaD2QcKXmuCEhmPC70JbzzvUebEaZZ14VlKBEJQEapltw7OqDfLbobWIDu/fandZ2X2Ys="
+script: mvn -B clean verify
