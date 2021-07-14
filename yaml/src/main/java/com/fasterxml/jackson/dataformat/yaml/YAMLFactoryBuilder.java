@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.TSFBuilder;
@@ -34,6 +35,13 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     protected StringQuotingChecker _quotingChecker;
 
     /**
+     * Helper object used to determine node styles of objects and arrays.
+     *
+     * @since 2.13
+     */
+    protected NodeStyleResolver _nodeStyleResolver;
+
+    /**
      * YAML version for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
      * whatever default settings {@code SnakeYAML} deems best).
@@ -55,6 +63,7 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         _formatGeneratorFeatures = base._yamlGeneratorFeatures;
         _version = base._version;
         _quotingChecker = base._quotingChecker;
+        _nodeStyleResolver = base._nodeStyleResolver;
     }
 
     // // // Parser features NOT YET defined
@@ -111,9 +120,25 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      *   default one (see {@code StringQuotingChecker.Default.instance()})
      *
      * @return This builder instance, to allow chaining
+     *
+     * @since 2.12
      */
     public YAMLFactoryBuilder stringQuotingChecker(StringQuotingChecker sqc) {
         _quotingChecker = sqc;
+        return this;
+    }
+
+    /**
+     * Method to specify a custom {@link NodeStyleResolver} to specify custom
+     * {@link com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver.NodeStyle}s
+     * while serializing YAML objects and arrays.
+     *
+     * @return This builder instance, to allow chaining
+     *
+     * @since 2.13
+     */
+    public YAMLFactoryBuilder nodeStyleResolver(NodeStyleResolver nodeStyleResolver) {
+        _nodeStyleResolver = nodeStyleResolver;
         return this;
     }
 
@@ -145,11 +170,21 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return _version;
     }
 
+    /**
+     * @since 2.12
+     */
     public StringQuotingChecker stringQuotingChecker() {
         if (_quotingChecker != null) {
             return _quotingChecker;
         }
         return StringQuotingChecker.Default.instance();
+    }
+
+    /**
+     * @since 2.13
+     */
+    public NodeStyleResolver nodeStyleResolver() {
+        return _nodeStyleResolver;
     }
 
     @Override
