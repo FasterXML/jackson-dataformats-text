@@ -1456,10 +1456,9 @@ public class CsvSchema
     public String getColumnDesc()
     {
         StringBuilder sb = new StringBuilder(100);
+        sb.append('[');
         for (Column col : _columns) {
-            if (sb.length() == 0) {
-                sb.append('[');
-            } else {
+            if (sb.length() > 1) {
                 sb.append(',');
             }
             sb.append('"');
