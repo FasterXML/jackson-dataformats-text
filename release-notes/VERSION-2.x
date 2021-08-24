@@ -21,9 +21,11 @@ Active Maintainers:
 #240: (csv) Split `CsvMappingException` into `CsvReadException`/`CsvWriteException`
 #255: (properties) Ensure that empty String to null/empty works by default
   for Properties format
-#270: Should not quote with strict quoting when line starts with `#` but comments
+#270: (csv) Should not quote with strict quoting when line starts with `#` but comments
   are disabled
  (contributed by Krzysztof D)
+#283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns are empty
+ (contributed by PJ Fanning)
 
 2.12.4 (06-Jul-2021)
 
