@@ -142,6 +142,12 @@ public class CsvSchemaTest extends ModuleTestBase
         _verifyLinks(schema);
     }
 
+    public void testColumnDescForEmptyScheme() throws Exception
+    {
+        CsvSchema schema = CsvSchema.emptySchema();
+        assertEquals("[]", schema.getColumnDesc());
+    }
+
     private void _verifyLinks(CsvSchema schema)
     {
         List<Column> all = new ArrayList<Column>();
