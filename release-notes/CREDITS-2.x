@@ -183,3 +183,10 @@ Krzysztof Debski (kdebski85@github)
 * Contributed #270: Should not quote with strict quoting when line starts with `#` but comments
   are disabled
  (2.13.0)
+
+PJ Fanning (pjfanning@github)
+* Contributed #283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns
+  are empty
+ (2.13.0)
+
+
