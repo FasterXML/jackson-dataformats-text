@@ -8,6 +8,10 @@ Modules:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.12.5 (27-Aug-2021)
+
+No changes since 2.12.4
+
 2.12.4 (06-Jul-2021)
 
 #274: YAMLGenerator does not quote tilde (~) characters when MINIMIZE_QUOTES
