@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.13.0 (not yet released)
+2.13.0 (30-Sep-2021)
 
 #219: (toml) Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (requested by Suminda S; contributed by Jonas K)
