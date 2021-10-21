@@ -10,54 +10,62 @@ import com.fasterxml.jackson.core.FormatSchema;
  * a CSV document to read or write.
  * Properties supported currently are:
  *<ul>
- * <li>columns (List of {@link Column}) [default: empty List]: Ordered list of columns (which may be empty, see below).
+ * <li>{@code columns} (List of {@link Column}) [default: empty List]: Ordered list of columns (which may be empty, see below).
  *   Each column has name (mandatory)  as well as type (optional; if not
  *   defined, defaults to "String").
  *   Note that
  *  </li>
- * <li>useHeader (boolean) [default: false]: whether the first line of physical document defines
+ * <li>{@code useHeader} (boolean) [default: false]: whether the first line of physical document defines
  *    column names (true) or not (false): if enabled, parser will take
  *    first-line values to define column names; and generator will output
  *    column names as the first line
  *  </li>
- * <li>quoteChar (char) [default: double-quote ('")]: character used for quoting values
+ * <li>{@code quoteChar} (char) [default: double-quote ('")]: character used for quoting values
  *   that contain quote characters or linefeeds.
  *  </li>
- * <li>columnSeparator (char) [default: comma (',')]: character used to separate values.
+ * <li>{@code columnSeparator} (char) [default: comma (',')]: character used to separate values.
  *     Other commonly used values include tab ('\t') and pipe ('|')
  *  </li>
- * <li>arrayElementSeparator (String) [default: semicolon (";")]: string used to separate array elements.
+ * <li>{@code arrayElementSeparator} (String) [default: semicolon (";")]: string used to separate array elements.
  *  </li>
- * <li>lineSeparator (String) [default: "\n"]: character used to separate data rows.
+ * <li>{@code lineSeparator} (String) [default: "\n"]: character used to separate data rows.
  *    Only used by generator; parser accepts three standard linefeeds ("\r", "\r\n", "\n").
  *  </li>
- * <li>escapeChar (int) [default: -1 meaning "none"]: character, if any, used to
+ * <li>{@code escapeChar} (int) [default: -1 meaning "none"]: character, if any, used to
  *   escape values. Most commonly defined as backslash ('\'). Only used by parser;
  *   generator only uses quoting, including doubling up of quotes to indicate quote char
  *   itself.
  *  </li>
- * <li>skipFirstDataRow (boolean) [default: false]: whether the first data line (either
+ * <li>{@code skipFirstDataRow} (boolean) [default: false]: whether the first data line (either
  *    first line of the document, if useHeader=false, or second, if useHeader=true)
  *    should be completely ignored by parser. Needed to support CSV-like file formats
  *    that include additional non-data content before real data begins (specifically
  *    some database dumps do this)
  *  </li>
- * <li>nullValue (String) [default: "" (empty String)]: When asked to write Java `null`,
+ * <li>{@code nullValue} (String) [default: "" (empty String)]: When asked to write Java `null`,
  *    this String value will be used instead.<br />
- *   With 2.6, value will also be recognized during value reads.
+ *   Null values will also be recognized during value reads.
  *  </li>
- * <li>strictHeaders (boolean) [default: false] (added in Jackson 2.7): whether names of
+ * <li>{@code strictHeaders} (boolean) [default: false] (added in Jackson 2.7): whether names of
  *   columns defined in the schema MUST match with actual declaration from
  *   the header row (if header row handling enabled): if true, they must be and
  *   an exception if thrown if order differs: if false, no verification is performed.
  *  </li>
- * </ul>
+ * <li>{@code allowComments} (boolean) [default: false]: whether lines that start with character "#"
+ *  are processed as comment lines and skipped/ignored.
+ *  </li>
+ * <li>{@code anyProperty} (String] [default: none]: if "any properties" (properties for
+ *   'extra' columns; ones not specified in schema) are enabled, they are mapped to
+ *    this name: leaving it as {@code null} disables use of
+ *   "any properties" (and they are either ignored, or an exception
+ * is thrown, depending on other settings); setting it to a non-null
+ * String value will expose all extra properties under one specified name.
+ * Most often used with Jackson {@code @JsonAnySetter} annotation.
  *<p>
  * Note that schemas without any columns are legal, but if no columns
  * are added, behavior of parser/generator is usually different and
  * content will be exposed as logical Arrays instead of Objects.
  *<p>
- *
  * There are 4 ways to create <code>CsvSchema</code> instances:
  *<ul>
  * <li>Manually build one, using {@link Builder}
@@ -395,7 +403,7 @@ public class CsvSchema
         /**
          * If "any properties" (properties for 'extra' columns; ones
          * not specified in schema) are enabled, they are mapped to
-         * this name: leaving it as <code>null</code> disables use of
+         * this name: leaving it as {@code null} disables use of
          * "any properties" (and they are either ignored, or an exception
          * is thrown, depending on other settings); setting it to a non-null
          * String value will expose all extra properties under one specified
