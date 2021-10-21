@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 import java.io.*;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
@@ -65,5 +66,21 @@ public class TestGeneratorNoSchema extends ModuleTestBase
         assertEquals("foo;13;true\r\n"
                 +"bar;28;false\r\n",
                 csv);
+    }
+
+    public void testUntypedWithSequenceWriter() throws Exception
+    {
+        try (StringWriter strW = new StringWriter()) {
+            SequenceWriter seqW = MAPPER.writer()
+                    .writeValues(strW);
+
+            seqW.write(new Object[] { "foo", 13, true });
+            seqW.write(new Object[] { "bar", 28, false });
+            seqW.close();
+            String csv = strW.toString();
+            assertEquals("foo,13,true\n"
+                    +"bar,28,false\n",
+                    csv);
+        }
     }
 }
