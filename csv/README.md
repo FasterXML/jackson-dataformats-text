@@ -20,13 +20,18 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
     <groupId>com.fasterxml.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-csv</artifactId>
-    <version>2.12.1</version>
+    <version>2.13.0</version>
 </dependency>
 ```
 
 (with whatever is the latest version)
 
 # Usage
+
+## How-To Documents
+
+* [Reading CSV with Jackson](https://cowtowncoder.medium.com/reading-csv-with-jackson-c4e74a15ddc1) (April 2021)
+* [Writing CSV with Jackson](https://cowtowncoder.medium.com/writing-csv-with-jackson-204fdb3c9dac) (October 2021)
 
 ## CSV Schema: what is that?
 
