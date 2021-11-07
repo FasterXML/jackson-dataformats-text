@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 public class ObjectIdTest extends ModuleTestBase
 {
     @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
+    @JsonPropertyOrder({ "name", "next"})
     static class Node
     {
         public String name;
@@ -129,6 +131,7 @@ public class ObjectIdTest extends ModuleTestBase
     {
         YAMLMapper mapper = YAMLMapper.builder()
                 .disable(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
+		.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true)
                 .build();
         Node first = new Node("first");
         Node second = new Node("second");
