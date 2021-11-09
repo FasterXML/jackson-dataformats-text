@@ -11,6 +11,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 public class ObjectIdTest extends ModuleTestBase
 {
     @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
+    @JsonPropertyOrder({ "name", "next"})
     static class Node
     {
         public String name;
