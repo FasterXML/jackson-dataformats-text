@@ -20,21 +20,21 @@ public class MissingColumnsTest extends ModuleTestBase
         public String b = "b";
         public String c = "c";
     }
-    
+
     /*
     /**********************************************************************
     /* Test methods
     /**********************************************************************
      */
 
-    final CsvMapper MAPPER = mapperForCsv();
+    private final CsvMapper MAPPER = mapperForCsv();
 
-    final CsvSchema SCHEMA = MAPPER.schemaFor(ABC.class);
+    private final CsvSchema SCHEMA_ABC = MAPPER.schemaFor(ABC.class);
 
     // by default, just... ignore
     public void testDefaultMissingHandling() throws Exception
     {
-        ObjectReader r = MAPPER.readerFor(ABC.class).with(SCHEMA);
+        ObjectReader r = MAPPER.readerFor(ABC.class).with(SCHEMA_ABC);
         final ABC DEFAULT = new ABC();
 
         ABC result = r.readValue("first,second,third\n");
@@ -65,7 +65,7 @@ public class MissingColumnsTest extends ModuleTestBase
     public void testInjectMissingAsNulls() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)
-                .with(SCHEMA)
+                .with(SCHEMA_ABC)
                 .with(CsvParser.Feature.INSERT_NULLS_FOR_MISSING_COLUMNS);
         
         // check with various number of missing; but first with no missing
@@ -95,7 +95,7 @@ public class MissingColumnsTest extends ModuleTestBase
     public void testFailOnMissingColumns() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)
-                .with(SCHEMA)
+                .with(SCHEMA_ABC)
                 .with(CsvParser.Feature.FAIL_ON_MISSING_COLUMNS);
         
         // check with various number of missing, as well as recovery
