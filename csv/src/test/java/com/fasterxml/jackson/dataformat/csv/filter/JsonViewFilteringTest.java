@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.deser;
+package com.fasterxml.jackson.dataformat.csv.filter;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -17,7 +17,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvReadException;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
-public class TestFiltering extends ModuleTestBase
+public class JsonViewFilteringTest extends ModuleTestBase
 {
     // Classes that represent views
     static class ViewA { }
