@@ -31,6 +31,7 @@ No changes since 2.13
 #283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns are empty
  (contributed by PJ Fanning)
 
+2.12.6 (15-Dec-2021)
 2.12.5 (27-Aug-2021)
 
 No changes since 2.12.4
