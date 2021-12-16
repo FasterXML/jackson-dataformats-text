@@ -428,10 +428,15 @@ public class CsvMapper extends ObjectMapper
     protected CsvSchema _schemaFor(JavaType pojoType, SimpleLookupCache<JavaType,CsvSchema> schemas,
             boolean typed, Class<?> view)
     {
-        synchronized (schemas) {
-            CsvSchema s = schemas.get(pojoType);
-            if (s != null) {
-                return s;
+        // 15-Dec-2021, tatu: [dataformats-text#288] Only cache if we don't have
+        //    a view, to avoid conflicts. For now. May be improved by changing cache
+        //    key if that is considered a performance problem.
+        if (view == null) { 
+            synchronized (schemas) {
+                CsvSchema s = schemas.get(pojoType);
+                if (s != null) {
+                    return s;
+                }
             }
         }
         // 15-Oct-2019, tatu: Since 3.0, need context for introspection
@@ -439,8 +444,10 @@ public class CsvMapper extends ObjectMapper
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(ctxt, builder, typed, pojoType, null, view);
         CsvSchema result = builder.build();
-        synchronized (schemas) {
-            schemas.put(pojoType, result);
+        if (view == null) { // only cache without view (see above)
+            synchronized (schemas) {
+                schemas.put(pojoType, result);
+            }
         }
         return result;
     }
