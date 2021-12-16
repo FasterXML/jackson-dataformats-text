@@ -189,4 +189,8 @@ PJ Fanning (pjfanning@github)
   are empty
  (2.13.0)
 
+Falk Hanisch (mrpiggi@github)
+#288: Caching conflict when creating CSV schemas with different views
+  for the same POJO
+ (2.13.1)
 

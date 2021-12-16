@@ -18,6 +18,12 @@ Active Maintainers:
 
 No changes since 2.13
 
+2.13.1 (not yet released)
+
+#288: Caching conflict when creating CSV schemas with different views
+  for the same POJO
+ (reported by Falk H)
+
 2.13.0 (30-Sep-2021)
 
 #219: (toml) Add TOML (https://en.wikipedia.org/wiki/TOML) support
