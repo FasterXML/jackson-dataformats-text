@@ -425,18 +425,24 @@ public class CsvMapper extends ObjectMapper
     protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas,
             boolean typed, Class<?> view)
     {
-        synchronized (schemas) {
-            CsvSchema s = schemas.get(pojoType);
-            if (s != null) {
-                return s;
+        // 15-Dec-2021, tatu: [dataformats-text#288] Only cache if we don't have
+        //    a view, to avoid conflicts
+        if (view == null) { 
+            synchronized (schemas) {
+                CsvSchema s = schemas.get(pojoType);
+                if (s != null) {
+                    return s;
+                }
             }
         }
         final AnnotationIntrospector intr = _deserializationConfig.getAnnotationIntrospector();
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(builder, intr, typed, pojoType, null, view);
         CsvSchema result = builder.build();
-        synchronized (schemas) {
-            schemas.put(pojoType, result);
+        if (view == null) { // only cache without view (see above)
+            synchronized (schemas) {
+                schemas.put(pojoType, result);
+            }
         }
         return result;
     }
