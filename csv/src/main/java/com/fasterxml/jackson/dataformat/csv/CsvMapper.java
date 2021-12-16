@@ -426,7 +426,8 @@ public class CsvMapper extends ObjectMapper
             boolean typed, Class<?> view)
     {
         // 15-Dec-2021, tatu: [dataformats-text#288] Only cache if we don't have
-        //    a view, to avoid conflicts
+        //    a view, to avoid conflicts. For now. May be improved by changing cache
+        //    key if that is considered a performance problem.
         if (view == null) { 
             synchronized (schemas) {
                 CsvSchema s = schemas.get(pojoType);
