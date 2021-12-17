@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
@@ -86,17 +87,62 @@ public class CsvMapper extends ObjectMapper
         }
     }
 
+
+    /**
+     * Simple class in order to create a map key based on {@link JavaType} and a given view.
+     * Used for caching associated schemas in {@code _untypedSchemas} and {@code _typedSchemas}.
+     */
+    public static final class ViewKey
+        implements java.io.Serializable
+    {
+        private static final long serialVersionUID = 1L;
+    
+        private final JavaType _pojoType;
+        private final Class<?> _view;
+        private final int _hashCode;
+    
+    
+        public ViewKey(final JavaType pojoType, final Class<?> view)
+        {
+            _pojoType = pojoType;
+            _view = view;
+            _hashCode = Objects.hash(pojoType, view);
+        }
+    
+    
+      @Override
+      public int hashCode() { return _hashCode; }
+    
+      @Override
+      public boolean equals(final Object o)
+      {
+          if (o == this) { return true; }
+          if (o == null || o.getClass() != getClass()) { return false; }
+          final ViewKey other = (ViewKey) o;
+          if (_hashCode != other._hashCode || _view != other._view) { return false; }
+          return Objects.equals(_pojoType, other._pojoType);
+      }
+    
+      @Override
+      public String toString()
+      {
+          String viewName = _view != null ? _view.getName() : null;
+          return "[ViewKey: pojoType=" + _pojoType + ", view=" + viewName + "]";
+      }
+    }
+
+
     /**
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for "loose" (non-typed) schemas
      */
-    protected final LRUMap<JavaType,CsvSchema> _untypedSchemas;
+    protected final LRUMap<ViewKey,CsvSchema> _untypedSchemas;
 
     /**
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for typed schemas
      */
-    protected final LRUMap<JavaType,CsvSchema> _typedSchemas;
+    protected final LRUMap<ViewKey,CsvSchema> _typedSchemas;
 
     /*
     /**********************************************************************
@@ -114,8 +160,8 @@ public class CsvMapper extends ObjectMapper
         super(f);
         // As per #11: default to alphabetic ordering
         enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+        _untypedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
+        _typedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
     }
 
     /**
@@ -128,8 +174,8 @@ public class CsvMapper extends ObjectMapper
     protected CsvMapper(CsvMapper src)
     {
         super(src);
-        _untypedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<JavaType,CsvSchema>(8,32);
+        _untypedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
+        _typedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
     }
 
     /**
@@ -422,34 +468,28 @@ public class CsvMapper extends ObjectMapper
     /**********************************************************************
      */
 
-    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas,
+    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<ViewKey,CsvSchema> schemas,
             boolean typed, Class<?> view)
     {
-        // 15-Dec-2021, tatu: [dataformats-text#288] Only cache if we don't have
-        //    a view, to avoid conflicts. For now. May be improved by changing cache
-        //    key if that is considered a performance problem.
-        if (view == null) { 
-            synchronized (schemas) {
-                CsvSchema s = schemas.get(pojoType);
-                if (s != null) {
-                    return s;
-                }
+        final ViewKey viewKey = new ViewKey(pojoType, view);
+        synchronized (schemas) {
+            CsvSchema s = schemas.get(viewKey);
+            if (s != null) {
+                return s;
             }
         }
         final AnnotationIntrospector intr = _deserializationConfig.getAnnotationIntrospector();
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(builder, intr, typed, pojoType, null, view);
         CsvSchema result = builder.build();
-        if (view == null) { // only cache without view (see above)
-            synchronized (schemas) {
-                schemas.put(pojoType, result);
-            }
+        synchronized (schemas) {
+            schemas.put(viewKey, result);
         }
         return result;
     }
 
     @Deprecated // since 2.11 (remove from 3.0 at latest)
-    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<JavaType,CsvSchema> schemas, boolean typed) {
+    protected CsvSchema _schemaFor(JavaType pojoType, LRUMap<ViewKey,CsvSchema> schemas, boolean typed) {
         return _schemaFor(pojoType, schemas, typed, null);
     }
 
