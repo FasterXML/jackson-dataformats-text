@@ -1,8 +1,8 @@
 # Overview
 
 This project contains [Jackson](../../../../jackson) extension component for reading and writing [YAML](http://en.wikipedia.org/wiki/YAML) encoded data.
-Since version 3.0, which is being developed in this branch, [SnakeYAML Engine](https://bitbucket.org/asomov/snakeyaml-engine/) library will be used for low-level YAML parsing.
-In current released versions 2.* [SnakeYAML](https://bitbucket.org/asomov/snakeyaml/) library is used. See separate branches [2.9](https://github.com/FasterXML/jackson-dataformats-text/tree/2.9) and [2.10](https://github.com/FasterXML/jackson-dataformats-text/tree/2.10) for sources.
+Since version 3.0, which is being developed in this branch, [SnakeYAML Engine](https://bitbucket.org/snakeyaml/snakeyaml-engine/) library will be used for low-level YAML parsing.
+In current released versions 2.* [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/) library is used. See separate branches [2.9](https://github.com/FasterXML/jackson-dataformats-text/tree/2.9) and [2.10](https://github.com/FasterXML/jackson-dataformats-text/tree/2.10) for sources.
 This project adds necessary abstractions on top to make things work with other Jackson functionality.
 
 Project is licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
