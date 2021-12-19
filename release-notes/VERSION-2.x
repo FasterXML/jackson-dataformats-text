@@ -18,7 +18,7 @@ Active Maintainers:
 
 No changes since 2.13
 
-2.13.1 (not yet released)
+2.13.1 (19-Dec-2021)
 
 #288: Caching conflict when creating CSV schemas with different views
   for the same POJO
