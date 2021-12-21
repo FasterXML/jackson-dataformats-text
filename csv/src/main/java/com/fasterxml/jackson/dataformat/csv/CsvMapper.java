@@ -86,11 +86,11 @@ public class CsvMapper extends ObjectMapper
             return this;
         }
     }
-
-
     /**
      * Simple class in order to create a map key based on {@link JavaType} and a given view.
      * Used for caching associated schemas in {@code _untypedSchemas} and {@code _typedSchemas}.
+     *
+     * @since 2.14
      */
     public static final class ViewKey
         implements java.io.Serializable
@@ -160,8 +160,8 @@ public class CsvMapper extends ObjectMapper
         super(f);
         // As per #11: default to alphabetic ordering
         enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
-        _untypedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
+        _untypedSchemas = new LRUMap<>(8,32);
+        _typedSchemas = new LRUMap<>(8,32);
     }
 
     /**
@@ -174,8 +174,8 @@ public class CsvMapper extends ObjectMapper
     protected CsvMapper(CsvMapper src)
     {
         super(src);
-        _untypedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
-        _typedSchemas = new LRUMap<ViewKey,CsvSchema>(8,32);
+        _untypedSchemas = new LRUMap<>(8,32);
+        _typedSchemas = new LRUMap<>(8,32);
     }
 
     /**
