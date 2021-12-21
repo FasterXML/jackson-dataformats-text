@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 
@@ -130,13 +131,13 @@ public class CsvMapper extends ObjectMapper
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for "loose" (non-typed) schemas
      */
-    protected final SimpleLookupCache<JavaType,CsvSchema> _untypedSchemas;
+    protected final SimpleLookupCache<ViewKey,CsvSchema> _untypedSchemas;
 
     /**
      * Simple caching for schema instances, given that they are relatively expensive
      * to construct; this one is for typed schemas
      */
-    protected final SimpleLookupCache<JavaType,CsvSchema> _typedSchemas;
+    protected final SimpleLookupCache<ViewKey,CsvSchema> _typedSchemas;
 
     /*
     /**********************************************************************
@@ -150,6 +151,7 @@ public class CsvMapper extends ObjectMapper
 
     public CsvMapper(CsvFactory f) {
         this(new Builder(f));
+
     }
 
     /**
@@ -157,8 +159,8 @@ public class CsvMapper extends ObjectMapper
      */
     public CsvMapper(CsvMapper.Builder b) {
         super(b);
-        _untypedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
-        _typedSchemas = new SimpleLookupCache<JavaType,CsvSchema>(8,32);
+        _untypedSchemas = new SimpleLookupCache<>(8,32);
+        _typedSchemas = new SimpleLookupCache<>(8,32);
     }
 
     public static CsvMapper.Builder builder() {
@@ -425,18 +427,14 @@ public class CsvMapper extends ObjectMapper
     /**********************************************************************
      */
 
-    protected CsvSchema _schemaFor(JavaType pojoType, SimpleLookupCache<JavaType,CsvSchema> schemas,
+    protected CsvSchema _schemaFor(JavaType pojoType, SimpleLookupCache<ViewKey,CsvSchema> schemas,
             boolean typed, Class<?> view)
     {
-        // 15-Dec-2021, tatu: [dataformats-text#288] Only cache if we don't have
-        //    a view, to avoid conflicts. For now. May be improved by changing cache
-        //    key if that is considered a performance problem.
-        if (view == null) { 
-            synchronized (schemas) {
-                CsvSchema s = schemas.get(pojoType);
-                if (s != null) {
-                    return s;
-                }
+        final ViewKey viewKey = new ViewKey(pojoType, view);
+        synchronized (schemas) {
+            CsvSchema s = schemas.get(viewKey);
+            if (s != null) {
+                return s;
             }
         }
         // 15-Oct-2019, tatu: Since 3.0, need context for introspection
@@ -444,10 +442,8 @@ public class CsvMapper extends ObjectMapper
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(ctxt, builder, typed, pojoType, null, view);
         CsvSchema result = builder.build();
-        if (view == null) { // only cache without view (see above)
-            synchronized (schemas) {
-                schemas.put(pojoType, result);
-            }
+        synchronized (schemas) {
+            schemas.put(viewKey, result);
         }
         return result;
     }
@@ -570,10 +566,53 @@ public class CsvMapper extends ObjectMapper
     }
 
     /*
-    /**********************************************************
-    /* Helper class(es)
-    /**********************************************************
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
      */
+
+    /**
+     * Simple class in order to create a map key based on {@link JavaType} and a given view.
+     * Used for caching associated schemas in {@code _untypedSchemas} and {@code _typedSchemas}.
+     */
+    public static final class ViewKey
+        implements java.io.Serializable
+    {
+        private static final long serialVersionUID = 1L;
+    
+        private final JavaType _pojoType;
+        private final Class<?> _view;
+        private final int _hashCode;
+    
+    
+        public ViewKey(final JavaType pojoType, final Class<?> view)
+        {
+            _pojoType = pojoType;
+            _view = view;
+            _hashCode = Objects.hash(pojoType, view);
+        }
+    
+    
+      @Override
+      public int hashCode() { return _hashCode; }
+    
+      @Override
+      public boolean equals(final Object o)
+      {
+          if (o == this) { return true; }
+          if (o == null || o.getClass() != getClass()) { return false; }
+          final ViewKey other = (ViewKey) o;
+          if (_hashCode != other._hashCode || _view != other._view) { return false; }
+          return Objects.equals(_pojoType, other._pojoType);
+      }
+    
+      @Override
+      public String toString()
+      {
+          String viewName = _view != null ? _view.getName() : null;
+          return "[ViewKey: pojoType=" + _pojoType + ", view=" + viewName + "]";
+      }
+    }
 
     /**
      * Helper class to contain dynamically constructed "shared" instance of

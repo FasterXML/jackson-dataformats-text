@@ -16,6 +16,9 @@ Active Maintainers:
 
 2.14.0 (not yet released)
 
+#297: CSV schema caching POJOs with different views
+ (contributed by Falk H)
+
 No changes since 2.13
 
 2.13.1 (19-Dec-2021)
