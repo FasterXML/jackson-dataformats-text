@@ -18,9 +18,14 @@ Active Maintainers:
 
 No changes since 2.13
 
+2.13.2 (not yet released)
+
+#303: (yaml) Update to SnakeYAML 1.30
+ (suggested by PJ Fanning)
+
 2.13.1 (19-Dec-2021)
 
-#288: Caching conflict when creating CSV schemas with different views
+#288: (csv) Caching conflict when creating CSV schemas with different views
   for the same POJO
  (reported by Falk H)
 
