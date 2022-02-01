@@ -195,3 +195,7 @@ Falk Hanisch (mrpiggi@github)
  (2.13.1)
 * Contributed #297: CSV schema caching POJOs with different views
  (2.14.0)
+
+Esteban Ginez (eginez@github)
+#306: (yaml) Error when generating/serializing keys with multilines and colon
+ (2.13.2)

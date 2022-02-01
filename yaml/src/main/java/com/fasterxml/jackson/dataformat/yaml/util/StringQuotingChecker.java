@@ -163,7 +163,27 @@ public abstract class StringQuotingChecker
         }
         return false;
     }
-    
+
+    /**
+     * Looks like we may get names with "funny characters" so.
+     *
+     * @since 2.13.2
+     */
+    protected boolean nameHasQuotableChar(String inputStr)
+    {
+        // 31-Jan-2022, tatu: As per [dataformats-text#306] linefeed is
+        //   problematic. I'm sure there are likely other cases, but let's
+        //   start with the obvious ones, control characters
+        final int end = inputStr.length();
+        for (int i = 0; i < end; ++i) {
+            int ch = inputStr.charAt(i);
+            if (ch < 0x0020) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Default {@link StringQuotingChecker} implementation used unless
      * custom implementation registered.
@@ -189,7 +209,10 @@ public abstract class StringQuotingChecker
         @Override
         public boolean needToQuoteName(String name)
         {
-            return isReservedKeyword(name) || looksLikeYAMLNumber(name);
+            return isReservedKeyword(name) || looksLikeYAMLNumber(name)
+                    // 31-Jan-2022, tatu: as per [dataformats-text#306] may also
+                    //   have other characters requiring quoting...
+                    || nameHasQuotableChar(name);
         }
 
         /**
