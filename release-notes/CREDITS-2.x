@@ -194,3 +194,6 @@ Falk Hanisch (mrpiggi@github)
   for the same POJO
  (2.13.1)
 
+Esteban Ginez (eginez@github)
+#306: (yaml) Error when generating/serializing keys with multilines and colon
+ (2.13.2)

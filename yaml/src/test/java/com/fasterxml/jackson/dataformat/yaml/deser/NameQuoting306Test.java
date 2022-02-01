@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import java.util.Collections;
 import java.util.Map;
