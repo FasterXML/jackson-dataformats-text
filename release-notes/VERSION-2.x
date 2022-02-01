@@ -25,6 +25,8 @@ No changes since 2.13
 
 #303: (yaml) Update to SnakeYAML 1.30
  (suggested by PJ Fanning)
+#306: (yaml) Error when generating/serializing keys with multilines and colon
+ (reported by Esteban G)
 
 2.13.1 (19-Dec-2021)
 
