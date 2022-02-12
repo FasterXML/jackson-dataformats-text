@@ -496,7 +496,9 @@ public class CsvMapper extends ObjectMapper
                 if (views == null) {
                     views = beanDesc.findDefaultViews();
                 }
-                if (!ViewMatcher.construct(views).isVisibleForView(view)) {
+                if (!ViewMatcher.construct(views).isVisibleForView(view)
+                  && !(views == null && this.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION))
+                ) {
                     continue;
                 }
             }
