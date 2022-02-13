@@ -190,10 +190,12 @@ PJ Fanning (pjfanning@github)
  (2.13.0)
 
 Falk Hanisch (mrpiggi@github)
-* Reported #288: Caching conflict when creating CSV schemas with different views
+#288: Caching conflict when creating CSV schemas with different views
   for the same POJO
  (2.13.1)
-* Contributed #297: CSV schema caching POJOs with different views
+#308: (csv) `CsvMapper.typedSchemaForWithView()` with `DEFAULT_VIEW_INCLUSION`
+ (2.13.2)
+#297: (csv) CSV schema caching POJOs with different views
  (2.14.0)
 
 Esteban Ginez (eginez@github)
