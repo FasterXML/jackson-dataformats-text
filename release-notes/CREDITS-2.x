@@ -193,6 +193,8 @@ Falk Hanisch (mrpiggi@github)
 #288: Caching conflict when creating CSV schemas with different views
   for the same POJO
  (2.13.1)
+#308: (csv) `CsvMapper.typedSchemaForWithView()` with `DEFAULT_VIEW_INCLUSION`
+ (2.13.2)
 
 Esteban Ginez (eginez@github)
 #306: (yaml) Error when generating/serializing keys with multilines and colon

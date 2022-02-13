@@ -24,6 +24,8 @@ No changes since 2.13
  (suggested by PJ Fanning)
 #306: (yaml) Error when generating/serializing keys with multilines and colon
  (reported by Esteban G)
+#308: (csv) `CsvMapper.typedSchemaForWithView()` with `DEFAULT_VIEW_INCLUSION`
+ (contributed by Falk H)
 
 2.13.1 (19-Dec-2021)
 

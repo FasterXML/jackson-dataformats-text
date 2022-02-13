@@ -9,10 +9,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
-
 public class SchemaDefaultView308Test extends ModuleTestBase
 {
-
     interface BaseView {}
     @JsonView(BaseView.class)
     interface BaseViewMixIn {}
@@ -25,8 +23,7 @@ public class SchemaDefaultView308Test extends ModuleTestBase
     @JsonView(OtherView.class)
     interface OtherViewMixIn {}
 
-
-    class ViewTestPojo
+    static class ViewTestPojo
     {
         @JsonProperty
         boolean flag;
@@ -49,9 +46,7 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         }
     }
 
-
     private final ViewTestPojo POJO = new ViewTestPojo(true, '!', 1234, "dummy");
-
 
     private CsvMapper _createMapper(boolean inclusion, Class<?> defaultViewMixin)
     {
@@ -61,7 +56,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         }
         return builder.build();
     }
-
 
     private void _verifyExpected(final CsvMapper csvMapper, final Class<?> view, final String... expectedNames)
     {
@@ -75,7 +69,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         );
     }
 
-
     public void testSchemaWithImplicitDefaultViewAndDefaultViewInclusionDisabled()
     {
         CsvMapper csvMapper = _createMapper(false, null);
@@ -84,7 +77,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, ExtendedView.class, "character", "number");
         _verifyExpected(csvMapper, OtherView.class, "text");
     }
-
 
     public void testSchemaWithDefaultBaseViewAndDefaultViewInclusionDisabled()
     {
@@ -95,7 +87,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, OtherView.class, "text");
     }
 
-
     public void testSchemaWithDefaultExtendedViewAndDefaultViewInclusionDisabled()
     {
         CsvMapper csvMapper = _createMapper(false, ExtendedViewMixIn.class);
@@ -104,7 +95,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, ExtendedView.class, "flag", "character", "number");
         _verifyExpected(csvMapper, OtherView.class, "text");
     }
-
 
     public void testSchemaWithDefaultOtherViewAndDefaultViewInclusionDisabled()
     {
@@ -115,7 +105,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, OtherView.class, "flag", "text");
     }
 
-
     public void testSchemaWithImplicitDefaultViewAndDefaultViewInclusionEnabled()
     {
         CsvMapper csvMapper = _createMapper(true, null);
@@ -124,7 +113,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, ExtendedView.class, "flag", "character", "number");
         _verifyExpected(csvMapper, OtherView.class, "flag", "text");
     }
-
 
     public void testSchemaWithDefaultBaseViewAndDefaultViewInclusionEnabled()
     {
@@ -135,7 +123,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, OtherView.class, "text");
     }
 
-
     public void testSchemaWithDefaultExtendedViewAndDefaultViewInclusionEnabled()
     {
         CsvMapper csvMapper = _createMapper(true, ExtendedViewMixIn.class);
@@ -144,7 +131,6 @@ public class SchemaDefaultView308Test extends ModuleTestBase
         _verifyExpected(csvMapper, ExtendedView.class, "flag", "character", "number");
         _verifyExpected(csvMapper, OtherView.class, "text");
     }
-
 
     public void testSchemaWithDefaultOtherViewAndDefaultViewInclusionEnabled()
     {
