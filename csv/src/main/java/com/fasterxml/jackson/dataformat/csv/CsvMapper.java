@@ -531,13 +531,18 @@ public class CsvMapper extends ObjectMapper
         }
         
         BeanDescription beanDesc = getSerializationConfig().introspect(pojoType);
+        final boolean includeByDefault = isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION);
         for (BeanPropertyDefinition prop : beanDesc.findProperties()) {
             if (view != null) {
                 Class<?>[] views = prop.findViews();
                 if (views == null) {
                     views = beanDesc.findDefaultViews();
                 }
-                if (!ViewMatcher.construct(views).isVisibleForView(view)) {
+                // If property defines no Views AND non-view-enabled included by default,
+                // should include
+                if ((views == null) && includeByDefault) {
+                    ;
+                } else if (!ViewMatcher.construct(views).isVisibleForView(view)) {
                     continue;
                 }
             }
