@@ -94,8 +94,24 @@ public final class NumberInput
         return true;
     }
 
-    public final static double parseDouble(String numStr) throws NumberFormatException
-    {
-        return Double.parseDouble(numStr);
+    /**
+     * @param s a string representing a number to parse
+     * @return closest matching double
+     * @throws NumberFormatException if string cannot be represented by a double where useFastParser=false
+     * @see #parseDouble(String, boolean)
+     */
+    public static double parseDouble(final String s) throws NumberFormatException {
+        return parseDouble(s, false);
+    }
+
+    /**
+     * @param s a string representing a number to parse
+     * @param useFastParser whether to use {@link com.fasterxml.jackson.core.io.doubleparser}
+     * @return closest matching double
+     * @throws NumberFormatException if string cannot be represented by a double
+     * @since v2.14
+     */
+    public static double parseDouble(final String s, final boolean useFastParser) throws NumberFormatException {
+        return com.fasterxml.jackson.core.io.NumberInput.parseDouble(s, useFastParser);
     }
 }

@@ -1228,7 +1228,7 @@ public class CsvDecoder
                 _numTypesValid = NR_BIGDECIMAL;
             } else {
                 // Otherwise double has to do
-                _numberDouble = _textBuffer.contentsAsDouble();
+                _numberDouble = _textBuffer.contentsAsDouble(_owner.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                 _numTypesValid = NR_DOUBLE;
             }
         } catch (NumberFormatException nex) {

@@ -1,5 +1,8 @@
 package com.fasterxml.jackson.dataformat.csv;
 
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.StreamWriteFeature;
+
 import java.io.StringWriter;
 
 public class FeaturesTest extends ModuleTestBase
@@ -25,5 +28,14 @@ public class FeaturesTest extends ModuleTestBase
         assertTrue(g.canWriteFormattedNumbers());
         assertTrue(g.canUseSchema(CsvSchema.emptySchema()));
         g.close();
+    }
+
+    public void testFactoryFastFeatures() throws Exception
+    {
+        CsvFactory f = new CsvFactory();
+        f.enable(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature());
+        assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        f.enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature());
+        assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
     }
 }
