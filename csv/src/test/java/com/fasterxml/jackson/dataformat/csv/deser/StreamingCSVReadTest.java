@@ -25,6 +25,10 @@ public class StreamingCSVReadTest extends ModuleTestBase
             .setUseHeader(false)
             .build();
 
+    protected CsvFactory csvFactory() {
+        return CSV_F;
+    }
+
     public void testIntRead() throws Exception
     {
         _testInts(1, 59, -8);
@@ -194,9 +198,9 @@ public class StreamingCSVReadTest extends ModuleTestBase
     {
         CsvParser p;
         if (useBytes) {
-            p = CSV_F.createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
+            p = csvFactory().createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
         } else {
-            p = CSV_F.createParser(csv);
+            p = csvFactory().createParser(csv);
         }
         p.setSchema(schema);
         return p;
