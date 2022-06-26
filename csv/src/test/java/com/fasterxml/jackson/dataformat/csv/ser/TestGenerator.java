@@ -114,8 +114,7 @@ public class TestGenerator extends ModuleTestBase
                 .build();
 
         float amount = 1.89f;
-        //this value loses precision when converted
-        assertFalse(Double.toString((double)amount).equals("1.89"));
+        assertFalse(Double.toString(amount).equals("1.89"));
         String result = MAPPER.writer(schema).writeValueAsString(new Entry2("abc", amount));
         assertEquals("abc,1.89\n", result);
     }
@@ -128,8 +127,7 @@ public class TestGenerator extends ModuleTestBase
                 .build();
 
         float amount = 1.89f;
-        //this value loses precision when converted
-        assertFalse(Double.toString((double)amount).equals("1.89"));
+        assertFalse(Double.toString(amount).equals("1.89"));
         CsvMapper mapper =  CsvMapper.builder().enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER).build();
         String result = mapper.writer(schema).writeValueAsString(new Entry2("abc", amount));
         assertEquals("abc,1.89\n", result);
