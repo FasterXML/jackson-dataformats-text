@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.StreamWriteFeature;
 
+import java.io.StringReader;
 import java.io.StringWriter;
 
 public class FeaturesTest extends ModuleTestBase
@@ -37,6 +38,10 @@ public class FeaturesTest extends ModuleTestBase
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
         f.enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature());
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
+        CsvParser parser = f.createParser(new StringReader(""));
+        assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+        CsvGenerator generator = f.createGenerator(new StringWriter());
+        assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 
     public void testFactoryBuilderFastFeatures() throws Exception
@@ -47,5 +52,9 @@ public class FeaturesTest extends ModuleTestBase
             .build();
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
+        CsvParser parser = f.createParser(new StringReader(""));
+        assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+        CsvGenerator generator = f.createGenerator(new StringWriter());
+        assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 }
