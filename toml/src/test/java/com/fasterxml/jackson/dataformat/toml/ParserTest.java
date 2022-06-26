@@ -40,7 +40,8 @@ public class ParserTest {
 
     static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
         return Parser.parse(
-                new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.construct(true, toml), false),
+                new IOContext(BufferRecyclers.getBufferRecycler(),
+                        ContentReference.construct(true, toml), false),
                 opts,
                 new StringReader(toml)
         );
