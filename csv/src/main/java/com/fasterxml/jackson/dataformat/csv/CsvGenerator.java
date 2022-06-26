@@ -218,11 +218,12 @@ public class CsvGenerator extends GeneratorBase
                 ? DupDetector.rootDetector(this) : null;
         _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
         _schema = schema;
-
         if (characterEscapes == null) {
             characterEscapes = CsvCharacterEscapes.fromCsvFeatures(csvFeatures);
         }
-        _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes);
+        boolean useFastDoubleWriter = isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER);
+        _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes,
+                useFastDoubleWriter);
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,

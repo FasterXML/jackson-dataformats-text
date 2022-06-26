@@ -17,7 +17,7 @@ import com.fasterxml.jackson.dataformat.csv.*;
  */
 public class StreamingCSVReadTest extends ModuleTestBase
 {
-    private final CsvMapper CSV_MAPPER = mapperForCsv();
+    private final CsvMapper VANILLA_CSV_MAPPER = mapperForCsv();
 
     private final CsvSchema ABC_SCHEMA = CsvSchema.builder()
             .addColumn("a")
@@ -25,6 +25,10 @@ public class StreamingCSVReadTest extends ModuleTestBase
             .addColumn("c")
             .setUseHeader(false)
             .build();
+
+    protected CsvMapper csvMapper() {
+        return VANILLA_CSV_MAPPER;
+    }
 
     public void testIntRead() throws Exception
     {
@@ -194,9 +198,9 @@ public class StreamingCSVReadTest extends ModuleTestBase
         throws IOException
     {
         JsonParser p;
-        ObjectReader r = CSV_MAPPER.reader().with(schema);
+        ObjectReader r = csvMapper().reader().with(schema);
         if (useBytes) {
-            p = r.createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
+            p = r.createParser(new ByteArrayInputStream(utf8(csv)));
         } else {
             p = r.createParser(csv);
         }

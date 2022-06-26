@@ -176,18 +176,20 @@ Suminda Sirinath Salpitikorala Dharmasena (sirinath@github)
  (2.13.0)
 
 Jonas Konrad (yawkat@github)
-* Contributed #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
+#219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (2.13.0)
 
 Krzysztof Debski (kdebski85@github)
-* Contributed #270: Should not quote with strict quoting when line starts with `#` but comments
+#270: Should not quote with strict quoting when line starts with `#` but comments
   are disabled
  (2.13.0)
 
 PJ Fanning (pjfanning@github)
-* Contributed #283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns
+#283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns
   are empty
  (2.13.0)
+#314: (csv) Add fast floating-point parsing, generation support
+ (2.14.0)
 
 Falk Hanisch (mrpiggi@github)
 #288: Caching conflict when creating CSV schemas with different views

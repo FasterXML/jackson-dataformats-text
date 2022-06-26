@@ -55,7 +55,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         if (useBytes) {
             user = r.readValue(INPUT);
         } else {
-            user = r.readValue(INPUT.getBytes("UTF-8"));
+            user = r.readValue(utf8(INPUT));
         }
         assertEquals("Bob", user.firstName);
         assertEquals("Robertson", user.lastName);
@@ -73,7 +73,7 @@ public class BasicCSVParserTest extends ModuleTestBase
 
         // first, UTF-8 BOM:
         b.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF});
-        b.write("Bob,Robertson,MALE,AQIDBAU=,false\n".getBytes("UTF-8"));
+        b.write(utf8("Bob,Robertson,MALE,AQIDBAU=,false\n"));
         b.close();
 
         user = r.readValue(b.toByteArray());
@@ -140,7 +140,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         MappingIterator<Map<String, String>> mi;
 
         if (useBytes) {
-            mi = or.readValues(CSV.getBytes("UTF-8"));
+            mi = or.readValues(utf8(CSV));
         } else {
             mi = or.readValues(CSV);
         }

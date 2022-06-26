@@ -102,6 +102,11 @@ public class CsvEncoder
 
     protected boolean _cfgEscapeControlCharWithEscapeChar;
 
+    /**
+     * @since 2.14
+     */
+    protected boolean _cfgUseFastDoubleWriter;
+
     protected final char _cfgQuoteCharEscapeChar;
 
     protected final char _cfgControlCharEscapeChar;
@@ -174,10 +179,11 @@ public class CsvEncoder
      */
 
     public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema,
-            CharacterEscapes esc)
+            CharacterEscapes esc, boolean useFastDoubleWriter)
     {
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
+        _cfgUseFastDoubleWriter = useFastDoubleWriter;
         _cfgOptimalQuoting = CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
         _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
@@ -218,6 +224,7 @@ public class CsvEncoder
     {
         _ioContext = base._ioContext;
         _csvFeatures = base._csvFeatures;
+        _cfgUseFastDoubleWriter = base._cfgUseFastDoubleWriter;
         _cfgOptimalQuoting = base._cfgOptimalQuoting;
         _cfgIncludeMissingTail = base._cfgIncludeMissingTail;
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
@@ -566,7 +573,7 @@ public class CsvEncoder
 
     protected void appendValue(float value) throws JacksonException
     {
-        String str = NumberOutput.toString(value);
+        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -579,7 +586,7 @@ public class CsvEncoder
 
     protected void appendValue(double value) throws JacksonException
     {
-        String str = NumberOutput.toString(value);
+        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();

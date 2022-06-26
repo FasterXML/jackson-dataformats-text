@@ -220,14 +220,40 @@ public final class NumberOutput
     }
     */
 
-    public static String toString(double value)
-    {
-        return Double.toString(value);
+    /**
+     * @param v double
+     * @return double as a string
+     */
+    public static String toString(final double v) {
+        return toString(v, false);
     }
 
-    public static String toString(float value)
-    {
-        return Float.toString(value);
+    /**
+     * @param v double
+     * @param useFastWriter whether to use Schubfach algorithm to write output (default false)
+     * @return double as a string
+     * @since 2.14
+     */
+    public static String toString(final double v, final boolean useFastWriter) {
+        return com.fasterxml.jackson.core.io.NumberOutput.toString(v, useFastWriter);
+    }
+
+    /**
+     * @param v float
+     * @return float as a string
+     */
+    public static String toString(final float v) {
+        return toString(v, false);
+    }
+
+    /**
+     * @param v float
+     * @param useFastWriter whether to use Schubfach algorithm to write output (default false)
+     * @return float as a string
+     * @since 2.14
+     */
+    public static String toString(final float v, final boolean useFastWriter) {
+        return com.fasterxml.jackson.core.io.NumberOutput.toString(v, useFastWriter);
     }
 
     /*

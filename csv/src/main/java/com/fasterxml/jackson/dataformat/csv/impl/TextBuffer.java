@@ -312,11 +312,25 @@ public final class TextBuffer
     /**
      * Convenience method for converting contents of the buffer
      * into a Double value.
+     * @deprecated use {@link #contentsAsDouble(boolean)}
      */
-    public double contentsAsDouble()
-        throws NumberFormatException
-    {
+    @Deprecated //since 2.14
+    public double contentsAsDouble() throws NumberFormatException {
         return NumberInput.parseDouble(contentsAsString());
+    }
+
+    /**
+     * Convenience method for converting contents of the buffer
+     * into a Double value.
+     *
+     * @param useFastParser whether to use {@link com.fasterxml.jackson.core.io.doubleparser}
+     * @return Buffered text value parsed as a {@link Double}, if possible
+     *
+     * @throws NumberFormatException if contents are not a valid Java number
+     * @since 2.14
+     */
+    public double contentsAsDouble(final boolean useFastParser) throws NumberFormatException {
+        return NumberInput.parseDouble(contentsAsString(), useFastParser);
     }
 
     public boolean looksLikeInt() {
