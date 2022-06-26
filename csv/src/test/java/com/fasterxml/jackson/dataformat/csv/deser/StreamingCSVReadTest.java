@@ -198,7 +198,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
     {
         CsvParser p;
         if (useBytes) {
-            p = csvFactory().createParser(new ByteArrayInputStream(csv.getBytes("UTF-8")));
+            p = csvFactory().createParser(new ByteArrayInputStream(utf8(csv)));
         } else {
             p = csvFactory().createParser(csv);
         }

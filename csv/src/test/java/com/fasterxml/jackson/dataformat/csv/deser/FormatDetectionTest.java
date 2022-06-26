@@ -14,7 +14,7 @@ public class FormatDetectionTest extends ModuleTestBase
     {
         CsvFactory f = new CsvFactory();
         DataFormatDetector detector = new DataFormatDetector(f);
-        byte[] doc = "name,place,town\nBob,home,Denver\n".getBytes("UTF-8");
+        byte[] doc = utf8("name,place,town\nBob,home,Denver\n");
         DataFormatMatcher matcher = detector.findFormat(doc);
         // should have match
         assertTrue(matcher.hasMatch());
@@ -23,7 +23,7 @@ public class FormatDetectionTest extends ModuleTestBase
         assertSame(f, matcher.getMatch());
 
         // and also something that does NOT look like CSV
-        doc = "{\"a\":3}".getBytes("UTF-8");
+        doc = utf8("{\"a\":3}");
         matcher = detector.findFormat(doc);
         assertFalse(matcher.hasMatch());
     }
