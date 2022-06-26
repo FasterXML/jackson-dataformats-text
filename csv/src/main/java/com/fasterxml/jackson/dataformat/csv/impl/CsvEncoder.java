@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
@@ -116,6 +117,11 @@ public class CsvEncoder
      */
     protected boolean _cfgEscapeControlCharWithEscapeChar;
 
+    /**
+     * @since 2.14
+     */
+    protected boolean _cfgUseFastDoubleWriter;
+
     protected final char _cfgQuoteCharEscapeChar;
 
     /**
@@ -193,10 +199,18 @@ public class CsvEncoder
     /**********************************************************
      */
 
+
+    @Deprecated //since 2.14
     public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema)
+    {
+        this(ctxt, csvFeatures, out, schema, false);
+    }
+
+    public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema, boolean useFastDoubleWriter)
     {
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
+        _cfgUseFastDoubleWriter = useFastDoubleWriter;
         _cfgOptimalQuoting = CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
         _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
@@ -235,6 +249,7 @@ public class CsvEncoder
     {
         _ioContext = base._ioContext;
         _csvFeatures = base._csvFeatures;
+        _cfgUseFastDoubleWriter = base._cfgUseFastDoubleWriter;
         _cfgOptimalQuoting = base._cfgOptimalQuoting;
         _cfgIncludeMissingTail = base._cfgIncludeMissingTail;
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
@@ -586,7 +601,7 @@ public class CsvEncoder
 
     protected void appendValue(float value) throws IOException
     {
-        String str = NumberOutput.toString(value);
+        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -599,7 +614,7 @@ public class CsvEncoder
 
     protected void appendValue(double value) throws IOException
     {
-        String str = NumberOutput.toString(value);
+        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();

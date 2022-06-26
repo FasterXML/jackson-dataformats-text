@@ -245,7 +245,8 @@ public class CsvGenerator extends GeneratorBase
         _ioContext = ctxt;
         _formatFeatures = csvFeatures;
         _schema = schema;
-        _writer = new CsvEncoder(ctxt, csvFeatures, out, schema);
+        boolean useFastDoubleWriter = StreamWriteFeature.USE_FAST_DOUBLE_WRITER.enabledIn(jsonFeatures);
+        _writer = new CsvEncoder(ctxt, csvFeatures, out, schema, useFastDoubleWriter);
         _writeContext = null; // just to make sure it won't be used
         _tokenWriteContext = SimpleTokenWriteContext.createRootContext(null);
         _writer.setOutputEscapes(CsvCharacterEscapes.fromCsvFeatures(csvFeatures).getEscapeCodesForAscii());

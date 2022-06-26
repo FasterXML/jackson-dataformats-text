@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
 
@@ -80,7 +81,7 @@ public class ParserAutoCloseTest extends ModuleTestBase
         private boolean closed;
 
         public CloseTrackerOutputStream(String s) {
-            super(s.getBytes());
+            super(s.getBytes(StandardCharsets.UTF_8));
         }
 
         @Override
