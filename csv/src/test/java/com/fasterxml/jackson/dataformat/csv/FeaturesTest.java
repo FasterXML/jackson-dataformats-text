@@ -38,4 +38,14 @@ public class FeaturesTest extends ModuleTestBase
         f.enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature());
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
     }
+
+    public void testFactoryBuilderFastFeatures() throws Exception
+    {
+        CsvFactory f = CsvFactory.builder()
+            .enable(StreamReadFeature.USE_FAST_DOUBLE_PARSER)
+            .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
+            .build();
+        assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
+    }
 }
