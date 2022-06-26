@@ -16,8 +16,10 @@ Active Maintainers:
 
 2.14.0 (not yet released)
 
-#297: CSV schema caching POJOs with different views
+#297: (csv) CSV schema caching POJOs with different views
  (contributed by Falk H)
+#314: (csv) Add fast floating-point parsing, generation support
+ (contributed by @pjfanning)
 
 No changes since 2.13
 

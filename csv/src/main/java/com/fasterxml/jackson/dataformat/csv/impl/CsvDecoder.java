@@ -31,13 +31,13 @@ public class CsvDecoder
     /**
      * Unfortunate back reference, needed for error reporting
      */
-    final protected CsvParser _owner;
+    protected final CsvParser _owner;
     
     /**
      * I/O context for this reader. It handles buffer allocation
      * for the reader.
      */
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
     
     /**
      * Input stream that can be used for reading more content, if one
