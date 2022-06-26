@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
@@ -40,7 +41,8 @@ public class ParserTest {
 
     static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
         return Parser.parse(
-                new IOContext(BufferRecyclers.getBufferRecycler(), toml, false),
+                new IOContext(BufferRecyclers.getBufferRecycler(),
+                        ContentReference.rawReference(toml), false),
                 opts,
                 new StringReader(toml)
         );

@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -108,6 +109,6 @@ public class LongTokenTest {
     }
 
     private IOContext _ioContext(CharSequence toml) {
-        return new IOContext(BufferRecyclers.getBufferRecycler(), toml, false);
+        return new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.rawReference(toml), false);
     }
 }

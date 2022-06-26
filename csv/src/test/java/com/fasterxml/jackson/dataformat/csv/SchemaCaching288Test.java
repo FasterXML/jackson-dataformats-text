@@ -3,10 +3,6 @@ package com.fasterxml.jackson.dataformat.csv;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
-
 public class SchemaCaching288Test extends ModuleTestBase
 {
     static class ViewA { }
