@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.dataformat.csv.CsvFactory;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 
 public class FastParserStreamingCSVReadTest extends StreamingCSVReadTest {

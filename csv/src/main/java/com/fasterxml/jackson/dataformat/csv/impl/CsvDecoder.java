@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.SimpleStreamReadContext;
 

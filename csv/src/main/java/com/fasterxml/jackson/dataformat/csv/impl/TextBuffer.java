@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 
+import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 
 // NOTE: copied and slightly modified from Jackson code version
