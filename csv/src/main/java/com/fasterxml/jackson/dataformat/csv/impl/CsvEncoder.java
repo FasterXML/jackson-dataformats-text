@@ -1,8 +1,8 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.io.CharTypes;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.io.NumberOutput;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
