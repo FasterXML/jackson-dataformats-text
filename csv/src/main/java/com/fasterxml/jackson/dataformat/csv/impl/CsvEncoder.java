@@ -199,16 +199,18 @@ public class CsvEncoder
     /**********************************************************
      */
 
+
+    @Deprecated //since 2.14
     public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema)
     {
-        this(ctxt, 0, csvFeatures, out, schema);
+        this(ctxt, csvFeatures, out, schema, false);
     }
 
-    public CsvEncoder(IOContext ctxt, int jsonFeatures, int csvFeatures, Writer out, CsvSchema schema)
+    public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema, boolean useFastDoubleWriter)
     {
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
-        _cfgUseFastDoubleWriter = JsonGenerator.Feature.USE_FAST_DOUBLE_WRITER.enabledIn(jsonFeatures);
+        _cfgUseFastDoubleWriter = useFastDoubleWriter;
         _cfgOptimalQuoting = CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
         _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);

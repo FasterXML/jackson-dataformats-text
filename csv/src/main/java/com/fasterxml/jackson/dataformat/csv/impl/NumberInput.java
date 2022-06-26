@@ -98,8 +98,9 @@ public final class NumberInput
      * @param s a string representing a number to parse
      * @return closest matching double
      * @throws NumberFormatException if string cannot be represented by a double where useFastParser=false
-     * @see #parseDouble(String, boolean)
+     * @deprecated use {@link #parseDouble(String, boolean)}
      */
+    @Deprecated //since 2.14
     public static double parseDouble(final String s) throws NumberFormatException {
         return parseDouble(s, false);
     }

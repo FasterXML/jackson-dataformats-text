@@ -312,7 +312,9 @@ public final class TextBuffer
     /**
      * Convenience method for converting contents of the buffer
      * into a Double value.
+     * @deprecated use {@link #contentsAsDouble(boolean)}
      */
+    @Deprecated //since 2.14
     public double contentsAsDouble() throws NumberFormatException {
         return NumberInput.parseDouble(contentsAsString());
     }
