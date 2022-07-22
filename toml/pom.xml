@@ -7,7 +7,7 @@
     <!-- do_not_remove: published-with-gradle-metadata -->
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <groupId>tools.jackson.dataformat</groupId>
         <artifactId>jackson-dataformats-text</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>

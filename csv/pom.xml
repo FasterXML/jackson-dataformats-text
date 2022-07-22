@@ -7,7 +7,7 @@
   <!-- do_not_remove: published-with-gradle-metadata -->
   <modelVersion>4.0.0</modelVersion> 
   <parent>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformats-text</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
@@ -21,9 +21,9 @@ abstractions.
 
   <properties>
     <!-- Generate PackageVersion.java into this directory. -->
-    <packageVersion.dir>com/fasterxml/jackson/dataformat/csv</packageVersion.dir>
+    <packageVersion.dir>tools/jackson/dataformat/csv</packageVersion.dir>
     <packageVersion.package>${project.groupId}.csv</packageVersion.package>
-    <osgi.private>com.fasterxml.jackson.dataformat.csv.impl</osgi.private>
+    <osgi.private>tools.jackson.dataformat.csv.impl</osgi.private>
     <!-- default OSGi import ought to work -->
   </properties>
 

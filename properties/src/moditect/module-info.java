@@ -1,15 +1,15 @@
 // Generated 27-Mar-2019 using Moditect maven plugin
-module com.fasterxml.jackson.dataformat.javaprop {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
+module tools.jackson.dataformat.javaprop {
+    requires tools.jackson.core;
+    requires tools.jackson.databind;
 
-    exports com.fasterxml.jackson.dataformat.javaprop;
-//    exports com.fasterxml.jackson.dataformat.javaprop.impl;
-    exports com.fasterxml.jackson.dataformat.javaprop.io;
-    exports com.fasterxml.jackson.dataformat.javaprop.util;
+    exports tools.jackson.dataformat.javaprop;
+//    exports tools.jackson.dataformat.javaprop.impl;
+    exports tools.jackson.dataformat.javaprop.io;
+    exports tools.jackson.dataformat.javaprop.util;
 
-    provides com.fasterxml.jackson.core.TokenStreamFactory with
-        com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
-    provides com.fasterxml.jackson.databind.ObjectMapper with
-        com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+    provides tools.jackson.core.TokenStreamFactory with
+        tools.jackson.dataformat.javaprop.JavaPropsFactory;
+    provides tools.jackson.databind.ObjectMapper with
+        tools.jackson.dataformat.javaprop.JavaPropsMapper;
 }

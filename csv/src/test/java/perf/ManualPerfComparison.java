@@ -5,7 +5,7 @@ import java.util.*;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.*;
-import com.fasterxml.jackson.dataformat.csv.*;
+import tools.jackson.dataformat.csv.*;
 
 /**
  * Simple manual performance micro-benchmark that compares compress and

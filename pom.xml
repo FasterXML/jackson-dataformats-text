@@ -5,7 +5,7 @@
     <artifactId>jackson-base</artifactId>
     <version>3.0.0-SNAPSHOT</version>
   </parent>
-  <groupId>com.fasterxml.jackson.dataformat</groupId>
+  <groupId>tools.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
   <name>Jackson dataformats: Text</name>
   <version>3.0.0-SNAPSHOT</version>
@@ -74,7 +74,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <configuration>
             <excludes>
-              <exclude>com/fasterxml/jackson/**/failing/*.java</exclude>
+              <exclude>tools/jackson/**/failing/*.java</exclude>
             </excludes>
           </configuration>
 	</plugin>
