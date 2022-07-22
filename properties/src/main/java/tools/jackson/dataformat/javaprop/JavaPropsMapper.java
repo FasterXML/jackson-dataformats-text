@@ -17,7 +17,6 @@ import tools.jackson.databind.cfg.CoercionInputShape;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.cfg.MapperBuilderState;
 import tools.jackson.databind.ser.SerializationContextExt;
-import tools.jackson.dataformat.javaprop.PackageVersion;
 
 public class JavaPropsMapper extends ObjectMapper
 {

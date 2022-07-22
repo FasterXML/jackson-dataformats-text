@@ -6,11 +6,6 @@ import java.io.StringReader;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.BufferRecyclers;
-import tools.jackson.dataformat.toml.StringOutputUtil;
-import tools.jackson.dataformat.toml.TomlStreamReadException;
-import tools.jackson.dataformat.toml.TomlToken;
-
-import tools.jackson.dataformat.toml.Lexer;
 
 import org.junit.Assert;
 import org.junit.Test;

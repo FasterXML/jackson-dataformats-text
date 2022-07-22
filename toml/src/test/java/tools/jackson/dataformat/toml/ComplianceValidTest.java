@@ -21,8 +21,6 @@ import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.dataformat.toml.TomlMapper;
-import tools.jackson.dataformat.toml.TomlReadFeature;
 
 import org.junit.Assert;
 import org.junit.Test;

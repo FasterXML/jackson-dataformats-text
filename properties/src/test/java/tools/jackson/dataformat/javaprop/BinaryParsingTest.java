@@ -6,8 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-
 public class BinaryParsingTest extends ModuleTestBase
 {
     // [dataformats-text#74]: problem with multiple binary fields

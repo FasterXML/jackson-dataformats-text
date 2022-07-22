@@ -13,10 +13,10 @@ import java.util.Objects;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.dataformat.toml.TomlMapper;
 
 // Composed of pieces from other format modules' tests
 public class POJOReadWriteTest

@@ -1,19 +1,17 @@
 package tools.jackson.dataformat.toml;
 
-import tools.jackson.core.io.ContentReference;
-import tools.jackson.core.io.IOContext;
-import tools.jackson.core.util.BufferRecyclers;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.dataformat.toml.Parser;
-import tools.jackson.dataformat.toml.TomlWriteFeature;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.util.BufferRecyclers;
+import tools.jackson.databind.node.ObjectNode;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size

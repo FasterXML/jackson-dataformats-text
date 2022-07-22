@@ -1,13 +1,13 @@
 package tools.jackson.dataformat.toml;
 
 import tools.jackson.core.Version;
+
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.cfg.CoercionAction;
 import tools.jackson.databind.cfg.CoercionInputShape;
 import tools.jackson.databind.cfg.MapperBuilder;
 import tools.jackson.databind.cfg.MapperBuilderState;
-import tools.jackson.dataformat.toml.PackageVersion;
 
 public class TomlMapper extends ObjectMapper
 {

@@ -5,7 +5,7 @@ import java.io.*;
 import tools.jackson.core.*;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 public final class SerPerf
 {

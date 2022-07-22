@@ -2,9 +2,6 @@ package tools.jackson.dataformat.javaprop;
 
 import java.util.*;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
-
 /**
  * Tests for extended functionality to work with JDK `Properties` Object
  * (as well as {@code java.util.Map}, since 2.10)

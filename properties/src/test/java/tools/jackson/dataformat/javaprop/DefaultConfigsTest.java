@@ -8,7 +8,6 @@ import tools.jackson.core.ObjectReadContext;
 import tools.jackson.core.ObjectWriteContext;
 import tools.jackson.core.Version;
 import tools.jackson.core.Versioned;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 
 public class DefaultConfigsTest extends ModuleTestBase
 {

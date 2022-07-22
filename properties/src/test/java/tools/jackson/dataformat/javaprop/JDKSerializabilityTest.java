@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-
 public class JDKSerializabilityTest extends ModuleTestBase
 {
     public void testApacheMapperWithModule() throws Exception {

@@ -19,7 +19,7 @@
   <url>https://github.com/FasterXML/jackson-dataformats-text</url>
 
   <properties>
-    <packageVersion.dir>com/fasterxml/jackson/dataformat/yaml</packageVersion.dir>
+    <packageVersion.dir>tools/jackson/dataformat/yaml</packageVersion.dir>
     <packageVersion.package>${project.groupId}.yaml</packageVersion.package>
   </properties>
 

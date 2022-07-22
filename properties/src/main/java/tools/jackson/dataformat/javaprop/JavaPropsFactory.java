@@ -6,7 +6,6 @@ import java.util.*;
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.io.IOContext;
-import tools.jackson.dataformat.javaprop.PackageVersion;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import tools.jackson.dataformat.javaprop.io.Latin1Reader;

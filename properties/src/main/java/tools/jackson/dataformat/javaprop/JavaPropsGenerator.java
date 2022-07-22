@@ -9,7 +9,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.JacksonFeatureSet;
-import tools.jackson.dataformat.javaprop.PackageVersion;
+
 import tools.jackson.dataformat.javaprop.io.JPropWriteContext;
 import tools.jackson.dataformat.javaprop.util.Markers;
 

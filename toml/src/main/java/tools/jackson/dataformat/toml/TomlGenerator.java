@@ -16,7 +16,6 @@ import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.VersionUtil;
-import tools.jackson.dataformat.toml.PackageVersion;
 
 final class TomlGenerator extends GeneratorBase
 {

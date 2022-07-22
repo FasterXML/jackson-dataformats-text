@@ -3,9 +3,6 @@ package tools.jackson.dataformat.javaprop;
 import java.util.Map;
 import java.util.Properties;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
-
 public class SimpleGenerationTest extends ModuleTestBase
 {
     private final JavaPropsMapper MAPPER = newPropertiesMapper();

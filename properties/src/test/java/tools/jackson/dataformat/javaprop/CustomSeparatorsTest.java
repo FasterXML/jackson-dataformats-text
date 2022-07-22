@@ -1,7 +1,6 @@
 package tools.jackson.dataformat.javaprop;
 
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class CustomSeparatorsTest extends ModuleTestBase
 {

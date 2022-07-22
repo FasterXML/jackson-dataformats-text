@@ -7,9 +7,9 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class ArrayParsingTest extends ModuleTestBase
 {

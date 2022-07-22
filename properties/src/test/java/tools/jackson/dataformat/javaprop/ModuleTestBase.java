@@ -11,9 +11,6 @@ import java.util.List;
 import tools.jackson.core.*;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
-import tools.jackson.dataformat.javaprop.JavaPropsFactoryBuilder;
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 

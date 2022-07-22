@@ -5,8 +5,6 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.ContentReference;
 
-import tools.jackson.dataformat.toml.Lexer;
-
 public class TomlStreamReadException
     extends StreamReadException
 {

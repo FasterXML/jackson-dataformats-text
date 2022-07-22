@@ -1,7 +1,5 @@
 package tools.jackson.dataformat.javaprop;
 
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
-
 public class SchemaConstructionTest extends ModuleTestBase
 {
     // Tests to verify stickiness of settings

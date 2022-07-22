@@ -4,7 +4,7 @@ import tools.jackson.core.*;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Micro-benchmark for comparing performance of bean deserialization

@@ -11,7 +11,7 @@ import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.ByteArrayBuilder;
 import tools.jackson.core.util.JacksonFeatureSet;
-import tools.jackson.dataformat.javaprop.PackageVersion;
+
 import tools.jackson.dataformat.javaprop.io.JPropReadContext;
 import tools.jackson.dataformat.javaprop.util.JPropNode;
 import tools.jackson.dataformat.javaprop.util.JPropNodeBuilder;

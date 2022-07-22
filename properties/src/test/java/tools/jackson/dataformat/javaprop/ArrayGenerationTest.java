@@ -3,8 +3,6 @@ package tools.jackson.dataformat.javaprop;
 import java.util.Map;
 import java.util.Properties;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 import tools.jackson.dataformat.javaprop.util.Markers;
 
 public class ArrayGenerationTest extends ModuleTestBase

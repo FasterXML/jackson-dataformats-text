@@ -12,9 +12,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import tools.jackson.dataformat.toml.TomlMapper;
-import tools.jackson.dataformat.toml.TomlStreamReadException;
-
 @RunWith(Parameterized.class)
 public class ComplianceInvalidTest {
     @Parameterized.Parameters

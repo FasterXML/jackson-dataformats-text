@@ -6,9 +6,6 @@ import tools.jackson.core.*;
 
 import tools.jackson.databind.ObjectMapper;
 
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsParser;
-
 public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException

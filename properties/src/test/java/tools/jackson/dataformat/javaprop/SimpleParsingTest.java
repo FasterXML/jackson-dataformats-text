@@ -4,7 +4,6 @@ import java.util.Map;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class SimpleParsingTest extends ModuleTestBase
 {

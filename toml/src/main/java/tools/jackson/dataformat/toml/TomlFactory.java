@@ -9,7 +9,6 @@ import tools.jackson.core.io.UTF8Writer;
 
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.databind.node.TreeTraversingParser;
-import tools.jackson.dataformat.toml.PackageVersion;
 
 public final class TomlFactory extends TextualTSFactory
 {

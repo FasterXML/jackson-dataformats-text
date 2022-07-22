@@ -2,7 +2,6 @@ package tools.jackson.dataformat.javaprop.util;
 
 import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
-import tools.jackson.dataformat.javaprop.util.JPropPathSplitter;
 
 public class JPropPathSplitterTest extends ModuleTestBase
 {

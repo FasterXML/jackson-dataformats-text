@@ -9,7 +9,6 @@ import java.util.List;
 import org.junit.Test;
 
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.toml.TomlMapper;
 
 // Copied from YAML modules "DatabindAdvancedTest"
 public class ComplexPojoReadWriteTest

@@ -16,6 +16,7 @@ implementations)
 
 3.0.0 (not yet released)
 
+#320: Rename "com.fasterxml.jackson" -> "tools.jackson"
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 
 CSV:

@@ -19,7 +19,7 @@
     <url>https://github.com/FasterXML/jackson-dataformats-text</url>
 
     <properties>
-        <packageVersion.dir>com/fasterxml/jackson/dataformat/toml</packageVersion.dir>
+        <packageVersion.dir>tools/jackson/dataformat/toml</packageVersion.dir>
         <packageVersion.package>${project.groupId}.toml</packageVersion.package>
     </properties>
 
