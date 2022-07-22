@@ -1,11 +1,11 @@
-module com.fasterxml.jackson.dataformat.toml {
-    requires com.fasterxml.jackson.core;
-    requires com.fasterxml.jackson.databind;
+module tools.jackson.dataformat.toml {
+    requires tools.jackson.core;
+    requires tools.jackson.databind;
 
-    exports com.fasterxml.jackson.dataformat.toml;
+    exports tools.jackson.dataformat.toml;
 
-    provides com.fasterxml.jackson.core.TokenStreamFactory with
-            com.fasterxml.jackson.dataformat.toml.TomlFactory;
-    provides com.fasterxml.jackson.databind.ObjectMapper with
-            com.fasterxml.jackson.dataformat.toml.TomlMapper;
+    provides tools.jackson.core.TokenStreamFactory with
+            tools.jackson.dataformat.toml.TomlFactory;
+    provides tools.jackson.databind.ObjectMapper with
+            tools.jackson.dataformat.toml.TomlMapper;
 }

@@ -1,10 +1,10 @@
 package perf;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.core.*;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.type.TypeFactory;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
  * Micro-benchmark for comparing performance of bean deserialization

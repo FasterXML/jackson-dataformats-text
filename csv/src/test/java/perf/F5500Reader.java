@@ -3,10 +3,9 @@ package perf;
 import java.io.*;
 import java.util.*;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
  * Manual test for checking how fast a F-5500 file
