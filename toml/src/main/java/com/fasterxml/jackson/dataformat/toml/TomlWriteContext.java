@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.TokenStreamContext;
+import tools.jackson.core.TokenStreamContext;
 
 final class TomlWriteContext extends TokenStreamContext {
     /**

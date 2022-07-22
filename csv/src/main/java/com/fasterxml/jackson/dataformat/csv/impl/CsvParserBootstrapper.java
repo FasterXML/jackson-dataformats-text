@@ -2,11 +2,11 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.exc.WrappedIOException;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.MergedStream;
-import com.fasterxml.jackson.core.io.UTF32Reader;
+import tools.jackson.core.*;
+import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.MergedStream;
+import tools.jackson.core.io.UTF32Reader;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 

@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import java.math.BigInteger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 // [dataformats-text#71]: hex numbers

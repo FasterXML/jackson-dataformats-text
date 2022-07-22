@@ -3,9 +3,9 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import java.io.StringWriter;
 import java.math.BigInteger;
 
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import tools.jackson.core.JsonLocation;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;

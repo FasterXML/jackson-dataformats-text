@@ -7,8 +7,8 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 public class ParserAutoCloseTest extends ModuleTestBase

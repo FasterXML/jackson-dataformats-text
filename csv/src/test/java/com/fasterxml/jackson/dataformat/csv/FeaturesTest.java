@@ -1,15 +1,15 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.StreamWriteFeature;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.StreamWriteFeature;
 
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectReadContext;
-import com.fasterxml.jackson.core.ObjectWriteContext;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.ObjectWriteContext;
 
 public class FeaturesTest extends ModuleTestBase
 {

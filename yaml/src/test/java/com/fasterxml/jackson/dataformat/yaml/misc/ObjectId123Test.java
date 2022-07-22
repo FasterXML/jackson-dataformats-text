@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.*;
 
 //for [dataformats-text#123], problem with YAML, Object Ids

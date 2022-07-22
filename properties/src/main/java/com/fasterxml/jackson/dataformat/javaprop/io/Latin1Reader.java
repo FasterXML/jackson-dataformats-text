@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.javaprop.io;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.io.IOContext;
 
 /**
  * Optimized Reader that reads ISO-8859-1 encoded content from an input stream.

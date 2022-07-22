@@ -1,9 +1,9 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.io.ContentReference;
+import tools.jackson.core.JsonLocation;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.io.ContentReference;
 
 public class TomlStreamReadException
     extends StreamReadException

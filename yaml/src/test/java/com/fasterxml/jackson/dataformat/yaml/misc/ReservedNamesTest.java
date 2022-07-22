@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import java.util.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 // [dataformats-text#68]: should quote reserved names

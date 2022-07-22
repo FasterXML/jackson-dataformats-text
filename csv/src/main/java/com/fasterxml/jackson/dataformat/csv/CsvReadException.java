@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
+import tools.jackson.core.exc.StreamReadException;
 
 /**
  * Format-specific exception used to indicate problems regarding low-level

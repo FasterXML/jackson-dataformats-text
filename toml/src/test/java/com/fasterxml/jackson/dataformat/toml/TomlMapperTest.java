@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.exc.WrappedIOException;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.databind.node.JsonNodeFactory;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;

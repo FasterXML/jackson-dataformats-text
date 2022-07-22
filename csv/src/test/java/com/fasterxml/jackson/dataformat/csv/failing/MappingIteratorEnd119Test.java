@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 public class MappingIteratorEnd119Test extends ModuleTestBase

@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.core.*;
+import tools.jackson.core.*;
 
 public abstract class ModuleTestBase extends junit.framework.TestCase
 {

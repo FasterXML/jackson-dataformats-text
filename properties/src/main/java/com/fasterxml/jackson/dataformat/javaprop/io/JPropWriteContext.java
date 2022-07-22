@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop.io;
 
-import com.fasterxml.jackson.core.*;
-//import com.fasterxml.jackson.core.json.JsonWriteContext;
+import tools.jackson.core.*;
+//import tools.jackson.core.json.JsonWriteContext;
 
 public class JPropWriteContext
     extends TokenStreamContext

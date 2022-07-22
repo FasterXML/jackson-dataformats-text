@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 public class CustomSeparatorsTest extends ModuleTestBase
 {

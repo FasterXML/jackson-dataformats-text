@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.*;
 
-import com.fasterxml.jackson.core.FormatSchema;
+import tools.jackson.core.FormatSchema;
 
 /**
  * Simple {@link FormatSchema} sub-type that defines properties of

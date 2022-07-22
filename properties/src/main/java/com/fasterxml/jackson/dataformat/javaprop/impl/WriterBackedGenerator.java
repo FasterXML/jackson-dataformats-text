@@ -2,8 +2,8 @@ package com.fasterxml.jackson.dataformat.javaprop.impl;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.*;
+import tools.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropEscapes;

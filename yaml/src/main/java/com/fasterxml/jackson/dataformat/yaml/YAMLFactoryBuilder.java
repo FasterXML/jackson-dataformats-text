@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
-import com.fasterxml.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
+import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 

@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Collections;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

@@ -2,10 +2,10 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.TextualTSFactory;
-import com.fasterxml.jackson.core.io.ContentReference;
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.*;
+import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.io.IOContext;
 
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;

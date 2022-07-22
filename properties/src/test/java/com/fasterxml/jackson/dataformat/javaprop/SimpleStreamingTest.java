@@ -7,14 +7,14 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TokenStreamContext;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.io.SerializedString;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.JsonToken;
+import tools.jackson.core.io.SerializedString;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
 
 public class SimpleStreamingTest extends ModuleTestBase

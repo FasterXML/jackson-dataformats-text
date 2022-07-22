@@ -5,18 +5,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.Version;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.Version;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
-import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
-import com.fasterxml.jackson.databind.ser.SerializationContextExt;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.CoercionAction;
+import tools.jackson.databind.cfg.CoercionInputShape;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.cfg.MapperBuilderState;
+import tools.jackson.databind.ser.SerializationContextExt;
 
 public class JavaPropsMapper extends ObjectMapper
 {

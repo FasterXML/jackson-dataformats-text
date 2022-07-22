@@ -1,8 +1,8 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import com.fasterxml.jackson.core.SerializableString;
-import com.fasterxml.jackson.core.io.CharTypes;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
+import tools.jackson.core.SerializableString;
+import tools.jackson.core.io.CharTypes;
+import tools.jackson.core.io.CharacterEscapes;
 import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
 
 /**

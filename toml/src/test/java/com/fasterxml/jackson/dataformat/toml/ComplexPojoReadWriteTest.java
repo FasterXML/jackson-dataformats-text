@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 // Copied from YAML modules "DatabindAdvancedTest"
 public class ComplexPojoReadWriteTest

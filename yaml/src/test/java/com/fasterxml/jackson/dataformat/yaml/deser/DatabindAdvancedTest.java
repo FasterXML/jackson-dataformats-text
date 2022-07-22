@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class DatabindAdvancedTest extends ModuleTestBase

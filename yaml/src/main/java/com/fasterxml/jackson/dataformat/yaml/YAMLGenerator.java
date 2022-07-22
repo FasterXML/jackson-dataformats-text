@@ -28,13 +28,13 @@ import org.snakeyaml.engine.v2.events.StreamEndEvent;
 import org.snakeyaml.engine.v2.events.StreamStartEvent;
 import org.snakeyaml.engine.v2.nodes.Tag;
 
-import com.fasterxml.jackson.core.*;
+import tools.jackson.core.*;
 
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleStreamWriteContext;
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.json.DupDetector;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.SimpleStreamWriteContext;
+import tools.jackson.core.io.IOContext;
 
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 

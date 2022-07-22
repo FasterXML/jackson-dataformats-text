@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
+import tools.jackson.core.*;
 
 public class TestVersions extends ModuleTestBase
 {

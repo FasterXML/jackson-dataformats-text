@@ -2,8 +2,8 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.*;
+import tools.jackson.databind.ObjectMapper;
 
 public class TestVersions extends ModuleTestBase
 {

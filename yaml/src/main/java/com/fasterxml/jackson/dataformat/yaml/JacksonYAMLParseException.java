@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.exc.StreamReadException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.exc.StreamReadException;
 
 public class JacksonYAMLParseException extends StreamReadException
 {

@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml.type;
 import org.junit.Test;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class PolymorphicIdTest extends ModuleTestBase

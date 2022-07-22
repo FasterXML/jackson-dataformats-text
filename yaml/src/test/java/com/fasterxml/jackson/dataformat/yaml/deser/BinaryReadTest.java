@@ -6,10 +6,10 @@ import java.util.Random;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.*;
+import tools.jackson.core.*;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.*;
+import tools.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class BinaryReadTest extends ModuleTestBase

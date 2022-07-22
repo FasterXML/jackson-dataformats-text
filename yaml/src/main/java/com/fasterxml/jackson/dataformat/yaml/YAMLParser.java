@@ -20,13 +20,13 @@ import org.snakeyaml.engine.v2.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.v2.resolver.ScalarResolver;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.ParserBase;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.util.BufferRecycler;
-import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleStreamReadContext;
+import tools.jackson.core.*;
+import tools.jackson.core.base.ParserBase;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.DupDetector;
+import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.SimpleStreamReadContext;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents

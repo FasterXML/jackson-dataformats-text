@@ -2,8 +2,8 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.ObjectReader;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.ObjectReader;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 

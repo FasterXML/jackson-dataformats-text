@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class DatabindWriteTest extends ModuleTestBase

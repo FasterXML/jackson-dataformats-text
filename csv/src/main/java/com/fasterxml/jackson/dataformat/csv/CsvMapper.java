@@ -3,16 +3,16 @@ package com.fasterxml.jackson.dataformat.csv;
 import java.util.Collection;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
-import com.fasterxml.jackson.databind.cfg.MapperBuilderState;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMember;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import com.fasterxml.jackson.databind.util.NameTransformer;
-import com.fasterxml.jackson.databind.util.SimpleLookupCache;
-import com.fasterxml.jackson.databind.util.ViewMatcher;
+import tools.jackson.databind.*;
+import tools.jackson.databind.cfg.MapperBuilder;
+import tools.jackson.databind.cfg.MapperBuilderState;
+import tools.jackson.databind.introspect.AnnotatedMember;
+import tools.jackson.databind.introspect.BeanPropertyDefinition;
+import tools.jackson.databind.util.NameTransformer;
+import tools.jackson.databind.util.SimpleLookupCache;
+import tools.jackson.databind.util.ViewMatcher;
 
 /**
  * Specialized {@link ObjectMapper}, with extended functionality to

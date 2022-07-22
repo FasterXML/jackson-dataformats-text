@@ -11,11 +11,11 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.VersionUtil;
+import tools.jackson.core.*;
+import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.VersionUtil;
 
 final class TomlGenerator extends GeneratorBase
 {

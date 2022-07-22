@@ -5,10 +5,10 @@ import java.util.Arrays;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.*;
+import tools.jackson.databind.node.JsonNodeType;
+import tools.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class BinaryWriteTest extends ModuleTestBase

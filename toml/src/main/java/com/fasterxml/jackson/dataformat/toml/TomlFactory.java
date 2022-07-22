@@ -2,13 +2,13 @@ package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.TextualTSFactory;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.UTF8Writer;
+import tools.jackson.core.*;
+import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.UTF8Writer;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TreeTraversingParser;
+import tools.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.node.TreeTraversingParser;
 
 public final class TomlFactory extends TextualTSFactory
 {

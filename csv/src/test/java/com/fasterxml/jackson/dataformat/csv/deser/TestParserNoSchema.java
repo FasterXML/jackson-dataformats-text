@@ -3,8 +3,8 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.MappingIterator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 /**

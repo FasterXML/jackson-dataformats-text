@@ -2,10 +2,10 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.*;
+import tools.jackson.core.type.TypeReference;
 
-import com.fasterxml.jackson.databind.MappingIterator;
+import tools.jackson.databind.MappingIterator;
 
 public class MultipleDocumentsReadTest extends ModuleTestBase
 {

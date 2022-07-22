@@ -2,8 +2,8 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.MapperFeature;
+import tools.jackson.core.*;
+import tools.jackson.databind.MapperFeature;
 
 public class TestVersions extends ModuleTestBase
 {

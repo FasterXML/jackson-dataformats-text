@@ -4,8 +4,8 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import com.fasterxml.jackson.core.StreamWriteFeature;
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 public class GeneratorIgnoreUnknownTest extends ModuleTestBase

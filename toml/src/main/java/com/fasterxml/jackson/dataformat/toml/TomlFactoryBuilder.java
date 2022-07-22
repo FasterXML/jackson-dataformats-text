@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.base.DecorableTSFactory;
+import tools.jackson.core.base.DecorableTSFactory;
 
 /**
  * {@link com.fasterxml.jackson.core.TokenStreamFactory.TSFBuilder}

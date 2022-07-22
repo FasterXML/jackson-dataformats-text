@@ -5,7 +5,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.SequenceWriter;
+import tools.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 // Tests for verifying that headers are emitted

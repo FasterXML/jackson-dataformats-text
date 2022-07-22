@@ -3,9 +3,9 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.io.*;
 import java.util.*;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.TextualTSFactory;
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.*;
+import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.IOContext;
 
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;

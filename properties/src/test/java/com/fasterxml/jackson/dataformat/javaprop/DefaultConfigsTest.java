@@ -2,12 +2,12 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.ObjectReadContext;
-import com.fasterxml.jackson.core.ObjectWriteContext;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.Versioned;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.core.ObjectWriteContext;
+import tools.jackson.core.Version;
+import tools.jackson.core.Versioned;
 
 public class DefaultConfigsTest extends ModuleTestBase
 {

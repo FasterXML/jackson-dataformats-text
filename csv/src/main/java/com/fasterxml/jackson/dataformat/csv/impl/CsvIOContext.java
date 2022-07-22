@@ -1,8 +1,8 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.ContentReference;
-import com.fasterxml.jackson.core.util.BufferRecycler;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.util.BufferRecycler;
 
 public class CsvIOContext extends IOContext
 {

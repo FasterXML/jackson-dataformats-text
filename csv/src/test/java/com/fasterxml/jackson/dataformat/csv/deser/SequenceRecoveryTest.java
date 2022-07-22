@@ -2,10 +2,10 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import com.fasterxml.jackson.core.exc.StreamReadException;
+import tools.jackson.core.exc.StreamReadException;
 
-import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 public class SequenceRecoveryTest extends ModuleTestBase

@@ -1,9 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.core.ObjectReadContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.TokenBuffer;
+import tools.jackson.core.ObjectReadContext;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.util.TokenBuffer;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;

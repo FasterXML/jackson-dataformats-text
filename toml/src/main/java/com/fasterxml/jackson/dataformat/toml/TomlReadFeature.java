@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.FormatFeature;
+import tools.jackson.core.FormatFeature;
 
 /**
  * Enumeration that defines all togglable features for TOML parsers.

@@ -5,9 +5,9 @@ import java.nio.charset.Charset;
 
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.TextualTSFactory;
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.*;
+import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 @SuppressWarnings("resource")

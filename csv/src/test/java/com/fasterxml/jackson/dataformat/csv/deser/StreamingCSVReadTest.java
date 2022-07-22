@@ -4,10 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.JsonParser.NumberType;
-import com.fasterxml.jackson.core.io.SerializedString;
-import com.fasterxml.jackson.databind.ObjectReader;
+import tools.jackson.core.*;
+import tools.jackson.core.JsonParser.NumberType;
+import tools.jackson.core.io.SerializedString;
+import tools.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 /**

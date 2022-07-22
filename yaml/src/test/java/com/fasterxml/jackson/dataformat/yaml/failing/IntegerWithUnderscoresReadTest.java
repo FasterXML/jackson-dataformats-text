@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.failing;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 // for [dataformat-text#146]: cannot handle underscores in numbers

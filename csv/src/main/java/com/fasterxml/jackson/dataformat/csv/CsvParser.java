@@ -6,12 +6,12 @@ import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.ParserMinimalBase;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.util.ByteArrayBuilder;
-import com.fasterxml.jackson.core.util.JacksonFeatureSet;
-import com.fasterxml.jackson.core.util.SimpleStreamReadContext;
+import tools.jackson.core.*;
+import tools.jackson.core.base.ParserMinimalBase;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.util.ByteArrayBuilder;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.SimpleStreamReadContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
@@ -1260,13 +1260,13 @@ public class CsvParser
         throw CsvReadException.from(this, msg, _schema);
     }
 
-    public void _reportUnexpectedCsvChar(int ch, String msg)  throws JacksonException {
-        super._reportUnexpectedChar(ch, msg);
+    public <T> T _reportUnexpectedCsvChar(int ch, String msg)  throws JacksonException {
+        return super._reportUnexpectedChar(ch, msg);
     }
 
     @Override // just to make visible to decoder
-    public void _reportError(String msg) throws StreamReadException {
-        super._reportError(msg);
+    public <T> T _reportError(String msg) throws StreamReadException {
+        return super._reportError(msg);
     }
 
     @Override // just to make visible to decoder

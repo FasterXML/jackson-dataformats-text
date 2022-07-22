@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.csv;
 import java.io.*;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectReader;
+import tools.jackson.databind.ObjectReader;
 
 public class NullReader122Test extends ModuleTestBase
 {

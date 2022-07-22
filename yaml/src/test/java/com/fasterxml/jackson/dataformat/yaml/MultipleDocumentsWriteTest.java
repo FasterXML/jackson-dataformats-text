@@ -4,7 +4,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.databind.*;
 
 // for [dataformats-text#163]
 public class MultipleDocumentsWriteTest extends ModuleTestBase

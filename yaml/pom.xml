@@ -26,7 +26,7 @@
   <dependencies>
     <!-- Extends Jackson core, databind (optional); uses SnakeYAML for parsing, generation -->
     <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
+      <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
     </dependency>
 

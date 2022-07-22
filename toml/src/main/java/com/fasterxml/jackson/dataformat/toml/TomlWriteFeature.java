@@ -1,7 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.FormatFeature;
-import com.fasterxml.jackson.core.JsonGenerator;
+import tools.jackson.core.FormatFeature;
+import tools.jackson.core.JsonGenerator;
 
 /**
  * Enumeration that defines all togglable features for TOML generators.

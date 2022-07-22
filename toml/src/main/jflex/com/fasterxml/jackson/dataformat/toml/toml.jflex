@@ -10,7 +10,7 @@ package com.fasterxml.jackson.dataformat.toml;
 %char
 %buffer 4000
 
-%ctorarg com.fasterxml.jackson.core.io.IOContext ioContext
+%ctorarg tools.jackson.core.io.IOContext ioContext
 %ctorarg TomlStreamReadException.ErrorContext errorContext
 
 %init{
@@ -22,14 +22,14 @@ this.textBuffer = ioContext.constructTextBuffer();
 %init}
 
 %{
-  private final com.fasterxml.jackson.core.io.IOContext ioContext;
+  private final tools.jackson.core.io.IOContext ioContext;
   private final TomlStreamReadException.ErrorContext errorContext;
 
   boolean prohibitInternalBufferAllocate = false;
   private boolean releaseTokenBuffer = true;
 
   private boolean trimmedNewline;
-  final com.fasterxml.jackson.core.util.TextBuffer textBuffer;
+  final tools.jackson.core.util.TextBuffer textBuffer;
 
   private void requestLargerBuffer() throws TomlStreamReadException {
       if (prohibitInternalBufferAllocate) {

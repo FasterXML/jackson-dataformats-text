@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml.filter;
 import java.io.*;
 import java.util.*;
 
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.databind.*;
 
 import com.fasterxml.jackson.dataformat.yaml.*;
 import com.fasterxml.jackson.dataformat.yaml.testutil.PrefixInputDecorator;

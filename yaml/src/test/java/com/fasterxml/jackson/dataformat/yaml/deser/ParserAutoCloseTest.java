@@ -6,8 +6,8 @@ import java.io.StringReader;
 
 import org.junit.Assert;
 
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class ParserAutoCloseTest extends ModuleTestBase

@@ -6,13 +6,13 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.base.GeneratorBase;
-import com.fasterxml.jackson.core.io.CharacterEscapes;
-import com.fasterxml.jackson.core.json.DupDetector;
-import com.fasterxml.jackson.core.util.SimpleStreamWriteContext;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.*;
+import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.io.CharacterEscapes;
+import tools.jackson.core.json.DupDetector;
+import tools.jackson.core.util.SimpleStreamWriteContext;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvEncoder;
 
 public class CsvGenerator extends GeneratorBase

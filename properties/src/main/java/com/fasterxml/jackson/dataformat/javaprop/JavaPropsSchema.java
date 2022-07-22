@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import com.fasterxml.jackson.core.FormatSchema;
+import tools.jackson.core.FormatSchema;
 import com.fasterxml.jackson.dataformat.javaprop.util.JPropPathSplitter;
 import com.fasterxml.jackson.dataformat.javaprop.util.Markers;
 

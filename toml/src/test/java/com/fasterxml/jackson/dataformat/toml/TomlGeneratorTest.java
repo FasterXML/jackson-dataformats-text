@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.time.*;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.ObjectMapper;
 
 import org.junit.Assert;
 import org.junit.Test;

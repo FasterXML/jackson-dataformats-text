@@ -1,11 +1,11 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.core.exc.StreamWriteException;
-import com.fasterxml.jackson.core.io.ContentReference;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonLocation;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.exc.StreamWriteException;
+import tools.jackson.core.io.ContentReference;
 
 public final class TomlStreamWriteException extends StreamWriteException {
     private static final long serialVersionUID = 1L;

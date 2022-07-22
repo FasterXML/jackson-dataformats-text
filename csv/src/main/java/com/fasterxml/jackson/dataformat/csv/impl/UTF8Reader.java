@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 
 import java.io.*;
 
-import com.fasterxml.jackson.core.io.IOContext;
+import tools.jackson.core.io.IOContext;
 
 /**
  * Optimized Reader that reads UTF-8 encoded content from an input stream.

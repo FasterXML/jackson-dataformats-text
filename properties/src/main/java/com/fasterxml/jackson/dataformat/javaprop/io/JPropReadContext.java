@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.javaprop.io;
 
 import java.util.*;
 
-import com.fasterxml.jackson.core.*;
+import tools.jackson.core.*;
 import com.fasterxml.jackson.dataformat.javaprop.util.JPropNode;
 
 /**
