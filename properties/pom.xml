@@ -20,7 +20,7 @@ configuration files as if there was implied nesting structure (by default using 
   <url>http://github.com/FasterXML/jackson-dataformats-text</url>    
 
   <properties>
-    <packageVersion.dir>com/fasterxml/jackson/dataformat/javaprop</packageVersion.dir>
+    <packageVersion.dir>tools/jackson/dataformat/javaprop</packageVersion.dir>
     <packageVersion.package>${project.groupId}.javaprop</packageVersion.package>
   </properties>
 
