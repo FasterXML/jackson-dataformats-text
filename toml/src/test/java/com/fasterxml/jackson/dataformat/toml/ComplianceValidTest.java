@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -12,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,7 +96,7 @@ public class ComplianceValidTest {
                         case "nan":
                             return JsonNodeFactory.instance.numberNode(Double.NaN);
                         default:
-                            return JsonNodeFactory.instance.numberNode(new BigDecimal(value.textValue()));
+                            return JsonNodeFactory.instance.numberNode(NumberInput.parseBigDecimal(value.textValue()));
                     }
                 case "boolean":
                     return JsonNodeFactory.instance.booleanNode(Boolean.parseBoolean(value.textValue()));
