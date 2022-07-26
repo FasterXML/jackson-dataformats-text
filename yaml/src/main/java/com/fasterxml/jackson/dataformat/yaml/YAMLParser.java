@@ -993,7 +993,7 @@ public class YAMLParser extends ParserBase
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do
-                    _numberDouble = Double.parseDouble(str);
+                    _numberDouble = NumberInput.parseDouble(str, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                     _numTypesValid = NR_DOUBLE;
                 }
             } catch (NumberFormatException nex) {
