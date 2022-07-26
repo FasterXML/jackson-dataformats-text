@@ -1,9 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import com.fasterxml.jackson.core.io.NumberInput;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -989,11 +989,11 @@ public class YAMLParser extends ParserBase
             final String str = _cleanedTextValue;
             try {
                 if (expType == NR_BIGDECIMAL) {
-                    _numberBigDecimal = new BigDecimal(str);
+                    _numberBigDecimal = NumberInput.parseBigDecimal(str);
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do
-                    _numberDouble = Double.parseDouble(str);
+                    _numberDouble = NumberInput.parseDouble(str, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                     _numTypesValid = NR_DOUBLE;
                 }
             } catch (NumberFormatException nex) {
