@@ -321,7 +321,7 @@ class Parser {
         } else if (text.endsWith("inf")) {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
-            BigDecimal dec = new BigDecimal(text);
+            BigDecimal dec = NumberInput.parseBigDecimal(text);
             return factory.numberNode(dec);
         }
     }

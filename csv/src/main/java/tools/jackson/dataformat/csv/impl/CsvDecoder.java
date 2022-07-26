@@ -1304,7 +1304,7 @@ public class CsvDecoder
             /* Let's actually parse from String representation, to avoid
              * rounding errors that non-decimal floating operations could incur
              */
-            _numberBigDecimal = new BigDecimal(getText());
+            _numberBigDecimal = NumberInput.parseBigDecimal(getText());
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             _numberBigDecimal = new BigDecimal(_numberBigInt);
         } else if ((_numTypesValid & NR_LONG) != 0) {

@@ -1,9 +1,17 @@
 package tools.jackson.dataformat.yaml;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
+
+import tools.jackson.core.*;
+import tools.jackson.core.base.ParserBase;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberInput;
+import tools.jackson.core.json.DupDetector;
+import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.SimpleStreamReadContext;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.Anchor;
@@ -19,14 +27,6 @@ import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.v2.resolver.ScalarResolver;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
-
-import tools.jackson.core.*;
-import tools.jackson.core.base.ParserBase;
-import tools.jackson.core.io.IOContext;
-import tools.jackson.core.json.DupDetector;
-import tools.jackson.core.util.BufferRecycler;
-import tools.jackson.core.util.JacksonFeatureSet;
-import tools.jackson.core.util.SimpleStreamReadContext;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
@@ -933,11 +933,11 @@ public class YAMLParser extends ParserBase
             final String str = _cleanedTextValue;
             try {
                 if (expType == NR_BIGDECIMAL) {
-                    _numberBigDecimal = new BigDecimal(str);
+                    _numberBigDecimal = NumberInput.parseBigDecimal(str);
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do
-                    _numberDouble = Double.parseDouble(str);
+                    _numberDouble = NumberInput.parseDouble(str, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                     _numTypesValid = NR_DOUBLE;
                 }
             } catch (NumberFormatException nex) {
