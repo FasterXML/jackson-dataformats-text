@@ -20,7 +20,7 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
-  
+
   <modules>
     <module>csv</module>
     <module>properties</module>
