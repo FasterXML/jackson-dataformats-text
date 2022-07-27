@@ -19,6 +19,14 @@ abstractions.
   </description>
   <url>https://github.com/FasterXML/jackson-dataformats-text</url>
 
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
   <properties>
     <!-- Generate PackageVersion.java into this directory. -->
     <packageVersion.dir>tools/jackson/dataformat/csv</packageVersion.dir>
