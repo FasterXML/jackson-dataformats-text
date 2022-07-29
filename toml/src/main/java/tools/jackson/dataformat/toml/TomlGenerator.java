@@ -194,14 +194,15 @@ final class TomlGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    protected void _writeRaw(char c) throws JacksonException {
+    protected JsonGenerator _writeRaw(char c) throws JacksonException {
         if (_outputTail >= _outputEnd) {
             _flushBuffer();
         }
         _outputBuffer[_outputTail++] = c;
+        return this;
     }
 
-    protected void _writeRaw(String text) throws JacksonException {
+    protected JsonGenerator _writeRaw(String text) throws JacksonException {
         // Nothing to check, can just output as is
         int len = text.length();
         int room = _outputEnd - _outputTail;
@@ -217,9 +218,10 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRawLong(text);
         }
+        return this;
     }
 
-    protected void _writeRaw(StringBuilder text) throws JacksonException {
+    protected JsonGenerator _writeRaw(StringBuilder text) throws JacksonException {
         // Nothing to check, can just output as is
         int len = text.length();
         int room = _outputEnd - _outputTail;
@@ -235,9 +237,10 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRawLong(text);
         }
+        return this;
     }
 
-    protected void _writeRaw(char[] text, int offset, int len) throws JacksonException {
+    protected JsonGenerator _writeRaw(char[] text, int offset, int len) throws JacksonException {
         // Only worth buffering if it's a short write?
         if (len < SHORT_WRITE) {
             int room = _outputEnd - _outputTail;
@@ -246,7 +249,7 @@ final class TomlGenerator extends GeneratorBase
             }
             System.arraycopy(text, offset, _outputBuffer, _outputTail, len);
             _outputTail += len;
-            return;
+            return this;
         }
         // Otherwise, better just pass through:
         _flushBuffer();
@@ -255,6 +258,7 @@ final class TomlGenerator extends GeneratorBase
         } catch (IOException e) {
             throw _wrapIOFailure(e);
         }
+        return this;
     }
 
     protected void _writeRawLong(String text) throws JacksonException {
@@ -353,7 +357,7 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeName(String name) throws JacksonException {
+    public JsonGenerator writeName(String name) throws JacksonException {
         if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
@@ -372,12 +376,13 @@ final class TomlGenerator extends GeneratorBase
             }
             _appendPropertyName(_basePath, name);
         }
+        return this;
     }
 
     @Override
-    public void writePropertyId(long id) throws JacksonException {
+    public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
-        writeName(Long.toString(id));
+        return writeName(Long.toString(id));
     }
 
     /*
@@ -387,12 +392,12 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeStartArray() throws JacksonException {
-        writeStartArray(null);
+    public JsonGenerator writeStartArray() throws JacksonException {
+        return writeStartArray(null);
     }
 
     @Override
-    public void writeStartArray(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
         // arrays are always inline, force writing the current key
         // NOTE: if this ever changes, we need to add empty array handling in writeEndArray
         _verifyValueWrite("start an array", true);
@@ -401,10 +406,11 @@ final class TomlGenerator extends GeneratorBase
         if (_streamWriteContext._inline) {
             _writeRaw('[');
         }
+        return this;
     }
 
     @Override
-    public void writeEndArray() throws JacksonException {
+    public JsonGenerator writeEndArray() throws JacksonException {
         if (!_streamWriteContext.inArray()) {
             _reportError("Current context not an Array but " + _streamWriteContext.typeDesc());
         }
@@ -415,26 +421,27 @@ final class TomlGenerator extends GeneratorBase
             VersionUtil.throwInternal();
         }
         _streamWriteContext = _streamWriteContext.getParent();
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeStartObject() throws JacksonException {
-        writeStartObject(null);
+    public JsonGenerator writeStartObject() throws JacksonException {
+        return writeStartObject(null);
     }
 
     @Override
-    public void writeStartObject(Object forValue) throws JacksonException {
+    public JsonGenerator writeStartObject(Object forValue) throws JacksonException {
         // objects aren't always materialized right now
         _verifyValueWrite("start an object", false);
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
         if (_streamWriteContext._inline) {
             writeRaw('{');
         }
+        return this;
     }
 
     @Override
-    public void writeEndObject() throws JacksonException {
+    public JsonGenerator writeEndObject() throws JacksonException {
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
@@ -451,6 +458,7 @@ final class TomlGenerator extends GeneratorBase
             }
             _streamWriteContext = _streamWriteContext.getParent();
         }
+        return this;
     }
 
     /*
@@ -460,32 +468,31 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws JacksonException {
+    public JsonGenerator writeString(String text) throws JacksonException {
         if (text == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text);
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
         writeString(new String(text, offset, len, StandardCharsets.UTF_8));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -495,28 +502,28 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeRaw(String text) throws JacksonException {
-        _writeRaw(text);
+    public JsonGenerator writeRaw(String text) throws JacksonException {
+        return _writeRaw(text);
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws JacksonException {
-        _writeRaw(text.substring(offset, offset + len));
+    public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
+        return _writeRaw(text.substring(offset, offset + len));
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
-        _writeRaw(text, offset, len);
+    public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
+        return _writeRaw(text, offset, len);
     }
 
     @Override
-    public void writeRaw(char c) throws JacksonException {
-        _writeRaw(c);
+    public JsonGenerator writeRaw(char c) throws JacksonException {
+        return _writeRaw(c);
     }
 
     @Override
-    public void writeRaw(SerializableString text) throws JacksonException {
-        writeRaw(text.toString());
+    public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
+        return writeRaw(text.toString());
     }
 
     /*
@@ -526,11 +533,10 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
             throws JacksonException {
         if (data == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write Binary value");
         // ok, better just Base64 encode as a String...
@@ -542,7 +548,7 @@ final class TomlGenerator extends GeneratorBase
         _writeRaw('\'');
         _writeRaw(encoded);
         _writeRaw('\'');
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -552,88 +558,85 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBoolean(boolean state) throws JacksonException {
+    public JsonGenerator writeBoolean(boolean state) throws JacksonException {
         _verifyValueWrite("write boolean value");
         _writeRaw(state ? "true" : "false");
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(short v) throws JacksonException {
+    public JsonGenerator writeNumber(short v) throws JacksonException {
         writeNumber((int) v);
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(int i) throws JacksonException {
+    public JsonGenerator writeNumber(int i) throws JacksonException {
         _verifyValueWrite("write number");
         _writeRaw(String.valueOf(i));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(long l) throws JacksonException {
+    public JsonGenerator writeNumber(long l) throws JacksonException {
         _verifyValueWrite("write number");
         _writeRaw(String.valueOf(l));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws JacksonException {
+    public JsonGenerator writeNumber(BigInteger v) throws JacksonException {
         if (v == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeRaw(String.valueOf(v));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(double d) throws JacksonException {
+    public JsonGenerator writeNumber(double d) throws JacksonException {
         _verifyValueWrite("write number");
         _writeRaw(String.valueOf(d));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(float f) throws JacksonException {
+    public JsonGenerator writeNumber(float f) throws JacksonException {
         _verifyValueWrite("write number");
         _writeRaw(String.valueOf(f));
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws JacksonException {
+    public JsonGenerator writeNumber(BigDecimal dec) throws JacksonException {
         if (dec == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeRaw(str);
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws JacksonException {
+    public JsonGenerator writeNumber(String encodedValue) throws JacksonException {
         if (encodedValue == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeRaw(encodedValue);
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
-    public void writeNull() throws JacksonException {
+    public JsonGenerator writeNull() throws JacksonException {
         if (TomlWriteFeature.FAIL_ON_NULL_WRITE.enabledIn(_tomlFeatures)) {
             throw new TomlStreamWriteException(this, "TOML null writing disabled (TomlWriteFeature.FAIL_ON_NULL_WRITE)");
         }
         _verifyValueWrite("write null value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, "");
-        writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -674,10 +677,11 @@ final class TomlGenerator extends GeneratorBase
         _writeRaw(" = ");
     }
 
-    private void writeValueEnd() {
+    private JsonGenerator writeValueEnd() {
         if (!_streamWriteContext._inline) {
             writeRaw('\n');
         }
+        return this;
     }
 
     /*
@@ -777,7 +781,7 @@ final class TomlGenerator extends GeneratorBase
      */
 
     @Override
-    public void writePOJO(Object value) throws JacksonException {
+    public JsonGenerator writePOJO(Object value) throws JacksonException {
         if (value == null) {
             // important: call method that does check value write:
             writeNull();
@@ -792,5 +796,6 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _objectWriteContext.writeValue(this, value);
         }
+        return this;
     }
 }

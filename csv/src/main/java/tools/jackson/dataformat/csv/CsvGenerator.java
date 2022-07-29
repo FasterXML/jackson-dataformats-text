@@ -332,28 +332,30 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeName(String name) throws JacksonException
+    public JsonGenerator writeName(String name) throws JacksonException
     {
         if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
+        return this;
     }
 
     @Override
-    public void writePropertyId(long id) throws JacksonException {
+    public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
-        writeName(Long.toString(id));
+        return writeName(Long.toString(id));
     }
 
     @Override
-    public final void writeName(SerializableString name) throws JacksonException
+    public JsonGenerator writeName(SerializableString name) throws JacksonException
     {
         // Object is a value, need to verify it's allowed
         if (!_streamWriteContext.writeName(name.getValue())) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
+        return this;
     }
 
     private final void _writeFieldName(String name) throws JacksonException
@@ -455,7 +457,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeStartArray() throws JacksonException
+    public JsonGenerator writeStartArray() throws JacksonException
     {
         _verifyValueWrite("start an array");
         // Ok to create root-level array to contain Objects/Arrays, but
@@ -495,16 +497,18 @@ public class CsvGenerator extends GeneratorBase
         }
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
         // and that's about it, really
+        return this;
     }
 
     @Override
-    public final void writeStartArray(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
         writeStartArray();
         assignCurrentValue(currValue);
+        return this;
     }
 
     @Override
-    public final void writeEndArray() throws JacksonException
+    public JsonGenerator writeEndArray() throws JacksonException
     {
         if (!_streamWriteContext.inArray()) {
             _reportError("Current context not Array but "+_streamWriteContext.typeDesc());
@@ -515,7 +519,7 @@ public class CsvGenerator extends GeneratorBase
             if (_streamWriteContext == _skipWithin) {
                 _skipWithin = null;
             }
-            return;
+            return this;
         }
         if (!_arraySeparator.isEmpty()) {
             _arraySeparator = CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
@@ -526,10 +530,11 @@ public class CsvGenerator extends GeneratorBase
         if (!_streamWriteContext.inObject()) {
             finishRow();
         }
+        return this;
     }
 
     @Override
-    public final void writeStartObject() throws JacksonException
+    public JsonGenerator writeStartObject() throws JacksonException
     {
         _verifyValueWrite("start an object");
         // No nesting for objects; can write Objects inside logical root-level arrays.
@@ -546,16 +551,18 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
+        return this;
     }
 
     @Override
-    public final void writeStartObject(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartObject(Object currValue) throws JacksonException {
         writeStartObject();
         assignCurrentValue(currValue);
+        return this;
     }
 
     @Override
-    public final void writeEndObject() throws JacksonException
+    public JsonGenerator writeEndObject() throws JacksonException
     {
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not Object but "+_streamWriteContext.typeDesc());
@@ -566,10 +573,11 @@ public class CsvGenerator extends GeneratorBase
             if (_streamWriteContext == _skipWithin) {
                 _skipWithin = null;
             }
-            return;
+            return this;
         }
         // not 100% fool-proof, but chances are row should be done now
         finishRow();
+        return this;
     }
 
     /*
@@ -579,11 +587,10 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws JacksonException
+    public JsonGenerator writeString(String text) throws JacksonException
     {
         if (text == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write String value");
         if (!_skipValue) {
@@ -593,10 +600,11 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), text);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws JacksonException
+    public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException
     {
         _verifyValueWrite("write String value");
         if (!_skipValue) {
@@ -606,10 +614,11 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), text, offset, len);
             }
         }
+        return this;
     }
 
     @Override
-    public final void writeString(SerializableString sstr) throws JacksonException
+    public JsonGenerator writeString(SerializableString sstr) throws JacksonException
     {
         _verifyValueWrite("write String value");
         if (!_skipValue) {
@@ -619,16 +628,17 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), sstr.getValue());
             }
         }
+        return this;
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRawUTF8String(byte[] text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
+    public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -638,50 +648,57 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeRaw(String text) throws JacksonException {
+    public JsonGenerator writeRaw(String text) throws JacksonException {
         _writer.writeRaw(text);
+        return this;
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
         _writer.writeRaw(text, offset, len);
+        return this;
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
         _writer.writeRaw(text, offset, len);
+        return this;
     }
 
     @Override
-    public void writeRaw(char c) throws JacksonException {
+    public JsonGenerator writeRaw(char c) throws JacksonException {
         _writer.writeRaw(c);
+        return this;
     }
 
     @Override
-    public void writeRawValue(String text) throws JacksonException {
+    public JsonGenerator writeRawValue(String text) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
             _writer.writeNonEscaped(_columnIndex(), text);
         }
+        return this;
     }
 
     @Override
-    public void writeRawValue(String text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
             _writer.writeNonEscaped(_columnIndex(), text.substring(offset, offset+len));
         }
+        return this;
     }
 
     @Override
-    public void writeRawValue(char[] text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
         _verifyValueWrite("write Raw value");
         if (!_skipValue) {
             // NOTE: ignore array stuff
             _writer.writeNonEscaped(_columnIndex(), new String(text, offset, len));
         }
+        return this;
     }
 
     /*
@@ -691,12 +708,11 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
         throws JacksonException
     {
         if (data == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write Binary value");
         if (!_skipValue) {
@@ -712,6 +728,7 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), encoded);
             }
         }
+        return this;
     }
 
     /*
@@ -721,7 +738,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBoolean(boolean state) throws JacksonException
+    public JsonGenerator writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         if (!_skipValue) {
@@ -731,10 +748,11 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), state);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNull() throws JacksonException
+    public JsonGenerator writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
 
@@ -761,15 +779,16 @@ public class CsvGenerator extends GeneratorBase
 */
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
+    public JsonGenerator writeNumber(short v) throws JacksonException {
+        return writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int v) throws JacksonException
+    public JsonGenerator writeNumber(int v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -779,15 +798,15 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), v);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNumber(long v) throws JacksonException
+    public JsonGenerator writeNumber(long v) throws JacksonException
     {
         // First: maybe 32 bits is enough?
         if (v <= MAX_INT_AS_LONG && v >= MIN_INT_AS_LONG) {
-            writeNumber((int) v);
-            return;
+            return writeNumber((int) v);
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -797,14 +816,14 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), v);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws JacksonException
+    public JsonGenerator writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -815,10 +834,11 @@ public class CsvGenerator extends GeneratorBase
 
             }
         }
+        return this;
     }
     
     @Override
-    public void writeNumber(double v) throws JacksonException
+    public JsonGenerator writeNumber(double v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -828,10 +848,11 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), v);
             }
         }
+        return this;
     }    
 
     @Override
-    public void writeNumber(float v) throws JacksonException
+    public JsonGenerator writeNumber(float v) throws JacksonException
     {
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -841,14 +862,14 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), v);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNumber(BigDecimal v) throws JacksonException
+    public JsonGenerator writeNumber(BigDecimal v) throws JacksonException
     {
         if (v == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -860,14 +881,14 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), str);
             }
         }
+        return this;
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws JacksonException
+    public JsonGenerator writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
@@ -877,6 +898,7 @@ public class CsvGenerator extends GeneratorBase
                 _writer.write(_columnIndex(), encodedValue);
             }
         }
+        return this;
     }
     
     /*
@@ -886,7 +908,7 @@ public class CsvGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeOmittedProperty(String propName) throws JacksonException
+    public JsonGenerator writeOmittedProperty(String propName) throws JacksonException
     {
         // Hmmh. Should we require a match? Actually, let's use logic: if property found,
         // assumption is we must add a placeholder; if not, we can merely ignore
@@ -904,6 +926,7 @@ public class CsvGenerator extends GeneratorBase
             _verifyValueWrite("skip positional value due to filtering");
             _writer.write(_columnIndex(), "");
         }
+        return this;
     }
 
     /*

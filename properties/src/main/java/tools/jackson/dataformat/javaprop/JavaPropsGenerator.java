@@ -167,7 +167,7 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeName(String name) throws JacksonException
+    public JsonGenerator writeName(String name) throws JacksonException
     {
         if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
@@ -191,12 +191,13 @@ public abstract class JavaPropsGenerator
             }
         }
         _appendPropertyName(_basePath, name);
+        return this;
     }
 
     @Override
-    public void writePropertyId(long id) throws JacksonException {
+    public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 15-Aug-2019, tatu: should be improved to avoid String generation
-        writeName(Long.toString(id));
+        return writeName(Long.toString(id));
     }
 
     protected abstract void _appendPropertyName(StringBuilder path, String name);
@@ -208,46 +209,52 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeStartArray() throws JacksonException {
+    public JsonGenerator writeStartArray() throws JacksonException {
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null,
                 _basePath.length());
+        return this;
     }
 
     @Override
-    public void writeStartArray(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
+        return this;
     }
     
     @Override
-    public void writeEndArray() throws JacksonException {
+    public JsonGenerator writeEndArray() throws JacksonException {
         if (!_streamWriteContext.inArray()) {
             _reportError("Current context not an Array but "+_streamWriteContext.typeDesc());
         }
         _streamWriteContext = _streamWriteContext.getParent();
+        return this;
     }
 
     @Override
-    public void writeStartObject() throws JacksonException {
+    public JsonGenerator writeStartObject() throws JacksonException {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null, _basePath.length());
+        return this;
     }
 
     @Override
-    public void writeStartObject(Object forValue) throws JacksonException {
+    public JsonGenerator writeStartObject(Object forValue) throws JacksonException {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
+        return this;
     }
 
     @Override
-    public void writeEndObject() throws JacksonException
+    public JsonGenerator writeEndObject() throws JacksonException
     {
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Ibject but "+_streamWriteContext.typeDesc());
         }
         _streamWriteContext = _streamWriteContext.getParent();
+        return this;
     }
 
     /*
@@ -257,34 +264,35 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeString(String text) throws JacksonException
+    public JsonGenerator writeString(String text) throws JacksonException
     {
         if (text == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write String value");
         _writeEscapedEntry(text);
+        return this;
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len)
+    public JsonGenerator writeString(char[] text, int offset, int len)
         throws JacksonException
     {
         _verifyValueWrite("write String value");
         _writeEscapedEntry(text, offset, len);
+        return this;
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len)throws JacksonException
+    public JsonGenerator writeRawUTF8String(byte[] text, int offset, int len)throws JacksonException
     {
-        _reportUnsupportedOperation();
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeUTF8String(byte[] text, int offset, int len) throws JacksonException
+    public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException
     {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -294,28 +302,33 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeRaw(String text) throws JacksonException {
+    public JsonGenerator writeRaw(String text) throws JacksonException {
         _writeRaw(text);
+        return this;
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
         _writeRaw(text.substring(offset, offset+len));
+        return this;
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
+    public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
         _writeRaw(text, offset, len);
+        return this;
     }
 
     @Override
-    public void writeRaw(char c) throws JacksonException {
+    public JsonGenerator writeRaw(char c) throws JacksonException {
         _writeRaw(c);
+        return this;
     }
 
     @Override
-    public void writeRaw(SerializableString text) throws JacksonException {
+    public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
         writeRaw(text.toString());
+        return this;
     }
 
     /*
@@ -325,12 +338,11 @@ public abstract class JavaPropsGenerator
      */
     
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte[] data, int offset, int len)
         throws JacksonException
     {
         if (data == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write Binary value");
         // ok, better just Base64 encode as a String...
@@ -339,6 +351,7 @@ public abstract class JavaPropsGenerator
         }
         String encoded = b64variant.encode(data);
         _writeEscapedEntry(encoded);
+        return this;
     }
 
     /*
@@ -348,84 +361,90 @@ public abstract class JavaPropsGenerator
      */
 
     @Override
-    public void writeBoolean(boolean state) throws JacksonException
+    public JsonGenerator writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         _writeUnescapedEntry(state ? "true" : "false");
+        return this;
     }
 
     @Override
-    public void writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
+    public JsonGenerator writeNumber(short v) throws JacksonException {
+        return writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int i) throws JacksonException
+    public JsonGenerator writeNumber(int i) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(i));
+        return this;
     }
 
     @Override
-    public void writeNumber(long l) throws JacksonException
+    public JsonGenerator writeNumber(long l) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(l));
+        return this;
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws JacksonException
+    public JsonGenerator writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(v));
+        return this;
     }
     
     @Override
-    public void writeNumber(double d) throws JacksonException
+    public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(d));
+        return this;
     }    
 
     @Override
-    public void writeNumber(float f) throws JacksonException
+    public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeUnescapedEntry(String.valueOf(f));
+        return this;
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws JacksonException
+    public JsonGenerator writeNumber(BigDecimal dec) throws JacksonException
     {
         if (dec == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeUnescapedEntry(str);
+        return this;
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws JacksonException
+    public JsonGenerator writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeUnescapedEntry(encodedValue);
+        return this;
     }
 
     @Override
-    public void writeNull() throws JacksonException
+    public JsonGenerator writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
         _writeUnescapedEntry("");
+        return this;
     }
 
     /*

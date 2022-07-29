@@ -396,16 +396,17 @@ public class YAMLGenerator extends GeneratorBase
     // And then methods overridden to make final, streamline some aspects...
 
     @Override
-    public final void writeName(String name) throws JacksonException
+    public JsonGenerator writeName(String name) throws JacksonException
     {
         if (!_streamWriteContext.writeName(name)) {
             _reportError("Cannot write a property name, expecting a value");
         }
         _writeFieldName(name);
+        return this;
     }
 
     @Override
-    public final void writeName(SerializableString name)
+    public JsonGenerator writeName(SerializableString name)
         throws JacksonException
     {
         // Object is a value, need to verify it's allowed
@@ -413,10 +414,11 @@ public class YAMLGenerator extends GeneratorBase
             _reportError("Cannotwrite a property name, expecting a value");
         }
         _writeFieldName(name.getValue());
+        return this;
     }
 
     @Override
-    public void writePropertyId(long id) throws JacksonException {
+    public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
         String idStr = Long.valueOf(id).toString(); // since instances for small values cached
         if (!_streamWriteContext.writeName(idStr)) {
@@ -425,6 +427,7 @@ public class YAMLGenerator extends GeneratorBase
         // to avoid quoting
 //        _writeFieldName(idStr);
         _writeScalar(idStr, "int", STYLE_SCALAR);
+        return this;
     }
 
     private final void _writeFieldName(String name) throws JacksonException
@@ -489,7 +492,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public final void writeStartArray() throws JacksonException
+    public JsonGenerator writeStartArray() throws JacksonException
     {
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
@@ -502,16 +505,18 @@ public class YAMLGenerator extends GeneratorBase
         }
         _emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
                 implicit,  style));
+        return this;
     }
 
     @Override
-    public final void writeStartArray(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
         writeStartArray();
         assignCurrentValue(currValue);
+        return this;
     }
 
     @Override
-    public final void writeEndArray() throws JacksonException
+    public JsonGenerator writeEndArray() throws JacksonException
     {
         if (!_streamWriteContext.inArray()) {
             _reportError("Current context not Array but "+_streamWriteContext.typeDesc());
@@ -520,10 +525,11 @@ public class YAMLGenerator extends GeneratorBase
         _typeId = null;
         _streamWriteContext = _streamWriteContext.getParent();
         _emit(new SequenceEndEvent());
+        return this;
     }
 
     @Override
-    public final void writeStartObject() throws JacksonException
+    public JsonGenerator writeStartObject() throws JacksonException
     {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
@@ -535,16 +541,18 @@ public class YAMLGenerator extends GeneratorBase
             _objectId = null;
         }
         _emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
+        return this;
     }
 
     @Override
-    public final void writeStartObject(Object currValue) throws JacksonException {
+    public JsonGenerator writeStartObject(Object currValue) throws JacksonException {
         writeStartObject();
         assignCurrentValue(currValue);
+        return this;
     }
 
     @Override
-    public final void writeEndObject() throws JacksonException
+    public JsonGenerator writeEndObject() throws JacksonException
     {
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not Object but "+_streamWriteContext.typeDesc());
@@ -553,6 +561,7 @@ public class YAMLGenerator extends GeneratorBase
         _typeId = null;
         _streamWriteContext = _streamWriteContext.getParent();
         _emit(new MappingEndEvent());
+        return this;
     }
 
     /*
@@ -562,18 +571,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws JacksonException
+    public JsonGenerator writeString(String text) throws JacksonException
     {
         if (text == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write String value");
 
         // [dataformats-text#50]: Empty String always quoted
         if (text.isEmpty()) {
             _writeScalar(text, "string", STYLE_QUOTED);
-            return;
+            return this;
         }
 
         ScalarStyle style;
@@ -598,33 +606,34 @@ public class YAMLGenerator extends GeneratorBase
             }
         }
         _writeScalar(text, "string", style);
+        return this;
     }
 
     @Override
-    public void writeString(char[] text, int offset, int len) throws JacksonException
+    public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException
     {
-        writeString(new String(text, offset, len));
+        return writeString(new String(text, offset, len));
     }
 
     @Override
-    public final void writeString(SerializableString sstr)
+    public JsonGenerator writeString(SerializableString sstr)
         throws JacksonException
     {
-        writeString(sstr.toString());
+        return writeString(sstr.toString());
     }
 
     @Override
-    public void writeRawUTF8String(byte[] text, int offset, int len)
+    public JsonGenerator writeRawUTF8String(byte[] text, int offset, int len)
         throws JacksonException
     {
-        _reportUnsupportedOperation();
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public final void writeUTF8String(byte[] text, int offset, int len)
+    public JsonGenerator writeUTF8String(byte[] text, int offset, int len)
         throws JacksonException
     {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -634,38 +643,38 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeRaw(String text) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRaw(String text) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(String text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(char[] text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRaw(char c) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRaw(char c) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(String text) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRawValue(String text) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(String text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     @Override
-    public void writeRawValue(char[] text, int offset, int len) throws JacksonException {
-        _reportUnsupportedOperation();
+    public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
+        return _reportUnsupportedOperation();
     }
 
     /*
@@ -675,17 +684,17 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws JacksonException
+    public JsonGenerator writeBinary(Base64Variant b64variant, byte[] data, int offset, int len) throws JacksonException
     {
         if (data == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write Binary value");
         if (offset > 0 || (offset+len) != data.length) {
             data = Arrays.copyOfRange(data, offset, offset+len);
         }
         _writeScalarBinary(b64variant, data);
+        return this;
     }
 
     /*
@@ -695,90 +704,95 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeBoolean(boolean state) throws JacksonException
+    public JsonGenerator writeBoolean(boolean state) throws JacksonException
     {
         _verifyValueWrite("write boolean value");
         _writeScalar(state ? "true" : "false", "bool", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
+    public JsonGenerator writeNumber(short v) throws JacksonException {
+        return writeNumber((int) v);
     }
 
     @Override
-    public void writeNumber(int v) throws JacksonException
+    public JsonGenerator writeNumber(int v) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(v), "int", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(long l) throws JacksonException
+    public JsonGenerator writeNumber(long l) throws JacksonException
     {
         // First: maybe 32 bits is enough?
         if (l <= MAX_INT_AS_LONG && l >= MIN_INT_AS_LONG) {
-            writeNumber((int) l);
-            return;
+            return writeNumber((int) l);
         }
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(l), "long", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(BigInteger v) throws JacksonException
+    public JsonGenerator writeNumber(BigInteger v) throws JacksonException
     {
         if (v == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(v.toString()), "java.math.BigInteger", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(double d) throws JacksonException
+    public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(float f) throws JacksonException
+    public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
         _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(BigDecimal dec) throws JacksonException
+    public JsonGenerator writeNumber(BigDecimal dec) throws JacksonException
     {
         if (dec == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeScalar(str, "java.math.BigDecimal", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNumber(String encodedValue) throws JacksonException
+    public JsonGenerator writeNumber(String encodedValue) throws JacksonException
     {
         if (encodedValue == null) {
-            writeNull();
-            return;
+            return writeNull();
         }
         _verifyValueWrite("write number");
         _writeScalar(encodedValue, "number", STYLE_SCALAR);
+        return this;
     }
 
     @Override
-    public void writeNull() throws JacksonException
+    public JsonGenerator writeNull() throws JacksonException
     {
         _verifyValueWrite("write null value");
         // no real type for this, is there?
         _writeScalar("null", "object", STYLE_SCALAR);
+        return this;
     }
 
     /*
@@ -802,28 +816,31 @@ public class YAMLGenerator extends GeneratorBase
     }
 
     @Override
-    public void writeTypeId(Object id)
+    public JsonGenerator writeTypeId(Object id)
         throws JacksonException
     {
         // should we verify there's no preceding type id?
         _typeId = String.valueOf(id);
+        return this;
     }
 
     @Override
-    public void writeObjectRef(Object id)
+    public JsonGenerator writeObjectRef(Object id)
         throws JacksonException
     {
         _verifyValueWrite("write Object reference");
         AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
         _emit(evt);
+        return this;
     }
 
     @Override
-    public void writeObjectId(Object id)
+    public JsonGenerator writeObjectId(Object id)
         throws JacksonException
     {
         // should we verify there's no preceding id?
         _objectId = (id == null) ? null : String.valueOf(id);
+        return this;
     }
 
     /*
