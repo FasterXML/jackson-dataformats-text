@@ -391,8 +391,7 @@ public final class UTF8Reader
      * @return True, if enough bytes were read to allow decoding of at least
      *   one full character; false if EOF was encountered instead.
      */
-    private boolean loadMore(int available)
-        throws IOException
+    private boolean loadMore(int available) throws IOException
     {
         _byteCount += (_inputEnd - available);
 
@@ -400,7 +399,17 @@ public final class UTF8Reader
         if (available > 0) {
             if (_inputPtr > 0) {
                 if (!canModifyBuffer()) {
-                    throw new IllegalStateException("Need to move partially decoded character; buffer not modifiable");
+                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
+                    //     characters; uncovered by:
+                    //
+                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+                    //
+                    // and need to be reported as IOException
+                    if (_inputSource == null) {
+                        throw new IOException(String.format(
+"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
+available));
+                    }
                 }
                 for (int i = 0; i < available; ++i) {
                     _inputBuffer[i] = _inputBuffer[_inputPtr+i];
@@ -444,10 +453,9 @@ public final class UTF8Reader
             return true;
         }
 
-        /* And then we'll just need to load up to that many bytes;
-         * if an EOF is hit, that'll be an error. But we need not do
-         * actual decoding here, just load enough bytes.
-         */
+        // And then we'll just need to load up to that many bytes;
+        // if an EOF is hit, that'll be an error. But we need not do
+        // actual decoding here, just load enough bytes.
         while ((_inputPtr + needed) > _inputEnd) {
             int count = readBytesAt(_inputEnd);
             if (count < 1) {

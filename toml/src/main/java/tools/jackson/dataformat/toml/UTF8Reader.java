@@ -101,6 +101,15 @@ public final class UTF8Reader
         }
     }
 
+    /**
+     * Method that can be used to see if we can actually modify the
+     * underlying buffer. This is the case if we are managing the buffer,
+     * but not if it was just given to us.
+     */
+    protected final boolean canModifyBuffer() {
+        return (_ioContext != null);
+    }
+
     /*
     /**********************************************************************
     /* Reader API
@@ -171,6 +180,10 @@ public final class UTF8Reader
             //   where content ends with UTF-8 multibyte characters... but
             //   this has existed in multiple incarnations for over a decade
             //   so... maybe I thought it all through?
+            // 15-Aug-2022, tatu: Guess again, former me! It IS a problem, as per
+            //
+            // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+            //
             if (left < 4) {
                 // Need to load more?
                 if (left < 1 || _inputBuffer[_inputPtr] < 0) {
@@ -310,15 +323,24 @@ public final class UTF8Reader
      */
     private boolean loadMore(int available) throws IOException
     {
-        if (_inputSource == null) {
-            return false;
-        }
-
         _byteCount += (_inputEnd - available);
 
         // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
             if (_inputPtr > 0) {
+                if (!canModifyBuffer()) {
+                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
+                    //     characters; uncovered by:
+                    //
+                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+                    //
+                    // and need to be reported as IOException
+                    if (_inputSource == null) {
+                        throw new IOException(String.format(
+"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
+available));
+                    }
+                }
                 for (int i = 0; i < available; ++i) {
                     _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                 }
@@ -326,11 +348,10 @@ public final class UTF8Reader
                 _inputEnd = available;
             }
         } else {
-            // Ok; here we can actually reasonably expect an EOF,
-            // so let's do a separate read right away:
+            // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
             int count = readBytes();
             if (count < 1) {
-                freeBuffers(); // recycle eagerly
+                freeBuffers(); // to help GC?
                 if (count < 0) { // -1
                     return false;
                 }
@@ -357,9 +378,9 @@ public final class UTF8Reader
             // 4 bytes; double-char BS, with surrogates and all...
             needed = 4;
         } else {
-            reportInvalidInitial(c & 0xFF, 0);
-            // never gets here... but compiler whines without this:
-            needed = 1;
+            // 25-Aug-2016, tatu: As per [dataformat-csv#132], let's not throw
+            //    exception from here but let caller handle
+            return true;
         }
 
         // And then we'll just need to load up to that many bytes;
