@@ -503,9 +503,10 @@ public class CsvDecoder
     }
 
     /**
-     * optionally skip lines that are empty or are comments, depending on the feature activated in the parser
+     * Optionally skip lines that are empty or are comments, depending on the feature activated in the parser
+     *
      * @return false if the end of input was reached
-     * @throws IOException
+     *
      * @since 2.10.1
      */
     public boolean skipLinesWhenNeeded() throws IOException {

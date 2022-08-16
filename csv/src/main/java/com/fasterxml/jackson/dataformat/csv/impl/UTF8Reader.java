@@ -400,7 +400,17 @@ public final class UTF8Reader
         if (available > 0) {
             if (_inputPtr > 0) {
                 if (!canModifyBuffer()) {
-                    throw new IllegalStateException("Need to move partially decoded character; buffer not modifiable");
+                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
+                    //     characters; uncovered by:
+                    //
+                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+                    //
+                    // and need to be reported as IOException
+                    if (_inputSource == null) {
+                        throw new IOException(String.format(
+"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
+available));
+                    }
                 }
                 for (int i = 0; i < available; ++i) {
                     _inputBuffer[i] = _inputBuffer[_inputPtr+i];
