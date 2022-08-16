@@ -391,8 +391,7 @@ public final class UTF8Reader
      * @return True, if enough bytes were read to allow decoding of at least
      *   one full character; false if EOF was encountered instead.
      */
-    private boolean loadMore(int available)
-        throws IOException
+    private boolean loadMore(int available) throws IOException
     {
         _byteCount += (_inputEnd - available);
 
@@ -454,10 +453,9 @@ available));
             return true;
         }
 
-        /* And then we'll just need to load up to that many bytes;
-         * if an EOF is hit, that'll be an error. But we need not do
-         * actual decoding here, just load enough bytes.
-         */
+        // And then we'll just need to load up to that many bytes;
+        // if an EOF is hit, that'll be an error. But we need not do
+        // actual decoding here, just load enough bytes.
         while ((_inputPtr + needed) > _inputEnd) {
             int count = readBytesAt(_inputEnd);
             if (count < 1) {
