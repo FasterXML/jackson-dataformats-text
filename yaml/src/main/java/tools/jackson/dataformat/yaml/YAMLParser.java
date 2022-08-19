@@ -513,7 +513,8 @@ public class YAMLParser extends ParserBase
             if (typeTag.startsWith("tag:yaml.org,2002:")) {
                 typeTag = typeTag.substring("tag:yaml.org,2002:".length());
                 if (typeTag.contains(",")) {
-                    typeTag = typeTag.split(",")[0];
+                    final String[] tags = typeTag.split(",");
+                    typeTag = (tags.length == 0) ? "" : tags[0];
                 }
             }
             // [dataformats-text#39]: support binary type

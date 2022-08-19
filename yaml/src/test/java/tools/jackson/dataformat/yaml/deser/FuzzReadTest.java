@@ -25,6 +25,20 @@ public class FuzzReadTest extends ModuleTestBase
         }
     }
 
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50339
+    public void testTagDecoding50339() throws Exception
+    {
+        final String DOC = "[!!,";
+        try {
+            MAPPER.readTree(DOC);
+            fail("Should not pass");
+        } catch (IOException e) {
+            // 19-Aug-2022, tatu: The actual error we get is from SnakeYAML
+            //    and might change. Should try matching it at all?
+            verifyException(e, "while parsing");
+        }
+    }
+
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
     public void testNumberdecoding50407() throws Exception
     {
