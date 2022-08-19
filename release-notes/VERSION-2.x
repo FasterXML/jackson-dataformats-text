@@ -20,6 +20,7 @@ Active Maintainers:
  (contributed by Falk H)
 #314: (csv) Add fast floating-point parsing, generation support
  (contributed by @pjfanning)
+* (yaml) Fixes to number decoding based on oss-fuzz findings
 
 No changes since 2.13
 
