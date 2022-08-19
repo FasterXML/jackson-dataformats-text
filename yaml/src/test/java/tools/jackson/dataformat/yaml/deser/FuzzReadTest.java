@@ -1,7 +1,6 @@
 package tools.jackson.dataformat.yaml.deser;
 
-import tools.jackson.core.JacksonException;
-
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.ObjectMapper;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
@@ -20,7 +19,7 @@ public class FuzzReadTest extends ModuleTestBase
         try {
             MAPPER.readTree(INPUT);
             fail("Should not pass");
-        } catch (JacksonException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
         }
@@ -45,7 +44,7 @@ public class FuzzReadTest extends ModuleTestBase
         try {
             MAPPER.readTree(doc);
             fail("Should not pass");
-        } catch (IOException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Invalid base-");
         }
     }

@@ -569,7 +569,7 @@ public class YAMLParser extends ParserBase
     }
 
     protected JsonToken _decodeNumberScalar(String value, final int len)
-        throws IOException
+        throws JacksonException
     {
         // 05-May-2012, tatu: Turns out this is a hot spot; so let's write it
         //  out and avoid regexp overhead...
@@ -656,10 +656,9 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_STRING;
     }
 
-    // @since 2.12
     protected JsonToken _decodeNumberIntBinary(final String value, int i, final int origLen,
             boolean negative)
-        throws IOException
+        throws JacksonException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
@@ -680,10 +679,9 @@ public class YAMLParser extends ParserBase
         return _decodeFromBigInteger(_decodeBigInt(cleansed, 2), negative);
     }
 
-    // @since 2.12
     protected JsonToken _decodeNumberIntOctal(final String value, int i, final int origLen,
             boolean negative)
-        throws IOException
+        throws JacksonException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
@@ -703,10 +701,9 @@ public class YAMLParser extends ParserBase
         return _decodeFromBigInteger(_decodeBigInt(cleansed, 8), negative);
     }
 
-    // @since 2.12
     protected JsonToken _decodeNumberIntHex(final String value, int i, final int origLen,
             boolean negative)
-        throws IOException
+        throws JacksonException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
@@ -764,8 +761,7 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_NUMBER_INT;
     }
 
-    // @since 2.14
-    private int _decodeInt(String str, int base) throws IOException {
+    private int _decodeInt(String str, int base) throws JacksonException {
         try {
             return Integer.parseInt(str, base);
         } catch (NumberFormatException e) {
@@ -773,8 +769,7 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    // @since 2.14
-    private long _decodeLong(String str, int base) throws IOException {
+    private long _decodeLong(String str, int base) throws JacksonException {
         try {
             return Long.parseLong(str, base);
         } catch (NumberFormatException e) {
@@ -782,8 +777,7 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    // @since 2.14
-    private BigInteger _decodeBigInt(String str, int base) throws IOException {
+    private BigInteger _decodeBigInt(String str, int base) throws JacksonException {
         try {
             return new BigInteger(str, base);
         } catch (NumberFormatException e) {
@@ -791,8 +785,7 @@ public class YAMLParser extends ParserBase
         }
     }
 
-    // @since 2.14
-    private <T> T _reportInvalidNumber(String str, int base, Exception e) throws IOException {
+    private <T> T _reportInvalidNumber(String str, int base, Exception e) throws JacksonException {
         _reportError(String.format("Invalid base-%d number ('%s'), problem: %s",
                 base, str, e.getMessage()));
         return null; // never gets here
