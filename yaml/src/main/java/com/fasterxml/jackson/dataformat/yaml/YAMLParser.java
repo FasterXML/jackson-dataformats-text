@@ -641,6 +641,7 @@ public class YAMLParser extends ParserBase
     }
 
     protected JsonToken _decodeNumberScalar(String value, final int len)
+        throws IOException
     {
         // 05-May-2012, tatu: Turns out this is a hot spot; so let's write it
         //  out and avoid regexp overhead...
@@ -730,12 +731,13 @@ public class YAMLParser extends ParserBase
     // @since 2.12
     protected JsonToken _decodeNumberIntBinary(final String value, int i, final int origLen,
             boolean negative)
+        throws IOException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
 
         if (digitLen <= 31) {
-            int v = Integer.parseInt(cleansed, 2);
+            int v = _decodeInt(cleansed, 2);
             if (negative) {
                 v = -v;
             }
@@ -744,21 +746,22 @@ public class YAMLParser extends ParserBase
             return JsonToken.VALUE_NUMBER_INT;
         }
         if (digitLen <= 63) {
-            return _decodeFromLong(Long.parseLong(cleansed, 2), negative,
+            return _decodeFromLong(_decodeLong(cleansed, 2), negative,
                     (digitLen == 32));
         }
-        return _decodeFromBigInteger(new BigInteger(cleansed, 2), negative);
+        return _decodeFromBigInteger(_decodeBigInt(cleansed, 2), negative);
     }
 
     // @since 2.12
     protected JsonToken _decodeNumberIntOctal(final String value, int i, final int origLen,
             boolean negative)
+        throws IOException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
 
         if (digitLen <= 10) { // 30 bits
-            int v = Integer.parseInt(cleansed, 8);
+            int v = _decodeInt(cleansed, 8);
             if (negative) {
                 v = -v;
             }
@@ -767,20 +770,21 @@ public class YAMLParser extends ParserBase
             return JsonToken.VALUE_NUMBER_INT;
         }
         if (digitLen <= 21) { // 63 bits
-            return _decodeFromLong(Long.parseLong(cleansed, 8), negative, false);
+            return _decodeFromLong(_decodeLong(cleansed, 8), negative, false);
         }
-        return _decodeFromBigInteger(new BigInteger(cleansed, 8), negative);
+        return _decodeFromBigInteger(_decodeBigInt(cleansed, 8), negative);
     }
 
     // @since 2.12
     protected JsonToken _decodeNumberIntHex(final String value, int i, final int origLen,
             boolean negative)
+        throws IOException
     {
         final String cleansed = _cleanUnderscores(value, i, origLen);
         int digitLen = cleansed.length();
 
         if (digitLen <= 7) { // 28 bits
-            int v = Integer.parseInt(cleansed, 16);
+            int v = _decodeInt(cleansed, 16);
             if (negative) {
                 v = -v;
             }
@@ -789,10 +793,10 @@ public class YAMLParser extends ParserBase
             return JsonToken.VALUE_NUMBER_INT;
         }
         if (digitLen <= 15) { // 60 bits
-            return _decodeFromLong(Long.parseLong(cleansed, 16), negative,
+            return _decodeFromLong(_decodeLong(cleansed, 16), negative,
                     (digitLen == 8));
         }
-        return _decodeFromBigInteger(new BigInteger(cleansed, 16), negative);
+        return _decodeFromBigInteger(_decodeBigInt(cleansed, 16), negative);
     }
 
     private JsonToken _decodeFromLong(long unsignedValue, boolean negative,
@@ -832,6 +836,40 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_NUMBER_INT;
     }
 
+    // @since 2.14
+    private int _decodeInt(String str, int base) throws IOException {
+        try {
+            return Integer.parseInt(str, base);
+        } catch (NumberFormatException e) {
+            return _reportInvalidNumber(str, base, e);
+        }
+    }
+
+    // @since 2.14
+    private long _decodeLong(String str, int base) throws IOException {
+        try {
+            return Long.parseLong(str, base);
+        } catch (NumberFormatException e) {
+            return _reportInvalidNumber(str, base, e);
+        }
+    }
+
+    // @since 2.14
+    private BigInteger _decodeBigInt(String str, int base) throws IOException {
+        try {
+            return new BigInteger(str, base);
+        } catch (NumberFormatException e) {
+            return _reportInvalidNumber(str, base, e);
+        }
+    }
+
+    // @since 2.14
+    private <T> T _reportInvalidNumber(String str, int base, Exception e) throws IOException {
+        _reportError(String.format("Invalid base-%d number ('%s'), problem: %s",
+                base, str, e.getMessage()));
+        return null; // never gets here
+    }
+    
     /*
     /**********************************************************
     /* String value handling
