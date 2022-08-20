@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.VersionUtil;
@@ -321,8 +322,12 @@ class Parser {
         } else if (text.endsWith("inf")) {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
-            BigDecimal dec = NumberInput.parseBigDecimal(text);
-            return factory.numberNode(dec);
+            try {
+                BigDecimal dec = NumberInput.parseBigDecimal(text);
+                return factory.numberNode(dec);
+            } catch (NumberFormatException e) {
+                throw errorContext.atPosition(lexer).invalidNumber(e, text);
+            }
         }
     }
 

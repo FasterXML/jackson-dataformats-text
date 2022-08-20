@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.junit.Assert;
@@ -26,6 +27,20 @@ public class FuzzReadTest
         } catch (IOException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50039    
+    @Test
+    public void testBigDecimalOverflow() throws Exception
+    {
+        String INPUT = "q=8E8188888888";
+        try {
+            MAPPER.readTree(INPUT);
+            Assert.fail("Should not pass");
+        } catch (IOException e) {
+            verifyException(e, "Invalid number");
+            verifyException(e, "8E8188888888");
         }
     }
 
