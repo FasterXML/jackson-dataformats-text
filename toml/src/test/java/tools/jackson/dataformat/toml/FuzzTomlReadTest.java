@@ -9,11 +9,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Collection of OSS-Fuzz found issues.
+ * Collection of OSS-Fuzz found issues for TOML format module.
  */
-public class FuzzReadTest
+public class FuzzTomlReadTest
 {
-    private final ObjectMapper MAPPER = new TomlMapper();
+    private final ObjectMapper TOML_MAPPER = new TomlMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     @Test
@@ -21,7 +21,7 @@ public class FuzzReadTest
     {
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
-            MAPPER.readTree(INPUT);
+            TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
         } catch (JacksonException e) {
             verifyException(e, "End-of-input after first 1 byte");
@@ -35,7 +35,7 @@ public class FuzzReadTest
     {
         String INPUT = "q=8E8188888888";
         try {
-            MAPPER.readTree(INPUT);
+            TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
         } catch (JacksonException e) {
             verifyException(e, "Invalid number");
