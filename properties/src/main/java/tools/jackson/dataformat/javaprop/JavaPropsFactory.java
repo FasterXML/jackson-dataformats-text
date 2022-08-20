@@ -5,6 +5,7 @@ import java.util.*;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
@@ -308,9 +309,16 @@ public class JavaPropsFactory
             } else {
                 props.load(r0);
             }
+        } catch (IllegalArgumentException e) {
+            _reportReadException("Invalid content, problem: "+e.getMessage(), e);
         } catch (IOException e) {
             throw _wrapIOFailure(e);
         }
         return props;
+    }
+
+    protected <T> T _reportReadException(String msg, Exception rootCause)
+    {
+        throw new StreamReadException((JsonParser) null, msg, rootCause);
     }
 }
