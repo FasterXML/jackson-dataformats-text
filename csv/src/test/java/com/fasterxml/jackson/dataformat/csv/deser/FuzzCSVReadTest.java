@@ -5,18 +5,18 @@ import java.io.IOException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 
 /**
- * Collection of OSS-Fuzz found issues.
+ * Collection of OSS-Fuzz found issues for CSV format module.
  */
-public class FuzzReadTest extends StreamingCSVReadTest
+public class FuzzCSVReadTest extends StreamingCSVReadTest
 {
-    private final CsvMapper MAPPER = mapperForCsv();
+    private final CsvMapper CSV_MAPPER = mapperForCsv();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     public void testUTF8Decoding50036() throws Exception
     {
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
-            MAPPER.readTree(INPUT);
+            CSV_MAPPER.readTree(INPUT);
             fail("Should not pass");
         } catch (IOException e) {
             verifyException(e, "End-of-input after first 1 byte");

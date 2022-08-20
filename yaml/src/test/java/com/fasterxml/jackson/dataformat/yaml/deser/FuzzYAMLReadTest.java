@@ -6,18 +6,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 /**
- * Collection of OSS-Fuzz found issues.
+ * Collection of OSS-Fuzz found issues for YAML format module.
  */
-public class FuzzReadTest extends ModuleTestBase
+public class FuzzYAMLReadTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = newObjectMapper();
+    private final ObjectMapper YAML_MAPPER = newObjectMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     public void testUTF8Decoding50036() throws Exception
     {
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
-            MAPPER.readTree(INPUT);
+            YAML_MAPPER.readTree(INPUT);
             fail("Should not pass");
         } catch (IOException e) {
             verifyException(e, "End-of-input after first 1 byte");
@@ -30,7 +30,7 @@ public class FuzzReadTest extends ModuleTestBase
     {
         final String DOC = "[!!,";
         try {
-            MAPPER.readTree(DOC);
+            YAML_MAPPER.readTree(DOC);
             fail("Should not pass");
         } catch (IOException e) {
             // 19-Aug-2022, tatu: The actual error we get is from SnakeYAML
@@ -56,7 +56,7 @@ public class FuzzReadTest extends ModuleTestBase
 
     private void _testNumberdecoding50407(String doc) {
         try {
-            MAPPER.readTree(doc);
+            YAML_MAPPER.readTree(doc);
             fail("Should not pass");
         } catch (IOException e) {
             verifyException(e, "Invalid base-");
