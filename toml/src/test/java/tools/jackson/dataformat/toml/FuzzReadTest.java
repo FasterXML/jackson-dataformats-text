@@ -29,6 +29,20 @@ public class FuzzReadTest
         }
     }
 
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50039    
+    @Test
+    public void testBigDecimalOverflow() throws Exception
+    {
+        String INPUT = "q=8E8188888888";
+        try {
+            MAPPER.readTree(INPUT);
+            Assert.fail("Should not pass");
+        } catch (JacksonException e) {
+            verifyException(e, "Invalid number");
+            verifyException(e, "8E8188888888");
+        }
+    }
+
     protected void verifyException(Throwable e, String... matches)
     {
         String msg = e.getMessage();

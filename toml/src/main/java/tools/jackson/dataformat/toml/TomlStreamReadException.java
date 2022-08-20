@@ -66,6 +66,11 @@ public class TomlStreamReadException
                 return new TomlStreamReadException(parser,
                         "Number out of bounds", location, cause);
             }
+
+            TomlStreamReadException invalidNumber(NumberFormatException cause, String value) {
+                return new TomlStreamReadException(parser,
+                        "Invalid number representation ('"+value+"'), problem: "+cause.getMessage(), location, cause);
+            }
         }
     }
 }
