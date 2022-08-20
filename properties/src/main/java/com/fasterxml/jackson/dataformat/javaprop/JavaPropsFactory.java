@@ -352,6 +352,8 @@ public class JavaPropsFactory extends JsonFactory
         if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
             try (Reader r = r0) {
                 props.load(r);
+            } catch (IllegalArgumentException e) {
+                _reportReadException("Invalid content, problem: "+e.getMessage(), e);
             }
         } else {
             props.load(r0);
@@ -379,4 +381,11 @@ public class JavaPropsFactory extends JsonFactory
             System.out.printf("#%d: %s -> %s\n", i++, entry.getKey(), entry.getValue());
         }
     }*/
+
+    // @since 2.14
+    protected <T> T _reportReadException(String msg, Exception rootCause)
+        throws IOException
+    {
+        throw new JsonParseException((JsonParser) null, msg, rootCause);
+    }
 }
