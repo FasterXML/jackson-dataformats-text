@@ -16,6 +16,9 @@ Active Maintainers:
 
 2.14.0 (not yet released)
 
+#285: (csv) Missing columns from header line (compare to `CsvSchema`) not detected
+  when reordering columns (add `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS`)
+ (reported by Björn M)
 #297: (csv) CSV schema caching POJOs with different views
  (contributed by Falk H)
 #314: (csv) Add fast floating-point parsing, generation support

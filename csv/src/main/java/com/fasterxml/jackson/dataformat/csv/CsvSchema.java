@@ -927,7 +927,7 @@ public class CsvSchema
         if (_columns.length == 0) {
             _columnsByName = Collections.emptyMap();
         } else {
-            _columnsByName = new HashMap<String,Column>(4 + _columns.length);
+            _columnsByName = new LinkedHashMap<String,Column>(4 + _columns.length);
             for (Column c : _columns) {
                 _columnsByName.put(c.getName(), c);
             }
@@ -976,7 +976,7 @@ public class CsvSchema
         if (_columns.length == 0) {
             _columnsByName = Collections.emptyMap();
         } else {
-            _columnsByName = new HashMap<String,Column>(4 + _columns.length);
+            _columnsByName = new LinkedHashMap<String,Column>(4 + _columns.length);
             for (Column c : _columns) {
                 _columnsByName.put(c.getName(), c);
             }
@@ -1407,7 +1407,7 @@ public class CsvSchema
     /* Public API, extended; column access
     /**********************************************************************
      */
-    
+
     @Override
     public Iterator<Column> iterator() {
         return Arrays.asList(_columns).iterator();
@@ -1456,7 +1456,31 @@ public class CsvSchema
         }
         return _columnsByName.get(name);
     }
-    
+
+    /**
+     * Accessor for getting names of included columns, in the order they are
+     * included in the schema.
+     *
+     * @since 2.14
+     */
+    public List<String> getColumnNames() {
+        return (List<String>) getColumnNames(new ArrayList<String>(_columns.length));
+    }
+
+    /**
+     * Accessor for getting names of included columns, added in given
+     * {@code Collection}.
+     *
+     * @since 2.14
+     */
+    public Collection<String> getColumnNames(Collection<String> names) {
+        final int len = _columns.length;
+        for (int i = 0; i < len; ++i) {
+            names.add(_columns[i].getName());
+        }
+        return names;
+    }
+
     /**
      * Method for getting description of column definitions in
      * developer-readable form
