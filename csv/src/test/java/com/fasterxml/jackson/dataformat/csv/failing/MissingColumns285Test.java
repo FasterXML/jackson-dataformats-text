@@ -1,6 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 
@@ -13,12 +13,6 @@ import com.fasterxml.jackson.dataformat.csv.*;
  */
 public class MissingColumns285Test extends ModuleTestBase
 {
-    @JsonPropertyOrder({ "name", "age" })
-    static class Person {
-        public String name;
-        public int age;
-    }
-
     /*
     /**********************************************************************
     /* Test methods
@@ -32,9 +26,10 @@ public class MissingColumns285Test extends ModuleTestBase
     {
         CsvSchema csvSchema = CsvSchema.builder().setUseHeader(true).setReorderColumns(true)
                 .addColumn("name").addColumn("age").build();
-        final String CSV = "name\nRoger\n";
-        MappingIterator<Person> it = MAPPER
-                .readerFor(Person.class)
+        final String CSV = "name\n"
+                +"Roger\n";
+        MappingIterator<Map<String, Object>> it = MAPPER
+                .readerFor(Map.class)
                 .with(csvSchema)
                 .readValues(CSV);
         try {
