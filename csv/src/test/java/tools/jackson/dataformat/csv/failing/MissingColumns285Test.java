@@ -27,16 +27,17 @@ public class MissingColumns285Test extends ModuleTestBase
                 .addColumn("name").addColumn("age").build();
         final String CSV = "name\n"
                 +"Roger\n";
-        MappingIterator<Map<String, Object>> it = MAPPER
-                .readerFor(Map.class)
-                .with(csvSchema)
-                .readValues(CSV);
+        // Need to have it all inside try block since construction tries to read
+        // the first token
         try {
+            MappingIterator<Map<String, Object>> it = MAPPER
+                    .readerFor(Map.class)
+                    .with(csvSchema)
+                    .readValues(CSV);
             it.nextValue();
             fail("Should not pass with missing columns");
         } catch (CsvReadException e) {
-            verifyException(e, "Not enough column values");
-            verifyException(e, "expected 2, found 1");
+            verifyException(e, "Missing 1 header column: [\"age\"]");
         }
     }
 }

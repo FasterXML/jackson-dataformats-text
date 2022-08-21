@@ -5,6 +5,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.ParserMinimalBase;
@@ -104,13 +106,24 @@ public class CsvParser
         /**
          * Feature that allows failing (with a {@link CsvReadException}) in cases
          * where number of column values encountered is less than number of columns
-         * declared in active schema ("missing columns").
+         * declared in the active schema ("missing columns").
          *<p>
          * Note that this feature has precedence over {@link #INSERT_NULLS_FOR_MISSING_COLUMNS}
          *<p>
          * Feature is disabled by default.
          */
         FAIL_ON_MISSING_COLUMNS(false),
+
+        /**
+         * Feature that allows failing (with a {@link CsvReadException}) in cases
+         * where number of header columns encountered is less than number of columns
+         * declared in the active schema (if there is one).
+         *<p>
+         * Feature is enabled by default
+         *
+         * @since 2.14
+         */
+        FAIL_ON_MISSING_HEADER_COLUMNS(true),
 
         /**
          * Feature that allows "inserting" virtual key / `null` value pairs in case
@@ -712,7 +725,8 @@ public class CsvParser
                default schema based on the columns found in the header.
          */
 
-        if (_schema.size() > 0 && !_schema.reordersColumns()) {
+        final int schemaColumnCount = _schema.size();
+        if (schemaColumnCount > 0 && !_schema.reordersColumns()) {
             if (_schema.strictHeaders()) {
                 String name;
                 int ix = 0;
@@ -768,13 +782,24 @@ public class CsvParser
 
         // Ok: did we get any  columns?
         CsvSchema newSchema = builder.build();
-        int size = newSchema.size();
-        if (size < 2) { // 1 just because we may get 'empty' header name
-            String first = (size == 0) ? "" : newSchema.columnName(0).trim();
+        int newColumnCount = newSchema.size();
+        if (newColumnCount < 2) { // 1 just because we may get 'empty' header name
+            String first = (newColumnCount == 0) ? "" : newSchema.columnName(0).trim();
             if (first.length() == 0) {
                 _reportCsvReadError("Empty header line: can not bind data");
             }
         }
+        // [dataformats-text#285]: Are we missing something?
+        int diff = schemaColumnCount - newColumnCount;
+        if (diff > 0) {
+            Set<String> oldColumnNames = new LinkedHashSet<>();
+            _schema.getColumnNames(oldColumnNames);
+            oldColumnNames.removeAll(newSchema.getColumnNames());
+            _reportCsvMappingError(String.format("Missing %d header column%s: [\"%s\"]",
+                    diff, (diff == 1) ? "" : "s",
+                            String.join("\",\"", oldColumnNames)));
+        }
+
         // otherwise we will use what we got
         _setSchema(builder.build());
     }

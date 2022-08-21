@@ -144,8 +144,11 @@ Francesco Tumanischvili (frantuma@github)
  (2.11.1)
 
 Björn Michael (bjmi@github)
-* Reported #204: `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
+* Reported #204: (csv) `CsvParser.Feature.ALLOW_TRAILING_COMMA` doesn't work with header columns
  (2.11.2)
+* Reported #285: (csv) Missing columns from header line (compare to `CsvSchema`) not detected
+  when reordering columns (add `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS`)
+ (2.14.0)
 
 Jesper Nielsen (jn-asseco@github)
 * Requested #175: (yaml) Add `YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR`
