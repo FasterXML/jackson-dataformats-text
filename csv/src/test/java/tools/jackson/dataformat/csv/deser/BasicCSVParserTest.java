@@ -411,7 +411,7 @@ public class BasicCSVParserTest extends ModuleTestBase
             parser.nextToken();
             fail("Should have failed");
         } catch (StreamReadException e) {
-            verifyException(e, "Extra header d");
+            verifyException(e, "Extra header column \"d\"");
         }
         parser.close();
     }

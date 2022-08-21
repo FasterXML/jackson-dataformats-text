@@ -111,7 +111,7 @@ public class CsvParser
          * Feature is disabled by default.
          */
         FAIL_ON_MISSING_COLUMNS(false),
-        
+
         /**
          * Feature that allows "inserting" virtual key / `null` value pairs in case
          * a row contains fewer columns than declared by configured schema.
@@ -727,7 +727,7 @@ public class CsvParser
                 }
                 }
                 if ((name = _reader.nextString()) != null) {
-                    _reportError(String.format("Extra header %s", name));
+                    _reportError(String.format("Extra header column \"%s\"", name));
                 }
             } else {
                 int allowed = MAX_COLUMNS;
