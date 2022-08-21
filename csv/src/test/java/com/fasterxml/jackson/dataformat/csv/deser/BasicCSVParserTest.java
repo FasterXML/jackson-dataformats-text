@@ -413,7 +413,7 @@ public class BasicCSVParserTest extends ModuleTestBase
             parser.nextToken();
             fail("Should have failed");
         } catch (JsonProcessingException e) {
-            verifyException(e, "Extra header d");
+            verifyException(e, "Extra header column \"d\"");
         }
         parser.close();
     }
