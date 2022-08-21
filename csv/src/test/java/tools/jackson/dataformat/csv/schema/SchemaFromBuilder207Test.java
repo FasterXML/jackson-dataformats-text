@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.failing;
+package tools.jackson.dataformat.csv.schema;
 
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.dataformat.csv.CsvMapper;
