@@ -23,6 +23,8 @@ Active Maintainers:
  (contributed by Falk H)
 #314: (csv) Add fast floating-point parsing, generation support
  (contributed by @pjfanning)
+#328: (yaml) Update to SnakeYAML 1.31
+ (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
 No changes since 2.13
@@ -32,7 +34,7 @@ No changes since 2.13
 No changes since 2.13.2
 
 2.13.2 (06-Mar-2022)
-
+ 
 #303: (yaml) Update to SnakeYAML 1.30
  (suggested by PJ Fanning)
 #306: (yaml) Error when generating/serializing keys with multilines and colon
