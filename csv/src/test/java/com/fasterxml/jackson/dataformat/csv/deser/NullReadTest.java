@@ -23,7 +23,13 @@ public class NullReadTest extends ModuleTestBase
             prop3 = c;
         }
     }
-    
+
+    // [dataformats-text#330]: empty String as null
+    static class Row330 {
+        public Integer id;
+        public String value = "default";
+    }
+
     /*
     /**********************************************************************
     /* Test methods
@@ -134,5 +140,23 @@ public class NullReadTest extends ModuleTestBase
         assertNotNull(result);
         assertEquals("id", result.id);
         assertEquals("", result.desc);
+    }
+
+    // [dataformats-text#330]: empty String as null
+    public void testEmptyStringAsNull330() throws Exception
+    {
+        CsvSchema headerSchema = CsvSchema.emptySchema().withHeader();
+        final String DOC = "id,value\n"
+                + "1,\n";
+
+        MappingIterator<Row330> iterator = MAPPER
+                .readerFor(Row330.class)
+                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL)
+                .with(headerSchema)
+                .readValues(DOC);
+        Row330 row = iterator.next();
+
+        assertEquals(Integer.valueOf(1), row.id);
+        assertNull(row.value);
     }
 }
