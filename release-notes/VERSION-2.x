@@ -29,6 +29,11 @@ Active Maintainers:
 
 No changes since 2.13
 
+2.13.4 (not yet released)
+
+#329: (yaml) Update to SnakeYAML 1.31
+ (contributed by @pjfanning)
+
 2.13.3 (14-May-2022)
 
 No changes since 2.13.2
