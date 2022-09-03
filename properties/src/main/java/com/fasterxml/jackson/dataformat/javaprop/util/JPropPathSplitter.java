@@ -1,7 +1,5 @@
 package com.fasterxml.jackson.dataformat.javaprop.util;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
