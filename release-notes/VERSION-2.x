@@ -27,7 +27,7 @@ Active Maintainers:
  (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
-2.13.4 (not yet released)
+2.13.4 (03-Sep-2022)
 
 #329: (yaml) Update to SnakeYAML 1.31
  (contributed by @pjfanning)
