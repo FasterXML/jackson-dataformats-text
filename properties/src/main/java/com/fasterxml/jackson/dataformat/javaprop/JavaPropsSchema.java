@@ -64,6 +64,15 @@ public class JavaPropsSchema
     protected String _pathSeparator = ".";
 
     /**
+     * Default escape character to use for single character path separators
+     * , enabling the pathSeparator to be included in a segment.
+     * Note that this is only used if the path separator is a single character
+     * and the default value (backslash) is subject to the processing of backslashes
+     * by the JDK Properties.load method (i.e. two backslashes will be required in the properties file).
+     */
+    protected char _pathSeparatorEscapeChar = '\\';
+
+    /**
      * Default start marker for index access, if any; empty String may be used
      * to indicate no marker-based index detection should be made.
      *<p>
@@ -158,6 +167,7 @@ public class JavaPropsSchema
     public JavaPropsSchema(JavaPropsSchema base) {
         _firstArrayOffset = base._firstArrayOffset;
         _pathSeparator = base._pathSeparator;
+        _pathSeparatorEscapeChar = base._pathSeparatorEscapeChar;
         _indexMarker = base._indexMarker;
         _parseSimpleIndexes = base._parseSimpleIndexes;
         _writeIndexUsingMarkers = base._writeIndexUsingMarkers;
@@ -208,6 +218,19 @@ public class JavaPropsSchema
         }
         JavaPropsSchema s = new JavaPropsSchema(this);
         s._pathSeparator = v;
+        return s;
+    }
+
+    /**
+     * Mutant factory method for constructing a new instance with
+     * specified path separator escape; default being backslash ("\").
+     */
+    public JavaPropsSchema withPathSeparatorEscapeChar(char v) {
+        if (_equals(v, _pathSeparator)) {
+            return this;
+        }
+        JavaPropsSchema s = new JavaPropsSchema(this);
+        s._pathSeparatorEscapeChar = v;
         return s;
     }
 
@@ -396,9 +419,10 @@ public class JavaPropsSchema
         return _pathSeparator;
     }
 
-    /**
-     * @since 2.10
-     */
+    public char pathSeparatorEscapeChar() {
+        return _pathSeparatorEscapeChar;
+    }
+
     public String prefix() {
         return _prefix;
     }

@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop.util;
 
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,7 +49,7 @@ public abstract class JPropPathSplitter
         }
         // otherwise it's still quite simple
         if (sep.length() == 1) {
-            return new CharPathOnlySplitter(sep.charAt(0), schema.parseSimpleIndexes());
+            return new CharPathOnlySplitter(sep.charAt(0), schema.pathSeparatorEscapeChar(), schema.parseSimpleIndexes());
         }
         return new StringPathOnlySplitter(sep, schema.parseSimpleIndexes());
     }
@@ -139,12 +141,14 @@ public abstract class JPropPathSplitter
     public static class CharPathOnlySplitter extends JPropPathSplitter
     {
         protected final char _pathSeparatorChar;
+        protected final char _escapeChar;
 
-        public CharPathOnlySplitter(char sepChar, boolean useIndex)
+        public CharPathOnlySplitter(char sepChar, char escapeChar, boolean useIndex)
         {
             super(useIndex);
             _pathSeparatorChar = sepChar;
-        }
+            _escapeChar = escapeChar;
+        }        
 
         @Override
         public JPropNode splitAndAdd(JPropNode parent,
@@ -157,15 +161,56 @@ public abstract class JPropPathSplitter
 
             while ((ix = key.indexOf(_pathSeparatorChar, start)) >= start) {
                 if (ix > start) { // segment before separator
+                    if (key.charAt(ix - 1) == _escapeChar) { //potentially escaped, so process slowly
+                      return _continueWithEscapes(curr, key, start, value);
+                    }
                     String segment = key.substring(start, ix);
                     curr = _addSegment(curr, segment);
                 }
                 start = ix + 1;
-                if (start == key.length()) {
+                if (start == keyLen) {
                     break;
                 }
             }
             return _lastSegment(curr, key, start, keyLen).setValue(value);
+        }
+        
+        // Working character by character to handle escapes is slower 
+        // than using indexOf, so only do it if we have an escape char 
+        // before the path separator char.
+        // Note that this resets back to the previous start, so one segment 
+        // is scanned twice.
+        private JPropNode _continueWithEscapes(JPropNode parent, String key, int start, String value) {
+            JPropNode curr = parent;
+          
+            int keylen = key.length();
+            boolean esc = false;
+            
+            StringBuilder segment = new StringBuilder();
+            
+            for (int ix = start; ix < keylen; ++ix) {
+              int cc = key.charAt(ix);
+              if (cc ==_escapeChar) {
+                esc = !esc;  
+              } else if (cc == _pathSeparatorChar) {
+                if (esc) {
+                  segment.append(key, start, ix - 1);
+                  segment.append((char) cc);
+                  start = ix + 1;
+                  esc = false;
+                } else {
+                  segment.append(key, start, ix);
+                  curr = _addSegment(curr, segment.toString());
+                  segment = new StringBuilder();
+                }
+              } else if (esc) {
+                esc = false;
+              }             
+            }
+            segment.append(key, start, keylen);
+            curr = _addSegment(curr, segment.toString()).setValue(value);
+            
+            return curr;            
         }
     }
 

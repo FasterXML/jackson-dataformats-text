@@ -25,13 +25,19 @@ public class MapParsingTest extends ModuleTestBase
         final String INPUT = "map=first\n"
                 +"map.b=second\n"
                 +"map.xyz=third\n"
+                +"map.ab\\\\.c=fourth\n"
+                +"map.ab\\\\cd\\\\.ef\\\\.gh\\\\\\\\ij=fifth\n"
+                +"map.\\\\.=sixth\n"
                 ;
         MapWrapper w = MAPPER.readValue(INPUT, MapWrapper.class);
         assertNotNull(w.map);
-        assertEquals(3, w.map.size());
+        assertEquals(6, w.map.size());
         assertEquals("first", w.map.get(""));
         assertEquals("second", w.map.get("b"));
         assertEquals("third", w.map.get("xyz"));
+        assertEquals("fourth", w.map.get("ab.c"));
+        assertEquals("fifth", w.map.get("ab\\cd.ef.gh\\\\ij"));
+        assertEquals("sixth", w.map.get("."));
     }
 
 }
