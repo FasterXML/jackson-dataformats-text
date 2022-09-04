@@ -182,28 +182,35 @@ public abstract class JPropPathSplitter
             JPropNode curr = parent;
           
             int keylen = key.length();
-            boolean esc = false;
+            int escCount = 0;
             
             StringBuilder segment = new StringBuilder();
             
             for (int ix = start; ix < keylen; ++ix) {
-              int cc = key.charAt(ix);
-              if (cc ==_escapeChar) {
-                esc = !esc;  
-              } else if (cc == _pathSeparatorChar) {
-                if (esc) {
-                  segment.append(key, start, ix - 1);
-                  segment.append((char) cc);
-                  start = ix + 1;
-                  esc = false;
-                } else {
-                  segment.append(key, start, ix);
-                  curr = _addSegment(curr, segment.toString());
-                  segment = new StringBuilder();
-                }
-              } else if (esc) {
-                esc = false;
-              }             
+                int cc = key.charAt(ix);
+                if (cc ==_escapeChar) {
+                    escCount++;  
+                } else if (cc == _pathSeparatorChar) {
+                    if (escCount > 0) {
+                        segment.append(key, start, ix - ((escCount + 1) >> 1));
+                        if (escCount % 2 == 0) {
+                            curr = _addSegment(curr, segment.toString());
+                            segment = new StringBuilder();
+                            start = ix + 1;
+                        } else {
+                            segment.append((char) cc);
+                            start = ix + 1;
+                            escCount = 0;
+                        }
+                    } else {
+                        segment.append(key, start, ix);
+                        curr = _addSegment(curr, segment.toString());
+                        segment = new StringBuilder();
+                        start = ix + 1;
+                    }
+                } else if (escCount > 0) {
+                    escCount = 0;
+                }             
             }
             segment.append(key, start, keylen);
             curr = _addSegment(curr, segment.toString()).setValue(value);

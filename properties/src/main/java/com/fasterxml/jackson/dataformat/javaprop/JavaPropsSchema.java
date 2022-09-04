@@ -70,7 +70,7 @@ public class JavaPropsSchema
      * and the default value (backslash) is subject to the processing of backslashes
      * by the JDK Properties.load method (i.e. two backslashes will be required in the properties file).
      */
-    protected char _pathSeparatorEscapeChar = '\\';
+    protected char _pathSeparatorEscapeChar = '\0';
 
     /**
      * Default start marker for index access, if any; empty String may be used
@@ -223,7 +223,11 @@ public class JavaPropsSchema
 
     /**
      * Mutant factory method for constructing a new instance with
-     * specified path separator escape; default being backslash ("\").
+     * specified path separator escape; default being null ('\0') which
+     * should effectively disable escape processing.
+     * Any escape character may be used, backslash ('\\') is the most obvious candidate
+     * but be aware that the JDK Properties loader will dedupe all backslash characters
+     * before the JavaPropsMapper gets to see them.
      */
     public JavaPropsSchema withPathSeparatorEscapeChar(char v) {
         if (_equals(v, _pathSeparator)) {
