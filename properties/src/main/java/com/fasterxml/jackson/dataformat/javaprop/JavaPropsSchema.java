@@ -66,9 +66,26 @@ public class JavaPropsSchema
     /**
      * Default escape character to use for single character path separators
      * , enabling the pathSeparator to be included in a segment.
-     * Note that this is only used if the path separator is a single character
-     * and the default value (backslash) is subject to the processing of backslashes
-     * by the JDK Properties.load method (i.e. two backslashes will be required in the properties file).
+     * Note that this is only used if the path separator is a single character.
+     * 
+     * The default value is NULL ('\0') which effectively disables escape processing.
+     * 
+     * The escape character is only used for escaping either the pathSeparator character
+     * or a sequence of escape characters immediately prior to the pathSeparator.
+     * i.e., if the pathSeparator is "." and the escape char is '#' then "a#.b" 
+     * produces a segment called "a.b", but "a##.b" produces a segment called "a#" 
+     * with a child called "b" and "a###.b" produces a segment called "a#.b".
+     * Finally, "a#b" produces a segment called "a#b" - the escape processing is only used
+     * immediately prior to the path separator.
+     * 
+     * Any escape character may be used.
+     * Backslash ('\\') is the most obvious candidate but be aware that the JDK Properties
+     * loader has its own rules for escape processing (documented in the Javadoc for 
+     * <a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)">Properties.load</a>
+     * ) that will remove ALL duplicated backslash characters (and also carry out 
+     * other escape handling) before the JavaPropsMapper gets to see them.
+     * 
+     * @since 2.14
      */
     protected char _pathSeparatorEscapeChar = '\0';
 
@@ -223,11 +240,28 @@ public class JavaPropsSchema
 
     /**
      * Mutant factory method for constructing a new instance with
-     * specified path separator escape; default being null ('\0') which
-     * should effectively disable escape processing.
-     * Any escape character may be used, backslash ('\\') is the most obvious candidate
-     * but be aware that the JDK Properties loader will dedupe all backslash characters
-     * before the JavaPropsMapper gets to see them.
+     * a different escape character to use for single character path separators
+     * , enabling the pathSeparator to be included in a segment.
+     * Note that this is only used if the path separator is a single character.
+     * 
+     * The default value is NULL ('\0') which effectively disables escape processing.
+     * 
+     * The escape character is only used for escaping either the pathSeparator character
+     * or a sequence of escape characters immediately prior to the pathSeparator.
+     * i.e., if the pathSeparator is "." and the escape char is '#' then "a#.b" 
+     * produces a segment called "a.b", but "a##.b" produces a segment called "a#" 
+     * with a child called "b" and "a###.b" produces a segment called "a#.b".
+     * Finally, "a#b" produces a segment called "a#b" - the escape processing is only used
+     * immediately prior to the path separator.
+     * 
+     * Any escape character may be used.
+     * Backslash ('\\') is the most obvious candidate but be aware that the JDK Properties
+     * loader has its own rules for escape processing (documented in the Javadoc for 
+     * <a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)">Properties.load</a>
+     * ) that will remove ALL duplicated backslash characters (and also carry out 
+     * other escape handling) before the JavaPropsMapper gets to see them.
+     * 
+     * @since 2.14
      */
     public JavaPropsSchema withPathSeparatorEscapeChar(char v) {
         if (_equals(v, _pathSeparator)) {
@@ -423,10 +457,16 @@ public class JavaPropsSchema
         return _pathSeparator;
     }
 
+    /**
+     * @since 2.14
+     */
     public char pathSeparatorEscapeChar() {
         return _pathSeparatorEscapeChar;
     }
 
+    /**
+     * @since 2.10
+     */
     public String prefix() {
         return _prefix;
     }

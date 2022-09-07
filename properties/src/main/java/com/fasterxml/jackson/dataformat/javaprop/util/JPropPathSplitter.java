@@ -139,13 +139,13 @@ public abstract class JPropPathSplitter
     public static class CharPathOnlySplitter extends JPropPathSplitter
     {
         protected final char _pathSeparatorChar;
-        protected final char _escapeChar;
+        protected final char _pathSeparatorEscapeChar;
 
-        public CharPathOnlySplitter(char sepChar, char escapeChar, boolean useIndex)
+        public CharPathOnlySplitter(char sepChar, char pathSeparatorEscapeChar, boolean useIndex)
         {
             super(useIndex);
             _pathSeparatorChar = sepChar;
-            _escapeChar = escapeChar;
+            _pathSeparatorEscapeChar = pathSeparatorEscapeChar;
         }        
 
         @Override
@@ -159,7 +159,7 @@ public abstract class JPropPathSplitter
 
             while ((ix = key.indexOf(_pathSeparatorChar, start)) >= start) {
                 if (ix > start) { // segment before separator
-                    if (key.charAt(ix - 1) == _escapeChar) { //potentially escaped, so process slowly
+                    if (key.charAt(ix - 1) == _pathSeparatorEscapeChar) { //potentially escaped, so process slowly
                       return _continueWithEscapes(curr, key, start, value);
                     }
                     String segment = key.substring(start, ix);
@@ -188,7 +188,7 @@ public abstract class JPropPathSplitter
             
             for (int ix = start; ix < keylen; ++ix) {
                 int cc = key.charAt(ix);
-                if (cc ==_escapeChar) {
+                if (cc ==_pathSeparatorEscapeChar) {
                     escCount++;  
                 } else if (cc == _pathSeparatorChar) {
                     if (escCount > 0) {
@@ -208,7 +208,7 @@ public abstract class JPropPathSplitter
                         segment = new StringBuilder();
                         start = ix + 1;
                     }
-                } else if (escCount > 0) {
+                } else {
                     escCount = 0;
                 }             
             }
