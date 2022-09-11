@@ -206,3 +206,8 @@ Falk Hanisch (mrpiggi@github)
 Esteban Ginez (eginez@github)
 #306: (yaml) Error when generating/serializing keys with multilines and colon
  (2.13.2)
+
+Jim Talbut (Yaytay@github)
+#169: Need a way to escape dots in property keys (add path separator configuration)
+ (2.14.0)
+
