@@ -234,6 +234,33 @@ Currently existing configuration settings to use can be divide into three groups
     * `JavaPropsSchema.withPathSeparator(String)` to assign path separator (except if "" given, same as disabling)
     * `JavaPropsSchema.withoutPathSeparator()` to disable use of path logic; if so, only main-level properties are available, with exact property key as name
 
+#### JavaPropsSchema.pathSeparatorEscapeChar
+
+* Marker used to enable the JavaPropsSchema.pathSeparator to be included in key names.
+* Default value: '\0' (effectively disabling it).
+* Mutator methods
+    * `JavaPropsSchema.withPathSeparatorEscapeChar(char)` to assign path separator escape char
+* Notes
+    * The escape character is only used if the path separator is a single character.
+    * The escape character is only used for escaping either the pathSeparator character
+      or a sequence of escape characters immediately prior to the pathSeparator.
+    * Any escape character may be used.
+    * Backslash ('\\') is the most obvious character to use, but be aware that the JDK Properties
+      loader has its own rules for escape processing (documented in the Javadoc for [Properties.load]
+      (https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/Properties.html#load(java.io.Reader) )
+      ) that will remove ALL duplicated backslash characters (and also carry out other escape handling)
+      before the JavaPropsMapper gets to see them.
+* Examples
+    * Given a pathSeparator of "." and an escape char of '#' then
+       * a#.b 
+         produces a segment called "a.b"
+       * a##.b 
+         produces a segment called "a#" with a child called "b"
+       * a###.b
+         produces a segment called "a#.b"
+       * a#b 
+         produces a segment called "a#b" - the escape processing is only used immediately prior to the path separator.
+
 ### JavaPropsSchema: array representation
 
 #### JavaPropsSchema.firstArrayOffset

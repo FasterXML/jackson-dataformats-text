@@ -64,6 +64,32 @@ public class JavaPropsSchema
     protected String _pathSeparator = ".";
 
     /**
+     * Default escape character to use for single character path separators
+     * , enabling the pathSeparator to be included in a segment.
+     * Note that this is only used if the path separator is a single character.
+     * 
+     * The default value is NULL ('\0') which effectively disables escape processing.
+     * 
+     * The escape character is only used for escaping either the pathSeparator character
+     * or a sequence of escape characters immediately prior to the pathSeparator.
+     * i.e., if the pathSeparator is "." and the escape char is '#' then "a#.b" 
+     * produces a segment called "a.b", but "a##.b" produces a segment called "a#" 
+     * with a child called "b" and "a###.b" produces a segment called "a#.b".
+     * Finally, "a#b" produces a segment called "a#b" - the escape processing is only used
+     * immediately prior to the path separator.
+     * 
+     * Any escape character may be used.
+     * Backslash ('\\') is the most obvious candidate but be aware that the JDK Properties
+     * loader has its own rules for escape processing (documented in the Javadoc for 
+     * <a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)">Properties.load</a>
+     * ) that will remove ALL duplicated backslash characters (and also carry out 
+     * other escape handling) before the JavaPropsMapper gets to see them.
+     * 
+     * @since 2.14
+     */
+    protected char _pathSeparatorEscapeChar = '\0';
+
+    /**
      * Default start marker for index access, if any; empty String may be used
      * to indicate no marker-based index detection should be made.
      *<p>
@@ -158,6 +184,7 @@ public class JavaPropsSchema
     public JavaPropsSchema(JavaPropsSchema base) {
         _firstArrayOffset = base._firstArrayOffset;
         _pathSeparator = base._pathSeparator;
+        _pathSeparatorEscapeChar = base._pathSeparatorEscapeChar;
         _indexMarker = base._indexMarker;
         _parseSimpleIndexes = base._parseSimpleIndexes;
         _writeIndexUsingMarkers = base._writeIndexUsingMarkers;
@@ -208,6 +235,40 @@ public class JavaPropsSchema
         }
         JavaPropsSchema s = new JavaPropsSchema(this);
         s._pathSeparator = v;
+        return s;
+    }
+
+    /**
+     * Mutant factory method for constructing a new instance with
+     * a different escape character to use for single character path separators
+     * , enabling the pathSeparator to be included in a segment.
+     * Note that this is only used if the path separator is a single character.
+     * 
+     * The default value is NULL ('\0') which effectively disables escape processing.
+     * 
+     * The escape character is only used for escaping either the pathSeparator character
+     * or a sequence of escape characters immediately prior to the pathSeparator.
+     * i.e., if the pathSeparator is "." and the escape char is '#' then "a#.b" 
+     * produces a segment called "a.b", but "a##.b" produces a segment called "a#" 
+     * with a child called "b" and "a###.b" produces a segment called "a#.b".
+     * Finally, "a#b" produces a segment called "a#b" - the escape processing is only used
+     * immediately prior to the path separator.
+     * 
+     * Any escape character may be used.
+     * Backslash ('\\') is the most obvious candidate but be aware that the JDK Properties
+     * loader has its own rules for escape processing (documented in the Javadoc for 
+     * <a href="https://docs.oracle.com/en/java/javase/18/docs/api/java.base/java/util/Properties.html#load(java.io.Reader)">Properties.load</a>
+     * ) that will remove ALL duplicated backslash characters (and also carry out 
+     * other escape handling) before the JavaPropsMapper gets to see them.
+     * 
+     * @since 2.14
+     */
+    public JavaPropsSchema withPathSeparatorEscapeChar(char v) {
+        if (_equals(v, _pathSeparator)) {
+            return this;
+        }
+        JavaPropsSchema s = new JavaPropsSchema(this);
+        s._pathSeparatorEscapeChar = v;
         return s;
     }
 
@@ -394,6 +455,13 @@ public class JavaPropsSchema
 
     public String pathSeparator() {
         return _pathSeparator;
+    }
+
+    /**
+     * @since 2.14
+     */
+    public char pathSeparatorEscapeChar() {
+        return _pathSeparatorEscapeChar;
     }
 
     /**
