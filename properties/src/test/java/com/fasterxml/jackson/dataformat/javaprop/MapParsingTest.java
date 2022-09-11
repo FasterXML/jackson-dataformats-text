@@ -34,7 +34,7 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("first", w.map.get(""));
         assertEquals("second", w.map.get("b"));
         assertEquals("third", w.map.get("xyz"));
-        assertEquals("fourth", ((Map) w.map.get("ab\\")).get("c"));
+        assertEquals("fourth", ((Map<?,?>) w.map.get("ab\\")).get("c"));
     }
 
     public void testMapWithBranchBackslashEscape() throws Exception
@@ -55,7 +55,9 @@ public class MapParsingTest extends ModuleTestBase
                 +"map.xy\\\\\\\\.d.ij=eleventh\n"     // xy\\.d.ij => xy\->d->ij
                 +"map.xy\\\\\\\\\\\\.d.ij=twelfth\n"  // xy\\\.d => xy\.d->ij
                 ;
-        MapWrapper w = mapper.reader(new JavaPropsSchema().withPathSeparatorEscapeChar('\\')).readValue(INPUT, MapWrapper.class);
+        MapWrapper w = mapper.readerFor(MapWrapper.class)
+                .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))
+                .readValue(INPUT);
         assertNotNull(w.map);
         System.out.println(w.map.toString());
         assertEquals(12, w.map.size());
@@ -66,11 +68,11 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("fifth", w.map.get("ab\\cd.ef.gh\\\\ij"));
         assertEquals("sixth", w.map.get("."));
         assertEquals("seventh", w.map.get("ab.d"));
-        assertEquals("eigth", ((Map) w.map.get("ef\\")).get("d"));
+        assertEquals("eigth", ((Map<?,?>) w.map.get("ef\\")).get("d"));
         assertEquals("ninth", w.map.get("ab\\.d"));
-        assertEquals("tenth", ((Map) w.map.get("xy.d")).get("ij"));
-        assertEquals("eleventh", ((Map) ((Map) w.map.get("xy\\")).get("d")).get("ij"));
-        assertEquals("twelfth", ((Map) w.map.get("xy\\.d")).get("ij"));
+        assertEquals("tenth", ((Map<?,?>) w.map.get("xy.d")).get("ij"));
+        assertEquals("eleventh", ((Map<?,?>) ((Map<?,?>) w.map.get("xy\\")).get("d")).get("ij"));
+        assertEquals("twelfth", ((Map<?,?>) w.map.get("xy\\.d")).get("ij"));
     }
 
 
@@ -92,7 +94,8 @@ public class MapParsingTest extends ModuleTestBase
                 +"map.xy##.d.ij=eleventh\n"       // xy##.d.ij => xy#->d->ij
                 +"map.xy###.d.ij=twelfth\n"       // xy###.d => xy#.d->ij
                 ;
-        MapWrapper w = mapper.reader(new JavaPropsSchema().withPathSeparatorEscapeChar('#')).readValue(INPUT, MapWrapper.class);
+        MapWrapper w = mapper.readerFor(MapWrapper.class)
+                .with(new JavaPropsSchema().withPathSeparatorEscapeChar('#')).readValue(INPUT);
         assertNotNull(w.map);
         System.out.println(w.map.toString());
         assertEquals(12, w.map.size());
@@ -103,11 +106,11 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("fifth", w.map.get("ab#cd.ef.gh##ij"));
         assertEquals("sixth", w.map.get("."));
         assertEquals("seventh", w.map.get("ab.d"));
-        assertEquals("eigth", ((Map) w.map.get("ef#")).get("d"));
+        assertEquals("eigth", ((Map<?,?>) w.map.get("ef#")).get("d"));
         assertEquals("ninth", w.map.get("ab#.d"));
-        assertEquals("tenth", ((Map) w.map.get("xy.d")).get("ij"));
-        assertEquals("eleventh", ((Map) ((Map) w.map.get("xy#")).get("d")).get("ij"));
-        assertEquals("twelfth", ((Map) w.map.get("xy#.d")).get("ij"));
+        assertEquals("tenth", ((Map<?,?>) w.map.get("xy.d")).get("ij"));
+        assertEquals("eleventh", ((Map<?,?>) ((Map<?,?>) w.map.get("xy#")).get("d")).get("ij"));
+        assertEquals("twelfth", ((Map<?,?>) w.map.get("xy#.d")).get("ij"));
     }
 
 }
