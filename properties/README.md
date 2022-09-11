@@ -7,8 +7,8 @@ assuming dotted notation, but configurable from non-nested to other separators).
 
 ## Status
 
-Jackson 2.8.0 was the first official release. With 2.8.x this is still considered somewhat
-experimental module.
+Since version 2.9 this module is considered complete and production ready.
+All Jackson layers (streaming, databind, tree model) are supported.
 
 ## Maven dependency
 
@@ -18,7 +18,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-properties</artifactId>
-  <version>2.8.8</version>
+  <version>2.13.4</version>
 </dependency>
 ```
 
