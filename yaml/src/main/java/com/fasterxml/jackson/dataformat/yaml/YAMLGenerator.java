@@ -137,6 +137,16 @@ public class YAMLGenerator extends GeneratorBase
          * @since 2.9.6
          */
         USE_PLATFORM_LINE_BREAKS(false),
+
+        /**
+         * Option passed to SnakeYAML to enable usage of key longer that 128 characters.
+         * If disabled, the max key length is set to 128 characters.
+         * <p>
+         * Default value is {@code false}.
+         * 
+         * @since 2.14
+         */
+        USE_LONG_KEYS(false),
         ;
 
         protected final boolean _defaultState;
@@ -309,6 +319,10 @@ public class YAMLGenerator extends GeneratorBase
         // 14-May-2018: [dataformats-text#84] allow use of platform linefeed
         if (Feature.USE_PLATFORM_LINE_BREAKS.enabledIn(_formatFeatures)) {
             opt.setLineBreak(DumperOptions.LineBreak.getPlatformLineBreak());
+        }
+
+        if (Feature.USE_LONG_KEYS.enabledIn(_formatFeatures)) {
+            opt.setMaxSimpleKeyLength(1024);
         }
         return opt;
     }
