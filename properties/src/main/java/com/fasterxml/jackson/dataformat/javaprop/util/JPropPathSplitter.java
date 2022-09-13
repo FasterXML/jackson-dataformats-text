@@ -200,8 +200,8 @@ public abstract class JPropPathSplitter
                         } else {
                             segment.append((char) cc);
                             start = ix + 1;
-                            escCount = 0;
                         }
+                        escCount = 0;
                     } else {
                         segment.append(key, start, ix);
                         curr = _addSegment(curr, segment.toString());

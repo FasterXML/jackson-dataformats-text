@@ -75,7 +75,6 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("twelfth", ((Map<?,?>) w.map.get("xy\\.d")).get("ij"));
     }
 
-
     public void testMapWithBranchHashEscape() throws Exception
     {
         JavaPropsMapper mapper = newPropertiesMapper();
@@ -112,5 +111,4 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("eleventh", ((Map<?,?>) ((Map<?,?>) w.map.get("xy#")).get("d")).get("ij"));
         assertEquals("twelfth", ((Map<?,?>) w.map.get("xy#.d")).get("ij"));
     }
-
 }
