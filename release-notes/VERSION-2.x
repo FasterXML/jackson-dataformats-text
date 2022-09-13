@@ -25,7 +25,7 @@ Active Maintainers:
  (contributed by Falk H)
 #314: (csv) Add fast floating-point parsing, generation support
  (contributed by @pjfanning)
-#329: (yaml) Update to SnakeYAML 1.31
+#335: (yaml) Update to SnakeYAML 1.32
  (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
