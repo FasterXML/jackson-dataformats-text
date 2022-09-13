@@ -20,7 +20,7 @@ No changes since 2.13
 
 2.13.5 (not yet released)
 
-#335: (yaml) Update to SnakeYAML 1.31
+#335: (yaml) Update to SnakeYAML 1.32
  (contributed by @pjfanning)
 
 2.13.4 (03-Sep-2022)
