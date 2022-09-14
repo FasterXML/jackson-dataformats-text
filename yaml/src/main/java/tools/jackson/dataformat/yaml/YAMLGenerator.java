@@ -125,6 +125,17 @@ public class YAMLGenerator extends GeneratorBase
          * Default value is {@code false} for backwards compatibility
          */
         INDENT_ARRAYS_WITH_INDICATOR(false),
+
+        /**
+         * Option passed to SnakeYAML to allows writing key longer that 128 characters
+         * (up to 1024 characters).
+         * If disabled, the max key length is left as 128 characters: longer names
+         * are truncated. If enabled, limit is raised to 1024 characters.
+         * <p>
+         * Default value is {@code false} for backwards-compatibility (same as behavior
+         * before this feature was added).
+         */
+        ALLOW_LONG_KEYS(false),
         ;
 
         protected final boolean _defaultState;
@@ -292,6 +303,9 @@ public class YAMLGenerator extends GeneratorBase
         if (Feature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatWriteFeatures)) {
             opt.setIndicatorIndent(2);
             opt.setIndentWithIndicator(true);
+        }
+        if (Feature.ALLOW_LONG_KEYS.enabledIn(_formatWriteFeatures)) {
+            opt.setMaxSimpleKeyLength(1024);
         }
 
         // 03-Oct-2020, tatu: Specify spec version; however, does not seem to make

@@ -60,6 +60,21 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("- \"third\"", parts[3].trim());
     }
 
+    //@since 2.14
+    public void testLongKeys() throws Exception
+    {
+        final String LONG_KEY = "key_longer_than_128_characters_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+        ObjectMapper defaultMapper = YAMLMapper.builder().build();
+        final Object inputValue = Collections.singletonMap(LONG_KEY, "value");
+        assertEquals("---\n? " + LONG_KEY + "\n: \"value\"",
+        _trim(defaultMapper.writeValueAsString(inputValue)));
+        
+        ObjectMapper longKeysMapper = YAMLMapper.builder().enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS).build();
+        assertEquals("---\n" + LONG_KEY + ": \"value\"",
+                _trim(longKeysMapper.writeValueAsString(inputValue)));
+    }
+
     public void testYAMLSpecVersionDefault() throws Exception
     {
         ObjectMapper defaultMapper = YAMLMapper.builder().build();

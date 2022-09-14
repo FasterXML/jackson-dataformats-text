@@ -16,8 +16,12 @@ Active Maintainers:
 
 2.14.0 (not yet released)
 
-#169: Need a way to escape dots in property keys (add path separator configuration)
+#169: (properties) Need a way to escape dots in property keys (add path separator configuration)
  (contributed by Jim T)
+#244: (yaml) Add `YAMLGenerator.Feature.ALLOW_LONG_KEYS` to allow writing keys longer than
+  128 characters (default)
+ (requested by Simon D)
+ (contributed by Shauni A)
 #285: (csv) Missing columns from header line (compare to `CsvSchema`) not detected
   when reordering columns (add `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS`)
  (reported by Björn M)
