@@ -179,7 +179,7 @@ Suminda Sirinath Salpitikorala Dharmasena (sirinath@github)
  (2.13.0)
 
 Jonas Konrad (yawkat@github)
-#219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
+* Contributed #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (2.13.0)
 
 Krzysztof Debski (kdebski85@github)
@@ -191,7 +191,7 @@ PJ Fanning (pjfanning@github)
 #283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns
   are empty
  (2.13.0)
-#314: (csv) Add fast floating-point parsing, generation support
+* Contributed #314: (csv) Add fast floating-point parsing, generation support
  (2.14.0)
 
 Falk Hanisch (mrpiggi@github)
@@ -208,6 +208,13 @@ Esteban Ginez (eginez@github)
  (2.13.2)
 
 Jim Talbut (Yaytay@github)
-#169: Need a way to escape dots in property keys (add path separator configuration)
+#169: (properties) Need a way to escape dots in property keys (add path separator configuration)
  (2.14.0)
 
+Simon Dean (msmsimondean@github)
+* Requested #244: (yaml) Add `YAMLGenerator.Feature.ALLOW_LONG_KEYS` to allow writing keys
+  longer than 128 characters (default)
+
+Shauni Arima (ShauniArima@github)
+* Contributed #244: (yaml) Add `YAMLGenerator.Feature.ALLOW_LONG_KEYS` to allow writing keys
+  longer than 128 characters (default)

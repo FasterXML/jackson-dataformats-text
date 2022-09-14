@@ -74,7 +74,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("---\n? " + LONG_KEY + "\n: \"value\"",
         _trim(defaultMapper.writeValueAsString(inputValue)));
         
-        ObjectMapper longKeysMapper = YAMLMapper.builder().enable(YAMLGenerator.Feature.USE_LONG_KEYS).build();
+        ObjectMapper longKeysMapper = YAMLMapper.builder().enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS).build();
         assertEquals("---\n" + LONG_KEY + ": \"value\"",
                 _trim(longKeysMapper.writeValueAsString(inputValue)));
     }
