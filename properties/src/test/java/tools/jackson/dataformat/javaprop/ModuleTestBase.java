@@ -178,11 +178,11 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /**********************************************************
      */
 
-    public String quote(String str) {
+    public String q(String str) {
         return '"'+str+'"';
     }
 
-    protected String aposToQuotes(String json) {
+    protected String a2q(String json) {
         return json.replace("'", "\"");
     }
 

@@ -1,7 +1,9 @@
 package tools.jackson.dataformat.javaprop.deser;
 
 import tools.jackson.core.exc.StreamReadException;
+
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
 
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
 
@@ -21,5 +23,15 @@ public class FuzzPropsReadTest extends ModuleTestBase
             verifyException(e, "Invalid content, problem:");
             verifyException(e, "Malformed \\uxxxx encoding");
         }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=51247
+    public void testDoubleSeparators51247() throws Exception
+    {
+        // Threw IndexOutOfBoundsException since counter was not cleared
+        // Relies on the default path-separator-escape being null character
+        // (for some reason not reproducible with different escape chars?)
+        JsonNode n = MAPPER.readTree("\0\0..");
+        assertEquals(a2q("{'\\u0000':{'':{'':''}}}"), n.toString());
     }
 }
