@@ -13,7 +13,7 @@ public class CsvFuzzTest extends ModuleTestBase
         byte[] input = readResource("/data/fuzz-50402.csv");
         try {
             mapper.readTree(input);
-            fail("Should not pass");
+            // Ok; don't care about content, just buffer reads
         } catch (JacksonException e) {
             verifyException(e, "foo");
         }

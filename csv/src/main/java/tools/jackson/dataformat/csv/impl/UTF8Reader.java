@@ -152,8 +152,7 @@ public final class UTF8Reader
     }
     
     @Override
-    public int read(char[] cbuf, int start, int len)
-        throws IOException
+    public int read(final char[] cbuf, final int start, int len) throws IOException
     {
         // Already EOF?
         if (_inputBuffer == null) {
@@ -167,6 +166,12 @@ public final class UTF8Reader
             cbuf[outPtr++] = (char) _surrogate;
             _surrogate = -1;
             // No need to load more, already got one char
+            // 15-Sep-2022, tatu: But need to avoid having empty buffer
+            if (_inputPtr >= _inputEnd) {
+                _charCount += 1;
+                return 1;
+            }
+            // otherwise let things work the way they should
         } else {
             if (_decodeErrorOffset != 0) {
                 reportDeferredInvalid();
@@ -310,11 +315,11 @@ public final class UTF8Reader
         }
 
         _inputPtr = inPtr;
-        len = outPtr - start;
-        _charCount += len;
-        return len;
+        final int actualLen = outPtr - start;
+        _charCount += actualLen;
+        return actualLen;
     }
-    
+
     /*
     /**********************************************************************
     /* Internal/package methods:
