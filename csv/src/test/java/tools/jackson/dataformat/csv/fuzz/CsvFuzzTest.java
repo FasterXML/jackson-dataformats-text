@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.failing;
+package tools.jackson.dataformat.csv.fuzz;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
