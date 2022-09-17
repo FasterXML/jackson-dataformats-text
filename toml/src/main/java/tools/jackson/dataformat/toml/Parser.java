@@ -248,36 +248,41 @@ class Parser {
                 start += 2;
                 length -= 2;
                 String text = new String(buffer, start, length);
-                // note: we parse all these as unsigned. Hence the weird int limits.
-                // hex
-                if (baseChar == 'x') {
-                    if (length <= 31 / 4) {
-                        return factory.numberNode(Integer.parseInt(text, 16));
-                    } else if (length <= 63 / 4) {
-                        return factory.numberNode(Long.parseLong(text, 16));
-                    } else {
-                        return factory.numberNode(new BigInteger(text, 16));
+
+                try {
+                    // note: we parse all these as unsigned. Hence the weird int limits.
+                    // hex
+                    if (baseChar == 'x') {
+                        if (length <= 31 / 4) {
+                            return factory.numberNode(Integer.parseInt(text, 16));
+                        } else if (length <= 63 / 4) {
+                            return factory.numberNode(Long.parseLong(text, 16));
+                        } else {
+                            return factory.numberNode(new BigInteger(text, 16));
+                        }
                     }
-                }
-                // octal
-                if (baseChar == 'o') {
-                    // this is a bit conservative, but who uses octal anyway?
-                    if (length <= 31 / 3) {
-                        return factory.numberNode(Integer.parseInt(text, 8));
-                    } else if (text.length() <= 63 / 3) {
-                        return factory.numberNode(Long.parseLong(text, 8));
-                    } else {
-                        return factory.numberNode(new BigInteger(text, 8));
+                    // octal
+                    if (baseChar == 'o') {
+                        // this is a bit conservative, but who uses octal anyway?
+                        if (length <= 31 / 3) {
+                            return factory.numberNode(Integer.parseInt(text, 8));
+                        } else if (text.length() <= 63 / 3) {
+                            return factory.numberNode(Long.parseLong(text, 8));
+                        } else {
+                            return factory.numberNode(new BigInteger(text, 8));
+                        }
                     }
-                }
-                // binary
-                assert baseChar == 'b';
-                if (length <= 31) {
-                    return factory.numberNode(Integer.parseUnsignedInt(text, 2));
-                } else if (length <= 63) {
-                    return factory.numberNode(Long.parseUnsignedLong(text, 2));
-                } else {
-                    return factory.numberNode(new BigInteger(text, 2));
+                    // binary
+                    assert baseChar == 'b';
+                    if (length <= 31) {
+                        return factory.numberNode(Integer.parseUnsignedInt(text, 2));
+                    } else if (length <= 63) {
+                        return factory.numberNode(Long.parseUnsignedLong(text, 2));
+                    } else {
+                        return factory.numberNode(new BigInteger(text, 2));
+                    }
+                } catch (NumberFormatException e) {
+                    throw errorContext.atPosition(lexer).invalidNumber(e, text);
                 }
             }
         }

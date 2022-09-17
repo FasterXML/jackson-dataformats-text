@@ -43,6 +43,20 @@ public class FuzzTomlReadTest
         }
     }
 
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50395
+    @Test
+    public void testNumberParsingFail50395() throws Exception
+    {
+        String INPUT = "j=427\n-03b-";
+        try {
+            TOML_MAPPER.readTree(INPUT);
+            Assert.fail("Should not pass");
+        } catch (JacksonException e) {
+            verifyException(e, "Invalid number representation");
+            verifyException(e, "Illegal leading minus sign");
+        }
+    }
+        
     protected void verifyException(Throwable e, String... matches)
     {
         String msg = e.getMessage();
