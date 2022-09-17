@@ -1,6 +1,9 @@
 package tools.jackson.dataformat.yaml.deser;
 
+import tools.jackson.core.JsonToken;
 import tools.jackson.core.exc.StreamReadException;
+
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
@@ -61,5 +64,15 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         } catch (StreamReadException e) {
             verifyException(e, "Invalid base-");
         }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
+    public void testNumberdecoding50052() throws Exception
+    {
+        // 17-Sep-2022, tatu: Could produce an exception but for now type
+        //    tag basically ignored, returned as empty String otken
+        JsonNode n = YAML_MAPPER.readTree("!!int");
+        assertEquals(JsonToken.VALUE_STRING, n.asToken());
+        assertEquals("", n.textValue());
     }
 }

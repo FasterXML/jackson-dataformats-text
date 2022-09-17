@@ -538,15 +538,20 @@ public class YAMLParser extends ParserBase
                     return B ? JsonToken.VALUE_TRUE : JsonToken.VALUE_FALSE;
                 }
             } else {
-                if ("int".equals(typeTag)) {
-                    return _decodeNumberScalar(value, len);
-                }
-                if ("float".equals(typeTag)) {
-                    _numTypesValid = 0;
-                    return _cleanYamlFloat(value);
-                }
-                if ("null".equals(typeTag)) {
-                    return JsonToken.VALUE_NULL;
+                // 17-Sep-2022, tatu: empty String value is not valid number;
+                //    so we could indicate exception or... for now, report as
+                //    String value?
+                if (len > 0) {
+                    if ("int".equals(typeTag)) {
+                        return _decodeNumberScalar(value, len);
+                    }
+                    if ("float".equals(typeTag)) {
+                        _numTypesValid = 0;
+                        return _cleanYamlFloat(value);
+                    }
+                    if ("null".equals(typeTag)) {
+                        return JsonToken.VALUE_NULL;
+                    }
                 }
             }
         }
