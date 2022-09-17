@@ -1,7 +1,8 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import java.io.IOException;
-
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
@@ -19,7 +20,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         try {
             YAML_MAPPER.readTree(INPUT);
             fail("Should not pass");
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
         }
@@ -32,7 +33,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         try {
             YAML_MAPPER.readTree(DOC);
             fail("Should not pass");
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             // 19-Aug-2022, tatu: The actual error we get is from SnakeYAML
             //    and might change. Should try matching it at all?
             verifyException(e, "while parsing");
@@ -58,8 +59,18 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         try {
             YAML_MAPPER.readTree(doc);
             fail("Should not pass");
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             verifyException(e, "Invalid base-");
         }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
+    public void testNumberdecoding50052() throws Exception
+    {
+        // 17-Sep-2022, tatu: Could produce an exception but for now type
+        //    tag basically ignored, returned as empty String otken
+        JsonNode n = YAML_MAPPER.readTree("!!int");
+        assertEquals(JsonToken.VALUE_STRING, n.asToken());
+        assertEquals("", n.textValue());
     }
 }
