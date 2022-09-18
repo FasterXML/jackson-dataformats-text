@@ -6,6 +6,8 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -17,12 +19,31 @@ public class FuzzTomlReadTest
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     @Test
+    public void testBigIntegerDecoding50033() throws Exception
+    {
+        String INPUT = "a=1971\n"
+                + "0O=0xd6e0333333243333333\n"
+                + "033333333434"
+                ;
+        try {
+            JsonNode n = TOML_MAPPER.readTree(INPUT);
+            Assert.fail("Should not pass, got: "+n);
+        } catch (StreamReadException e) {
+            verifyException(e, "Invalid number");
+            // NOTE: decoding of token for error message seems wrong, cannot
+            // quite verify it for the last line
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+    @Test
     public void testUTF8Decoding50036() throws Exception
     {
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
             TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
+        // NOTE! This is an actual IOException in Jackson 2.x
         } catch (IOException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
@@ -37,7 +58,7 @@ public class FuzzTomlReadTest
         try {
             TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
-        } catch (IOException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Invalid number");
             verifyException(e, "8E8188888888");
         }
@@ -51,7 +72,7 @@ public class FuzzTomlReadTest
         try {
             TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
-        } catch (IOException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Invalid number representation");
             verifyException(e, "Illegal leading minus sign");
         }

@@ -231,6 +231,7 @@ class Parser {
         char[] buffer = lexer.getTextBuffer();
         int start = lexer.getTextBufferStart();
         int length = lexer.getTextBufferEnd() - lexer.getTextBufferStart();
+
         for (int i = 0; i < length; i++) {
             if (buffer[start + i] == '_') {
                 // slow path to remove underscores
@@ -244,6 +245,7 @@ class Parser {
         pollExpected(TomlToken.INTEGER, nextState);
         if (length > 2) {
             char baseChar = buffer[start + 1];
+
             if (baseChar == 'x' || baseChar == 'o' || baseChar == 'b') {
                 start += 2;
                 length -= 2;
@@ -315,7 +317,12 @@ class Parser {
                 return factory.numberNode(v);
             }
         }
-        return factory.numberNode(new BigInteger(new String(buffer, start, length)));
+        final String text = new String(buffer, start, length);
+        try {
+            return factory.numberNode(new BigInteger(text));
+        } catch (NumberFormatException e) {
+            throw errorContext.atPosition(lexer).invalidNumber(e, text);
+        }
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
