@@ -3,6 +3,8 @@ package tools.jackson.dataformat.toml;
 import java.util.Arrays;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 import org.junit.Assert;
@@ -14,6 +16,24 @@ import org.junit.Test;
 public class FuzzTomlReadTest
 {
     private final ObjectMapper TOML_MAPPER = new TomlMapper();
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+    @Test
+    public void testBigIntegerDecoding50033() throws Exception
+    {
+        String INPUT = "a=1971\n"
+                + "0O=0xd6e0333333243333333\n"
+                + "033333333434"
+                ;
+        try {
+            JsonNode n = TOML_MAPPER.readTree(INPUT);
+            Assert.fail("Should not pass, got: "+n);
+        } catch (StreamReadException e) {
+            verifyException(e, "Invalid number");
+            // NOTE: decoding of token for error message seems wrong, cannot
+            // quite verify it for the last line
+        }
+    }
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     @Test
