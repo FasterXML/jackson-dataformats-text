@@ -4,6 +4,7 @@ import java.io.*;
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.io.NumberInput;
+import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.NodeId;
@@ -166,16 +167,30 @@ public class YAMLParser extends ParserBase
     /* Life-cycle
     /**********************************************************************
      */
-    
+
+
+    /**
+     * @deprecated since 2.14, use other constructor
+     */
+    @Deprecated
     public YAMLParser(IOContext ctxt, BufferRecycler br,
             int parserFeatures, int formatFeatures,
             ObjectCodec codec, Reader reader)
     {
-        super(ctxt, parserFeatures);    
+        this(ctxt, parserFeatures, formatFeatures, YAMLFactoryBuilder.getDefaultCodepointLimit(),
+                codec, reader);
+    }
+
+    public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
+                      int codePointLimit, ObjectCodec codec, Reader reader)
+    {
+        super(ctxt, parserFeatures);
         _objectCodec = codec;
         _formatFeatures = formatFeatures;
         _reader = reader;
-        _yamlParser = new ParserImpl(new StreamReader(reader));
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setCodePointLimit(codePointLimit);
+        _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
 

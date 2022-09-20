@@ -18,7 +18,9 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     /**********************************************************
      */
 
-//    protected int _formatParserFeatures;
+    //copied from https://bitbucket.org/snakeyaml/snakeyaml/src/26624702fab8e0a1c301d7fad723c048528f75c3/src/main/java/org/yaml/snakeyaml/LoaderOptions.java#lines-26
+    private final static int DEFAULT_CODEPOINT_LIMIT = 3 * 1024 * 1024; // 3 MB
+    private int _codePointLimit = DEFAULT_CODEPOINT_LIMIT;
 
     /**
      * Set of {@link YAMLGenerator.Feature}s enabled, as bitmask.
@@ -39,6 +41,10 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      * whatever default settings {@code SnakeYAML} deems best).
      */
     protected DumperOptions.Version _version;
+
+    public static int getDefaultCodepointLimit() {
+        return DEFAULT_CODEPOINT_LIMIT;
+    }
 
     /*
     /**********************************************************
@@ -132,6 +138,16 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return this;
     }
 
+    /**
+     * @param codePointLimit the limit on number of codepoints when parsing YAML (default is 3Mb)
+     * @return This builder instance, to allow chaining
+     * @since 2.14
+     */
+    public YAMLFactoryBuilder codePointLimit(int codePointLimit) {
+        this._codePointLimit = codePointLimit;
+        return this;
+    }
+
     /*
     /**********************************************************
     /* Accessors
@@ -150,6 +166,10 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
             return _quotingChecker;
         }
         return StringQuotingChecker.Default.instance();
+    }
+
+    public int codePointLimit() {
+        return _codePointLimit;
     }
 
     @Override
