@@ -4,6 +4,7 @@ import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.TSFBuilder;
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
+import org.yaml.snakeyaml.LoaderOptions;
 
 /**
  * {@link com.fasterxml.jackson.core.TSFBuilder}
@@ -17,10 +18,6 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     /* Configuration
     /**********************************************************
      */
-
-    //copied from https://bitbucket.org/snakeyaml/snakeyaml/src/26624702fab8e0a1c301d7fad723c048528f75c3/src/main/java/org/yaml/snakeyaml/LoaderOptions.java#lines-26
-    private final static int DEFAULT_CODEPOINT_LIMIT = 3 * 1024 * 1024; // 3 MB
-    private int _codePointLimit = DEFAULT_CODEPOINT_LIMIT;
 
     /**
      * Set of {@link YAMLGenerator.Feature}s enabled, as bitmask.
@@ -42,9 +39,19 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      */
     protected DumperOptions.Version _version;
 
-    public static int getDefaultCodepointLimit() {
-        return DEFAULT_CODEPOINT_LIMIT;
-    }
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @since 2.14
+     */
+    protected LoaderOptions _loaderOptions;
 
     /*
     /**********************************************************
@@ -139,12 +146,21 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     }
 
     /**
-     * @param codePointLimit the limit on number of codepoints when parsing YAML (default is 3Mb)
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @param loaderOptions the {@code SnakeYAML} configuration to use when parsing YAML
      * @return This builder instance, to allow chaining
      * @since 2.14
      */
-    public YAMLFactoryBuilder codePointLimit(int codePointLimit) {
-        this._codePointLimit = codePointLimit;
+    public YAMLFactoryBuilder loaderOptions(LoaderOptions loaderOptions) {
+        _loaderOptions = loaderOptions;
         return this;
     }
 
@@ -168,8 +184,21 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return StringQuotingChecker.Default.instance();
     }
 
-    public int codePointLimit() {
-        return _codePointLimit;
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @return the {@code SnakeYAML} configuration to use when parsing YAML
+     * @since 2.14
+     */
+    public LoaderOptions loaderOptions() {
+        return _loaderOptions;
     }
 
     @Override

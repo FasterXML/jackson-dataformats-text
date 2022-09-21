@@ -177,20 +177,21 @@ public class YAMLParser extends ParserBase
             int parserFeatures, int formatFeatures,
             ObjectCodec codec, Reader reader)
     {
-        this(ctxt, parserFeatures, formatFeatures, YAMLFactoryBuilder.getDefaultCodepointLimit(),
-                codec, reader);
+        this(ctxt, parserFeatures, formatFeatures, null, codec, reader);
     }
 
     public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
-                      int codePointLimit, ObjectCodec codec, Reader reader)
+                      LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
     {
         super(ctxt, parserFeatures);
         _objectCodec = codec;
         _formatFeatures = formatFeatures;
         _reader = reader;
-        LoaderOptions loaderOptions = new LoaderOptions();
-        loaderOptions.setCodePointLimit(codePointLimit);
-        _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
+        if (loaderOptions == null) {
+            _yamlParser = new ParserImpl(new StreamReader(reader));
+        } else {
+            _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
+        }
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
 
