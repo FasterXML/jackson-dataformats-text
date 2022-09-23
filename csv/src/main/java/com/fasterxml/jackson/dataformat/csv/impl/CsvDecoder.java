@@ -1251,7 +1251,7 @@ public class CsvDecoder
                 _numTypesValid = NR_LONG;
             } else {
                 // nope, need the heavy guns... (rare case)
-                _numberBigInt = new BigInteger(numStr);
+                _numberBigInt = NumberInput.parseBigInteger(numStr);
                 _numTypesValid = NR_BIGINT;
             }
         } catch (NumberFormatException nex) {
