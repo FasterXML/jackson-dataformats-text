@@ -319,7 +319,7 @@ class Parser {
         }
         final String text = new String(buffer, start, length);
         try {
-            return factory.numberNode(new BigInteger(text));
+            return factory.numberNode(NumberInput.parseBigInteger(text));
         } catch (NumberFormatException e) {
             throw errorContext.atPosition(lexer).invalidNumber(e, text);
         }

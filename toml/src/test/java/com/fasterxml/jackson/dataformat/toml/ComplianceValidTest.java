@@ -86,7 +86,7 @@ public class ComplianceValidTest {
                     // for some reason, the compliance tests escape these values. this makes some tests fail right now
                     return JsonNodeFactory.instance.textNode(value.textValue());
                 case "integer":
-                    return JsonNodeFactory.instance.numberNode(new BigInteger(value.textValue()));
+                    return JsonNodeFactory.instance.numberNode(NumberInput.parseBigInteger(value.textValue()));
                 case "float":
                     switch (value.textValue()) {
                         case "inf":
