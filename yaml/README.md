@@ -22,7 +22,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-yaml</artifactId>
-  <version>2.8.3</version>
+  <version>2.13.4</version>
 </dependency>
 ```
 
@@ -30,21 +30,51 @@ To use this extension on Maven-based projects, use following dependency:
 
 ## Simple usage
 
-Usage is as with basic `JsonFactory`; most commonly you will just construct a standard `ObjectMapper` with `com.fasterxml.jackson.dataformat.yaml.YAMLFactory`, like so:
+Usage is through basic `JsonFactory` and/or `ObjectMapper` API but you will construct instances differently:
 
 ```java
-ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+// Mapper with default configuration
+ObjectMapper mapper = new YAMLMapper();
 User user = mapper.readValue(yamlSource, User.class);
+
+// Or using builder
+ObjectMapper mapper = YAMLMapper.builder()
+   .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+   .build();
+Json
+
 ```
 
 but you can also just use underlying `YAMLFactory` and parser it produces, for event-based processing:
 
 ```java
 YAMLFactory factory = new YAMLFactory();
-JsonParser parser = factory.createJsonParser(yamlString); // don't be fooled by method name...
+JsonParser parser = factory.createParser(yamlString); // don't be fooled by method name...
 while (parser.nextToken() != null) {
   // do something!
 }
+```
+
+## Configuration
+
+Most configuration is applied during mapper instance configuration, through
+`YAMLMapper.Builder`, similar to how JSON-based plain `ObjectMapper` is configured.
+
+## Known problems
+
+### Maximum input YAML document size (3 MB)
+
+SnakeYAML implementation starts imposing the default limit of 3 megabyte document
+size as of version 1.32, used by Jackson 2.14.0. If you hit this limitation,
+you need to explicitly increase the limit by configuring `YAMLFactory` and constructing `YAMLMapper` with that:
+
+```java
+LoaderOptions loaderOptions = new LoaderOptions();
+loaderOptions.setCodePointLimit(10 * 1024 * 1024); // 10 MB
+YAMLFactory yamlFactory = YAMLFactory.builder()
+    .loaderOptions(loaderOptions)
+    .build();
+YAMLMapper mapper = new YAMLMapper(yamlFactory);
 ```
 
 # Documentation
