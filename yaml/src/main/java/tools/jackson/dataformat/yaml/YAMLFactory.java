@@ -1,7 +1,6 @@
 package tools.jackson.dataformat.yaml;
 
 import java.io.*;
-import java.nio.charset.Charset;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
@@ -18,8 +17,6 @@ public class YAMLFactory
     implements java.io.Serializable
 {
     private static final long serialVersionUID = 1L;
-
-    protected final static Charset UTF8 = Charset.forName("UTF-8");
 
     /**
      * Name used to identify YAML format.
