@@ -380,7 +380,7 @@ public class CsvEncoder
         if (columnIndex == _nextColumnToWrite) {
             // inlined 'appendValue(int)'
             // up to 10 digits and possible minus sign, leading comma
-            if ((_outputTail + 12) > _outputTail) {
+            if ((_outputTail + 12) > _outputEnd) {
                 _flushBuffer();
             }
             if (_nextColumnToWrite > 0) {
@@ -399,7 +399,7 @@ public class CsvEncoder
         if (columnIndex == _nextColumnToWrite) {
             // inlined 'appendValue(int)'
             // up to 20 digits, minus sign, leading comma
-            if ((_outputTail + 22) > _outputTail) {
+            if ((_outputTail + 22) > _outputEnd) {
                 _flushBuffer();
             }
             if (_nextColumnToWrite > 0) {

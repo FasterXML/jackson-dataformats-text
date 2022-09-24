@@ -785,7 +785,7 @@ public class YAMLParser extends ParserBase
 
     private BigInteger _decodeBigInt(String str, int base) throws JacksonException {
         try {
-            return new BigInteger(str, base);
+            return base == 10 ? NumberInput.parseBigInteger(str) : new BigInteger(str, base);
         } catch (NumberFormatException e) {
             return _reportInvalidNumber(str, base, e);
         }
@@ -947,7 +947,7 @@ public class YAMLParser extends ParserBase
             }
             // !!! TODO: implement proper bounds checks; now we'll just use BigInteger for convenience
             try {
-                BigInteger n = new BigInteger(_cleanedTextValue);
+                BigInteger n = NumberInput.parseBigInteger(_cleanedTextValue);
                 // Could still fit in a long, need to check
                 if (len == 19 && n.bitLength() <= 63) {
                     _numberLong = n.longValue();
