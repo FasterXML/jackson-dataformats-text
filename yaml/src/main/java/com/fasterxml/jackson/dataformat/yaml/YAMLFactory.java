@@ -2,7 +2,6 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.charset.Charset;
 
 import org.yaml.snakeyaml.DumperOptions;
 
@@ -11,13 +10,12 @@ import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
+import org.yaml.snakeyaml.LoaderOptions;
 
 @SuppressWarnings("resource")
 public class YAMLFactory extends JsonFactory
 {
 	private static final long serialVersionUID = 1L;
-
-	protected final static Charset UTF8 = Charset.forName("UTF-8");
 
 	/**
      * Name used to identify YAML format.
@@ -66,6 +64,20 @@ public class YAMLFactory extends JsonFactory
      */
     protected final StringQuotingChecker _quotingChecker;
 
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @since 2.14
+     */
+    protected final LoaderOptions _loaderOptions;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -94,6 +106,7 @@ public class YAMLFactory extends JsonFactory
         //_version = DumperOptions.Version.V1_1;
         _version = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
+        _loaderOptions = null;
     }
 
     /**
@@ -106,6 +119,7 @@ public class YAMLFactory extends JsonFactory
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
         _version = src._version;
         _quotingChecker = src._quotingChecker;
+        _loaderOptions = src._loaderOptions;
     }
 
     /**
@@ -119,6 +133,7 @@ public class YAMLFactory extends JsonFactory
         _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
+        _loaderOptions = b.loaderOptions();
     }
 
     @Override
@@ -462,28 +477,28 @@ public class YAMLFactory extends JsonFactory
 
     @Override
     protected YAMLParser _createParser(InputStream in, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, _createReader(in, null, ctxt));
+        return new YAMLParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, _createReader(in, null, ctxt));
     }
 
     @Override
     protected YAMLParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, r);
+        return new YAMLParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, r);
     }
 
     // since 2.4
     @Override
     protected YAMLParser _createParser(char[] data, int offset, int len, IOContext ctxt,
             boolean recyclable) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, new CharArrayReader(data, offset, len));
+        return new YAMLParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, new CharArrayReader(data, offset, len));
     }
 
     @Override
     protected YAMLParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return new YAMLParser(ctxt, _getBufferRecycler(), _parserFeatures, _yamlParserFeatures,
-                _objectCodec, _createReader(data, offset, len, null, ctxt));
+        return new YAMLParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, _createReader(data, offset, len, null, ctxt));
     }
 
     @Override

@@ -7,9 +7,11 @@ import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
+import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import org.yaml.snakeyaml.LoaderOptions;
 
 /**
  * Unit tests for checking functioning of the underlying
@@ -596,5 +598,30 @@ public class StreamingParseTest extends ModuleTestBase
           assertToken(JsonToken.END_OBJECT, p.nextToken());
           assertNull(p.nextToken());
           p.close();
+    }
+
+    public void testYamlParseFailsWhenCodePointLimitVerySmall() throws Exception
+    {
+        final String YAML = "---\n"
+                +"content:\n"
+                +"  uri: \"http://javaone.com/keynote.mpg\"\n"
+                +"  title: \"Javaone Keynote\"\n"
+                +"  width: 640\n"
+                +"  height: 480\n"
+                +"  persons:\n"
+                +"  - \"Foo Bar\"\n"
+                +"  - \"Max Power\"\n"
+                ;
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setCodePointLimit(5); //5 bytes
+        YAMLFactory yamlFactory = YAMLFactory.builder()
+                .loaderOptions(loaderOptions)
+                .build();
+        try (JsonParser p = yamlFactory.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            fail("expected to fail by now");
+        } catch (JacksonYAMLParseException e) {
+            assertTrue(e.getMessage().startsWith("The incoming YAML document exceeds the limit: 5 code points."));
+        }
     }
 }
