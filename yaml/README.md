@@ -64,9 +64,8 @@ Most configuration is applied during mapper instance configuration, through
 
 ### Maximum input YAML document size (3 MB)
 
-SnakeYAML implementation starts imposing the default limit of 3 megabyte document
-size as of version 1.32, used by Jackson 2.14.0. If you hit this limitation,
-you need to explicitly increase the limit by configuring `YAMLFactory` and constructing `YAMLMapper` with that:
+SnakeYAML implementation (that Jackson uses for low-level encoding and decoding) starts imposing the default limit of 3 megabyte document size as of version 1.32, used by Jackson 2.14 (and later).
+If you hit this limitation, you need to explicitly increase the limit by configuring `YAMLFactory` and constructing `YAMLMapper` with that:
 
 ```java
 LoaderOptions loaderOptions = new LoaderOptions();
