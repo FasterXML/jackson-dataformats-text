@@ -33,6 +33,11 @@ Active Maintainers:
  (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
+2.13.5 (not yet released)
+
+#343: Incorrect output buffer boundary check in `CsvEncoder`
+ (reported by k163377@github)
+
 2.13.4 (03-Sep-2022)
 
 #329: (yaml) Update to SnakeYAML 1.31
