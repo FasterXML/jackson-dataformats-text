@@ -31,6 +31,9 @@ Active Maintainers:
  (contributed by @pjfanning)
 #335: (yaml) Update to SnakeYAML 1.32
  (contributed by @pjfanning)
+#337: (yaml) Allow overriding of file size limit for YAMLParser by exposing
+  SnakeYAML `LoaderOptions`
+ (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
 2.13.5 (not yet released)

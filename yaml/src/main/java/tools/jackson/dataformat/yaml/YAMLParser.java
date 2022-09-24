@@ -173,13 +173,16 @@ public class YAMLParser extends ParserBase
      */
 
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
-            int streamReadFeatures, int formatFeatures, Reader reader)
+            int streamReadFeatures, int formatFeatures,
+            LoadSettings loadSettings, Reader reader)
     {
         super(readCtxt, ioCtxt, streamReadFeatures);
         _formatFeatures = formatFeatures;
         _reader = reader;
-        LoadSettings settings = LoadSettings.builder().build();//TODO use parserFeatures
-        _yamlParser = new ParserImpl(new StreamReader(reader, settings), settings);
+        if (loadSettings == null) {
+            loadSettings = LoadSettings.builder().build();
+        }
+        _yamlParser = new ParserImpl(loadSettings, new StreamReader(loadSettings, reader));
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;

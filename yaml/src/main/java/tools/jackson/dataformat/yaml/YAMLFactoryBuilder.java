@@ -3,6 +3,7 @@ package tools.jackson.dataformat.yaml;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
 /**
@@ -31,6 +32,18 @@ public class YAMLFactoryBuilder
      * whatever default settings {@code SnakeYAML} deems best).
      */
     protected SpecVersion _version;
+
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     */
+    protected LoadSettings _loadSettings;
 
     /*
     /**********************************************************************
@@ -123,6 +136,25 @@ public class YAMLFactoryBuilder
         return this;
     }
 
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @param settings the {@code SnakeYAML} configuration to use when parsing YAML
+     * @return This builder instance, to allow chaining
+     * @since 2.14
+     */
+    public YAMLFactoryBuilder loadSettings(LoadSettings settings) {
+        _loadSettings = settings;
+        return this;
+    }
+
     /*
     /**********************************************************************
     /* Accessors
@@ -138,6 +170,22 @@ public class YAMLFactoryBuilder
             return _quotingChecker;
         }
         return StringQuotingChecker.Default.instance();
+    }
+
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     If you need to support parsing YAML files that are larger than 3Mb,
+     *     it is recommended that you provide a LoaderOptions instance where
+     *     you set the Codepoint Limit to a larger value than its 3Mb default.
+     * </p>
+     *
+     * @return the {@code SnakeYAML} configuration to use when parsing YAML
+     */
+    public LoadSettings loadSettings() {
+        return _loadSettings;
     }
 
     @Override

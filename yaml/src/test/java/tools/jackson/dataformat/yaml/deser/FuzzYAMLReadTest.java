@@ -38,7 +38,8 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         } catch (StreamReadException e) {
             // 19-Aug-2022, tatu: The actual error we get is from SnakeYAML
             //    and might change. Should try matching it at all?
-            verifyException(e, "while parsing");
+            // 24-Sep-2022, tatu: ... and snakeyaml-engine has different
+            verifyException(e, "while scanning");
         }
     }
 

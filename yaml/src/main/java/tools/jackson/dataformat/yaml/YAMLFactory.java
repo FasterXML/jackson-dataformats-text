@@ -3,6 +3,7 @@ package tools.jackson.dataformat.yaml;
 import java.io.*;
 import java.nio.charset.Charset;
 
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
 import tools.jackson.core.*;
@@ -55,6 +56,13 @@ public class YAMLFactory
      */
     protected final StringQuotingChecker _quotingChecker;
 
+    /**
+     * Configuration for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code snakeyaml-engine} deems best).
+     */
+    protected final LoadSettings _loadSettings;    
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -73,6 +81,7 @@ public class YAMLFactory
         //  that adds version declaration which looks ugly...
         _version = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
+        _loadSettings = null;
     }
 
     public YAMLFactory(YAMLFactory src)
@@ -80,6 +89,7 @@ public class YAMLFactory
         super(src);
         _version = src._version;
         _quotingChecker = src._quotingChecker;
+        _loadSettings = src._loadSettings;
     }
 
     /**
@@ -92,6 +102,7 @@ public class YAMLFactory
         super(b);
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
+        _loadSettings = b.loadSettings();
     }
 
     @Override
@@ -208,6 +219,7 @@ public class YAMLFactory
                 _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
+                _loadSettings,
                 _createReader(in, null, ioCtxt));
     }
 
@@ -218,6 +230,7 @@ public class YAMLFactory
                 _getBufferRecycler(), 
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
+                _loadSettings,
                 r);
     }
 
@@ -228,6 +241,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
+                _loadSettings,
                 new CharArrayReader(data, offset, len));
     }
 
@@ -237,6 +251,7 @@ public class YAMLFactory
         return new YAMLParser(readCtxt, ioCtxt, _getBufferRecycler(),
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
+                _loadSettings,
                 _createReader(data, offset, len, null, ioCtxt));
     }
 
