@@ -283,6 +283,30 @@ public class YAMLGenerator extends GeneratorBase
         _emitStartDocument();
     }
 
+    /**
+     * @since 2.14
+     */
+    public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
+                         StringQuotingChecker quotingChecker,
+                         ObjectCodec codec, Writer out,
+                         org.yaml.snakeyaml.DumperOptions dumperOptions)
+            throws IOException
+    {
+        super(jsonFeatures, codec);
+        _ioContext = ctxt;
+        _formatFeatures = yamlFeatures;
+        _quotingChecker = (quotingChecker == null)
+                ? StringQuotingChecker.Default.instance() : quotingChecker;
+        _writer = out;
+        _docVersion = dumperOptions.getVersion();
+        _outputOptions = dumperOptions;
+
+        _emitter = new Emitter(_writer, _outputOptions);
+        // should we start output now, or try to defer?
+        _emit(new StreamStartEvent(null, null));
+        _emitStartDocument();
+    }
+
     @Deprecated // since 2.12
     public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
             ObjectCodec codec, Writer out,

@@ -78,6 +78,26 @@ public class YAMLFactory extends JsonFactory
      */
     protected final LoaderOptions _loaderOptions;
 
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @since 2.14
+     */
+    protected final DumperOptions _dumperOptions;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -107,6 +127,7 @@ public class YAMLFactory extends JsonFactory
         _version = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
         _loaderOptions = null;
+        _dumperOptions = null;
     }
 
     /**
@@ -120,6 +141,7 @@ public class YAMLFactory extends JsonFactory
         _version = src._version;
         _quotingChecker = src._quotingChecker;
         _loaderOptions = src._loaderOptions;
+        _dumperOptions = src._dumperOptions;
     }
 
     /**
@@ -134,6 +156,7 @@ public class YAMLFactory extends JsonFactory
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
         _loaderOptions = b.loaderOptions();
+        _dumperOptions = b.dumperOptions();
     }
 
     @Override
@@ -504,10 +527,13 @@ public class YAMLFactory extends JsonFactory
     @Override
     protected YAMLGenerator _createGenerator(Writer out, IOContext ctxt) throws IOException {
         int feats = _yamlGeneratorFeatures;
-        YAMLGenerator gen = new YAMLGenerator(ctxt, _generatorFeatures, feats,
-                _quotingChecker, _objectCodec, out, _version);
-        // any other initializations? No?
-        return gen;
+        if (_dumperOptions == null) {
+            return new YAMLGenerator(ctxt, _generatorFeatures, feats,
+                    _quotingChecker, _objectCodec, out, _version);
+        } else {
+            return new YAMLGenerator(ctxt, _generatorFeatures, feats,
+                    _quotingChecker, _objectCodec, out, _dumperOptions);
+        }
     }
 
     @Override
