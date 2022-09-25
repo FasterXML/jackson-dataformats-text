@@ -34,6 +34,8 @@ Active Maintainers:
 #337: (yaml) Allow overriding of file size limit for YAMLParser by exposing
   SnakeYAML `LoaderOptions`
  (contributed by @pjfanning)
+#345: (yaml) Support configuring SnakeYAML DumperOptions directly
+ (contributed by @pjfanning)
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
 2.13.5 (not yet released)
