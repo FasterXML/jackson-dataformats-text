@@ -36,6 +36,9 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      * YAML version for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
      * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     Ignored if you provide your own {@code DumperOptions}.
+     * </p>
      */
     protected DumperOptions.Version _version;
 
@@ -52,6 +55,26 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      * @since 2.14
      */
     protected LoaderOptions _loaderOptions;
+
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @since 2.14
+     */
+    protected DumperOptions _dumperOptions;
 
     /*
     /**********************************************************
@@ -164,6 +187,31 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
         return this;
     }
 
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @param dumperOptions the {@code SnakeYAML} configuration to use when generating YAML
+     * @return This builder instance, to allow chaining
+     * @since 2.14
+     */
+    public YAMLFactoryBuilder dumperOptions(DumperOptions dumperOptions) {
+        _dumperOptions = dumperOptions;
+        return this;
+    }
+
     /*
     /**********************************************************
     /* Accessors
@@ -199,6 +247,29 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      */
     public LoaderOptions loaderOptions() {
         return _loaderOptions;
+    }
+
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @return the {@code SnakeYAML} configuration to use when generating YAML
+     * @since 2.14
+     */
+    public DumperOptions dumperOptions() {
+        return _dumperOptions;
     }
 
     @Override
