@@ -68,35 +68,44 @@ public class YAMLGenerator extends GeneratorBase
 
         /**
          * Do we try to force so-called canonical output or not.
+         * <p>
+         *     Ignored if you provide your own {@code DumperOptions}.
+         * </p>
          */
         CANONICAL_OUTPUT(false),
 
         /**
          * Options passed to SnakeYAML that determines whether longer textual content
          * gets automatically split into multiple lines or not.
-         *<p>
-         * Feature is enabled by default to conform to SnakeYAML defaults as well as
-         * backwards compatibility with 2.5 and earlier versions.
+         * <p>
+         *     Feature is enabled by default to conform to SnakeYAML defaults as well as
+         *     backwards compatibility with 2.5 and earlier versions.
+         * </p>
+         * <p>
+         *     Ignored if you provide your own {@code DumperOptions}.
+         * </p>
          */
         SPLIT_LINES(true),
 
         /**
          * Whether strings will be rendered without quotes (true) or
          * with quotes (false, default).
-         *<p>
-         * Minimized quote usage makes for more human readable output; however, content is
-         * limited to printable characters according to the rules of
-         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         * <p>
+         *     Minimized quote usage makes for more human readable output; however, content is
+         *     limited to printable characters according to the rules of
+         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         * </p>
          */
         MINIMIZE_QUOTES(false),
 
         /**
          * Whether numbers stored as strings will be rendered with quotes (true) or
          * without quotes (false, default) when MINIMIZE_QUOTES is enabled.
-         *<p>
-         * Minimized quote usage makes for more human readable output; however, content is
-         * limited to printable characters according to the rules of
-         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         * <p>
+         *     Minimized quote usage makes for more human readable output; however, content is
+         *     limited to printable characters according to the rules of
+         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         * </p>
          */
         ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
 
@@ -105,24 +114,35 @@ public class YAMLGenerator extends GeneratorBase
          * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
          * should be used. This automatically enabled when {@link #MINIMIZE_QUOTES} is set.
          * <p>
-         * The content of such strings is limited to printable characters according to the rules of
-         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         *     The content of such strings is limited to printable characters according to the rules of
+         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
+         * </p>
          */
         LITERAL_BLOCK_STYLE(false),
 
         /**
          * Feature enabling of which adds indentation for array entry generation
          * (default indentation being 2 spaces).
-         *<p>
-         * Default value is {@code false} for backwards compatibility
+         * <p>
+         *     Default value is {@code false} for backwards compatibility
+         * </p>
+         * <p>
+         *     Ignored if you provide your own {@code DumperOptions}.
+         * </p>
+         *
          */
         INDENT_ARRAYS(false),
 
         /**
          * Feature enabling of which adds indentation with indicator for array entry generation
          * (default indentation being 2 spaces).
-         *<p>
-         * Default value is {@code false} for backwards compatibility
+         * <p>
+         *     Default value is {@code false} for backwards compatibility
+         * </p>
+         * <p>
+         *     Ignored if you provide your own {@code DumperOptions}.
+         * </p>
+         *
          */
         INDENT_ARRAYS_WITH_INDICATOR(false),
 
@@ -132,8 +152,8 @@ public class YAMLGenerator extends GeneratorBase
          * If disabled, the max key length is left as 128 characters: longer names
          * are truncated. If enabled, limit is raised to 1024 characters.
          * <p>
-         * Default value is {@code false} for backwards-compatibility (same as behavior
-         * before this feature was added).
+         *     Ignored if you provide your own {@code DumperOptions}.
+         * </p>
          */
         ALLOW_LONG_KEYS(false),
         ;
@@ -249,11 +269,12 @@ public class YAMLGenerator extends GeneratorBase
     /* Life-cycle
     /**********************************************************************
      */
+
     public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
             int streamWriteFeatures, int yamlFeatures,
             StringQuotingChecker quotingChecker,
-            Writer out,
-            SpecVersion version)
+            Writer out, SpecVersion version,
+            DumpSettings dumpOptions)
     {
         super(writeContext, streamWriteFeatures);
         _ioContext = ioCtxt;
@@ -267,11 +288,13 @@ public class YAMLGenerator extends GeneratorBase
         _writer = out;
         _docVersion = version;
 
-        _outputOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
+        if (dumpOptions == null) {
+            dumpOptions = buildDumperOptions(streamWriteFeatures, yamlFeatures, version);
+        }
+        _outputOptions = dumpOptions;
 
         _emitter = new Emitter(_outputOptions, new WriterWrapper(_writer));
         // should we start output now, or try to defer?
-
         _emit(new StreamStartEvent());
         _emitStartDocument();
     }

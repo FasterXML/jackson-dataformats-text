@@ -2,6 +2,7 @@ package tools.jackson.dataformat.yaml;
 
 import java.io.*;
 
+import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
@@ -60,6 +61,24 @@ public class YAMLFactory
      */
     protected final LoadSettings _loadSettings;    
 
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     */
+    protected final DumpSettings _dumpSettings;
+
     /*
     /**********************************************************************
     /* Factory construction, configuration
@@ -79,6 +98,7 @@ public class YAMLFactory
         _version = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
         _loadSettings = null;
+        _dumpSettings = null;
     }
 
     public YAMLFactory(YAMLFactory src)
@@ -87,6 +107,7 @@ public class YAMLFactory
         _version = src._version;
         _quotingChecker = src._quotingChecker;
         _loadSettings = src._loadSettings;
+        _dumpSettings = src._dumpSettings;
     }
 
     /**
@@ -100,6 +121,7 @@ public class YAMLFactory
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
         _loadSettings = b.loadSettings();
+        _dumpSettings = b.dumpSettings();
     }
 
     @Override
@@ -272,7 +294,7 @@ public class YAMLFactory
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
                 _quotingChecker,
-                out, _version);
+                out, _version, _dumpSettings);
     }
 
     @Override

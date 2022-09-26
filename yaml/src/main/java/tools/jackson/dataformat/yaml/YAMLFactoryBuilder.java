@@ -3,6 +3,7 @@ package tools.jackson.dataformat.yaml;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
+import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
@@ -30,6 +31,9 @@ public class YAMLFactoryBuilder
      * YAML version for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
      * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     Ignored if you provide your own {@code DumperOptions}.
+     * </p>
      */
     protected SpecVersion _version;
 
@@ -45,6 +49,24 @@ public class YAMLFactoryBuilder
      */
     protected LoadSettings _loadSettings;
 
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     */
+    protected DumpSettings _dumpSettings;
+
     /*
     /**********************************************************************
     /* Life cycle
@@ -59,6 +81,8 @@ public class YAMLFactoryBuilder
         super(base);
         _version = base._version;
         _quotingChecker = base._quotingChecker;
+        _loadSettings = base._loadSettings;
+        _dumpSettings = base._dumpSettings;
     }
 
     // // // Parser features NOT YET defined
@@ -155,6 +179,30 @@ public class YAMLFactoryBuilder
         return this;
     }
 
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @param dumperOptions the {@code SnakeYAML} configuration to use when generating YAML
+     * @return This builder instance, to allow chaining
+     */
+    public YAMLFactoryBuilder dumperOptions(DumpSettings dumperOptions) {
+        _dumpSettings = dumperOptions;
+        return this;
+    }
+
     /*
     /**********************************************************************
     /* Accessors
@@ -186,6 +234,29 @@ public class YAMLFactoryBuilder
      */
     public LoadSettings loadSettings() {
         return _loadSettings;
+    }
+
+    /**
+     * Configuration for underlying generator to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * <p>
+     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     <ul>
+     *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS}</li>
+     *         <li>{@code YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR}</li>
+     *         <li>{@code YAMLGenerator.Feature.SPLIT_LINES}</li>
+     *         <li>{@code YAMLGenerator.Feature.USE_PLATFORM_LINE_BREAKS}</li>
+     *     </ul>
+     * </p>
+     *
+     * @return the {@code SnakeYAML} configuration to use when generating YAML
+     * @since 2.14
+     */
+    public DumpSettings dumpSettings() {
+        return _dumpSettings;
     }
 
     @Override
