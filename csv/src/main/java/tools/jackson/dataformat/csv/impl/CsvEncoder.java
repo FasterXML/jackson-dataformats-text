@@ -24,21 +24,21 @@ public class CsvEncoder
     // Default set of escaped characters (none)
     private static final int [] sOutputEscapes = new int[0];
 
-    final protected static char[] HEX_CHARS = CharTypes.copyHexChars();
+    protected final static char[] HEX_CHARS = CharTypes.copyHexChars(true);
 
     /**
      * As an optimization we try coalescing short writes into
      * buffer; but pass longer directly.
      */
-    final protected static int SHORT_WRITE = 32;
+    protected final static int SHORT_WRITE = 32;
 
     /**
      * Also: only do check for optional quotes for short
      * values; longer ones will always be quoted.
      */
-    final protected static int MAX_QUOTE_CHECK = 24;
+    protected final static int MAX_QUOTE_CHECK = 24;
     
-    final protected BufferedValue[] NO_BUFFERED = new BufferedValue[0];
+    protected final BufferedValue[] NO_BUFFERED = new BufferedValue[0];
 
     private final static char[] TRUE_CHARS = "true".toCharArray();
     private final static char[] FALSE_CHARS = "false".toCharArray();
@@ -55,32 +55,32 @@ public class CsvEncoder
     /**********************************************************************
      */
 
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
 
     /**
      * Underlying {@link Writer} used for output.
      */
-    final protected Writer _out;
+    protected final Writer _out;
     
-    final protected char _cfgColumnSeparator;
+    protected final char _cfgColumnSeparator;
 
-    final protected int _cfgQuoteCharacter;
+    protected final int _cfgQuoteCharacter;
 
-    final protected int _cfgEscapeCharacter;
+    protected final int _cfgEscapeCharacter;
     
-    final protected char[] _cfgLineSeparator;
+    protected final char[] _cfgLineSeparator;
 
-    final protected char[] _cfgNullValue;
+    protected final char[] _cfgNullValue;
 
-    final protected int _cfgLineSeparatorLength;
+    protected final int _cfgLineSeparatorLength;
 
-    final protected int _cfgMaxQuoteCheckChars;
+    protected final int _cfgMaxQuoteCheckChars;
     
     /**
      * Lowest-valued character that is safe to output without using
      * quotes around value, NOT including possible escape character.
      */
-    final protected int _cfgMinSafeChar;
+    protected final int _cfgMinSafeChar;
 
     protected int _csvFeatures;
 
@@ -90,7 +90,7 @@ public class CsvEncoder
      */
     protected boolean _cfgOptimalQuoting;
 
-    final protected boolean _cfgAllowsComments;
+    protected final boolean _cfgAllowsComments;
 
     protected boolean _cfgIncludeMissingTail;
 
