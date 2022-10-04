@@ -3,11 +3,14 @@ package tools.jackson.dataformat.yaml.deser;
 import java.io.StringWriter;
 import java.math.BigInteger;
 
+import org.snakeyaml.engine.v2.api.LoadSettings;
+
 import tools.jackson.core.JsonLocation;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
-
+import tools.jackson.dataformat.yaml.JacksonYAMLParseException;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLParser;
 
@@ -601,5 +604,33 @@ public class StreamingParseTest extends ModuleTestBase
           assertToken(JsonToken.END_OBJECT, p.nextToken());
           assertNull(p.nextToken());
           p.close();
+    }
+
+    // [dataformats-text#337]: different setting in 3.0 than 2.x
+    public void testYamlParseFailsWhenCodePointLimitVerySmall() throws Exception
+    {
+        final String YAML = "---\n"
+                +"content:\n"
+                +"  uri: \"http://javaone.com/keynote.mpg\"\n"
+                +"  title: \"Javaone Keynote\"\n"
+                +"  width: 640\n"
+                +"  height: 480\n"
+                +"  persons:\n"
+                +"  - \"Foo Bar\"\n"
+                +"  - \"Max Power\"\n"
+                ;
+        LoadSettings loadSettings = LoadSettings.builder()
+                .setCodePointLimit(5) //5 bytes
+                .build();
+        YAMLFactory yamlFactory = YAMLFactory.builder()
+                .loadSettings(loadSettings)
+                .build();
+        YAMLMapper mapper = new YAMLMapper(yamlFactory);
+        try (JsonParser p = mapper.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            fail("expected to fail by now");
+        } catch (JacksonYAMLParseException e) {
+            assertTrue(e.getMessage().startsWith("The incoming YAML document exceeds the limit: 5 code points."));
+        }
     }
 }
