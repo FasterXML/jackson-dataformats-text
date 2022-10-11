@@ -14,6 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.14.0-rc2 (10-Oct-2022)
 2.14.0-rc1 (25-Sep-2022)
 
 #169: (properties) Need a way to escape dots in property keys (add path separator configuration)
