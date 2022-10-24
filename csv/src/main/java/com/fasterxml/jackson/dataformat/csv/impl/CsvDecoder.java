@@ -254,6 +254,16 @@ public class CsvDecoder
 
     protected BigDecimal _numberBigDecimal;
 
+    /**
+     * Textual number representation captured from input in cases lazy-parsing
+     * is desired.
+     *<p>
+     * As of 2.14, this only applies to {@link BigInteger} and {@link BigDecimal}.
+     *
+     * @since 2.14
+     */
+    protected String _numberString;
+
     /*
     /**********************************************************************
     /* Life-cycle
@@ -1019,12 +1029,12 @@ public class CsvDecoder
             return Long.valueOf(_numberLong);
         }
         if ((_numTypesValid & NR_BIGINT) != 0) {
-            return _numberBigInt;
+            return _getBigInteger();
         }
         // And then floating point types. But here optimal type
         // needs to be big decimal, to avoid losing any data?
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            return _numberBigDecimal;
+            return _getBigDecimal();
         }
         if ((_numTypesValid & NR_DOUBLE) == 0) { // sanity check
             _throwInternal();
@@ -1093,7 +1103,7 @@ public class CsvDecoder
                 convertNumberToBigInteger();
             }
         }
-        return _numberBigInt;
+        return _getBigInteger();
     }
     
     public float getFloatValue() throws IOException
@@ -1126,6 +1136,40 @@ public class CsvDecoder
                 convertNumberToBigDecimal();
             }
         }
+        return _getBigDecimal();
+    }
+
+    /**
+     * Internal accessor that needs to be used for accessing number value of type
+     * {@link BigInteger} which -- as of 2.14 -- is typically lazily parsed.
+     *
+     * @since 2.14
+     */
+    protected BigInteger _getBigInteger() {
+        if (_numberBigInt != null) {
+            return _numberBigInt;
+        } else if (_numberString == null) {
+            throw new IllegalStateException("cannot get BigInteger from current parser state");
+        }
+        _numberBigInt = NumberInput.parseBigInteger(_numberString);
+        _numberString = null;
+        return _numberBigInt;
+    }
+
+    /**
+     * Internal accessor that needs to be used for accessing number value of type
+     * {@link BigDecimal} which -- as of 2.14 -- is typically lazily parsed.
+     *
+     * @since 2.14
+     */
+    protected BigDecimal _getBigDecimal() {
+        if (_numberBigDecimal != null) {
+            return _numberBigDecimal;
+        } else if (_numberString == null) {
+            throw new IllegalStateException("cannot get BigDecimal from current parser state");
+        }
+        _numberBigDecimal = NumberInput.parseBigDecimal(_numberString);
+        _numberString = null;
         return _numberBigDecimal;
     }
 
@@ -1226,7 +1270,8 @@ public class CsvDecoder
          */
         try {
             if (exactNumber) {
-                _numberBigDecimal = _textBuffer.contentsAsDecimal();
+                _numberBigDecimal = null;
+                _numberString = _textBuffer.contentsAsString();
                 _numTypesValid = NR_BIGDECIMAL;
             } else {
                 // Otherwise double has to do
@@ -1251,7 +1296,8 @@ public class CsvDecoder
                 _numTypesValid = NR_LONG;
             } else {
                 // nope, need the heavy guns... (rare case)
-                _numberBigInt = NumberInput.parseBigInteger(numStr);
+                _numberBigInt = null;
+                _numberString = numStr;
                 _numTypesValid = NR_BIGINT;
             }
         } catch (NumberFormatException nex) {
@@ -1278,7 +1324,7 @@ public class CsvDecoder
             _numberInt = result;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             // !!! Should check for range...
-            _numberInt = _numberBigInt.intValue();
+            _numberInt = _getBigInteger().intValue();
         } else if ((_numTypesValid & NR_DOUBLE) != 0) {
             // Need to check boundaries
             if (_numberDouble < MIN_INT_D || _numberDouble > MAX_INT_D) {
@@ -1286,11 +1332,12 @@ public class CsvDecoder
             }
             _numberInt = (int) _numberDouble;
         } else if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            if (BD_MIN_INT.compareTo(_numberBigDecimal) > 0 
-                || BD_MAX_INT.compareTo(_numberBigDecimal) < 0) {
+            final BigDecimal bigDecimal = _getBigDecimal();
+            if (BD_MIN_INT.compareTo(bigDecimal) > 0
+                || BD_MAX_INT.compareTo(bigDecimal) < 0) {
                 reportOverflowInt();
             }
-            _numberInt = _numberBigDecimal.intValue();
+            _numberInt = bigDecimal.intValue();
         } else {
             _throwInternal(); // should never get here
         }
@@ -1304,7 +1351,7 @@ public class CsvDecoder
             _numberLong = _numberInt;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             // !!! Should check for range...
-            _numberLong = _numberBigInt.longValue();
+            _numberLong = _getBigInteger().longValue();
         } else if ((_numTypesValid & NR_DOUBLE) != 0) {
             // Need to check boundaries
             if (_numberDouble < MIN_LONG_D || _numberDouble > MAX_LONG_D) {
@@ -1312,11 +1359,12 @@ public class CsvDecoder
             }
             _numberLong = (long) _numberDouble;
         } else if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            if (BD_MIN_LONG.compareTo(_numberBigDecimal) > 0 
-                || BD_MAX_LONG.compareTo(_numberBigDecimal) < 0) {
+            final BigDecimal bigDecimal = _getBigDecimal();
+            if (BD_MIN_LONG.compareTo(bigDecimal) > 0
+                || BD_MAX_LONG.compareTo(bigDecimal) < 0) {
                 reportOverflowLong();
             }
-            _numberLong = _numberBigDecimal.longValue();
+            _numberLong = bigDecimal.longValue();
         } else {
             _throwInternal(); // should never get here
         }
@@ -1329,7 +1377,7 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             // here it'll just get truncated, no exceptions thrown
-            _numberBigInt = _numberBigDecimal.toBigInteger();
+            _numberBigInt = _getBigDecimal().toBigInteger();
         } else if ((_numTypesValid & NR_LONG) != 0) {
             _numberBigInt = BigInteger.valueOf(_numberLong);
         } else if ((_numTypesValid & NR_INT) != 0) {
@@ -1352,9 +1400,9 @@ public class CsvDecoder
          */
     
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
-            _numberDouble = _numberBigDecimal.doubleValue();
+            _numberDouble = _getBigDecimal().doubleValue();
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
-            _numberDouble = _numberBigInt.doubleValue();
+            _numberDouble = _getBigInteger().doubleValue();
         } else if ((_numTypesValid & NR_LONG) != 0) {
             _numberDouble = _numberLong;
         } else if ((_numTypesValid & NR_INT) != 0) {
@@ -1374,7 +1422,7 @@ public class CsvDecoder
              */
             _numberBigDecimal = NumberInput.parseBigDecimal(getText());
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
-            _numberBigDecimal = new BigDecimal(_numberBigInt);
+            _numberBigDecimal = new BigDecimal(_getBigInteger());
         } else if ((_numTypesValid & NR_LONG) != 0) {
             _numberBigDecimal = BigDecimal.valueOf(_numberLong);
         } else if ((_numTypesValid & NR_INT) != 0) {
