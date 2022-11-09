@@ -863,7 +863,7 @@ public class CsvParser
         }
         // [dataformats-text#285]: Are we missing something?
         int diff = schemaColumnCount - newColumnCount;
-        if (diff > 0) {
+        if (Feature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures) && diff > 0) {
             Set<String> oldColumnNames = new LinkedHashSet<>();
             _schema.getColumnNames(oldColumnNames);
             oldColumnNames.removeAll(newSchema.getColumnNames());
