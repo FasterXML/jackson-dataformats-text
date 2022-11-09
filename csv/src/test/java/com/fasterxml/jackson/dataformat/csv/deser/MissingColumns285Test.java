@@ -20,14 +20,17 @@ public class MissingColumns285Test extends ModuleTestBase
      */
 
     private final CsvMapper MAPPER = mapperForCsv();
+    private final CsvSchema csvSchema = CsvSchema.builder()
+            .setUseHeader(true)
+            .setReorderColumns(true)
+            .addColumn("name")
+            .addColumn("age")
+            .build();
+    private final String CSV = "name\nRoger\n";
 
     // [dataformats-text#285]: fail by default
     public void testFailOnMissingWithReorder() throws Exception
     {
-        CsvSchema csvSchema = CsvSchema.builder().setUseHeader(true).setReorderColumns(true)
-                .addColumn("name").addColumn("age").build();
-        final String CSV = "name\n"
-                +"Roger\n";
         // Need to have it all inside try block since construction tries to read
         // the first token
         try {
@@ -45,15 +48,6 @@ public class MissingColumns285Test extends ModuleTestBase
     // [dataformats-text#285]: optionally allow
     public void testAllowMissingWithReorder() throws Exception
     {
-        CsvSchema csvSchema = CsvSchema.builder()
-                .setUseHeader(true)
-                .setReorderColumns(true)
-                .addColumn("name")
-                .addColumn("age")
-                .build();
-        final String CSV = "name\n"
-                +"Roger\n";
-
         MappingIterator<Map<String, Object>> it = MAPPER
                 .readerFor(Map.class)
                 .with(csvSchema)
