@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.14.1 (not yet released)
+
+#352: Disabling `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS` has no effect
+ (fix contributed by Matteo G)
+
 2.14.0 (05-Nov-2022)
 
 #169: (properties) Need a way to escape dots in property keys (add path separator configuration)

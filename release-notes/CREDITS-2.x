@@ -214,7 +214,13 @@ Jim Talbut (Yaytay@github)
 Simon Dean (msmsimondean@github)
 * Requested #244: (yaml) Add `YAMLGenerator.Feature.ALLOW_LONG_KEYS` to allow writing keys
   longer than 128 characters (default)
+ (2.14.0)
 
 Shauni Arima (ShauniArima@github)
 * Contributed #244: (yaml) Add `YAMLGenerator.Feature.ALLOW_LONG_KEYS` to allow writing keys
   longer than 128 characters (default)
+ (2.14.0)
+
+Matteo Giordano (malteo@github)
+* Contributed fix for #352: Disabling `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS` has no effect
+ (2.14.1)
