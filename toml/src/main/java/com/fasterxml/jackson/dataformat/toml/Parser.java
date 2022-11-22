@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -242,7 +243,12 @@ class Parser {
             }
         }
 
+        ValueNode node = parseIntFromBuffer(buffer, start, length);
         pollExpected(TomlToken.INTEGER, nextState);
+        return node;
+    }
+
+    private ValueNode parseIntFromBuffer(char[] buffer, int start, int length) throws TomlStreamReadException {
         if (length > 2) {
             char baseChar = buffer[start + 1];
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
@@ -1026,5 +1028,24 @@ public class ParserTest {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown escape sequence");
         toml("foo = \"\\k\"");
+    }
+
+    @Test
+    public void chunkEdge() throws IOException {
+        BufferRecycler br = BufferRecyclers.getBufferRecycler();
+        char[] chars = br.allocCharBuffer(0);
+        br.releaseCharBuffer(0, chars);
+        int bufferLength = chars.length;
+
+        ObjectNode node = toml("foo = \"" + repeat('a', bufferLength - 19) + "\"\n" +
+                "bar = 123\n" +
+                "baz = \"" + repeat('a', bufferLength) + "\"");
+        Assert.assertEquals(123, node.get("bar").intValue());
+    }
+
+    private static String repeat(char c, int n) {
+        char[] chars = new char[n];
+        Arrays.fill(chars, c);
+        return new String(chars);
     }
 }
