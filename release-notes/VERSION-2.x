@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.14.2 (not yet released)
+
+#356: Fix TOML parse failure when number token hits buffer edge
+ (fix by Jonas K)
+
 2.14.1 (21-Nov-2022)
 
 #352: Disabling `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS` has no effect

@@ -7,10 +7,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.core.util.BufferRecycler;
 import tools.jackson.core.util.BufferRecyclers;
 
 import tools.jackson.databind.DeserializationFeature;
@@ -1027,5 +1029,24 @@ public class ParserTest {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown escape sequence");
         toml("foo = \"\\k\"");
+    }
+
+    @Test
+    public void chunkEdge() throws IOException {
+        BufferRecycler br = BufferRecyclers.getBufferRecycler();
+        char[] chars = br.allocCharBuffer(0);
+        br.releaseCharBuffer(0, chars);
+        int bufferLength = chars.length;
+
+        ObjectNode node = toml("foo = \"" + repeat('a', bufferLength - 19) + "\"\n" +
+                "bar = 123\n" +
+                "baz = \"" + repeat('a', bufferLength) + "\"");
+        Assert.assertEquals(123, node.get("bar").intValue());
+    }
+
+    private static String repeat(char c, int n) {
+        char[] chars = new char[n];
+        Arrays.fill(chars, c);
+        return new String(chars);
     }
 }

@@ -181,6 +181,8 @@ Suminda Sirinath Salpitikorala Dharmasena (sirinath@github)
 Jonas Konrad (yawkat@github)
 * Contributed #219: Add TOML (https://en.wikipedia.org/wiki/TOML) support
  (2.13.0)
+* Contributed #356: Fix TOML parse failure when number token hits buffer edge
+ (2.14.2)
 
 Krzysztof Debski (kdebski85@github)
 #270: Should not quote with strict quoting when line starts with `#` but comments
