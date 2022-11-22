@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.14.1 (not yet released)
+2.14.1 (21-Nov-2022)
 
 #352: Disabling `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS` has no effect
  (fix contributed by Matteo G)
