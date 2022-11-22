@@ -29,7 +29,7 @@ public class FuzzTomlReadTest
             JsonNode n = TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass, got: "+n);
         } catch (StreamReadException e) {
-            verifyException(e, "Invalid number");
+            verifyException(e, "Premature end of file");
             // NOTE: decoding of token for error message seems wrong, cannot
             // quite verify it for the last line
         }
@@ -73,8 +73,7 @@ public class FuzzTomlReadTest
             TOML_MAPPER.readTree(INPUT);
             Assert.fail("Should not pass");
         } catch (StreamReadException e) {
-            verifyException(e, "Invalid number representation");
-            verifyException(e, "Illegal leading minus sign");
+            verifyException(e, "Premature end of file");
         }
     }
         
