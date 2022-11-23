@@ -14,6 +14,10 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.15.0 (not yet released)
+
+-
+
 2.14.2 (not yet released)
 
 #356: Fix TOML parse failure when number token hits buffer edge
