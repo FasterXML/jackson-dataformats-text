@@ -40,6 +40,8 @@
   </issueManagement>
 
   <properties>
+    <!-- for Reproducible Builds -->
+    <project.build.outputTimestamp>2022-11-28T00:00:00Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
