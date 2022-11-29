@@ -13,7 +13,7 @@
   </parent>
   <artifactId>jackson-dataformat-csv</artifactId>
   <name>Jackson-dataformat-CSV</name>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
   <description>Support for reading and writing CSV-encoded data via Jackson
 abstractions.
   </description>

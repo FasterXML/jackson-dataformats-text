@@ -13,7 +13,7 @@
   </parent>
   <artifactId>jackson-dataformat-properties</artifactId>
   <name>Jackson-dataformat-Properties</name>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
   <description>Support for reading and writing content of "Java Properties" style
 configuration files as if there was implied nesting structure (by default using dots as separators).
   </description>
