@@ -1,9 +1,10 @@
 package tools.jackson.dataformat.toml;
 
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.base.DecorableTSFactory;
 
 /**
- * {@link tools.jackson.core.TokenStreamFactory.TSFBuilder}
+ * {@link tools.jackson.core.TSFBuilder}
  * implementation for constructing {@link TomlFactory}
  * instances.
  */
@@ -16,7 +17,8 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
      */
 
     TomlFactoryBuilder() {
-        super(TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
+        super(StreamReadConstraints.defaults(),
+                TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 
     TomlFactoryBuilder(TomlFactory base) {

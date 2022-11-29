@@ -64,7 +64,8 @@ public class CsvFactory
      * factory instance.
      */
     public CsvFactory() {
-        super(DEFAULT_CSV_PARSER_FEATURE_FLAGS,
+        super(StreamReadConstraints.defaults(),
+                DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
         _characterEscapes = null; // derive from flags
     }
@@ -317,6 +318,7 @@ public class CsvFactory
     @Override
     protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
     {
-        return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
+        return new CsvIOContext(_streamReadConstraints,
+                _getBufferRecycler(), contentRef, resourceManaged);
     }
 }

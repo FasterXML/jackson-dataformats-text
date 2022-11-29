@@ -92,7 +92,8 @@ public class YAMLFactory
      */
     public YAMLFactory()
     {
-        super(DEFAULT_YAML_PARSER_FEATURE_FLAGS, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
+        super(StreamReadConstraints.defaults(),
+                DEFAULT_YAML_PARSER_FEATURE_FLAGS, DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         _version = null;

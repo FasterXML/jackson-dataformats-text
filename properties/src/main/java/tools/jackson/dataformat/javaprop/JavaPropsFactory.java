@@ -35,7 +35,7 @@ public class JavaPropsFactory
     
     public JavaPropsFactory() {
         // No format-specific features yet so:
-        super(0, 0);
+        super(StreamReadConstraints.defaults(), 0, 0);
     }
 
     protected JavaPropsFactory(JavaPropsFactory src)

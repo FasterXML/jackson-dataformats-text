@@ -1,5 +1,6 @@
 package tools.jackson.dataformat.yaml;
 
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
@@ -8,7 +9,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 
 /**
- * {@link tools.jackson.core.TokenStreamFactory.TSFBuilder}
+ * {@link tools.jackson.core.TSFBuilder}
  * implementation for constructing {@link YAMLFactory}
  * instances.
  */
@@ -74,7 +75,8 @@ public class YAMLFactoryBuilder
      */
 
     protected YAMLFactoryBuilder() {
-        super(0, YAMLFactory.DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
+        super(StreamReadConstraints.defaults(),
+                0, YAMLFactory.DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
     }
 
     public YAMLFactoryBuilder(YAMLFactory base) {

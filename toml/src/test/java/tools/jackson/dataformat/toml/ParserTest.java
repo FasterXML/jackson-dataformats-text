@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.json.JsonReadFeature;
@@ -44,8 +45,9 @@ public class ParserTest {
 
     static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
         return Parser.parse(
-                new IOContext(BufferRecyclers.getBufferRecycler(),
-                        ContentReference.construct(true, toml), false),
+                new IOContext(StreamReadConstraints.defaults(),
+                        BufferRecyclers.getBufferRecycler(),
+                        ContentReference.construct(true, toml), false, null),
                 opts,
                 new StringReader(toml)
         );
