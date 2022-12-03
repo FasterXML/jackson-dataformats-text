@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import tools.jackson.databind.ObjectMapper;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +28,8 @@ public class ComplianceInvalidTest {
                 .collect(Collectors.toList());
     }
 
+    private final ObjectMapper MAPPER = new TomlMapper();
+
     private final Path path;
 
     public ComplianceInvalidTest(Path path) {
@@ -33,7 +37,8 @@ public class ComplianceInvalidTest {
     }
 
     @Test(expected = TomlStreamReadException.class)
-    public void test() {
-        TomlMapper.shared().readTree(path);
+    public void test() throws IOException {
+        // TODO: verify more details of failure
+        MAPPER.readTree(path.toFile());
     }
 }
