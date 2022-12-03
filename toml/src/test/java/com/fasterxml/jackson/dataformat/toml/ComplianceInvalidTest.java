@@ -4,6 +4,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +28,8 @@ public class ComplianceInvalidTest {
                 .collect(Collectors.toList());
     }
 
+    private final ObjectMapper MAPPER = new TomlMapper();
+
     private final Path path;
 
     public ComplianceInvalidTest(Path path) {
@@ -34,6 +38,7 @@ public class ComplianceInvalidTest {
 
     @Test(expected = TomlStreamReadException.class)
     public void test() throws IOException {
-        new TomlMapper().readTree(path.toFile());
+        // TODO: verify more details of failure
+        MAPPER.readTree(path.toFile());
     }
 }

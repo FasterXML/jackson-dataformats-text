@@ -1,8 +1,10 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,6 +17,8 @@ import java.math.BigInteger;
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
+    private final ObjectMapper MAPPER = new TomlMapper();
+
     @Test
     public void decimal() throws IOException {
         StringBuilder toml = new StringBuilder("foo = 0.");
@@ -23,7 +27,7 @@ public class LongTokenTest {
         }
         toml.append('1');
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         BigDecimal decimal = node.get("foo").decimalValue();
 
         Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
@@ -37,7 +41,7 @@ public class LongTokenTest {
             toml.append('0');
         }
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         BigInteger integer = node.get("foo").bigIntegerValue();
 
         Assert.assertEquals(SCALE + 1, integer.bitLength());
@@ -50,8 +54,7 @@ public class LongTokenTest {
             toml.append('a');
         }
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
-
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         Assert.assertTrue(node.isEmpty());
     }
 
@@ -62,9 +65,7 @@ public class LongTokenTest {
             toml.append(' ');
         }
         toml.append(']');
-
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
-
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         Assert.assertEquals(0, node.get("foo").size());
     }
 
@@ -76,9 +77,7 @@ public class LongTokenTest {
         }
         String expectedKey = toml.toString();
         toml.append(" = 0");
-
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
-
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         Assert.assertEquals(expectedKey, node.fieldNames().next());
     }
 
@@ -89,9 +88,7 @@ public class LongTokenTest {
             toml.append('a');
         }
         toml.append("'");
-
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
-
+        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
 
@@ -103,12 +100,14 @@ public class LongTokenTest {
         }
         toml.append("\"");
 
+        // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
         ObjectNode node = Parser.parse(_ioContext(toml), TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
 
     private IOContext _ioContext(CharSequence toml) {
-        return new IOContext(BufferRecyclers.getBufferRecycler(), ContentReference.rawReference(toml), false);
+        return new IOContext(StreamReadConstraints.defaults(),
+                BufferRecyclers.getBufferRecycler(), ContentReference.rawReference(toml), false);
     }
 }

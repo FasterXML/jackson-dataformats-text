@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.JsonNodeCreator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
 import org.junit.Assert;
@@ -13,7 +13,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,40 +78,41 @@ public class ComplianceValidTest {
     }
 
     private static JsonNode mapFromComplianceNode(ObjectNode expected) {
+        final JsonNodeCreator nodeF = expected;
         if (expected.has("type") && expected.has("value")) {
             JsonNode value = expected.get("value");
             switch (expected.get("type").textValue()) {
                 case "string":
                     // for some reason, the compliance tests escape these values. this makes some tests fail right now
-                    return JsonNodeFactory.instance.textNode(value.textValue());
+                    return nodeF.textNode(value.textValue());
                 case "integer":
-                    return JsonNodeFactory.instance.numberNode(NumberInput.parseBigInteger(value.textValue()));
+                    return nodeF.numberNode(NumberInput.parseBigInteger(value.textValue()));
                 case "float":
                     switch (value.textValue()) {
                         case "inf":
-                            return JsonNodeFactory.instance.numberNode(Double.POSITIVE_INFINITY);
+                            return nodeF.numberNode(Double.POSITIVE_INFINITY);
                         case "-inf":
-                            return JsonNodeFactory.instance.numberNode(Double.NEGATIVE_INFINITY);
+                            return nodeF.numberNode(Double.NEGATIVE_INFINITY);
                         case "nan":
-                            return JsonNodeFactory.instance.numberNode(Double.NaN);
+                            return nodeF.numberNode(Double.NaN);
                         default:
-                            return JsonNodeFactory.instance.numberNode(NumberInput.parseBigDecimal(value.textValue()));
+                            return nodeF.numberNode(NumberInput.parseBigDecimal(value.textValue()));
                     }
                 case "boolean":
-                    return JsonNodeFactory.instance.booleanNode(Boolean.parseBoolean(value.textValue()));
+                    return nodeF.booleanNode(Boolean.parseBoolean(value.textValue()));
                 case "offset datetime":
-                    return JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse(value.textValue()));
+                    return nodeF.pojoNode(OffsetDateTime.parse(value.textValue()));
                 case "local datetime":
                 case "datetime-local":
-                    return JsonNodeFactory.instance.pojoNode(LocalDateTime.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalDateTime.parse(value.textValue()));
                 case "local date":
                 case "date":
-                    return JsonNodeFactory.instance.pojoNode(LocalDate.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalDate.parse(value.textValue()));
                 case "local time":
                 case "time":
-                    return JsonNodeFactory.instance.pojoNode(LocalTime.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalTime.parse(value.textValue()));
                 case "array":
-                    ArrayNode array = JsonNodeFactory.instance.arrayNode();
+                    ArrayNode array = nodeF.arrayNode();
                     for (JsonNode member : value) {
                         array.add(mapFromComplianceNode((ObjectNode) member));
                     }
@@ -121,7 +121,7 @@ public class ComplianceValidTest {
                     throw new AssertionError(expected);
             }
         } else {
-            ObjectNode object = JsonNodeFactory.instance.objectNode();
+            ObjectNode object = expected.objectNode();
             for (Map.Entry<String, JsonNode> field : (Iterable<? extends Map.Entry<String, JsonNode>>) expected::fields) {
                 object.set(field.getKey(), mapFromComplianceNode((ObjectNode) field.getValue()));
             }

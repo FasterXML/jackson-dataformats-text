@@ -28,6 +28,7 @@ import java.util.Arrays;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
+    private static final ObjectMapper TOML_MAPPER = new TomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -38,7 +39,7 @@ public class ParserTest {
     }
 
     static ObjectNode toml(@Language("toml") String toml) throws IOException {
-        return toml(0, toml);
+        return (ObjectNode) TOML_MAPPER.readTree(toml);
     }
 
     static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
