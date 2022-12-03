@@ -1152,7 +1152,7 @@ public class CsvDecoder
             throw new IllegalStateException("cannot get BigInteger from current parser state");
         }
         _numberBigInt = NumberInput.parseBigInteger(
-                _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER);
+                _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         _numberString = null;
         return _numberBigInt;
     }
@@ -1170,7 +1170,7 @@ public class CsvDecoder
             throw new IllegalStateException("cannot get BigDecimal from current parser state");
         }
         _numberBigDecimal = NumberInput.parseBigDecimal(
-                _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER);
+                _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         _numberString = null;
         return _numberBigDecimal;
     }

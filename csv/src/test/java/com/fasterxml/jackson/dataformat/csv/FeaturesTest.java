@@ -36,12 +36,25 @@ public class FeaturesTest extends ModuleTestBase
         CsvFactory f = new CsvFactory();
         f.enable(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature());
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER.mappedFeature()));
         f.enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature());
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
         CsvParser parser = f.createParser(new StringReader(""));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+        assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         CsvGenerator generator = f.createGenerator(new StringWriter());
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
+    }
+
+    public void testFactoryFastBigNumberFeature() throws Exception
+    {
+        CsvFactory f = new CsvFactory();
+        f.enable(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER.mappedFeature());
+        assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER.mappedFeature()));
+        CsvParser parser = f.createParser(new StringReader(""));
+        assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+        assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
     }
 
     public void testFactoryBuilderFastFeatures() throws Exception
@@ -51,10 +64,24 @@ public class FeaturesTest extends ModuleTestBase
             .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
             .build();
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER.mappedFeature()));
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER.mappedFeature()));
         CsvParser parser = f.createParser(new StringReader(""));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+        assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         CsvGenerator generator = f.createGenerator(new StringWriter());
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
+    }
+
+    public void testFactoryBuilderFastBigNumberFeature() throws Exception
+    {
+        CsvFactory f = CsvFactory.builder()
+                .enable(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)
+                .build();
+        assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER.mappedFeature()));
+        assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER.mappedFeature()));
+        CsvParser parser = f.createParser(new StringReader(""));
+        assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+        assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
     }
 }
