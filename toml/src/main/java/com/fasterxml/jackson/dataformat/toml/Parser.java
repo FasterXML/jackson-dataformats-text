@@ -54,9 +54,11 @@ class Parser {
     ) throws IOException {
         Parser parser = new Parser(new TomlFactory(), ioContext,
                 new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
-        ObjectNode node = parser.parse();
-        parser.lexer.releaseBuffers();
-        return node;
+        try {
+            return parser.parse();
+        } finally {
+            parser.lexer.releaseBuffers();
+        }
     }
 
     /**
@@ -76,9 +78,11 @@ class Parser {
         Parser parser = new Parser(factory, ioContext,
                 new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null),
                 factory.getFormatParserFeatures(), reader);
-        ObjectNode node = parser.parse();
-        parser.lexer.releaseBuffers();
-        return node;
+        try {
+            return parser.parse();
+        } finally {
+            parser.lexer.releaseBuffers();
+        }
     }
 
     private TomlToken peek() throws TomlStreamReadException {
