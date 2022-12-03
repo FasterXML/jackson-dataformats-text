@@ -290,7 +290,12 @@ public final class TextBuffer
     /**
      * Convenience method for converting contents of the buffer
      * into a {@link BigDecimal}.
+     * <p>
+     *   This method is unused and is deprecated. If we choose to start using it, we should
+     *   copy over the <code>USE_FAST_BIG_NUMBER_PARSER</code> support from jackson-core.
+     * </p>
      */
+    @Deprecated //since 2.15
     public BigDecimal contentsAsDecimal()
         throws NumberFormatException
     {

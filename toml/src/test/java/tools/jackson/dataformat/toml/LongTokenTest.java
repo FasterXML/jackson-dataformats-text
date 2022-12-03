@@ -17,6 +17,8 @@ import org.junit.Test;
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
+    private static TomlFactory TOML_F = new TomlFactory();
+
     @Test
     public void decimal() throws IOException {
         StringBuilder toml = new StringBuilder("foo = 0.");
@@ -25,7 +27,7 @@ public class LongTokenTest {
         }
         toml.append('1');
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
         BigDecimal decimal = node.get("foo").decimalValue();
 
         Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
@@ -39,7 +41,7 @@ public class LongTokenTest {
             toml.append('0');
         }
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
         BigInteger integer = node.get("foo").bigIntegerValue();
 
         Assert.assertEquals(SCALE + 1, integer.bitLength());
@@ -52,7 +54,7 @@ public class LongTokenTest {
             toml.append('a');
         }
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
 
         Assert.assertTrue(node.isEmpty());
     }
@@ -65,7 +67,7 @@ public class LongTokenTest {
         }
         toml.append(']');
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
 
         Assert.assertEquals(0, node.get("foo").size());
     }
@@ -79,7 +81,7 @@ public class LongTokenTest {
         String expectedKey = toml.toString();
         toml.append(" = 0");
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
 
         Assert.assertEquals(expectedKey, node.propertyNames().next());
     }
@@ -92,7 +94,7 @@ public class LongTokenTest {
         }
         toml.append("'");
 
-        ObjectNode node = Parser.parse(_ioContext(toml), 0, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), 0, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
@@ -105,7 +107,7 @@ public class LongTokenTest {
         }
         toml.append("\"");
 
-        ObjectNode node = Parser.parse(_ioContext(toml), TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(TOML_F, _ioContext(toml), TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }

@@ -12,7 +12,7 @@ import tools.jackson.databind.node.TreeTraversingParser;
 
 public final class TomlFactory extends TextualTSFactory
 {
-    private static final long serialVersionUID = 1L;
+    private final static long serialVersionUID = 1L;
 
     public final static String FORMAT_NAME_TOML = "toml";
 
@@ -232,10 +232,10 @@ public final class TomlFactory extends TextualTSFactory
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 try (Reader r = r0) {
-                    return Parser.parse(ctxt, readFeatures, r);
+                    return Parser.parse(this, ctxt, readFeatures, r);
                 }
             } else {
-                return Parser.parse(ctxt, readFeatures, r0);
+                return Parser.parse(this, ctxt, readFeatures, r0);
             }
         } catch (IOException e) {
             throw _wrapIOFailure(e);

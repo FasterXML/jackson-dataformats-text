@@ -30,6 +30,8 @@ import org.junit.rules.ExpectedException;
 
 @SuppressWarnings("OctalInteger")
 public class ParserTest {
+    private static final TomlMapper TOML_MAPPER = new TomlMapper();
+
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -40,11 +42,11 @@ public class ParserTest {
     }
 
     static ObjectNode toml(@Language("toml") String toml) throws IOException {
-        return toml(0, toml);
+        return (ObjectNode) TOML_MAPPER.readTree(toml);
     }
 
     static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
-        return Parser.parse(
+        return Parser.parse(TOML_MAPPER.tokenStreamFactory(),
                 new IOContext(StreamReadConstraints.defaults(),
                         BufferRecyclers.getBufferRecycler(),
                         ContentReference.construct(true, toml), false, null),
