@@ -879,7 +879,9 @@ public class YAMLParser extends ParserBase
     // @since 2.14
     private BigInteger _decodeBigInt(String str, int base) throws IOException {
         try {
-            return base == 10 ? NumberInput.parseBigInteger(str) : new BigInteger(str, base);
+            return base == 10 ?
+                    NumberInput.parseBigInteger(str, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)) :
+                    new BigInteger(str, base);
         } catch (NumberFormatException e) {
             return _reportInvalidNumber(str, base, e);
         }
@@ -1028,7 +1030,8 @@ public class YAMLParser extends ParserBase
             }
             // !!! TODO: implement proper bounds checks; now we'll just use BigInteger for convenience
             try {
-                BigInteger n = NumberInput.parseBigInteger(_cleanedTextValue);
+                BigInteger n = NumberInput.parseBigInteger(
+                        _cleanedTextValue, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 // Could still fit in a long, need to check
                 if (len == 19 && n.bitLength() <= 63) {
                     _numberLong = n.longValue();
@@ -1049,7 +1052,8 @@ public class YAMLParser extends ParserBase
             final String str = _cleanedTextValue;
             try {
                 if (expType == NR_BIGDECIMAL) {
-                    _numberBigDecimal = NumberInput.parseBigDecimal(str);
+                    _numberBigDecimal = NumberInput.parseBigDecimal(
+                            str, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do

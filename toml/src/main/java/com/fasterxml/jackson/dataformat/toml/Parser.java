@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.VersionUtil;
@@ -22,6 +23,8 @@ import java.time.temporal.Temporal;
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
 
+    private final TomlFactory tomlFactory;
+
     private final TomlStreamReadException.ErrorContext errorContext;
     private final int options;
     private final Lexer lexer;
@@ -29,11 +32,13 @@ class Parser {
     private TomlToken next;
 
     private Parser(
+            TomlFactory tomlFactory,
             IOContext ioContext,
             TomlStreamReadException.ErrorContext errorContext,
             int options,
             Reader reader
     ) throws IOException {
+        this.tomlFactory = tomlFactory;
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, ioContext, errorContext);
@@ -41,15 +46,43 @@ class Parser {
         this.next = lexer.yylex();
     }
 
+    @Deprecated // v2.15
     public static ObjectNode parse(
-            IOContext ioContext,
-            int options,
-            Reader reader
+            final IOContext ioContext,
+            final int options,
+            final Reader reader
     ) throws IOException {
-        Parser parser = new Parser(ioContext, new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
-        ObjectNode node = parser.parse();
-        parser.lexer.releaseBuffers();
-        return node;
+        Parser parser = new Parser(new TomlFactory(), ioContext,
+                new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
+        try {
+            return parser.parse();
+        } finally {
+            parser.lexer.releaseBuffers();
+        }
+    }
+
+    /**
+     * @param tomlFactory factory with configuration
+     * @param ioContext I/O context
+     * @param reader character stream
+     * @return parsed <code>ObjectNode</code>
+     * @throws IOException if there are I/O issues
+     * @since v2.15
+     */
+    public static ObjectNode parse(
+            final TomlFactory tomlFactory,
+            final IOContext ioContext,
+            final Reader reader
+    ) throws IOException {
+        final TomlFactory factory = tomlFactory == null ? new TomlFactory() : tomlFactory;
+        Parser parser = new Parser(factory, ioContext,
+                new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null),
+                factory.getFormatParserFeatures(), reader);
+        try {
+            return parser.parse();
+        } finally {
+            parser.lexer.releaseBuffers();
+        }
     }
 
     private TomlToken peek() throws TomlStreamReadException {
@@ -325,7 +358,8 @@ class Parser {
         }
         final String text = new String(buffer, start, length);
         try {
-            return factory.numberNode(NumberInput.parseBigInteger(text));
+            return factory.numberNode(NumberInput.parseBigInteger(
+                    text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
         } catch (NumberFormatException e) {
             throw errorContext.atPosition(lexer).invalidNumber(e, text);
         }
@@ -340,7 +374,8 @@ class Parser {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
             try {
-                BigDecimal dec = NumberInput.parseBigDecimal(text);
+                BigDecimal dec = NumberInput.parseBigDecimal(
+                        text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 return factory.numberNode(dec);
             } catch (NumberFormatException e) {
                 throw errorContext.atPosition(lexer).invalidNumber(e, text);
