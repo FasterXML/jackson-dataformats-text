@@ -85,7 +85,7 @@ public class JavaPropsParser extends ParserMinimalBase
             int parserFeatures, JavaPropsSchema schema,
             Object inputSource, Map<?,?> sourceMap)
     {
-        super(readCtxt, parserFeatures);
+        super(readCtxt, ioCtxt, parserFeatures);
         _inputSource = inputSource;
         _sourceContent = sourceMap;
         _schema = schema;

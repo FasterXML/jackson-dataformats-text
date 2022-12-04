@@ -329,7 +329,7 @@ public final class TextBuffer
      * Convenience method for converting contents of the buffer
      * into a Double value.
      *
-     * @param useFastParser whether to use {@link tools.jackson.core.io.doubleparser}
+     * @param useFastParser whether to use {@code FastDoubleParser} or standard JDK parsing
      * @return Buffered text value parsed as a {@link Double}, if possible
      *
      * @throws NumberFormatException if contents are not a valid Java number

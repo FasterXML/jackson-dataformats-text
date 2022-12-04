@@ -204,6 +204,10 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         return new CsvMapper();
     }
 
+    protected CsvMapper mapperForCsv(CsvFactory f) {
+        return new CsvMapper(f);
+    }
+
     protected CsvMapper newObjectMapper() {
         return CsvMapper.builder().build();
     }

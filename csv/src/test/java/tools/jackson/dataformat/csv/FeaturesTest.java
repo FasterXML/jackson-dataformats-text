@@ -12,17 +12,19 @@ public class FeaturesTest extends ModuleTestBase
 {
     public void testFactoryFeatures() throws Exception
     {
-        CsvFactory f = new CsvFactory();
+        final CsvMapper mapper = mapperForCsv();
+
+        CsvFactory f = mapper.tokenStreamFactory();
         assertFalse(f.canHandleBinaryNatively());
         assertFalse(f.canUseCharArrays());
         assertTrue(f.canUseSchema(CsvSchema.emptySchema()));
 
-        JsonParser p = f.createParser("");
+        JsonParser p = mapper.createParser("");
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());
         p.close();
 
-        JsonGenerator g = f.createGenerator(new StringWriter());
+        JsonGenerator g = mapper.createGenerator(new StringWriter());
         assertFalse(g.canOmitProperties());
         assertFalse(g.canWriteObjectId());
         assertFalse(g.canWriteTypeId());
@@ -38,10 +40,11 @@ public class FeaturesTest extends ModuleTestBase
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
-        JsonParser parser = f.createParser(new StringReader(""));
+        final CsvMapper mapper = mapperForCsv(f);
+        JsonParser parser = mapper.createParser(new StringReader(""));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
-        JsonGenerator generator = f.createGenerator(new StringWriter());
+        JsonGenerator generator = mapper.createGenerator(new StringWriter());
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 
@@ -52,7 +55,8 @@ public class FeaturesTest extends ModuleTestBase
                 .build();
         assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
-        JsonParser parser = f.createParser(new StringReader(""));
+        final CsvMapper mapper = mapperForCsv(f);
+        JsonParser parser = mapper.createParser(new StringReader(""));
         assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
     }
@@ -66,10 +70,11 @@ public class FeaturesTest extends ModuleTestBase
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         assertTrue(f.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
-        JsonParser parser = f.createParser(new StringReader(""));
+        final CsvMapper mapper = mapperForCsv(f);
+        JsonParser parser = mapper.createParser(new StringReader(""));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
         assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
-        JsonGenerator generator = f.createGenerator(new StringWriter());
+        JsonGenerator generator = mapper.createGenerator(new StringWriter());
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 
@@ -80,7 +85,8 @@ public class FeaturesTest extends ModuleTestBase
                 .build();
         assertTrue(f.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         assertFalse(f.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
-        JsonParser parser = f.createParser(new StringReader(""));
+        final CsvMapper mapper = mapperForCsv(f);
+        JsonParser parser = mapper.createParser(new StringReader(""));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
     }

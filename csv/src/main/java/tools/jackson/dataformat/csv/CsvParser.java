@@ -379,7 +379,7 @@ public class CsvParser
             int stdFeatures, int csvFeatures, CsvSchema schema,
             Reader reader)
     {
-        super(readCtxt, stdFeatures);
+        super(readCtxt, ioCtxt, stdFeatures);
         if (reader == null) {
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
