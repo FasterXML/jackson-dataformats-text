@@ -486,6 +486,6 @@ public class CsvFactory extends JsonFactory
     @Override // since 2.13
     protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
     {
-        return new CsvIOContext(_getBufferRecycler(), contentRef, resourceManaged);
+        return new CsvIOContext(streamReadConstraints(), _getBufferRecycler(), contentRef, resourceManaged);
     }
 }
