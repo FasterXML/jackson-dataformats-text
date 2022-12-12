@@ -17,10 +17,11 @@ import java.math.BigInteger;
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
+    // Need to ensure max-number-limit not hit
     private final TomlFactory FACTORY = TomlFactory.builder()
             .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
             .build();
-    private final ObjectMapper MAPPER = new TomlMapper(FACTORY);
+    private final ObjectMapper NO_LIMITS_MAPPER = new TomlMapper(FACTORY);
 
     @Test
     public void decimal() throws IOException {
@@ -30,7 +31,7 @@ public class LongTokenTest {
         }
         toml.append('1');
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigDecimal decimal = node.get("foo").decimalValue();
 
         Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
@@ -40,7 +41,7 @@ public class LongTokenTest {
     @Test
     public void decimalTooLong() throws IOException {
         // default TomlFactory has max num length of 1000
-        final ObjectMapper mapper = new TomlMapper(new TomlFactory());
+        final ObjectMapper mapper = new TomlMapper();
         StringBuilder toml = new StringBuilder("foo = 0.");
         for (int i = 0; i < SCALE; i++) {
             toml.append('0');
@@ -62,7 +63,7 @@ public class LongTokenTest {
             toml.append('0');
         }
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigInteger integer = node.get("foo").bigIntegerValue();
 
         Assert.assertEquals(SCALE + 1, integer.bitLength());
@@ -75,7 +76,7 @@ public class LongTokenTest {
             toml.append('a');
         }
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertTrue(node.isEmpty());
     }
 
@@ -86,7 +87,7 @@ public class LongTokenTest {
             toml.append(' ');
         }
         toml.append(']');
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(0, node.get("foo").size());
     }
 
@@ -98,7 +99,7 @@ public class LongTokenTest {
         }
         String expectedKey = toml.toString();
         toml.append(" = 0");
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(expectedKey, node.fieldNames().next());
     }
 
@@ -109,7 +110,7 @@ public class LongTokenTest {
             toml.append('a');
         }
         toml.append("'");
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
 
