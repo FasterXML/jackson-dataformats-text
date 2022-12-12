@@ -22,6 +22,7 @@ import java.time.temporal.Temporal;
 
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
+    private static final int MAX_CHARS_TO_REPORT = 1000;
 
     private final TomlFactory tomlFactory;
 
@@ -341,12 +342,18 @@ class Parser {
                 return factory.numberNode(v);
             }
         }
-        final String text = new String(buffer, start, length);
+        String text = null;
         try {
+            tomlFactory.streamReadConstraints().validateIntegerLength(length);
+            text = new String(buffer, start, length);
             return factory.numberNode(NumberInput.parseBigInteger(
                     text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
         } catch (NumberFormatException e) {
-            throw errorContext.atPosition(lexer).invalidNumber(e, text);
+            final String reportNum = length <= MAX_CHARS_TO_REPORT ?
+                    text == null ? new String(buffer, start, length) : text :
+                    (text == null ? new String(buffer, start, MAX_CHARS_TO_REPORT) : text.substring(0, MAX_CHARS_TO_REPORT))
+                            + " [truncated]";
+            throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
     }
 
@@ -359,11 +366,15 @@ class Parser {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
             try {
+                tomlFactory.streamReadConstraints().validateFPLength(text.length());
                 BigDecimal dec = NumberInput.parseBigDecimal(
                         text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 return factory.numberNode(dec);
             } catch (NumberFormatException e) {
-                throw errorContext.atPosition(lexer).invalidNumber(e, text);
+                final String reportNum = text.length() <= MAX_CHARS_TO_REPORT ?
+                        text :
+                        text.substring(0, MAX_CHARS_TO_REPORT) + " [truncated]";
+                throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
             }
         }
     }

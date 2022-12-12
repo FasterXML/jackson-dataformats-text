@@ -10,6 +10,7 @@ import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.BufferRecyclers;
 
+import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
 import org.junit.Assert;
@@ -18,7 +19,11 @@ import org.junit.Test;
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
-    private final TomlMapper MAPPER = new TomlMapper();
+    // Need to ensure max-number-limit not hit
+    private final TomlFactory FACTORY = TomlFactory.builder()
+            .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+            .build();
+    private final ObjectMapper NO_LIMITS_MAPPER = new TomlMapper(FACTORY);
 
     @Test
     public void decimal() throws IOException {
@@ -28,11 +33,29 @@ public class LongTokenTest {
         }
         toml.append('1');
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigDecimal decimal = node.get("foo").decimalValue();
 
         Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
         Assert.assertTrue(decimal.compareTo(BigDecimal.ONE) < 0);
+    }
+
+    @Test
+    public void decimalTooLong() throws IOException {
+        // default TomlFactory has max num length of 1000
+        final ObjectMapper mapper = new TomlMapper();
+        StringBuilder toml = new StringBuilder("foo = 0.");
+        for (int i = 0; i < SCALE; i++) {
+            toml.append('0');
+        }
+        toml.append('1');
+
+        try {
+            mapper.readTree(toml.toString());
+            Assert.fail("expected TomlStreamReadException");
+        } catch (TomlStreamReadException e) {
+            Assert.assertTrue("exception message contains truncated number", e.getMessage().contains("[truncated]"));
+        }
     }
 
     @Test
@@ -42,7 +65,7 @@ public class LongTokenTest {
             toml.append('0');
         }
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigInteger integer = node.get("foo").bigIntegerValue();
 
         Assert.assertEquals(SCALE + 1, integer.bitLength());
@@ -55,7 +78,7 @@ public class LongTokenTest {
             toml.append('a');
         }
 
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertTrue(node.isEmpty());
     }
 
@@ -66,7 +89,7 @@ public class LongTokenTest {
             toml.append(' ');
         }
         toml.append(']');
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(0, node.get("foo").size());
     }
 
@@ -78,8 +101,7 @@ public class LongTokenTest {
         }
         String expectedKey = toml.toString();
         toml.append(" = 0");
-
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(expectedKey, node.propertyNames().next());
     }
 
@@ -90,7 +112,7 @@ public class LongTokenTest {
             toml.append('a');
         }
         toml.append("'");
-        ObjectNode node = (ObjectNode) MAPPER.readTree(toml.toString());
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
 
@@ -103,7 +125,7 @@ public class LongTokenTest {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = Parser.parse(MAPPER.tokenStreamFactory(), _ioContext(toml),
+        ObjectNode node = Parser.parse(FACTORY, _ioContext(toml),
                 TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
