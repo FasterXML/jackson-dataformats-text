@@ -36,6 +36,8 @@ public class JavaPropsParser extends ParserMinimalBase
     /**********************************************************
      */
 
+    protected IOContext _ioContext;
+
     /**
      * Codec used for data binding when (if) requested.
      */
@@ -96,10 +98,15 @@ public class JavaPropsParser extends ParserMinimalBase
             ObjectCodec codec, Map<?,?> sourceMap)
     {
         super(parserFeatures);
+        _ioContext = ctxt;
         _objectCodec = codec;
         _inputSource = inputSource;
         _sourceContent = sourceMap;
-        
+    }
+
+    @Override
+    public StreamReadConstraints streamReadConstraints() {
+        return _ioContext == null ? StreamReadConstraints.defaults() : _ioContext.streamReadConstraints();
     }
     
     @Override
