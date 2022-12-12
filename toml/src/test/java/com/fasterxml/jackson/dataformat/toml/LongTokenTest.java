@@ -17,7 +17,10 @@ import java.math.BigInteger;
 public class LongTokenTest {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
-    private final ObjectMapper MAPPER = new TomlMapper();
+    private final TomlFactory FACTORY = TomlFactory.builder()
+            .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+            .build();
+    private final ObjectMapper MAPPER = new TomlMapper(FACTORY);
 
     @Test
     public void decimal() throws IOException {
@@ -32,6 +35,24 @@ public class LongTokenTest {
 
         Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
         Assert.assertTrue(decimal.compareTo(BigDecimal.ONE) < 0);
+    }
+
+    @Test
+    public void decimalTooLong() throws IOException {
+        // default TomlFactory has max num length of 1000
+        final ObjectMapper mapper = new TomlMapper(new TomlFactory());
+        StringBuilder toml = new StringBuilder("foo = 0.");
+        for (int i = 0; i < SCALE; i++) {
+            toml.append('0');
+        }
+        toml.append('1');
+
+        try {
+            mapper.readTree(toml.toString());
+            Assert.fail("expected TomlStreamReadException");
+        } catch (TomlStreamReadException e) {
+            Assert.assertTrue("exception message contains truncated number", e.getMessage().contains("[truncated]"));
+        }
     }
 
     @Test
