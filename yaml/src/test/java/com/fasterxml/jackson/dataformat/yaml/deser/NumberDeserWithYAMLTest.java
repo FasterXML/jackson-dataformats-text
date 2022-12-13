@@ -11,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,8 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 // Tests copied from databind "JDKNumberDeserTest": may need more clean up
@@ -304,5 +308,40 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         final String DOC = "value: 5.00\n";
         NestedBigDecimalHolder2784 result = MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
         assertEquals(new BigDecimal("5.00"), result.holder.value);
-    }    
+    }
+
+    public void testVeryBigDecimalUnwrapped() throws Exception
+    {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        final String DOC = "value: " + value + "\n";
+        try {
+            MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
+            fail("expected JsonMappingException");
+        } catch (JsonMappingException jme) {
+            assertTrue("unexpected message: " + jme.getMessage(),
+                    jme.getMessage().startsWith("Number length (1200) exceeds the maximum length (1000)"));
+        }
+    }
+
+    public void testVeryBigDecimalUnwrappedWithNumLenUnlimited() throws Exception
+    {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        final String DOC = "value: " + value + "\n";
+        YAMLFactory factory = streamFactoryBuilder()
+                .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+                .build();
+        NestedBigDecimalHolder2784 result = mapperBuilder(factory).build()
+                .readValue(DOC, NestedBigDecimalHolder2784.class);
+        assertEquals(new BigDecimal(value), result.holder.value);
+    }
 }

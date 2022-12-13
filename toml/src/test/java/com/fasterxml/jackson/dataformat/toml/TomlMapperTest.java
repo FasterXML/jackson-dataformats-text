@@ -120,7 +120,6 @@ public class TomlMapperTest {
             sb.append(1);
         }
         final String value = sb.toString();
-        BigDecimal testValue = new BigDecimal(value);
         try {
             new TomlMapper().readTree("abc = " + value);
             Assert.fail("expected TomlStreamReadException");
