@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.MapperFeature;
@@ -18,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 // Tests copied from databind "JDKNumberDeserTest": may need more clean up
@@ -303,5 +306,40 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         final String DOC = "value: 5.00\n";
         NestedBigDecimalHolder2784 result = MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
         assertEquals(new BigDecimal("5.00"), result.holder.value);
-    }    
+    }
+
+    public void testVeryBigDecimalUnwrapped() throws Exception
+    {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        final String DOC = "value: " + value + "\n";
+        try {
+            MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
+            fail("expected DatabindException");
+        } catch (DatabindException jme) {
+            assertTrue("unexpected message: " + jme.getMessage(),
+                    jme.getMessage().startsWith("Number length (1200) exceeds the maximum length (1000)"));
+        }
+    }
+
+    public void testVeryBigDecimalUnwrappedWithNumLenUnlimited() throws Exception
+    {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        final String DOC = "value: " + value + "\n";
+        YAMLFactory factory = streamFactoryBuilder()
+                .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+                .build();
+        NestedBigDecimalHolder2784 result = mapperBuilder(factory).build()
+                .readValue(DOC, NestedBigDecimalHolder2784.class);
+        assertEquals(new BigDecimal(value), result.holder.value);
+    }
 }

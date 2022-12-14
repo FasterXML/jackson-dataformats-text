@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.WrappedIOException;
 import tools.jackson.databind.node.JsonNodeFactory;
 
@@ -115,7 +116,43 @@ public class TomlMapperTest {
     }
 
     @Test
-    public void temporalFieldFlag() {
+    public void veryBigDecimal() throws Exception {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        try {
+            new TomlMapper().readTree("abc = " + value);
+            Assert.fail("expected TomlStreamReadException");
+        } catch (TomlStreamReadException e) {
+            Assert.assertTrue("unexpected message: " + e.getMessage(),
+                    e.getMessage().contains("Number length (1200) exceeds the maximum length (1000)"));
+        }
+    }
+
+    @Test
+    public void veryBigDecimalWithNumLenUnlimited() throws Exception {
+        final int len = 1200;
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append(1);
+        }
+        final String value = sb.toString();
+        BigDecimal testValue = new BigDecimal(value);
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+                .build();
+        TomlMapper mapper = new TomlMapper(factory);
+        Assert.assertEquals(
+                testValue,
+                mapper.readTree("abc = " + value).get("abc").decimalValue()
+        );
+    }
+
+    @Test
+    public void temporalFieldFlag() throws Exception {
         Assert.assertEquals(
                 LocalDate.of(2021, 3, 26),
                 TomlMapper.builder()
