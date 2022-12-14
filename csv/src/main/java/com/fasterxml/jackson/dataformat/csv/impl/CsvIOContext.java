@@ -7,15 +7,16 @@ import com.fasterxml.jackson.core.util.BufferRecycler;
 
 public class CsvIOContext extends IOContext
 {
+    // @since 2.15
+    public CsvIOContext(StreamReadConstraints streamReadConstraints,
+                        BufferRecycler br, ContentReference sourceRef, boolean managedResource) {
+        super(streamReadConstraints, br, sourceRef, managedResource);
+    }
+
     @Deprecated // @since v2.15
     public CsvIOContext(BufferRecycler br, ContentReference sourceRef,
             boolean managedResource) {
         super(br, sourceRef, managedResource);
-    }
-
-    public CsvIOContext(StreamReadConstraints streamReadConstraints,
-                        BufferRecycler br, ContentReference sourceRef, boolean managedResource) {
-        super(streamReadConstraints, br, sourceRef, managedResource);
     }
 
     public TextBuffer csvTextBuffer() {

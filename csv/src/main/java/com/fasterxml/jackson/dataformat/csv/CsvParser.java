@@ -294,14 +294,14 @@ public class CsvParser
      */
 
     /**
-     * @since 2.15
-     */
-    protected CsvIOContext _ioContext;
-    
-    /**
      * Codec used for data binding when (if) requested.
      */
     protected ObjectCodec _objectCodec;
+
+    /**
+     * @since 2.15
+     */
+    protected final StreamReadConstraints _streamReadConstraints;
 
     protected int _formatFeatures;
 
@@ -411,7 +411,7 @@ public class CsvParser
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
         _objectCodec = codec;
-        _ioContext = ctxt;
+        _streamReadConstraints = ctxt.streamReadConstraints();
         _textBuffer =  ctxt.csvTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
@@ -424,7 +424,7 @@ public class CsvParser
 
     @Override
     public StreamReadConstraints streamReadConstraints() {
-        return _ioContext.streamReadConstraints();
+        return _streamReadConstraints;
     }
 
     /*

@@ -36,12 +36,15 @@ public class JavaPropsParser extends ParserMinimalBase
     /**********************************************************
      */
 
-    protected IOContext _ioContext;
-
     /**
      * Codec used for data binding when (if) requested.
      */
     protected ObjectCodec _objectCodec;
+
+    /**
+     * @since 2.15
+     */
+    protected final StreamReadConstraints _streamReadConstraints;
 
     /**
      * Although most massaging is done later, caller may be interested in the
@@ -98,7 +101,7 @@ public class JavaPropsParser extends ParserMinimalBase
             ObjectCodec codec, Map<?,?> sourceMap)
     {
         super(parserFeatures);
-        _ioContext = ctxt;
+        _streamReadConstraints = ctxt.streamReadConstraints();
         _objectCodec = codec;
         _inputSource = inputSource;
         _sourceContent = sourceMap;
@@ -106,9 +109,9 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public StreamReadConstraints streamReadConstraints() {
-        return _ioContext == null ? StreamReadConstraints.defaults() : _ioContext.streamReadConstraints();
+        return _streamReadConstraints;
     }
-    
+
     @Override
     public Version version() {
         return PackageVersion.VERSION;
