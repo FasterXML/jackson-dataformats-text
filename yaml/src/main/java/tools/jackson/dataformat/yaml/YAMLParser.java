@@ -951,9 +951,11 @@ public class YAMLParser extends ParserBase
                 return;
             }
             // !!! TODO: implement proper bounds checks; now we'll just use BigInteger for convenience
+            final String numStr = _cleanedTextValue;
             try {
+                streamReadConstraints().validateIntegerLength(numStr.length());
                 BigInteger n = NumberInput.parseBigInteger(
-                        _cleanedTextValue, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+                        numStr, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 // Could still fit in a long, need to check
                 if (len == 19 && n.bitLength() <= 63) {
                     _numberLong = n.longValue();
@@ -973,15 +975,16 @@ public class YAMLParser extends ParserBase
         }
         if (_currToken == JsonToken.VALUE_NUMBER_FLOAT) {
             // strip out optional underscores, if any:
-            final String str = _cleanedTextValue;
+            final String numStr = _cleanedTextValue;
             try {
+                streamReadConstraints().validateFPLength(numStr.length());
                 if (expType == NR_BIGDECIMAL) {
                     _numberBigDecimal = NumberInput.parseBigDecimal(
-                            str, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+                            numStr, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do
-                    _numberDouble = NumberInput.parseDouble(str, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
+                    _numberDouble = NumberInput.parseDouble(numStr, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                     _numTypesValid = NR_DOUBLE;
                 }
             } catch (NumberFormatException nex) {
