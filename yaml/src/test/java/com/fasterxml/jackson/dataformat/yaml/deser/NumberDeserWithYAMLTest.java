@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactoryBuilder;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 // Tests copied from databind "JDKNumberDeserTest": may need more clean up
@@ -321,8 +320,8 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         final String DOC = "value: " + value + "\n";
         try {
             MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
-            fail("expected JsonMappingException");
-        } catch (JsonMappingException jme) {
+            fail("expected DatabindException");
+        } catch (DatabindException jme) {
             assertTrue("unexpected message: " + jme.getMessage(),
                     jme.getMessage().startsWith("Number length (1200) exceeds the maximum length (1000)"));
         }
