@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
@@ -319,10 +320,10 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         final String DOC = "value: " + value + "\n";
         try {
             MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
-            fail("expected DatabindException");
-        } catch (DatabindException jme) {
+            fail("expected StreamReadException");
+        } catch (StreamReadException jme) {
             assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number length (1200) exceeds the maximum length (1000)"));
+                    jme.getMessage().contains("Number length (1200) exceeds the maximum length (1000)"));
         }
     }
 
