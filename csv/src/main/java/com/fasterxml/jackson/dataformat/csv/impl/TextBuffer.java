@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.impl;
 import java.math.BigDecimal;
 import java.util.LinkedList;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 
@@ -28,6 +29,8 @@ public final class TextBuffer
 
     // thing we can borrow char array from, return...
     private final BufferRecycler _allocator;
+
+    private final StreamReadConstraints _streamReadConstraints;
 
     /*
     /**********************************************************
@@ -68,7 +71,7 @@ public final class TextBuffer
     // // // Currently used segment; not (yet) contained in _seqments
 
     /**
-     * Amount of characters in segments in {@link _segments}
+     * Amount of characters in segments
      */
     private int _segmentSize;
 
@@ -99,8 +102,16 @@ public final class TextBuffer
     /**********************************************************
      */
 
+    @Deprecated // @since 2.15
     public TextBuffer(BufferRecycler allocator)
     {
+        _streamReadConstraints = null;
+        _allocator = allocator;
+    }
+
+    public TextBuffer(StreamReadConstraints streamReadConstraints, BufferRecycler allocator)
+    {
+        _streamReadConstraints = streamReadConstraints;
         _allocator = allocator;
     }
 
@@ -288,12 +299,9 @@ public final class TextBuffer
     }
 
     /**
-     * Convenience method for converting contents of the buffer
-     * into a {@link BigDecimal}.
-     * <p>
-     *   This method is unused and is deprecated. If we choose to start using it, we should
-     *   copy over the <code>USE_FAST_BIG_NUMBER_PARSER</code> support from jackson-core.
-     * </p>
+     * Please do not use this deprecated method. It is not used by Jackson's internal code and is maintained
+     * just in case external users are using it. It will be removed in a future release.
+     * This method does not enforce number length constraints.
      */
     @Deprecated //since 2.15
     public BigDecimal contentsAsDecimal()
@@ -322,7 +330,9 @@ public final class TextBuffer
      */
     @Deprecated //since 2.14
     public double contentsAsDouble() throws NumberFormatException {
-        return NumberInput.parseDouble(contentsAsString());
+        final String text = contentsAsString();
+        if (_streamReadConstraints != null) _streamReadConstraints.validateFPLength(text.length());
+        return NumberInput.parseDouble(text);
     }
 
     /**
@@ -336,7 +346,9 @@ public final class TextBuffer
      * @since 2.14
      */
     public double contentsAsDouble(final boolean useFastParser) throws NumberFormatException {
-        return NumberInput.parseDouble(contentsAsString(), useFastParser);
+        final String text = contentsAsString();
+        if (_streamReadConstraints != null) _streamReadConstraints.validateFPLength(text.length());
+        return NumberInput.parseDouble(text, useFastParser);
     }
 
     public boolean looksLikeInt() {
