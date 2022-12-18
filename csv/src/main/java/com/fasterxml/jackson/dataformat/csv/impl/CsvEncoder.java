@@ -288,11 +288,11 @@ public class CsvEncoder
     {
         final char quoteEscapeChar;
 
-        if (_cfgEscapeQuoteCharWithEscapeChar && _cfgEscapeCharacter > 0) {
-            quoteEscapeChar = (char) _cfgEscapeCharacter;
+        if (escapeQuoteCharWithEscapeChar && escapeCharacter > 0) {
+            quoteEscapeChar = (char) escapeCharacter;
         }
-        else if (_cfgQuoteCharacter > 0) {
-            quoteEscapeChar = (char) _cfgQuoteCharacter;
+        else if (quoteCharacter > 0) {
+            quoteEscapeChar = (char) quoteCharacter;
         }
         else {
             quoteEscapeChar = '\\';
