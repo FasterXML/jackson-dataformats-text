@@ -19,7 +19,7 @@ public class CsvIOContext extends IOContext
         super(br, sourceRef, managedResource);
     }
 
-    public TextBuffer csvTextBuffer() {
-        return new TextBuffer(streamReadConstraints(), _bufferRecycler);
+    public CsvTextBuffer csvTextBuffer() {
+        return new CsvTextBuffer(streamReadConstraints(), _bufferRecycler);
     }
 }

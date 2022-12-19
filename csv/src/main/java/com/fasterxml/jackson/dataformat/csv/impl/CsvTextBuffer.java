@@ -13,7 +13,7 @@ import com.fasterxml.jackson.core.util.BufferRecycler;
  * textual content
  *
  */
-public final class TextBuffer
+public final class CsvTextBuffer
 {
     final static char[] NO_CHARS = new char[0];
 
@@ -103,13 +103,13 @@ public final class TextBuffer
      */
 
     @Deprecated // @since 2.15
-    public TextBuffer(BufferRecycler allocator)
+    public CsvTextBuffer(BufferRecycler allocator)
     {
         _streamReadConstraints = null;
         _allocator = allocator;
     }
 
-    public TextBuffer(StreamReadConstraints streamReadConstraints, BufferRecycler allocator)
+    public CsvTextBuffer(StreamReadConstraints streamReadConstraints, BufferRecycler allocator)
     {
         _streamReadConstraints = streamReadConstraints;
         _allocator = allocator;
