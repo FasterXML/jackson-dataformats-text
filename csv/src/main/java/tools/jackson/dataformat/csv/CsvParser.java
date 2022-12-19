@@ -17,7 +17,7 @@ import tools.jackson.core.util.SimpleStreamReadContext;
 
 import tools.jackson.dataformat.csv.impl.CsvDecoder;
 import tools.jackson.dataformat.csv.impl.CsvIOContext;
-import tools.jackson.dataformat.csv.impl.TextBuffer;
+import tools.jackson.dataformat.csv.impl.CsvTextBuffer;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -365,7 +365,7 @@ public class CsvParser
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final TextBuffer _textBuffer;
+    protected final CsvTextBuffer _textBuffer;
 
     protected ByteArrayBuilder _byteArrayBuilder;
 

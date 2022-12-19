@@ -95,7 +95,7 @@ public class CsvDecoder
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final TextBuffer _textBuffer;
+    protected final CsvTextBuffer _textBuffer;
 
     /**
      * Current buffer from which data is read; generally data is read into
@@ -273,7 +273,7 @@ public class CsvDecoder
      */
 
     public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
-                      CsvSchema schema, TextBuffer textBuffer,
+                      CsvSchema schema, CsvTextBuffer textBuffer,
                       int stdFeatures, int csvFeatures) {
         _owner = owner;
         _ioContext = ctxt;

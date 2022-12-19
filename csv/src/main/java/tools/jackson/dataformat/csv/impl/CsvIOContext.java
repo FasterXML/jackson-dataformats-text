@@ -13,7 +13,7 @@ public class CsvIOContext extends IOContext
         super(src, br, sourceRef, managedResource, null);
     }
 
-    public TextBuffer csvTextBuffer() {
-        return new TextBuffer(_bufferRecycler);
+    public CsvTextBuffer csvTextBuffer() {
+        return new CsvTextBuffer(_bufferRecycler);
     }
 }
