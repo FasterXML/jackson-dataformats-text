@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
-import com.fasterxml.jackson.dataformat.csv.impl.TextBuffer;
+import com.fasterxml.jackson.dataformat.csv.impl.CsvTextBuffer;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -393,7 +393,7 @@ public class CsvParser
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final TextBuffer _textBuffer;
+    protected final CsvTextBuffer _textBuffer;
 
     protected ByteArrayBuilder _byteArrayBuilder;
 

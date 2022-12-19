@@ -12,7 +12,7 @@ import com.fasterxml.jackson.core.util.BufferRecycler;
  * textual content
  *
  */
-public final class TextBuffer
+public final class CsvTextBuffer
 {
     final static char[] NO_CHARS = new char[0];
 
@@ -99,7 +99,7 @@ public final class TextBuffer
     /**********************************************************
      */
 
-    public TextBuffer(BufferRecycler allocator)
+    public CsvTextBuffer(BufferRecycler allocator)
     {
         _allocator = allocator;
     }
