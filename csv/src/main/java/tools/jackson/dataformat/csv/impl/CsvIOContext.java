@@ -14,6 +14,6 @@ public class CsvIOContext extends IOContext
     }
 
     public CsvTextBuffer csvTextBuffer() {
-        return new CsvTextBuffer(_bufferRecycler);
+        return new CsvTextBuffer(_streamReadConstraints, _bufferRecycler);
     }
 }

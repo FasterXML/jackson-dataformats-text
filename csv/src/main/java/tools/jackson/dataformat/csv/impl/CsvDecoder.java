@@ -1089,6 +1089,7 @@ public class CsvDecoder
         } else if (_numberString == null) {
             throw new IllegalStateException("cannot get BigInteger from current parser state");
         }
+        _ioContext.streamReadConstraints().validateIntegerLength(_numberString.length());
         _numberBigInt = NumberInput.parseBigInteger(
                 _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         _numberString = null;
@@ -1107,6 +1108,7 @@ public class CsvDecoder
         } else if (_numberString == null) {
             throw new IllegalStateException("cannot get BigDecimal from current parser state");
         }
+        _ioContext.streamReadConstraints().validateFPLength(_numberString.length());
         _numberBigDecimal = NumberInput.parseBigDecimal(
                 _numberString, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         _numberString = null;
@@ -1354,8 +1356,10 @@ public class CsvDecoder
             /* Let's actually parse from String representation, to avoid
              * rounding errors that non-decimal floating operations could incur
              */
+            final String text = getText();
+            _ioContext.streamReadConstraints().validateFPLength(text.length());
             _numberBigDecimal = NumberInput.parseBigDecimal(
-                    getText(), _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+                    text, _owner.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
             _numberBigDecimal = new BigDecimal(_getBigInteger());
         } else if ((_numTypesValid & NR_LONG) != 0) {

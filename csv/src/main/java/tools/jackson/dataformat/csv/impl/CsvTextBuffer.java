@@ -1,8 +1,8 @@
 package tools.jackson.dataformat.csv.impl;
 
-import java.math.BigDecimal;
 import java.util.LinkedList;
 
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.util.BufferRecycler;
 
@@ -28,6 +28,8 @@ public final class CsvTextBuffer
 
     // thing we can borrow char array from, return...
     private final BufferRecycler _allocator;
+
+    private final StreamReadConstraints _streamReadConstraints;
 
     /*
     /**********************************************************
@@ -68,7 +70,7 @@ public final class CsvTextBuffer
     // // // Currently used segment; not (yet) contained in _seqments
 
     /**
-     * Amount of characters in segments in {@link _segments}
+     * Amount of characters in segments
      */
     private int _segmentSize;
 
@@ -99,8 +101,9 @@ public final class CsvTextBuffer
     /**********************************************************
      */
 
-    public CsvTextBuffer(BufferRecycler allocator)
+    public CsvTextBuffer(StreamReadConstraints streamReadConstraints, BufferRecycler allocator)
     {
+        _streamReadConstraints = streamReadConstraints;
         _allocator = allocator;
     }
 
@@ -289,54 +292,17 @@ public final class CsvTextBuffer
 
     /**
      * Convenience method for converting contents of the buffer
-     * into a {@link BigDecimal}.
-     * <p>
-     *   This method is unused and is deprecated. If we choose to start using it, we should
-     *   copy over the <code>USE_FAST_BIG_NUMBER_PARSER</code> support from jackson-core.
-     * </p>
-     */
-    @Deprecated //since 2.15
-    public BigDecimal contentsAsDecimal()
-        throws NumberFormatException
-    {
-        // Already got a pre-cut array?
-        if (_resultArray != null) {
-            return NumberInput.parseBigDecimal(_resultArray);
-        }
-        // Or a shared buffer?
-        if (_inputStart >= 0) {
-            return NumberInput.parseBigDecimal(_inputBuffer, _inputStart, _inputLen);
-        }
-        // Or if not, just a single buffer (the usual case)
-        if (_segmentSize == 0) {
-            return NumberInput.parseBigDecimal(_currentSegment, 0, _currentSize);
-        }
-        // If not, let's just get it aggregated...
-        return NumberInput.parseBigDecimal(contentsAsArray());
-    }
-
-    /**
-     * Convenience method for converting contents of the buffer
-     * into a Double value.
-     * @deprecated use {@link #contentsAsDouble(boolean)}
-     */
-    @Deprecated //since 2.14
-    public double contentsAsDouble() throws NumberFormatException {
-        return NumberInput.parseDouble(contentsAsString());
-    }
-
-    /**
-     * Convenience method for converting contents of the buffer
      * into a Double value.
      *
      * @param useFastParser whether to use {@code FastDoubleParser} or standard JDK parsing
      * @return Buffered text value parsed as a {@link Double}, if possible
      *
      * @throws NumberFormatException if contents are not a valid Java number
-     * @since 2.14
      */
     public double contentsAsDouble(final boolean useFastParser) throws NumberFormatException {
-        return NumberInput.parseDouble(contentsAsString(), useFastParser);
+        final String text = contentsAsString();
+        _streamReadConstraints.validateFPLength(text.length());
+        return NumberInput.parseDouble(text, useFastParser);
     }
 
     public boolean looksLikeInt() {

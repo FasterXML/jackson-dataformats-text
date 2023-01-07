@@ -984,6 +984,7 @@ public class YAMLParser extends ParserBase
                     _numTypesValid = NR_BIGDECIMAL;
                 } else {
                     // Otherwise double has to do
+                    streamReadConstraints().validateFPLength(numStr.length());
                     _numberDouble = NumberInput.parseDouble(numStr, isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
                     _numTypesValid = NR_DOUBLE;
                 }
