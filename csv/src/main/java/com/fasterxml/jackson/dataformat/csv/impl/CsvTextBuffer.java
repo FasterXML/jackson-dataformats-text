@@ -105,8 +105,7 @@ public final class CsvTextBuffer
     @Deprecated // @since 2.15
     public CsvTextBuffer(BufferRecycler allocator)
     {
-        _streamReadConstraints = null;
-        _allocator = allocator;
+        this(StreamReadConstraints.defaults(), allocator);
     }
 
     public CsvTextBuffer(StreamReadConstraints streamReadConstraints, BufferRecycler allocator)
@@ -331,7 +330,7 @@ public final class CsvTextBuffer
     @Deprecated //since 2.14
     public double contentsAsDouble() throws NumberFormatException {
         final String text = contentsAsString();
-        if (_streamReadConstraints != null) _streamReadConstraints.validateFPLength(text.length());
+        _streamReadConstraints.validateFPLength(text.length());
         return NumberInput.parseDouble(text);
     }
 
@@ -339,7 +338,7 @@ public final class CsvTextBuffer
      * Convenience method for converting contents of the buffer
      * into a Double value.
      *
-     * @param useFastParser whether to use {@link com.fasterxml.jackson.core.io.doubleparser}
+     * @param useFastParser whether to use {@code FastDoubleParser}
      * @return Buffered text value parsed as a {@link Double}, if possible
      *
      * @throws NumberFormatException if contents are not a valid Java number
@@ -347,7 +346,7 @@ public final class CsvTextBuffer
      */
     public double contentsAsDouble(final boolean useFastParser) throws NumberFormatException {
         final String text = contentsAsString();
-        if (_streamReadConstraints != null) _streamReadConstraints.validateFPLength(text.length());
+        _streamReadConstraints.validateFPLength(text.length());
         return NumberInput.parseDouble(text, useFastParser);
     }
 
