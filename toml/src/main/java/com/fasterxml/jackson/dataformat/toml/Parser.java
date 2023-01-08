@@ -300,7 +300,8 @@ class Parser {
                         } else if (length <= 63 / 4) {
                             return factory.numberNode(Long.parseLong(text, 16));
                         } else {
-                            return factory.numberNode(new BigInteger(text, 16));
+                            return factory.numberNode(NumberInput.parseBigIntegerWithRadix(
+                                    text, 16, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
                         }
                     }
                     // octal
@@ -311,7 +312,8 @@ class Parser {
                         } else if (text.length() <= 63 / 3) {
                             return factory.numberNode(Long.parseLong(text, 8));
                         } else {
-                            return factory.numberNode(new BigInteger(text, 8));
+                            return factory.numberNode(NumberInput.parseBigIntegerWithRadix(
+                                    text, 8, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
                         }
                     }
                     // binary
@@ -321,7 +323,8 @@ class Parser {
                     } else if (length <= 63) {
                         return factory.numberNode(Long.parseUnsignedLong(text, 2));
                     } else {
-                        return factory.numberNode(new BigInteger(text, 2));
+                        return factory.numberNode(NumberInput.parseBigIntegerWithRadix(
+                                text, 2, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
                     }
                 } catch (NumberFormatException e) {
                     throw errorContext.atPosition(lexer).invalidNumber(e, text);
