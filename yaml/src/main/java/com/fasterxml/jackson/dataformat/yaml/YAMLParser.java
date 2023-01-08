@@ -882,7 +882,8 @@ public class YAMLParser extends ParserBase
         try {
             return base == 10 ?
                     NumberInput.parseBigInteger(numStr, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)) :
-                    new BigInteger(numStr, base);
+                    NumberInput.parseBigIntegerWithRadix(
+                            numStr, base, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         } catch (NumberFormatException e) {
             return _reportInvalidNumber(numStr, base, e);
         }
