@@ -770,35 +770,36 @@ public class YAMLParser extends ParserBase
         return JsonToken.VALUE_NUMBER_INT;
     }
 
-    private int _decodeInt(String str, int base) throws JacksonException {
+    private int _decodeInt(String numStr, int base) throws JacksonException {
         try {
-            return Integer.parseInt(str, base);
+            return Integer.parseInt(numStr, base);
         } catch (NumberFormatException e) {
-            return _reportInvalidNumber(str, base, e);
+            return _reportInvalidNumber(numStr, base, e);
         }
     }
 
-    private long _decodeLong(String str, int base) throws JacksonException {
+    private long _decodeLong(String numStr, int base) throws JacksonException {
         try {
-            return Long.parseLong(str, base);
+            return Long.parseLong(numStr, base);
         } catch (NumberFormatException e) {
-            return _reportInvalidNumber(str, base, e);
+            return _reportInvalidNumber(numStr, base, e);
         }
     }
 
-    private BigInteger _decodeBigInt(String str, int base) throws JacksonException {
+    private BigInteger _decodeBigInt(String numStr, int base) throws JacksonException {
         try {
             return base == 10 ?
-                    NumberInput.parseBigInteger(str, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)) :
-                    new BigInteger(str, base);
+                    NumberInput.parseBigInteger(numStr, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)) :
+                    NumberInput.parseBigIntegerWithRadix(
+                            numStr, base, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         } catch (NumberFormatException e) {
-            return _reportInvalidNumber(str, base, e);
+            return _reportInvalidNumber(numStr, base, e);
         }
     }
 
-    private <T> T _reportInvalidNumber(String str, int base, Exception e) throws JacksonException {
+    private <T> T _reportInvalidNumber(String numStr, int base, Exception e) throws JacksonException {
         _reportError(String.format("Invalid base-%d number ('%s'), problem: %s",
-                base, str, e.getMessage()));
+                base, numStr, e.getMessage()));
         return null; // never gets here
     }
     
