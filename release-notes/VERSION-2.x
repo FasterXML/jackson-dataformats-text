@@ -18,6 +18,8 @@ Active Maintainers:
 
 #356: Fix TOML parse failure when number token hits buffer edge
  (fix by Jonas K)
+#370: Replace use of deprecated constructor of SnakeYAML ParserImpl
+ (contributed by Andrey S)
 
 2.14.1 (21-Nov-2022)
 

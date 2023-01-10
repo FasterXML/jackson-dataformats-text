@@ -188,10 +188,9 @@ public class YAMLParser extends ParserBase
         _formatFeatures = formatFeatures;
         _reader = reader;
         if (loaderOptions == null) {
-            _yamlParser = new ParserImpl(new StreamReader(reader));
-        } else {
-            _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
+            loaderOptions = new LoaderOptions();
         }
+        _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
 
