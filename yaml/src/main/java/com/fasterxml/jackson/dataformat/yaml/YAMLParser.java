@@ -188,7 +188,7 @@ public class YAMLParser extends ParserBase
         _formatFeatures = formatFeatures;
         _reader = reader;
         if (loaderOptions == null) {
-            _yamlParser = new ParserImpl(new StreamReader(reader));
+            _yamlParser = new ParserImpl(new StreamReader(reader), new LoaderOptions());
         } else {
             _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
         }
