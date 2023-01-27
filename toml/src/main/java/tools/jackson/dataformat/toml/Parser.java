@@ -509,7 +509,7 @@ class Parser {
     @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
     private static class JsonNodeFactoryImpl extends JsonNodeFactory {
         public JsonNodeFactoryImpl() {
-            super(true); // exact bigdecimals
+            super();
         }
 
         @Override
