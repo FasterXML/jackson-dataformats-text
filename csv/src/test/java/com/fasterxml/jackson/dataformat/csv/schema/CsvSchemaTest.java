@@ -125,9 +125,9 @@ public class CsvSchemaTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(Mixed.class);
-        assertEquals(aposToQuotes("['a','b','c','d']"), schema.getColumnDesc());
+        assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
         schema = schema.sortedBy("b", "c");
-        assertEquals(aposToQuotes("['b','c','a','d']"), schema.getColumnDesc());
+        assertEquals(a2q("['b','c','a','d']"), schema.getColumnDesc());
 
         _verifyLinks(schema);
     }
@@ -137,7 +137,7 @@ public class CsvSchemaTest extends ModuleTestBase
     {
         CsvSchema schema = MAPPER.schemaFor(Mixed.class);
         schema = schema.sortedBy(Collections.<String>reverseOrder());
-        assertEquals(aposToQuotes("['d','c','b','a']"), schema.getColumnDesc());
+        assertEquals(a2q("['d','c','b','a']"), schema.getColumnDesc());
 
         _verifyLinks(schema);
     }

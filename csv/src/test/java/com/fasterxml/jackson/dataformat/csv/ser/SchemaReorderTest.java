@@ -18,9 +18,9 @@ public class SchemaReorderTest extends ModuleTestBase
     public void testSchemaWithOrdering() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Reordered.class);
-        assertEquals(aposToQuotes("['a','b','c','d']"), schema.getColumnDesc());
+        assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
         schema = schema.sortedBy("b", "c");
-        assertEquals(aposToQuotes("['b','c','a','d']"), schema.getColumnDesc());
+        assertEquals(a2q("['b','c','a','d']"), schema.getColumnDesc());
 
         Reordered value = new Reordered();
         value.a = 1;

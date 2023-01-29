@@ -24,7 +24,7 @@ public class TestParserEscapes extends ModuleTestBase
         CsvSchema schema = mapper.schemaFor(Desc.class).withColumnSeparator('|').withEscapeChar('\\');
         final String id = "abc\\\\def"; // doubled for javac
         final String desc = "Desc with\\\nlinefeed";
-        String input = quote(id)+"|"+quote(desc)+"\n";
+        String input = q(id)+"|"+q(desc)+"\n";
         Desc result = mapper.reader(schema).forType(Desc.class).readValue(input);
         assertEquals("abc\\def", result.id);
         assertEquals("Desc with\nlinefeed", result.desc);

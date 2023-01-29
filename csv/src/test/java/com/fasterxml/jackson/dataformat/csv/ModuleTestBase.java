@@ -221,7 +221,7 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
     /**********************************************************
      */
 
-    public String quote(String str) {
+    public String q(String str) {
         return '"'+str+'"';
     }
 
@@ -229,7 +229,7 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         return str.getBytes(StandardCharsets.UTF_8);
     }
 
-    protected String aposToQuotes(String json) {
+    protected String a2q(String json) {
         return json.replace("'", "\"");
     }
 
