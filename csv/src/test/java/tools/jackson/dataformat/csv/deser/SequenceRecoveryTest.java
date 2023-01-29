@@ -186,7 +186,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
     // and do not fail on next line
     public void testRecoveryFromUnclosedQuotes() throws Exception
     {
-        String toParse = aposToQuotes(
+        String toParse = a2q(
                 "'value1','value2','value3'\n" +
                 "'value4','value5','value6\n" + // missing closing quote
                 "'value7','value8','value9'\n"+
