@@ -1,8 +1,12 @@
 package tools.jackson.dataformat.csv.deser;
 
+import java.util.Arrays;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.databind.MappingIterator;
+import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
@@ -57,5 +61,32 @@ public class TestParserEscapes extends ModuleTestBase
         Desc result = mapper.reader(schema).forType(Desc.class).readValue(input);
         assertEquals("|abcdef", result.id);
         assertEquals("Desc with\nlinefeed", result.desc);
+    }
+
+    // [dataformats-text#374]: suspected bug, was missing enabling of escape char
+    public void testEscaping374() throws Exception
+    {
+        CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(';')
+                .withEscapeChar('\\');
+        CsvMapper mapper = CsvMapper.builder()
+                .enable(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                .enable(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                .build();
+
+        List<String> row1 = Arrays.asList("\"The\"", "foo");
+        List<List<String>> content = Arrays.asList(row1);
+
+        String csv = mapper.writer(schema).writeValueAsString(content);
+        //String csv = a2q("'\\'The\\';'foo'\n");
+
+        MappingIterator<List<String>> it = mapper
+                .readerForListOf(String.class)
+                .with(schema)
+                .readValues(csv);
+        List<List<String>> rows = it.readAll();
+
+        assertEquals(1, rows.size());
+        assertEquals(row1, rows.get(0));
     }
 }

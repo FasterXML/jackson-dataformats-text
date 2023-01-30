@@ -850,7 +850,6 @@ public class CsvDecoder
         }
         // note: do NOT trim from within quoted Strings
         String result = _textBuffer.finishAndReturn(outPtr, false);
-
         // good, but we also need to locate and skip trailing space, separator
         // (note: space outside quotes never included, but must be skipped)
         while (_inputPtr < _inputEnd || loadMore()) { // end-of-input is fine
