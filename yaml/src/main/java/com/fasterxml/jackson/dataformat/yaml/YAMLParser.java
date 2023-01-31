@@ -992,6 +992,11 @@ public class YAMLParser extends ParserBase
     /* Number accessor overrides
     /**********************************************************************
      */
+
+    @Override
+    public Object getNumberValueDeferred() throws IOException {
+        return getDecimalValue();
+    }
     
     @Override
     protected void _parseNumericValue(int expType) throws IOException
