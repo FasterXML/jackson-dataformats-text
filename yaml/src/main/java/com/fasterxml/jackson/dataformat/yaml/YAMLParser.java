@@ -992,7 +992,39 @@ public class YAMLParser extends ParserBase
     /* Number accessor overrides
     /**********************************************************************
      */
-    
+
+    @Override
+    public Object getNumberValueDeferred() throws IOException {
+        // 01-Feb-2023, tatu: ParserBase implementation does not quite work
+        //   due to refactoring. So let's try to cobble something together
+
+        if (_currToken == JsonToken.VALUE_NUMBER_INT) {
+            // For integrals, use eager decoding for all ints, longs (and
+            // some cheaper BigIntegers)
+            if (_cleanedTextValue.length() <= 18) {
+                return getNumberValue();
+            }
+            return _cleanedTextValue;
+        }
+        if (_currToken != JsonToken.VALUE_NUMBER_FLOAT) {
+            _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
+        }
+
+        // For FP, see if we might have decoded values already
+        if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
+            return _getBigDecimal();
+        }
+        if ((_numTypesValid & NR_DOUBLE) != 0) {
+            return _getNumberDouble();
+        }
+        if ((_numTypesValid & NR_FLOAT) != 0) {
+            return _getNumberFloat();
+        }
+
+        // But if not, same as BigInteger, let lazy/deferred handling be done
+        return _cleanedTextValue;
+    }
+
     @Override
     protected void _parseNumericValue(int expType) throws IOException
     {
