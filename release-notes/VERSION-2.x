@@ -14,10 +14,9 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.14.0 (not yet released)
+Not yet released:
 
-#335: (yaml) Update to SnakeYAML 1.32
- (contributed by @pjfanning)
+#378: Some artifacts missing `NOTICE`, `LICENSE` files
 
 2.13.5 (23-Jan-2023)
 
