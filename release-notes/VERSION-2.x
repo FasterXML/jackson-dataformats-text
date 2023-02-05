@@ -14,6 +14,10 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+Not yet released
+
+#378: Some artifacts missing `NOTICE`, `LICENSE` files
+
 2.14.2 (28-Jan-2023)
 
 #356: Fix TOML parse failure when number token hits buffer edge
@@ -51,7 +55,7 @@ Active Maintainers:
 #351: (csv) Make CSVDecoder use lazy parsing of BigInteger/BigDecimal
 * (yaml) Fixes to number decoding based on oss-fuzz findings
 
-2.13.5 (not yet released)
+2.13.5 (23-Jan-2023)
 
 #343: Incorrect output buffer boundary check in `CsvEncoder`
  (reported by k163377@github)
