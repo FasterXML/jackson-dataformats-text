@@ -8,13 +8,13 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
+import com.fasterxml.jackson.core.util.TextBuffer;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvTextBuffer;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -393,7 +393,7 @@ public class CsvParser
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final CsvTextBuffer _textBuffer;
+    protected final TextBuffer _textBuffer;
 
     protected ByteArrayBuilder _byteArrayBuilder;
 
@@ -403,8 +403,8 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(CsvIOContext ctxt, int stdFeatures, int csvFeatures,
-            ObjectCodec codec, Reader reader)
+    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+                     ObjectCodec codec, Reader reader)
     {
         super(stdFeatures);
         if (reader == null) {
@@ -412,7 +412,7 @@ public class CsvParser
         }
         _objectCodec = codec;
         _streamReadConstraints = ctxt.streamReadConstraints();
-        _textBuffer =  ctxt.csvTextBuffer();
+        _textBuffer = ctxt.constructTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;

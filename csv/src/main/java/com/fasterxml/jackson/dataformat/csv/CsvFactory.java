@@ -7,8 +7,6 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.io.ContentReference;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Writer;
@@ -35,9 +33,6 @@ public class CsvFactory extends JsonFactory
      */
     final static int DEFAULT_CSV_GENERATOR_FEATURE_FLAGS = CsvGenerator.Feature.collectDefaults();
 
-    // could make it use Platform default too but...
-    protected final static char[] DEFAULT_LF = { '\n' };
-
     protected final static CsvSchema DEFAULT_SCHEMA = CsvSchema.emptySchema();
     
     /*
@@ -51,14 +46,6 @@ public class CsvFactory extends JsonFactory
     protected int _csvParserFeatures = DEFAULT_CSV_PARSER_FEATURE_FLAGS;
 
     protected int _csvGeneratorFeatures = DEFAULT_CSV_GENERATOR_FEATURE_FLAGS;
-
-    /*
-    protected char _cfgColumnSeparator = ',';
-
-    protected char _cfgQuoteCharacter = '"';
-    
-    protected char[] _cfgLineSeparator = DEFAULT_LF;
-    */
     
     /*
     /**********************************************************************
@@ -414,14 +401,14 @@ public class CsvFactory extends JsonFactory
      */
     @Override
     protected CsvParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new CsvParser((CsvIOContext) ctxt, _parserFeatures, _csvParserFeatures,
+        return new CsvParser(ctxt, _parserFeatures, _csvParserFeatures,
                 _objectCodec, r);
     }
 
     @Override
     protected CsvParser _createParser(char[] data, int offset, int len, IOContext ctxt,
             boolean recyclable) throws IOException {
-        return new CsvParser((CsvIOContext) ctxt, _parserFeatures, _csvParserFeatures,
+        return new CsvParser(ctxt, _parserFeatures, _csvParserFeatures,
                 _objectCodec, new CharArrayReader(data, offset, len));
     }
 
@@ -481,11 +468,5 @@ public class CsvFactory extends JsonFactory
         }
         ByteArrayInputStream in = new ByteArrayInputStream(data, offset, len);
         return new InputStreamReader(in, enc.getJavaName());
-    }
-
-    @Override // since 2.13
-    protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
-    {
-        return new CsvIOContext(streamReadConstraints(), _getBufferRecycler(), contentRef, resourceManaged);
     }
 }

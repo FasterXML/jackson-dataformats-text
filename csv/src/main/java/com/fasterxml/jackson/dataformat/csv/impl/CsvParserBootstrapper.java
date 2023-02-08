@@ -158,7 +158,7 @@ public final class CsvParserBootstrapper
         _context.setEncoding(enc);
         final boolean autoClose = _context.isResourceManaged()
                 || JsonParser.Feature.AUTO_CLOSE_SOURCE.enabledIn(baseFeatures);
-        return new CsvParser((CsvIOContext) _context, baseFeatures, csvFeatures, _codec,
+        return new CsvParser(_context, baseFeatures, csvFeatures, _codec,
                 _createReader(enc, autoClose));
     }
 
