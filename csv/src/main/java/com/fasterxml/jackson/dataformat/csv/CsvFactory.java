@@ -460,7 +460,7 @@ public class CsvFactory extends JsonFactory
     }
 
     protected Reader _createReader(byte[] data, int offset, int len,
-                                   JsonEncoding enc, IOContext ctxt) throws IOException
+            JsonEncoding enc, IOContext ctxt) throws IOException
     {
         // default to UTF-8 if encoding missing
         if (enc == null || enc == JsonEncoding.UTF8) {
