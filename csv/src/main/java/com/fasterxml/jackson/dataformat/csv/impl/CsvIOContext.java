@@ -18,8 +18,4 @@ public class CsvIOContext extends IOContext
             boolean managedResource) {
         super(br, sourceRef, managedResource);
     }
-
-    public CsvTextBuffer csvTextBuffer() {
-        return new CsvTextBuffer(streamReadConstraints(), _bufferRecycler);
-    }
 }

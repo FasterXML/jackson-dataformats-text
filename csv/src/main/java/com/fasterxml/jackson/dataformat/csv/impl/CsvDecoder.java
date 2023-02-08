@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.TextBuffer;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -94,7 +95,7 @@ public class CsvDecoder
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final CsvTextBuffer _textBuffer;
+    protected final TextBuffer _textBuffer;
 
     /**
      * Current buffer from which data is read; generally data is read into
@@ -271,7 +272,7 @@ public class CsvDecoder
      */
 
     public CsvDecoder(CsvParser owner, IOContext ctxt, Reader r, CsvSchema schema,
-            CsvTextBuffer textBuffer,
+            TextBuffer textBuffer,
             int stdFeatures, int csvFeatures)
     {
         _owner = owner;
@@ -998,7 +999,7 @@ public class CsvDecoder
      */
     public boolean isExpectedNumberIntToken()
     {
-        if (_textBuffer.looksLikeInt()) {
+        if (looksLikeInt()) {
             try {
                 _parseIntValue();
             } catch (IOException e) {
@@ -1195,7 +1196,7 @@ public class CsvDecoder
         throws IOException
     {
         // Int or float?
-        if (_textBuffer.looksLikeInt()) {
+        if (looksLikeInt()) {
             _parseIntValue();
             return;
         }
@@ -1207,6 +1208,31 @@ public class CsvDecoder
         _reportError("Current token ("+_currToken+") not numeric, can not use numeric value accessors");
         */
         _parseSlowFloatValue(exactNumber);
+    }
+
+    private boolean looksLikeInt() {
+        final char[] ch = _textBuffer.contentsAsArray();
+        final int len = ch.length;
+
+        if (len == 0) {
+            return false;
+        }
+
+        int i = 0;
+        char c = ch[0];
+        if (c == '-' || c == '+') {
+            if (len == 1) {
+                return false;
+            }
+            ++i;
+        }
+        for (; i < len; ++i) {
+            c = ch[i];
+            if (c > '9' || c < '0') {
+                return false;
+            }
+        }
+        return true;
     }
 
     // @since 2.12
