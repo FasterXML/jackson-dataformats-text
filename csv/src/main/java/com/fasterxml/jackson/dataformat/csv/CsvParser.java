@@ -8,13 +8,13 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonReadContext;
 import com.fasterxml.jackson.core.util.ByteArrayBuilder;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
 import com.fasterxml.jackson.core.util.TextBuffer;
 import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
-import com.fasterxml.jackson.dataformat.csv.impl.CsvIOContext;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -403,8 +403,8 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(CsvIOContext ctxt, int stdFeatures, int csvFeatures,
-            ObjectCodec codec, Reader reader)
+    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+                     ObjectCodec codec, Reader reader)
     {
         super(stdFeatures);
         if (reader == null) {
