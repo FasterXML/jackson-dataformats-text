@@ -24,6 +24,7 @@ public class CsvEncoder
     // Default set of escaped characters (none)
     private static final int [] sOutputEscapes = new int[0];
 
+    // Upper case hex chars:
     protected final static char[] HEX_CHARS = CharTypes.copyHexChars(true);
 
     /**

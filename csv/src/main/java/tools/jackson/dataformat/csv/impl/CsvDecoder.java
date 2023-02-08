@@ -13,6 +13,7 @@ import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.SimpleStreamReadContext;
+import tools.jackson.core.util.TextBuffer;
 import tools.jackson.dataformat.csv.CsvParser;
 import tools.jackson.dataformat.csv.CsvSchema;
 
@@ -95,7 +96,7 @@ public class CsvDecoder
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final CsvTextBuffer _textBuffer;
+    protected final TextBuffer _textBuffer;
 
     /**
      * Current buffer from which data is read; generally data is read into
@@ -273,8 +274,9 @@ public class CsvDecoder
      */
 
     public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
-                      CsvSchema schema, CsvTextBuffer textBuffer,
-                      int stdFeatures, int csvFeatures) {
+                      CsvSchema schema, TextBuffer textBuffer,
+                      int stdFeatures, int csvFeatures)
+    {
         _owner = owner;
         _ioContext = ctxt;
         _inputReader = r;
@@ -948,7 +950,7 @@ public class CsvDecoder
      */
     public boolean isExpectedNumberIntToken()
     {
-        if (_textBuffer.looksLikeInt()) {
+        if (looksLikeInt()) {
             _parseIntValue();
             return true;
         }
@@ -1133,7 +1135,7 @@ public class CsvDecoder
         throws JacksonException
     {
         // Int or float?
-        if (_textBuffer.looksLikeInt()) {
+        if (looksLikeInt()) {
             _parseIntValue();
             return;
         }
@@ -1147,6 +1149,32 @@ public class CsvDecoder
         _parseSlowFloatValue(exactNumber);
     }
 
+    private boolean looksLikeInt() {
+        final char[] ch = _textBuffer.contentsAsArray();
+        final int len = ch.length;
+
+        if (len == 0) {
+            return false;
+        }
+
+        int i = 0;
+        char c = ch[0];
+        if (c == '-' || c == '+') {
+            if (len == 1) {
+                return false;
+            }
+            ++i;
+        }
+        for (; i < len; ++i) {
+            c = ch[i];
+            if (c > '9' || c < '0') {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // @since 2.12
     protected void _parseIntValue() throws JacksonException
     {
         char[] buf = _textBuffer.getTextBuffer();

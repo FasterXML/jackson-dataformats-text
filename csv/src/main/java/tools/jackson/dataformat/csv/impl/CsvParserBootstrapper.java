@@ -7,6 +7,7 @@ import tools.jackson.core.exc.WrappedIOException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.MergedStream;
 import tools.jackson.core.io.UTF32Reader;
+
 import tools.jackson.dataformat.csv.CsvParser;
 import tools.jackson.dataformat.csv.CsvSchema;
 
@@ -157,7 +158,7 @@ public final class CsvParserBootstrapper
         _context.setEncoding(enc);
         final boolean autoClose = _context.isResourceManaged()
             || StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(parserFeatures);
-        return new CsvParser(readCtxt, (CsvIOContext) _context,
+        return new CsvParser(readCtxt, _context,
                 parserFeatures, csvFeatures, schema,
                 _createReader(enc, autoClose));
     }

@@ -6,7 +6,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
-import tools.jackson.dataformat.csv.impl.CsvIOContext;
+
 import tools.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import tools.jackson.dataformat.csv.impl.UTF8Writer;
 
@@ -239,7 +239,7 @@ public class CsvFactory
     protected CsvParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r)
     {
-        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
+        return new CsvParser(readCtxt, ioCtxt,
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _getSchema(readCtxt),
@@ -251,7 +251,7 @@ public class CsvFactory
             char[] data, int offset, int len,
             boolean recyclable)
     {
-        return new CsvParser(readCtxt, (CsvIOContext) ioCtxt,
+        return new CsvParser(readCtxt, ioCtxt,
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _getSchema(readCtxt),
@@ -307,18 +307,5 @@ public class CsvFactory
             return DEFAULT_SCHEMA;
         }
         return (CsvSchema) sch;
-    }
-
-    /*
-    /**********************************************************************
-    /* Factory methods: context creation
-    /**********************************************************************
-     */
-
-    @Override
-    protected IOContext _createContext(ContentReference contentRef, boolean resourceManaged)
-    {
-        return new CsvIOContext(_streamReadConstraints,
-                _getBufferRecycler(), contentRef, resourceManaged);
     }
 }

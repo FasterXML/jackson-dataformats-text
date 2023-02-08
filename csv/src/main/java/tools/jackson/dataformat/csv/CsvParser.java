@@ -11,13 +11,13 @@ import java.util.Set;
 import tools.jackson.core.*;
 import tools.jackson.core.base.ParserMinimalBase;
 import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.ByteArrayBuilder;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.SimpleStreamReadContext;
+import tools.jackson.core.util.TextBuffer;
 
 import tools.jackson.dataformat.csv.impl.CsvDecoder;
-import tools.jackson.dataformat.csv.impl.CsvIOContext;
-import tools.jackson.dataformat.csv.impl.CsvTextBuffer;
 
 /**
  * {@link JsonParser} implementation used to expose CSV documents
@@ -365,7 +365,7 @@ public class CsvParser
      * Buffer that contains contents of all values after processing
      * of doubled-quotes, escaped characters.
      */
-    protected final CsvTextBuffer _textBuffer;
+    protected final TextBuffer _textBuffer;
 
     protected ByteArrayBuilder _byteArrayBuilder;
 
@@ -375,7 +375,7 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(ObjectReadContext readCtxt, CsvIOContext ioCtxt,
+    public CsvParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             int stdFeatures, int csvFeatures, CsvSchema schema,
             Reader reader)
     {
@@ -383,9 +383,9 @@ public class CsvParser
         if (reader == null) {
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
-        _textBuffer =  ioCtxt.csvTextBuffer();
         _formatFeatures = csvFeatures;
         _streamReadContext = SimpleStreamReadContext.createRootContext(null);
+        _textBuffer = ioCtxt.constructTextBuffer();
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);
