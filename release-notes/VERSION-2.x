@@ -16,7 +16,9 @@ Active Maintainers:
 
 2.15.0 (not yet released)
 
--
+#373: Positive numbers with plus sign not quoted correctly with
+  `ALWAYS_QUOTE_NUMBERS_AS_STRINGS`
+ (requested by @dyadyaJora)
 
 2.14.2 (28-Jan-2023)
 
