@@ -177,6 +177,8 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
     public void testQuoteNumberStoredAsString() throws Exception
     {
+        // [dataformats-text#182]
+
         YAMLFactory f = new YAMLFactory();
         // verify default settings
         assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
@@ -206,6 +208,11 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         yaml = mapper.writeValueAsString(Collections.singletonMap("key", "-60.25")).trim();
         assertEquals("---\n" +
                 "key: \"-60.25\"", yaml);
+
+        // [dataformats-text#373]
+        yaml = mapper.writeValueAsString(Collections.singletonMap("key", "+125")).trim();
+        assertEquals("---\n" +
+                "key: \"+125\"", yaml);
     }
 
     public void testNonQuoteNumberStoredAsString() throws Exception
