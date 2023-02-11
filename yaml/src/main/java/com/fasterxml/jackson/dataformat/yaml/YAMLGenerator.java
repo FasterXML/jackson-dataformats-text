@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver;
+import com.fasterxml.jackson.dataformat.yaml.util.NodeStyleResolver.NodeStyle;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
@@ -242,6 +244,8 @@ public class YAMLGenerator extends GeneratorBase
 
     protected final StringQuotingChecker _quotingChecker;
 
+    protected final NodeStyleResolver _nodeStyleResolver;
+
     /*
     /**********************************************************
     /* Life-cycle
@@ -250,6 +254,7 @@ public class YAMLGenerator extends GeneratorBase
 
     public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
             StringQuotingChecker quotingChecker,
+            NodeStyleResolver nodeStyleResolver,
             ObjectCodec codec, Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
@@ -259,6 +264,8 @@ public class YAMLGenerator extends GeneratorBase
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
                 ? StringQuotingChecker.Default.instance() : quotingChecker;
+        _nodeStyleResolver = (nodeStyleResolver == null)
+            ? NodeStyleResolver.DEFAULT_INSTANCE : nodeStyleResolver;
         _writer = out;
         _docVersion = version;
 
@@ -274,7 +281,7 @@ public class YAMLGenerator extends GeneratorBase
     public YAMLGenerator(IOContext ctxt, int jsonFeatures, int yamlFeatures,
             ObjectCodec codec, Writer out,
             org.yaml.snakeyaml.DumperOptions.Version version) throws IOException {
-        this(ctxt, jsonFeatures, yamlFeatures, null,
+        this(ctxt, jsonFeatures, yamlFeatures, null, null,
                 codec, out, version);
     }
 
@@ -518,13 +525,16 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _writeContext = _writeContext.createChildArrayContext();
-        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
         if (anchor != null) {
             _objectId = null;
         }
+        NodeStyle jacksonStyle = _nodeStyleResolver.resolveStyle(
+            _writeContext.getParent().getCurrentName());
+        FlowStyle style = jacksonStyle != null ? jacksonStyle.getSnakeYamlFlowStyle()
+            : _outputOptions.getDefaultFlowStyle();
         _emit(new SequenceStartEvent(anchor, yamlTag,
                 implicit,  null, null, style));
     }
@@ -546,13 +556,16 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _writeContext = _writeContext.createChildObjectContext();
-        FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
         String anchor = _objectId;
         if (anchor != null) {
             _objectId = null;
         }
+        NodeStyle jacksonStyle = _nodeStyleResolver.resolveStyle(
+            _writeContext.getParent().getCurrentName());
+        FlowStyle style = jacksonStyle != null ? jacksonStyle.getSnakeYamlFlowStyle()
+            : _outputOptions.getDefaultFlowStyle();
         _emit(new MappingStartEvent(anchor, yamlTag,
                 implicit, null, null, style));
     }
