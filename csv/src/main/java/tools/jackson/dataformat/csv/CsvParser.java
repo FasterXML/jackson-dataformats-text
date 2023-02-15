@@ -12,6 +12,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.base.ParserMinimalBase;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.DupDetector;
 import tools.jackson.core.util.ByteArrayBuilder;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.SimpleStreamReadContext;
@@ -384,7 +385,9 @@ public class CsvParser
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
         _formatFeatures = csvFeatures;
-        _streamReadContext = SimpleStreamReadContext.createRootContext(null);
+        DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
         _textBuffer = ioCtxt.constructReadConstrainedTextBuffer();
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
