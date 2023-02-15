@@ -1,10 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.MappingIterator;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -39,7 +36,7 @@ public class BigStringsTest
     public void testBigString() throws Exception
     {
         try {
-            StringWrapper sw = MAPPER.readValue(generateToml(1001000), StringWrapper.class);
+            MAPPER.readValue(generateToml(1001000), StringWrapper.class);
             fail("expected IllegalStateException");
         } catch (IllegalStateException illegalStateException) {
             assertTrue("unexpected exception message: " + illegalStateException.getMessage(),
@@ -51,7 +48,7 @@ public class BigStringsTest
     public void testBiggerString() throws Exception
     {
         try {
-            StringWrapper sw = MAPPER.readValue(generateToml(2000000), StringWrapper.class);
+            MAPPER.readValue(generateToml(2000000), StringWrapper.class);
             fail("expected IllegalStateException");
         } catch (IllegalStateException illegalStateException) {
             final String message = illegalStateException.getMessage();
