@@ -412,7 +412,7 @@ public class CsvParser
         }
         _objectCodec = codec;
         _streamReadConstraints = ctxt.streamReadConstraints();
-        _textBuffer = ctxt.constructTextBuffer();
+        _textBuffer = ctxt.constructReadConstrainedTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _formatFeatures = csvFeatures;

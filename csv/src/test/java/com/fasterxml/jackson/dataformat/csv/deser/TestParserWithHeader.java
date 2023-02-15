@@ -24,7 +24,7 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSimpleHeader() throws Exception
     {
-        CsvParser parser = (CsvParser) new CsvFactory().createParser(
+        CsvParser parser = new CsvFactory().createParser(
                 "name, age,  other\nfoo,2,xyz\n");
         // need to enable first-line-as-schema handling:
         parser.setSchema(CsvSchema.emptySchema().withHeader());
