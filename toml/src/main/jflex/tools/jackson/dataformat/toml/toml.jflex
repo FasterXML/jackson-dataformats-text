@@ -18,7 +18,7 @@ this.ioContext = ioContext;
 this.errorContext = errorContext;
 yybegin(EXPECT_EXPRESSION);
 this.zzBuffer = ioContext.allocTokenBuffer();
-this.textBuffer = ioContext.constructTextBuffer();
+this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
 %init}
 
 %{

@@ -385,7 +385,7 @@ public class CsvParser
         }
         _formatFeatures = csvFeatures;
         _streamReadContext = SimpleStreamReadContext.createRootContext(null);
-        _textBuffer = ioCtxt.constructTextBuffer();
+        _textBuffer = ioCtxt.constructReadConstrainedTextBuffer();
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);
