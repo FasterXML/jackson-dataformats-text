@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.*;
 
-public class TestGenerator extends ModuleTestBase
+public class CSVGeneratorTest extends ModuleTestBase
 {
     @JsonPropertyOrder({"id", "amount"})
     static class Entry {
