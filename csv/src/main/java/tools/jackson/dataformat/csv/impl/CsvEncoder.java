@@ -10,9 +10,10 @@ import tools.jackson.core.io.CharTypes;
 import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberOutput;
+
 import tools.jackson.dataformat.csv.CsvGenerator;
 import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.CsvGenerator.Feature;
+import tools.jackson.dataformat.csv.CsvWriteException;
 
 /**
  * Helper class that handles actual low-level construction of
@@ -190,7 +191,7 @@ public class CsvEncoder
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
         _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
-        _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
+        _cfgEscapeControlCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
         _outputBuffer = ctxt.allocConcatBuffer();
         _bufferRecyclable = true;
@@ -219,6 +220,8 @@ public class CsvEncoder
         );
 
         _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
+
+        _verifyConfiguration(schema);
     }
 
     public CsvEncoder(CsvEncoder base, CsvSchema newSchema)
@@ -255,8 +258,25 @@ public class CsvEncoder
                 newSchema.getEscapeChar()
         );
         _cfgControlCharEscapeChar = _cfgEscapeCharacter > 0 ? (char) _cfgEscapeCharacter : '\\';
+
+        _verifyConfiguration(newSchema);
     }
 
+    private void _verifyConfiguration(CsvSchema schema) 
+    {
+        // 21-Feb-2023, tatu: [dataformats-text#374]: Need to verify that Escape character
+        //   is defined if need to use it
+        if (_cfgEscapeQuoteCharWithEscapeChar || _cfgEscapeControlCharWithEscapeChar) {
+            if (!schema.usesEscapeChar()) {
+                throw CsvWriteException.from(null,
+"Cannot use `CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR` or `CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR`"
+                        +" if no escape character defined in `CsvSchema`",
+                        schema);
+            }
+        }
+    }
+    
+    
     private final char _getQuoteCharEscapeChar(
             final boolean escapeQuoteCharWithEscapeChar,
             final int quoteCharacter,
@@ -295,6 +315,7 @@ public class CsvEncoder
         return new CsvEncoder(this, schema);
     }
 
+    /*
     public CsvEncoder overrideFormatFeatures(int feat) {
         if (feat != _csvFeatures) {
             _csvFeatures = feat;
@@ -307,6 +328,7 @@ public class CsvEncoder
         }
         return this;
     }
+    */
 
     public CsvEncoder setOutputEscapes(int[] esc) {
         _outputEscapes = (esc != null) ? esc : sOutputEscapes;

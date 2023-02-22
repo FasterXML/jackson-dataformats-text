@@ -396,6 +396,7 @@ public class CsvGenerator extends GeneratorBase
         return (_formatFeatures & f.getMask()) != 0;
     }
 
+    /*
     public CsvGenerator configure(Feature f, boolean state) {
         if (state) {
             return enable(f);
@@ -414,6 +415,7 @@ public class CsvGenerator extends GeneratorBase
         _writer.overrideFormatFeatures(_formatFeatures);
         return this;
     }
+    */
 
     /*
     /**********************************************************************

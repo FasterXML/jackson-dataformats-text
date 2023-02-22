@@ -227,6 +227,24 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("\"\\\"abc\\\"\",1.25\n", result);
     }
 
+    // [dataformats-text#374]: require escape char if needed
+    public void testMissingEscapeCharacterSetting() throws Exception
+    {
+        CsvSchema schema = CsvSchema.builder()
+                                    .addColumn("id")
+                                    .addColumn("amount")
+                                    //.setEscapeChar('\\')
+                                    .build();
+        try {
+            String result = MAPPER.writer(schema)
+                    .with(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                    .writeValueAsString(new Entry("\"abc\"", 1.25));
+            fail("Should not pass, got: "+result);
+        } catch (CsvWriteException e) {
+            verifyException(e, "Cannot use `CsvGenerator.Feature.ESCAPE");
+        }
+    }
+    
     public void testForcedQuotingEmptyStrings() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

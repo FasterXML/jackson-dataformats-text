@@ -17,6 +17,9 @@ implementations)
 3.0.0 (not yet released)
 
 #320: Rename "com.fasterxml.jackson" -> "tools.jackson"
+#374: Should verify that escape character set if enabling
+  `CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR`
+ (suggested by @SebastianSolidwork)
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 
 CSV:
