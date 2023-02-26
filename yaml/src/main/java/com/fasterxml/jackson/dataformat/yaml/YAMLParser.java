@@ -537,9 +537,6 @@ public class YAMLParser extends ParserBase
                 close();
                 return (_currToken = null);
             }
-            if (evt.is(Event.ID.StreamStart)) { // useless, skip
-                continue;
-            }
         }
     }
 
