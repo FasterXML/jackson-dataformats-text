@@ -16,15 +16,17 @@ Active Maintainers:
 
 2.15.0 (not yet released)
 
-#373: Positive numbers with plus sign not quoted correctly with
+#373: (yaml) Positive numbers with plus sign not quoted correctly with
   `ALWAYS_QUOTE_NUMBERS_AS_STRINGS`
  (requested by @dyadyaJora)
+#390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
+ (contributed by @pjfanning)
 
 2.14.2 (28-Jan-2023)
 
-#356: Fix TOML parse failure when number token hits buffer edge
+#356: (toml) Fix TOML parse failure when number token hits buffer edge
  (fix by Jonas K)
-#370: Replace use of deprecated constructor of SnakeYAML ParserImpl
+#370: (yaml) Replace use of deprecated constructor of SnakeYAML ParserImpl
  (contributed by Andrey S)
 
 2.14.1 (21-Nov-2022)

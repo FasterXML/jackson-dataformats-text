@@ -193,8 +193,10 @@ PJ Fanning (pjfanning@github)
 #283: (csv) `CsvSchema.getColumnDesc()` returns unpaired square bracket when columns
   are empty
  (2.13.0)
-* Contributed #314: (csv) Add fast floating-point parsing, generation support
+#314: (csv) Add fast floating-point parsing, generation support
  (2.14.0)
+#390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
+ (2.15.0)
 
 Falk Hanisch (mrpiggi@github)
 #288: Caching conflict when creating CSV schemas with different views
