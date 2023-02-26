@@ -468,6 +468,9 @@ public class YAMLParser extends ParserBase
                 // 22-Jul-2022, tatu: Interesting... what to do?
                 case Comment:
                     continue;
+
+                // 26-Feb-2023, tatu: Should we report an error or... ?
+                default:
             }
         }
     }
