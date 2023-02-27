@@ -39,7 +39,15 @@ public class YAMLParser extends ParserBase
          * Feature is enabled by default in Jackson 2.12 for backwards-compatibility
          * reasons.
          */
-        EMPTY_STRING_AS_NULL(true)
+        EMPTY_STRING_AS_NULL(true),
+
+        /**
+         * Feature that determines whether to parse boolean-like words as strings instead of booleans.
+         * When enabled, the following words will be parsed as strings instead of booleans: yes, no, on, off.
+         * 
+         * @since 2.15
+         */
+        PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS(false),
         ;
 
         final boolean _defaultState;
@@ -633,27 +641,32 @@ public class YAMLParser extends ParserBase
 
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
-        switch (len) {
-        case 1:
-            switch (value.charAt(0)) {
-            case 'y': case 'Y': return Boolean.TRUE;
-            case 'n': case 'N': return Boolean.FALSE;
-            }
-            break;
-        case 2:
-            if ("no".equalsIgnoreCase(value)) return Boolean.FALSE;
-            if ("on".equalsIgnoreCase(value)) return Boolean.TRUE;
-            break;
-        case 3:
-            if ("yes".equalsIgnoreCase(value)) return Boolean.TRUE;
-            if ("off".equalsIgnoreCase(value)) return Boolean.FALSE;
-            break;
-        case 4:
+        if (isEnabled(Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)) {
             if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-            break;
-        case 5:
             if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-            break;
+        } else {
+            switch (len) {
+                case 1:
+                    switch (value.charAt(0)) {
+                        case 'y': case 'Y': return Boolean.TRUE;
+                        case 'n': case 'N': return Boolean.FALSE;
+                    }
+                    break;
+                case 2:
+                    if ("no".equalsIgnoreCase(value)) return Boolean.FALSE;
+                    if ("on".equalsIgnoreCase(value)) return Boolean.TRUE;
+                    break;
+                case 3:
+                    if ("yes".equalsIgnoreCase(value)) return Boolean.TRUE;
+                    if ("off".equalsIgnoreCase(value)) return Boolean.FALSE;
+                    break;
+                case 4:
+                    if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
+                    break;
+                case 5:
+                    if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
+                    break;
+            }
         }
         return null;
     }
