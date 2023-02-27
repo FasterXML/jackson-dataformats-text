@@ -45,9 +45,9 @@ public class YAMLFactory extends JsonFactory
     /**********************************************************************
      */
 
-    protected int _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
-
     protected int _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
+
+    protected int _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
 
     /**
      * YAML version for underlying generator to follow, if specified.
@@ -119,8 +119,8 @@ public class YAMLFactory extends JsonFactory
     public YAMLFactory(ObjectCodec oc)
     {
         super(oc);
-        _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
         _yamlGeneratorFeatures = DEFAULT_YAML_GENERATOR_FEATURE_FLAGS;
+        _yamlParserFeatures = DEFAULT_YAML_PARSER_FEATURE_FLAGS;
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //   that adds version declaration which looks ugly...
         //_version = DumperOptions.Version.V1_1;
@@ -136,8 +136,8 @@ public class YAMLFactory extends JsonFactory
     public YAMLFactory(YAMLFactory src, ObjectCodec oc)
     {
         super(src, oc);
-        _yamlParserFeatures = src._yamlParserFeatures;
         _yamlGeneratorFeatures = src._yamlGeneratorFeatures;
+        _yamlParserFeatures = src._yamlParserFeatures;
         _version = src._version;
         _quotingChecker = src._quotingChecker;
         _loaderOptions = src._loaderOptions;
@@ -153,6 +153,7 @@ public class YAMLFactory extends JsonFactory
     {
         super(b, false);
         _yamlGeneratorFeatures = b.formatGeneratorFeaturesMask();
+        _yamlParserFeatures = b.formatParserFeaturesMask();
         _version = b.yamlVersionToWrite();
         _quotingChecker = b.stringQuotingChecker();
         _loaderOptions = b.loaderOptions();
@@ -275,56 +276,6 @@ public class YAMLFactory extends JsonFactory
         }
         return MatchStrength.INCONCLUSIVE;
     }
-    
-    /*
-    /**********************************************************
-    /* Configuration, parser settings
-    /**********************************************************
-     */
-
-    /**
-     * Method for enabling or disabling specified parser feature
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public final YAMLFactory configure(YAMLParser.Feature f, boolean state)
-    {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-
-    /**
-     * Method for enabling specified parser feature
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public YAMLFactory enable(YAMLParser.Feature f) {
-        _yamlParserFeatures |= f.getMask();
-        return this;
-    }
-
-    /**
-     * Method for disabling specified parser features
-     * (check {@link YAMLParser.Feature} for list of features)
-     */
-    public YAMLFactory disable(YAMLParser.Feature f) {
-        _yamlParserFeatures &= ~f.getMask();
-        return this;
-    }
-
-    /**
-     * Checked whether specified parser feature is enabled.
-     */
-    public final boolean isEnabled(YAMLParser.Feature f) {
-        return (_yamlParserFeatures & f.getMask()) != 0;
-    }
-
-    @Override
-    public int getFormatParserFeatures() {
-        return _yamlParserFeatures;
-    }
 
     /*
     /**********************************************************
@@ -373,6 +324,56 @@ public class YAMLFactory extends JsonFactory
     @Override
     public int getFormatGeneratorFeatures() {
         return _yamlGeneratorFeatures;
+    }
+
+    /*
+    /**********************************************************
+    /* Configuration, parser settings
+    /**********************************************************
+     */
+
+    /**
+     * Method for enabling or disabling specified parser feature
+     * (check {@link YAMLParser.Feature} for list of features)
+     */
+    public final YAMLFactory configure(YAMLParser.Feature f, boolean state)
+    {
+        if (state) {
+            enable(f);
+        } else {
+            disable(f);
+        }
+        return this;
+    }
+
+    /**
+     * Method for enabling specified parser feature
+     * (check {@link YAMLParser.Feature} for list of features)
+     */
+    public YAMLFactory enable(YAMLParser.Feature f) {
+        _yamlParserFeatures |= f.getMask();
+        return this;
+    }
+
+    /**
+     * Method for disabling specified parser features
+     * (check {@link YAMLParser.Feature} for list of features)
+     */
+    public YAMLFactory disable(YAMLParser.Feature f) {
+        _yamlParserFeatures &= ~f.getMask();
+        return this;
+    }
+
+    /**
+     * Checked whether specified parser feature is enabled.
+     */
+    public final boolean isEnabled(YAMLParser.Feature f) {
+        return (_yamlParserFeatures & f.getMask()) != 0;
+    }
+
+    @Override
+    public int getFormatParserFeatures() {
+        return _yamlParserFeatures;
     }
 
     /*
@@ -448,7 +449,7 @@ public class YAMLFactory extends JsonFactory
         }
         return _createParser(data, offset, len, ctxt);
     }
-    
+
     /*
     /**********************************************************
     /* Overridden generator factory methods (2.1)

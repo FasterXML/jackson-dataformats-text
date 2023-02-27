@@ -25,6 +25,13 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     protected int _formatGeneratorFeatures;
 
     /**
+     * Set of {@link YAMLParser.Feature}s enabled, as bitmask.
+     *
+     * @since 2.15
+     */
+    protected int _formatParserFeatures;
+
+    /**
      * Helper object used to determine whether property names, String values
      * must be quoted or not.
      *
@@ -89,11 +96,46 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     public YAMLFactoryBuilder(YAMLFactory base) {
         super(base);
         _formatGeneratorFeatures = base._yamlGeneratorFeatures;
+        _formatParserFeatures = base._yamlParserFeatures;
         _version = base._version;
         _quotingChecker = base._quotingChecker;
     }
 
-    // // // Parser features NOT YET defined
+    /*
+    /**********************************************************
+    /* Parser feature setting
+    /**********************************************************
+     */
+
+    public YAMLFactoryBuilder enable(YAMLParser.Feature f) {
+        _formatParserFeatures |= f.getMask();
+        return this;
+    }
+
+    public YAMLFactoryBuilder enable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+        _formatParserFeatures |= first.getMask();
+        for (YAMLParser.Feature f : other) {
+            _formatParserFeatures |= f.getMask();
+        }
+        return this;
+    }
+
+    public YAMLFactoryBuilder disable(YAMLParser.Feature f) {
+        _formatParserFeatures &= ~f.getMask();
+        return this;
+    }
+    
+    public YAMLFactoryBuilder disable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+        _formatParserFeatures &= ~first.getMask();
+        for (YAMLParser.Feature f : other) {
+            _formatParserFeatures &= ~f.getMask();
+        }
+        return this;
+    }
+
+    public YAMLFactoryBuilder configure(YAMLParser.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
+    }
 
     /*
     /**********************************************************
@@ -218,7 +260,7 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
     /**********************************************************
      */
 
-//    public int formatParserFeaturesMask() { return _formatParserFeatures; }
+    public int formatParserFeaturesMask() { return _formatParserFeatures; }
     public int formatGeneratorFeaturesMask() { return _formatGeneratorFeatures; }
 
     public DumperOptions.Version yamlVersionToWrite() {

@@ -53,7 +53,9 @@ public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
 
     public void testParseBooleanLikeWordsAsString_enabledFF() throws Exception
     {
-        YAMLFactory f = new YAMLFactory().enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS);
+        YAMLFactory f = YAMLFactory.builder()
+                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)
+                .build();
         assertTrue(f.isEnabled(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS));
         ObjectMapper mapper = new ObjectMapper(f);
 
