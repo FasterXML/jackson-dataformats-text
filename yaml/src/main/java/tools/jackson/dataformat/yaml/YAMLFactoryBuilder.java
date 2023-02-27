@@ -87,8 +87,6 @@ public class YAMLFactoryBuilder
         _dumpSettings = base._dumpSettings;
     }
 
-    // // // Parser features NOT YET defined
-
     /*
     /**********************************************************
     /* Generator feature setting
@@ -122,6 +120,42 @@ public class YAMLFactoryBuilder
     }
 
     public YAMLFactoryBuilder configure(YAMLGenerator.Feature f, boolean state) {
+        return state ? enable(f) : disable(f);
+    }
+
+    /*
+    /**********************************************************
+    /* Generator feature setting
+    /**********************************************************
+     */
+
+    public YAMLFactoryBuilder enable(YAMLParser.Feature f) {
+        _formatReadFeatures |= f.getMask();
+        return this;
+    }
+
+    public YAMLFactoryBuilder enable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+        _formatReadFeatures |= first.getMask();
+        for (YAMLParser.Feature f : other) {
+            _formatReadFeatures |= f.getMask();
+        }
+        return this;
+    }
+
+    public YAMLFactoryBuilder disable(YAMLParser.Feature f) {
+        _formatReadFeatures &= ~f.getMask();
+        return this;
+    }
+
+    public YAMLFactoryBuilder disable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+        _formatReadFeatures &= ~first.getMask();
+        for (YAMLParser.Feature f : other) {
+            _formatReadFeatures &= ~f.getMask();
+        }
+        return this;
+    }
+
+    public YAMLFactoryBuilder configure(YAMLParser.Feature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
 
@@ -174,7 +208,6 @@ public class YAMLFactoryBuilder
      *
      * @param settings the {@code SnakeYAML} configuration to use when parsing YAML
      * @return This builder instance, to allow chaining
-     * @since 2.14
      */
     public YAMLFactoryBuilder loadSettings(LoadSettings settings) {
         _loadSettings = settings;
@@ -255,7 +288,6 @@ public class YAMLFactoryBuilder
      * </p>
      *
      * @return the {@code SnakeYAML} configuration to use when generating YAML
-     * @since 2.14
      */
     public DumpSettings dumpSettings() {
         return _dumpSettings;

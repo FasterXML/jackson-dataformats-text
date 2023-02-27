@@ -268,17 +268,12 @@ public class YAMLParser extends ParserBase
 
     /*
     /**********************************************************************
-    /* FormatFeature support (none yet)
-    /**********************************************************************
-
-    /*
-    /**********************************************************************
     /* Public API, configuration
     /**********************************************************************
      */
 
     /**
-     * Method for checking whether specified CSV {@link Feature}
+     * Method for checking whether specified {@link YAMLParser.Feature}
      * is enabled.
      */
     public boolean isEnabled(YAMLParser.Feature f) {

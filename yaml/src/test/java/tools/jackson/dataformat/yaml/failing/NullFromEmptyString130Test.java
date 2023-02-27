@@ -9,7 +9,7 @@ import tools.jackson.dataformat.yaml.YAMLParser;
 //  after RCs)
 //
 // Fix to be done by ignoring snakeyaml's implicit type for case of
-// empty String (in `YAMLParser.
+// empty String (in `YAMLParser).
 public class NullFromEmptyString130Test extends ModuleTestBase
 {
     static class Value130 {
@@ -25,7 +25,7 @@ public class NullFromEmptyString130Test extends ModuleTestBase
     // [dataformats-text#130]
     public void testEmptyValueToNull130() throws Exception
     {
-        // by default, empy Strings are coerced:
+        // by default, empty Strings are coerced:
         assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLParser.Feature.EMPTY_STRING_AS_NULL));
 
         {
