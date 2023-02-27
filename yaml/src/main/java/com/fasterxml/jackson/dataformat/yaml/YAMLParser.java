@@ -44,7 +44,10 @@ public class YAMLParser extends ParserBase
         /**
          * Feature that determines whether to parse boolean-like words as strings instead of booleans.
          * When enabled, the following words will be parsed as strings instead of booleans: yes, no, on, off.
-         * 
+         *<p>
+         * Feature is disabled by default for backwards-compatibility: works the
+         * same as YAML specification default and previous Jackson versions.
+         *
          * @since 2.15
          */
         PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS(false),
