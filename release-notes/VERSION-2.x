@@ -19,6 +19,9 @@ Active Maintainers:
 #373: (yaml) Positive numbers with plus sign not quoted correctly with
   `ALWAYS_QUOTE_NUMBERS_AS_STRINGS`
  (requested by @dyadyaJora)
+#388: (yaml) Add `YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS`
+  to allow parsing "boolean" words as strings instead of booleans
+ (contributed by Axel N)
 #390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
  (contributed by @pjfanning)
 

@@ -228,3 +228,9 @@ Shauni Arima (ShauniArima@github)
 Matteo Giordano (malteo@github)
 * Contributed fix for #352: Disabling `CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS` has no effect
  (2.14.1)
+
+Axel Niklasson (axelniklasson@github)
+
+* Contributed #388: (yaml) Add `YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS`
+  to allow parsing "boolean" words as strings instead of booleans
+ (2.15.0)
