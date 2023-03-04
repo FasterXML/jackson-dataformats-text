@@ -658,6 +658,10 @@ public class CsvParser
         return false;
     }
 
+    /**
+     * @return whether the token is expected to be an IntToken
+     * @throws IllegalStateException if the number is too long
+     */
     @Override // since 2.12
     public boolean isExpectedNumberIntToken()
     {
@@ -671,7 +675,7 @@ public class CsvParser
                     return true;
                 }
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new IllegalStateException(e);
             }
             return false;
         }
