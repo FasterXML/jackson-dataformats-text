@@ -67,7 +67,7 @@ public class TomlStreamReadException
                         "Number out of bounds", location, cause);
             }
 
-            TomlStreamReadException invalidNumber(NumberFormatException cause, String value) {
+            TomlStreamReadException invalidNumber(Exception cause, String value) {
                 return new TomlStreamReadException(parser,
                         "Invalid number representation ('"+value+"'), problem: "+cause.getMessage(), location, cause);
             }

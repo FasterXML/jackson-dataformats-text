@@ -3,6 +3,7 @@ package tools.jackson.dataformat.toml;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.util.VersionUtil;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -13,7 +14,6 @@ import tools.jackson.databind.node.ValueNode;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -348,16 +348,16 @@ class Parser {
         String text = null;
         try {
             tomlFactory.streamReadConstraints().validateIntegerLength(length);
-            text = new String(buffer, start, length);
-            return factory.numberNode(NumberInput.parseBigInteger(
-                    text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | StreamConstraintsException e) {
             final String reportNum = length <= MAX_CHARS_TO_REPORT ?
                     text == null ? new String(buffer, start, length) : text :
                     (text == null ? new String(buffer, start, MAX_CHARS_TO_REPORT) : text.substring(0, MAX_CHARS_TO_REPORT))
                             + " [truncated]";
             throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
+        text = new String(buffer, start, length);
+        return factory.numberNode(NumberInput.parseBigInteger(
+                text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
@@ -373,7 +373,7 @@ class Parser {
                 BigDecimal dec = NumberInput.parseBigDecimal(
                         text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 return factory.numberNode(dec);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | StreamConstraintsException e) {
                 final String reportNum = text.length() <= MAX_CHARS_TO_REPORT ?
                         text :
                         text.substring(0, MAX_CHARS_TO_REPORT) + " [truncated]";
