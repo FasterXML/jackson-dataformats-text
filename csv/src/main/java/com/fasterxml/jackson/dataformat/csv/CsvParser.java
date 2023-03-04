@@ -663,9 +663,15 @@ public class CsvParser
     {
         JsonToken t = _currToken;
         if (t == JsonToken.VALUE_STRING) {
-            if (_reader.isExpectedNumberIntToken()) {
-                _currToken = JsonToken.VALUE_NUMBER_INT;
-                return true;
+            // Unfortunate as this method is not declared to throw exceptions;
+            // only occurs with StreamReadConstraints violations
+            try {
+                if (_reader.isExpectedNumberIntToken()) {
+                    _currToken = JsonToken.VALUE_NUMBER_INT;
+                    return true;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
             return false;
         }

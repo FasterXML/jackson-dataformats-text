@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.util.VersionUtil;
@@ -13,7 +14,6 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -363,16 +363,16 @@ class Parser {
         String text = null;
         try {
             tomlFactory.streamReadConstraints().validateIntegerLength(length);
-            text = new String(buffer, start, length);
-            return factory.numberNode(NumberInput.parseBigInteger(
-                    text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
-        } catch (NumberFormatException e) {
+        } catch (StreamConstraintsException e) {
             final String reportNum = length <= MAX_CHARS_TO_REPORT ?
                     text == null ? new String(buffer, start, length) : text :
                     (text == null ? new String(buffer, start, MAX_CHARS_TO_REPORT) : text.substring(0, MAX_CHARS_TO_REPORT))
                             + " [truncated]";
             throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
+        text = new String(buffer, start, length);
+        return factory.numberNode(NumberInput.parseBigInteger(
+                text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {

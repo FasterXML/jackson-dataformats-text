@@ -479,7 +479,7 @@ public class CsvDecoder
     /**********************************************************************
      */
 
-    public String getText() {
+    public String getText() throws IOException {
         return _textBuffer.contentsAsString();
     }
 
@@ -997,15 +997,10 @@ public class CsvDecoder
      *
      * @since 2.12
      */
-    public boolean isExpectedNumberIntToken()
+    public boolean isExpectedNumberIntToken() throws IOException
     {
         if (looksLikeInt()) {
-            try {
-                _parseIntValue();
-            } catch (IOException e) {
-                // should not occur but is declared so
-                throw new RuntimeException(e);
-            }
+            _parseIntValue();
             return true;
         }
         return false;
@@ -1145,7 +1140,7 @@ public class CsvDecoder
      *
      * @since 2.14
      */
-    protected BigInteger _getBigInteger() {
+    protected BigInteger _getBigInteger() throws IOException {
         if (_numberBigInt != null) {
             return _numberBigInt;
         } else if (_numberString == null) {
@@ -1164,7 +1159,7 @@ public class CsvDecoder
      *
      * @since 2.14
      */
-    protected BigDecimal _getBigDecimal() {
+    protected BigDecimal _getBigDecimal() throws IOException{
         if (_numberBigDecimal != null) {
             return _numberBigDecimal;
         } else if (_numberString == null) {
@@ -1210,7 +1205,7 @@ public class CsvDecoder
         _parseSlowFloatValue(exactNumber);
     }
 
-    private boolean looksLikeInt() {
+    private boolean looksLikeInt() throws IOException {
         final char[] ch = _textBuffer.contentsAsArray();
         final int len = ch.length;
 
