@@ -65,7 +65,7 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       textBuffer.append(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead);
   }
 
-  private void appendNewlineWithPossibleTrim() throws java.io.IOException  {
+  private void appendNewlineWithPossibleTrim() throws java.io.IOException {
       if (!trimmedNewline && textBuffer.size() == 0) {
           trimmedNewline = true;
       } else {
