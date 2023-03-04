@@ -52,8 +52,8 @@ public class LongTokenTest {
         try {
             mapper.readTree(toml.toString());
             Assert.fail("expected TomlStreamReadException");
-        } catch (StreamConstraintsException e) {
-            Assert.assertEquals("Number length (10003) exceeds the maximum length (1000)", e.getMessage());
+        } catch (TomlStreamReadException e) {
+            Assert.assertTrue("exception message contains truncated number", e.getMessage().contains("[truncated]"));
         }
     }
 
