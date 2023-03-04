@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
@@ -51,8 +52,8 @@ public class LongTokenTest {
         try {
             mapper.readTree(toml.toString());
             Assert.fail("expected TomlStreamReadException");
-        } catch (TomlStreamReadException e) {
-            Assert.assertTrue("exception message contains truncated number", e.getMessage().contains("[truncated]"));
+        } catch (StreamConstraintsException e) {
+            Assert.assertEquals("Number length (10003) exceeds the maximum length (1000)", e.getMessage());
         }
     }
 

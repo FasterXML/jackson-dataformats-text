@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -37,10 +38,10 @@ public class BigStringsTest
     {
         try {
             MAPPER.readValue(generateToml(1001000), StringWrapper.class);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException illegalStateException) {
-            assertTrue("unexpected exception message: " + illegalStateException.getMessage(),
-                    illegalStateException.getMessage().startsWith("String length (1001000) exceeds the maximum length (1000000)"));
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
+            assertTrue("unexpected exception message: " + e.getMessage(),
+                    e.getMessage().startsWith("String length (1001000) exceeds the maximum length (1000000)"));
         }
     }
 
@@ -49,9 +50,9 @@ public class BigStringsTest
     {
         try {
             MAPPER.readValue(generateToml(2000000), StringWrapper.class);
-            fail("expected IllegalStateException");
-        } catch (IllegalStateException illegalStateException) {
-            final String message = illegalStateException.getMessage();
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
+            final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
             // so best not to assert that the String length value in the message is the full 2000000 value
             assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
