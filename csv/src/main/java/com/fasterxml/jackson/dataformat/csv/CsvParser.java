@@ -659,8 +659,10 @@ public class CsvParser
     }
 
     /**
-     * @return whether the token is expected to be an IntToken
-     * @throws IllegalStateException if the number is too long
+     * @return Whether the token can be read as {@code JsonToken.VALUE_NUMBER_INT}
+     *    (with possible coercion)
+     *
+     * @throws UncheckedIOException if the number is too long
      */
     @Override // since 2.12
     public boolean isExpectedNumberIntToken()
@@ -675,7 +677,7 @@ public class CsvParser
                     return true;
                 }
             } catch (IOException e) {
-                throw new IllegalStateException(e);
+                throw new UncheckedIOException(e);
             }
             return false;
         }
