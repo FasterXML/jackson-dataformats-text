@@ -363,7 +363,7 @@ class Parser {
         String text = null;
         try {
             tomlFactory.streamReadConstraints().validateIntegerLength(length);
-        } catch (StreamConstraintsException e) {
+        } catch (NumberFormatException | StreamConstraintsException e) {
             final String reportNum = length <= MAX_CHARS_TO_REPORT ?
                     text == null ? new String(buffer, start, length) : text :
                     (text == null ? new String(buffer, start, MAX_CHARS_TO_REPORT) : text.substring(0, MAX_CHARS_TO_REPORT))
@@ -388,7 +388,7 @@ class Parser {
                 BigDecimal dec = NumberInput.parseBigDecimal(
                         text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 return factory.numberNode(dec);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | StreamConstraintsException e) {
                 final String reportNum = text.length() <= MAX_CHARS_TO_REPORT ?
                         text :
                         text.substring(0, MAX_CHARS_TO_REPORT) + " [truncated]";

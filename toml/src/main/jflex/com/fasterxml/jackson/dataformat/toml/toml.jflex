@@ -60,12 +60,12 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       trimmedNewline = false;
   }
 
-  private void appendNormalTextToken() {
+  private void appendNormalTextToken() throws java.io.IOException {
       // equivalent to append(yytext()), without the roundtrip through the String constructor
       textBuffer.append(zzBuffer, zzStartRead, zzMarkedPos-zzStartRead);
   }
 
-  private void appendNewlineWithPossibleTrim() {
+  private void appendNewlineWithPossibleTrim() throws java.io.IOException  {
       if (!trimmedNewline && textBuffer.size() == 0) {
           trimmedNewline = true;
       } else {
@@ -74,7 +74,7 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       }
   }
 
-  private void appendUnicodeEscapeShort() {
+  private void appendUnicodeEscapeShort() throws java.io.IOException {
       int value = (Character.digit(yycharat(2), 16) << 12) |
                    (Character.digit(yycharat(3), 16) << 8) |
                    (Character.digit(yycharat(4), 16) << 4) |
