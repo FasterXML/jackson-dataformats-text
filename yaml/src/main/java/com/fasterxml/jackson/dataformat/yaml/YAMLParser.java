@@ -503,6 +503,7 @@ public class YAMLParser extends ParserBase
                 MappingStartEvent map = (MappingStartEvent) evt;
                 _currentAnchor = map.getAnchor();
                 _parsingContext = _parsingContext.createChildObjectContext(m.getLine(), m.getColumn());
+                _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
                 return (_currToken = JsonToken.START_OBJECT);
             }
             if (evt.is(Event.ID.MappingEnd)) { // actually error; can not have map-end here
@@ -512,6 +513,7 @@ public class YAMLParser extends ParserBase
                 Mark m = evt.getStartMark();
                 _currentAnchor = ((NodeEvent)evt).getAnchor();
                 _parsingContext = _parsingContext.createChildArrayContext(m.getLine(), m.getColumn());
+                _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
                 return (_currToken = JsonToken.START_ARRAY);
             }
             if (evt.is(Event.ID.SequenceEnd)) {

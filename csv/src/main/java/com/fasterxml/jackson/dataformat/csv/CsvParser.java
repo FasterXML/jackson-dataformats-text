@@ -626,6 +626,8 @@ public class CsvParser
      * We need to override this method to support coercion from basic
      * String value into array, in cases where schema does not
      * specify actual type.
+     *
+     * @throws UncheckedIOException if the nesting depth is too large, see {@link StreamReadConstraints.Builder#maxNestingDepth(int)}
      */
     @Override
     public boolean isExpectedStartArrayToken() {
@@ -926,6 +928,7 @@ public class CsvParser
             // but even empty sequence must still be wrapped in logical array
             if (wrapAsArray) {
                 _parsingContext = _reader.childArrayContext(_parsingContext);
+                _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
                 return JsonToken.START_ARRAY;
             }
             return null;
@@ -933,6 +936,7 @@ public class CsvParser
         
         if (wrapAsArray) {
             _parsingContext = _reader.childArrayContext(_parsingContext);
+            _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
             _state = STATE_RECORD_START;
             return JsonToken.START_ARRAY;
         }
@@ -946,10 +950,12 @@ public class CsvParser
         if (_columnCount == 0) { // no schema; exposed as an array
             _state = STATE_UNNAMED_VALUE;
             _parsingContext = _reader.childArrayContext(_parsingContext);
+            _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
             return JsonToken.START_ARRAY;
         }
         // otherwise, exposed as an Object
         _parsingContext = _reader.childObjectContext(_parsingContext);
+        _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
         _state = STATE_NEXT_ENTRY;
         return JsonToken.START_OBJECT;
     }
@@ -1403,11 +1409,16 @@ public class CsvParser
         return _byteArrayBuilder;
     }
 
-    protected void _startArray(CsvSchema.Column column)
+    protected void _startArray(CsvSchema.Column column) throws UncheckedIOException
     {
         _currToken = JsonToken.START_ARRAY;
         _parsingContext = _parsingContext.createChildArrayContext(_reader.getCurrentRow(),
                 _reader.getCurrentColumn());
+        try {
+            _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         _state = STATE_IN_ARRAY;
         _arrayValueStart = 0;
         _arrayValue = _currentValue;
