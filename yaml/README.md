@@ -60,9 +60,13 @@ while (parser.nextToken() != null) {
 Most configuration is applied during mapper instance configuration, through
 `YAMLMapper.Builder`, similar to how JSON-based plain `ObjectMapper` is configured.
 
-If you are parsing YAML, it is recommended that you consider configuring the
-[SnakeYAML LoaderOptions](https://www.javadoc.io/doc/org.yaml/snakeyaml/latest/org/yaml/snakeyaml/LoaderOptions.html).
-See the related 'Known Problems' below to see an example of how to do this. As well as configuring the
+### SnakeYAML Configuration
+
+Since jackson-dataformat-yaml 2.14, it is possible to configure the underlying [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/wiki/Home) behavior.
+
+If you are parsing YAML, you might consider configuring the
+[LoaderOptions](https://www.javadoc.io/doc/org.yaml/snakeyaml/latest/org/yaml/snakeyaml/LoaderOptions.html).
+See the related 'Known Problems' section below to see an example of how to do this. As well as configuring the
 'codePointLimit', you might also want to configure the 'nestingDepthLimit'.
 
 If you are generating YAML, you can also control the underlying SnakeYAML behavior by
