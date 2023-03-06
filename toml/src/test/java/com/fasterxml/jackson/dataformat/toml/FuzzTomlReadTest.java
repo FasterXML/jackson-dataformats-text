@@ -76,6 +76,21 @@ public class FuzzTomlReadTest
             verifyException(e, "Premature end of file");
         }
     }
+
+    @Test
+    public void testStackOverflow50083() throws Exception
+    {
+        StringBuilder input = new StringBuilder();
+        for (int i = 0; i < 9999; i++) {
+            input.append("a={");
+        }
+        try {
+            TOML_MAPPER.readTree(input.toString());
+            Assert.fail("Should not pass");
+        } catch (StreamReadException e) {
+            verifyException(e, "Nesting too deep");
+        }
+    }
         
     protected void verifyException(Throwable e, String... matches)
     {

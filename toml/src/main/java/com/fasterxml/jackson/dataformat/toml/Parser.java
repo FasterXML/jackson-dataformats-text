@@ -23,6 +23,7 @@ import java.time.temporal.Temporal;
 class Parser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
     private static final int MAX_CHARS_TO_REPORT = 1000;
+    private static final int MAX_DEPTH = 1000;
 
     private final TomlFactory tomlFactory;
 
@@ -115,7 +116,7 @@ class Parser {
         while (next != null) {
             TomlToken token = peek();
             if (token == TomlToken.UNQUOTED_KEY || token == TomlToken.STRING) {
-                parseKeyVal(currentTable, Lexer.EXPECT_EOL);
+                parseKeyVal(currentTable, Lexer.EXPECT_EOL, 0);
             } else if (token == TomlToken.STD_TABLE_OPEN) {
                 pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
                 FieldRef fieldRef = parseAndEnterKey(root, true);
@@ -201,7 +202,11 @@ class Parser {
         }
     }
 
-    private JsonNode parseValue(int nextState) throws IOException {
+    private JsonNode parseValue(int nextState, int depth) throws IOException {
+        if (depth > MAX_DEPTH) {
+            throw errorContext.atPosition(lexer).generic("Nesting too deep");
+        }
+
         TomlToken firstToken = peek();
         switch (firstToken) {
             case STRING:
@@ -224,9 +229,9 @@ class Parser {
             case INTEGER:
                 return parseInt(nextState);
             case ARRAY_OPEN:
-                return parseArray(nextState);
+                return parseArray(nextState, depth);
             case INLINE_TABLE_OPEN:
-                return parseInlineTable(nextState);
+                return parseInlineTable(nextState, depth);
             default:
                 throw errorContext.atPosition(lexer).unexpectedToken(firstToken, "value");
         }
@@ -397,7 +402,7 @@ class Parser {
         }
     }
 
-    private ObjectNode parseInlineTable(int nextState) throws IOException {
+    private ObjectNode parseInlineTable(int nextState, int depth) throws IOException {
         // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
         // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
         pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
@@ -413,7 +418,7 @@ class Parser {
                     throw errorContext.atPosition(lexer).generic("Trailing comma not permitted for inline tables");
                 }
             }
-            parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
+            parseKeyVal(node, Lexer.EXPECT_TABLE_SEP, depth + 1);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.INLINE_TABLE_CLOSE) {
                 break;
@@ -429,7 +434,7 @@ class Parser {
         return node;
     }
 
-    private ArrayNode parseArray(int nextState) throws IOException {
+    private ArrayNode parseArray(int nextState, int depth) throws IOException {
         // array = array-open [ array-values ] ws-comment-newline array-close
         // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
         // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
@@ -440,7 +445,7 @@ class Parser {
             if (token == TomlToken.ARRAY_CLOSE) {
                 break;
             }
-            JsonNode value = parseValue(Lexer.EXPECT_ARRAY_SEP);
+            JsonNode value = parseValue(Lexer.EXPECT_ARRAY_SEP, depth + 1);
             node.add(value);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.ARRAY_CLOSE) {
@@ -456,11 +461,11 @@ class Parser {
         return node;
     }
 
-    private void parseKeyVal(TomlObjectNode target, int nextState) throws IOException {
+    private void parseKeyVal(TomlObjectNode target, int nextState, int depth) throws IOException {
         // keyval = key keyval-sep val
         FieldRef fieldRef = parseAndEnterKey(target, false);
         pollExpected(TomlToken.KEY_VAL_SEP, Lexer.EXPECT_VALUE);
-        JsonNode value = parseValue(nextState);
+        JsonNode value = parseValue(nextState, depth);
         if (fieldRef.object.has(fieldRef.key)) {
             throw errorContext.atPosition(lexer).generic("Duplicate key");
         }
