@@ -266,6 +266,7 @@ System.err.println("\n>>");
             if (_readContext == null) { // end of content
                 return null;
             }
+            _streamReadConstraints.validateNestingDepth(_readContext.getNestingDepth());
         }
         return _currToken;
     }
