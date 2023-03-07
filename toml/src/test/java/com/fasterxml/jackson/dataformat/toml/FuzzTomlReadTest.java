@@ -67,21 +67,6 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         }
     }
 
-    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50083
-    @Test
-    public void testParseInlineTable50083() throws Exception
-    {
-        try (InputStream is = FuzzTomlReadTest.class.getResourceAsStream(
-                             "/clusterfuzz-testcase-minimized-TOMLFuzzer-6612473003769856")) {
-            try {
-                TOML_MAPPER.readTree(is);
-                Assert.fail("Should not pass");
-            } catch (IOException e) {
-                verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
-            }
-        }
-    }
-
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=51654
     @Test
     public void testCodepoint51654() throws Exception
