@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.toml;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,6 +75,21 @@ public class FuzzTomlReadTest
             Assert.fail("Should not pass");
         } catch (StreamReadException e) {
             verifyException(e, "Premature end of file");
+        }
+    }
+
+    @Test
+    public void testStackOverflow50083() throws Exception
+    {
+        StringBuilder input = new StringBuilder();
+        for (int i = 0; i < 9999; i++) {
+            input.append("a={");
+        }
+        try {
+            TOML_MAPPER.readTree(input.toString());
+            Assert.fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
         }
     }
         
