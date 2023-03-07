@@ -73,7 +73,6 @@ public class ComplianceValidTest extends TomlMapperTestBase {
     public void test() throws IOException {
         JsonNode actual = TomlMapper.builder()
                 .enable(TomlReadFeature.PARSE_JAVA_TIME)
-                .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
                 .build().readTree(path.toFile());
         Assert.assertEquals(mapFromComplianceNode(expected), actual);
     }

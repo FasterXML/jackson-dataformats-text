@@ -30,7 +30,6 @@ public class BigStringsTest extends TomlMapperTestBase
     private TomlMapper newMapperWithUnlimitedStringSizeSupport() {
         TomlFactory tomlFactory = TomlFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
-                .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
                 .build();
         return TomlMapper.builder(tomlFactory).build();
     }

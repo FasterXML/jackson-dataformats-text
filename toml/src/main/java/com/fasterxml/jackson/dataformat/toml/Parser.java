@@ -57,9 +57,7 @@ class Parser {
                 new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
         try {
             final ObjectNode node = parser.parse();
-            if (TomlReadFeature.VALIDATE_NESTING_DEPTH.enabledIn(options) && parser.getNestingDepth() > 0) {
-                throw new IOException("Nesting Depth is non-zero after parsing TOML");
-            }
+            assert parser.getNestingDepth() == 0;
             return node;
         } finally {
             parser.lexer.releaseBuffers();
@@ -85,9 +83,7 @@ class Parser {
                 factory.getFormatParserFeatures(), reader);
         try {
             final ObjectNode node = parser.parse();
-            if (factory.isEnabled(TomlReadFeature.VALIDATE_NESTING_DEPTH) && parser.getNestingDepth() > 0) {
-                throw new IOException("Nesting Depth is non-zero after parsing TOML");
-            }
+            assert parser.getNestingDepth() == 0;
             return node;
         } finally {
             parser.lexer.releaseBuffers();

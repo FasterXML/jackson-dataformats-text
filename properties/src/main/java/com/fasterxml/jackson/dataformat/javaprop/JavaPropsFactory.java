@@ -28,7 +28,9 @@ public class JavaPropsFactory extends JsonFactory
     /**********************************************************
      */
     
-    public JavaPropsFactory() { }
+    public JavaPropsFactory() {
+        super();
+    }
 
     public JavaPropsFactory(ObjectCodec codec) {
         super(codec);

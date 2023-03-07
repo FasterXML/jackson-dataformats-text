@@ -20,7 +20,6 @@ public class LongTokenTest extends TomlMapperTestBase {
     // Need to ensure max-number-limit not hit
     private final TomlFactory FACTORY = TomlFactory.builder()
             .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
-            .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
             .build();
     private final ObjectMapper NO_LIMITS_MAPPER = newTomlMapper(FACTORY);
 
