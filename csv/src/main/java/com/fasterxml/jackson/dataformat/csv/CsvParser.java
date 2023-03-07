@@ -643,19 +643,24 @@ public class CsvParser
         case JsonTokenId.ID_START_ARRAY:
             return true;
         }
-        // Otherwise: may coerce into array, iff we have essentially "untyped" column
-        if (_columnIndex < _columnCount) {
-            CsvSchema.Column column = _schema.column(_columnIndex);
-            if (column.getType() == CsvSchema.ColumnType.STRING) {
-                _startArray(column);
+        try {
+            // Otherwise: may coerce into array, iff we have essentially "untyped" column
+            if (_columnIndex < _columnCount) {
+                CsvSchema.Column column = _schema.column(_columnIndex);
+                if (column.getType() == CsvSchema.ColumnType.STRING) {
+                    _startArray(column);
+                    return true;
+                }
+            }
+            // 30-Dec-2014, tatu: Seems like it should be possible to allow this
+            //   in non-array-wrapped case too (for 2.5), so let's try that:
+            else if (_currToken == JsonToken.VALUE_STRING) {
+                _startArray(CsvSchema.Column.PLACEHOLDER);
                 return true;
             }
-        }
-        // 30-Dec-2014, tatu: Seems like it should be possible to allow this
-        //   in non-array-wrapped case too (for 2.5), so let's try that:
-        else if (_currToken == JsonToken.VALUE_STRING) {
-            _startArray(CsvSchema.Column.PLACEHOLDER);
-            return true;
+
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return false;
     }
@@ -1409,16 +1414,12 @@ public class CsvParser
         return _byteArrayBuilder;
     }
 
-    protected void _startArray(CsvSchema.Column column) throws UncheckedIOException
+    protected void _startArray(CsvSchema.Column column) throws IOException
     {
         _currToken = JsonToken.START_ARRAY;
         _parsingContext = _parsingContext.createChildArrayContext(_reader.getCurrentRow(),
                 _reader.getCurrentColumn());
-        try {
-            _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        _streamReadConstraints.validateNestingDepth(_parsingContext.getNestingDepth());
         _state = STATE_IN_ARRAY;
         _arrayValueStart = 0;
         _arrayValue = _currentValue;
