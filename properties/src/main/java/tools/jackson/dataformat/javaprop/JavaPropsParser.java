@@ -223,6 +223,7 @@ System.err.println("\n>>");
             if (_streamReadContext == null) { // end of content
                 return null;
             }
+            _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
         }
         return _currToken;
     }
