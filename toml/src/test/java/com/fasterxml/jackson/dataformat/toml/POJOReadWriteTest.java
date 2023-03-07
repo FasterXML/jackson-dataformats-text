@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 
 // Composed of pieces from other format modules' tests
-public class POJOReadWriteTest
+public class POJOReadWriteTest extends TomlMapperTestBase
 {
     @JsonPropertyOrder({ "topLeft", "bottomRight" })
     protected static class Rectangle {
@@ -150,7 +150,7 @@ public class POJOReadWriteTest
         }
     }
 
-    private final ObjectMapper MAPPER = new TomlMapper();
+    private final ObjectMapper MAPPER = newTomlMapper();
     private final ObjectMapper JSON_MAPPER = new JsonMapper();
 
     @Test

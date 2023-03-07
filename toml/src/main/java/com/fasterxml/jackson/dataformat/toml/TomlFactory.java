@@ -56,6 +56,7 @@ public final class TomlFactory extends JsonFactory
      */
 
     public TomlFactory() {
+        super();
         _tomlParserFeatures = DEFAULT_TOML_PARSER_FEATURE_FLAGS;
         _tomlGeneratorFeatures = DEFAULT_TOML_GENERATOR_FEATURE_FLAGS;
     }

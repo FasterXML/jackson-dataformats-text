@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.toml;
 import java.io.IOException;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,9 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
  */
-public class FuzzTomlReadTest
+public class FuzzTomlReadTest extends TomlMapperTestBase
 {
-    private final ObjectMapper TOML_MAPPER = new TomlMapper();
+    private final ObjectMapper TOML_MAPPER = newTomlMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     @Test
@@ -74,6 +75,21 @@ public class FuzzTomlReadTest
             Assert.fail("Should not pass");
         } catch (StreamReadException e) {
             verifyException(e, "Premature end of file");
+        }
+    }
+
+    @Test
+    public void testStackOverflow50083() throws Exception
+    {
+        StringBuilder input = new StringBuilder();
+        for (int i = 0; i < 9999; i++) {
+            input.append("a={");
+        }
+        try {
+            TOML_MAPPER.readTree(input.toString());
+            Assert.fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
         }
     }
         

@@ -11,11 +11,11 @@ import org.junit.Test;
 import java.io.StringWriter;
 import java.time.*;
 
-public class TomlGeneratorTest {
+public class TomlGeneratorTest extends TomlMapperTestBase {
     @Test
     public void number() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeNumber(123);
@@ -27,7 +27,7 @@ public class TomlGeneratorTest {
     @Test
     public void bool() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeBoolean(true);
@@ -39,7 +39,7 @@ public class TomlGeneratorTest {
     @Test
     public void floats() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeNumber(1.23);
@@ -51,7 +51,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringNormal() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo");
@@ -63,7 +63,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringApostrophe() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo'");
@@ -75,7 +75,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringQuote() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo\"");
@@ -87,7 +87,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringQuoteApostrophe() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo\"'");
@@ -99,7 +99,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringControlCharUnicode() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo\u0001");
@@ -111,7 +111,7 @@ public class TomlGeneratorTest {
     @Test
     public void stringControlCharSpecial() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeString("foo\b");
@@ -123,7 +123,7 @@ public class TomlGeneratorTest {
     @Test
     public void binary() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeBinary(new byte[] {1,2,3});
@@ -135,7 +135,7 @@ public class TomlGeneratorTest {
     @Test
     public void emptyObject() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartObject();
@@ -148,7 +148,7 @@ public class TomlGeneratorTest {
     @Test
     public void objectWithValues() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartObject();
@@ -165,7 +165,7 @@ public class TomlGeneratorTest {
     @Test
     public void emptyArray() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartArray();
@@ -178,7 +178,7 @@ public class TomlGeneratorTest {
     @Test
     public void arrayWithScalars() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartArray();
@@ -194,7 +194,7 @@ public class TomlGeneratorTest {
     @Test
     public void arrayMixed() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartArray();
@@ -214,7 +214,7 @@ public class TomlGeneratorTest {
     @Test
     public void temporal() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
             generator.writeStartArray();
@@ -231,7 +231,7 @@ public class TomlGeneratorTest {
     @Test
     public void complexKey() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("foo bar");
             generator.writeNumber(123);
@@ -243,7 +243,7 @@ public class TomlGeneratorTest {
     // [dataformats-text#258]: byte-backed output not flushing?
     @Test
     public void nestedObjectValues() throws IOException {
-        final ObjectMapper mapper = new TomlMapper();
+        final ObjectMapper mapper = newTomlMapper();
         final String EXP_TOML = "point.x = 19\n"
                 +"point.y = 72\n";
 
@@ -277,7 +277,7 @@ public class TomlGeneratorTest {
     @Test
     public void nullEnabledDefault() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("foo");
             generator.writeNull();
@@ -289,7 +289,7 @@ public class TomlGeneratorTest {
     @Test(expected = TomlStreamWriteException.class)
     public void nullDisable() throws IOException {
         StringWriter w = new StringWriter();
-        try (JsonGenerator generator = new TomlMapper().enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).createGenerator(w)) {
+        try (JsonGenerator generator = newTomlMapper().enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("foo");
             generator.writeNull();

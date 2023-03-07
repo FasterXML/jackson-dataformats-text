@@ -56,7 +56,9 @@ class Parser {
         Parser parser = new Parser(new TomlFactory(), ioContext,
                 new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null), options, reader);
         try {
-            return parser.parse();
+            final ObjectNode node = parser.parse();
+            assert parser.getNestingDepth() == 0;
+            return node;
         } finally {
             parser.lexer.releaseBuffers();
         }
@@ -80,10 +82,16 @@ class Parser {
                 new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null),
                 factory.getFormatParserFeatures(), reader);
         try {
-            return parser.parse();
+            final ObjectNode node = parser.parse();
+            assert parser.getNestingDepth() == 0;
+            return node;
         } finally {
             parser.lexer.releaseBuffers();
         }
+    }
+
+    int getNestingDepth() {
+        return lexer.getNestingDepth();
     }
 
     private TomlToken peek() throws TomlStreamReadException {
@@ -376,7 +384,7 @@ class Parser {
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
-        String text = lexer.yytext().replace("_", "");
+        final String text = lexer.yytext().replace("_", "");
         pollExpected(TomlToken.FLOAT, nextState);
         if (text.endsWith("nan")) {
             return factory.numberNode(Double.NaN);

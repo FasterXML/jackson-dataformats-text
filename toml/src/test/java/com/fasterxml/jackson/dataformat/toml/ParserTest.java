@@ -27,8 +27,8 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 
 @SuppressWarnings("OctalInteger")
-public class ParserTest {
-    private static final ObjectMapper TOML_MAPPER = new TomlMapper();
+public class ParserTest extends TomlMapperTestBase {
+    private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -42,11 +42,11 @@ public class ParserTest {
         return (ObjectNode) TOML_MAPPER.readTree(toml);
     }
 
-    static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
+    static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws IOException {
         return Parser.parse(
+                factory,
                 new IOContext(BufferRecyclers.getBufferRecycler(),
                         ContentReference.rawReference(toml), false),
-                opts,
                 new StringReader(toml)
         );
     }
@@ -950,7 +950,8 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
+        final TomlFactory tomlFactory = newTomlFactory();
+        tomlFactory.enable(TomlReadFeature.PARSE_JAVA_TIME);
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
@@ -958,7 +959,7 @@ public class ParserTest {
                         .<ObjectNode>set("odt2", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00-07:00")))
                         .<ObjectNode>set("odt3", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00.999999-07:00")))
                         .<ObjectNode>set("odt4", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T07:32:00Z"))),
-                toml(options,
+                toml(tomlFactory,
                         "odt1 = 1979-05-27T07:32:00Z\n" +
                                 "odt2 = 1979-05-27T00:32:00-07:00\n" +
                                 "odt3 = 1979-05-27T00:32:00.999999-07:00\n" +
@@ -968,20 +969,20 @@ public class ParserTest {
                 JsonNodeFactory.instance.objectNode()
                         .<ObjectNode>set("ldt1", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T07:32:00")))
                         .<ObjectNode>set("ldt2", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T00:32:00.999999"))),
-                toml(options,
+                toml(tomlFactory,
                         "ldt1 = 1979-05-27T07:32:00\n" +
                                 "ldt2 = 1979-05-27T00:32:00.999999")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("ld1", JsonNodeFactory.instance.pojoNode(LocalDate.parse("1979-05-27"))),
-                toml(options, "ld1 = 1979-05-27")
+                toml(tomlFactory, "ld1 = 1979-05-27")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .<ObjectNode>set("lt1", JsonNodeFactory.instance.pojoNode(LocalTime.parse("07:32:00")))
                         .<ObjectNode>set("lt2", JsonNodeFactory.instance.pojoNode(LocalTime.parse("00:32:00.999999"))),
-                toml(options,
+                toml(tomlFactory,
                         "lt1 = 07:32:00\n" +
                                 "lt2 = 00:32:00.999999")
         );

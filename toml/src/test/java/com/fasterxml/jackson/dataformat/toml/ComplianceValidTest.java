@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
-public class ComplianceValidTest {
+public class ComplianceValidTest extends TomlMapperTestBase {
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         Path folder = Paths.get("compliance", "valid");
