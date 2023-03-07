@@ -23,7 +23,7 @@ To use this extension on Maven-based projects, use following dependency:
 <dependency>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformat-yaml</artifactId>
-  <version>2.13.4</version>
+  <version>2.14.2</version>
 </dependency>
 ```
 
@@ -61,7 +61,20 @@ while (parser.nextToken() != null) {
 Most configuration is applied during mapper instance configuration, through
 `YAMLMapper.Builder`, similar to how JSON-based plain `ObjectMapper` is configured.
 
-## Known problems
+### SnakeYAML Configuration
+
+Since jackson-dataformat-yaml 2.14, it is possible to configure the underlying [SnakeYAML](https://bitbucket.org/snakeyaml/snakeyaml/wiki/Home) behavior.
+
+If you are parsing YAML, you might consider configuring the
+[LoaderOptions](https://www.javadoc.io/doc/org.yaml/snakeyaml/latest/org/yaml/snakeyaml/LoaderOptions.html).
+See the related 'Known Problems' section below to see an example of how to do this. As well as configuring the
+'codePointLimit', you might also want to configure the 'nestingDepthLimit'.
+
+If you are generating YAML, you can also control the underlying SnakeYAML behavior by
+setting the [DumperOptions](https://www.javadoc.io/doc/org.yaml/snakeyaml/latest/org/yaml/snakeyaml/DumperOptions.html)
+on the [YAMLFactory.builder()](https://javadoc.io/static/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.14.2/com/fasterxml/jackson/dataformat/yaml/YAMLFactoryBuilder.html).
+
+## Known Problems
 
 ### Maximum input YAML document size (3 MB)
 
