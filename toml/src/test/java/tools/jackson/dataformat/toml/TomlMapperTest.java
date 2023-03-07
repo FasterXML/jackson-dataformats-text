@@ -22,7 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class TomlMapperTest {
+public class TomlMapperTest extends TomlMapperTestBase {
     @SuppressWarnings("deprecation")
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -40,22 +40,22 @@ public class TomlMapperTest {
 
     @Test
     public void string() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(TEST_STRING, TestClass.class));
+        Assert.assertEquals(TEST_OBJECT, newTomlMapper().readValue(TEST_STRING, TestClass.class));
     }
 
     @Test
     public void bytes() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(TEST_STRING.getBytes(StandardCharsets.UTF_8), TestClass.class));
+        Assert.assertEquals(TEST_OBJECT, newTomlMapper().readValue(TEST_STRING.getBytes(StandardCharsets.UTF_8), TestClass.class));
     }
 
     @Test
     public void stream() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(new ByteArrayInputStream(TEST_STRING.getBytes(StandardCharsets.UTF_8)), TestClass.class));
+        Assert.assertEquals(TEST_OBJECT, newTomlMapper().readValue(new ByteArrayInputStream(TEST_STRING.getBytes(StandardCharsets.UTF_8)), TestClass.class));
     }
 
     @Test
     public void reader() {
-        Assert.assertEquals(TEST_OBJECT, TomlMapper.shared().readValue(new StringReader(TEST_STRING), TestClass.class));
+        Assert.assertEquals(TEST_OBJECT, newTomlMapper().readValue(new StringReader(TEST_STRING), TestClass.class));
     }
 
     public static class TestClass {
@@ -111,7 +111,7 @@ public class TomlMapperTest {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("abc", testValue),
-                TomlMapper.shared().readTree("abc = " + testValue.toString())
+                newTomlMapper().readTree("abc = " + testValue.toString())
         );
     }
 
@@ -124,7 +124,7 @@ public class TomlMapperTest {
         }
         final String value = sb.toString();
         try {
-            new TomlMapper().readTree("abc = " + value);
+            newTomlMapper().readTree("abc = " + value);
             Assert.fail("expected TomlStreamReadException");
         } catch (TomlStreamReadException e) {
             Assert.assertTrue("unexpected message: " + e.getMessage(),
@@ -144,7 +144,7 @@ public class TomlMapperTest {
         TomlFactory factory = TomlFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
                 .build();
-        TomlMapper mapper = new TomlMapper(factory);
+        TomlMapper mapper = newTomlMapper(factory);
         Assert.assertEquals(
                 testValue,
                 mapper.readTree("abc = " + value).get("abc").decimalValue()
@@ -162,7 +162,7 @@ public class TomlMapperTest {
         );
         Assert.assertEquals(
                 "2021-03-26",
-                TomlMapper.shared().readValue("foo = 2021-03-26", ObjectField.class).foo
+                newTomlMapper().readValue("foo = 2021-03-26", ObjectField.class).foo
         );
     }
 

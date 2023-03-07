@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class ComplianceValidTest {
+public class ComplianceValidTest extends TomlMapperTestBase {
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         Path folder = Paths.get("compliance", "valid");

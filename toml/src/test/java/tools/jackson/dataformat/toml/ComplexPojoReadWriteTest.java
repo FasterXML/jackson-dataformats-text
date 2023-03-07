@@ -11,7 +11,7 @@ import org.junit.Test;
 import tools.jackson.databind.ObjectMapper;
 
 // Copied from YAML modules "DatabindAdvancedTest"
-public class ComplexPojoReadWriteTest
+public class ComplexPojoReadWriteTest extends TomlMapperTestBase
 {
     enum Size { SMALL, LARGE; }
 
@@ -145,7 +145,7 @@ public class ComplexPojoReadWriteTest
     @Test
     public void testReadWriteComplexPojo() throws Exception
     {
-        ObjectMapper mapper = new TomlMapper();
+        ObjectMapper mapper = newTomlMapper();
 
         MediaItem input = new MediaItem();
         MediaContent content = new MediaContent();

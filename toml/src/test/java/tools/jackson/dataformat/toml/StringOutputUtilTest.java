@@ -11,7 +11,7 @@ import tools.jackson.core.util.BufferRecyclers;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class StringOutputUtilTest {
+public class StringOutputUtilTest extends TomlMapperTestBase {
     @Test
     public void exhaustiveWriteReadTest() throws IOException {
         // this test attempts single-character writes for *all* code points, and sees whether they're read back

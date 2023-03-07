@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
@@ -29,28 +30,30 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 @SuppressWarnings("OctalInteger")
-public class ParserTest {
-    private static final TomlMapper TOML_MAPPER = new TomlMapper();
-
+public class ParserTest extends TomlMapperTestBase {
+    private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
             .build();
 
-    static ObjectNode json(@Language("json") String json) {
+    static ObjectNode json(@Language("json") String json) throws JacksonException {
         return (ObjectNode) jsonMapper.readTree(json);
     }
 
-    static ObjectNode toml(@Language("toml") String toml) throws IOException {
+    static ObjectNode toml(@Language("toml") String toml) throws JacksonException {
         return (ObjectNode) TOML_MAPPER.readTree(toml);
     }
 
-    static ObjectNode toml(int opts, @Language("toml") String toml) throws IOException {
-        return Parser.parse(TOML_MAPPER.tokenStreamFactory(),
+    static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws IOException {
+        // 07-Mar-2023, tatu: Due to refactoring, ended up here...
+        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
+        return Parser.parse(
+                factory,
                 new IOContext(StreamReadConstraints.defaults(),
                         BufferRecyclers.getBufferRecycler(),
                         ContentReference.construct(true, toml), false, null),
-                opts,
+                options,
                 new StringReader(toml)
         );
     }
@@ -954,7 +957,9 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
+        final TomlFactory tomlFactory = TomlFactory.builder()
+                .enable(TomlReadFeature.PARSE_JAVA_TIME)
+                .build();
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
@@ -962,7 +967,7 @@ public class ParserTest {
                         .set("odt2", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00-07:00")))
                         .set("odt3", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T00:32:00.999999-07:00")))
                         .set("odt4", JsonNodeFactory.instance.pojoNode(OffsetDateTime.parse("1979-05-27T07:32:00Z"))),
-                toml(options,
+                toml(tomlFactory,
                         "odt1 = 1979-05-27T07:32:00Z\n" +
                                 "odt2 = 1979-05-27T00:32:00-07:00\n" +
                                 "odt3 = 1979-05-27T00:32:00.999999-07:00\n" +
@@ -972,20 +977,20 @@ public class ParserTest {
                 JsonNodeFactory.instance.objectNode()
                         .set("ldt1", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T07:32:00")))
                         .set("ldt2", JsonNodeFactory.instance.pojoNode(LocalDateTime.parse("1979-05-27T00:32:00.999999"))),
-                toml(options,
+                toml(tomlFactory,
                         "ldt1 = 1979-05-27T07:32:00\n" +
                                 "ldt2 = 1979-05-27T00:32:00.999999")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("ld1", JsonNodeFactory.instance.pojoNode(LocalDate.parse("1979-05-27"))),
-                toml(options, "ld1 = 1979-05-27")
+                toml(tomlFactory, "ld1 = 1979-05-27")
         );
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .set("lt1", JsonNodeFactory.instance.pojoNode(LocalTime.parse("07:32:00")))
                         .set("lt2", JsonNodeFactory.instance.pojoNode(LocalTime.parse("00:32:00.999999"))),
-                toml(options,
+                toml(tomlFactory,
                         "lt1 = 07:32:00\n" +
                                 "lt2 = 00:32:00.999999")
         );
