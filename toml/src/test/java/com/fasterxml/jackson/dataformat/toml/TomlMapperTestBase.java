@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.toml;
 abstract class TomlMapperTestBase {
     protected static TomlFactory newTomlFactory() {
         return TomlFactory.builder()
-                //.enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
+                .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
                 .build();
     }
     
