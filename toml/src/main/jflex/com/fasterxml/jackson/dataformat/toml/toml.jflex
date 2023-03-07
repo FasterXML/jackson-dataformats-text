@@ -15,6 +15,7 @@ package com.fasterxml.jackson.dataformat.toml;
 
 %init{
 this.ioContext = ioContext;
+this.streamReadConstraints = ioContext.streamReadConstraints();
 this.errorContext = errorContext;
 yybegin(EXPECT_EXPRESSION);
 this.zzBuffer = ioContext.allocTokenBuffer();
@@ -30,6 +31,8 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
 
   private boolean trimmedNewline;
   final com.fasterxml.jackson.core.util.TextBuffer textBuffer;
+  private final com.fasterxml.jackson.core.StreamReadConstraints streamReadConstraints;
+  private int nestingDepth;
 
   private void requestLargerBuffer() throws TomlStreamReadException {
       if (prohibitInternalBufferAllocate) {
@@ -257,8 +260,14 @@ HexDig = [0-9A-Fa-f]
           yybegin(LITERAL_STRING);
           startString();
       }
-    {StdTableOpen} {return TomlToken.STD_TABLE_OPEN;}
-    {ArrayTableOpen} {return TomlToken.ARRAY_TABLE_OPEN;}
+    {StdTableOpen} {
+          streamReadConstraints.validateNestingDepth(++nestingDepth);
+          return TomlToken.STD_TABLE_OPEN;
+      }
+    {ArrayTableOpen} {
+          streamReadConstraints.validateNestingDepth(++nestingDepth);
+          return TomlToken.ARRAY_TABLE_OPEN;
+      }
     {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
     {NewLine} {}
     {Comment} {}
@@ -284,9 +293,18 @@ HexDig = [0-9A-Fa-f]
           startString();
       }
     {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
-    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
-    {StdTableClose} {return TomlToken.STD_TABLE_CLOSE;}
-    {ArrayTableClose} {return TomlToken.ARRAY_TABLE_CLOSE;}
+    {InlineTableClose} {
+          nestingDepth--;
+          return TomlToken.INLINE_TABLE_CLOSE;
+      }
+    {StdTableClose} {
+          nestingDepth--;
+          return TomlToken.STD_TABLE_CLOSE;
+      }
+    {ArrayTableClose} {
+          nestingDepth--;
+          return TomlToken.ARRAY_TABLE_CLOSE;
+      }
 }
 
 <EXPECT_EOL> {
@@ -340,18 +358,30 @@ HexDig = [0-9A-Fa-f]
       }
 
     // inline array / table
-    {ArrayOpen} {WsCommentNewlineNonEmpty}* {return TomlToken.ARRAY_OPEN;}
-    {InlineTableOpen} {return TomlToken.INLINE_TABLE_OPEN;}
+    {ArrayOpen} {WsCommentNewlineNonEmpty}* {
+          streamReadConstraints.validateNestingDepth(++nestingDepth);
+          return TomlToken.ARRAY_OPEN;
+      }
+    {InlineTableOpen} {
+          streamReadConstraints.validateNestingDepth(++nestingDepth);
+          return TomlToken.INLINE_TABLE_OPEN;
+      }
 
     // array end just after comma
-    {WsCommentNewlineNonEmpty}* {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
+    {WsCommentNewlineNonEmpty}* {ArrayClose} {
+          nestingDepth--;
+          return TomlToken.ARRAY_CLOSE;
+      }
 }
 
 <EXPECT_ARRAY_SEP> {
     // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
     // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
     {Comma} {WsCommentNewlineNonEmpty}* {return TomlToken.COMMA;}
-    {ArrayClose} {return TomlToken.ARRAY_CLOSE;}
+    {ArrayClose} {
+          nestingDepth--;
+          return TomlToken.ARRAY_CLOSE;
+      }
     {WsCommentNewlineNonEmpty} {} // always allowed here
 }
 
@@ -360,7 +390,10 @@ HexDig = [0-9A-Fa-f]
     // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
 
     {Ws} {Comma} {Ws} {return TomlToken.COMMA;}
-    {InlineTableClose} {return TomlToken.INLINE_TABLE_CLOSE;}
+    {InlineTableClose} {
+          nestingDepth--;
+          return TomlToken.INLINE_TABLE_CLOSE;
+      }
 }
 
 <BASIC_STRING> {
