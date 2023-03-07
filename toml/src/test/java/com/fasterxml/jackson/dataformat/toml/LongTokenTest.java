@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecyclers;
@@ -15,14 +14,15 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class LongTokenTest {
+public class LongTokenTest extends TomlMapperTestBase {
     private static final int SCALE = 10000; // must be bigger than the default buffer size
 
     // Need to ensure max-number-limit not hit
     private final TomlFactory FACTORY = TomlFactory.builder()
             .streamReadConstraints(StreamReadConstraints.builder().maxNumberLength(Integer.MAX_VALUE).build())
+            .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
             .build();
-    private final ObjectMapper NO_LIMITS_MAPPER = new TomlMapper(FACTORY);
+    private final ObjectMapper NO_LIMITS_MAPPER = newTomlMapper(FACTORY);
 
     @Test
     public void decimal() throws IOException {
@@ -42,7 +42,7 @@ public class LongTokenTest {
     @Test
     public void decimalTooLong() throws IOException {
         // default TomlFactory has max num length of 1000
-        final ObjectMapper mapper = new TomlMapper();
+        final ObjectMapper mapper = newTomlMapper();
         StringBuilder toml = new StringBuilder("foo = 0.");
         for (int i = 0; i < SCALE; i++) {
             toml.append('0');

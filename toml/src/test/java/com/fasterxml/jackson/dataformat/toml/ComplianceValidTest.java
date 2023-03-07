@@ -27,7 +27,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RunWith(Parameterized.class)
-public class ComplianceValidTest {
+public class ComplianceValidTest extends TomlMapperTestBase {
     @Parameterized.Parameters
     public static Collection<Object[]> data() throws IOException {
         Path folder = Paths.get("compliance", "valid");
@@ -73,6 +73,7 @@ public class ComplianceValidTest {
     public void test() throws IOException {
         JsonNode actual = TomlMapper.builder()
                 .enable(TomlReadFeature.PARSE_JAVA_TIME)
+                .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
                 .build().readTree(path.toFile());
         Assert.assertEquals(mapFromComplianceNode(expected), actual);
     }

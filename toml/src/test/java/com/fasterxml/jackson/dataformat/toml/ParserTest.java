@@ -27,8 +27,8 @@ import java.time.OffsetDateTime;
 import java.util.Arrays;
 
 @SuppressWarnings("OctalInteger")
-public class ParserTest {
-    private static final ObjectMapper TOML_MAPPER = new TomlMapper();
+public class ParserTest extends TomlMapperTestBase {
+    private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
@@ -950,7 +950,8 @@ public class ParserTest {
     @Test
     public void javaTimeDeser() throws IOException {
         // this is the same test as above, except with explicit java.time deserialization
-        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
+        final int options =
+                TomlReadFeature.PARSE_JAVA_TIME.getMask() + TomlReadFeature.VALIDATE_NESTING_DEPTH.getMask();
 
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()

@@ -15,7 +15,14 @@ public enum TomlReadFeature
      * When this option is set, these time types will be parsed to their proper {@code java.time} counterparts and
      * appear as {@link com.fasterxml.jackson.core.JsonToken#VALUE_EMBEDDED_OBJECT} tokens.
      */
-    PARSE_JAVA_TIME(false);
+    PARSE_JAVA_TIME(false),
+
+    /**
+     * The TOML parser tracks the nesting depth. See {@link com.fasterxml.jackson.core.StreamReadConstraints.Builder#maxNestingDepth(int)}.
+     * If you enable this feature, an {@link java.io.IOException} will be thrown if the depth is not back to zero when
+     * the full TOML document is parsed.
+     */
+    VALIDATE_NESTING_DEPTH(false);
 
     final boolean _defaultState;
     final int _mask;

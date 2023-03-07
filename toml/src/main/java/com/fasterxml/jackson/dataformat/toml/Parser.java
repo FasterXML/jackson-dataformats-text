@@ -58,6 +58,9 @@ class Parser {
         try {
             return parser.parse();
         } finally {
+            if (TomlReadFeature.VALIDATE_NESTING_DEPTH.enabledIn(options) && parser.getNestingDepth() > 0) {
+                throw new IOException("Nesting Depth is non-zero after parsing TOML");
+            }
             parser.lexer.releaseBuffers();
         }
     }
@@ -82,8 +85,15 @@ class Parser {
         try {
             return parser.parse();
         } finally {
+            if (factory.isEnabled(TomlReadFeature.VALIDATE_NESTING_DEPTH) && parser.getNestingDepth() > 0) {
+                throw new IOException("Nesting Depth is non-zero after parsing TOML");
+            }
             parser.lexer.releaseBuffers();
         }
+    }
+
+    int getNestingDepth() {
+        return lexer.getNestingDepth();
     }
 
     private TomlToken peek() throws TomlStreamReadException {
@@ -376,7 +386,7 @@ class Parser {
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
-        String text = lexer.yytext().replace("_", "");
+        final String text = lexer.yytext().replace("_", "");
         pollExpected(TomlToken.FLOAT, nextState);
         if (text.endsWith("nan")) {
             return factory.numberNode(Double.NaN);

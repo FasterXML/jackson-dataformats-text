@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.core.format.InputAccessor;
@@ -151,6 +152,12 @@ public final class TomlFactory extends JsonFactory
     @Override
     public MatchStrength hasFormat(InputAccessor acc) throws IOException {
         return MatchStrength.INCONCLUSIVE;
+    }
+
+    @Override
+    public StreamReadConstraints streamReadConstraints() {
+        StreamReadConstraints src = super.streamReadConstraints();
+        return src == null ? StreamReadConstraints.defaults() : src;
     }
 
     /*

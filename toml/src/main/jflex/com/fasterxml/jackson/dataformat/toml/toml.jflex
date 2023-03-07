@@ -57,6 +57,10 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       textBuffer.releaseBuffers();
   }
 
+  public int getNestingDepth() {
+      return nestingDepth;
+  }
+
   private void startString() {
       // resetWithEmpty does not set _currentSegment, so we need this variant to be able to append further data
       textBuffer.emptyAndGetCurrentSegment();

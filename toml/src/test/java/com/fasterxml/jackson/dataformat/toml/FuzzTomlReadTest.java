@@ -14,9 +14,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
  */
-public class FuzzTomlReadTest
+public class FuzzTomlReadTest extends TomlMapperTestBase
 {
-    private final ObjectMapper TOML_MAPPER = new TomlMapper();
+    private final ObjectMapper TOML_MAPPER = newTomlMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     @Test

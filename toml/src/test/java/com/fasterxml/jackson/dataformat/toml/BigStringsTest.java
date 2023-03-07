@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-public class BigStringsTest
+public class BigStringsTest extends TomlMapperTestBase
 {
 
     final static class StringWrapper
@@ -25,11 +25,12 @@ public class BigStringsTest
         }
     }
 
-    private final TomlMapper MAPPER = new TomlMapper();
+    private final TomlMapper MAPPER = newTomlMapper();
 
     private TomlMapper newMapperWithUnlimitedStringSizeSupport() {
         TomlFactory tomlFactory = TomlFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
+                .enable(TomlReadFeature.VALIDATE_NESTING_DEPTH)
                 .build();
         return TomlMapper.builder(tomlFactory).build();
     }
