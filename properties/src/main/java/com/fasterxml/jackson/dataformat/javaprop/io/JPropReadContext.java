@@ -52,6 +52,7 @@ public abstract class JPropReadContext
         _index = -1;
         _parent = p;
         _branchText = node.getValue();
+        _nestingDepth = p == null ? 0 : p._nestingDepth + 1;
     }
 
     public static JPropReadContext create(JPropNode root) {
