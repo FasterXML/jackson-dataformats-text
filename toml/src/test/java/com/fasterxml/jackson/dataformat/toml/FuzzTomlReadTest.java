@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
@@ -48,6 +49,51 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         } catch (IOException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50432
+    @Test
+    public void testParseInlineTable50432() throws Exception
+    {
+        try (InputStream is = FuzzTomlReadTest.class.getResourceAsStream(
+                             "/clusterfuzz-testcase-minimized-TOMLFuzzer-6370486359031808")) {
+            try {
+                TOML_MAPPER.readTree(is);
+                Assert.fail("Should not pass");
+            } catch (IOException e) {
+                verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
+            }
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50083
+    @Test
+    public void testParseInlineTable50083() throws Exception
+    {
+        try (InputStream is = FuzzTomlReadTest.class.getResourceAsStream(
+                             "/clusterfuzz-testcase-minimized-TOMLFuzzer-6612473003769856")) {
+            try {
+                TOML_MAPPER.readTree(is);
+                Assert.fail("Should not pass");
+            } catch (IOException e) {
+                verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
+            }
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=51654
+    @Test
+    public void testCodepoint51654() throws Exception
+    {
+        try (InputStream is = FuzzTomlReadTest.class.getResourceAsStream(
+                "/clusterfuzz-testcase-minimized-TOMLFuzzer-5068015447703552")) {
+            try {
+                TOML_MAPPER.readTree(is);
+                Assert.fail("Should not pass");
+            } catch (IOException e) {
+                verifyException(e, "Failed to parse TOML input");
+            }
         }
     }
 
