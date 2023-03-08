@@ -89,9 +89,9 @@ class Parser {
             } finally {
                 parser.lexer.releaseBuffers();
             }
-        } catch (IndexOutOfBoundsException indexOutOfBoundsException) {
+        } catch (IndexOutOfBoundsException e) {
             // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=51654
-            throw new IOException("Failed to parse TOML input", indexOutOfBoundsException);
+            throw new IOException("Failed to parse TOML input: uncaught IndexOutOfBoundsException", e);
         }
     }
 
