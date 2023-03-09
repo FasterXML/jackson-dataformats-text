@@ -78,20 +78,15 @@ class Parser {
             final Reader reader
     ) throws IOException {
         final TomlFactory factory = tomlFactory == null ? new TomlFactory() : tomlFactory;
+        Parser parser = new Parser(factory, ioContext,
+                new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null),
+                factory.getFormatParserFeatures(), reader);
         try {
-            Parser parser = new Parser(factory, ioContext,
-                    new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null),
-                    factory.getFormatParserFeatures(), reader);
-            try {
-                final ObjectNode node = parser.parse();
-                assert parser.getNestingDepth() == 0;
-                return node;
-            } finally {
-                parser.lexer.releaseBuffers();
-            }
-        } catch (IndexOutOfBoundsException e) {
-            // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=51654
-            throw new IOException("Failed to parse TOML input: uncaught IndexOutOfBoundsException", e);
+            final ObjectNode node = parser.parse();
+            assert parser.getNestingDepth() == 0;
+            return node;
+        } finally {
+            parser.lexer.releaseBuffers();
         }
     }
 

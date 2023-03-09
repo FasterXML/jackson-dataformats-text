@@ -94,46 +94,56 @@
       zzStartRead = 0;
     }
 
-    /* is the buffer big enough? */
-    if (zzCurrentPos >= zzBuffer.length - zzFinalHighSurrogate) {
-      /* if not: blow it up */
-      // JACKSON: replace resize logic, more in .jflex
-      requestLargerBuffer();
-      // JACKSON: the low surrogate is read below
-      zzEndRead += zzFinalHighSurrogate;
-      zzFinalHighSurrogate = 0;
-    }
+    // JACKSON: introduce loop, see comment on 'continue' below
+    while (true) {
 
-    /* fill the buffer with new input */
-    int requested = zzBuffer.length - zzEndRead;
-    int numRead = zzReader.read(zzBuffer, zzEndRead, requested);
+      /* is the buffer big enough? */
+      if (zzCurrentPos >= zzBuffer.length - zzFinalHighSurrogate) {
+        /* if not: blow it up */
+        // JACKSON: replace resize logic, more in .jflex
+        requestLargerBuffer();
+        // JACKSON: the low surrogate is read below
+        zzEndRead += zzFinalHighSurrogate;
+        zzFinalHighSurrogate = 0;
+      }
 
-    /* not supposed to occur according to specification of java.io.Reader */
-    if (numRead == 0) {
-      throw new java.io.IOException(
-          "Reader returned 0 characters. See JFlex examples/zero-reader for a workaround.");
-    }
-    if (numRead > 0) {
-      zzEndRead += numRead;
-      if (Character.isHighSurrogate(zzBuffer[zzEndRead - 1])) {
-        if (numRead == requested) { // We requested too few chars to encode a full Unicode character
-          --zzEndRead;
-          zzFinalHighSurrogate = 1;
-        } else {                    // There is room in the buffer for at least one more char
-          int c = zzReader.read();  // Expecting to read a paired low surrogate char
-          if (c == -1) {
-            return true;
-          } else {
-            zzBuffer[zzEndRead++] = (char)c;
+      /* fill the buffer with new input */
+      int requested = zzBuffer.length - zzEndRead;
+      int numRead = zzReader.read(zzBuffer, zzEndRead, requested);
+
+      /* not supposed to occur according to specification of java.io.Reader */
+      if (numRead == 0) {
+        throw new java.io.IOException(
+            "Reader returned 0 characters. See JFlex examples/zero-reader for a workaround.");
+      }
+      if (numRead > 0) {
+        zzEndRead += numRead;
+        if (Character.isHighSurrogate(zzBuffer[zzEndRead - 1])) {
+          if (numRead == requested) { // We requested too few chars to encode a full Unicode character
+            --zzEndRead;
+            zzFinalHighSurrogate = 1;
+
+            if (numRead == 1) {
+              // JACKSON: we only read one character, and it was a high surrogate. We need to ensure that if we return
+              //  false, zzEndRead has advanced, so we need to try reading another character.
+              continue;
+            }
+          } else {                    // There is room in the buffer for at least one more char
+            int c = zzReader.read();  // Expecting to read a paired low surrogate char
+            if (c == -1) {
+              return true;
+            } else {
+              zzBuffer[zzEndRead++] = (char)c;
+            }
           }
         }
+        /* potentially more input available */
+        return false;
       }
-      /* potentially more input available */
-      return false;
-    }
 
-    /* numRead < 0 ==> end of stream */
-    return true;
+      /* numRead < 0 ==> end of stream */
+      return true;
+    }
   }
 
 
