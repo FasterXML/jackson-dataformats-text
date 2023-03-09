@@ -77,7 +77,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 TOML_MAPPER.readTree(is);
                 Assert.fail("Should not pass");
             } catch (StreamReadException e) {
-                verifyException(e, "Failed to parse TOML input");
+                verifyException(e, "EOF in wrong state");
             }
         }
     }
