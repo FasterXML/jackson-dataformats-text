@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.15.0 (not yet released)
+2.15.0-rc1 (18-Mar-2023)
 
 #373: (yaml) Positive numbers with plus sign not quoted correctly with
   `ALWAYS_QUOTE_NUMBERS_AS_STRINGS`
