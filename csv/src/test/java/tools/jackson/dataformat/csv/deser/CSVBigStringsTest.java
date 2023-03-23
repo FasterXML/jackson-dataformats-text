@@ -28,12 +28,12 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(1001000));
+                    .readValues(generateCsv(5001000));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
             assertTrue("unexpected exception message: " + e.getMessage(),
-                    e.getMessage().startsWith("String length (1001000) exceeds the maximum length (1000000)"));
+                    e.getMessage().startsWith("String length (5001000) exceeds the maximum length (5000000)"));
         }
     }
 
@@ -43,7 +43,7 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(2000000));
+                    .readValues(generateCsv(7_000_000));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
@@ -51,13 +51,13 @@ public class CSVBigStringsTest extends ModuleTestBase
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
             // so best not to assert that the String length value in the message is the full 2000000 value
             assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length (1000000)"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length (5000000)"));
         }
     }
 
     public void testUnlimitedString() throws Exception
     {
-        final int len = 1001000;
+        final int len = 5001000;
         MappingIterator<List<String>> it = newCsvMapperWithUnlimitedStringSizeSupport()
                 .readerForListOf(String.class)
                 .with(CsvParser.Feature.WRAP_AS_ARRAY)
