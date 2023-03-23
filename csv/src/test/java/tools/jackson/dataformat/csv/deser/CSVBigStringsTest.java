@@ -10,7 +10,7 @@ import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvParser;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
-public class TestBigStrings extends ModuleTestBase
+public class CSVBigStringsTest extends ModuleTestBase
 {
 
     private final CsvMapper MAPPER = mapperForCsv();
