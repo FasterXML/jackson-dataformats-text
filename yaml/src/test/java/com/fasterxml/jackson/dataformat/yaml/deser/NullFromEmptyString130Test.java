@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
