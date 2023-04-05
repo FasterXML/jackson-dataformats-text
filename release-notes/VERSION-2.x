@@ -54,7 +54,7 @@ Active Maintainers:
  (contributed by Falk H)
 #314: (csv) Add fast floating-point parsing, generation support
  (contributed by @pjfanning)
-#335: (yaml) Update to SnakeYAML 1.33
+#335/#346: (yaml) Update to SnakeYAML 1.33
  (contributed by @pjfanning)
 #337: (yaml) Allow overriding of file size limit for YAMLParser by exposing
   SnakeYAML `LoaderOptions`
