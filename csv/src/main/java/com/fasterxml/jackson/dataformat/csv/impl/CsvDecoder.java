@@ -1401,7 +1401,9 @@ public class CsvDecoder
     {
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             // here it'll just get truncated, no exceptions thrown
-            _numberBigInt = _getBigDecimal().toBigInteger();
+            final BigDecimal bd = _getBigDecimal();
+            _ioContext.streamReadConstraints().validateBigIntegerScale(bd.scale());
+            _numberBigInt = bd.toBigInteger();
         } else if ((_numTypesValid & NR_LONG) != 0) {
             _numberBigInt = BigInteger.valueOf(_numberLong);
         } else if ((_numTypesValid & NR_INT) != 0) {
