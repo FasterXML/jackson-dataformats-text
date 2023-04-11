@@ -14,6 +14,9 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+#411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
+ (contributed by @yawkat)
+
 2.15.0-rc2 (28-Mar-2023)
 
 #373: (yaml) Positive numbers with plus sign not quoted correctly with
