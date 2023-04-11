@@ -29,7 +29,7 @@ public class FuzzTomlRead57237Test extends TomlMapperTestBase
                 Assert.fail("Should not pass");
             } catch (IOException e) {
                 // Possibly not what we should get; tweak once working
-                verifyException(e, "EOF in wrong state");
+                verifyException(e, "Premature end of file");
             }
         }
     }

@@ -81,8 +81,11 @@
 
     /* first: make room (if you can) */
     if (zzStartRead > 0) {
-      zzEndRead += zzFinalHighSurrogate;
-      zzFinalHighSurrogate = 0;
+      // JACKSON: check bounds before modifying zzEndRead (jackson-dataformats-text#411)
+      if (zzEndRead < zzBuffer.length - zzFinalHighSurrogate) {
+        zzEndRead += zzFinalHighSurrogate;
+        zzFinalHighSurrogate = 0;
+      }
       System.arraycopy(zzBuffer, zzStartRead,
                        zzBuffer, 0,
                        zzEndRead - zzStartRead);
