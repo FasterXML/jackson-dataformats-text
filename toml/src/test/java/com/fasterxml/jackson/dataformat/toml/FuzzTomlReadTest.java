@@ -123,7 +123,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
             verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
         }
     }
-        
+
     protected void verifyException(Throwable e, String... matches)
     {
         String msg = e.getMessage();
