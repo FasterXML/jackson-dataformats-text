@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.toml.failing;
+package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.fasterxml.jackson.dataformat.toml.TomlMapperTestBase;
 
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
