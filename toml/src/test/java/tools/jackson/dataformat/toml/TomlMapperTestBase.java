@@ -1,6 +1,6 @@
 package tools.jackson.dataformat.toml;
 
-abstract class TomlMapperTestBase {
+public abstract class TomlMapperTestBase {
     protected static TomlFactory newTomlFactory() {
         return TomlFactory.builder().build();
     }
