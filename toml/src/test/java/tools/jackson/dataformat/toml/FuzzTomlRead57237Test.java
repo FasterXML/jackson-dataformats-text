@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import tools.jackson.core.exc.StreamReadException;
+
 import tools.jackson.databind.ObjectMapper;
 
 /**
