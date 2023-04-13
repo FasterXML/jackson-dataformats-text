@@ -9,7 +9,7 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
  *
  * https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50431
  */
-public class FuzzYAMLRead50431Test extends ModuleTestBase
+public class FuzzYAMLRead_400_50431Test extends ModuleTestBase
 {
     private final ObjectMapper YAML_MAPPER = newObjectMapper();
 
