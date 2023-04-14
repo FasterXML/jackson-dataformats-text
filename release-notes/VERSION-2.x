@@ -14,12 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-#411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
- (contributed by @yawkat)
-#415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
- (contributed by Niels B)
-
-2.15.0-rc2 (28-Mar-2023)
+2.15.0-rc2 (14-Apr-2023)
 
 #373: (yaml) Positive numbers with plus sign not quoted correctly with
   `ALWAYS_QUOTE_NUMBERS_AS_STRINGS`
@@ -30,7 +25,11 @@ Active Maintainers:
   to allow parsing "boolean" words as strings instead of booleans
  (contributed by Axel N)
 #390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
- (contributed by @pjfanning)
+ (contributed by @pjfannin
+#411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
+ (contributed by @yawkat)
+#415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
+ (contributed by Niels B)
 
 2.14.2 (28-Jan-2023)
 
