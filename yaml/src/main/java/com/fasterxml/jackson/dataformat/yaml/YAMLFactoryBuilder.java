@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import com.fasterxml.jackson.core.StreamReadFeature;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.core.TSFBuilder;
@@ -226,6 +227,11 @@ public class YAMLFactoryBuilder extends TSFBuilder<YAMLFactory, YAMLFactoryBuild
      */
     public YAMLFactoryBuilder loaderOptions(LoaderOptions loaderOptions) {
         _loaderOptions = loaderOptions;
+
+        // If the user wants to block duplicate keys this needs to be set in a different way to work
+        if (!_loaderOptions.isAllowDuplicateKeys()) {
+            enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION);
+        }
         return this;
     }
 

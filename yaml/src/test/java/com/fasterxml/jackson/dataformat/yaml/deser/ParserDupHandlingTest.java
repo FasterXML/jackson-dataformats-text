@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import org.yaml.snakeyaml.LoaderOptions;
 
 public class ParserDupHandlingTest extends ModuleTestBase
 {
@@ -28,6 +29,17 @@ public class ParserDupHandlingTest extends ModuleTestBase
     {
         YAMLFactory f = new YAMLFactory();
         f.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
+        ObjectMapper mapper = new ObjectMapper(f);
+        _verifyDupsFail(mapper, YAML_WITH_DUPS, false);
+        _verifyDupsFail(mapper, YAML_WITH_DUPS, true);
+    }
+
+    public void testDupChecksEnabledLoaderOptions() throws Exception
+    {
+        LoaderOptions loaderOptions = new LoaderOptions();
+        loaderOptions.setAllowDuplicateKeys(false);
+        YAMLFactory f = YAMLFactory.builder().loaderOptions(loaderOptions).build();
+
         ObjectMapper mapper = new ObjectMapper(f);
         _verifyDupsFail(mapper, YAML_WITH_DUPS, false);
         _verifyDupsFail(mapper, YAML_WITH_DUPS, true);
