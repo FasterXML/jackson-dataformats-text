@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.yaml;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
@@ -211,6 +212,11 @@ public class YAMLFactoryBuilder
      */
     public YAMLFactoryBuilder loadSettings(LoadSettings settings) {
         _loadSettings = settings;
+
+        // If the user wants to block duplicate keys this needs to be set in a different way to work
+        if (!_loadSettings.getAllowDuplicateKeys()) {
+            enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION);
+        }
         return this;
     }
 

@@ -234,3 +234,8 @@ Axel Niklasson (axelniklasson@github)
 * Contributed #388: (yaml) Add `YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS`
   to allow parsing "boolean" words as strings instead of booleans
  (2.15.0)
+
+Niels Basjes (nielsbasjes@github)
+
+* Contributed #415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
+ (2.15.0)

@@ -16,6 +16,8 @@ Active Maintainers:
 
 #411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
  (contributed by @yawkat)
+#415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
+ (contributed by Niels B)
 
 2.15.0-rc2 (28-Mar-2023)
 

@@ -3,6 +3,8 @@ package tools.jackson.dataformat.yaml.deser;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import org.snakeyaml.engine.v2.api.LoadSettings;
+
 import tools.jackson.core.*;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.ObjectMapper;
@@ -31,6 +33,18 @@ public class ParserDupHandlingTest extends ModuleTestBase
         YAMLFactory f = YAMLFactory.builder()
                 .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
                 .build();
+        ObjectMapper mapper = new ObjectMapper(f);
+        _verifyDupsFail(mapper, YAML_WITH_DUPS, false);
+        _verifyDupsFail(mapper, YAML_WITH_DUPS, true);
+    }
+
+    public void testDupChecksEnabledLoaderOptions() throws Exception
+    {
+        LoadSettings loadSettings = LoadSettings.builder()
+                .setAllowDuplicateKeys(false)
+                .build();
+        YAMLFactory f = YAMLFactory.builder().loadSettings(loadSettings).build();
+
         ObjectMapper mapper = new ObjectMapper(f);
         _verifyDupsFail(mapper, YAML_WITH_DUPS, false);
         _verifyDupsFail(mapper, YAML_WITH_DUPS, true);
