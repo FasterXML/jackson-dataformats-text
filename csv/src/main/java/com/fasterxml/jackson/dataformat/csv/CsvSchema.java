@@ -567,6 +567,15 @@ public class CsvSchema
         }
 
         /**
+         * Helper method called to remove a column
+         *
+         * @since 2.17.2
+         */
+        public boolean removeColumn(Column column) {
+            return _columns.remove(column);
+        }
+
+        /**
          * Helper method called to drop the last collected column name if
          * it is empty: called if {link CsvParser.Feature#ALLOW_TRAILING_COMMA}
          * enabled to remove the last entry after being added initially.
@@ -1499,6 +1508,21 @@ public class CsvSchema
         }
         sb.append(']');
         return sb.toString();
+    }
+    /**
+     * Method for ignoring fields for CsvBuilder
+     * @param ignoreProperties Array of column names to be ignored by the csv builder
+     * @return A newly built {@link CsvSchema} with the ignored properties
+     */
+    public CsvSchema ignoreProperty(String[] ignoreProperties) {
+        Builder b = rebuild();
+        for(String ignoreProperty : ignoreProperties) {
+            if (this._columnsByName.containsKey(ignoreProperty)) {
+                b.removeColumn(this._columnsByName.get(ignoreProperty));
+                this._columnsByName.remove(ignoreProperty);
+            }
+        }
+        return b.build();
     }
 
     /*

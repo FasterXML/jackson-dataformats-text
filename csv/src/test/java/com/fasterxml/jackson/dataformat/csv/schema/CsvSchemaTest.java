@@ -132,6 +132,28 @@ public class CsvSchemaTest extends ModuleTestBase
         _verifyLinks(schema);
     }
 
+    // for [ignore Add .ignoreProperty() to csv builder #386]
+    public void testIgnoreProperty() throws Exception {
+        CsvMapper mapper = mapperForCsv();
+        CsvSchema schema = mapper.schemaFor(Mixed.class);
+        assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
+        schema = schema.ignoreProperty(new String[]{"a", "d", "z"});
+        assertEquals(a2q("['b','c']"), schema.getColumnDesc());
+
+        _verifyLinks(schema);
+    }
+
+    // for [ignore Add .ignoreProperty() to csv builder #386]
+    public void testIgnorePropertyPropertyNotPresent() throws Exception {
+        CsvMapper mapper = mapperForCsv();
+        CsvSchema schema = mapper.schemaFor(Mixed.class);
+        assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
+        schema = schema.ignoreProperty(new String[]{"q", "w", "e"});
+        assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
+
+        _verifyLinks(schema);
+    }
+
     // for [dataformat-csv#42]
     public void testReorderWithComparator() throws Exception
     {
