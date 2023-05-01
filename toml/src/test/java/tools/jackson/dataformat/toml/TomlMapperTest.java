@@ -128,7 +128,7 @@ public class TomlMapperTest extends TomlMapperTestBase {
             Assert.fail("expected TomlStreamReadException");
         } catch (TomlStreamReadException e) {
             Assert.assertTrue("unexpected message: " + e.getMessage(),
-                    e.getMessage().contains("Number length (1200) exceeds the maximum length (1000)"));
+                    e.getMessage().contains("Number value length (1200) exceeds the maximum allowed"));
         }
     }
 

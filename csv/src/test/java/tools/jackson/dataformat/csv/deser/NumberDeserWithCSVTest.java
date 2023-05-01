@@ -80,7 +80,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
             fail("expected JsonMappingException");
         } catch (DatabindException jme) {
             assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number length (1200) exceeds the maximum length (1000)"));
+                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
         }
     }
 

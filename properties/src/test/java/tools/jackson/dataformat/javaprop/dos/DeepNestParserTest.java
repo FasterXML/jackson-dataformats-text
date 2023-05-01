@@ -21,7 +21,8 @@ public class DeepNestParserTest extends ModuleTestBase {
             }
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
-            assertEquals("Depth (1001) exceeds the maximum allowed nesting depth (1000)", e.getMessage());
+            assertTrue("unexpected exception message: " + e.getMessage(),
+                    e.getMessage().startsWith("Document nesting depth (1001) exceeds the maximum allowed"));
         }
     }
 

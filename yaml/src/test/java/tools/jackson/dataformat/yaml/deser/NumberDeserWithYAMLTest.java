@@ -322,7 +322,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException jme) {
             assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().contains("Number length (1200) exceeds the maximum length (1000)"));
+                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
         }
     }
 

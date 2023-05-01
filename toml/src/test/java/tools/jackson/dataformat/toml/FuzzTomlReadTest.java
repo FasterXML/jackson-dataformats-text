@@ -61,7 +61,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 TOML_MAPPER.readTree(is);
                 Assert.fail("Should not pass");
             } catch (StreamConstraintsException e) {
-                verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
+                verifyException(e, "Document nesting depth (1001) exceeds the maximum allowed");
             }
         }
     }
@@ -119,7 +119,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
             TOML_MAPPER.readTree(input.toString());
             Assert.fail("Should not pass");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
+            verifyException(e, "Document nesting depth (1001) exceeds the maximum allowed");
         }
     }
 
