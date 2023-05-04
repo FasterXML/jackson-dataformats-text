@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.15.1 (not yet released)
+
+#404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
+ (reported by Peter H)
+
 2.15.0 (23-Apr-2023)
 
 #373: (yaml) Positive numbers with plus sign not quoted correctly with
