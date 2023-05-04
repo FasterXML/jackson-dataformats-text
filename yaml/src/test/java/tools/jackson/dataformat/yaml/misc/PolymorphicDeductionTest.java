@@ -10,7 +10,7 @@ import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.DEDUCTION;
 
 // for [databind#43], deduction-based polymorphism
-public class TestPolymorphicDeduction extends ModuleTestBase
+public class PolymorphicDeductionTest extends ModuleTestBase
 {
   @JsonTypeInfo(use = DEDUCTION)
   @JsonSubTypes( {@Type(LiveCat.class), @Type(DeadCat.class), @Type(Fleabag.class)})
