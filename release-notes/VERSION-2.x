@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-Not yet released
+2.14.3 (05-May-2023)
 
 #378: Some artifacts missing `NOTICE`, `LICENSE` files
 
