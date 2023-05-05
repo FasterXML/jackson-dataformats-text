@@ -36,6 +36,10 @@ Active Maintainers:
 #415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
  (contributed by Niels B)
 
+2.14.3 (05-May-2023)
+
+#378: Some artifacts missing `NOTICE`, `LICENSE` files
+
 2.14.2 (28-Jan-2023)
 
 #356: (toml) Fix TOML parse failure when number token hits buffer edge
