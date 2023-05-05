@@ -239,3 +239,8 @@ Niels Basjes (nielsbasjes@github)
 
 * Contributed #415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
  (2.15.0)
+
+Peter Haumer (phaumer@github)
+
+* Reported #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
+ (2.15.1)

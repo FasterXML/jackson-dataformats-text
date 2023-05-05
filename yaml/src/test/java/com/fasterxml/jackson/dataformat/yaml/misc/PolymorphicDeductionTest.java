@@ -9,8 +9,8 @@ import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.DEDUCTION;
 
-// for [databind#43], deduction-based polymorphism
-public class TestPolymorphicDeduction extends ModuleTestBase
+// Copied from [databind#43], deduction-based polymorphism
+public class PolymorphicDeductionTest extends ModuleTestBase
 {
   @JsonTypeInfo(use = DEDUCTION)
   @JsonSubTypes( {@Type(LiveCat.class), @Type(DeadCat.class), @Type(Fleabag.class)})
@@ -21,7 +21,7 @@ public class TestPolymorphicDeduction extends ModuleTestBase
   @JsonSubTypes( {@Type(LiveCat.class), @Type(DeadCat.class)})
   // A supertype containing common properties
   public static class Cat implements Feline {
-    public String name;
+    public String name = "Grizabella";
   }
 
   // Distinguished by its parent and a unique property
@@ -86,5 +86,12 @@ public class TestPolymorphicDeduction extends ModuleTestBase
     assertSame(cat.getClass(), DeadCat.class);
     assertEquals("FELIX", cat.name);
     assertEquals("ENTROPY", ((DeadCat)cat).causeOfDeath);
+  }
+
+  // [dataformats-text#404]:
+  public void testSerializationOfInferred() throws Exception
+  {
+      assertEquals("name: \"Grizabella\"",
+              trimDocMarker(MAPPER.writeValueAsString(new Cat())));
   }
 }
