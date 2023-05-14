@@ -36,8 +36,8 @@ public class CSVBigStringsTest extends ModuleTestBase
             fail("expected DatabindException");
         } catch (DatabindException e) {
             final String message = e.getMessage();
-            assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length ("));
+            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
         }
     }
 
@@ -54,8 +54,8 @@ public class CSVBigStringsTest extends ModuleTestBase
             final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
             // so best not to assert that the String length value in the message is the full 20_000_000 value
-            assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length ("));
+            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
         }
     }
 
