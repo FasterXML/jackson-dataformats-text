@@ -29,12 +29,13 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(5001000));
+                    .readValues(generateCsv(20_001_000));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
-            assertTrue("unexpected exception message: " + e.getMessage(),
-                    e.getMessage().startsWith("String value length (5001000) exceeds the maximum allowed"));
+            final String message = e.getMessage();
+            assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length ("));
         }
     }
 
@@ -44,15 +45,15 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(7_000_000));
+                    .readValues(generateCsv(21_000_000));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
             final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
-            // so best not to assert that the String length value in the message is the full 2000000 value
-            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed"));
+            // so best not to assert that the String length value in the message is the full 20_000_000 value
+            assertTrue("unexpected exception message: " + message, message.startsWith("String length"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum length ("));
         }
     }
 
