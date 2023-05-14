@@ -16,6 +16,8 @@ public class CSVBigStringsTest extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
+    private final static int TOO_LONG_STRING_VALUE_LEN = 20_000_100;
+    
     private CsvMapper newCsvMapperWithUnlimitedStringSizeSupport() {
         CsvFactory csvFactory = CsvFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
@@ -29,7 +31,7 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(20_001_000));
+                    .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
@@ -45,7 +47,7 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(21_000_000));
+                    .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
@@ -59,7 +61,7 @@ public class CSVBigStringsTest extends ModuleTestBase
 
     public void testUnlimitedString() throws Exception
     {
-        final int len = 5001000;
+        final int len = TOO_LONG_STRING_VALUE_LEN;
         MappingIterator<List<String>> it = newCsvMapperWithUnlimitedStringSizeSupport()
                 .readerForListOf(String.class)
                 .with(CsvParser.Feature.WRAP_AS_ARRAY)

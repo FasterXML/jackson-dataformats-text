@@ -11,6 +11,7 @@ import static org.junit.Assert.fail;
 
 public class TomlBigStringsTest extends TomlMapperTestBase
 {
+    private final static int TOO_LONG_STRING_VALUE_LEN = 20_000_100;
 
     final static class StringWrapper
     {
@@ -38,7 +39,7 @@ public class TomlBigStringsTest extends TomlMapperTestBase
     public void testBigString() throws Exception
     {
         try {
-            MAPPER.readValue(generateToml(20_001_000), StringWrapper.class);
+            MAPPER.readValue(generateToml(TOO_LONG_STRING_VALUE_LEN), StringWrapper.class);
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             final String message = e.getMessage();
@@ -51,7 +52,7 @@ public class TomlBigStringsTest extends TomlMapperTestBase
     public void testBiggerString() throws Exception
     {
         try {
-            MAPPER.readValue(generateToml(20_100_000), StringWrapper.class);
+            MAPPER.readValue(generateToml(TOO_LONG_STRING_VALUE_LEN), StringWrapper.class);
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             final String message = e.getMessage();
@@ -65,7 +66,7 @@ public class TomlBigStringsTest extends TomlMapperTestBase
     @Test
     public void testUnlimitedString() throws Exception
     {
-        final int len = 5001000;
+        final int len = TOO_LONG_STRING_VALUE_LEN;
         StringWrapper sw = newMapperWithUnlimitedStringSizeSupport()
                 .readValue(generateToml(len), StringWrapper.class);
         assertEquals(len, sw.string.length());
