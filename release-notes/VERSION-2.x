@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.15.1 (not yet released)
+2.15.1 (16-May-2023)
 
 #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
  (reported by Peter H)
