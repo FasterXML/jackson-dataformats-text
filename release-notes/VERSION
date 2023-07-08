@@ -9,7 +9,7 @@ Contains streaming API format codec implementations for supported textual format
 (except for xml which is in separate repo)
 as well as support for integration via `jackson-databind` (`ObjectMapper` subtype
 implementations)
-
+ 
 ------------------------------------------------------------------------
 === Releases ===
 ------------------------------------------------------------------------
