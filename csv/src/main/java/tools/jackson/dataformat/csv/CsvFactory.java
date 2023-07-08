@@ -64,7 +64,7 @@ public class CsvFactory
      * factory instance.
      */
     public CsvFactory() {
-        super(StreamReadConstraints.defaults(),
+        super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
                 DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
         _characterEscapes = null; // derive from flags

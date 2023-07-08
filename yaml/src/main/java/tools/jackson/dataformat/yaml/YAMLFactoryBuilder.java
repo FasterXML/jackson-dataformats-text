@@ -2,6 +2,7 @@ package tools.jackson.dataformat.yaml;
 
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamReadFeature;
+import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
@@ -76,7 +77,7 @@ public class YAMLFactoryBuilder
      */
 
     protected YAMLFactoryBuilder() {
-        super(StreamReadConstraints.defaults(),
+        super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
                 0, YAMLFactory.DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
     }
 

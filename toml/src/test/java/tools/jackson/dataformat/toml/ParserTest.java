@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.json.JsonReadFeature;
@@ -50,7 +51,7 @@ public class ParserTest extends TomlMapperTestBase {
         int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
         return Parser.parse(
                 factory,
-                new IOContext(StreamReadConstraints.defaults(),
+                new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
                         BufferRecyclers.getBufferRecycler(),
                         ContentReference.construct(true, toml), false, null),
                 options,

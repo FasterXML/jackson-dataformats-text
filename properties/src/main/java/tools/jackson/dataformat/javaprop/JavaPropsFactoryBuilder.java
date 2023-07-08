@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.javaprop;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
 /**
@@ -14,7 +15,8 @@ public class JavaPropsFactoryBuilder extends DecorableTSFBuilder<JavaPropsFactor
 {
     public JavaPropsFactoryBuilder() {
         // No format-specific features yet so:
-        super(StreamReadConstraints.defaults(), 0, 0);
+        super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                0, 0);
     }
 
     public JavaPropsFactoryBuilder(JavaPropsFactory base) {

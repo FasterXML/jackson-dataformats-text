@@ -2,6 +2,7 @@ package tools.jackson.dataformat.csv;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
 /**
@@ -28,7 +29,7 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
      */
 
     protected CsvFactoryBuilder() {
-        super(StreamReadConstraints.defaults(),
+        super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
                 CsvFactory.DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 CsvFactory.DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
     }

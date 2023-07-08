@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.BufferRecyclers;
@@ -102,7 +103,7 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
     }
 
     private IOContext _ioContext(CharSequence toml) {
-        return new IOContext(StreamReadConstraints.defaults(),
+        return new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
                 BufferRecyclers.getBufferRecycler(),
                 ContentReference.construct(true, toml), false, null);
     }
