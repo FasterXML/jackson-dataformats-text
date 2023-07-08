@@ -267,6 +267,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     public void writeStartArray() throws IOException {
         _verifyValueWrite("start an array");
         _jpropContext = _jpropContext.createChildArrayContext(_basePath.length());
+        streamWriteConstraints().validateNestingDepth(_jpropContext.getNestingDepth());
     }
 
     @Override
@@ -281,6 +282,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     public void writeStartObject() throws IOException {
         _verifyValueWrite("start an object");
         _jpropContext = _jpropContext.createChildObjectContext(_basePath.length());
+        streamWriteConstraints().validateNestingDepth(_jpropContext.getNestingDepth());
     }
 
     @Override
