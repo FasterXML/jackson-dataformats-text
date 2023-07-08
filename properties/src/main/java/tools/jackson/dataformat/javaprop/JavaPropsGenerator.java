@@ -26,8 +26,6 @@ public abstract class JavaPropsGenerator
     /**********************************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * Definition of mapping of logically structured property names into actual
      * flattened property names.
@@ -67,8 +65,7 @@ public abstract class JavaPropsGenerator
     public JavaPropsGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, JavaPropsSchema schema)
     {
-        super(writeCtxt, stdFeatures);
-        _ioContext = ioCtxt;
+        super(writeCtxt, ioCtxt, stdFeatures);
         _streamWriteContext = JPropWriteContext.createRootContext();
 
         _schema = schema;

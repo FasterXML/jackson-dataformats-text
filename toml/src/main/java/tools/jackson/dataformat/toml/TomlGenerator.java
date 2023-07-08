@@ -29,15 +29,12 @@ final class TomlGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * Underlying {@link Writer} used for output.
      */
     protected final Writer _out;
 
     private final int _tomlFeatures;
-
 
     /*
     /**********************************************************************
@@ -84,8 +81,7 @@ final class TomlGenerator extends GeneratorBase
 
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, int tomlFeatures, Writer out) {
-        super(writeCtxt, stdFeatures);
-        _ioContext = ioCtxt;
+        super(writeCtxt, ioCtxt, stdFeatures);
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;

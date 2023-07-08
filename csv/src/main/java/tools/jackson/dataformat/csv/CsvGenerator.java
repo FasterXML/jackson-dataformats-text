@@ -122,15 +122,13 @@ public class CsvGenerator extends GeneratorBase
     protected final static long MIN_INT_AS_LONG = Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = Integer.MAX_VALUE;
     
+    private final static CsvSchema EMPTY_SCHEMA = CsvSchema.emptySchema();
+
     /*
     /**********************************************************************
     /* Configuration
     /**********************************************************************
      */
-
-    private final static CsvSchema EMPTY_SCHEMA = CsvSchema.emptySchema();
-
-    final protected IOContext _ioContext;
 
     /**
      * Bit flag composed of bits that indicate which
@@ -211,8 +209,7 @@ public class CsvGenerator extends GeneratorBase
             int streamWriteFeatures, int csvFeatures,
             Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes)
     {
-        super(writeCtxt, streamWriteFeatures);
-        _ioContext = ioCtxt;
+        super(writeCtxt, ioCtxt, streamWriteFeatures);
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
@@ -230,8 +227,7 @@ public class CsvGenerator extends GeneratorBase
             int streamWriteFeatures, int csvFeatures,
             CsvEncoder csvWriter)
     {
-        super(writeCtxt, streamWriteFeatures);
-        _ioContext = ioCtxt;
+        super(writeCtxt, ioCtxt, streamWriteFeatures);
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;

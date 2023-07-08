@@ -222,8 +222,6 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    final protected IOContext _ioContext;
-
     /**
      * Bit flag composed of bits that indicate which {@link YAMLGenerator.Feature}s
      * are enabled.
@@ -276,8 +274,7 @@ public class YAMLGenerator extends GeneratorBase
             Writer out, SpecVersion version,
             DumpSettings dumpOptions)
     {
-        super(writeContext, streamWriteFeatures);
-        _ioContext = ioCtxt;
+        super(writeContext, ioCtxt, streamWriteFeatures);
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
