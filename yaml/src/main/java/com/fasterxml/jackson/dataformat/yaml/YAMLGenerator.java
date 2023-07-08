@@ -380,6 +380,11 @@ public class YAMLGenerator extends GeneratorBase
         return opt;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     /*
     /**********************************************************************
     /* Versioned

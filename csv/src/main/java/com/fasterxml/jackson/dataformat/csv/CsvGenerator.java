@@ -478,6 +478,11 @@ public class CsvGenerator extends GeneratorBase
         return this;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     /*
     /**********************************************************
     /* Public API: low-level I/O

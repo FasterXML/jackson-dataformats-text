@@ -80,6 +80,11 @@ public abstract class JavaPropsGenerator extends GeneratorBase
         _jpropContext = JPropWriteContext.createRootContext();
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     @Override // since 2.13
     public Object currentValue() {
         return _jpropContext.getCurrentValue();

@@ -91,6 +91,11 @@ final class TomlGenerator extends GeneratorBase
         _outputEnd = _outputBuffer.length;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     /*
     /**********************************************************************
     /* Versioned
