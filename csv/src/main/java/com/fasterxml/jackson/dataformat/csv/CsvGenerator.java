@@ -478,6 +478,11 @@ public class CsvGenerator extends GeneratorBase
         return this;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     /*
     /**********************************************************
     /* Public API: low-level I/O
@@ -551,6 +556,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
+        streamWriteConstraints().validateNestingDepth(_tokenWriteContext.getNestingDepth());
         // and that's about it, really
     }
 
@@ -597,6 +603,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
+        streamWriteConstraints().validateNestingDepth(_tokenWriteContext.getNestingDepth());
     }
 
     @Override

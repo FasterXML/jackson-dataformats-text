@@ -91,6 +91,11 @@ final class TomlGenerator extends GeneratorBase
         _outputEnd = _outputBuffer.length;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _ioContext.streamWriteConstraints();
+    }
+
     /*
     /**********************************************************************
     /* Versioned
@@ -343,6 +348,7 @@ final class TomlGenerator extends GeneratorBase
         _verifyValueWrite("start an array", true);
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
             _writeRaw('[');
         }
@@ -373,6 +379,7 @@ final class TomlGenerator extends GeneratorBase
         // objects aren't always materialized right now
         _verifyValueWrite("start an object", false);
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
             writeRaw('{');
         }
