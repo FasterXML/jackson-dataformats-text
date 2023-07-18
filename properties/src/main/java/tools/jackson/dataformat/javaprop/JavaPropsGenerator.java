@@ -210,6 +210,7 @@ public abstract class JavaPropsGenerator
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null,
                 _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
 
@@ -218,6 +219,7 @@ public abstract class JavaPropsGenerator
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
     
@@ -234,6 +236,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeStartObject() throws JacksonException {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null, _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
 
@@ -241,6 +244,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeStartObject(Object forValue) throws JacksonException {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
 

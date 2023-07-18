@@ -393,27 +393,6 @@ public class CsvGenerator extends GeneratorBase
     }
 
     /*
-    public CsvGenerator configure(Feature f, boolean state) {
-        if (state) {
-            return enable(f);
-        }
-        return disable(f);
-    }
-
-    public CsvGenerator enable(Feature f) {
-        _formatFeatures |= f.getMask();
-        _writer.overrideFormatFeatures(_formatFeatures);
-        return this;
-    }
-
-    public CsvGenerator disable(Feature f) {
-        _formatFeatures &= ~f.getMask();
-        _writer.overrideFormatFeatures(_formatFeatures);
-        return this;
-    }
-    */
-
-    /*
     /**********************************************************************
     /* Public API: low-level I/O
     /**********************************************************************
@@ -494,6 +473,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         // and that's about it, really
         return this;
     }
@@ -549,6 +529,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
 

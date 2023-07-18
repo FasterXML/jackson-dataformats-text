@@ -7,6 +7,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import tools.jackson.core.*;
+
+import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.json.DupDetector;
+import tools.jackson.core.util.JacksonFeatureSet;
+import tools.jackson.core.util.SimpleStreamWriteContext;
+
+import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
+
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.DumpSettingsBuilder;
 import org.snakeyaml.engine.v2.common.Anchor;
@@ -14,28 +24,8 @@ import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 import org.snakeyaml.engine.v2.emitter.Emitter;
-import org.snakeyaml.engine.v2.events.AliasEvent;
-import org.snakeyaml.engine.v2.events.DocumentEndEvent;
-import org.snakeyaml.engine.v2.events.DocumentStartEvent;
-import org.snakeyaml.engine.v2.events.Event;
-import org.snakeyaml.engine.v2.events.ImplicitTuple;
-import org.snakeyaml.engine.v2.events.MappingEndEvent;
-import org.snakeyaml.engine.v2.events.MappingStartEvent;
-import org.snakeyaml.engine.v2.events.ScalarEvent;
-import org.snakeyaml.engine.v2.events.SequenceEndEvent;
-import org.snakeyaml.engine.v2.events.SequenceStartEvent;
-import org.snakeyaml.engine.v2.events.StreamEndEvent;
-import org.snakeyaml.engine.v2.events.StreamStartEvent;
+import org.snakeyaml.engine.v2.events.*;
 import org.snakeyaml.engine.v2.nodes.Tag;
-
-import tools.jackson.core.*;
-
-import tools.jackson.core.base.GeneratorBase;
-import tools.jackson.core.json.DupDetector;
-import tools.jackson.core.util.JacksonFeatureSet;
-import tools.jackson.core.util.SimpleStreamWriteContext;
-import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
-import tools.jackson.core.io.IOContext;
 
 public class YAMLGenerator extends GeneratorBase
 {
@@ -399,28 +389,6 @@ public class YAMLGenerator extends GeneratorBase
         return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
-    // Should not be needed in 3.0
-/*    
-    public YAMLGenerator enable(Feature f) {
-        _formatWriteFeatures |= f.getMask();
-        return this;
-    }
-
-    public YAMLGenerator disable(Feature f) {
-        _formatWriteFeatures &= ~f.getMask();
-        return this;
-    }
-
-    public YAMLGenerator configure(YAMLGenerator.Feature f, boolean state) {
-        if (state) {
-            enable(f);
-        } else {
-            disable(f);
-        }
-        return this;
-    }
-*/
-
     /*
     /**********************************************************************
     /* Overridden methods; writing property names
@@ -530,6 +498,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -567,6 +536,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);

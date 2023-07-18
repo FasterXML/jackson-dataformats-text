@@ -56,6 +56,7 @@ final class TomlWriteContext extends TokenStreamContext {
         super();
         _type = type;
         _parent = parent;
+        _nestingDepth = parent == null ? 0 : parent._nestingDepth + 1;
         _basePathLength = basePathLength;
         _index = -1;
         _currentValue = currValue;
