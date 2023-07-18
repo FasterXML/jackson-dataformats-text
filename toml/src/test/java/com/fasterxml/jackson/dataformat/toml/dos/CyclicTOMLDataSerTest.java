@@ -1,13 +1,15 @@
 package com.fasterxml.jackson.dataformat.toml.dos;
 
-import com.fasterxml.jackson.core.StreamWriteConstraints;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.toml.TomlMapperTestBase;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.core.StreamWriteConstraints;
+
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.toml.TomlMapperTestBase;
+
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -16,7 +18,7 @@ import static org.junit.Assert.fail;
  * Simple unit tests to verify that we fail gracefully if you attempt to serialize
  * data that is cyclic (eg a list that contains itself).
  */
-public class CyclicDataSerTest extends TomlMapperTestBase
+public class CyclicTOMLDataSerTest extends TomlMapperTestBase
 {
     private final ObjectMapper MAPPER = newTomlMapper();
 
@@ -26,11 +28,11 @@ public class CyclicDataSerTest extends TomlMapperTestBase
         list.add(list);
         try {
             MAPPER.writeValueAsString(list);
-            fail("expected JsonMappingException");
-        } catch (JsonMappingException jmex) {
+            fail("expected DatabindException");
+        } catch (DatabindException jmex) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
-            assertTrue("JsonMappingException message is as expected?",
+            assertTrue("DatabindException message is as expected?",
                     jmex.getMessage().startsWith(exceptionPrefix));
         }
     }

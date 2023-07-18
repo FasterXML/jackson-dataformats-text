@@ -226,7 +226,12 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
+
+    /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
 
     /**
      * Bit flag composed of bits that indicate which
@@ -295,6 +300,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
                 ? StringQuotingChecker.Default.instance() : quotingChecker;
@@ -320,6 +326,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
                 ? StringQuotingChecker.Default.instance() : quotingChecker;
@@ -382,7 +389,7 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public StreamWriteConstraints streamWriteConstraints() {
-        return _ioContext.streamWriteConstraints();
+        return _streamWriteConstraints;
     }
 
     /*

@@ -31,12 +31,16 @@ final class TomlGenerator extends GeneratorBase
     protected final IOContext _ioContext;
 
     /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
+
+    /**
      * Underlying {@link Writer} used for output.
      */
     protected final Writer _out;
 
     private final int _tomlFeatures;
-
 
     /*
     /**********************************************************************
@@ -84,6 +88,7 @@ final class TomlGenerator extends GeneratorBase
     public TomlGenerator(IOContext ioCtxt, int stdFeatures, int tomlFeatures, ObjectCodec codec, Writer out) {
         super(stdFeatures, codec);
         _ioContext = ioCtxt;
+        _streamWriteConstraints = ioCtxt.streamWriteConstraints();
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
@@ -93,7 +98,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public StreamWriteConstraints streamWriteConstraints() {
-        return _ioContext.streamWriteConstraints();
+        return _streamWriteConstraints;
     }
 
     /*
