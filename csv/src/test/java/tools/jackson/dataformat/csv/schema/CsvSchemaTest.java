@@ -95,6 +95,11 @@ public class CsvSchemaTest extends ModuleTestBase
 
         // Then verify linkage
         _verifyLinks(schema);
+
+        // and then modify it a bit
+        CsvSchema.Builder b = schema.rebuild();
+        b.removeColumn(1); // lastName;
+        assertEquals(4, b.build().size());
     }
 
     public void testArrayWithTypedAutoSchema() throws Exception
