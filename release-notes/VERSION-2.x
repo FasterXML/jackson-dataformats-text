@@ -14,6 +14,10 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.16.0 (not yet released)
+
+#422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
+
 2.15.2 (30-May-2023)
 
 No changes since 2.15.1
