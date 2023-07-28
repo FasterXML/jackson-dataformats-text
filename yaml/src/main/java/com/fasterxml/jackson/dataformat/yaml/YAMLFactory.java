@@ -3,13 +3,13 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.*;
 import java.net.URL;
 
-import org.yaml.snakeyaml.DumperOptions;
-
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
+
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.LoaderOptions;
 
 @SuppressWarnings("resource")
