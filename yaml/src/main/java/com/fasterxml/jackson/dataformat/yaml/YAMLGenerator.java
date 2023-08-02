@@ -226,7 +226,12 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
+
+    /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
 
     /**
      * Bit flag composed of bits that indicate which
@@ -295,6 +300,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
                 ? StringQuotingChecker.Default.instance() : quotingChecker;
@@ -320,6 +326,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
                 ? StringQuotingChecker.Default.instance() : quotingChecker;
@@ -378,6 +385,11 @@ public class YAMLGenerator extends GeneratorBase
             opt.setMaxSimpleKeyLength(1024);
         }
         return opt;
+    }
+
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _streamWriteConstraints;
     }
 
     /*
@@ -585,6 +597,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _writeContext = _writeContext.createChildArrayContext();
+        streamWriteConstraints().validateNestingDepth(_writeContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -613,6 +626,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _writeContext = _writeContext.createChildObjectContext();
+        streamWriteConstraints().validateNestingDepth(_writeContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);

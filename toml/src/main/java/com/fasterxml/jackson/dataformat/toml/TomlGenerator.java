@@ -31,12 +31,16 @@ final class TomlGenerator extends GeneratorBase
     protected final IOContext _ioContext;
 
     /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
+
+    /**
      * Underlying {@link Writer} used for output.
      */
     protected final Writer _out;
 
     private final int _tomlFeatures;
-
 
     /*
     /**********************************************************************
@@ -84,11 +88,17 @@ final class TomlGenerator extends GeneratorBase
     public TomlGenerator(IOContext ioCtxt, int stdFeatures, int tomlFeatures, ObjectCodec codec, Writer out) {
         super(stdFeatures, codec);
         _ioContext = ioCtxt;
+        _streamWriteConstraints = ioCtxt.streamWriteConstraints();
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
         _outputBuffer = ioCtxt.allocConcatBuffer();
         _outputEnd = _outputBuffer.length;
+    }
+
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _streamWriteConstraints;
     }
 
     /*
@@ -343,6 +353,7 @@ final class TomlGenerator extends GeneratorBase
         _verifyValueWrite("start an array", true);
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
             _writeRaw('[');
         }
@@ -373,6 +384,7 @@ final class TomlGenerator extends GeneratorBase
         // objects aren't always materialized right now
         _verifyValueWrite("start an object", false);
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
             writeRaw('{');
         }

@@ -39,6 +39,11 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     protected final IOContext _ioContext;
 
     /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
+
+    /**
      * Definition of columns being written, if available.
      */
     protected JavaPropsSchema _schema = EMPTY_SCHEMA;
@@ -77,7 +82,13 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     {
         super(stdFeatures, codec, BOGUS_WRITE_CONTEXT);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _jpropContext = JPropWriteContext.createRootContext();
+    }
+
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _streamWriteConstraints;
     }
 
     @Override // since 2.13
@@ -267,6 +278,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     public void writeStartArray() throws IOException {
         _verifyValueWrite("start an array");
         _jpropContext = _jpropContext.createChildArrayContext(_basePath.length());
+        streamWriteConstraints().validateNestingDepth(_jpropContext.getNestingDepth());
     }
 
     @Override
@@ -281,6 +293,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     public void writeStartObject() throws IOException {
         _verifyValueWrite("start an object");
         _jpropContext = _jpropContext.createChildObjectContext(_basePath.length());
+        streamWriteConstraints().validateNestingDepth(_jpropContext.getNestingDepth());
     }
 
     @Override

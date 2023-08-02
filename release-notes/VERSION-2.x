@@ -14,7 +14,15 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.15.1 (not yet released)
+2.16.0 (not yet released)
+
+#422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
+
+2.15.2 (30-May-2023)
+
+No changes since 2.15.1
+
+2.15.1 (16-May-2023)
 
 #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
  (reported by Peter H)

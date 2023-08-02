@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.core.StreamWriteConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,7 +64,9 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 TOML_MAPPER.readTree(is);
                 Assert.fail("Should not pass");
             } catch (IOException e) {
-                verifyException(e, "Document nesting depth (1001) exceeds the maximum allowed");
+                String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
+                        StreamReadConstraints.DEFAULT_MAX_DEPTH + 1);
+                verifyException(e, exceptionPrefix);
             }
         }
     }
@@ -120,7 +124,9 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
             TOML_MAPPER.readTree(input.toString());
             Assert.fail("Should not pass");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Document nesting depth (1001) exceeds the maximum allowed");
+            String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
+                    StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
+            verifyException(e, exceptionPrefix);
         }
     }
 

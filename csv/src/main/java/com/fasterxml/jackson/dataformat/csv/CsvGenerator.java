@@ -145,8 +145,13 @@ public class CsvGenerator extends GeneratorBase
         EMPTY_SCHEMA = CsvSchema.emptySchema();
     }
     
-    final protected IOContext _ioContext;
+    protected final IOContext _ioContext;
 
+    /**
+     * @since 2.16
+     */
+    protected final StreamWriteConstraints _streamWriteConstraints;
+    
     /**
      * Bit flag composed of bits that indicate which
      * {@link CsvGenerator.Feature}s
@@ -243,6 +248,7 @@ public class CsvGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = csvFeatures;
         _schema = schema;
         boolean useFastDoubleWriter = isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER);
@@ -257,6 +263,7 @@ public class CsvGenerator extends GeneratorBase
     {
         super(jsonFeatures, codec);
         _ioContext = ctxt;
+        _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = csvFeatures;
         _writer = csvWriter;
         _writeContext = null; // just to make sure it won't be used
@@ -478,6 +485,11 @@ public class CsvGenerator extends GeneratorBase
         return this;
     }
 
+    @Override
+    public StreamWriteConstraints streamWriteConstraints() {
+        return _streamWriteConstraints;
+    }
+
     /*
     /**********************************************************
     /* Public API: low-level I/O
@@ -551,6 +563,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _tokenWriteContext = _tokenWriteContext.createChildArrayContext(null);
+        streamWriteConstraints().validateNestingDepth(_tokenWriteContext.getNestingDepth());
         // and that's about it, really
     }
 
@@ -597,6 +610,7 @@ public class CsvGenerator extends GeneratorBase
             }
         }
         _tokenWriteContext = _tokenWriteContext.createChildObjectContext(null);
+        streamWriteConstraints().validateNestingDepth(_tokenWriteContext.getNestingDepth());
     }
 
     @Override

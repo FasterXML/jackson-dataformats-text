@@ -16,6 +16,8 @@ public class CSVBigStringsTest extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
+    private final static int TOO_LONG_STRING_VALUE_LEN = 20_000_100;
+    
     private CsvMapper newCsvMapperWithUnlimitedStringSizeSupport() {
         CsvFactory csvFactory = CsvFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
@@ -29,12 +31,13 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(5001000));
+                    .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
-            assertTrue("unexpected exception message: " + e.getMessage(),
-                    e.getMessage().startsWith("String value length (5001000) exceeds the maximum allowed"));
+            final String message = e.getMessage();
+            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
         }
     }
 
@@ -44,21 +47,21 @@ public class CSVBigStringsTest extends ModuleTestBase
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                    .readValues(generateCsv(7_000_000));
+                    .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected DatabindException");
         } catch (DatabindException e) {
             final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
-            // so best not to assert that the String length value in the message is the full 2000000 value
+            // so best not to assert that the String length value in the message is the full 20_000_000 value
             assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed"));
+            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
         }
     }
 
     public void testUnlimitedString() throws Exception
     {
-        final int len = 5001000;
+        final int len = TOO_LONG_STRING_VALUE_LEN;
         MappingIterator<List<String>> it = newCsvMapperWithUnlimitedStringSizeSupport()
                 .readerForListOf(String.class)
                 .with(CsvParser.Feature.WRAP_AS_ARRAY)

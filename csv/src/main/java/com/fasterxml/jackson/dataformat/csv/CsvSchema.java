@@ -279,14 +279,6 @@ public class CsvSchema
             this(index, name, type, "");
         }
 
-        /**
-         * @deprecated use variant where `arrayElementSep` is <code>String</code>
-         */
-        @Deprecated // in 2.7; remove from 2.8
-        public Column(int index, String name, ColumnType type, int arrayElementSep) {
-            this(index, name, type, (arrayElementSep < 0) ? NO_ARRAY_ELEMENT_SEPARATOR : Character.toString((char) arrayElementSep));
-        }
-
         public Column(int index, String name, ColumnType type, String arrayElementSep)
         {
             _index = index;
@@ -530,15 +522,6 @@ public class CsvSchema
         }
 
         /**
-         * @deprecated use {@link #addArrayColumn(String, String)} instead
-         */
-        @Deprecated // in 2.7; remove from 2.8
-        public Builder addArrayColumn(String name, int elementSeparator) {
-            int index = _columns.size();
-            return addColumn(new Column(index, name, ColumnType.ARRAY, elementSeparator));
-        }
-
-        /**
          * @since 2.7
          */
         public Builder addArrayColumn(String name, String elementSeparator) {
@@ -554,15 +537,24 @@ public class CsvSchema
             return addColumn(new Column(index, name, ColumnType.BOOLEAN));
         }
 
+        public Builder renameColumn(int index, String newName) {
+            _checkIndex(index);
+            _columns.set(index, _columns.get(index).withName(newName));
+            return this;
+        }
+
         public Builder replaceColumn(int index, Column c) {
             _checkIndex(index);
             _columns.set(index, c);
             return this;
         }
 
-        public Builder renameColumn(int index, String newName) {
+        /**
+         * @since 2.16
+         */
+        public Builder removeColumn(int index) {
             _checkIndex(index);
-            _columns.set(index, _columns.get(index).withName(newName));
+            _columns.remove(index);
             return this;
         }
 
@@ -601,15 +593,6 @@ public class CsvSchema
             _checkIndex(index);
             _columns.set(index, _columns.get(index).withArrayElementSeparator(""));
             return this;
-        }
-
-        /**
-         * @deprecated use {@link #setArrayElementSeparator(String)} instead
-         */
-        @Deprecated // in 2.7; remove from 2.8
-        public void setArrayElementSeparator(int index, char sep) {
-            _checkIndex(index);
-            _columns.set(index, _columns.get(index).withElementSeparator(sep));
         }
 
         /**
