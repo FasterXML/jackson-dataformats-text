@@ -1,5 +1,6 @@
 package tools.jackson.dataformat.toml;
 
+import tools.jackson.core.ErrorReportConfiguration;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.base.DecorableTSFactory;
@@ -19,6 +20,7 @@ public class TomlFactoryBuilder extends DecorableTSFactory.DecorableTSFBuilder<T
 
     TomlFactoryBuilder() {
         super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 TomlFactory.DEFAULT_TOML_PARSER_FEATURE_FLAGS, TomlFactory.DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 

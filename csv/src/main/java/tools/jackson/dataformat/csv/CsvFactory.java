@@ -4,7 +4,6 @@ import java.io.*;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
-import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 
 import tools.jackson.dataformat.csv.impl.CsvParserBootstrapper;
@@ -65,6 +64,7 @@ public class CsvFactory
      */
     public CsvFactory() {
         super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
         _characterEscapes = null; // derive from flags

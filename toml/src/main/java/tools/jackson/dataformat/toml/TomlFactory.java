@@ -36,6 +36,7 @@ public final class TomlFactory extends TextualTSFactory
 
     public TomlFactory() {
         super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 DEFAULT_TOML_PARSER_FEATURE_FLAGS, DEFAULT_TOML_GENERATOR_FEATURE_FLAGS);
     }
 

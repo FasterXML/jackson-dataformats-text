@@ -36,6 +36,7 @@ public class JavaPropsFactory
     public JavaPropsFactory() {
         // No format-specific features yet so:
         super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 0, 0);
     }
 

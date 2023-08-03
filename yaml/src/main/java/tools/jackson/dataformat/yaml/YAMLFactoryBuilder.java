@@ -1,5 +1,6 @@
 package tools.jackson.dataformat.yaml;
 
+import tools.jackson.core.ErrorReportConfiguration;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.StreamWriteConstraints;
@@ -78,6 +79,7 @@ public class YAMLFactoryBuilder
 
     protected YAMLFactoryBuilder() {
         super(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 0, YAMLFactory.DEFAULT_YAML_GENERATOR_FEATURE_FLAGS);
     }
 
