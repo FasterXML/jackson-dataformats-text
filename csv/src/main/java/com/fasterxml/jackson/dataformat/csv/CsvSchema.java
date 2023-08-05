@@ -1498,14 +1498,15 @@ public class CsvSchema
      * @return A newly built {@link CsvSchema} with the ignored properties
      */
     public CsvSchema ignoreProperty(String[] ignoreProperties) {
-        Builder b = rebuild();
+        Map<String, Column> map = this._columnsByName;
         for(String ignoreProperty : ignoreProperties) {
             if (this._columnsByName.containsKey(ignoreProperty)) {
-                b.removeColumn(this._columnsByName.get(ignoreProperty));
-                this._columnsByName.remove(ignoreProperty);
+                map.remove(ignoreProperty);
             }
         }
-        return b.build();
+        CsvSchema csvSchema = new CsvSchema(this, map.values().toArray(new Column[map.size()]));
+        Builder builder = new Builder(csvSchema);
+        return builder.build();
     }
 
     /*

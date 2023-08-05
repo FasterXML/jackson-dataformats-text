@@ -148,6 +148,18 @@ public class CsvSchemaTest extends ModuleTestBase
         _verifyLinks(schema);
     }
 
+    public void testIgnorePropertyDoesNotModifyUnderLyingSchema() throws Exception {
+        CsvMapper mapper = mapperForCsv();
+        CsvSchema originalSchema = mapper.schemaFor(Mixed.class);
+        assertEquals(a2q("['a','b','c','d']"), originalSchema.getColumnDesc());
+        CsvSchema modifiedSchema = originalSchema.ignoreProperty(new String[]{"a", "d", "z"});
+        assertEquals(a2q("['b','c']"), modifiedSchema.getColumnDesc());
+        assertEquals(a2q("['a','b','c','d']"), originalSchema.getColumnDesc());
+
+        _verifyLinks(modifiedSchema);
+        _verifyLinks(originalSchema);
+    }
+
     // for [ignore Add .ignoreProperty() to csv builder #386]
     public void testIgnorePropertyPropertyNotPresent() throws Exception {
         CsvMapper mapper = mapperForCsv();
