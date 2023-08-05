@@ -559,15 +559,6 @@ public class CsvSchema
         }
 
         /**
-         * Helper method called to remove a column
-         *
-         * @since 2.17.2
-         */
-        public boolean removeColumn(Column column) {
-            return _columns.remove(column);
-        }
-
-        /**
          * Helper method called to drop the last collected column name if
          * it is empty: called if {link CsvParser.Feature#ALLOW_TRAILING_COMMA}
          * enabled to remove the last entry after being added initially.
