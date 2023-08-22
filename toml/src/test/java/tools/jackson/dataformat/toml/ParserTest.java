@@ -9,6 +9,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
+import tools.jackson.core.ErrorReportConfiguration;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamWriteConstraints;
@@ -52,6 +53,7 @@ public class ParserTest extends TomlMapperTestBase {
         return Parser.parse(
                 factory,
                 new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                        ErrorReportConfiguration.defaults(),
                         BufferRecyclers.getBufferRecycler(),
                         ContentReference.construct(true, toml), false, null),
                 options,

@@ -132,6 +132,7 @@ public class LongTokenTest extends TomlMapperTestBase {
 
     private IOContext _ioContext(CharSequence toml) {
         return new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 BufferRecyclers.getBufferRecycler(),
                 ContentReference.construct(true, toml), false, null);
     }
