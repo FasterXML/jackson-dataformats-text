@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.ErrorReportConfiguration;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamWriteConstraints;
@@ -49,6 +50,7 @@ public class ParserTest extends TomlMapperTestBase {
                 factory,
                 new IOContext(StreamReadConstraints.defaults(),
                         StreamWriteConstraints.defaults(),
+                        ErrorReportConfiguration.defaults(),
                         BufferRecyclers.getBufferRecycler(),
                         ContentReference.rawReference(toml), false),
                 new StringReader(toml)

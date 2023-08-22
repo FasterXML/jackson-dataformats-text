@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.ErrorReportConfiguration;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamWriteConstraints;
 import com.fasterxml.jackson.core.io.ContentReference;
@@ -103,6 +104,7 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
     private IOContext _ioContext(CharSequence toml) {
         return new IOContext(StreamReadConstraints.defaults(),
                 StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
                 BufferRecyclers.getBufferRecycler(),
                 ContentReference.rawReference(true, toml), false);
     }
