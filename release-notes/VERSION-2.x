@@ -18,6 +18,14 @@ Active Maintainers:
 
 #422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
 
+2.15.3 (not yet released)
+
+#400: (yaml) `IllegalArgumentException` when attempting to decode invalid UTF-8
+  surrogate by SnakeYAML (oss-fuzz 50431)
+#406: (yaml) NumberFormatException from SnakeYAML due to int overflow for
+  corrupt YAML version
+#426: (yaml) Update to SnakeYAML 2.1
+
 2.15.2 (30-May-2023)
 
 No changes since 2.15.1

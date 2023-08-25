@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.ser;
 
 import java.util.Collections;
 
