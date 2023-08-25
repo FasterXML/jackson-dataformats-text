@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.deser;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,7 +30,7 @@ public class FuzzYAMLRead_406_56902Test extends ModuleTestBase
         } catch (StreamReadException e) {
             // Not sure what to verify, but should be exposed as one of Jackson's
             // exceptions (or possibly IOException)
-            verifyException(e, "Not a valid YAML version");
+            verifyException(e, "found a number which cannot represent a valid version");
         }
     }
 }
