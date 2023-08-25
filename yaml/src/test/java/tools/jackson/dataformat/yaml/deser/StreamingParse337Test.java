@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.deser;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
@@ -34,8 +34,7 @@ public class StreamingParse337Test extends ModuleTestBase
                 +"  - \"Max Power\"\n"
                 ;
         LoadSettings loaderOptions = LoadSettings.builder()
-                // !!! This is where we would limit maximum size
-                // .setCodePointLimit(5)
+                .setCodePointLimit(5)
                 .build();
         YAMLFactory yamlFactory = YAMLFactory.builder()
                 .loadSettings(loaderOptions)
