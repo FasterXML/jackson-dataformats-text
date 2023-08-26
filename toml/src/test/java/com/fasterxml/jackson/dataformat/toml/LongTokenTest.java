@@ -1,11 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.ErrorReportConfiguration;
 import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.core.StreamWriteConstraints;
-import com.fasterxml.jackson.core.io.ContentReference;
-import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.BufferRecyclers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Assert;
@@ -125,15 +120,9 @@ public class LongTokenTest extends TomlMapperTestBase {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = Parser.parse(_ioContext(toml), TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(testIOContext(),
+                TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
-    }
-
-    private IOContext _ioContext(CharSequence toml) {
-        return new IOContext(StreamReadConstraints.defaults(),
-                StreamWriteConstraints.defaults(),
-                ErrorReportConfiguration.defaults(),
-                BufferRecyclers.getBufferRecycler(), ContentReference.rawReference(toml), false);
     }
 }

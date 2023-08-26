@@ -47,12 +47,7 @@ public class ParserTest extends TomlMapperTestBase {
 
     static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws IOException {
         return Parser.parse(
-                factory,
-                new IOContext(StreamReadConstraints.defaults(),
-                        StreamWriteConstraints.defaults(),
-                        ErrorReportConfiguration.defaults(),
-                        BufferRecyclers.getBufferRecycler(),
-                        ContentReference.rawReference(toml), false),
+                factory, testIOContext(),
                 new StringReader(toml)
         );
     }
