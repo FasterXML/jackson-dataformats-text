@@ -6,9 +6,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import tools.jackson.core.*;
-import tools.jackson.core.io.ContentReference;
-import tools.jackson.core.io.IOContext;
-import tools.jackson.core.util.BufferRecyclers;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -124,16 +121,9 @@ public class LongTokenTest extends TomlMapperTestBase {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = Parser.parse(FACTORY, _ioContext(toml),
+        ObjectNode node = Parser.parse(FACTORY, testIOContext(),
                 TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
-    }
-
-    private IOContext _ioContext(CharSequence toml) {
-        return new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
-                ErrorReportConfiguration.defaults(),
-                BufferRecyclers.getBufferRecycler(),
-                ContentReference.construct(true, toml), false, null);
     }
 }

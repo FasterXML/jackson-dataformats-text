@@ -9,10 +9,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-import tools.jackson.core.ErrorReportConfiguration;
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.StreamReadConstraints;
-import tools.jackson.core.StreamWriteConstraints;
+import tools.jackson.core.*;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.json.JsonReadFeature;
@@ -52,10 +49,7 @@ public class ParserTest extends TomlMapperTestBase {
         int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
         return Parser.parse(
                 factory,
-                new IOContext(StreamReadConstraints.defaults(), StreamWriteConstraints.defaults(),
-                        ErrorReportConfiguration.defaults(),
-                        BufferRecyclers.getBufferRecycler(),
-                        ContentReference.construct(true, toml), false, null),
+                testIOContext(),
                 options,
                 new StringReader(toml)
         );
@@ -1045,10 +1039,7 @@ public class ParserTest extends TomlMapperTestBase {
 
     @Test
     public void chunkEdge() throws IOException {
-        BufferRecycler br = BufferRecyclers.getBufferRecycler();
-        char[] chars = br.allocCharBuffer(0);
-        br.releaseCharBuffer(0, chars);
-        int bufferLength = chars.length;
+        int bufferLength = 4096;
 
         ObjectNode node = toml("foo = \"" + repeat('a', bufferLength - 19) + "\"\n" +
                 "bar = 123\n" +
