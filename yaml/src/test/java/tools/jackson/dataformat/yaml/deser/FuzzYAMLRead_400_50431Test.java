@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.deser;
 
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.ObjectMapper;
