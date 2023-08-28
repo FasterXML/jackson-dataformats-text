@@ -142,7 +142,7 @@ public class CsvSchemaTest extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(Mixed.class);
         assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
-        schema = schema.ignoreProperty(new String[]{"a", "d", "z"});
+        schema = schema.ignoreProperties("a", "d", "z");
         assertEquals(a2q("['b','c']"), schema.getColumnDesc());
 
         _verifyLinks(schema);
@@ -152,7 +152,7 @@ public class CsvSchemaTest extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema originalSchema = mapper.schemaFor(Mixed.class);
         assertEquals(a2q("['a','b','c','d']"), originalSchema.getColumnDesc());
-        CsvSchema modifiedSchema = originalSchema.ignoreProperty(new String[]{"a", "d", "z"});
+        CsvSchema modifiedSchema = originalSchema.ignoreProperties("a", "d", "z");
         assertEquals(a2q("['b','c']"), modifiedSchema.getColumnDesc());
         assertEquals(a2q("['a','b','c','d']"), originalSchema.getColumnDesc());
 
@@ -165,7 +165,7 @@ public class CsvSchemaTest extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(Mixed.class);
         assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
-        schema = schema.ignoreProperty(new String[]{"q", "w", "e"});
+        schema = schema.ignoreProperties("q", "w", "e");
         assertEquals(a2q("['a','b','c','d']"), schema.getColumnDesc());
 
         _verifyLinks(schema);

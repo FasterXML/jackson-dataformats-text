@@ -1488,7 +1488,7 @@ public class CsvSchema
      * @param ignoreProperties Array of column names to be ignored by the csv builder
      * @return A newly built {@link CsvSchema} with the ignored properties
      */
-    public CsvSchema ignoreProperty(String[] ignoreProperties) {
+    public CsvSchema ignoreProperties(String... ignoreProperties) {
         Map<String, Column> map = this._columnsByName;
         for(String ignoreProperty : ignoreProperties) {
             if (this._columnsByName.containsKey(ignoreProperty)) {
