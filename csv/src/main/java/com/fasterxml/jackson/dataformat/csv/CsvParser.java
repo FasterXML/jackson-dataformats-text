@@ -511,8 +511,10 @@ public class CsvParser
 
     @Override
     public void close() throws IOException {
-        _ioContext.close();
-        _reader.close();
+        if (!isClosed()) {
+            _reader.close();
+            _ioContext.close();
+        }
     }
 
     /*                                                                                       
