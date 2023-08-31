@@ -583,6 +583,7 @@ public class YAMLGenerator extends GeneratorBase
                     _writer.flush();
                 }
             }
+            _ioContext.close();
         }
     }
 

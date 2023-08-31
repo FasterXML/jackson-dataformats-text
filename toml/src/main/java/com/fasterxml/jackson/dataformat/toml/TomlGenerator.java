@@ -120,20 +120,23 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void close() throws IOException {
-        super.close();
-        _flushBuffer();
-        _outputTail = 0; // just to ensure we don't think there's anything buffered
+        if (!isClosed()) {
+            super.close();
+            _flushBuffer();
+            _outputTail = 0; // just to ensure we don't think there's anything buffered
 
-        if (_out != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                _out.close();
-            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                // If we can't close it, we should at least flush
-                _out.flush();
+            if (_out != null) {
+                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                    _out.close();
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    // If we can't close it, we should at least flush
+                    _out.flush();
+                }
             }
+            _ioContext.close();
+            // Internal buffer(s) generator has can now be released as well
+            _releaseBuffers();
         }
-        // Internal buffer(s) generator has can now be released as well
-        _releaseBuffers();
     }
 
     @Override

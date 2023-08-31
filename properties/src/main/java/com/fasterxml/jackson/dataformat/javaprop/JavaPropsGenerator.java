@@ -222,7 +222,13 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************
      */
 
-//    public void close() throws IOException
+    @Override
+    public void close() throws IOException {
+        if (!isClosed()) {
+            super.close();
+            _ioContext.close();
+        }
+    }
 
 //    public void flush() throws IOException
 
