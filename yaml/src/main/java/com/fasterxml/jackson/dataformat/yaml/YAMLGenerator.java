@@ -226,8 +226,6 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * @since 2.16
      */
@@ -298,8 +296,7 @@ public class YAMLGenerator extends GeneratorBase
             org.yaml.snakeyaml.DumperOptions.Version version)
         throws IOException
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(jsonFeatures, codec, ctxt);
         _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
@@ -324,8 +321,7 @@ public class YAMLGenerator extends GeneratorBase
                          org.yaml.snakeyaml.DumperOptions dumperOptions)
             throws IOException
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(jsonFeatures, codec, ctxt);
         _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = yamlFeatures;
         _quotingChecker = (quotingChecker == null)
@@ -567,7 +563,6 @@ public class YAMLGenerator extends GeneratorBase
 
             _emitEndDocument();
             _emit(new StreamEndEvent(null, null));
-            super.close();
 
             /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
              *   on the underlying Reader, unless we "own" it, or auto-closing
@@ -583,7 +578,7 @@ public class YAMLGenerator extends GeneratorBase
                     _writer.flush();
                 }
             }
-            _ioContext.close();
+            super.close();
         }
     }
 
