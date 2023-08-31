@@ -133,9 +133,9 @@ final class TomlGenerator extends GeneratorBase
                     _out.flush();
                 }
             }
-            _ioContext.close();
             // Internal buffer(s) generator has can now be released as well
             _releaseBuffers();
+            _ioContext.close();
         }
     }
 
