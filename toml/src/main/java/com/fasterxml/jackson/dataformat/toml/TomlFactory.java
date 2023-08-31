@@ -270,8 +270,12 @@ public final class TomlFactory extends JsonFactory
 
     @Override
     public JsonParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        ObjectNode node = parse(ctxt, r);
-        return new TreeTraversingParser(node); // don't pass our _objectCodec, this part shouldn't be customized
+        try {
+            ObjectNode node = parse(ctxt, r);
+            return new TreeTraversingParser(node); // don't pass our _objectCodec, this part shouldn't be customized
+        } finally {
+            ctxt.close();
+        }
     }
 
     @Override

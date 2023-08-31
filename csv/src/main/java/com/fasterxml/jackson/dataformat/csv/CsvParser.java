@@ -303,6 +303,11 @@ public class CsvParser
      */
     protected final StreamReadConstraints _streamReadConstraints;
 
+    /**
+     * @since 2.16
+     */
+    protected final IOContext _ioContext;
+
     protected int _formatFeatures;
 
     /**
@@ -411,6 +416,7 @@ public class CsvParser
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
         _objectCodec = codec;
+        _ioContext = ctxt;
         _streamReadConstraints = ctxt.streamReadConstraints();
         _textBuffer = ctxt.constructReadConstrainedTextBuffer();
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
@@ -504,7 +510,10 @@ public class CsvParser
     public boolean isClosed() { return _reader.isClosed(); }
 
     @Override
-    public void close() throws IOException { _reader.close(); }
+    public void close() throws IOException {
+        _ioContext.close();
+        _reader.close();
+    }
 
     /*                                                                                       
     /**********************************************************                              

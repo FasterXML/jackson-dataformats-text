@@ -47,6 +47,11 @@ public class JavaPropsParser extends ParserMinimalBase
     protected final StreamReadConstraints _streamReadConstraints;
 
     /**
+     * @since 2.16
+     */
+    protected final IOContext _ioContext;
+
+    /**
      * Although most massaging is done later, caller may be interested in the
      * ultimate source.
      */
@@ -101,6 +106,7 @@ public class JavaPropsParser extends ParserMinimalBase
             ObjectCodec codec, Map<?,?> sourceMap)
     {
         super(parserFeatures);
+        _ioContext = ctxt;
         _streamReadConstraints = ctxt.streamReadConstraints();
         _objectCodec = codec;
         _inputSource = inputSource;
@@ -151,8 +157,11 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public void close() throws IOException {
-        _closed = true;
-        _readContext = null;
+        if (!_closed) {
+            _ioContext.close();
+            _closed = true;
+            _readContext = null;
+        }
     }
 
     @Override
