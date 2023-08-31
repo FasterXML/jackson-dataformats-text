@@ -484,6 +484,7 @@ public class YAMLGenerator extends GeneratorBase
                     throw _wrapIOFailure(e);
                 }
             }
+            _ioContext.close();
         }
     }
 

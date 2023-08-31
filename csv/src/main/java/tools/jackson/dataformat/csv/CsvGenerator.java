@@ -410,20 +410,23 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public void close()
     {
-        super.close();
+        if (!isClosed()) {
+            super.close();
 
-        // Let's mark row as closed, if we had any...
-        finishRow();
-        
-        // Write the header if necessary, occurs when no rows written
-        if (_handleFirstLine) {
-            _handleFirstLine();
-        }
-        try {
-            _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
-                    isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
-        } catch (IOException e) {
-            throw _wrapIOFailure(e);
+            // Let's mark row as closed, if we had any...
+            finishRow();
+
+            // Write the header if necessary, occurs when no rows written
+            if (_handleFirstLine) {
+                _handleFirstLine();
+            }
+            try {
+                _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
+                        isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+            _ioContext.close();
         }
     }
 

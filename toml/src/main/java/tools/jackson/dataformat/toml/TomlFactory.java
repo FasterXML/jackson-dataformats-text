@@ -178,8 +178,12 @@ public final class TomlFactory extends TextualTSFactory
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) throws JacksonException {
-        ObjectNode node = parse(readCtxt, ctxt, r);
-        return new TreeTraversingParser(node, readCtxt);
+        try {
+            ObjectNode node = parse(readCtxt, ctxt, r);
+            return new TreeTraversingParser(node, readCtxt);
+        } finally {
+            ctxt.close();
+        }
     }
 
     @Override

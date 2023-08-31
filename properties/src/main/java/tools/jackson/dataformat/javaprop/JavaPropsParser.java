@@ -38,6 +38,11 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     /**
+     * @since 2.16
+     */
+    protected final IOContext _ioContext;
+
+    /**
      * Although most massaging is done later, caller may be interested in the
      * ultimate source.
      */
@@ -86,6 +91,7 @@ public class JavaPropsParser extends ParserMinimalBase
             Object inputSource, Map<?,?> sourceMap)
     {
         super(readCtxt, ioCtxt, parserFeatures);
+        _ioContext = ioCtxt;
         _inputSource = inputSource;
         _sourceContent = sourceMap;
         _schema = schema;
@@ -132,8 +138,11 @@ public class JavaPropsParser extends ParserMinimalBase
 
     @Override
     public void close() {
-        _closed = true;
-        _streamReadContext = null;
+        if (!_closed) {
+            _ioContext.close();
+            _closed = true;
+            _streamReadContext = null;
+        }
     }
 
     @Override
