@@ -1,6 +1,5 @@
 package tools.jackson.dataformat.toml;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import tools.jackson.core.io.IOContext;
@@ -10,7 +9,7 @@ import org.junit.Test;
 
 public class StringOutputUtilTest extends TomlMapperTestBase {
     @Test
-    public void exhaustiveWriteReadTest() throws IOException {
+    public void exhaustiveWriteReadTest() throws Exception {
         // this test attempts single-character writes for *all* code points, and sees whether they're read back
         // correctly.
 
