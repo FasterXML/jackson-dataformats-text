@@ -38,11 +38,6 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     /**
-     * @since 2.16
-     */
-    protected final IOContext _ioContext;
-
-    /**
      * Although most massaging is done later, caller may be interested in the
      * ultimate source.
      */
@@ -91,7 +86,6 @@ public class JavaPropsParser extends ParserMinimalBase
             Object inputSource, Map<?,?> sourceMap)
     {
         super(readCtxt, ioCtxt, parserFeatures);
-        _ioContext = ioCtxt;
         _inputSource = inputSource;
         _sourceContent = sourceMap;
         _schema = schema;
@@ -101,18 +95,6 @@ public class JavaPropsParser extends ParserMinimalBase
     public Version version() {
         return PackageVersion.VERSION;
     }
-
-    /*// No need in 3.0
-    @Override
-    public void setSchema(FormatSchema schema)
-    {
-        if (schema instanceof JavaPropsSchema) {
-            _schema = (JavaPropsSchema) schema;
-        } else {
-            super.setSchema(schema);
-        }
-    }
-    */
 
     @Override
     public JavaPropsSchema getSchema() {
@@ -139,7 +121,7 @@ public class JavaPropsParser extends ParserMinimalBase
     @Override
     public void close() {
         if (!_closed) {
-            _ioContext.close();
+            super.close();
             _closed = true;
             _streamReadContext = null;
         }

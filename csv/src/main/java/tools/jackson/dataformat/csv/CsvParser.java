@@ -280,11 +280,6 @@ public class CsvParser
     /**********************************************************************
      */
 
-    /**
-     * @since 2.16
-     */
-    protected final IOContext _ioContext;
-
     protected int _formatFeatures;
 
     /**
@@ -389,7 +384,6 @@ public class CsvParser
         if (reader == null) {
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
         }
-        _ioContext = ioCtxt;
         _formatFeatures = csvFeatures;
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
@@ -454,9 +448,8 @@ public class CsvParser
                 _reader.close();
             } catch (IOException e) {
                 throw _wrapIOFailure(e);
-            } finally {
-                _ioContext.close();
             }
+            super.close();
         }
     }
 
