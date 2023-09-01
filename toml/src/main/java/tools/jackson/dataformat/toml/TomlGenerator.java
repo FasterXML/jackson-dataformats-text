@@ -125,8 +125,8 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public void close() {
         if (!isClosed()) {
-            super.close();
             _flushBuffer();
+            super.close();
             _outputTail = 0; // just to ensure we don't think there's anything buffered
         }
     }
