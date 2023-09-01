@@ -101,6 +101,12 @@ public class JavaPropsParser extends ParserMinimalBase
         return _schema;
     }
 
+    /*
+    /**********************************************************************
+    /* Public API overrides: input state
+    /**********************************************************************
+     */
+
     // we do not take byte-based input, so base impl would be fine
     /*
     @Override
@@ -119,6 +125,11 @@ public class JavaPropsParser extends ParserMinimalBase
     */
 
     @Override
+    public boolean isClosed() {
+        return _closed;
+    }
+
+    @Override
     public void close() {
         if (!_closed) {
             super.close();
@@ -128,15 +139,10 @@ public class JavaPropsParser extends ParserMinimalBase
     }
 
     @Override
-    public boolean isClosed() {
-        return _closed;
-    }
+    protected void _closeInput() throws IOException { }
 
-    /*
-    /**********************************************************************
-    /* Public API overrides
-    /**********************************************************************
-     */
+    @Override
+    protected void _releaseBuffers() { }
 
     @Override
     public Object streamReadInputSource() {
@@ -145,7 +151,7 @@ public class JavaPropsParser extends ParserMinimalBase
 
     /*
     /**********************************************************************
-    /* Overrides: capability introspection methods
+    /* Public API overrides: capability introspection methods
     /**********************************************************************
      */
 

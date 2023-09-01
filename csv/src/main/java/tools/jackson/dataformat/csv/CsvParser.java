@@ -453,6 +453,12 @@ public class CsvParser
         }
     }
 
+    @Override
+    protected void _closeInput() throws IOException { }
+
+    @Override
+    protected void _releaseBuffers() { }
+
     /*
     /**********************************************************************
     /* Public API, configuration
