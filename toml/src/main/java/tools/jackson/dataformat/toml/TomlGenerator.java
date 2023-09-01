@@ -174,7 +174,7 @@ final class TomlGenerator extends GeneratorBase
     }
 
     protected void _flushBuffer() throws JacksonException {
-        if (_outputTail > 0) {
+        if (_outputTail > 0 && _out != null) {
             try {
                 _out.write(_outputBuffer, 0, _outputTail);
             } catch (IOException e) {
