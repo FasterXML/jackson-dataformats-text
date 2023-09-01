@@ -465,26 +465,25 @@ public class YAMLGenerator extends GeneratorBase
             _emitEndDocument();
             _emit(new StreamEndEvent());
             super.close();
+        }
+    }
 
-            /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
-             *   on the underlying Reader, unless we "own" it, or auto-closing
-             *   feature is enabled.
-             *   One downside: when using UTF8Writer, underlying buffer(s)
-             *   may not be properly recycled if we don't close the writer.
-             */
-            if (_writer != null) {
-                try {
-                    if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                        _writer.close();
-                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                        // If we can't close it, we should at least flush
-                        _writer.flush();
-                    }
-                } catch (IOException e) {
-                    throw _wrapIOFailure(e);
-                }
+    @Override
+    protected void _closeInput() throws IOException
+    {
+        /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
+         *   on the underlying Reader, unless we "own" it, or auto-closing
+         *   feature is enabled.
+         *   One downside: when using UTF8Writer, underlying buffer(s)
+         *   may not be properly recycled if we don't close the writer.
+         */
+        if (_writer != null) {
+            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                _writer.close();
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                // If we can't close it, we should at least flush
+                _writer.flush();
             }
-            _ioContext.close();
         }
     }
 
