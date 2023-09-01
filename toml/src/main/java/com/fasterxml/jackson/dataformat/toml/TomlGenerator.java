@@ -28,8 +28,6 @@ final class TomlGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * @since 2.16
      */
@@ -86,8 +84,7 @@ final class TomlGenerator extends GeneratorBase
      */
 
     public TomlGenerator(IOContext ioCtxt, int stdFeatures, int tomlFeatures, ObjectCodec codec, Writer out) {
-        super(stdFeatures, codec);
-        _ioContext = ioCtxt;
+        super(stdFeatures, codec, ioCtxt);
         _streamWriteConstraints = ioCtxt.streamWriteConstraints();
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
@@ -121,7 +118,6 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public void close() throws IOException {
         if (!isClosed()) {
-            super.close();
             _flushBuffer();
             _outputTail = 0; // just to ensure we don't think there's anything buffered
 
@@ -135,7 +131,7 @@ final class TomlGenerator extends GeneratorBase
             }
             // Internal buffer(s) generator has can now be released as well
             _releaseBuffers();
-            _ioContext.close();
+            super.close();
         }
     }
 
