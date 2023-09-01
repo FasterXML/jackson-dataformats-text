@@ -438,23 +438,14 @@ public class CsvParser
         }
     }
 
-    @Override
-    public boolean isClosed() { return _reader.isClosed(); }
+    // Default close() works fine
+    //
+    // public void close() throws JacksonException
 
     @Override
-    public void close() {
-        if (!isClosed()) {
-            try {
-                _reader.close();
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
-            }
-            super.close();
-        }
+    protected void _closeInput() throws IOException {
+        _reader.close();
     }
-
-    @Override
-    protected void _closeInput() throws IOException { }
 
     @Override
     protected void _releaseBuffers() { }

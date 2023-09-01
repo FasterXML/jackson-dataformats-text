@@ -20,7 +20,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.temporal.Temporal;
 
-class Parser {
+class TomlParser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
     private static final int MAX_CHARS_TO_REPORT = 1000;
 
@@ -32,7 +32,7 @@ class Parser {
 
     private TomlToken next;
 
-    private Parser(
+    private TomlParser(
             TomlFactory tomlFactory,
             IOContext ioContext,
             TomlStreamReadException.ErrorContext errorContext,
@@ -62,7 +62,7 @@ class Parser {
     ) throws IOException {
         final TomlFactory factory = tomlFactory == null ? new TomlFactory() : tomlFactory;
         TomlStreamReadException.ErrorContext errorCtxt = new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null);
-        Parser parser = new Parser(factory, ioContext, errorCtxt,
+        TomlParser parser = new TomlParser(factory, ioContext, errorCtxt,
                 formatReadFeatures, reader);
         try {
             final ObjectNode node = parser.parse();

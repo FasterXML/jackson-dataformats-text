@@ -22,9 +22,7 @@ public class JavaPropsParser extends ParserMinimalBase
 
     /**
      * Properties capabilities slightly different from defaults, having
-     * untyped (text-only) scalars
-     *
-     * @since 2.12
+     * untyped (text-only) scalars.
      */
     protected final static JacksonFeatureSet<StreamReadCapability> STREAM_READ_CAPABILITIES =
             DEFAULT_READ_CAPABILITIES
@@ -62,8 +60,6 @@ public class JavaPropsParser extends ParserMinimalBase
      */
 
     protected JPropReadContext _streamReadContext;
-
-    protected boolean _closed;
 
     /*
     /**********************************************************************
@@ -125,21 +121,9 @@ public class JavaPropsParser extends ParserMinimalBase
     */
 
     @Override
-    public boolean isClosed() {
-        return _closed;
+    protected void _closeInput() throws IOException {
+        _streamReadContext = null;
     }
-
-    @Override
-    public void close() {
-        if (!_closed) {
-            super.close();
-            _closed = true;
-            _streamReadContext = null;
-        }
-    }
-
-    @Override
-    protected void _closeInput() throws IOException { }
 
     @Override
     protected void _releaseBuffers() { }

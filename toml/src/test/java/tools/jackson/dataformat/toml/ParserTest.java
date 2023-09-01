@@ -43,7 +43,7 @@ public class ParserTest extends TomlMapperTestBase {
     static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws IOException {
         // 07-Mar-2023, tatu: Due to refactoring, ended up here...
         int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
-        return Parser.parse(
+        return TomlParser.parse(
                 factory,
                 testIOContext(),
                 options,

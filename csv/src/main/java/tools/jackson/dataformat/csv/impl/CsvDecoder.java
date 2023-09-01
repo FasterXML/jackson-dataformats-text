@@ -317,10 +317,6 @@ public class CsvDecoder
         return _inputReader;
     }
 
-    public boolean isClosed() {
-        return _closed;
-    }
-
     public void close() throws IOException {
         _pendingLF = 1; // just to ensure we'll also check _closed flag later on
         if (!_closed) {

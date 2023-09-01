@@ -121,7 +121,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = Parser.parse(FACTORY, testIOContext(),
+        ObjectNode node = TomlParser.parse(FACTORY, testIOContext(),
                 TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());

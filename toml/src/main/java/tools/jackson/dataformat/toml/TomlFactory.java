@@ -237,10 +237,10 @@ public final class TomlFactory extends TextualTSFactory
         try {
             if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 try (Reader r = r0) {
-                    return Parser.parse(this, ctxt, readFeatures, r);
+                    return TomlParser.parse(this, ctxt, readFeatures, r);
                 }
             } else {
-                return Parser.parse(this, ctxt, readFeatures, r0);
+                return TomlParser.parse(this, ctxt, readFeatures, r0);
             }
         } catch (IOException e) {
             throw _wrapIOFailure(e);
