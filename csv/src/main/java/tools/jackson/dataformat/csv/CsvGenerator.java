@@ -411,8 +411,6 @@ public class CsvGenerator extends GeneratorBase
     public void close()
     {
         if (!isClosed()) {
-            super.close();
-
             // Let's mark row as closed, if we had any...
             finishRow();
 
@@ -420,14 +418,15 @@ public class CsvGenerator extends GeneratorBase
             if (_handleFirstLine) {
                 _handleFirstLine();
             }
-            try {
-                _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
-                        isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
-            }
-            _ioContext.close();
         }
+        super.close();
+    }
+
+    @Override
+    protected void _closeInput() throws IOException
+    {
+        _writer.close(_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET),
+                isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM));
     }
 
     /*

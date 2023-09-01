@@ -85,24 +85,24 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     @Override
     public void close()
     {
-        super.close();
-        _flushBuffer();
-        _outputTail = 0; // just to ensure we don't think there's anything buffered
+        if (!isClosed()) {
+            _flushBuffer();
+            _outputTail = 0; // just to ensure we don't think there's anything buffered
+            super.close();
+        }
+    }
 
+    @Override
+    protected void _closeInput() throws IOException
+    {
         if (_out != null) {
-            try {
-                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                    _out.close();
-                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    // If we can't close it, we should at least flush
-                    _out.flush();
-                }
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
+            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                _out.close();
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                // If we can't close it, we should at least flush
+                _out.flush();
             }
         }
-        // Internal buffer(s) generator has can now be released as well
-        _releaseBuffers();
     }
 
     @Override

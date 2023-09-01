@@ -1,5 +1,6 @@
 package tools.jackson.dataformat.javaprop.impl;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
@@ -71,6 +72,9 @@ public class PropertiesBackedGenerator extends JavaPropsGenerator
     /* Implementations for methods from base class
     /**********************************************************************
      */
+
+    @Override
+    protected void _closeInput() { }
 
     @Override
     protected void _releaseBuffers() { }
