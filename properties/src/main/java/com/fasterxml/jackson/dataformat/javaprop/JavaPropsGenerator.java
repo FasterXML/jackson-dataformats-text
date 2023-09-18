@@ -36,8 +36,6 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /**********************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * @since 2.16
      */
@@ -80,8 +78,7 @@ public abstract class JavaPropsGenerator extends GeneratorBase
 
     public JavaPropsGenerator(IOContext ctxt, int stdFeatures, ObjectCodec codec)
     {
-        super(stdFeatures, codec, BOGUS_WRITE_CONTEXT);
-        _ioContext = ctxt;
+        super(stdFeatures, codec, ctxt, BOGUS_WRITE_CONTEXT);
         _streamWriteConstraints = ctxt.streamWriteConstraints();
         _jpropContext = JPropWriteContext.createRootContext();
     }
@@ -221,8 +218,6 @@ public abstract class JavaPropsGenerator extends GeneratorBase
     /* Overridden methods: low-level I/O
     /**********************************************************
      */
-
-//    public void close() throws IOException
 
 //    public void flush() throws IOException
 

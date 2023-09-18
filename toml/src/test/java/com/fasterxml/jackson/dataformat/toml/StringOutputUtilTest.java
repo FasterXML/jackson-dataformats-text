@@ -1,20 +1,14 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.ErrorReportConfiguration;
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.core.StreamWriteConstraints;
-import com.fasterxml.jackson.core.io.ContentReference;
+import java.io.StringReader;
+
 import com.fasterxml.jackson.core.io.IOContext;
-import com.fasterxml.jackson.core.util.BufferRecyclers;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.StringReader;
-
 public class StringOutputUtilTest extends TomlMapperTestBase {
     @Test
-    public void exhaustiveWriteReadTest() throws IOException {
+    public void exhaustiveWriteReadTest() throws Exception {
         // this test attempts single-character writes for *all* code points, and sees whether they're read back
         // correctly.
 

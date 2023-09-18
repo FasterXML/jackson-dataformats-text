@@ -145,8 +145,6 @@ public class CsvGenerator extends GeneratorBase
         EMPTY_SCHEMA = CsvSchema.emptySchema();
     }
     
-    protected final IOContext _ioContext;
-
     /**
      * @since 2.16
      */
@@ -246,8 +244,7 @@ public class CsvGenerator extends GeneratorBase
     public CsvGenerator(IOContext ctxt, int jsonFeatures, int csvFeatures,
             ObjectCodec codec, Writer out, CsvSchema schema)
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(jsonFeatures, codec, ctxt);
         _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = csvFeatures;
         _schema = schema;
@@ -261,8 +258,7 @@ public class CsvGenerator extends GeneratorBase
     public CsvGenerator(IOContext ctxt, int jsonFeatures, int csvFeatures,
             ObjectCodec codec, CsvEncoder csvWriter)
     {
-        super(jsonFeatures, codec);
-        _ioContext = ctxt;
+        super(jsonFeatures, codec, ctxt);
         _streamWriteConstraints = ctxt.streamWriteConstraints();
         _formatFeatures = csvFeatures;
         _writer = csvWriter;
@@ -504,17 +500,18 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public void close() throws IOException
     {
-        super.close();
+        if (!isClosed()) {
+            // Let's mark row as closed, if we had any...
+            finishRow();
 
-        // Let's mark row as closed, if we had any...
-        finishRow();
-        
-        // Write the header if necessary, occurs when no rows written
-        if (_handleFirstLine) {
-            _handleFirstLine();
+            // Write the header if necessary, occurs when no rows written
+            if (_handleFirstLine) {
+                _handleFirstLine();
+            }
+            _writer.close(_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET),
+                    isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
+            super.close();
         }
-        _writer.close(_ioContext.isResourceManaged() || isEnabled(JsonGenerator.Feature.AUTO_CLOSE_TARGET),
-                isEnabled(JsonGenerator.Feature.FLUSH_PASSED_TO_STREAM));
     }
 
     /*

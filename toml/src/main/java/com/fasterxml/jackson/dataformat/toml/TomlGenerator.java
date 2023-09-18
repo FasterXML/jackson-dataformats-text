@@ -28,8 +28,6 @@ final class TomlGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    protected final IOContext _ioContext;
-
     /**
      * @since 2.16
      */
@@ -86,8 +84,7 @@ final class TomlGenerator extends GeneratorBase
      */
 
     public TomlGenerator(IOContext ioCtxt, int stdFeatures, int tomlFeatures, ObjectCodec codec, Writer out) {
-        super(stdFeatures, codec);
-        _ioContext = ioCtxt;
+        super(stdFeatures, codec, ioCtxt);
         _streamWriteConstraints = ioCtxt.streamWriteConstraints();
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
@@ -120,20 +117,22 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void close() throws IOException {
-        super.close();
-        _flushBuffer();
-        _outputTail = 0; // just to ensure we don't think there's anything buffered
+        if (!isClosed()) {
+            _flushBuffer();
+            _outputTail = 0; // just to ensure we don't think there's anything buffered
 
-        if (_out != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
-                _out.close();
-            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                // If we can't close it, we should at least flush
-                _out.flush();
+            if (_out != null) {
+                if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+                    _out.close();
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    // If we can't close it, we should at least flush
+                    _out.flush();
+                }
             }
+            // Internal buffer(s) generator has can now be released as well
+            _releaseBuffers();
+            super.close();
         }
-        // Internal buffer(s) generator has can now be released as well
-        _releaseBuffers();
     }
 
     @Override
