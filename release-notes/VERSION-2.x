@@ -18,7 +18,7 @@ Active Maintainers:
 
 #422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
 
-2.15.3 (not yet released)
+2.15.3 (12-Oct-2023)
 
 #400: (yaml) `IllegalArgumentException` when attempting to decode invalid UTF-8
   surrogate by SnakeYAML (oss-fuzz 50431)
