@@ -74,7 +74,8 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         assertEquals("", n.textValue());
     }
 
-    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=61823
+    // [dataformats-text#435], originally from
+    //   https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=61823
     public void testNumberDecoding61823() throws Exception
     {
         try {
