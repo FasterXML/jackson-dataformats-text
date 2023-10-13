@@ -82,7 +82,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
             YAML_MAPPER.readTree("!!int _ ");
             fail("Should not pass");
         } catch (JacksonException e) {
-            verifyException(e, "Invalid base-");
+            verifyException(e, "Invalid number");
         }
     }
 }

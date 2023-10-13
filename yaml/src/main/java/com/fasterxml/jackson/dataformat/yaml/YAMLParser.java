@@ -1191,7 +1191,7 @@ public class YAMLParser extends ParserBase
      * using standard JDK classes.
      * Currently this just means stripping out optional underscores.
      */
-    private JsonToken _cleanYamlInt(String str)
+    private JsonToken _cleanYamlInt(String str) throws IOException
     {
         // Here we already know there is either plus sign, or underscore (or both) so
         final int len = str.length();
@@ -1205,6 +1205,9 @@ public class YAMLParser extends ParserBase
             }
         }
         _cleanedTextValue = sb.toString();
+        if (_cleanedTextValue.isEmpty()) {
+            _reportError(String.format("Invalid number ('%s')", str));
+        }
         return JsonToken.VALUE_NUMBER_INT;
     }
 
