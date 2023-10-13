@@ -84,7 +84,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         try {
             YAML_MAPPER.readTree("!!int _ ");
             fail("Should not pass");
-        } catch (JacksonException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Invalid number");
         }
     }
