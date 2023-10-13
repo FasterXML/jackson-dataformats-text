@@ -600,6 +600,7 @@ public class YAMLParser extends ParserBase
         if (len == i) { // should not occur but play it safe
             return null;
         }
+
         // Next: either "0" ("-0" and "+0" also accepted), or non-decimal. So:
         if (value.charAt(i) == '0') {
             if (++i == len) {
@@ -1100,7 +1101,7 @@ public class YAMLParser extends ParserBase
      * using standard JDK classes.
      * Currently this just means stripping out optional underscores.
      */
-    private JsonToken _cleanYamlInt(String str)
+    private JsonToken _cleanYamlInt(String str) throws IOException
     {
         // Here we already know there is either plus sign, or underscore (or both) so
         final int len = str.length();
@@ -1114,6 +1115,9 @@ public class YAMLParser extends ParserBase
             }
         }
         _cleanedTextValue = sb.toString();
+        if (_cleanedTextValue.isEmpty()) {
+            _reportError(String.format("Invalid number ('%s')", str));
+        }
         return JsonToken.VALUE_NUMBER_INT;
     }
 
