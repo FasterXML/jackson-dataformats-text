@@ -41,21 +41,21 @@ public class FuzzYAMLReadTest extends ModuleTestBase
     }
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
-    public void testNumberdecoding50407() throws Exception
+    public void testNumberDecoding50407() throws Exception
     {
         // int, octal
-        _testNumberdecoding50407("- !!int 0111-");
-        _testNumberdecoding50407("- !!int 01 11");
-        _testNumberdecoding50407("- !!int 01245zf");
+        _testNumberDecoding50407("- !!int 0111-");
+        _testNumberDecoding50407("- !!int 01 11");
+        _testNumberDecoding50407("- !!int 01245zf");
         // long, octal
-        _testNumberdecoding50407("- !!int 0123456789012345-");
-        _testNumberdecoding50407("- !!int 01234567   890123");
-        _testNumberdecoding50407("- !!int 0123456789012ab34");
+        _testNumberDecoding50407("- !!int 0123456789012345-");
+        _testNumberDecoding50407("- !!int 01234567   890123");
+        _testNumberDecoding50407("- !!int 0123456789012ab34");
         // BigInteger, octal
-        _testNumberdecoding50407("-       !!int       0111                -        -");
+        _testNumberDecoding50407("-       !!int       0111                -        -");
     }
 
-    private void _testNumberdecoding50407(String doc) {
+    private void _testNumberDecoding50407(String doc) {
         try {
             YAML_MAPPER.readTree(doc);
             fail("Should not pass");
@@ -65,12 +65,23 @@ public class FuzzYAMLReadTest extends ModuleTestBase
     }
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
-    public void testNumberdecoding50052() throws Exception
+    public void testNumberDecoding50052() throws Exception
     {
         // 17-Sep-2022, tatu: Could produce an exception but for now type
         //    tag basically ignored, returned as empty String otken
         JsonNode n = YAML_MAPPER.readTree("!!int");
         assertEquals(JsonToken.VALUE_STRING, n.asToken());
         assertEquals("", n.textValue());
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=61823
+    public void testNumberDecoding61823() throws Exception
+    {
+        try {
+            YAML_MAPPER.readTree("!!int _ ");
+            fail("Should not pass");
+        } catch (JacksonException e) {
+            verifyException(e, "Invalid base-");
+        }
     }
 }

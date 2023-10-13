@@ -699,6 +699,7 @@ public class YAMLParser extends ParserBase
         if (len == i) { // should not occur but play it safe
             return null;
         }
+
         // Next: either "0" ("-0" and "+0" also accepted), or non-decimal. So:
         if (value.charAt(i) == '0') {
             if (++i == len) {
