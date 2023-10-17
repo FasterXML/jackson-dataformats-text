@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import com.fasterxml.jackson.core.JacksonException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
@@ -12,6 +13,7 @@ public class FuzzYAMLRead63273Test extends ModuleTestBase
     public void testReadBoundary63273() throws Exception
     {
         // As bytes:
+        /*
         {
             byte[] BYTES = new byte[] {
                     '!', ' ', '>', (byte) 0xF0,
@@ -24,6 +26,7 @@ public class FuzzYAMLRead63273Test extends ModuleTestBase
                 System.err.printf(" %02x: %02x -> '%c'\n", i, (int) str.charAt(i), str.charAt(i));
             }
         }
+        */
 
         // Or as a UCS-2 String
         String doc = "! >\uD835\uDFD6C!";
@@ -33,6 +36,7 @@ public class FuzzYAMLRead63273Test extends ModuleTestBase
             MAPPER.readTree(doc);
             // Ok; don't care about content, just buffer reads
         } catch (JacksonException e) {
+            // !!! TODO: proper checking of exception
             verifyException(e, "foo");
         }
     }
