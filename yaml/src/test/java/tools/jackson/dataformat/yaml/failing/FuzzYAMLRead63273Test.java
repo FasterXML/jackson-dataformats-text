@@ -1,7 +1,9 @@
 package tools.jackson.dataformat.yaml.failing;
 
 import tools.jackson.core.JacksonException;
+
 import tools.jackson.databind.ObjectMapper;
+
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 
 public class FuzzYAMLRead63273Test extends ModuleTestBase
@@ -35,6 +37,7 @@ public class FuzzYAMLRead63273Test extends ModuleTestBase
             MAPPER.readTree(doc);
             // Ok; don't care about content, just buffer reads
         } catch (JacksonException e) {
+            // !!! TODO: proper checking of exception
             verifyException(e, "foo");
         }
     }
