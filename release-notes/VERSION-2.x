@@ -19,6 +19,7 @@ Active Maintainers:
 #422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
 #435: (yaml) Minor parsing validation miss: tagged as `int`, exception
   on underscore-only values
+#437: (yaml) Update SnakeYAML dependency to 2.2
 
 2.15.3 (12-Oct-2023)
 
