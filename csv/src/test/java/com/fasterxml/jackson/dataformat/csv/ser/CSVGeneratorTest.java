@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 import java.io.File;
 import java.io.StringWriter;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -51,6 +52,19 @@ public class CSVGeneratorTest extends ModuleTestBase
         }
     }
     
+    @JsonPropertyOrder({"id", "amount"})
+    static class NumberEntry<T> {
+        public String id;
+        public T amount;
+        public boolean enabled;
+
+        public NumberEntry(String id, T amount, boolean enabled) {
+            this.id = id;
+            this.amount = amount;
+            this.enabled = enabled;
+        }
+    }
+
     /*
     /**********************************************************************
     /* Test methods
@@ -242,7 +256,7 @@ public class CSVGeneratorTest extends ModuleTestBase
                        .writeValueAsString(new Entry3("xyz", BigDecimal.valueOf(1.5), false));
         assertEquals("xyz,1.5,false\n", result);
     }
-    
+
     public void testForcedQuotingWithQuoteEscapedWithBackslash() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -370,12 +384,10 @@ public class CSVGeneratorTest extends ModuleTestBase
     public void testSerializationOfPrimitivesToCsv() throws Exception
     {
         CsvMapper mapper = new CsvMapper();
-        /*
         testSerializationOfPrimitiveToCsv(mapper, String.class, "hello world", "\"hello world\"\n");
         testSerializationOfPrimitiveToCsv(mapper, Boolean.class, true, "true\n");
         testSerializationOfPrimitiveToCsv(mapper, Integer.class, 42, "42\n");
         testSerializationOfPrimitiveToCsv(mapper, Long.class, 42L, "42\n");
-        */
         testSerializationOfPrimitiveToCsv(mapper, Short.class, (short)42, "42\n");
         testSerializationOfPrimitiveToCsv(mapper, Double.class, 42.33d, "42.33\n");
         testSerializationOfPrimitiveToCsv(mapper, Float.class, 42.33f, "42.33\n");
@@ -389,6 +401,52 @@ public class CSVGeneratorTest extends ModuleTestBase
         String csv = writer.writeValueAsString(value);
         assertEquals(expectedCsv, csv);
     }    
+
+    // [dataformats-csv#198]: Verify quoting of Numbers
+    public void testForcedQuotingOfNumbers() throws Exception
+    {
+        final CsvSchema schema = CsvSchema.builder()
+                .addColumn("id")
+                .addColumn("amount")
+                .addColumn("enabled")
+                .build();
+        final CsvSchema reorderedSchema = CsvSchema.builder()
+                .addColumn("amount")
+                .addColumn("id")
+                .addColumn("enabled")
+                .build();
+        ObjectWriter w = MAPPER.writer(schema);
+        _testForcedQuotingOfNumbers(w, reorderedSchema,
+                new NumberEntry<Integer>("id", Integer.valueOf(42), true));
+        _testForcedQuotingOfNumbers(w, reorderedSchema,
+                new NumberEntry<Long>("id", Long.MAX_VALUE, false));
+        _testForcedQuotingOfNumbers(w, reorderedSchema,
+                new NumberEntry<BigInteger>("id", BigInteger.valueOf(-37), true));
+        _testForcedQuotingOfNumbers(w, reorderedSchema,
+                new NumberEntry<Double>("id", 2.25, false));
+        _testForcedQuotingOfNumbers(w, reorderedSchema,
+                new NumberEntry<BigDecimal>("id", BigDecimal.valueOf(-10.5), true));
+    }
+
+    private void _testForcedQuotingOfNumbers(ObjectWriter w, CsvSchema reorderedSchema,
+            NumberEntry<?> bean) throws Exception
+    {
+        // First verify with quoting
+        ObjectWriter w2 = w.with(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+        assertEquals(String.format("%s,\"%s\",%s\n", bean.id, bean.amount, bean.enabled),
+                w2.writeValueAsString(bean));
+
+        // And then dynamically disabled variant
+        ObjectWriter w3 = w2.without(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+        assertEquals(String.format("%s,%s,%s\n", bean.id, bean.amount, bean.enabled),
+                w3.writeValueAsString(bean));
+
+        // And then quoted but reordered to force buffering
+        ObjectWriter w4 = MAPPER.writer(reorderedSchema)
+                .with(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+        assertEquals(String.format("\"%s\",%s,%s\n", bean.amount, bean.id, bean.enabled),
+                w4.writeValueAsString(bean));
+    }
 
     /*
     /**********************************************************************

@@ -113,6 +113,9 @@ public class CsvEncoder
 
     protected boolean _cfgAlwaysQuoteEmptyStrings;
 
+    // @since 2.16
+    protected boolean _cfgAlwaysQuoteNumbers;
+
     protected boolean _cfgEscapeQuoteCharWithEscapeChar;
 
     /**
@@ -218,6 +221,7 @@ public class CsvEncoder
         _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
         _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
+        _cfgAlwaysQuoteNumbers = CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS.enabledIn(csvFeatures);
         _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
         _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
@@ -257,6 +261,8 @@ public class CsvEncoder
         _cfgIncludeMissingTail = base._cfgIncludeMissingTail;
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
         _cfgAlwaysQuoteEmptyStrings = base._cfgAlwaysQuoteEmptyStrings;
+        _cfgAlwaysQuoteNumbers = base._cfgAlwaysQuoteNumbers;
+
         _cfgEscapeQuoteCharWithEscapeChar = base._cfgEscapeQuoteCharWithEscapeChar;
         _cfgEscapeControlCharWithEscapeChar = base._cfgEscapeControlCharWithEscapeChar;
 
@@ -329,6 +335,7 @@ public class CsvEncoder
             _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(feat);
             _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(feat);
             _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(feat);
+            _cfgAlwaysQuoteNumbers = CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS.enabledIn(feat);
             _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(feat);
             _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(feat);
         }
@@ -407,14 +414,20 @@ public class CsvEncoder
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
             // inlined 'appendValue(int)'
-            // up to 10 digits and possible minus sign, leading comma
-            if ((_outputTail + 12) > _outputEnd) {
+            // up to 10 digits and possible minus sign, leading comma, possible quotes
+            if ((_outputTail + 14) > _outputEnd) {
                 _flushBuffer();
             }
             if (_nextColumnToWrite > 0) {
                 _outputBuffer[_outputTail++] = _cfgColumnSeparator;
             }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
             _outputTail = NumberOutput.outputInt(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
             ++_nextColumnToWrite;
             return;
         }
@@ -426,14 +439,20 @@ public class CsvEncoder
         // easy case: all in order
         if (columnIndex == _nextColumnToWrite) {
             // inlined 'appendValue(int)'
-            // up to 20 digits, minus sign, leading comma
-            if ((_outputTail + 22) > _outputEnd) {
+            // up to 20 digits, minus sign, leading comma, possible quotes
+            if ((_outputTail + 24) > _outputEnd) {
                 _flushBuffer();
             }
             if (_nextColumnToWrite > 0) {
                 _outputBuffer[_outputTail++] = _cfgColumnSeparator;
             }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
             _outputTail = NumberOutput.outputLong(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
             ++_nextColumnToWrite;
             return;
         }
@@ -607,28 +626,40 @@ public class CsvEncoder
 
     protected void appendValue(int value) throws IOException
     {
-        // up to 10 digits and possible minus sign, leading comma
-        if ((_outputTail + 12) > _outputEnd) {
+        // up to 10 digits and possible minus sign, leading comma, possible quotes
+        if ((_outputTail + 14) > _outputEnd) {
             _flushBuffer();
         }
         if (_nextColumnToWrite > 0) {
             _outputBuffer[_outputTail++] = _cfgColumnSeparator;
         }
+        if (_cfgAlwaysQuoteNumbers) {
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+        }
         _outputTail = NumberOutput.outputInt(value, _outputBuffer, _outputTail);
+        if (_cfgAlwaysQuoteNumbers) {
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+        }
     }
 
     protected void appendValue(long value) throws IOException
     {
-        // up to 20 digits, minus sign, leading comma
-        if ((_outputTail + 22) > _outputEnd) {
+        // up to 20 digits, minus sign, leading comma, possible quotes
+        if ((_outputTail + 24) > _outputEnd) {
             _flushBuffer();
         }
         if (_nextColumnToWrite > 0) {
             _outputBuffer[_outputTail++] = _cfgColumnSeparator;
         }
+        if (_cfgAlwaysQuoteNumbers) {
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+        }
         _outputTail = NumberOutput.outputLong(value, _outputBuffer, _outputTail);
+        if (_cfgAlwaysQuoteNumbers) {
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+        }
     }
-    
+
     protected void appendValue(float value) throws IOException
     {
         String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
@@ -639,7 +670,7 @@ public class CsvEncoder
         if (_nextColumnToWrite > 0) {
             _outputBuffer[_outputTail++] = _cfgColumnSeparator;
         }
-        writeRaw(str);
+        writeNumber(str);
     }
 
     protected void appendValue(double value) throws IOException
@@ -652,11 +683,11 @@ public class CsvEncoder
         if (_nextColumnToWrite > 0) {
             _outputBuffer[_outputTail++] = _cfgColumnSeparator;
         }
-        writeRaw(str);
+        writeNumber(str);
     }
 
     // @since 2.16: pre-encoded BigInteger/BigDecimal value
-    protected void appendNumberValue(String numValue) throws IOException
+    protected void appendNumberValue(String numStr) throws IOException
     {
         // Same as "appendRawValue()", except may want quoting
         if (_outputTail >= _outputEnd) {
@@ -665,7 +696,7 @@ public class CsvEncoder
         if (_nextColumnToWrite > 0) {
             appendColumnSeparator();
         }
-        writeRaw(numValue);
+        writeNumber(numStr);
     }
 
     protected void appendValue(boolean value) throws IOException {
@@ -702,7 +733,7 @@ public class CsvEncoder
     /* Output methods, unprocessed ("raw")
     /**********************************************************
      */
-    
+
     public void writeRaw(String text) throws IOException
     {
         // Nothing to check, can just output as is
@@ -786,6 +817,25 @@ public class CsvEncoder
         // And last piece (at most length of buffer)
         text.getChars(offset, offset+len, _outputBuffer, 0);
         _outputTail = len;
+    }
+
+    // @since 2.16
+    private void writeNumber(String text) throws IOException
+    {
+        final int len = text.length();
+        if ((_outputTail + len + 2) > _outputEnd) {
+            _flushBuffer();
+        }
+
+        if (_cfgAlwaysQuoteNumbers) {
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            text.getChars(0, len, _outputBuffer, _outputTail);
+            _outputTail += len;
+            _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+        } else {
+            text.getChars(0, len, _outputBuffer, _outputTail);
+            _outputTail += len;
+        }
     }
 
     /*

@@ -16,6 +16,8 @@ Active Maintainers:
 
 2.16.0 (not yet released)
 
+#198: (csv) Support writing numbers as quoted Strings with
+  `CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS`
 #422: (csv) Add `removeColumn()` method in `CsvSchema.Builder`
 #435: (yaml) Minor parsing validation miss: tagged as `int`, exception
   on underscore-only values
