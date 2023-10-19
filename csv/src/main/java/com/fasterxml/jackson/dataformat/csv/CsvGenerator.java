@@ -63,6 +63,8 @@ public class CsvGenerator extends GeneratorBase
          * actually need this.
          * Note that this feature has precedence over {@link #STRICT_CHECK_FOR_QUOTING}, when
          * both would be applicable.
+         * Note that this setting does NOT affect quoting of typed values like {@code Number}s
+         * or {@code Boolean}s.
          *
          * @since 2.5
          */
@@ -861,7 +863,7 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
             } else {
-                _writer.write(_columnIndex(), v.toString());
+                _writer.write(_columnIndex(), v);
 
             }
         }
@@ -902,12 +904,11 @@ public class CsvGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
-            String str = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN)
-                    ? v.toPlainString() : v.toString();
+            boolean plain = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(plain ? v.toPlainString() : v.toString());
             } else {
-                _writer.write(_columnIndex(), str);
+                _writer.write(_columnIndex(), v, plain);
             }
         }
     }

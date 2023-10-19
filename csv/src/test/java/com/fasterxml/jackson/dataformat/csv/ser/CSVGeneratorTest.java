@@ -2,6 +2,7 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.File;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -37,6 +38,19 @@ public class CSVGeneratorTest extends ModuleTestBase
         }
     }
 
+    @JsonPropertyOrder({"id", "amount", "enabled"})
+    static class Entry3 {
+        public String id;
+        public BigDecimal amount;
+        public boolean enabled;
+
+        public Entry3(String id, BigDecimal amount, boolean enabled) {
+            this.id = id;
+            this.amount = amount;
+            this.enabled = enabled;
+        }
+    }
+    
     /*
     /**********************************************************************
     /* Test methods
@@ -209,6 +223,26 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("xyz,2.5\n", result);
     }
 
+    // [dataformats-csv#438]: Should not quote BigInteger/BigDecimal (or booleans)
+    public void testForcedQuotingOfBigDecimal() throws Exception
+    {
+        CsvSchema schema = CsvSchema.builder()
+                                    .addColumn("id")
+                                    .addColumn("amount")
+                                    .addColumn("enabled")
+                                    .build();
+        String result = MAPPER.writer(schema)
+                .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                .writeValueAsString(new Entry3("abc", BigDecimal.valueOf(2.5), true));
+        assertEquals("\"abc\",2.5,true\n", result);
+
+        // Also, as per [dataformat-csv#81], should be possible to change dynamically
+        result = MAPPER.writer(schema)
+                       .without(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                       .writeValueAsString(new Entry3("xyz", BigDecimal.valueOf(1.5), false));
+        assertEquals("xyz,1.5,false\n", result);
+    }
+    
     public void testForcedQuotingWithQuoteEscapedWithBackslash() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
