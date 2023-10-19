@@ -76,6 +76,15 @@ public class CsvGenerator extends GeneratorBase
         ALWAYS_QUOTE_EMPTY_STRINGS(false),
 
         /**
+         * Feature that determines whether values written as Nymbers (from {@code java.lang.Number}
+         * valued POJO properties) should be forced to be quoted, regardless of whether they
+         * actually need this.
+         *
+         * @since 2.16
+         */
+        ALWAYS_QUOTE_NUMBERS(false),
+        
+        /**
          * Feature that determines whether quote characters within quoted String values are escaped
          * using configured escape character, instead of being "doubled up" (that is: a quote character
          * is written twice in a row).
