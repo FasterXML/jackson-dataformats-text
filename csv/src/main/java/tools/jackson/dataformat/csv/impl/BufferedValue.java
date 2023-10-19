@@ -16,7 +16,9 @@ public abstract class BufferedValue
     public static BufferedValue bufferedRaw(String v) { return new RawValue(v); }
     public static BufferedValue buffered(int v) { return new IntValue(v); }
     public static BufferedValue buffered(long v) { return new LongValue(v); }
+    public static BufferedValue buffered(float v) { return new FloatValue(v); }
     public static BufferedValue buffered(double v) { return new DoubleValue(v); }
+    public static BufferedValue bufferedNumber(String numStr) { return new BigNumberValue(numStr); }
     public static BufferedValue buffered(boolean v) {
         return v ? BooleanValue.TRUE : BooleanValue.FALSE;
     }
@@ -76,6 +78,19 @@ public abstract class BufferedValue
         }
     }
 
+    // @since 2.16
+    protected final static class FloatValue extends BufferedValue
+    {
+        private final float _value;
+        
+        public FloatValue(float v) { _value = v; }
+
+        @Override
+        public void write(CsvEncoder w) throws JacksonException {
+            w.appendValue(_value);
+        }
+    }
+
     protected final static class DoubleValue extends BufferedValue
     {
         private final double _value;
@@ -85,6 +100,18 @@ public abstract class BufferedValue
         @Override
         public void write(CsvEncoder w) throws JacksonException {
             w.appendValue(_value);
+        }
+    }
+
+    protected final static class BigNumberValue extends BufferedValue
+    {
+        private final String _value;
+        
+        public BigNumberValue(String v) { _value = v; }
+
+        @Override
+        public void write(CsvEncoder w) throws JacksonException {
+            w.appendNumberValue(_value);
         }
     }
 

@@ -2,6 +2,8 @@ package tools.jackson.dataformat.csv.impl;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 import tools.jackson.core.JacksonException;
@@ -435,6 +437,18 @@ public class CsvEncoder
         _buffer(columnIndex, BufferedValue.buffered(value));
     }
 
+    public final void write(int columnIndex, BigInteger value) throws JacksonException
+    {
+        // easy case: all in order
+        final String numStr = value.toString();
+        if (columnIndex == _nextColumnToWrite) {
+            appendNumberValue(numStr);
+            ++_nextColumnToWrite;
+            return;
+        }
+        _buffer(columnIndex, BufferedValue.bufferedNumber(numStr));
+    }
+    
     public final void write(int columnIndex, float value) throws JacksonException
     {
         // easy case: all in order
@@ -455,6 +469,19 @@ public class CsvEncoder
             return;
         }
         _buffer(columnIndex, BufferedValue.buffered(value));
+    }
+
+    public final void write(int columnIndex, BigDecimal value, boolean plain) throws JacksonException
+    {
+        final String numStr = plain ? value.toPlainString() : value.toString();
+
+        // easy case: all in order
+        if (columnIndex == _nextColumnToWrite) {
+            appendNumberValue(numStr);
+            ++_nextColumnToWrite;
+            return;
+        }
+        _buffer(columnIndex, BufferedValue.bufferedNumber(numStr));
     }
 
     public final void write(int columnIndex, boolean value) throws JacksonException
@@ -618,6 +645,19 @@ public class CsvEncoder
             _outputBuffer[_outputTail++] = _cfgColumnSeparator;
         }
         writeRaw(str);
+    }
+
+    // @since 2.16: pre-encoded BigInteger/BigDecimal value
+    protected void appendNumberValue(String numValue) throws JacksonException
+    {
+        // Same as "appendRawValue()", except may want quoting
+        if (_outputTail >= _outputEnd) {
+            _flushBuffer();
+        }
+        if (_nextColumnToWrite > 0) {
+            appendColumnSeparator();
+        }
+        writeRaw(numValue);
     }
 
     protected void appendValue(boolean value) throws JacksonException {

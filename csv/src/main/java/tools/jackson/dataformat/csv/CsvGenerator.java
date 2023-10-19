@@ -59,6 +59,13 @@ public class CsvGenerator extends GeneratorBase
          * actually need this.
          * Note that this feature has precedence over {@link #STRICT_CHECK_FOR_QUOTING}, when
          * both would be applicable.
+<<<<<<< HEAD:csv/src/main/java/tools/jackson/dataformat/csv/CsvGenerator.java
+=======
+         * Note that this setting does NOT affect quoting of typed values like {@code Number}s
+         * or {@code Boolean}s.
+         *
+         * @since 2.5
+>>>>>>> 2.16:csv/src/main/java/com/fasterxml/jackson/dataformat/csv/CsvGenerator.java
          */
         ALWAYS_QUOTE_STRINGS(false),
 
@@ -811,7 +818,7 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
             } else {
-                _writer.write(_columnIndex(), v.toString());
+                _writer.write(_columnIndex(), v);
 
             }
         }
@@ -854,12 +861,11 @@ public class CsvGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         if (!_skipValue) {
-            String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN)
-                    ? v.toPlainString() : v.toString();
+            boolean plain = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN);
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(plain ? v.toPlainString() : v.toString());
             } else {
-                _writer.write(_columnIndex(), str);
+                _writer.write(_columnIndex(), v, plain);
             }
         }
         return this;
