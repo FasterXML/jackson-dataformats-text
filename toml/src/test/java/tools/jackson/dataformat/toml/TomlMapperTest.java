@@ -12,7 +12,7 @@ import java.util.Objects;
 
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
-import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.databind.node.JsonNodeFactory;
 
 import org.intellij.lang.annotations.Language;
@@ -172,7 +172,7 @@ public class TomlMapperTest extends TomlMapperTestBase {
 
     @Test
     public void testIoException() {
-        Assert.assertThrows(WrappedIOException.class, () -> TomlMapper.shared().readTree(new Reader() {
+        Assert.assertThrows(JacksonIOException.class, () -> TomlMapper.shared().readTree(new Reader() {
             @Override
             public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
                 throw new IOException("Test");

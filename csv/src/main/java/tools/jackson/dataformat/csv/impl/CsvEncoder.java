@@ -7,7 +7,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.io.CharTypes;
 import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.io.IOContext;
@@ -1295,6 +1295,6 @@ public class CsvEncoder
     // @since 3.0: defined by basic JsonParser/JsonGenerator but since we are
     //   not extending need to copy here
     protected JacksonException _wrapIOFailure(IOException e) {
-        return WrappedIOException.construct(e);
+        return JacksonIOException.construct(e);
     }
 }

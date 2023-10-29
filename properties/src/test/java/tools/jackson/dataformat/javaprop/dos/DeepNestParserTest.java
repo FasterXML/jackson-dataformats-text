@@ -1,9 +1,9 @@
 package tools.jackson.dataformat.javaprop.dos;
 
 import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonToken;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
@@ -14,10 +14,9 @@ public class DeepNestParserTest extends ModuleTestBase {
         final int depth = 1500;
         final String doc = genDeeplyNestedData(depth);
         final ObjectMapper mapper = newPropertiesMapper();
-        try (JsonParser jp = mapper.createParser(doc)) {
-            JsonToken jt;
-            while ((jt = jp.nextToken()) != null) {
-
+        try (JsonParser p = mapper.createParser(doc)) {
+            while (p.nextToken() != null) {
+                ;
             }
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
@@ -35,9 +34,8 @@ public class DeepNestParserTest extends ModuleTestBase {
                 .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(Integer.MAX_VALUE).build())
                 .build();
         final ObjectMapper mapper = propertiesMapperBuilder(factory).build();
-        try (JsonParser jp = mapper.createParser(doc)) {
-            JsonToken jt;
-            while ((jt = jp.nextToken()) != null) {
+        try (JsonParser p = mapper.createParser(doc)) {
+            while (p.nextToken() != null) {
 
             }
         }

@@ -3,7 +3,7 @@ package tools.jackson.dataformat.csv.impl;
 import java.io.*;
 
 import tools.jackson.core.*;
-import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.MergedStream;
 import tools.jackson.core.io.UTF32Reader;
@@ -352,7 +352,7 @@ public final class CsvParserBootstrapper
     }
 
     private static JacksonException _wrapIOFailure(IOException e) throws JacksonException {
-        return WrappedIOException.construct(e);
+        return JacksonIOException.construct(e);
     }
 }
 

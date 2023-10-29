@@ -1,6 +1,5 @@
 package tools.jackson.dataformat.javaprop.impl;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 

@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
-import tools.jackson.core.exc.WrappedIOException;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.csv.*;
 
@@ -49,7 +49,7 @@ public class BrokenEncodingTest extends ModuleTestBase
         try {
             parser.nextToken();
             fail("Should trigger exception for invalid UTF-8 char");
-        } catch (WrappedIOException e) {
+        } catch (JacksonIOException e) {
             verifyException(e, "Invalid UTF-8 start byte");
             verifyException(e, "0xA0");
         }
@@ -83,7 +83,7 @@ public class BrokenEncodingTest extends ModuleTestBase
             assertEquals("b", parser.currentName());
             parser.nextToken();
             fail("Should trigger exception for invalid UTF-8 char");
-        } catch (WrappedIOException e) {
+        } catch (JacksonIOException e) {
             verifyException(e, "Invalid UTF-8 middle byte");
             verifyException(e, "0x41");
        }
