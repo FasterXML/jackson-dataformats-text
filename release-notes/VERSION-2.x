@@ -14,6 +14,10 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.17.0 (not yet released)
+
+-
+
 2.16.0 (15-Nov-2023)
 
 #198: (csv) Support writing numbers as quoted Strings with
