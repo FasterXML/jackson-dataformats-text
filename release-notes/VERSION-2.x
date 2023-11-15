@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.16.0-rc1 (20-Oct-2023)
+2.16.0 (15-Nov-2023)
 
 #198: (csv) Support writing numbers as quoted Strings with
   `CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS`
