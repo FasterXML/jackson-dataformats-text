@@ -47,6 +47,22 @@ public class ArrayReadTest extends ModuleTestBase
         assertEquals(3, v[2]);
     }
 
+    // Same as above, but Array value in double-quotes:
+    public void testSimpleExplicitLooseTypingWithQuotes() throws Exception
+    {
+        ValueEntry value = MAPPER.readerWithSchemaFor(ValueEntry.class)
+                .readValue("foo,\"1;2;3\",stuff");
+        assertNotNull(value);
+        assertEquals("foo", value.id);
+        assertEquals("stuff", value.extra);
+        int[] v = value.values;
+        assertNotNull(v);
+        assertEquals(3, v.length);
+        assertEquals(1, v[0]);
+        assertEquals(2, v[1]);
+        assertEquals(3, v[2]);
+    }
+
     public void testSimpleExplicitStrictTyping() throws Exception
     {
         ValueEntry value = MAPPER.readerWithTypedSchemaFor(ValueEntry.class)
