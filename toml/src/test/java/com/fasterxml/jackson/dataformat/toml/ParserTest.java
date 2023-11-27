@@ -2,8 +2,6 @@ package com.fasterxml.jackson.dataformat.toml;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.core.util.BufferRecycler;
-import com.fasterxml.jackson.core.util.BufferRecyclers;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
@@ -1030,9 +1028,7 @@ public class ParserTest extends TomlMapperTestBase {
 
     @Test
     public void chunkEdge() throws IOException {
-        BufferRecycler br = BufferRecyclers.getBufferRecycler();
-        char[] chars = br.allocCharBuffer(0);
-        br.releaseCharBuffer(0, chars);
+        char[] chars = new char[200];
         int bufferLength = chars.length;
 
         ObjectNode node = toml("foo = \"" + repeat('a', bufferLength - 19) + "\"\n" +
