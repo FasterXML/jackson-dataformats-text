@@ -1,6 +1,5 @@
 package tools.jackson.dataformat.javaprop.dos;
 
-import tools.jackson.core.JsonParser;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
 
@@ -15,9 +14,7 @@ public class DeepNestParserTest extends ModuleTestBase {
         final String doc = genDeeplyNestedData(depth);
         final ObjectMapper mapper = newPropertiesMapper();
         try (JsonParser p = mapper.createParser(doc)) {
-            while (p.nextToken() != null) {
-                ;
-            }
+            while (p.nextToken() != null) { }
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
@@ -35,9 +32,7 @@ public class DeepNestParserTest extends ModuleTestBase {
                 .build();
         final ObjectMapper mapper = propertiesMapperBuilder(factory).build();
         try (JsonParser p = mapper.createParser(doc)) {
-            while (p.nextToken() != null) {
-
-            }
+            while (p.nextToken() != null) { }
         }
     }
 

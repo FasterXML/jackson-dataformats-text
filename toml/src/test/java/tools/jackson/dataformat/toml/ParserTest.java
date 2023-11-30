@@ -24,7 +24,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-@SuppressWarnings("OctalInteger")
 public class ParserTest extends TomlMapperTestBase {
     private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
