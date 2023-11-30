@@ -22,7 +22,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-@SuppressWarnings("OctalInteger")
 public class ParserTest extends TomlMapperTestBase {
     private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()

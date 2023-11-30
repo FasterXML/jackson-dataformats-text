@@ -910,7 +910,7 @@ public class CsvSchema
         if (_columns.length == 0) {
             _columnsByName = Collections.emptyMap();
         } else {
-            _columnsByName = new LinkedHashMap<String,Column>(4 + _columns.length);
+            _columnsByName = new LinkedHashMap<>(4 + _columns.length);
             for (Column c : _columns) {
                 _columnsByName.put(c.getName(), c);
             }
@@ -959,7 +959,7 @@ public class CsvSchema
         if (_columns.length == 0) {
             _columnsByName = Collections.emptyMap();
         } else {
-            _columnsByName = new LinkedHashMap<String,Column>(4 + _columns.length);
+            _columnsByName = new LinkedHashMap<>(4 + _columns.length);
             for (Column c : _columns) {
                 _columnsByName.put(c.getName(), c);
             }
@@ -1267,7 +1267,7 @@ public class CsvSchema
      */
     public CsvSchema sortedBy(String... columnNames)
     {
-        LinkedHashMap<String,Column> map = new LinkedHashMap<String,Column>();
+        LinkedHashMap<String,Column> map = new LinkedHashMap<>();
         for (String colName : columnNames) {
             Column col = _columnsByName.get(colName);
             if (col != null) {
@@ -1287,7 +1287,7 @@ public class CsvSchema
      * @since 2.4
      */
     public CsvSchema sortedBy(Comparator<String> cmp) {
-        TreeMap<String,Column> map = new TreeMap<String,Column>(cmp);
+        TreeMap<String,Column> map = new TreeMap<>(cmp);
         for (Column col : _columns) {
             map.put(col.getName(), col);
         }

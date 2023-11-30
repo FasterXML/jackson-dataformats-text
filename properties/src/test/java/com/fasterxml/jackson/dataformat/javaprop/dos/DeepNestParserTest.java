@@ -1,26 +1,22 @@
 package com.fasterxml.jackson.dataformat.javaprop.dos;
 
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 
-import java.io.IOException;
-
 public class DeepNestParserTest extends ModuleTestBase {
 
-    public void testDeeplyNestedData() throws IOException {
+    public void testDeeplyNestedData() throws Exception {
         final int depth = 1500;
         final String doc = genDeeplyNestedData(depth);
         final ObjectMapper mapper = newPropertiesMapper();
-        try (JsonParser jp = mapper.createParser(doc)) {
-            JsonToken jt;
-            while ((jt = jp.nextToken()) != null) {
-
-            }
+        try (JsonParser p = mapper.createParser(doc)) {
+            while (p.nextToken() != null) { }
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
@@ -30,18 +26,15 @@ public class DeepNestParserTest extends ModuleTestBase {
         }
     }
 
-    public void testDeeplyNestedDataWithUnconstrainedMapper() throws IOException {
+    public void testDeeplyNestedDataWithUnconstrainedMapper() throws Exception {
         final int depth = 1500;
         final String doc = genDeeplyNestedData(depth);
         final JavaPropsFactory factory = JavaPropsFactory.builder()
                 .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(Integer.MAX_VALUE).build())
                 .build();
         final ObjectMapper mapper = propertiesMapperBuilder(factory).build();
-        try (JsonParser jp = mapper.createParser(doc)) {
-            JsonToken jt;
-            while ((jt = jp.nextToken()) != null) {
-
-            }
+        try (JsonParser p = mapper.createParser(doc)) {
+            while (p.nextToken() != null) { }
         }
     }
 
