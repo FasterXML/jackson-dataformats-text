@@ -1012,6 +1012,10 @@ public class YAMLParser extends ParserBase
         // 01-Feb-2023, tatu: ParserBase implementation does not quite work
         //   due to refactoring. So let's try to cobble something together
 
+        if (_cleanedTextValue == null) {
+            _reportError("Invalid value. Text value is null after cleaning.");
+        }
+
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             // For integrals, use eager decoding for all ints, longs (and
             // some cheaper BigIntegers)
@@ -1042,6 +1046,11 @@ public class YAMLParser extends ParserBase
     @Override
     protected void _parseNumericValue(int expType) throws IOException
     {
+
+        if (_cleanedTextValue == null) {
+            _reportError("Invalid value. Text value is null after cleaning.");
+        }
+
         // Int or float?
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             int len = _cleanedTextValue.length();
@@ -1124,6 +1133,10 @@ public class YAMLParser extends ParserBase
     @Override
     protected int _parseIntValue() throws IOException
     {
+        if (_cleanedTextValue == null) {
+            _reportError("Invalid value. Text value is null after cleaning.");
+        }
+
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             int len = _cleanedTextValue.length();
             if (_numberNegative) {

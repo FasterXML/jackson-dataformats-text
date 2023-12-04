@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -83,6 +85,27 @@ public class FuzzYAMLReadTest extends ModuleTestBase
             fail("Should not pass");
         } catch (JacksonException e) {
             verifyException(e, "Invalid number");
+        }
+    }
+
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=64662
+    public void testNullPointerException64662() throws Exception
+    {
+        try {
+            YAML_MAPPER.readValue(" :: ! 0000000000000000000000000000", ModelContainer64662.class);
+            fail("Should not pass");
+        } catch (JacksonException e) {
+            verifyException(e, "Invalid value. Text value is null after cleaning.");
+        }
+    }
+
+    private static final class ModelContainer64662
+    {
+        public String string;
+
+        @JsonCreator
+        public ModelContainer64662(@JsonProperty(value = "string")  String string) {
+            this.string = string;
         }
     }
 }
