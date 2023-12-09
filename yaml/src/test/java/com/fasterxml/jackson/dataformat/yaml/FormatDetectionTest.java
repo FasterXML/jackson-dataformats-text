@@ -29,7 +29,7 @@ public class FormatDetectionTest extends ModuleTestBase
        JsonParser p = match.createParserWithMatch();
        assertToken(JsonToken.START_OBJECT, p.nextToken());
        assertToken(JsonToken.FIELD_NAME, p.nextToken());
-       assertEquals("name", p.getCurrentName());
+       assertEquals("name", p.currentName());
        assertToken(JsonToken.VALUE_STRING, p.nextToken());
        assertEquals("Bob", p.getText());
        assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -43,7 +43,7 @@ public class FormatDetectionTest extends ModuleTestBase
        p = match.createParserWithMatch();
        assertToken(JsonToken.START_OBJECT, p.nextToken());
        assertToken(JsonToken.FIELD_NAME, p.nextToken());
-       assertEquals("name", p.getCurrentName());
+       assertEquals("name", p.currentName());
        assertToken(JsonToken.VALUE_STRING, p.nextToken());
        assertEquals("Bob", p.getText());
        assertToken(JsonToken.END_OBJECT, p.nextToken());

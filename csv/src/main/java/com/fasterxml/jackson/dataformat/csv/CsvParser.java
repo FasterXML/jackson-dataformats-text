@@ -612,15 +612,23 @@ public class CsvParser
         return _parsingContext;
     }
 
-    @Override
-    public JsonLocation getTokenLocation() {
+    @Override // since 2.17
+    public JsonLocation currentLocation() {
+        return _reader.getCurrentLocation();
+    }
+
+    @Override // since 2.17
+    public JsonLocation currentTokenLocation() {
         return _reader.getTokenLocation();
     }
 
+    @Deprecated // since 2.17
     @Override
-    public JsonLocation getCurrentLocation() {
-        return _reader.getCurrentLocation();
-    }
+    public JsonLocation getCurrentLocation() { return currentLocation(); }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getTokenLocation() { return currentTokenLocation(); }
 
     @Override
     public Object getInputSource() {
@@ -695,14 +703,20 @@ public class CsvParser
         return (t == JsonToken.VALUE_NUMBER_INT);
     }
 
-    @Override
-    public String getCurrentName() throws IOException {
+    @Override // since 2.17
+    public String currentName() throws IOException {
         return _currentName;
     }
 
     @Override
     public void overrideCurrentName(String name) {
         _currentName = name;
+    }
+
+    @Deprecated // since 2.17
+    @Override
+    public String getCurrentName() throws IOException {
+        return currentName();
     }
 
     @Override
