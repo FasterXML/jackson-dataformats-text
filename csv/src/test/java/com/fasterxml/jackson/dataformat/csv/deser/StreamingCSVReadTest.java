@@ -75,7 +75,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
 
         StringWriter w = new StringWriter();
         assertEquals(1, parser.getText(w));
@@ -149,7 +149,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
         assertEquals(""+a, parser.nextTextValue());
         assertEquals(a, parser.getLongValue());
 
@@ -171,7 +171,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
 
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
         assertEquals(""+a, parser.nextTextValue());
         assertEquals(a, parser.getDoubleValue());
         assertEquals((float) a, parser.getFloatValue());

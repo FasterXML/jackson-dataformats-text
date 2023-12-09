@@ -375,8 +375,17 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
-    @Override
-    public JsonLocation getTokenLocation()
+    @Override // since 2.17
+    public JsonLocation currentLocation() {
+        // can assume we are at the end of token now...
+        if (_lastEvent == null) {
+            return JsonLocation.NA;
+        }
+        return _locationFor(_lastEvent.getEndMark());
+    }
+
+    @Override // since 2.17
+    public JsonLocation currentTokenLocation()
     {
         if (_lastEvent == null) {
             return JsonLocation.NA;
@@ -384,14 +393,13 @@ public class YAMLParser extends ParserBase
         return _locationFor(_lastEvent.getStartMark());
     }
 
+    @Deprecated // since 2.17
     @Override
-    public JsonLocation getCurrentLocation() {
-        // can assume we are at the end of token now...
-        if (_lastEvent == null) {
-            return JsonLocation.NA;
-        }
-        return _locationFor(_lastEvent.getEndMark());
-    }
+    public JsonLocation getCurrentLocation() { return currentLocation(); }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getTokenLocation() { return currentTokenLocation(); }
     
     protected JsonLocation _locationFor(Mark m)
     {
@@ -915,6 +923,21 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
+    @Override // since 2.17
+    public String currentName() throws IOException
+    {
+        if (_currToken == JsonToken.FIELD_NAME) {
+            return _currentFieldName;
+        }
+        return super.currentName();
+    }
+
+    @Deprecated // since 2.17
+    @Override
+    public String getCurrentName() throws IOException {
+        return currentName();
+    }
+    
     // For now we do not store char[] representation...
     @Override
     public boolean hasTextCharacters() {
@@ -937,15 +960,6 @@ public class YAMLParser extends ParserBase
             return _currToken.asString();
         }
         return null;
-    }
-
-    @Override
-    public String getCurrentName() throws IOException
-    {
-        if (_currToken == JsonToken.FIELD_NAME) {
-            return _currentFieldName;
-        }
-        return super.getCurrentName();
     }
 
     @Override

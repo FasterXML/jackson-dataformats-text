@@ -29,8 +29,8 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertTrue(src instanceof Reader);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertNull(p.getEmbeddedObject());
-        assertNotNull(p.getCurrentLocation()); // N/A
-        assertNotNull(p.getTokenLocation()); // N/A
+        assertNotNull(p.currentLocation()); // N/A
+        assertNotNull(p.currentTokenLocation()); // N/A
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("foo", p.getText());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());

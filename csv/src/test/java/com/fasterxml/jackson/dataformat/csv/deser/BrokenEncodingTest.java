@@ -30,7 +30,7 @@ public class BrokenEncodingTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
@@ -40,7 +40,7 @@ public class BrokenEncodingTest extends ModuleTestBase
         // problem should only be triggered now
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("abc", parser.getText());
         try {
@@ -73,12 +73,12 @@ public class BrokenEncodingTest extends ModuleTestBase
 
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
         assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-        assertEquals("a", parser.getCurrentName());
+        assertEquals("a", parser.currentName());
         assertToken(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("1", parser.getText());
         try {
             assertToken(JsonToken.FIELD_NAME, parser.nextToken());
-            assertEquals("b", parser.getCurrentName());
+            assertEquals("b", parser.currentName());
             parser.nextToken();
             fail("Should trigger exception for invalid UTF-8 char");
         } catch (CharConversionException e) {

@@ -22,7 +22,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         JsonParser p = YAML_F.createParser(YAML);
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(42, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
@@ -30,7 +30,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
-        assertEquals("num", p.getCurrentName());
+        assertEquals("num", p.currentName());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(-42, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
