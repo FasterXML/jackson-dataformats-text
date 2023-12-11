@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class LongTokenTest extends TomlMapperTestBase {
-    private static final int SCALE = 10000; // must be bigger than the default buffer size
+    private static final int SCALE = 10_000; // must be bigger than the default buffer size
 
     // Need to ensure max-number-limit not hit
     private final TomlFactory FACTORY = TomlFactory.builder()

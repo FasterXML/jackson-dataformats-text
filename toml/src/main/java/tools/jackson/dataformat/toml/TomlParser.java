@@ -375,6 +375,10 @@ class TomlParser {
             return factory.numberNode(text.startsWith("-") ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
         } else {
             try {
+                // Related to [databind#4250], need to pre-validate
+                if (!NumberInput.looksLikeValidNumber(text)) {
+                    throw new NumberFormatException("Not a valid Number representation");
+                }
                 tomlFactory.streamReadConstraints().validateFPLength(text.length());
                 BigDecimal dec = NumberInput.parseBigDecimal(
                         text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
