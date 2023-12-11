@@ -10,7 +10,6 @@ public class MapParsingTest extends ModuleTestBase
         public Map<String,Object> map;
     }
 
-    
     /*
     /**********************************************************************
     /* Test methods
@@ -59,7 +58,6 @@ public class MapParsingTest extends ModuleTestBase
                 .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))
                 .readValue(INPUT);
         assertNotNull(w.map);
-        System.out.println(w.map.toString());
         assertEquals(12, w.map.size());
         assertEquals("first", w.map.get(""));
         assertEquals("second", w.map.get("b"));
@@ -96,7 +94,6 @@ public class MapParsingTest extends ModuleTestBase
         MapWrapper w = mapper.readerFor(MapWrapper.class)
                 .with(new JavaPropsSchema().withPathSeparatorEscapeChar('#')).readValue(INPUT);
         assertNotNull(w.map);
-        System.out.println(w.map.toString());
         assertEquals(12, w.map.size());
         assertEquals("first", w.map.get(""));
         assertEquals("second", w.map.get("b"));

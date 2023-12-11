@@ -104,7 +104,6 @@ public class TomlMapperTest extends TomlMapperTestBase {
         );
     }
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     @Test
     public void bigDecimal() {
         BigDecimal testValue = BigDecimal.valueOf(Double.MIN_VALUE).divide(BigDecimal.valueOf(2));

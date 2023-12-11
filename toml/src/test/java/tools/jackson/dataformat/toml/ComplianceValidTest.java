@@ -82,7 +82,7 @@ public class ComplianceValidTest extends TomlMapperTestBase {
                     // for some reason, the compliance tests escape these values. this makes some tests fail right now
                     return nodeF.textNode(value.textValue());
                 case "integer":
-                    return nodeF.numberNode(NumberInput.parseBigInteger(value.textValue()));
+                    return nodeF.numberNode(NumberInput.parseBigInteger(value.textValue(), false));
                 case "float":
                     switch (value.textValue()) {
                         case "inf":
@@ -92,7 +92,7 @@ public class ComplianceValidTest extends TomlMapperTestBase {
                         case "nan":
                             return nodeF.numberNode(Double.NaN);
                         default:
-                            return nodeF.numberNode(NumberInput.parseBigDecimal(value.textValue()));
+                            return nodeF.numberNode(NumberInput.parseBigDecimal(value.textValue(), false));
                     }
                 case "boolean":
                     return nodeF.booleanNode(Boolean.parseBoolean(value.textValue()));
