@@ -32,6 +32,16 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         }
     }
 
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50052
+    public void testNumberDecoding50052() throws Exception
+    {
+        // 17-Sep-2022, tatu: Could produce an exception but for now type
+        //    tag basically ignored, returned as empty String otken
+        JsonNode n = YAML_MAPPER.readTree("!!int");
+        assertEquals(JsonToken.VALUE_STRING, n.asToken());
+        assertEquals("", n.textValue());
+    }
+
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50339
     public void testTagDecoding50339() throws Exception
     {
@@ -71,14 +81,37 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         }
     }
 
-    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50407
-    public void testNumberDecoding50052() throws Exception
+    // [dataformats-text#400], originally from
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50431
+    public void testUnicodeDecoding50431() throws Exception
     {
-        // 17-Sep-2022, tatu: Could produce an exception but for now type
-        //    tag basically ignored, returned as empty String otken
-        JsonNode n = YAML_MAPPER.readTree("!!int");
-        assertEquals(JsonToken.VALUE_STRING, n.asToken());
-        assertEquals("", n.textValue());
+        String input = "\n\"\\UE30EEE";
+        try {
+            YAML_MAPPER.readTree(input);
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            // Not sure what to verify, but should be exposed as one of Jackson's
+            // exceptions (or possibly IOException)
+            verifyException(e, "found unknown escape character E30EEE");
+        }
+    }
+
+    // [dataformats-text#406]: int overflow for YAML version
+    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=56902
+    //
+    // Problem being value overflow wrt 32-bit integer for malformed YAML
+    // version indicators
+    public void testVersionNumberParsing56902() throws Exception
+    {
+        String input = "%YAML 1.9224775801";
+        try {
+            YAML_MAPPER.readTree(input);
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            // Not sure what to verify, but should be exposed as one of Jackson's
+            // exceptions (or possibly IOException)
+            verifyException(e, "found a number which cannot represent a valid version");
+        }
     }
 
     // [dataformats-text#435], originally from
@@ -93,13 +126,12 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         }
     }
 
-    // [dataformats-text#445]: NPE
     static class ModelContainer445
     {
-        public String string;
+        String string;
 
         @JsonCreator
-        public ModelContainer445(@JsonProperty(value = "string")  String string) {
+        public ModelContainer445(@JsonProperty(value = "string") String string) {
             this.string = string;
         }
     }
