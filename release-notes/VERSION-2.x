@@ -18,6 +18,12 @@ Active Maintainers:
 
 -
 
+2.16.1 (not yet released)
+
+#445: `YAMLParser` throws unexpected `NullPointerException` in certain
+  number parsing cases
+ (fix contributed by Arthur C)
+
 2.16.0 (15-Nov-2023)
 
 #198: (csv) Support writing numbers as quoted Strings with
