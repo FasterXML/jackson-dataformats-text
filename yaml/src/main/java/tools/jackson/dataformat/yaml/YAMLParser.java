@@ -920,10 +920,18 @@ public class YAMLParser extends ParserBase
         //   due to refactoring. So let's try to cobble something together
 
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            // For integrals, use eager decoding for all ints, longs (and
-            // some cheaper BigIntegers)
-            if (_cleanedTextValue.length() <= 18) {
-                return getNumberValue();
+            // We might already have suitable value?
+            if ((_numTypesValid & NR_INT) != 0) {
+                return _numberInt;
+            }
+            if ((_numTypesValid & NR_LONG) != 0) {
+                return _numberLong;
+            }
+            if ((_numTypesValid & NR_BIGINT) != 0) {
+                return _getBigInteger();
+            }
+            if (_cleanedTextValue == null) {
+                _reportError("Internal number decoding error: `_cleanedTextValue` null when nothing decoded for `JsonToken.VALUE_NUMBER_INT`");
             }
             return _cleanedTextValue;
         }

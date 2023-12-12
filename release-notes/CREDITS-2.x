@@ -244,3 +244,9 @@ Peter Haumer (phaumer@github)
 
 * Reported #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
  (2.15.1)
+
+Arthur Chan (arthurscchan@github)
+
+* Contributed fix for #445: `YAMLParser` throws unexpected `NullPointerException` in certain
+  number parsing cases
+ (2.16.1)
