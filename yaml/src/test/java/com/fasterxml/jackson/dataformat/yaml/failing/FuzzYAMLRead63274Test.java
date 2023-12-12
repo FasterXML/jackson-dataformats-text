@@ -5,12 +5,12 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
-public class FuzzYAMLRead63273Test extends ModuleTestBase
+public class FuzzYAMLRead63274Test extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=63274
-    public void testReadBoundary63273() throws Exception
+    public void testReadBoundary63274() throws Exception
     {
         // As bytes:
         /*
