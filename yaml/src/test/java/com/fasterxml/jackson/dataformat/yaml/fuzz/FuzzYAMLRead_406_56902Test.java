@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.deser;
+package com.fasterxml.jackson.dataformat.yaml.fuzz;
 
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.ObjectMapper;
