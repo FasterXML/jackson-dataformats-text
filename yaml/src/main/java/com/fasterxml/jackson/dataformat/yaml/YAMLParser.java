@@ -932,18 +932,23 @@ public class YAMLParser extends ParserBase
         return super.currentName();
     }
 
+    // NOTE: must override just to avoid problems b/w this and `currentName()`
+    // calls wrt parent definitions
     @Deprecated // since 2.17
     @Override
     public String getCurrentName() throws IOException {
-        return currentName();
+        if (_currToken == JsonToken.FIELD_NAME) {
+            return _currentFieldName;
+        }
+        return super.getCurrentName();
     }
-    
+
     // For now we do not store char[] representation...
     @Override
     public boolean hasTextCharacters() {
         return false;
     }
-    
+
     @Override
     public String getText() throws IOException
     {
