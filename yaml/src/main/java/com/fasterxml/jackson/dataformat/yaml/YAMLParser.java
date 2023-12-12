@@ -565,6 +565,7 @@ public class YAMLParser extends ParserBase
 
         _textValue = value;
         _cleanedTextValue = null;
+
         // [dataformats-text#130]: Allow determining whether empty String is
         // coerced into null or not
         if (!_cfgEmptyStringsToNull && value.isEmpty()) {
