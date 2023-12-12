@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 public class LongTokenTest extends TomlMapperTestBase {
-    private static final int SCALE = 10000; // must be bigger than the default buffer size
+    private static final int SCALE = 10_000; // must be bigger than the default buffer size
 
     // Need to ensure max-number-limit not hit
     private final TomlFactory FACTORY = TomlFactory.builder()
@@ -120,8 +120,8 @@ public class LongTokenTest extends TomlMapperTestBase {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = Parser.parse(testIOContext(),
-                TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
+        ObjectNode node = Parser.parse(FACTORY, testIOContext(),
+                new StringReader(toml.toString()));
 
         Assert.assertEquals(SCALE, node.get("foo").textValue().length());
     }
