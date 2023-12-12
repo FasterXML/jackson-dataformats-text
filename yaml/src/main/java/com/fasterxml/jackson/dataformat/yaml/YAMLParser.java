@@ -565,7 +565,6 @@ public class YAMLParser extends ParserBase
 
         _textValue = value;
         _cleanedTextValue = null;
-
         // [dataformats-text#130]: Allow determining whether empty String is
         // coerced into null or not
         if (!_cfgEmptyStringsToNull && value.isEmpty()) {
@@ -1026,15 +1025,19 @@ public class YAMLParser extends ParserBase
         // 01-Feb-2023, tatu: ParserBase implementation does not quite work
         //   due to refactoring. So let's try to cobble something together
 
-        if (_cleanedTextValue == null) {
-            _reportError("Invalid value. Text value is null after cleaning.");
-        }
-
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            // For integrals, use eager decoding for all ints, longs (and
-            // some cheaper BigIntegers)
-            if (_cleanedTextValue.length() <= 18) {
-                return getNumberValue();
+            // We might already have suitable value?
+            if ((_numTypesValid & NR_INT) != 0) {
+                return _numberInt;
+            }
+            if ((_numTypesValid & NR_LONG) != 0) {
+                return _numberLong;
+            }
+            if ((_numTypesValid & NR_BIGINT) != 0) {
+                return _getBigInteger();
+            }
+            if (_cleanedTextValue == null) {
+                _reportError("Internal number decoding error: `_cleanedTextValue` null when nothing decoded for `JsonToken.VALUE_NUMBER_INT`");
             }
             return _cleanedTextValue;
         }
@@ -1060,11 +1063,6 @@ public class YAMLParser extends ParserBase
     @Override
     protected void _parseNumericValue(int expType) throws IOException
     {
-
-        if (_cleanedTextValue == null) {
-            _reportError("Invalid value. Text value is null after cleaning.");
-        }
-
         // Int or float?
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             int len = _cleanedTextValue.length();
@@ -1147,10 +1145,6 @@ public class YAMLParser extends ParserBase
     @Override
     protected int _parseIntValue() throws IOException
     {
-        if (_cleanedTextValue == null) {
-            _reportError("Invalid value. Text value is null after cleaning.");
-        }
-
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
             int len = _cleanedTextValue.length();
             if (_numberNegative) {
