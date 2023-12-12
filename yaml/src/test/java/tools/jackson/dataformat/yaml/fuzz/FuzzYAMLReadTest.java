@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.deser;
+package tools.jackson.dataformat.yaml.fuzz;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
