@@ -18,7 +18,7 @@ import tools.jackson.dataformat.yaml.YAMLParser;
  * Unit tests for checking functioning of the underlying
  * parser implementation.
  */
-public class StreamingParseTest extends ModuleTestBase
+public class StreamingYAMLParseTest extends ModuleTestBase
 {
     final YAMLMapper MAPPER = newObjectMapper();
 

@@ -801,11 +801,11 @@ public class YAMLParser extends ParserBase
                 base, numStr, e.getMessage()));
         return null; // never gets here
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* String value handling
-    /**********************************************************
+    /**********************************************************************
      */
 
     // For now we do not store char[] representation...
