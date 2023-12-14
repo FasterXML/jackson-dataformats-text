@@ -17,7 +17,7 @@ import org.yaml.snakeyaml.LoaderOptions;
  * Unit tests for checking functioning of the underlying
  * parser implementation.
  */
-public class StreamingParseTest extends ModuleTestBase
+public class StreamingYAMLParseTest extends ModuleTestBase
 {
     private final YAMLFactory YAML_F = new YAMLFactory();
 
@@ -73,6 +73,50 @@ public class StreamingParseTest extends ModuleTestBase
         assertNull(p.nextToken());
         assertNull(p.nextToken());
         p.close();
+    }
+
+    // @since 2.17
+    @SuppressWarnings("deprecation")
+    public void testDeprecatedMethods() throws Exception
+    {
+        final String YAML =
+ "string: 'text'\n"
++"bool: true\n"
+;
+        try (JsonParser p = YAML_F.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertNull("string", p.getCurrentName());
+            assertNull("string", p.currentName());
+            assertNull(p.getCurrentValue());
+    
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("string", p.getCurrentName());
+            assertEquals("string", p.currentName());
+            assertNull(p.getCurrentValue());
+    
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("text", p.getText());
+            assertEquals("string", p.getCurrentName());
+            assertEquals("string", p.currentName());
+            assertNull(p.getCurrentValue());
+            JsonLocation loc = p.getTokenLocation();
+            assertEquals(1, loc.getLineNr());
+            assertEquals(9, loc.getColumnNr());
+            assertEquals(8, loc.getCharOffset());
+            assertEquals(-1, loc.getByteOffset());
+            loc = p.getCurrentLocation();
+            assertEquals(1, loc.getLineNr());
+            assertEquals(15, loc.getColumnNr());
+            assertEquals(14, loc.getCharOffset());
+            assertEquals(-1, loc.getByteOffset());
+    
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertToken(JsonToken.VALUE_TRUE, p.nextToken());
+            assertEquals("true", p.getText());
+    
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
     }
 
     // Parsing large numbers around the transition from int->long and long->BigInteger
