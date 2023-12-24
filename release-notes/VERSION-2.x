@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.16.1 (not yet released)
+2.16.1 (24-Dec-2023)
 
 #445: `YAMLParser` throws unexpected `NullPointerException` in certain
   number parsing cases
