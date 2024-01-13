@@ -342,6 +342,13 @@ public class YAMLParser extends ParserBase
                 evt = _yamlParser.next();
             } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
                 throw new JacksonYAMLParseException(this, e.getMessage(), e);
+            } catch (NumberFormatException e) {
+                // 12-Jan-2024, tatu: As per https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=63274
+                //    we seem to have unhandled case by SnakeYAML
+                throw _constructReadException(String.format(
+                        "Malformed Number token: failed to tokenize due to (%s): %s",
+                        e.getClass().getName(), e.getMessage()),
+                        e);
             }
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
