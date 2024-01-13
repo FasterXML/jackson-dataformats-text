@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.fuzz;
 
 import com.fasterxml.jackson.core.JacksonException;
 
@@ -10,7 +10,7 @@ public class FuzzYAMLRead63274Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=63274
-    public void testReadBoundary63274() throws Exception
+    public void testMalformedNumber63274() throws Exception
     {
         // As bytes:
         /*
@@ -35,9 +35,9 @@ public class FuzzYAMLRead63274Test extends ModuleTestBase
         try {
             MAPPER.readTree(doc);
             // Ok; don't care about content, just buffer reads
+            fail("Should not pass");
         } catch (JacksonException e) {
-            // !!! TODO: proper checking of exception
-            verifyException(e, "foo");
+            verifyException(e, "Malformed Number token: failed to ");
         }
     }
 }
