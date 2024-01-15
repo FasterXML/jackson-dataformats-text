@@ -16,7 +16,9 @@ Active Maintainers:
 
 2.17.0 (not yet released)
 
--
+#45: (csv) Allow skipping ending line break
+  (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
+ (proposed by Mathieu L)
 
 2.16.1 (24-Dec-2023)
 

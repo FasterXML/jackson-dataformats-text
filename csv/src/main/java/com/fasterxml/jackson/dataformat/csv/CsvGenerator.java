@@ -108,7 +108,23 @@ public class CsvGenerator extends GeneratorBase
          *
          * @since 2.9.9
          */
-        ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false)
+        ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false),
+
+        /**
+         * Feature that determines whether a line-feed will be written at the end of content,
+         * after the last row of output.
+         *<p>
+         * NOTE! When disabling this feature it is important that
+         * {@link #flush()} is NOT called before {@link #close()} is called;
+         * the current implementation relies on ability to essentially remove the
+         * last linefeed that was appended in the output buffer.
+         *<p>
+         * Default value is {@code true} so all rows, including the last, are terminated by
+         * a line feed.
+         *
+         * @since 2.17
+         */
+        WRITE_LINEFEED_AFTER_LAST_ROW(true)
         ;
 
         protected final boolean _defaultState;

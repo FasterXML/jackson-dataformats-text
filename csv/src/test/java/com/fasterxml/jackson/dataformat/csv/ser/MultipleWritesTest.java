@@ -6,6 +6,7 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
@@ -68,16 +69,30 @@ public class MultipleWritesTest extends ModuleTestBase
 
     public void testWriteValuesWithPOJOs() throws Exception
     {
-        CsvSchema schema = MAPPER.schemaFor(Pojo.class).withUseHeader(true);
+        final CsvSchema schema = MAPPER.schemaFor(Pojo.class).withUseHeader(true);
+
         ObjectWriter writer = MAPPER.writer(schema);
         StringWriter sw = new StringWriter();
-        SequenceWriter seqw = writer.writeValues(sw);
-        seqw.write(new Pojo(1, 2, 3));
-        seqw.write(new Pojo(0, 15, 9));
-        seqw.write(new Pojo(7, 8, 9));
-        seqw.flush();
+        try (SequenceWriter seqw = writer.writeValues(sw)) {
+            seqw.write(new Pojo(1, 2, 3));
+            seqw.write(new Pojo(0, 15, 9));
+            seqw.write(new Pojo(7, 8, 9));
+        }
         assertEquals("a,b,c\n1,2,3\n0,15,9\n7,8,9\n",
                 sw.toString());
-        seqw.close();
+
+        // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF.
+        // NOTE! Any form of `flush()` will prevent ability to "remove" trailing LF so...
+        writer = writer
+                .without(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
+                .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW);
+        sw = new StringWriter();
+        try (SequenceWriter seqw = writer.writeValues(sw)) {
+            seqw.write(new Pojo(1, 2, 3));
+            seqw.write(new Pojo(0, 15, 9));
+            seqw.write(new Pojo(7, 8, 9));
+        }
+        assertEquals("a,b,c\n1,2,3\n0,15,9\n7,8,9",
+                sw.toString());
     }
 }
