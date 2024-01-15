@@ -142,6 +142,8 @@ public class CsvEncoder
      */
     protected int _lastBuffered = -1;
 
+    protected boolean _trailingLFRemoved = false;
+
     /*
     /**********************************************************************
     /* Output buffering, low-level
@@ -1093,6 +1095,11 @@ public class CsvEncoder
 
     public void close(boolean autoClose, boolean flushStream) throws IOException
     {
+        // May need to remove the linefeed appended after the last row written
+        // (if not yet done)
+        if (!CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW.enabledIn(_csvFeatures)) {
+            _removeTrailingLF();
+        }
         _flushBuffer();
         if (autoClose) {
             _out.close();
@@ -1102,6 +1109,15 @@ public class CsvEncoder
         }
         // Internal buffer(s) generator has can now be released as well
         _releaseBuffers();
+    }
+
+    private void _removeTrailingLF() throws IOException {
+        if (!_trailingLFRemoved) {
+            _trailingLFRemoved = true;
+            // Remove trailing LF if (but only if) it appears to be in output
+            // buffer (may not be possible if `flush()` has been called)
+            _outputTail = Math.max(0, _outputTail - _cfgLineSeparatorLength);
+        }
     }
 
     /*

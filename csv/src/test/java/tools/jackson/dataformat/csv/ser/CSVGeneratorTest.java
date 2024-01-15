@@ -87,8 +87,14 @@ public class CSVGeneratorTest extends ModuleTestBase
 
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
-        String csv = MAPPER.writer(schema).writeValueAsString(user);
-        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n", csv);
+        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n",
+                MAPPER.writer(schema).writeValueAsString(user));
+
+        // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF:
+        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false",
+                MAPPER.writer(schema)
+                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .writeValueAsString(user));
     }
 
     public void testSimpleWithAutoSchema() throws Exception
@@ -99,13 +105,19 @@ public class CSVGeneratorTest extends ModuleTestBase
 
     public void testWriteHeaders() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        CsvSchema schema = mapper.schemaFor(FiveMinuteUser.class).withHeader();
+        CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class).withHeader();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
-        String result = mapper.writer(schema).writeValueAsString(user);
         assertEquals("firstName,lastName,gender,verified,userImage\n"
-                +"Barbie,Benton,FEMALE,false,\n", result);
-    }
+                +"Barbie,Benton,FEMALE,false,\n",
+                MAPPER.writer(schema).writeValueAsString(user));
+
+        // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF:
+        assertEquals("firstName,lastName,gender,verified,userImage\n"
+                +"Barbie,Benton,FEMALE,false,",
+                MAPPER.writer(schema)
+                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .writeValueAsString(user));
+}
 
     /**
      * Test that verifies that if a header line is needed, configured schema
@@ -113,11 +125,10 @@ public class CSVGeneratorTest extends ModuleTestBase
      */
     public void testFailedWriteHeaders() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder().setUseHeader(true).build();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
         try {
-            mapper.writer(schema).writeValueAsString(user);
+            MAPPER.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
         } catch (CsvWriteException e) {
             verifyException(e, "contains no column names");
