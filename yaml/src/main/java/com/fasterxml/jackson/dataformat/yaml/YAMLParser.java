@@ -1083,7 +1083,11 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                _numberInt = Integer.parseInt(_cleanedTextValue);
+                try {
+                    _numberInt = Integer.parseInt(_cleanedTextValue);
+                } catch (NumberFormatException e) {
+                    _reportInvalidNumber(_cleanedTextValue, 10, e);
+                }
                 _numTypesValid = NR_INT;
                 return;
             }
