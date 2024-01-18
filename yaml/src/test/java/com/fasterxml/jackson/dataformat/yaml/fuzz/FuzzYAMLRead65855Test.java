@@ -1,8 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml.fuzz;
 
-import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 public class FuzzYAMLRead65855Test extends ModuleTestBase
@@ -14,12 +15,13 @@ public class FuzzYAMLRead65855Test extends ModuleTestBase
     {
         String doc = "!!int\n-_";
 
-        try {
-            MAPPER.readTree(doc);
+        try (JsonParser p = MAPPER.createParser(doc)) {
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            p.getIntValue();
             // Ok; don't care about content, just buffer reads
             fail("Should not pass");
         } catch (JacksonException e) {
-            verifyException(e, "Invalid base-10 number");
+            verifyException(e, "Invalid base-10 number ('-')");
         }
     }
 }

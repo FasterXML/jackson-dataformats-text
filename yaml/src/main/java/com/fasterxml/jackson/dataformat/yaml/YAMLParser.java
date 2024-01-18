@@ -1083,11 +1083,7 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                try {
-                    _numberInt = Integer.parseInt(_cleanedTextValue);
-                } catch (NumberFormatException e) {
-                    _reportInvalidNumber(_cleanedTextValue, 10, e);
-                }
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
                 return;
             }
@@ -1168,8 +1164,9 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
-                return (_numberInt = Integer.parseInt(_cleanedTextValue));
+                return _numberInt;
             }
         }
         _parseNumericValue(NR_INT);
