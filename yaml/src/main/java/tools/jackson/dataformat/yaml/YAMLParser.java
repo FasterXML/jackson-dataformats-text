@@ -971,7 +971,7 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                _numberInt = Integer.parseInt(_cleanedTextValue);
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
                 return;
             }
@@ -1056,8 +1056,9 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
-                return (_numberInt = Integer.parseInt(_cleanedTextValue));
+                return _numberInt;
             }
         }
         _parseNumericValue(NR_INT);
@@ -1130,7 +1131,7 @@ public class YAMLParser extends ParserBase
             }
         }
         _cleanedTextValue = sb.toString();
-        if (_cleanedTextValue.isEmpty()) {
+        if (_cleanedTextValue.isEmpty() || "-".equals(_cleanedTextValue)) {
             _reportError(String.format("Invalid number ('%s')", str));
         }
         return JsonToken.VALUE_NUMBER_INT;
