@@ -16,12 +16,11 @@ public class FuzzYAMLRead65855Test extends ModuleTestBase
         String doc = "!!int\n-_";
 
         try (JsonParser p = MAPPER.createParser(doc)) {
+            // Should be triggered by advacing to next token, even without accessing value
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
-            p.getIntValue();
-            // Ok; don't care about content, just buffer reads
             fail("Should not pass");
         } catch (JacksonException e) {
-            verifyException(e, "Invalid base-10 number ('-')");
+            verifyException(e, "Invalid number ('-_')");
         }
     }
 }

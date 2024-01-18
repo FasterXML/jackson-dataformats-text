@@ -1240,7 +1240,7 @@ public class YAMLParser extends ParserBase
             }
         }
         _cleanedTextValue = sb.toString();
-        if (_cleanedTextValue.isEmpty()) {
+        if (_cleanedTextValue.isEmpty() || "-".equals(_cleanedTextValue)) {
             _reportError(String.format("Invalid number ('%s')", str));
         }
         return JsonToken.VALUE_NUMBER_INT;
