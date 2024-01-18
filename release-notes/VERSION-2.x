@@ -19,6 +19,8 @@ Active Maintainers:
 #45: (csv) Allow skipping ending line break
   (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
  (proposed by Mathieu L)
+#454: (yaml) Unexpected `NumberFormatException` in `YAMLParser`
+ (fix contributed by Arthur C)
 
 2.16.1 (24-Dec-2023)
 
