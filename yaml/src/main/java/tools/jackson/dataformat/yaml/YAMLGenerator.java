@@ -498,7 +498,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an array");
         _streamWriteContext = _streamWriteContext.createChildArrayContext(null);
-        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
+        _streamWriteConstraints.validateNestingDepth(_streamWriteContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
@@ -536,7 +536,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         _verifyValueWrite("start an object");
         _streamWriteContext = _streamWriteContext.createChildObjectContext(null);
-        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
+        _streamWriteConstraints.validateNestingDepth(_streamWriteContext.getNestingDepth());
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);

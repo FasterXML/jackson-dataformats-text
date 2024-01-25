@@ -418,6 +418,7 @@ public class YAMLParser extends ParserBase
                     _currentAnchor = map.getAnchor();
                     _streamReadContext = _streamReadContext.createChildObjectContext(
                             m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
+                    _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
                     return (_currToken = JsonToken.START_OBJECT);
 
                 case MappingEnd:
@@ -429,6 +430,7 @@ public class YAMLParser extends ParserBase
                     _currentAnchor = ((NodeEvent) evt).getAnchor();
                     _streamReadContext = _streamReadContext.createChildArrayContext(
                             mrk.map(mark -> mark.getLine()).orElse(0), mrk.map(mark -> mark.getColumn()).orElse(0));
+                    _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
                     return (_currToken = JsonToken.START_ARRAY);
 
                 case SequenceEnd:
