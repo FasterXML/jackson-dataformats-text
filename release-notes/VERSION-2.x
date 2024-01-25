@@ -21,6 +21,8 @@ Active Maintainers:
  (proposed by Mathieu L)
 #454: (yaml) Unexpected `NumberFormatException` in `YAMLParser`
  (fix contributed by Arthur C)
+#456: (yaml) Support max Read/Write nesting depth limits (`StreamReadConstraints`/
+  `StreamWriteConstraints`) for YAML
 
 2.16.1 (24-Dec-2023)
 
