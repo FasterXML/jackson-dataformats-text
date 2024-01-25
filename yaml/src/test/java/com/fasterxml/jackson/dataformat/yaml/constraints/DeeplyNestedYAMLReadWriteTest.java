@@ -51,7 +51,6 @@ public class DeeplyNestedYAMLReadWriteTest
             YAML_MAPPER.writeValueAsString(docRoot);
             fail("Should not pass");
         } catch (StreamConstraintsException e) {
-            e.printStackTrace();
             assertEquals("Document nesting depth (13) exceeds the maximum allowed (12, from `StreamWriteConstraints.getMaxNestingDepth()`)",
                     e.getMessage());
         }
