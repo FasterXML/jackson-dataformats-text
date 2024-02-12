@@ -832,13 +832,20 @@ public class CsvDecoder
                     _owner._reportParsingError("Missing closing quote for value"); // should indicate start position?
                 }
                 ptr = _inputPtr;
-                if (checkLF && inputBuffer[ptr] == '\n') {
-                    // undo earlier advancement, to keep line number correct
-                    --_currInputRow;
+                if (checkLF) {
+                    checkLF = false; // better reset
+                    if (inputBuffer[ptr] == '\n') {
+                        // undo earlier advancement, to keep line number correct
+                        --_currInputRow;
+                    }
                 }
             }
+            // 11-Feb-2024, tatu: Not quite sure what was supposed to happen here;
+            //   but nothing was done. Leaving for now, remove from 2.18 or later
+            /*
             if (checkLF) { // had a "hanging" CR in parse loop; check now
             }
+            */
             if (outPtr >= outBuf.length) {
                 outBuf = _textBuffer.finishCurrentSegment();
                 outPtr = 0;
