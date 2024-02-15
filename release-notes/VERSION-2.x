@@ -31,6 +31,10 @@ Active Maintainers:
 #438: (csv) `BigInteger` and `BigDecimal` are quoted if
   `CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS` enabled
 
+2.15.4 (15-Feb-2024)
+
+No changes since 2.15.3
+
 2.15.3 (12-Oct-2023)
 
 #400: (yaml) `IllegalArgumentException` when attempting to decode invalid UTF-8
