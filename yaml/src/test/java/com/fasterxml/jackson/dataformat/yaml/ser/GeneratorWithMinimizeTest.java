@@ -119,25 +119,22 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: f:off", yaml);
 
 
-        /* scenarios with single quoted scalars */
+        /* scenarios with double quoted scalars */
 
         content = Collections.singletonMap("key", "::");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
-                "key: '::'", yaml);
+                "key: \"::\"", yaml);
 
         content = Collections.singletonMap("key", "#");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
-                "key: '#'", yaml);
+                "key: \"#\"", yaml);
 
         content = Collections.singletonMap("key", "#a");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();
         assertEquals("---\n" +
-                "key: '#a'", yaml);
-
-
-        /* scenarios with double quoted scalars */
+                "key: \"#a\"", yaml);
 
         content = Collections.singletonMap("key", "a[b");
         yaml = MINIM_MAPPER.writeValueAsString(content).trim();

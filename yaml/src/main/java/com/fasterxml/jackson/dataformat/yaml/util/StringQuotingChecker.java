@@ -58,10 +58,10 @@ public abstract class StringQuotingChecker
      * Helper method that sub-classes may use to see if given String value is
      * one of:
      *<ul>
-     * <li>YAML 1.1 keyword representing 
+     * <li>YAML 1.1 keyword representing
      *  <a href="https://yaml.org/type/bool.html">boolean</a>
      *  </li>
-     * <li>YAML 1.1 keyword representing 
+     * <li>YAML 1.1 keyword representing
      *  <a href="https://yaml.org/type/null.html">null</a> value
      *   </li>
      * <li>empty String (length 0)
@@ -142,26 +142,38 @@ public abstract class StringQuotingChecker
                 return true;
             case '#':
                 // [dataformats-text#201]: limit quoting with MINIMIZE_QUOTES
-                if (i > 0) {
-                    char d = inputStr.charAt(i-1);
-                    if (' ' == d || '\t' == d) {
-                        return true;
-                    }
+                if (precededByBlank(inputStr, i)) {
+                    return true;
                 }
                 break;
             case ':':
                 // [dataformats-text#201]: limit quoting with MINIMIZE_QUOTES
-                if (i < (end-1)) {
-                    char d = inputStr.charAt(i + 1);
-                    if (' ' == d || '\t' == d) {
-                        return true;
-                    }
+                if (followedByBlank(inputStr, i)) {
+                    return true;
                 }
                 break;
             default:
             }
         }
         return false;
+    }
+
+    private boolean precededByBlank(String inputStr, int offset) {
+        if (offset == 0) {
+            return true;
+        }
+        return isBlank(inputStr.charAt(offset - 1));
+    }
+
+    private boolean followedByBlank(String inputStr, int offset) {
+        if (offset == inputStr.length() - 1) {
+            return true;
+        }
+        return isBlank(inputStr.charAt(offset + 1));
+    }
+
+    private boolean isBlank(char value) {
+        return (' ' == value || '\t' == value);
     }
 
     /**
@@ -199,7 +211,7 @@ public abstract class StringQuotingChecker
         public Default() { }
 
         public static Default instance() { return INSTANCE; }
-        
+
         /**
          * Default implementation will call
          * {@link #isReservedKeyword(String)} and
