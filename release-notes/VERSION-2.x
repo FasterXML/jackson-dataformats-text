@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.17.0 (not yet released)
+2.17.0-rc1 (26-Feb-2024)
 
 #45: (csv) Allow skipping ending line break
   (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
