@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.17.0 (not yet released)
+2.17.0-rc1 (26-Feb-2024)
 
 #45: (csv) Allow skipping ending line break
   (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
@@ -40,6 +40,10 @@ Active Maintainers:
 #437: (yaml) Update SnakeYAML dependency to 2.2
 #438: (csv) `BigInteger` and `BigDecimal` are quoted if
   `CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS` enabled
+
+2.15.4 (15-Feb-2024)
+
+No changes since 2.15.3
 
 2.15.3 (12-Oct-2023)
 
