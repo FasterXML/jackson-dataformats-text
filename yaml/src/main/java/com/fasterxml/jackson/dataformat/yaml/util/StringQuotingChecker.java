@@ -8,7 +8,7 @@ import java.util.Set;
  * Helper class that defines API used by
  * {@link com.fasterxml.jackson.dataformat.yaml.YAMLGenerator}
  * to check whether property names and String values need to be quoted or not.
- * Also contains default logic implementation; may be sub-classes to provide
+ * Also contains default logic implementation; may be sub-classed to provide
  * alternate implementation.
  *
  * @since 2.12
@@ -142,13 +142,15 @@ public abstract class StringQuotingChecker
                 return true;
             case '#':
                 // [dataformats-text#201]: limit quoting with MINIMIZE_QUOTES
-                if (precededByBlank(inputStr, i)) {
+                // (but not recognized as comment unless starts line or preceded by whitespace)
+                if (precededOnlyByBlank(inputStr, i)) {
                     return true;
                 }
                 break;
             case ':':
                 // [dataformats-text#201]: limit quoting with MINIMIZE_QUOTES
-                if (followedByBlank(inputStr, i)) {
+                // (but recognized as separator only if end-of-line or followed by whitespace)
+                if (followedOnlyByBlank(inputStr, i)) {
                     return true;
                 }
                 break;
@@ -158,21 +160,24 @@ public abstract class StringQuotingChecker
         return false;
     }
 
-    private boolean precededByBlank(String inputStr, int offset) {
+    // @since 2.17
+    protected boolean precededOnlyByBlank(String inputStr, int offset) {
         if (offset == 0) {
             return true;
         }
         return isBlank(inputStr.charAt(offset - 1));
     }
 
-    private boolean followedByBlank(String inputStr, int offset) {
+    // @since 2.17
+    protected boolean followedOnlyByBlank(String inputStr, int offset) {
         if (offset == inputStr.length() - 1) {
             return true;
         }
         return isBlank(inputStr.charAt(offset + 1));
     }
 
-    private boolean isBlank(char value) {
+    // @since 2.17
+    protected boolean isBlank(char value) {
         return (' ' == value || '\t' == value);
     }
 
