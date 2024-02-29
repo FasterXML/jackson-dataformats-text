@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.intellij.lang.annotations.Language;
 import org.junit.Assert;
@@ -18,6 +20,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.json.JsonReadFeature;
 
 import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.JsonNodeFactory;
@@ -377,7 +380,18 @@ public class TomlParserTest extends TomlMapperTestBase {
                         "\n" +
                         "# both\n" +
                         "flt7 = 6.626e-34");
-        Assert.assertEquals(json, toml);
+        if (!json.equals(toml)) {
+            for (Entry<String, JsonNode> entry : json.properties()) {
+                String key = entry.getKey();
+                JsonNode jsonValue = entry.getValue();
+                JsonNode tomlValue = toml.get(key);
+
+                Assert.assertEquals("Entry '"+key+"' differs",
+                        jsonValue, tomlValue);
+            }
+            // Should not happen but...
+            Assert.fail("Internal error: could not find difference in JSON vs TOML nodes");
+        }
     }
 
     @Test
@@ -1033,7 +1047,6 @@ public class TomlParserTest extends TomlMapperTestBase {
     @Test
     public void chunkEdge() throws Exception {
         int bufferLength = 4096;
-        char[] chars = new char[200];
 
         ObjectNode node = toml("foo = \"" + repeat('a', bufferLength - 19) + "\"\n" +
                 "bar = 123\n" +
