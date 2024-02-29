@@ -258,3 +258,8 @@ Mathieu Lavigne (@mathieu-lavigne)
 * Proposed #45 (and suggested implementation): (csv) Allow skipping ending line break
   (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
  (2.17.0)
+
+Michael Edgar (@MikeEdgar)
+
+* Contributed #465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
+ (2.17.0)

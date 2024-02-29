@@ -14,6 +14,9 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+#465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
+ (contributed by Michael E)
+
 2.17.0-rc1 (26-Feb-2024)
 
 #45: (csv) Allow skipping ending line break
