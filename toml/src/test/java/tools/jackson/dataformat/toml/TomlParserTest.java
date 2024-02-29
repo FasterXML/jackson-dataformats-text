@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.intellij.lang.annotations.Language;
@@ -22,19 +21,26 @@ import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.JsonNodeFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
 
 public class TomlParserTest extends TomlMapperTestBase {
-    private static final ObjectMapper TOML_MAPPER = newTomlMapper();
-    private static final ObjectMapper jsonMapper = JsonMapper.builder()
+    private static final ObjectMapper TOML_MAPPER = TomlMapper.builder()
+            .enable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
+            .build();
+    private static final ObjectMapper JSON_MAPPER = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+            // 28-Feb-2024, tatu: [dataformats-text#466] For some reason TOML parser
+            //   does manage to strip trailing zeroes. Not sure why (default in 3.0
+            //   should be "no normalization") but for now this needed for test to pass
+            .enable(JsonNodeFeature.STRIP_TRAILING_BIGDECIMAL_ZEROES)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
             .build();
 
     static ObjectNode json(@Language("json") String json) throws JacksonException {
-        return (ObjectNode) jsonMapper.readTree(json);
+        return (ObjectNode) JSON_MAPPER.readTree(json);
     }
 
     static ObjectNode toml(@Language("toml") String toml) throws JacksonException {
@@ -386,7 +392,8 @@ public class TomlParserTest extends TomlMapperTestBase {
                 JsonNode jsonValue = entry.getValue();
                 JsonNode tomlValue = toml.get(key);
 
-                Assert.assertEquals("Entry '"+key+"' differs",
+                Assert.assertEquals(String.format("Entry '%s' (JSON %s vs TOML %s) differs",
+                        key, jsonValue.getClass().getSimpleName(), tomlValue.getClass().getSimpleName()),
                         jsonValue, tomlValue);
             }
             // Should not happen but...
