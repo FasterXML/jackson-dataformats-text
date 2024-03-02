@@ -3,12 +3,9 @@ package tools.jackson.dataformat.csv;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.StreamReadFeature;
-import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.*;
 
-public class FeaturesTest extends ModuleTestBase
+public class CSVFactoryFeaturesTest extends ModuleTestBase
 {
     public void testFactoryFeatures() throws Exception
     {
