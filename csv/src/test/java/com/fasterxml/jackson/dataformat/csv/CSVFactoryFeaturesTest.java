@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.StreamWriteFeature;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-public class FeaturesTest extends ModuleTestBase
+public class CSVFactoryFeaturesTest extends ModuleTestBase
 {
     public void testFactoryFeatures() throws Exception
     {
