@@ -408,6 +408,11 @@ System.err.println("\n>>");
         return _noNumbers();
     }
 
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        return NumberTypeFP.UNKNOWN;
+    }
+
     @Override
     public int getIntValue() throws IOException {
         return _noNumbers();

@@ -1332,6 +1332,12 @@ public class CsvParser
         return _reader.getNumberType();
     }
 
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        // Could theoretically delegate but for now just do:
+        return NumberTypeFP.UNKNOWN;
+    }
+
     @Override
     public Number getNumberValue() throws IOException {
         return _reader.getNumberValue(false);

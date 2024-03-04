@@ -1033,6 +1033,11 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        return NumberTypeFP.UNKNOWN;
+    }
+
     @Override
     public Object getNumberValueDeferred() throws IOException {
         // 01-Feb-2023, tatu: ParserBase implementation does not quite work
