@@ -14,6 +14,8 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+Not yet released
+
 #465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
  (contributed by Michael E)
 
@@ -26,6 +28,10 @@ Active Maintainers:
  (fix contributed by Arthur C)
 #456: (yaml) Support max Read/Write nesting depth limits (`StreamReadConstraints`/
   `StreamWriteConstraints`) for YAML
+
+2.16.2 (09-Mar-2024)
+
+No changes since 2.16.1
 
 2.16.1 (24-Dec-2023)
 
