@@ -14,12 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-Not yet released
-
-#465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
- (contributed by Michael E)
-
-2.17.0-rc1 (26-Feb-2024)
+2.17.0 (12-Mar-2024)
 
 #45: (csv) Allow skipping ending line break
   (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
@@ -28,6 +23,8 @@ Not yet released
  (fix contributed by Arthur C)
 #456: (yaml) Support max Read/Write nesting depth limits (`StreamReadConstraints`/
   `StreamWriteConstraints`) for YAML
+#465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
+ (contributed by Michael E)
 
 2.16.2 (09-Mar-2024)
 
