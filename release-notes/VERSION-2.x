@@ -16,7 +16,8 @@ Active Maintainers:
 
 2.18.0 (not yet released)
 
-No changes since 2.17
+#468: Remove synchronization from `CsvMapper`
+ (contributed by @pjfanning)
 
 2.17.0 (12-Mar-2024)
 
@@ -83,7 +84,7 @@ No changes since 2.15.1
   to allow parsing "boolean" words as strings instead of booleans
  (contributed by Axel N)
 #390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
- (contributed by @pjfannin
+ (contributed by @pjfanning)
 #411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
  (contributed by @yawkat)
 #415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
