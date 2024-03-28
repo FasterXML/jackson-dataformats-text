@@ -431,20 +431,16 @@ public class CsvMapper extends ObjectMapper
             boolean typed, Class<?> view)
     {
         final ViewKey viewKey = new ViewKey(pojoType, view);
-        synchronized (schemas) {
-            CsvSchema s = schemas.get(viewKey);
-            if (s != null) {
-                return s;
-            }
+        CsvSchema s = schemas.get(viewKey);
+        if (s != null) {
+            return s;
         }
         // 15-Oct-2019, tatu: Since 3.0, need context for introspection
         final SerializerProvider ctxt = _serializerProvider();
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(ctxt, builder, typed, pojoType, null, view);
         CsvSchema result = builder.build();
-        synchronized (schemas) {
-            schemas.put(viewKey, result);
-        }
+        schemas.put(viewKey, result);
         return result;
     }
 
