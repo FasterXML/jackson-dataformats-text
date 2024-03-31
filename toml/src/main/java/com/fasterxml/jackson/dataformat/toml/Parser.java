@@ -117,7 +117,7 @@ class Parser {
         }
     }
 
-    public ObjectNode parse() throws IOException {
+/*    public ObjectNode parse() throws IOException {
         TomlObjectNode root = (TomlObjectNode) factory.objectNode();
         TomlObjectNode currentTable = root;
         while (next != null) {
@@ -152,6 +152,63 @@ class Parser {
             throw errorContext.atPosition(lexer).generic("EOF in wrong state");
         }
         return root;
+    }*/
+
+    public ObjectNode parse() throws IOException {
+        TomlObjectNode root = (TomlObjectNode) factory.objectNode();
+        TomlObjectNode currentTable = root;
+        while (next != null) {
+            TomlToken token = peek();
+            switch (token) {
+                case UNQUOTED_KEY:
+                case STRING:
+                    parseKeyVal(currentTable, Lexer.EXPECT_EOL);
+                    break;
+                case STD_TABLE_OPEN:
+                    currentTable = parseStandardTable(root, currentTable);
+                    break;
+                case ARRAY_TABLE_OPEN:
+                    currentTable = parseArrayTable(root, currentTable);
+                    break;
+                default:
+                    throw errorContext.atPosition(lexer).unexpectedToken(token, "key or table");
+            }
+        }
+        checkEOFState();
+        return root;
+    }
+
+    private TomlObjectNode parseStandardTable(TomlObjectNode root, TomlObjectNode currentTable) throws IOException {
+        pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
+        FieldRef fieldRef = parseAndEnterKey(root, true);
+        currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
+        if (currentTable.defined) {
+            throw errorContext.atPosition(lexer).generic("Table redefined");
+        }
+        currentTable.defined = true;
+        pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
+        return currentTable;
+    }
+
+
+    private TomlObjectNode parseArrayTable(TomlObjectNode root, TomlObjectNode currentTable) throws IOException {
+        pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
+        FieldRef fieldRef = parseAndEnterKey(root, true);
+        TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
+        if (array.closed) {
+            throw errorContext.atPosition(lexer).generic("Array already finished");
+        }
+        currentTable = (TomlObjectNode) array.addObject();
+        pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
+        return currentTable;
+    }
+
+    private void checkEOFState() throws IOException {
+        assert lexer.yyatEOF();
+        int eofState = lexer.yystate();
+        if (eofState != Lexer.EXPECT_EXPRESSION && eofState != Lexer.EXPECT_EOL) {
+            throw errorContext.atPosition(lexer).generic("EOF in wrong state");
+        }
     }
 
     private FieldRef parseAndEnterKey(
