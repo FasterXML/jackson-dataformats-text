@@ -243,8 +243,10 @@ class Parser {
     private JsonNode parseDateTime(int nextState) throws IOException {
         String text = lexer.yytext();
         TomlToken token = poll(nextState);
+        boolean isDateTimeToken = token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME;
+        boolean hasSpaceAtIndex10 = text.length() > 10 && text.charAt(10) == ' ';
         // the time-delim index can be [Tt ]. java.time supports only [Tt]
-        if ((token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) && text.charAt(10) == ' ') {
+        if (isDateTimeToken && hasSpaceAtIndex10) {
             text = text.substring(0, 10) + 'T' + text.substring(11);
         }
 
