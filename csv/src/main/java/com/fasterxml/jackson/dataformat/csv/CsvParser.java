@@ -829,6 +829,8 @@ public class CsvParser
     /**
      * Method called to process the expected header line
      */
+
+    private static final int maxColumnCount = 2;
     protected void _readHeaderLine() throws IOException {
         /*
             When the header line is present and the settings ask for it
@@ -903,7 +905,7 @@ public class CsvParser
         // Ok: did we get any  columns?
         CsvSchema newSchema = builder.build();
         int newColumnCount = newSchema.size();
-        if (newColumnCount < 2) { // 1 just because we may get 'empty' header name
+        if (newColumnCount < maxColumnCount) { // 1 just because we may get 'empty' header name
             String first = (newColumnCount == 0) ? "" : newSchema.columnName(0).trim();
             if (first.length() == 0) {
                 _reportCsvMappingError("Empty header line: can not bind data");
