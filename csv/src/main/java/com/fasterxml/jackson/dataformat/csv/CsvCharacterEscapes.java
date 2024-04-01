@@ -15,6 +15,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvGenerator.Feature;
  * <li> control and quote escape - do not double up quote, escape control characters and quote.</li>
  * </ul>
  */
+
+/*
 public final class CsvCharacterEscapes extends CharacterEscapes
 {
 
@@ -99,3 +101,43 @@ public final class CsvCharacterEscapes extends CharacterEscapes
         return escapes;
     }
 }
+*/
+
+public final class CsvCharacterEscapes extends CharacterEscapes {
+    private static final long serialVersionUID = 1L;
+
+    private final int[] escapes;
+
+    private CsvCharacterEscapes(EscapeStrategy strategy) {
+        this.escapes = strategy.getEscapeCodesForAscii();
+    }
+
+    public static CsvCharacterEscapes fromCsvFeatures(int csvFeatures) {
+        EscapeStrategy strategy;
+        if (CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures)) {
+            if (Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures)) {
+                strategy = new ControlQuoteEscapeStrategy();
+            } else {
+                strategy = new QuoteEscapeStrategy();
+            }
+        } else if (Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures)) {
+            strategy = new ControlEscapeStrategy();
+        } else {
+            strategy = new NoEscapeStrategy();
+        }
+
+        return new CsvCharacterEscapes(strategy);
+    }
+
+    @Override
+    public SerializableString getEscapeSequence(int ch) {
+        return null; // unused for CSV escapes
+    }
+
+    @Override
+    public int[] getEscapeCodesForAscii() {
+        return escapes;
+    }
+}
+
+
