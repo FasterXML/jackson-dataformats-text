@@ -152,7 +152,19 @@ public class CsvParser
          *
          * Feature is disabled by default
          */
-        EMPTY_STRING_AS_NULL(false)
+        EMPTY_STRING_AS_NULL(false),
+
+        /**
+         * Feature that enables coercing an empty un-quoted {@link String} to `null`.
+         * This feature allow differentiating between an empty quoted {@link String} and an empty un-quoted {@link String}.
+         *<p>
+         * Note that this feature is only considered if
+         * {@link #EMPTY_STRING_AS_NULL}
+         * is disabled.
+         *<p>
+         * Feature is disabled by default
+         */
+        EMPTY_UNQUOTED_STRING_AS_NULL(false),
         ;
 
         final boolean _defaultState;
@@ -326,6 +338,8 @@ public class CsvParser
      */
     protected boolean _cfgEmptyStringAsNull;
 
+    protected boolean _cfgEmptyUnquotedStringAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -426,6 +440,7 @@ public class CsvParser
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     @Override
@@ -537,6 +552,7 @@ public class CsvParser
             _formatFeatures = newF;
             _reader.overrideFormatFeatures(newF);
             _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+            _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         }
         return this;
     }
@@ -555,6 +571,7 @@ public class CsvParser
     {
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -566,6 +583,7 @@ public class CsvParser
     {
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -1021,14 +1039,11 @@ public class CsvParser
             }
         }
         _state = STATE_NEXT_ENTRY;
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
+
         return JsonToken.VALUE_STRING;
     }
 
@@ -1048,14 +1063,11 @@ public class CsvParser
         // state remains the same
         _currentValue = next;
         ++_columnIndex;
-        if (_nullValue != null) {
-            if (_nullValue.equals(next)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+
+        if (_isNullValue(next)) {
             return JsonToken.VALUE_NULL;
         }
+
         return JsonToken.VALUE_STRING;
     }
 
@@ -1093,14 +1105,10 @@ public class CsvParser
         if (isEnabled(Feature.TRIM_SPACES)) {
             _currentValue = _currentValue.trim();
         }
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
+
         return JsonToken.VALUE_STRING;
     }
 
@@ -1447,5 +1455,25 @@ public class CsvParser
             sep = _schema.getArrayElementSeparator();
         }
         _arraySeparator = sep;
+    }
+
+    /**
+     * Helper method called to check whether specified String value should be considered
+     * "null" value, if so configured.
+     */
+    protected boolean _isNullValue(String value) {
+        if (_nullValue != null) {
+            if (_nullValue.equals(value)) {
+                return true;
+            }
+        }
+        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+            return true;
+        }
+        if (_cfgEmptyUnquotedStringAsNull && !_reader.isCurrentTokenQuoted() && _currentValue.isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 }
