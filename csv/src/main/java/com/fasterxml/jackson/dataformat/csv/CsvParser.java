@@ -1039,7 +1039,6 @@ public class CsvParser
             }
         }
         _state = STATE_NEXT_ENTRY;
-
         if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
@@ -1063,7 +1062,6 @@ public class CsvParser
         // state remains the same
         _currentValue = next;
         ++_columnIndex;
-
         if (_isNullValue(next)) {
             return JsonToken.VALUE_NULL;
         }
@@ -1460,6 +1458,8 @@ public class CsvParser
     /**
      * Helper method called to check whether specified String value should be considered
      * "null" value, if so configured.
+     * 
+     * @since 2.17.1
      */
     protected boolean _isNullValue(String value) {
         if (_nullValue != null) {
@@ -1467,13 +1467,12 @@ public class CsvParser
                 return true;
             }
         }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_cfgEmptyStringAsNull && value.isEmpty()) {
             return true;
         }
-        if (_cfgEmptyUnquotedStringAsNull && !_reader.isCurrentTokenQuoted() && _currentValue.isEmpty()) {
+        if (_cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted()) {
             return true;
         }
-
         return false;
     }
 }
