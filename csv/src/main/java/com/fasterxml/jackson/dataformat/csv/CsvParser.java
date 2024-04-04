@@ -1021,12 +1021,7 @@ public class CsvParser
             }
         }
         _state = STATE_NEXT_ENTRY;
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1048,12 +1043,7 @@ public class CsvParser
         // state remains the same
         _currentValue = next;
         ++_columnIndex;
-        if (_nullValue != null) {
-            if (_nullValue.equals(next)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(next)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1093,12 +1083,7 @@ public class CsvParser
         if (isEnabled(Feature.TRIM_SPACES)) {
             _currentValue = _currentValue.trim();
         }
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1447,5 +1432,24 @@ public class CsvParser
             sep = _schema.getArrayElementSeparator();
         }
         _arraySeparator = sep;
+    }
+
+
+    /**
+     * Helper method called to check whether specified String value should be considered
+     * "null" value, if so configured.
+     * 
+     * @since 2.17.1
+     */
+    protected boolean _isNullValue(String value) {
+        if (_nullValue != null) {
+            if (_nullValue.equals(value)) {
+                return true;
+            }
+        }
+        if (_cfgEmptyStringAsNull && _currentValue.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 }
