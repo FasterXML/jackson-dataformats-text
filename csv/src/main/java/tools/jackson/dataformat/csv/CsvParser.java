@@ -1345,7 +1345,7 @@ public class CsvParser
                 return true;
             }
         }
-        if (_cfgEmptyStringAsNull && _currentValue.isEmpty()) {
+        if (_cfgEmptyStringAsNull && value.isEmpty()) {
             return true;
         }
         return false;
