@@ -155,6 +155,8 @@ public class CsvDecoder
 
     /**
      * Flag that indicates whether the current token has been quoted or not.
+     *
+     * @since 2.18
      */
     protected boolean _currInputQuoted = false;
 
@@ -414,6 +416,8 @@ public class CsvDecoder
     /**
      * Tell if the current token has been quoted or not.
      * @return True if the current token has been quoted, false otherwise
+     *
+     * @since 2.18
      */
     public final boolean isCurrentTokenQuoted() {
         return _currInputQuoted;

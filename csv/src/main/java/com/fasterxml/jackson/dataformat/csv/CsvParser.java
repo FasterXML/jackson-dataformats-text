@@ -338,6 +338,9 @@ public class CsvParser
      */
     protected boolean _cfgEmptyStringAsNull;
 
+    /**
+     * @since 2.18
+     */
     protected boolean _cfgEmptyUnquotedStringAsNull;
 
     /*
@@ -1042,7 +1045,6 @@ public class CsvParser
         if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
-
         return JsonToken.VALUE_STRING;
     }
 
@@ -1065,7 +1067,6 @@ public class CsvParser
         if (_isNullValue(next)) {
             return JsonToken.VALUE_NULL;
         }
-
         return JsonToken.VALUE_STRING;
     }
 
@@ -1106,7 +1107,6 @@ public class CsvParser
         if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
-
         return JsonToken.VALUE_STRING;
     }
 
