@@ -154,6 +154,13 @@ public class CsvDecoder
      */
     protected int _currInputRowStart = 0;
 
+    /**
+     * Flag that indicates whether the current token has been quoted or not.
+     *
+     * @since 2.18
+     */
+    protected boolean _currInputQuoted = false;
+
     // // // Location info at point when current token was started
 
     /**
@@ -383,6 +390,16 @@ public class CsvDecoder
             --ptr;
         }
         return ptr - _currInputRowStart + 1; // 1-based
+    }
+
+    /**
+     * Tell if the current token has been quoted or not.
+     * @return True if the current token has been quoted, false otherwise
+     *
+     * @since 2.18
+     */
+    public final boolean isCurrentTokenQuoted() {
+        return _currInputQuoted;
     }
     
     /*
@@ -629,7 +646,8 @@ public class CsvDecoder
             return "";
         }
         // two modes: quoted, unquoted
-        if (i == _quoteChar) { // offline quoted case (longer)
+        _currInputQuoted = i == _quoteChar; // Keep track of quoting
+        if (_currInputQuoted) { // offline quoted case (longer)
             return _nextQuotedString();
         }
         if (i == _separatorChar) {

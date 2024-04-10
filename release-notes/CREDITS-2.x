@@ -263,3 +263,9 @@ Michael Edgar (@MikeEdgar)
 
 * Contributed #465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
  (2.17.0)
+
+David Pujol (@PujolDavid)
+
+* Contributed #469: (csv) Allow CSV to differentiate between `null` and empty
+  fields (foo,,bar vs. foo,"",bar)
+ (2.18.0)
