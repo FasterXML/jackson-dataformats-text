@@ -16,8 +16,11 @@ Active Maintainers:
 
 2.18.0 (not yet released)
 
-#468: Remove synchronization from `CsvMapper`
+#468: (csv) Remove synchronization from `CsvMapper`
  (contributed by @pjfanning)
+#469: (csv) Allow CSV to differentiate between `null` and empty
+  fields (foo,,bar vs. foo,"",bar)
+ (contributed by David P)
 
 2.17.0 (12-Mar-2024)
 
