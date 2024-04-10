@@ -148,11 +148,28 @@ public class CsvParser
         INSERT_NULLS_FOR_MISSING_COLUMNS(false),
 
         /**
-         * Feature that enables coercing an empty {@link String} to `null`
+         * Feature that enables coercing an empty {@link String} to `null`.
+         *<p>
+         * Note that if this setting is enabled, {@link #EMPTY_UNQUOTED_STRING_AS_NULL}
+         * has no effect.
          *
-         * Feature is disabled by default
+         * Feature is disabled by default for backwards compatibility.
          */
-        EMPTY_STRING_AS_NULL(false)
+        EMPTY_STRING_AS_NULL(false),
+
+        /**
+         * Feature that enables coercing an empty un-quoted {@link String} to `null`.
+         * This feature allow differentiating between an empty quoted {@link String} and an empty un-quoted {@link String}.
+         *<p>
+         * Note that this feature is only considered if
+         * {@link #EMPTY_STRING_AS_NULL}
+         * is disabled.
+         *<p>
+         * Feature is disabled by default for backwards compatibility.
+         *
+         * @since 2.18
+         */
+        EMPTY_UNQUOTED_STRING_AS_NULL(false),
         ;
 
         final boolean _defaultState;
@@ -326,6 +343,11 @@ public class CsvParser
      */
     protected boolean _cfgEmptyStringAsNull;
 
+    /**
+     * @since 2.18
+     */
+    protected boolean _cfgEmptyUnquotedStringAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -426,6 +448,7 @@ public class CsvParser
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     @Override
@@ -537,6 +560,7 @@ public class CsvParser
             _formatFeatures = newF;
             _reader.overrideFormatFeatures(newF);
             _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+            _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         }
         return this;
     }
@@ -555,6 +579,7 @@ public class CsvParser
     {
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -566,6 +591,7 @@ public class CsvParser
     {
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -1434,7 +1460,6 @@ public class CsvParser
         _arraySeparator = sep;
     }
 
-
     /**
      * Helper method called to check whether specified String value should be considered
      * "null" value, if so configured.
@@ -1448,6 +1473,9 @@ public class CsvParser
             }
         }
         if (_cfgEmptyStringAsNull && value.isEmpty()) {
+            return true;
+        }
+        if (_cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted()) {
             return true;
         }
         return false;
