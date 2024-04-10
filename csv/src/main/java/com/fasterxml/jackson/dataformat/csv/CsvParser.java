@@ -148,9 +148,12 @@ public class CsvParser
         INSERT_NULLS_FOR_MISSING_COLUMNS(false),
 
         /**
-         * Feature that enables coercing an empty {@link String} to `null`
+         * Feature that enables coercing an empty {@link String} to `null`.
+         *<p>
+         * Note that if this setting is enabled, {@link #EMPTY_UNQUOTED_STRING_AS_NULL}
+         * has no effect.
          *
-         * Feature is disabled by default
+         * Feature is disabled by default for backwards compatibility.
          */
         EMPTY_STRING_AS_NULL(false),
 
@@ -162,7 +165,9 @@ public class CsvParser
          * {@link #EMPTY_STRING_AS_NULL}
          * is disabled.
          *<p>
-         * Feature is disabled by default
+         * Feature is disabled by default for backwards compatibility.
+         *
+         * @since 2.18
          */
         EMPTY_UNQUOTED_STRING_AS_NULL(false),
         ;
