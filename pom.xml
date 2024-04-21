@@ -49,6 +49,13 @@
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
     </dependency>
+
+    <!-- 20-Apr-2024, tatu: JUnit4 no longer from jackson-base, so: -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <!-- Alas, need to include snapshot reference since otherwise can not find
