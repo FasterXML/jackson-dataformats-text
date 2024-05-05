@@ -22,6 +22,10 @@ Active Maintainers:
   fields (foo,,bar vs. foo,"",bar)
  (contributed by David P)
 
+2.17.1 (04-May-2024)
+
+No changes since 2.17.0
+
 2.17.0 (12-Mar-2024)
 
 #45: (csv) Allow skipping ending line break
