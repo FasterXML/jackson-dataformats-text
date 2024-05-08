@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,7 +12,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -22,22 +20,22 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 
-public class ParserTest extends TomlMapperTestBase {
+public class TomlParserTest extends TomlMapperTestBase {
     private static final ObjectMapper TOML_MAPPER = newTomlMapper();
     private static final ObjectMapper jsonMapper = JsonMapper.builder()
             .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .enable(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS)
             .build();
 
-    static ObjectNode json(@Language("json") String json) throws JsonProcessingException {
+    static ObjectNode json(@Language("json") String json) throws Exception {
         return (ObjectNode) jsonMapper.readTree(json);
     }
 
-    static ObjectNode toml(@Language("toml") String toml) throws IOException {
+    static ObjectNode toml(@Language("toml") String toml) throws Exception {
         return (ObjectNode) TOML_MAPPER.readTree(toml);
     }
 
-    static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws IOException {
+    static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws Exception {
         return Parser.parse(
                 factory, testIOContext(),
                 new StringReader(toml)
@@ -49,7 +47,7 @@ public class ParserTest extends TomlMapperTestBase {
     public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void unclosed() throws IOException {
+    public void unclosed() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("EOF");
         toml("\"abc");
@@ -58,24 +56,24 @@ public class ParserTest extends TomlMapperTestBase {
     // from the manual
 
     @Test
-    public void keyValuePair() throws IOException {
+    public void keyValuePair() throws Exception {
         Assert.assertEquals(
                 json("{\"key\": \"value\"}"),
                 toml("key = \"value\""));
     }
 
     @Test(expected = TomlStreamReadException.class)
-    public void unspecified() throws IOException {
+    public void unspecified() throws Exception {
         toml("key =");
     }
 
     @Test(expected = TomlStreamReadException.class)
-    public void singleLine() throws IOException {
+    public void singleLine() throws Exception {
         toml("first = \"Tom\" last = \"Preston-Werner\"");
     }
 
     @Test
-    public void comment() throws IOException {
+    public void comment() throws Exception {
         Assert.assertEquals(
                 json("{\"key\": \"value\", \"another\": \"# This is not a comment\"}"),
                 toml("# This is a full-line comment\n" +
@@ -84,7 +82,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void bareKeys() throws IOException {
+    public void bareKeys() throws Exception {
         Assert.assertEquals(
                 json("{\"key\": \"value\", \"bare_key\": \"value\", \"bare-key\": \"value\", \"1234\": \"value\"}"),
                 toml("key = \"value\"\n" +
@@ -94,7 +92,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void quotedKeys() throws IOException {
+    public void quotedKeys() throws Exception {
         Assert.assertEquals(
                 json("{\"127.0.0.1\": \"value\", \"character encoding\": \"value\", \"ʎǝʞ\": \"value\", \"key2\": \"value\", \"quoted \\\"value\\\"\": \"value\"}"),
                 toml("\"127.0.0.1\" = \"value\"\n" +
@@ -105,18 +103,18 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test(expected = TomlStreamReadException.class)
-    public void bareKeyNonEmpty() throws IOException {
+    public void bareKeyNonEmpty() throws Exception {
         toml("= \"no key name\"");
     }
 
     @Test
-    public void quotedKeyEmpty() throws IOException {
+    public void quotedKeyEmpty() throws Exception {
         Assert.assertEquals(json("{\"\": \"blank\"}"), toml("\"\" = \"blank\""));
         Assert.assertEquals(json("{\"\": \"blank\"}"), toml("'' = 'blank'"));
     }
 
     @Test
-    public void dottedKeys() throws IOException {
+    public void dottedKeys() throws Exception {
         Assert.assertEquals(
                 json("{\n" +
                         "  \"name\": \"Orange\",\n" +
@@ -135,7 +133,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void dottedKeysWhitespace() throws IOException {
+    public void dottedKeysWhitespace() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"name\": \"banana\", \"color\": \"yellow\", \"flavor\": \"banana\"}}"),
                 toml("fruit.name = \"banana\"     # this is best practice\n" +
@@ -144,7 +142,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void collision() throws IOException {
+    public void collision() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("name = \"Tom\"\n" +
@@ -152,7 +150,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void collisionQuoted() throws IOException {
+    public void collisionQuoted() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("spelling = \"favorite\"\n" +
@@ -160,7 +158,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void keyMixed() throws IOException {
+    public void keyMixed() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"apple\": {\"smooth\": true}, \"orange\": 2}}"),
                 toml("# This makes the key \"fruit\" into a table.\n" +
@@ -172,7 +170,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void collisionNested() throws IOException {
+    public void collisionNested() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type NUMBER");
         toml("# This defines the value of fruit.apple to be an integer.\n" +
@@ -184,7 +182,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void outOfOrder() throws IOException {
+    public void outOfOrder() throws Exception {
         Assert.assertEquals(
                 json("{\"apple\": {\"type\": \"fruit\",\"skin\": \"thin\", \"color\": \"red\"}, \"orange\": {\"type\": \"fruit\", \"skin\": \"thick\", \"color\": \"orange\"}}"),
                 toml("apple.type = \"fruit\"\n" +
@@ -199,7 +197,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void inOrder() throws IOException {
+    public void inOrder() throws Exception {
         Assert.assertEquals(
                 json("{\"apple\": {\"type\": \"fruit\",\"skin\": \"thin\", \"color\": \"red\"}, \"orange\": {\"type\": \"fruit\", \"skin\": \"thick\", \"color\": \"orange\"}}"),
                 toml("apple.type = \"fruit\"\n" +
@@ -213,7 +211,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void numberDottedKey() throws IOException {
+    public void numberDottedKey() throws Exception {
         Assert.assertEquals(
                 json("{ \"3\": { \"14159\": \"pi\" } }"),
                 // intellij doesn't like this one :)
@@ -222,7 +220,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void stringBasic() throws IOException {
+    public void stringBasic() throws Exception {
         Assert.assertEquals(
                 json("{ \"str\": \"I'm a string. \\\"You can quote me\\\". Name\\tJosé\\nLocation\\tSF.\" }"),
                 toml("str = \"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\"")
@@ -230,7 +228,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void multiLineBasic() throws IOException {
+    public void multiLineBasic() throws Exception {
         Assert.assertEquals(
                 json("{\"str1\": \"Roses are red\\nViolets are blue\"}"),
                 toml("str1 = \"\"\"\n" +
@@ -240,7 +238,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void multiLineEscapeNl() throws IOException {
+    public void multiLineEscapeNl() throws Exception {
         Assert.assertEquals(
                 json("{\"str1\": \"The quick brown fox jumps over the lazy dog.\",\"str2\": \"The quick brown fox jumps over the lazy dog.\",\"str3\": \"The quick brown fox jumps over the lazy dog.\"}"),
                 toml("str1 = \"The quick brown fox jumps over the lazy dog.\"\n" +
@@ -261,7 +259,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void escapedQuotes() throws IOException {
+    public void escapedQuotes() throws Exception {
         Assert.assertEquals(
                 json("{\"str4\": \"Here are two quotation marks: \\\"\\\". Simple enough.\", \"str5\": \"Here are three quotation marks: \\\"\\\"\\\".\", \"str6\": \"Here are fifteen quotation marks: \\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\".\", \"str7\": \"\\\"This,\\\" she said, \\\"is just a pointless statement.\\\"\"}"),
                 toml("str4 = \"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\"\n" +
@@ -275,14 +273,14 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void missingQuotesEscape() throws IOException {
+    public void missingQuotesEscape() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\"");
     }
 
     @Test
-    public void literalStrings() throws IOException {
+    public void literalStrings() throws Exception {
         Assert.assertEquals(
                 json("{\"winpath\": \"C:\\\\Users\\\\nodejs\\\\templates\", \"winpath2\": \"\\\\\\\\ServerX\\\\admin$\\\\system32\\\\\", \"quoted\": \"Tom \\\"Dubs\\\" Preston-Werner\", \"regex\": \"<\\\\i\\\\c*\\\\s*>\"}"),
                 toml("winpath  = 'C:\\Users\\nodejs\\templates'\n" +
@@ -293,7 +291,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void multiLineLiteral() throws IOException {
+    public void multiLineLiteral() throws Exception {
         Assert.assertEquals(
                 json("{\"regex2\": \"I [dw]on't need \\\\d{2} apples\", \"lines\": \"The first newline is\\ntrimmed in raw strings.\\n   All other whitespace\\n   is preserved.\\n\"}"),
                 toml("regex2 = '''I [dw]on't need \\d{2} apples'''\n" +
@@ -307,7 +305,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void multiLineLiteralQuotes() throws IOException {
+    public void multiLineLiteralQuotes() throws Exception {
         Assert.assertEquals(
                 json("{\"quot15\": \"Here are fifteen quotation marks: \\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\\\"\", \"apos15\": \"Here are fifteen apostrophes: '''''''''''''''\", \"str\": \"'That,' she said, 'is still pointless.'\"}"),
                 toml("quot15 = '''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''\n" +
@@ -317,7 +315,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void integer() throws IOException {
+    public void integer() throws Exception {
         Assert.assertEquals(
                 json("{\"int1\": 99, \"int2\": 42, \"int3\": 0, \"int4\": -17}"),
                 toml("int1 = +99\n" +
@@ -328,7 +326,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void integerUnderscore() throws IOException {
+    public void integerUnderscore() throws Exception {
         Assert.assertEquals(
                 json("{\"int5\": 1000, \"int6\": 5349221, \"int7\": 5349221, \"int8\": 12345}"),
                 toml("int5 = 1_000\n" +
@@ -339,7 +337,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void integerBase() throws IOException {
+    public void integerBase() throws Exception {
         Assert.assertEquals(
                 json("{\"hex1\": 3735928559, \"hex2\": 3735928559, \"hex3\": 3735928559, \"oct1\": 342391, \"oct2\": 493, \"bin1\": 214}"),
                 toml("# hexadecimal with prefix `0x`\n" +
@@ -357,10 +355,9 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void floats() throws IOException {
-        Assert.assertEquals(
-                json("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}"),
-                toml("# fractional\n" +
+    public void floats() throws Exception {
+        ObjectNode json = json("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}");
+        ObjectNode toml = toml("# fractional\n" +
                         "flt1 = +1.0\n" +
                         "flt2 = 3.1415\n" +
                         "flt3 = -0.01\n" +
@@ -372,33 +369,33 @@ public class ParserTest extends TomlMapperTestBase {
                         "flt6 = -2E-2\n" +
                         "\n" +
                         "# both\n" +
-                        "flt7 = 6.626e-34")
-        );
+                        "flt7 = 6.626e-34");
+        Assert.assertEquals(json, toml);
     }
 
     @Test
-    public void invalidFloat1() throws IOException {
+    public void invalidFloat1() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown token");
         toml("invalid_float_1 = .7");
     }
 
     @Test
-    public void invalidFloat2() throws IOException {
+    public void invalidFloat2() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_2 = 7.");
     }
 
     @Test
-    public void invalidFloat3() throws IOException {
+    public void invalidFloat3() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("invalid_float_3 = 3.e+20");
     }
 
     @Test
-    public void floatUnderscore() throws IOException {
+    public void floatUnderscore() throws Exception {
         Assert.assertEquals(
                 json("{\"flt8\": 224617.445991228}"),
                 toml("flt8 = 224_617.445_991_228")
@@ -406,7 +403,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void floatSpecial() throws IOException {
+    public void floatSpecial() throws Exception {
         Assert.assertEquals(
                 json("{\"sf1\": Infinity, \"sf2\": Infinity, \"sf3\": -Infinity, \"sf4\": NaN, \"sf5\": NaN, \"sf6\": NaN}"),
                 toml("# infinity\n" +
@@ -422,7 +419,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void booleans() throws IOException {
+    public void booleans() throws Exception {
         Assert.assertEquals(
                 json("{\"bool1\": true, \"bool2\": false}"),
                 toml("bool1 = true\n" +
@@ -432,7 +429,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void odt() throws IOException {
+    public void odt() throws Exception {
         Assert.assertEquals(
                 json("{\"odt1\": \"1979-05-27T07:32:00Z\", \"odt2\": \"1979-05-27T00:32:00-07:00\", \"odt3\": \"1979-05-27T00:32:00.999999-07:00\", \"odt4\": \"1979-05-27T07:32:00Z\"}"),
                 toml("odt1 = 1979-05-27T07:32:00Z\n" +
@@ -443,7 +440,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void ldt() throws IOException {
+    public void ldt() throws Exception {
         Assert.assertEquals(
                 json("{\"ldt1\": \"1979-05-27T07:32:00\", \"ldt2\": \"1979-05-27T00:32:00.999999\"}"),
                 toml("ldt1 = 1979-05-27T07:32:00\n" +
@@ -452,7 +449,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void ld() throws IOException {
+    public void ld() throws Exception {
         Assert.assertEquals(
                 json("{\"ld1\": \"1979-05-27\"}"),
                 toml("ld1 = 1979-05-27")
@@ -460,7 +457,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void lt() throws IOException {
+    public void lt() throws Exception {
         Assert.assertEquals(
                 json("{\"lt1\": \"07:32:00\", \"lt2\": \"00:32:00.999999\"}"),
                 toml("lt1 = 07:32:00\n" +
@@ -469,7 +466,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void array() throws IOException {
+    public void array() throws Exception {
         Assert.assertEquals(
                 json("{\"integers\": [1,2,3], \"colors\": [\"red\",\"yellow\",\"green\"], \"nested_arrays_of_ints\": [ [ 1, 2 ], [3, 4, 5] ], \"nested_mixed_array\": [ [ 1, 2 ], [\"a\", \"b\", \"c\"] ], \"string_array\": [ \"all\", \"strings\", \"are the same\", \"type\" ],\n" +
                         "  \"numbers\": " +
@@ -495,7 +492,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayMultiLine() throws IOException {
+    public void arrayMultiLine() throws Exception {
         Assert.assertEquals(
                 json("{\"integers2\": [1,2,3]," +
                         "\"integers3\": [1,2]" +
@@ -512,7 +509,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void table() throws IOException {
+    public void table() throws Exception {
         Assert.assertEquals(
                 json("{\"table\": {}}"),
                 toml("[table]")
@@ -520,7 +517,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void table2() throws IOException {
+    public void table2() throws Exception {
         Assert.assertEquals(
                 json("{\"table-1\": {\"key1\": \"some string\", \"key2\": 123}, \"table-2\": {\"key1\": \"another string\", \"key2\": 456}}"),
                 toml("[table-1]\n" +
@@ -534,7 +531,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void tableQuoted() throws IOException {
+    public void tableQuoted() throws Exception {
         Assert.assertEquals(
                 json("{\"dog\": {\"tater.man\": {\"type\": {\"name\": \"pug\"}}}}"),
                 toml("[dog.\"tater.man\"]\n" +
@@ -543,7 +540,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void tableWhitespace() throws IOException {
+    public void tableWhitespace() throws Exception {
         Assert.assertEquals(
                 json("{\"a\": {\"b\": {" +
                         "\"c\": {}" +
@@ -556,7 +553,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void order() throws IOException {
+    public void order() throws Exception {
         Assert.assertEquals(
                 json("{\"x\": {\"y\": {" +
                         "\"z\": {\"w\": {}}" +
@@ -571,7 +568,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void duplicateTable() throws IOException {
+    public void duplicateTable() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
@@ -582,7 +579,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void mixedTable() throws IOException {
+    public void mixedTable() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type STRING");
         toml("[fruit]\n" +
@@ -593,7 +590,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void tableOutOfOrder() throws IOException {
+    public void tableOutOfOrder() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"apple\": {}, \"orange\": {}}, \"animal\": {}}"),
                 toml("[fruit.apple]\n" +
@@ -603,7 +600,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void tableInOrder() throws IOException {
+    public void tableInOrder() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"apple\": {}, \"orange\": {}}, \"animal\": {}}"),
                 toml("[fruit.apple]\n" +
@@ -613,7 +610,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void rootTable() throws IOException {
+    public void rootTable() throws Exception {
         Assert.assertEquals(
                 json("{\"name\": \"Fido\", \"breed\": \"pug\", \"owner\": {\"name\": \"Regina Dogman\"}}"),
                 toml("# Top-level table begins.\n" +
@@ -627,7 +624,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void dottedDefinesTable() throws IOException {
+    public void dottedDefinesTable() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"apple\": {\"color\": \"red\", " +
                         "\"taste\": {\"sweet\": true}" +
@@ -643,7 +640,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void dottedCollisionRoot() throws IOException {
+    public void dottedCollisionRoot() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("fruit.apple.color = \"red\"\n" +
@@ -656,7 +653,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void dottedCollisionNest() throws IOException {
+    public void dottedCollisionNest() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Table redefined");
         toml("[fruit]\n" +
@@ -667,7 +664,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void dottedSubTable() throws IOException {
+    public void dottedSubTable() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"apple\": {\"color\": \"red\", " +
                         "\"taste\": {\"sweet\": true}, \"texture\": {\"smooth\": true}" +
@@ -685,7 +682,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void inlineTable() throws IOException {
+    public void inlineTable() throws Exception {
         Assert.assertEquals(
                 json("{\"name\": {\"first\": \"Tom\", \"last\": \"Preston-Werner\"}, \"point\": {\"x\": 1, \"y\": 2}, \"animal\": {\"type\": {\"name\": \"pug\"}}}"),
                 toml("name = { first = \"Tom\", last = \"Preston-Werner\" }\n" +
@@ -695,7 +692,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void inlineTableSelfContained() throws IOException {
+    public void inlineTableSelfContained() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Object already closed");
         toml("[product]\n" +
@@ -704,7 +701,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void inlineTableSelfContained2() throws IOException {
+    public void inlineTableSelfContained2() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Duplicate key");
         toml("[product]\n" +
@@ -713,7 +710,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayTable() throws IOException {
+    public void arrayTable() throws Exception {
         Assert.assertEquals(
                 json("{\n" +
                         "  \"products\": [\n" +
@@ -737,7 +734,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayTableDotted() throws IOException {
+    public void arrayTableDotted() throws Exception {
         Assert.assertEquals(
                 json("{\n" +
                         "  \"fruits\": [\n" +
@@ -783,7 +780,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayTableStillMissing() throws IOException {
+    public void arrayTableStillMissing() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
@@ -797,7 +794,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayInlineAndTable() throws IOException {
+    public void arrayInlineAndTable() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Array already finished");
         toml("# INVALID TOML DOC\n" +
@@ -807,7 +804,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayCollision1() throws IOException {
+    public void arrayCollision1() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-object value of type ARRAY");
         toml("# INVALID TOML DOC\n" +
@@ -823,7 +820,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void arrayCollision2() throws IOException {
+    public void arrayCollision2() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Path into existing non-array value of type OBJECT");
         toml("# INVALID TOML DOC\n" +
@@ -840,7 +837,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void points() throws IOException {
+    public void points() throws Exception {
         Assert.assertEquals(
                 json("{\"points\":  [ { \"x\":1, \"y\":2, \"z\":3 },\n" +
                         "  { \"x\":7, \"y\":8, \"z\":9 },\n" +
@@ -855,14 +852,14 @@ public class ParserTest extends TomlMapperTestBase {
     // following are our tests :)
 
     @Test
-    public void inlineTableTrailingComma() throws IOException {
+    public void inlineTableTrailingComma() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Trailing comma not permitted for inline tables");
         toml("foo = {bar = 'baz',}");
     }
 
     @Test
-    public void inlineTableEmpty() throws IOException {
+    public void inlineTableEmpty() throws Exception {
         Assert.assertEquals(
                 json("{\"foo\": {}}"),
                 toml("foo = {}")
@@ -870,7 +867,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void inlineTableNl() throws IOException {
+    public void inlineTableNl() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Newline not permitted here");
         toml("foo = {bar = 'baz',\n" +
@@ -878,7 +875,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void extendedUnicodeEscape() throws IOException {
+    public void extendedUnicodeEscape() throws Exception {
         // 🆒
         Assert.assertEquals(
                 json("{\"foo\": \"\\uD83C\\uDD92\"}"),
@@ -887,14 +884,14 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void extendedUnicodeEscapeInvalid() throws IOException {
+    public void extendedUnicodeEscapeInvalid() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Invalid code point ffffffff");
         toml("foo = \"\\Uffffffff\"");
     }
 
     @Test
-    public void intTypes() throws IOException {
+    public void intTypes() throws Exception {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("int1", 99)
@@ -907,7 +904,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void longBase() throws IOException {
+    public void longBase() throws Exception {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("hex1", 0xDDEADBEEFL)
@@ -924,7 +921,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void bigintBase() throws IOException {
+    public void bigintBase() throws Exception {
         Assert.assertEquals(
                 JsonNodeFactory.instance.objectNode()
                         .put("hex1", new BigInteger("DDEADBEEFDDEADBEEF", 16))
@@ -941,7 +938,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void javaTimeDeser() throws IOException {
+    public void javaTimeDeser() throws Exception {
         // this is the same test as above, except with explicit java.time deserialization
         final TomlFactory tomlFactory = newTomlFactory();
         tomlFactory.enable(TomlReadFeature.PARSE_JAVA_TIME);
@@ -982,7 +979,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void controlCharInComment() throws IOException {
+    public void controlCharInComment() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Illegal control character");
         // https://github.com/toml-lang/toml/pull/812
@@ -990,7 +987,7 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void controlCharInLiteralString() throws IOException {
+    public void controlCharInLiteralString() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Illegal control character");
         // Not explicit in spec, but only in the abnf
@@ -998,35 +995,35 @@ public class ParserTest extends TomlMapperTestBase {
     }
 
     @Test
-    public void zeroPrefixedInt() throws IOException {
+    public void zeroPrefixedInt() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Zero-prefixed ints are not valid");
         toml("foo = 01");
     }
 
     @Test
-    public void signedBase() throws IOException {
+    public void signedBase() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("More data after value has already ended. Invalid value preceding this position?");
         toml("foo = +0b1");
     }
 
     @Test
-    public void illegalComment() throws IOException {
+    public void illegalComment() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Comment not permitted here");
         toml("foo = # bar");
     }
 
     @Test
-    public void unknownEscape() throws IOException {
+    public void unknownEscape() throws Exception {
         expectedException.expect(TomlStreamReadException.class);
         expectedException.expectMessage("Unknown escape sequence");
         toml("foo = \"\\k\"");
     }
 
     @Test
-    public void chunkEdge() throws IOException {
+    public void chunkEdge() throws Exception {
         char[] chars = new char[200];
         int bufferLength = chars.length;
 

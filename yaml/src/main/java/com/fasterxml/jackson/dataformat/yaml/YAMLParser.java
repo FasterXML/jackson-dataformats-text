@@ -375,8 +375,17 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
-    @Override
-    public JsonLocation getTokenLocation()
+    @Override // since 2.17
+    public JsonLocation currentLocation() {
+        // can assume we are at the end of token now...
+        if (_lastEvent == null) {
+            return JsonLocation.NA;
+        }
+        return _locationFor(_lastEvent.getEndMark());
+    }
+
+    @Override // since 2.17
+    public JsonLocation currentTokenLocation()
     {
         if (_lastEvent == null) {
             return JsonLocation.NA;
@@ -384,14 +393,13 @@ public class YAMLParser extends ParserBase
         return _locationFor(_lastEvent.getStartMark());
     }
 
+    @Deprecated // since 2.17
     @Override
-    public JsonLocation getCurrentLocation() {
-        // can assume we are at the end of token now...
-        if (_lastEvent == null) {
-            return JsonLocation.NA;
-        }
-        return _locationFor(_lastEvent.getEndMark());
-    }
+    public JsonLocation getCurrentLocation() { return currentLocation(); }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getTokenLocation() { return currentTokenLocation(); }
     
     protected JsonLocation _locationFor(Mark m)
     {
@@ -433,6 +441,13 @@ public class YAMLParser extends ParserBase
                         (this, (org.yaml.snakeyaml.error.MarkedYAMLException) e);
                 }
                 throw new JacksonYAMLParseException(this, e.getMessage(), e);
+            } catch (NumberFormatException e) {
+                // 12-Jan-2024, tatu: As per https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=63274
+                //    we seem to have unhandled case by SnakeYAML
+                throw _constructError(String.format(
+                        "Malformed Number token: failed to tokenize due to (%s): %s",
+                        e.getClass().getName(), e.getMessage()),
+                        e);
             }
             // is null ok? Assume it is, for now, consider to be same as end-of-doc
             if (evt == null) {
@@ -502,7 +517,7 @@ public class YAMLParser extends ParserBase
                 Mark m = evt.getStartMark();
                 MappingStartEvent map = (MappingStartEvent) evt;
                 _currentAnchor = map.getAnchor();
-                _parsingContext = _parsingContext.createChildObjectContext(m.getLine(), m.getColumn());
+                createChildObjectContext(m.getLine(), m.getColumn());
                 return (_currToken = JsonToken.START_OBJECT);
             }
             if (evt.is(Event.ID.MappingEnd)) { // actually error; can not have map-end here
@@ -511,7 +526,7 @@ public class YAMLParser extends ParserBase
             if (evt.is(Event.ID.SequenceStart)) {
                 Mark m = evt.getStartMark();
                 _currentAnchor = ((NodeEvent)evt).getAnchor();
-                _parsingContext = _parsingContext.createChildArrayContext(m.getLine(), m.getColumn());
+                createChildArrayContext(m.getLine(), m.getColumn());
                 return (_currToken = JsonToken.START_ARRAY);
             }
             if (evt.is(Event.ID.SequenceEnd)) {
@@ -915,12 +930,32 @@ public class YAMLParser extends ParserBase
     /**********************************************************
      */
 
+    @Override // since 2.17
+    public String currentName() throws IOException
+    {
+        if (_currToken == JsonToken.FIELD_NAME) {
+            return _currentFieldName;
+        }
+        return super.currentName();
+    }
+
+    // NOTE: must override just to avoid problems b/w this and `currentName()`
+    // calls wrt parent definitions
+    @Deprecated // since 2.17
+    @Override
+    public String getCurrentName() throws IOException {
+        if (_currToken == JsonToken.FIELD_NAME) {
+            return _currentFieldName;
+        }
+        return super.getCurrentName();
+    }
+
     // For now we do not store char[] representation...
     @Override
     public boolean hasTextCharacters() {
         return false;
     }
-    
+
     @Override
     public String getText() throws IOException
     {
@@ -937,15 +972,6 @@ public class YAMLParser extends ParserBase
             return _currToken.asString();
         }
         return null;
-    }
-
-    @Override
-    public String getCurrentName() throws IOException
-    {
-        if (_currToken == JsonToken.FIELD_NAME) {
-            return _currentFieldName;
-        }
-        return super.getCurrentName();
     }
 
     @Override
@@ -1007,16 +1033,29 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        return NumberTypeFP.UNKNOWN;
+    }
+
     @Override
     public Object getNumberValueDeferred() throws IOException {
         // 01-Feb-2023, tatu: ParserBase implementation does not quite work
         //   due to refactoring. So let's try to cobble something together
 
         if (_currToken == JsonToken.VALUE_NUMBER_INT) {
-            // For integrals, use eager decoding for all ints, longs (and
-            // some cheaper BigIntegers)
-            if (_cleanedTextValue.length() <= 18) {
-                return getNumberValue();
+            // We might already have suitable value?
+            if ((_numTypesValid & NR_INT) != 0) {
+                return _numberInt;
+            }
+            if ((_numTypesValid & NR_LONG) != 0) {
+                return _numberLong;
+            }
+            if ((_numTypesValid & NR_BIGINT) != 0) {
+                return _getBigInteger();
+            }
+            if (_cleanedTextValue == null) {
+                _reportError("Internal number decoding error: `_cleanedTextValue` null when nothing decoded for `JsonToken.VALUE_NUMBER_INT`");
             }
             return _cleanedTextValue;
         }
@@ -1049,7 +1088,7 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
-                _numberInt = Integer.parseInt(_cleanedTextValue);
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
                 return;
             }
@@ -1130,8 +1169,9 @@ public class YAMLParser extends ParserBase
                 len--;
             }
             if (len <= 9) { // definitely fits in int
+                _numberInt = _decodeInt(_cleanedTextValue, 10);
                 _numTypesValid = NR_INT;
-                return (_numberInt = Integer.parseInt(_cleanedTextValue));
+                return _numberInt;
             }
         }
         _parseNumericValue(NR_INT);
@@ -1205,7 +1245,7 @@ public class YAMLParser extends ParserBase
             }
         }
         _cleanedTextValue = sb.toString();
-        if (_cleanedTextValue.isEmpty()) {
+        if (_cleanedTextValue.isEmpty() || "-".equals(_cleanedTextValue)) {
             _reportError(String.format("Invalid number ('%s')", str));
         }
         return JsonToken.VALUE_NUMBER_INT;

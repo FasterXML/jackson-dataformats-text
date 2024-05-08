@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerator;
 
 import com.fasterxml.jackson.core.StreamWriteFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
+
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.csv.*;
@@ -88,8 +89,14 @@ public class CSVGeneratorTest extends ModuleTestBase
 
         FiveMinuteUser user = new FiveMinuteUser("Silu", "Seppala", false, Gender.MALE,
                 new byte[] { 1, 2, 3, 4, 5});
-        String csv = MAPPER.writer(schema).writeValueAsString(user);
-        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n", csv);
+        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false\n",
+                MAPPER.writer(schema).writeValueAsString(user));
+
+        // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF:
+        assertEquals("Silu,Seppala,MALE,AQIDBAU=,false",
+                MAPPER.writer(schema)
+                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .writeValueAsString(user));
     }
 
     public void testSimpleWithAutoSchema() throws Exception
@@ -102,10 +109,17 @@ public class CSVGeneratorTest extends ModuleTestBase
     {
         CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class).withHeader();
         FiveMinuteUser user = new FiveMinuteUser("Barbie", "Benton", false, Gender.FEMALE, null);
-        String result = MAPPER.writer(schema).writeValueAsString(user);
         assertEquals("firstName,lastName,gender,verified,userImage\n"
-                +"Barbie,Benton,FEMALE,false,\n", result);
-    }
+                +"Barbie,Benton,FEMALE,false,\n",
+                MAPPER.writer(schema).writeValueAsString(user));
+
+        // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF:
+        assertEquals("firstName,lastName,gender,verified,userImage\n"
+                +"Barbie,Benton,FEMALE,false,",
+                MAPPER.writer(schema)
+                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .writeValueAsString(user));
+}
 
     /**
      * Test that verifies that if a header line is needed, configured schema
@@ -118,7 +132,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         try {
             MAPPER.writer(schema).writeValueAsString(user);
             fail("Should fail without columns");
-        } catch (JsonMappingException e) {
+        } catch (DatabindException e) {
             verifyException(e, "contains no column names");
         }
     }

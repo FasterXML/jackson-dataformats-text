@@ -148,11 +148,28 @@ public class CsvParser
         INSERT_NULLS_FOR_MISSING_COLUMNS(false),
 
         /**
-         * Feature that enables coercing an empty {@link String} to `null`
+         * Feature that enables coercing an empty {@link String} to `null`.
+         *<p>
+         * Note that if this setting is enabled, {@link #EMPTY_UNQUOTED_STRING_AS_NULL}
+         * has no effect.
          *
-         * Feature is disabled by default
+         * Feature is disabled by default for backwards compatibility.
          */
-        EMPTY_STRING_AS_NULL(false)
+        EMPTY_STRING_AS_NULL(false),
+
+        /**
+         * Feature that enables coercing an empty un-quoted {@link String} to `null`.
+         * This feature allow differentiating between an empty quoted {@link String} and an empty un-quoted {@link String}.
+         *<p>
+         * Note that this feature is only considered if
+         * {@link #EMPTY_STRING_AS_NULL}
+         * is disabled.
+         *<p>
+         * Feature is disabled by default for backwards compatibility.
+         *
+         * @since 2.18
+         */
+        EMPTY_UNQUOTED_STRING_AS_NULL(false),
         ;
 
         final boolean _defaultState;
@@ -326,6 +343,11 @@ public class CsvParser
      */
     protected boolean _cfgEmptyStringAsNull;
 
+    /**
+     * @since 2.18
+     */
+    protected boolean _cfgEmptyUnquotedStringAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -426,6 +448,7 @@ public class CsvParser
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     @Override
@@ -537,6 +560,7 @@ public class CsvParser
             _formatFeatures = newF;
             _reader.overrideFormatFeatures(newF);
             _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+            _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         }
         return this;
     }
@@ -555,6 +579,7 @@ public class CsvParser
     {
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -566,6 +591,7 @@ public class CsvParser
     {
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -612,15 +638,23 @@ public class CsvParser
         return _parsingContext;
     }
 
-    @Override
-    public JsonLocation getTokenLocation() {
+    @Override // since 2.17
+    public JsonLocation currentLocation() {
+        return _reader.getCurrentLocation();
+    }
+
+    @Override // since 2.17
+    public JsonLocation currentTokenLocation() {
         return _reader.getTokenLocation();
     }
 
+    @Deprecated // since 2.17
     @Override
-    public JsonLocation getCurrentLocation() {
-        return _reader.getCurrentLocation();
-    }
+    public JsonLocation getCurrentLocation() { return currentLocation(); }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getTokenLocation() { return currentTokenLocation(); }
 
     @Override
     public Object getInputSource() {
@@ -695,14 +729,20 @@ public class CsvParser
         return (t == JsonToken.VALUE_NUMBER_INT);
     }
 
-    @Override
-    public String getCurrentName() throws IOException {
+    @Override // since 2.17
+    public String currentName() throws IOException {
         return _currentName;
     }
 
     @Override
     public void overrideCurrentName(String name) {
         _currentName = name;
+    }
+
+    @Deprecated // since 2.17
+    @Override
+    public String getCurrentName() throws IOException {
+        return currentName();
     }
 
     @Override
@@ -1007,12 +1047,7 @@ public class CsvParser
             }
         }
         _state = STATE_NEXT_ENTRY;
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1034,12 +1069,7 @@ public class CsvParser
         // state remains the same
         _currentValue = next;
         ++_columnIndex;
-        if (_nullValue != null) {
-            if (_nullValue.equals(next)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(next)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1079,12 +1109,7 @@ public class CsvParser
         if (isEnabled(Feature.TRIM_SPACES)) {
             _currentValue = _currentValue.trim();
         }
-        if (_nullValue != null) {
-            if (_nullValue.equals(_currentValue)) {
-                return JsonToken.VALUE_NULL;
-            }
-        }
-        if (_cfgEmptyStringAsNull && "".equals(_currentValue)) {
+        if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
@@ -1318,6 +1343,12 @@ public class CsvParser
         return _reader.getNumberType();
     }
 
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        // Could theoretically delegate but for now just do:
+        return NumberTypeFP.UNKNOWN;
+    }
+
     @Override
     public Number getNumberValue() throws IOException {
         return _reader.getNumberValue(false);
@@ -1427,5 +1458,26 @@ public class CsvParser
             sep = _schema.getArrayElementSeparator();
         }
         _arraySeparator = sep;
+    }
+
+    /**
+     * Helper method called to check whether specified String value should be considered
+     * "null" value, if so configured.
+     * 
+     * @since 2.17.1
+     */
+    protected boolean _isNullValue(String value) {
+        if (_nullValue != null) {
+            if (_nullValue.equals(value)) {
+                return true;
+            }
+        }
+        if (_cfgEmptyStringAsNull && value.isEmpty()) {
+            return true;
+        }
+        if (_cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted()) {
+            return true;
+        }
+        return false;
     }
 }

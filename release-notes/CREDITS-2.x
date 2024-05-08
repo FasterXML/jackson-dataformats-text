@@ -244,3 +244,22 @@ Peter Haumer (phaumer@github)
 
 * Reported #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
  (2.15.1)
+
+Arthur Chan (arthurscchan@github)
+
+* Contributed fix for #445: `YAMLParser` throws unexpected `NullPointerException` in certain
+  number parsing cases
+ (2.16.1)
+* Contributed fix for #454: (yaml) Unexpected `NumberFormatException` in `YAMLParser`
+ (2.17.0)
+
+Mathieu Lavigne (@mathieu-lavigne)
+
+* Proposed #45 (and suggested implementation): (csv) Allow skipping ending line break
+  (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
+ (2.17.0)
+
+Michael Edgar (@MikeEdgar)
+
+* Contributed #465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
+ (2.17.0)

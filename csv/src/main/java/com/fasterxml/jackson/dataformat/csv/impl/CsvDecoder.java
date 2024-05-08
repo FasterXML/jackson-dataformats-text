@@ -153,6 +153,13 @@ public class CsvDecoder
      */
     protected int _currInputRowStart = 0;
 
+    /**
+     * Flag that indicates whether the current token has been quoted or not.
+     *
+     * @since 2.18
+     */
+    protected boolean _currInputQuoted = false;
+
     // // // Location info at point when current token was started
 
     /**
@@ -404,6 +411,16 @@ public class CsvDecoder
             --ptr;
         }
         return ptr - _currInputRowStart + 1; // 1-based
+    }
+
+    /**
+     * Tell if the current token has been quoted or not.
+     * @return True if the current token has been quoted, false otherwise
+     *
+     * @since 2.18
+     */
+    public final boolean isCurrentTokenQuoted() {
+        return _currInputQuoted;
     }
     
     /*
@@ -673,7 +690,8 @@ public class CsvDecoder
             return "";
         }
         // two modes: quoted, unquoted
-        if (i == _quoteChar) { // offline quoted case (longer)
+        _currInputQuoted = i == _quoteChar; // Keep track of quoting
+        if (_currInputQuoted) { // offline quoted case (longer)
             return _nextQuotedString();
         }
         if (i == _separatorChar) {
@@ -832,13 +850,20 @@ public class CsvDecoder
                     _owner._reportParsingError("Missing closing quote for value"); // should indicate start position?
                 }
                 ptr = _inputPtr;
-                if (checkLF && inputBuffer[ptr] == '\n') {
-                    // undo earlier advancement, to keep line number correct
-                    --_currInputRow;
+                if (checkLF) {
+                    checkLF = false; // better reset
+                    if (inputBuffer[ptr] == '\n') {
+                        // undo earlier advancement, to keep line number correct
+                        --_currInputRow;
+                    }
                 }
             }
+            // 11-Feb-2024, tatu: Not quite sure what was supposed to happen here;
+            //   but nothing was done. Leaving for now, remove from 2.18 or later
+            /*
             if (checkLF) { // had a "hanging" CR in parse loop; check now
             }
+            */
             if (outPtr >= outBuf.length) {
                 outBuf = _textBuffer.finishCurrentSegment();
                 outPtr = 0;

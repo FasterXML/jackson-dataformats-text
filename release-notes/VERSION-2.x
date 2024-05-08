@@ -14,9 +14,35 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.17.0 (not yet released)
+2.18.0 (not yet released)
 
--
+No changes since 2.17
+
+2.17.1 (04-May-2024)
+
+No changes since 2.17.0
+
+2.17.0 (12-Mar-2024)
+
+#45: (csv) Allow skipping ending line break
+  (`CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW`)
+ (proposed by Mathieu L)
+#454: (yaml) Unexpected `NumberFormatException` in `YAMLParser`
+ (fix contributed by Arthur C)
+#456: (yaml) Support max Read/Write nesting depth limits (`StreamReadConstraints`/
+  `StreamWriteConstraints`) for YAML
+#465: (yaml) YAML: consider starting `#` and ending `:` as quotable characters
+ (contributed by Michael E)
+
+2.16.2 (09-Mar-2024)
+
+No changes since 2.16.1
+
+2.16.1 (24-Dec-2023)
+
+#445: `YAMLParser` throws unexpected `NullPointerException` in certain
+  number parsing cases
+ (fix contributed by Arthur C)
 
 2.16.0 (15-Nov-2023)
 
@@ -28,6 +54,10 @@ Active Maintainers:
 #437: (yaml) Update SnakeYAML dependency to 2.2
 #438: (csv) `BigInteger` and `BigDecimal` are quoted if
   `CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS` enabled
+
+2.15.4 (15-Feb-2024)
+
+No changes since 2.15.3
 
 2.15.3 (12-Oct-2023)
 

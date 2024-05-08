@@ -226,31 +226,11 @@ public class JavaPropsParser extends ParserMinimalBase
         return _readContext;
     }
 
-    @Override
-    public void overrideCurrentName(String name) {
-        _readContext.overrideCurrentName(name);
-    }
-
     /*
     /**********************************************************
-    /* Main parsing API, textual values
+    /* Main parsing API, traversal
     /**********************************************************
      */
-
-    @Override
-    public String getCurrentName() throws IOException {
-        if (_readContext == null) {
-            return null;
-        }
-        // [JACKSON-395]: start markers require information from parent
-        if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
-            JPropReadContext parent = _readContext.getParent();
-            if (parent != null) {
-                return parent.getCurrentName();
-            }
-        }
-        return _readContext.getCurrentName();
-    }
 
     @Override
     public JsonToken nextToken() throws IOException {
@@ -278,6 +258,38 @@ System.err.println("\n>>");
             _streamReadConstraints.validateNestingDepth(_readContext.getNestingDepth());
         }
         return _currToken;
+    }
+
+    /*
+    /**********************************************************
+    /* Main parsing API, textual values
+    /**********************************************************
+     */
+
+    @Override // since 2.17
+    public String currentName() throws IOException {
+        if (_readContext == null) {
+            return null;
+        }
+        // [JACKSON-395]: start markers require information from parent
+        if (_currToken == JsonToken.START_OBJECT || _currToken == JsonToken.START_ARRAY) {
+            JPropReadContext parent = _readContext.getParent();
+            if (parent != null) {
+                return parent.getCurrentName();
+            }
+        }
+        return _readContext.getCurrentName();
+    }
+
+    @Override
+    public void overrideCurrentName(String name) {
+        _readContext.overrideCurrentName(name);
+    }
+    
+    @Deprecated // since 2.17
+    @Override
+    public String getCurrentName() throws IOException {
+        return currentName();
     }
 
     @Override
@@ -362,19 +374,27 @@ System.err.println("\n>>");
         return null;
     }
     
-    @Override
-    public JsonLocation getTokenLocation() {
+    @Override // since 2.17
+    public JsonLocation currentLocation() {
         return JsonLocation.NA;
     }
 
-    @Override
-    public JsonLocation getCurrentLocation() {
+    @Override // since 2.17
+    public JsonLocation currentTokenLocation() {
         return JsonLocation.NA;
     }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getCurrentLocation() { return currentLocation(); }
+
+    @Deprecated // since 2.17
+    @Override
+    public JsonLocation getTokenLocation() { return currentTokenLocation(); }
 
     /*
     /**********************************************************
-    /* Main parsing API, textual values
+    /* Main parsing API, numeric values
     /**********************************************************
      */
     
@@ -386,6 +406,11 @@ System.err.println("\n>>");
     @Override
     public NumberType getNumberType() throws IOException {
         return _noNumbers();
+    }
+
+    @Override // added in 2.17
+    public NumberTypeFP getNumberTypeFP() throws IOException {
+        return NumberTypeFP.UNKNOWN;
     }
 
     @Override

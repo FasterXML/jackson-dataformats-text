@@ -1,6 +1,8 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -106,9 +108,9 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
         }
     }
     
-    protected void assertToken(JsonToken expToken, JsonParser jp)
+    protected void assertToken(JsonToken expToken, JsonParser p)
     {
-        assertToken(expToken, jp.getCurrentToken());
+        assertToken(expToken, p.getCurrentToken());
     }
 
     protected void assertType(Object ob, Class<?> expType)
@@ -137,35 +139,35 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
      * available methods, and ensures results are consistent, before
      * returning them
      */
-    protected String getAndVerifyText(JsonParser jp)
+    protected String getAndVerifyText(JsonParser p)
         throws IOException, JsonParseException
     {
         // Ok, let's verify other accessors
-        int actLen = jp.getTextLength();
-        char[] ch = jp.getTextCharacters();
-        String str2 = new String(ch, jp.getTextOffset(), actLen);
-        String str = jp.getText();
+        int actLen = p.getTextLength();
+        char[] ch = p.getTextCharacters();
+        String str2 = new String(ch, p.getTextOffset(), actLen);
+        String str = p.getText();
 
         if (str.length() !=  actLen) {
-            fail("Internal problem (jp.token == "+jp.getCurrentToken()+"): jp.getText().length() ['"+str+"'] == "+str.length()+"; jp.getTextLength() == "+actLen);
+            fail("Internal problem (p.token == "+p.getCurrentToken()+"): p.getText().length() ['"+str+"'] == "+str.length()+"; p.getTextLength() == "+actLen);
         }
         assertEquals("String access via getText(), getTextXxx() must be the same", str, str2);
 
         return str;
     }
 
-    protected void verifyFieldName(JsonParser jp, String expName)
+    protected void verifyFieldName(JsonParser p, String expName)
         throws IOException
     {
-        assertEquals(expName, jp.getText());
-        assertEquals(expName, jp.getCurrentName());
+        assertEquals(expName, p.getText());
+        assertEquals(expName, p.currentName());
     }
     
-    protected void verifyIntValue(JsonParser jp, long expValue)
+    protected void verifyIntValue(JsonParser p, long expValue)
         throws IOException
     {
         // First, via textual
-        assertEquals(String.valueOf(expValue), jp.getText());
+        assertEquals(String.valueOf(expValue), p.getText());
     }
     
     protected void verifyException(Throwable e, String... matches)
@@ -187,5 +189,26 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
             doc = doc.substring(3);
         }
         return doc.trim();
+    }
+
+    protected byte[] readResource(String ref)
+    {
+       ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+       final byte[] buf = new byte[4000];
+
+       try (InputStream in = getClass().getResourceAsStream(ref)) {
+           if (in != null) {
+               int len;
+               while ((len = in.read(buf)) > 0) {
+                   bytes.write(buf, 0, len);
+               }
+           }
+       } catch (IOException e) {
+           throw new RuntimeException("Failed to read resource '"+ref+"': "+e);
+       }
+       if (bytes.size() == 0) {
+           throw new IllegalArgumentException("Failed to read resource '"+ref+"': empty resource?");
+       }
+       return bytes.toByteArray();
     }
 }
