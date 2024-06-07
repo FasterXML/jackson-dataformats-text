@@ -2,7 +2,7 @@ package tools.jackson.dataformat.csv.ser;
 
 import tools.jackson.dataformat.csv.*;
 
-public class GeneratorQuotingTest extends ModuleTestBase
+public class CSVGeneratorQuotingTest extends ModuleTestBase
 {
     /*
     /**********************************************************************

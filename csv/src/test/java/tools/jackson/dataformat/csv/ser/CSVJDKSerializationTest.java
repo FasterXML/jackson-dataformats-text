@@ -14,7 +14,7 @@ import tools.jackson.dataformat.csv.ModuleTestBase;
  * platforms, such as Android, where memory management is handled
  * much more aggressively.
  */
-public class JDKSerializationTest extends ModuleTestBase
+public class CSVJDKSerializationTest extends ModuleTestBase
 {
     @JsonPropertyOrder({ "x", "y" })
     static class MyPojo {
