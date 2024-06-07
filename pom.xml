@@ -3,12 +3,12 @@
   <parent>
     <groupId>com.fasterxml.jackson</groupId>
     <artifactId>jackson-base</artifactId>
-    <version>2.17.2-SNAPSHOT</version>
+    <version>2.18.0-SNAPSHOT</version>
   </parent>
   <groupId>com.fasterxml.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
   <name>Jackson dataformats: Text</name>
-  <version>2.17.2-SNAPSHOT</version>
+  <version>2.18.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>Parent pom for Jackson text-based dataformats (as opposed to binary).
   </description>
@@ -41,7 +41,7 @@
 
   <properties>
     <!-- for Reproducible Builds -->
-    <project.build.outputTimestamp>2024-05-05T02:22:46Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2024-03-12T22:12:21Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
@@ -49,6 +49,13 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
+    </dependency>
+
+    <!-- 20-Apr-2024, tatu: JUnit4 no longer from jackson-base, so: -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
