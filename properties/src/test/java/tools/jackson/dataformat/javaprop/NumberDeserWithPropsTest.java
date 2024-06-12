@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
@@ -93,10 +94,10 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
         final String DOC = "value: " + value;
         try {
             MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
-            fail("expected DatabindException");
-        } catch (DatabindException jme) {
-            assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
+            assertTrue("unexpected message: " + e.getMessage(),
+                    e.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
         }
     }
 

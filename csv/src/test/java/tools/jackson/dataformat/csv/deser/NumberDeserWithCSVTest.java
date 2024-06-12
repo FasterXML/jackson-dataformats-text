@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.databind.DatabindException;
 import tools.jackson.dataformat.csv.CsvFactory;
 import tools.jackson.dataformat.csv.CsvMapper;
@@ -77,8 +78,8 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
             MAPPER.readerFor(NestedBigDecimalHolder2784.class)
                     .with(schema)
                     .readValue(DOC);
-            fail("expected JsonMappingException");
-        } catch (DatabindException jme) {
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException jme) {
             assertTrue("unexpected message: " + jme.getMessage(),
                     jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
         }

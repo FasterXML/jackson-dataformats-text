@@ -3,13 +3,12 @@ package tools.jackson.dataformat.toml.dos;
 import java.util.ArrayList;
 import java.util.List;
 
-import tools.jackson.core.StreamWriteConstraints;
+import org.junit.Test;
 
-import tools.jackson.databind.DatabindException;
+import tools.jackson.core.StreamWriteConstraints;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.toml.TomlMapperTestBase;
-
-import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -28,12 +27,12 @@ public class CyclicTOMLDataSerTest extends TomlMapperTestBase
         list.add(list);
         try {
             MAPPER.writeValueAsString(list);
-            fail("expected DatabindException");
-        } catch (DatabindException jmex) {
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
             assertTrue("DatabindException message is as expected?",
-                    jmex.getMessage().startsWith(exceptionPrefix));
+                    e.getMessage().startsWith(exceptionPrefix));
         }
     }
 }

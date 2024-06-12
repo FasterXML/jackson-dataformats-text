@@ -3,8 +3,10 @@ package tools.jackson.dataformat.csv.deser;
 import java.util.List;
 
 import tools.jackson.core.StreamReadConstraints;
-import tools.jackson.databind.DatabindException;
+import tools.jackson.core.exc.StreamConstraintsException;
+
 import tools.jackson.databind.MappingIterator;
+
 import tools.jackson.dataformat.csv.CsvFactory;
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvParser;
@@ -32,8 +34,8 @@ public class CSVBigStringsTest extends ModuleTestBase
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
                     .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
-            fail("expected DatabindException");
-        } catch (DatabindException e) {
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
             final String message = e.getMessage();
             assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
             assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
@@ -48,8 +50,8 @@ public class CSVBigStringsTest extends ModuleTestBase
                     .with(CsvParser.Feature.WRAP_AS_ARRAY)
                     .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
-            fail("expected DatabindException");
-        } catch (DatabindException e) {
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
             final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
             // so best not to assert that the String length value in the message is the full 20_000_000 value

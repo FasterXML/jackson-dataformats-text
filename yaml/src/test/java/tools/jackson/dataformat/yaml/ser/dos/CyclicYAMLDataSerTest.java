@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tools.jackson.core.StreamWriteConstraints;
-
-import tools.jackson.databind.DatabindException;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.core.exc.StreamConstraintsException;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
@@ -17,15 +15,15 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
  */
 public class CyclicYAMLDataSerTest extends ModuleTestBase
 {
-    private final ObjectMapper MAPPER = YAMLMapper.builder().build();
+    private final YAMLMapper MAPPER = YAMLMapper.builder().build();
 
     public void testListWithSelfReference() throws Exception {
         List<Object> list = new ArrayList<>();
         list.add(list);
         try {
             MAPPER.writeValueAsString(list);
-            fail("expected DatabindException");
-        } catch (DatabindException e) {
+            fail("expected StreamConstraintsException");
+        } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
             assertTrue("DatabindException message is as expected?",
