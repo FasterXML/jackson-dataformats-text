@@ -4,6 +4,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.*;
@@ -316,11 +317,6 @@ public class CsvParser
     protected ObjectCodec _objectCodec;
 
     /**
-     * @since 2.15
-     */
-    protected final StreamReadConstraints _streamReadConstraints;
-
-    /**
      * @since 2.16
      */
     protected final IOContext _ioContext;
@@ -433,27 +429,19 @@ public class CsvParser
     public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
                      ObjectCodec codec, Reader reader)
     {
-        super(stdFeatures);
-        if (reader == null) {
-            throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
-        }
+        super(stdFeatures, ctxt.streamReadConstraints());
+        Objects.requireNonNull(reader, "Can not pass `null` as `java.io.Reader` to read from");
         _objectCodec = codec;
         _ioContext = ctxt;
-        _streamReadConstraints = ctxt.streamReadConstraints();
-        _textBuffer = ctxt.constructReadConstrainedTextBuffer();
+        _formatFeatures = csvFeatures;
         DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
                 ? DupDetector.rootDetector(this) : null;
-        _formatFeatures = csvFeatures;
         _parsingContext = JsonReadContext.createRootContext(dups);
+        _textBuffer = ctxt.constructReadConstrainedTextBuffer();
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
-    }
-
-    @Override
-    public StreamReadConstraints streamReadConstraints() {
-        return _streamReadConstraints;
     }
 
     /*
