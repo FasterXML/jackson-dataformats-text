@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonReadContext;
@@ -659,6 +660,8 @@ public class CsvParser
      * We need to override this method to support coercion from basic
      * String value into array, in cases where schema does not
      * specify actual type.
+     *
+     * @throws UncheckedIOException if the token count is too large (since 2.18)
      */
     @Override
     public boolean isExpectedStartArrayToken() {
@@ -674,19 +677,23 @@ public class CsvParser
         case JsonTokenId.ID_START_ARRAY:
             return true;
         }
-        // Otherwise: may coerce into array, iff we have essentially "untyped" column
-        if (_columnIndex < _columnCount) {
-            CsvSchema.Column column = _schema.column(_columnIndex);
-            if (column.getType() == CsvSchema.ColumnType.STRING) {
-                _startArray(column);
+        try {
+            // Otherwise: may coerce into array, iff we have essentially "untyped" column
+            if (_columnIndex < _columnCount) {
+                CsvSchema.Column column = _schema.column(_columnIndex);
+                if (column.getType() == CsvSchema.ColumnType.STRING) {
+                    _startArray(column);
+                    return true;
+                }
+            }
+            // 30-Dec-2014, tatu: Seems like it should be possible to allow this
+            //   in non-array-wrapped case too (for 2.5), so let's try that:
+            else if (_currToken == JsonToken.VALUE_STRING) {
+                _startArray(CsvSchema.Column.PLACEHOLDER);
                 return true;
             }
-        }
-        // 30-Dec-2014, tatu: Seems like it should be possible to allow this
-        //   in non-array-wrapped case too (for 2.5), so let's try that:
-        else if (_currToken == JsonToken.VALUE_STRING) {
-            _startArray(CsvSchema.Column.PLACEHOLDER);
-            return true;
+        } catch (StreamConstraintsException e) {
+            throw new UncheckedIOException(e);
         }
         return false;
     }
@@ -706,7 +713,7 @@ public class CsvParser
             // only occurs with StreamReadConstraints violations
             try {
                 if (_reader.isExpectedNumberIntToken()) {
-                    _currToken = JsonToken.VALUE_NUMBER_INT;
+                    _updateToken(JsonToken.VALUE_NUMBER_INT);
                     return true;
                 }
             } catch (IOException e) {
@@ -739,24 +746,24 @@ public class CsvParser
         _binaryValue = null;
         switch (_state) {
         case STATE_DOC_START:
-            return (_currToken = _handleStartDoc());
+            return _updateToken(_handleStartDoc());
         case STATE_RECORD_START:
-            return (_currToken = _handleRecordStart());
+            return _updateToken(_handleRecordStart());
         case STATE_NEXT_ENTRY:
-            return (_currToken = _handleNextEntry());
+            return _updateToken(_handleNextEntry());
         case STATE_NAMED_VALUE:
-            return (_currToken = _handleNamedValue());
+            return _updateToken(_handleNamedValue());
         case STATE_UNNAMED_VALUE:
-            return (_currToken = _handleUnnamedValue());
+            return _updateToken(_handleUnnamedValue());
         case STATE_IN_ARRAY:
-            return (_currToken = _handleArrayValue());
+            return _updateToken(_handleArrayValue());
         case STATE_SKIP_EXTRA_COLUMNS:
             // Need to just skip whatever remains
             return _skipUntilEndOfLine();
         case STATE_MISSING_NAME:
-            return (_currToken = _handleMissingName());
+            return _updateToken(_handleMissingName());
         case STATE_MISSING_VALUE:
-            return (_currToken = _handleMissingValue());
+            return _updateToken(_handleMissingValue());
         case STATE_DOC_END:
             _reader.close();
             if (_parsingContext.inRoot()) {
@@ -782,8 +789,7 @@ public class CsvParser
         // Optimize for expected case of getting FIELD_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
-            JsonToken t = _handleNextEntry();
-            _currToken = t;
+            final JsonToken t = _updateToken(_handleNextEntry());
             if (t == JsonToken.FIELD_NAME) {
                 return str.getValue().equals(_currentName);
             }
@@ -799,8 +805,7 @@ public class CsvParser
         // Optimize for expected case of getting FIELD_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
-            JsonToken t = _handleNextEntry();
-            _currToken = t;
+            final JsonToken t = _updateToken(_handleNextEntry());
             if (t == JsonToken.FIELD_NAME) {
                 return _currentName;
             }
@@ -816,12 +821,12 @@ public class CsvParser
         _binaryValue = null;
         JsonToken t;
         if (_state == STATE_NAMED_VALUE) {
-            _currToken = t = _handleNamedValue();
+            t = _updateToken(_handleNamedValue());
             if (t == JsonToken.VALUE_STRING) {
                 return _currentValue;
             }
         } else if (_state == STATE_UNNAMED_VALUE) {
-            _currToken = t = _handleUnnamedValue();
+            t = _updateToken(_handleUnnamedValue());
             if (t == JsonToken.VALUE_STRING) {
                 return _currentValue;
             }
@@ -1231,7 +1236,7 @@ public class CsvParser
         // and check just in case
         _parsingContext = _parsingContext.getParent();
         _state = _reader.startNewLine() ? STATE_RECORD_START : STATE_DOC_END;
-        return (_currToken = _parsingContext.inArray()
+        return _updateToken(_parsingContext.inArray()
                 ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
     }
 
@@ -1433,9 +1438,9 @@ public class CsvParser
         return _byteArrayBuilder;
     }
 
-    protected void _startArray(CsvSchema.Column column)
-    {
-        _currToken = JsonToken.START_ARRAY;
+    // changed in 2.18 to support StreamConstraintsException (if token count is too large)
+    protected void _startArray(CsvSchema.Column column) throws StreamConstraintsException {
+        _updateToken(JsonToken.START_ARRAY);
         _parsingContext = _parsingContext.createChildArrayContext(_reader.getCurrentRow(),
                 _reader.getCurrentColumn());
         _state = STATE_IN_ARRAY;
