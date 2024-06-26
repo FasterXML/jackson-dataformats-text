@@ -498,14 +498,13 @@ public class CsvParser
     }
 
     @Override
-    public void setSchema(FormatSchema schema)
+    public void setSchema(final FormatSchema schema)
     {
         if (schema instanceof CsvSchema) {
             _schema = (CsvSchema) schema;
-            String str = _schema.getNullValueString();
-            _nullValue = str;
+            _nullValue = _schema.getNullValueString();
         } else if (schema == null) {
-            schema = EMPTY_SCHEMA;
+            _schema = EMPTY_SCHEMA;
         } else {
             super.setSchema(schema);
         }
@@ -924,7 +923,7 @@ public class CsvParser
         int newColumnCount = newSchema.size();
         if (newColumnCount < 2) { // 1 just because we may get 'empty' header name
             String first = (newColumnCount == 0) ? "" : newSchema.columnName(0).trim();
-            if (first.length() == 0) {
+            if (first.isEmpty()) {
                 _reportCsvMappingError("Empty header line: can not bind data");
             }
         }
@@ -1468,9 +1467,6 @@ public class CsvParser
         if (_cfgEmptyStringAsNull && value.isEmpty()) {
             return true;
         }
-        if (_cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted()) {
-            return true;
-        }
-        return false;
+        return _cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted();
     }
 }
