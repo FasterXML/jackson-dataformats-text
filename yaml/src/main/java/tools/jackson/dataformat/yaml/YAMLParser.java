@@ -354,7 +354,7 @@ public class YAMLParser extends ParserBase
             if (evt == null) {
                 _currentAnchor = Optional.empty();
                 _lastTagEvent = null;
-                return (_currToken = null);
+                return _updateTokenToNull();
             }
             _lastEvent = evt;
             // One complication: property names are only inferred from the fact that we are
@@ -371,7 +371,7 @@ public class YAMLParser extends ParserBase
                                 _reportMismatchedEndMarker('}', ']');
                             }
                             _streamReadContext = _streamReadContext.getParent();
-                            return (_currToken = JsonToken.END_OBJECT);
+                            return _updateToken(JsonToken.END_OBJECT);
                         }
                         _reportError("Expected a property name (Scalar value in YAML), got this instead: "+evt);
                     }
@@ -396,7 +396,7 @@ public class YAMLParser extends ParserBase
                     final String name = scalar.getValue();
                     _currentName = name;
                     _streamReadContext.setCurrentName(name);
-                    return (_currToken = JsonToken.PROPERTY_NAME);
+                    return _updateToken(JsonToken.PROPERTY_NAME);
                 }
             } else if (_streamReadContext.inArray()) {
                 _streamReadContext.valueRead();
@@ -409,8 +409,7 @@ public class YAMLParser extends ParserBase
                 case Scalar:
                     // scalar values are probably the commonest:
                     JsonToken t = _decodeScalar((ScalarEvent) evt);
-                    _currToken = t;
-                    return t;
+                    return _updateToken(t);
                 case MappingStart:
                     // followed by maps, then arrays
                     Optional<Mark> m = evt.getStartMark();
@@ -419,7 +418,7 @@ public class YAMLParser extends ParserBase
                     _streamReadContext = _streamReadContext.createChildObjectContext(
                             m.map(mark -> mark.getLine()).orElse(0), m.map(mark -> mark.getColumn()).orElse(0));
                     _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
-                    return (_currToken = JsonToken.START_OBJECT);
+                    return _updateToken(JsonToken.START_OBJECT);
 
                 case MappingEnd:
                     // actually error; can not have map-end here
@@ -431,21 +430,21 @@ public class YAMLParser extends ParserBase
                     _streamReadContext = _streamReadContext.createChildArrayContext(
                             mrk.map(mark -> mark.getLine()).orElse(0), mrk.map(mark -> mark.getColumn()).orElse(0));
                     _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
-                    return (_currToken = JsonToken.START_ARRAY);
+                    return _updateToken(JsonToken.START_ARRAY);
 
                 case SequenceEnd:
                     if (!_streamReadContext.inArray()) { // sanity check is optional, but let's do it for now
                         _reportMismatchedEndMarker(']', '}');
                     }
                     _streamReadContext = _streamReadContext.getParent();
-                    return (_currToken = JsonToken.END_ARRAY);
+                    return _updateToken(JsonToken.END_ARRAY);
 
                 // after this, less common tokens:
                 case DocumentEnd:
                     // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
                     // or return null as marker (but do NOT close). Earlier returned `null`, but
                     // to allow multi-document reading should actually just skip.
-                    // return (_currToken = null);
+                    // return _updateTokenToNull();
                     continue;
 
                 case DocumentStart:
@@ -459,12 +458,12 @@ public class YAMLParser extends ParserBase
                     _textValue = alias.getAnchor().orElseThrow(() -> new RuntimeException("Alias must be provided.")).getValue();
                     _cleanedTextValue = null;
                     // for now, nothing to do: in future, maybe try to expose as ObjectIds?
-                    return (_currToken = JsonToken.VALUE_STRING);
+                    return _updateToken(JsonToken.VALUE_STRING);
 
                 case StreamEnd:
                     // end-of-input; force closure
                     close();
-                    return (_currToken = null);
+                    return _updateTokenToNull();
 
                 case StreamStart:
                     // useless, skip

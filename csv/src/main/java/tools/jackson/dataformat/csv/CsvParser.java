@@ -609,7 +609,7 @@ public class CsvParser
         JsonToken t = _currToken;
         if (t == JsonToken.VALUE_STRING) {
             if (_reader.isExpectedNumberIntToken()) {
-                _currToken = JsonToken.VALUE_NUMBER_INT;
+                _updateToken(JsonToken.VALUE_NUMBER_INT);
                 return true;
             }
             return false;
@@ -628,24 +628,24 @@ public class CsvParser
         _binaryValue = null;
         switch (_state) {
         case STATE_DOC_START:
-            return (_currToken = _handleStartDoc());
+            return _updateToken(_handleStartDoc());
         case STATE_RECORD_START:
-            return (_currToken = _handleRecordStart());
+            return _updateToken(_handleRecordStart());
         case STATE_NEXT_ENTRY:
-            return (_currToken = _handleNextEntry());
+            return _updateToken(_handleNextEntry());
         case STATE_NAMED_VALUE:
-            return (_currToken = _handleNamedValue());
+            return _updateToken(_handleNamedValue());
         case STATE_UNNAMED_VALUE:
-            return (_currToken = _handleUnnamedValue());
+            return _updateToken(_handleUnnamedValue());
         case STATE_IN_ARRAY:
-            return (_currToken = _handleArrayValue());
+            return _updateToken(_handleArrayValue());
         case STATE_SKIP_EXTRA_COLUMNS:
             // Need to just skip whatever remains
             return _skipUntilEndOfLine();
         case STATE_MISSING_NAME:
-            return (_currToken = _handleMissingName());
+            return _updateToken(_handleMissingName());
         case STATE_MISSING_VALUE:
-            return (_currToken = _handleMissingValue());
+            return _updateToken(_handleMissingValue());
         case STATE_DOC_END:
             try {
                 _reader.close();
@@ -676,8 +676,7 @@ public class CsvParser
         // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
-            JsonToken t = _handleNextEntry();
-            _currToken = t;
+            final JsonToken t = _updateToken(_handleNextEntry());
             if (t == JsonToken.PROPERTY_NAME) {
                 return str.getValue().equals(_currentName);
             }
@@ -693,8 +692,7 @@ public class CsvParser
         // Optimize for expected case of getting PROPERTY_NAME:
         if (_state == STATE_NEXT_ENTRY) {
             _binaryValue = null;
-            JsonToken t = _handleNextEntry();
-            _currToken = t;
+            final JsonToken t = _updateToken(_handleNextEntry());
             if (t == JsonToken.PROPERTY_NAME) {
                 return _currentName;
             }
@@ -710,12 +708,12 @@ public class CsvParser
         _binaryValue = null;
         JsonToken t;
         if (_state == STATE_NAMED_VALUE) {
-            _currToken = t = _handleNamedValue();
+            t = _updateToken(_handleNamedValue());
             if (t == JsonToken.VALUE_STRING) {
                 return _currentValue;
             }
         } else if (_state == STATE_UNNAMED_VALUE) {
-            _currToken = t = _handleUnnamedValue();
+            t = _updateToken(_handleUnnamedValue());
             if (t == JsonToken.VALUE_STRING) {
                 return _currentValue;
             }
@@ -1120,7 +1118,7 @@ public class CsvParser
         // and check just in case
         _streamReadContext = _streamReadContext.clearAndGetParent();
         _state = _reader.startNewLine() ? STATE_RECORD_START : STATE_DOC_END;
-        return (_currToken = _streamReadContext.inArray()
+        return _updateToken(_streamReadContext.inArray()
                 ? JsonToken.END_ARRAY : JsonToken.END_OBJECT);
     }
 
@@ -1344,7 +1342,7 @@ public class CsvParser
 
     protected void _startArray(CsvSchema.Column column)
     {
-        _currToken = JsonToken.START_ARRAY;
+        _updateToken(JsonToken.START_ARRAY);
         _streamReadContext = _streamReadContext.createChildArrayContext(_reader.getCurrentRow(),
                 _reader.getCurrentColumn());
         _state = STATE_IN_ARRAY;
