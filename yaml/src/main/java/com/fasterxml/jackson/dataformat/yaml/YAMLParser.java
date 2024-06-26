@@ -541,7 +541,7 @@ public class YAMLParser extends ParserBase
                 // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
                 // or return null as marker (but do NOT close). Earlier returned `null`, but
                 // to allow multi-document reading should actually just skip.
-//                return (_currToken = null);
+//                return _updateTokenToNull();
                 continue;
             }
             if (evt.is(Event.ID.DocumentStart)) {
