@@ -199,14 +199,15 @@ System.err.println("SOURCE: ("+root.getClass().getName()+") <<\n"+new ObjectMapp
 System.err.println("\n>>");
 */
         }
-        while ((_currToken = _streamReadContext.nextToken()) == null) {
+        JsonToken t;
+        while ((t = _streamReadContext.nextToken()) == null) {
             _streamReadContext = _streamReadContext.nextContext();
             if (_streamReadContext == null) { // end of content
-                return null;
+                return _updateTokenToNull();
             }
-            _streamReadConstraints.validateNestingDepth(_streamReadContext.getNestingDepth());
+            streamReadConstraints().validateNestingDepth(_streamReadContext.getNestingDepth());
         }
-        return _currToken;
+        return _updateToken(t);
     }
 
     @Override
