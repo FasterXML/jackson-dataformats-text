@@ -5,7 +5,8 @@ text dataformats project, version 2.x
 (note: for older credits, check out release notes for 1.x versions)
 
 * Jonas Konrad (@yawkat): author of TOML module
-* Tatu Saloranta, tatu.saloranta@iki.fi: author of CSV, Properties and YAML modules
+* Tatu Saloranta (@cowtowncoder): author of CSV, Properties and YAML modules
+* PJ Fanning (@pjfanning): active contributor to most modules
 
 --------------------------------------------------------------------------------
 Credits for specific contributions
@@ -197,6 +198,7 @@ PJ Fanning (pjfanning@github)
  (2.14.0)
 #390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
  (2.15.0)
+ ... and many, many more not listed here
 
 Falk Hanisch (mrpiggi@github)
 #288: Caching conflict when creating CSV schemas with different views
