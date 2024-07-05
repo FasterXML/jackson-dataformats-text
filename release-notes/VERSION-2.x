@@ -18,7 +18,7 @@ Active Maintainers:
 
 No changes since 2.17
 
-2.17.2 (not yet released)
+2.17.2 (05-Jul-2024)
 
 #481: (csv) Fix issue in `setSchema()`
  (contributed by @pjfanning)
