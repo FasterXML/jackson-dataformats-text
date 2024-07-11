@@ -42,11 +42,6 @@ public class JavaPropsParser extends ParserMinimalBase
     protected ObjectCodec _objectCodec;
 
     /**
-     * @since 2.15
-     */
-    protected final StreamReadConstraints _streamReadConstraints;
-
-    /**
      * @since 2.16
      */
     protected final IOContext _ioContext;
@@ -105,17 +100,11 @@ public class JavaPropsParser extends ParserMinimalBase
     public JavaPropsParser(IOContext ctxt, int parserFeatures, Object inputSource,
             ObjectCodec codec, Map<?,?> sourceMap)
     {
-        super(parserFeatures);
+        super(parserFeatures, ctxt.streamReadConstraints());
         _ioContext = ctxt;
-        _streamReadConstraints = ctxt.streamReadConstraints();
         _objectCodec = codec;
         _inputSource = inputSource;
         _sourceContent = sourceMap;
-    }
-
-    @Override
-    public StreamReadConstraints streamReadConstraints() {
-        return _streamReadConstraints;
     }
 
     @Override
@@ -250,14 +239,15 @@ System.err.println("SOURCE: ("+root.getClass().getName()+") <<\n"+new ObjectMapp
 System.err.println("\n>>");
 */
         }
-        while ((_currToken = _readContext.nextToken()) == null) {
+        JsonToken t;
+        while ((t = _readContext.nextToken()) == null) {
             _readContext = _readContext.nextContext();
             if (_readContext == null) { // end of content
-                return null;
+                return _updateTokenToNull();
             }
-            _streamReadConstraints.validateNestingDepth(_readContext.getNestingDepth());
+            streamReadConstraints().validateNestingDepth(_readContext.getNestingDepth());
         }
-        return _currToken;
+        return _updateToken(t);
     }
 
     /*
