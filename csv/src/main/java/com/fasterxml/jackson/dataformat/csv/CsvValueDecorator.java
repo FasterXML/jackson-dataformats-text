@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  * to values of given column): if both defined, more specific -- latter, per-Column
  * -- is used.
  *
- * @since 2.17
+ * @since 2.18
  */
 public interface CsvValueDecorator
 {
