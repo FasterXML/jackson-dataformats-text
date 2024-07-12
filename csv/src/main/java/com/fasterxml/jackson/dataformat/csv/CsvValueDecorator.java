@@ -2,9 +2,6 @@ package com.fasterxml.jackson.dataformat.csv;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.SerializerProvider;
-
 /**
  * Interface defining API for handlers that can add and remove "decorations"
  * to CSV values: for example, brackets around Array (List) values encoded
@@ -30,7 +27,6 @@ public interface CsvValueDecorator
      * of {@link CsvSchema} is applied on decorated value.
      *
      * @param gen Generator that will be used for actual serialization
-     * @param ctxt Context passed to give access to configuration
      * @param plainValue Value to decorate
      *
      * @return Decorated value (which may be {@code plainValue} as-is)
@@ -38,8 +34,7 @@ public interface CsvValueDecorator
      * @throws IOException if attempt to decorate the value somehow fails
      *    (typically a {@link com.fasterxml.jackson.core.exc.StreamWriteException})
      */
-    public String decorateValue(CsvGenerator gen, SerializerProvider ctxt,
-            String plainValue)
+    public String decorateValue(CsvGenerator gen, String plainValue)
         throws IOException;
 
     /**
@@ -51,7 +46,6 @@ public interface CsvValueDecorator
      * has no escaping or quoting left.
      *
      * @param parser Parser that was used to decode textual value from input
-     * @param ctxt Context passed to give access to configuration
      * @param decoratedValue Value from which to remove decorations, if any
      *    (some decorators can allow optional decorations; others may fail
      *    if none found)
@@ -61,7 +55,6 @@ public interface CsvValueDecorator
      * @throws IOException if attempt to undecorate the value fails
      *    (typically a {@link com.fasterxml.jackson.core.exc.StreamReadException})
      */
-    public String undecorateValue(CsvParser parser, DeserializationContext ctxt,
-            String decoratedValue)
+        public String undecorateValue(CsvParser parser, String decoratedValue)
         throws IOException;
 }
