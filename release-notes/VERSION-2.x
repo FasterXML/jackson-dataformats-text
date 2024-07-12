@@ -22,6 +22,11 @@ Active Maintainers:
   fields (foo,,bar vs. foo,"",bar)
  (contributed by David P)
 
+2.17.2 (05-Jul-2024)
+
+#481: (csv) Fix issue in `setSchema()`
+ (contributed by @pjfanning)
+
 2.17.1 (04-May-2024)
 
 No changes since 2.17.0

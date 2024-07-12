@@ -2,7 +2,7 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
-public class GeneratorQuotingTest extends ModuleTestBase
+public class CSVGeneratorQuotingTest extends ModuleTestBase
 {
     /*
     /**********************************************************************

@@ -453,7 +453,7 @@ public class YAMLParser extends ParserBase
             if (evt == null) {
                 _currentAnchor = null;
                 _lastTagEvent = null;
-                return (_currToken = null);
+                return _updateTokenToNull();
             }
             _lastEvent = evt;
             // One complication: field names are only inferred from the fact that we are
@@ -470,7 +470,7 @@ public class YAMLParser extends ParserBase
                                 _reportMismatchedEndMarker('}', ']');
                             }
                             _parsingContext = _parsingContext.getParent();
-                            return (_currToken = JsonToken.END_OBJECT);
+                            return _updateToken(JsonToken.END_OBJECT);
                         }
                         _reportError("Expected a field name (Scalar value in YAML), got this instead: "+evt);
                     }
@@ -495,7 +495,7 @@ public class YAMLParser extends ParserBase
                     final String name = scalar.getValue();
                     _currentFieldName = name;
                     _parsingContext.setCurrentName(name);
-                    return (_currToken = JsonToken.FIELD_NAME);
+                    return _updateToken(JsonToken.FIELD_NAME);
                 }
             } else if (_parsingContext.inArray()) {
                 _parsingContext.expectComma();
@@ -507,9 +507,7 @@ public class YAMLParser extends ParserBase
 
             // scalar values are probably the commonest:
             if (evt.is(Event.ID.Scalar)) {
-                JsonToken t = _decodeScalar((ScalarEvent) evt);
-                _currToken = t;
-                return t;
+                return _updateToken(_decodeScalar((ScalarEvent) evt));
             }
 
             // followed by maps, then arrays
@@ -518,7 +516,7 @@ public class YAMLParser extends ParserBase
                 MappingStartEvent map = (MappingStartEvent) evt;
                 _currentAnchor = map.getAnchor();
                 createChildObjectContext(m.getLine(), m.getColumn());
-                return (_currToken = JsonToken.START_OBJECT);
+                return _updateToken(JsonToken.START_OBJECT);
             }
             if (evt.is(Event.ID.MappingEnd)) { // actually error; can not have map-end here
                 _reportError("Not expecting END_OBJECT but a value");
@@ -527,14 +525,14 @@ public class YAMLParser extends ParserBase
                 Mark m = evt.getStartMark();
                 _currentAnchor = ((NodeEvent)evt).getAnchor();
                 createChildArrayContext(m.getLine(), m.getColumn());
-                return (_currToken = JsonToken.START_ARRAY);
+                return _updateToken(JsonToken.START_ARRAY);
             }
             if (evt.is(Event.ID.SequenceEnd)) {
                 if (!_parsingContext.inArray()) { // sanity check is optional, but let's do it for now
                     _reportMismatchedEndMarker(']', '}');
                 }
                 _parsingContext = _parsingContext.getParent();
-                return (_currToken = JsonToken.END_ARRAY);
+                return _updateToken(JsonToken.END_ARRAY);
             }
 
             // after this, less common tokens:
@@ -543,7 +541,7 @@ public class YAMLParser extends ParserBase
                 // [dataformat-yaml#72]: logical end of doc; fine. Two choices; either skip,
                 // or return null as marker (but do NOT close). Earlier returned `null`, but
                 // to allow multi-document reading should actually just skip.
-//                return (_currToken = null);
+//                return _updateTokenToNull();
                 continue;
             }
             if (evt.is(Event.ID.DocumentStart)) {
@@ -557,11 +555,11 @@ public class YAMLParser extends ParserBase
                 _textValue = alias.getAnchor();
                 _cleanedTextValue = null;
                 // for now, nothing to do: in future, maybe try to expose as ObjectIds?
-                return (_currToken = JsonToken.VALUE_STRING);
+                return _updateToken(JsonToken.VALUE_STRING);
             }
             if (evt.is(Event.ID.StreamEnd)) { // end-of-input; force closure
                 close();
-                return (_currToken = null);
+                return _updateTokenToNull();
             }
         }
     }
