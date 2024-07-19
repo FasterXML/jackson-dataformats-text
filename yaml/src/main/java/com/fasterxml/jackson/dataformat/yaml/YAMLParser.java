@@ -192,14 +192,22 @@ public class YAMLParser extends ParserBase
     }
     
     public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
-                      LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
+            LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
     {
-        this(ctxt, parserFeatures, formatFeatures, codec, 
-             new ParserImpl(new StreamReader(reader), (loaderOptions == null) ? new LoaderOptions() : loaderOptions))
+        this(ctxt, parserFeatures, formatFeatures, codec, reader,
+             new ParserImpl(new StreamReader(reader),
+                     (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
     }
-    
+
+    /**
+     * Constructor to overload by custom parser sub-classes that want to replace
+     * {@link ParserImpl} passed.
+     *
+     * @since 2.18
+     */
     protected YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
-                      ObjectCodec codec, ParserImpl yamlParser)
+            ObjectCodec codec, Reader reader,
+            ParserImpl yamlParser)
     {
         super(ctxt, parserFeatures);
         _objectCodec = codec;
@@ -298,8 +306,10 @@ public class YAMLParser extends ParserBase
          *   Reader (granted, we only do that for UTF-32...) this
          *   means that buffer recycling won't work correctly.
          */
-        if (_ioContext.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
-            _reader.close();
+        if (_reader != null) {
+            if (_ioContext.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
+                _reader.close();
+            }
         }
     }
 
@@ -435,6 +445,7 @@ public class YAMLParser extends ParserBase
     /* Parsing
     /**********************************************************
      */
+
     @SuppressWarnings("deprecation")
     @Override
     public JsonToken nextToken() throws IOException
