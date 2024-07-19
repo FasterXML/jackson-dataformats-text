@@ -429,17 +429,6 @@ public class YAMLParser extends ParserBase
 
     // Note: SHOULD override 'getTokenLineNr', 'getTokenColumnNr', but those are final in 2.0
 
-    /**
-     * Since the parserImpl cannot be replaced allow subclasses to at least be able to
-     * influence the events being consumed.
-     *
-     * A particular use case is working around the lack of anchor and alias support to
-     * emit additional events.
-     */
-    protected Event getEvent() {
-        return _yamlParser.getEvent();
-    }
-    
     /*
     /**********************************************************
     /* Parsing
@@ -459,7 +448,7 @@ public class YAMLParser extends ParserBase
         while (true) {
             Event evt;
             try {
-                evt = _yamlParser.getEvent();
+                evt = getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
                 if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
@@ -587,6 +576,19 @@ public class YAMLParser extends ParserBase
                 return _updateTokenToNull();
             }
         }
+    }
+
+    /**
+     * Since the parserImpl cannot be replaced allow subclasses to at least be able to
+     * influence the events being consumed.
+     *
+     * A particular use case is working around the lack of anchor and alias support to
+     * emit additional events.
+     *
+     * @since 2.18
+     */
+    protected Event getEvent() {
+        return _yamlParser.getEvent();
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
