@@ -179,7 +179,6 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
-
     /**
      * @deprecated since 2.14, use other constructor
      */
@@ -190,7 +189,7 @@ public class YAMLParser extends ParserBase
     {
         this(ctxt, parserFeatures, formatFeatures, null, codec, reader);
     }
-    
+
     public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
             LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
     {
