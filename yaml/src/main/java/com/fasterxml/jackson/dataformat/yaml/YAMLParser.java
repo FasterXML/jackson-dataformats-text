@@ -190,18 +190,22 @@ public class YAMLParser extends ParserBase
     {
         this(ctxt, parserFeatures, formatFeatures, null, codec, reader);
     }
-
+    
     public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
                       LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
+    {
+        this(ctxt, parserFeatures, formatFeatures, codec, 
+             new ParserImpl(new StreamReader(reader), (loaderOptions == null) ? new LoaderOptions() : loaderOptions))
+    }
+    
+    protected YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
+                      ObjectCodec codec, ParserImpl yamlParser)
     {
         super(ctxt, parserFeatures);
         _objectCodec = codec;
         _formatFeatures = formatFeatures;
         _reader = reader;
-        if (loaderOptions == null) {
-            loaderOptions = new LoaderOptions();
-        }
-        _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
+        _yamlParser = yamlParser;
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
 
@@ -415,12 +419,22 @@ public class YAMLParser extends ParserBase
 
     // Note: SHOULD override 'getTokenLineNr', 'getTokenColumnNr', but those are final in 2.0
 
+    /**
+     * Since the parserImpl cannot be replaced allow subclasses to at least be able to
+     * influence the events being consumed.
+     *
+     * A particular use case is working around the lack of anchor and alias support to
+     * emit additional events.
+     */
+    protected Event getEvent() {
+        return _yamlParser.getEvent();
+    }
+    
     /*
     /**********************************************************
     /* Parsing
     /**********************************************************
      */
-
     @SuppressWarnings("deprecation")
     @Override
     public JsonToken nextToken() throws IOException
