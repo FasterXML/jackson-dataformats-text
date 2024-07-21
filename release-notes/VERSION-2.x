@@ -21,6 +21,8 @@ Active Maintainers:
 #469: (csv) Allow CSV to differentiate between `null` and empty
   fields (foo,,bar vs. foo,"",bar)
  (contributed by David P)
+#482: (yaml) Allow passing `ParserImpl` by a subclass or overwrite the events
+ (contributed by Heiko B)
 
 2.17.2 (05-Jul-2024)
 
