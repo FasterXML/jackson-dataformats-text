@@ -12,7 +12,7 @@ import tools.jackson.databind.*;
 import tools.jackson.databind.node.JsonNodeType;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 
-public class BinaryReadTest extends ModuleTestBase
+public class BinaryYAMLReadTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 

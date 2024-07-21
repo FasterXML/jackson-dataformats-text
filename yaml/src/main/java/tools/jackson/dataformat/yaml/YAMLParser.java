@@ -51,8 +51,8 @@ public class YAMLParser extends ParserBase
         EMPTY_STRING_AS_NULL(true)
         ;
 
-        final boolean _defaultState;
-        final int _mask;
+        private final boolean _defaultState;
+        private final int _mask;
 
         // Method that calculates bit set (flags) of all features that
         // are enabled by default.
@@ -176,17 +176,31 @@ public class YAMLParser extends ParserBase
             int streamReadFeatures, int formatFeatures,
             LoadSettings loadSettings, Reader reader)
     {
+        this(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures,
+                        reader,
+                        _defaultParserImpl(loadSettings, reader));
+    }
+    
+    protected YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
+            int streamReadFeatures, int formatFeatures,
+            Reader reader,
+            ParserImpl yamlParser)
+    {
         super(readCtxt, ioCtxt, streamReadFeatures);
         _formatFeatures = formatFeatures;
         _reader = reader;
-        if (loadSettings == null) {
-            loadSettings = LoadSettings.builder().build();
-        }
-        _yamlParser = new ParserImpl(loadSettings, new StreamReader(loadSettings, reader));
+        _yamlParser = yamlParser;
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
+    }
+
+    private static ParserImpl _defaultParserImpl(LoadSettings settings, Reader r) {
+        if (settings == null) {
+            settings = LoadSettings.builder().build();
+        }
+        return new ParserImpl(settings, new StreamReader(settings, r));
     }
 
     /*
@@ -257,8 +271,10 @@ public class YAMLParser extends ParserBase
          *   Reader (granted, we only do that for UTF-32...) this
          *   means that buffer recycling won't work correctly.
          */
-        if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
-            _reader.close();
+        if (_reader != null) {
+            if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+                _reader.close();
+            }
         }
     }
 
@@ -339,7 +355,7 @@ public class YAMLParser extends ParserBase
         while (true /*_yamlParser.hasNext()*/) {
             Event evt;
             try {
-                evt = _yamlParser.next();
+                evt = nextEvent();
             } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
                 throw new JacksonYAMLParseException(this, e.getMessage(), e);
             } catch (NumberFormatException e) {
@@ -476,6 +492,10 @@ public class YAMLParser extends ParserBase
                 default:
             }
         }
+    }
+
+    protected Event nextEvent() {
+        return _yamlParser.next();
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws JacksonException
