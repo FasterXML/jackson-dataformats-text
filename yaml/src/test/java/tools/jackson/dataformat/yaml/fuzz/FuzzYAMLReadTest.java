@@ -7,6 +7,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonToken;
 import tools.jackson.core.exc.StreamReadException;
 
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -17,7 +18,8 @@ import tools.jackson.dataformat.yaml.ModuleTestBase;
  */
 public class FuzzYAMLReadTest extends ModuleTestBase
 {
-    private final ObjectMapper YAML_MAPPER = newObjectMapper();
+    private final ObjectMapper YAML_MAPPER = mapperBuilder()
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).build();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
     public void testUTF8Decoding50036() throws Exception
