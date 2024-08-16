@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.csv.*;
 
 public class NullWriting116Test extends ModuleTestBase
 {
-    private final CsvMapper csv = new CsvMapper();
+    private final CsvMapper csv = mapperForCsv();
 
     // [dataformat#116]
     public void testWithObjectArray() throws Exception 
