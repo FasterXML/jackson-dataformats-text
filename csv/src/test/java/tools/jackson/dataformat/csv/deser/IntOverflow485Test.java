@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.failing;
+package tools.jackson.dataformat.csv.deser;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
