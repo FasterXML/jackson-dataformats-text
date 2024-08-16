@@ -1,12 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
-import java.math.BigInteger;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.core.exc.StreamReadException;
+
+import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectReader;
+
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 public class IntOverflow485Test extends ModuleTestBase
@@ -36,8 +35,9 @@ public class IntOverflow485Test extends ModuleTestBase
         try {
             Numbers485 result = READER.readValue(csv485("111111111111111111111111111111111111111111", "0"));
             fail("Should not pass; got: "+result.intValue);
-        } catch (StreamReadException e) {
-            verifyException(e, "CHANGE THIS");
+        } catch (DatabindException e) { // in 2.x gets wrapped
+            verifyException(e, "Numeric value");
+            verifyException(e, "out of range of int");
         }
     }
 
@@ -47,8 +47,9 @@ public class IntOverflow485Test extends ModuleTestBase
             Numbers485 result = READER.readValue(csv485("0",
                     "2222222222222222222222222222222222222222"));
             fail("Should not pass; got: "+result.longValue);
-        } catch (StreamReadException e) {
-            verifyException(e, "CHANGE THIS");
+        } catch (DatabindException e) { // in 2.x gets wrapped
+            verifyException(e, "Numeric value");
+            verifyException(e, "out of range of long");
         }
     }
 

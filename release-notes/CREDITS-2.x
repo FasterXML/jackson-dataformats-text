@@ -277,3 +277,8 @@ Heiko Boettger (@HeikoBoettger)
 * Contributed #482: (yaml) Allow passing `ParserImpl` by a subclass or overwrite the events
  (2.18.0)
 
+Burdyug Pavel (@Pavel38l)
+
+* Reported #485: (csv) CSVDecoder: No Long and Int out of range exceptions
+ (2.18.0)
+
