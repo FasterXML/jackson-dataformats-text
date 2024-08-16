@@ -23,6 +23,8 @@ Active Maintainers:
  (contributed by David P)
 #482: (yaml) Allow passing `ParserImpl` by a subclass or overwrite the events
  (contributed by Heiko B)
+#485: (csv) CSVDecoder: No Long and Int out of range exceptions
+ (reported by Burdyug P)
 
 2.17.2 (05-Jul-2024)
 
