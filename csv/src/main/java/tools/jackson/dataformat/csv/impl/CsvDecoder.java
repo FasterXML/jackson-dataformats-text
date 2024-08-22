@@ -373,15 +373,14 @@ public class CsvDecoder
 
     public JsonLocation getCurrentLocation() {
         int ptr = _inputPtr;
-        /* One twist: when dealing with a "pending LF", need to
-         * go back one position when calculating location
-         */
+        // One twist: when dealing with a "pending LF", need to
+        // go back one position when calculating location
         if (_pendingLF > 1) { // 1 is used as marker for end-of-input
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
         return new JsonLocation(_ioContext.contentReference(),
-                _currInputProcessed + ptr - 1, _currInputRow, col);
+                _currInputProcessed + ptr - 1L, _currInputRow, col);
     }
 
     public final int getCurrentRow() {
@@ -463,8 +462,8 @@ public class CsvDecoder
             if (_inputReader != null) {
                 int count = _inputReader.read(_inputBuffer, 0, _inputBuffer.length);
                 _inputEnd = count;
+                _inputPtr = 0;
                 if (count > 0) {
-                    _inputPtr = 0;
                     return true;
                 }
                 // End of input; close here --  but note, do NOT yet call releaseBuffers()
