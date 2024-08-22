@@ -199,8 +199,14 @@ public class CsvDecoder
     final protected static int NR_DOUBLE = 0x008;
     final protected static int NR_BIGDECIMAL = 0x0010;
 
-    // Also, we need some numeric constants
+    // Also, we need some numeric constants (copied from ParserBase)
 
+    final static BigInteger BI_MIN_INT = BigInteger.valueOf(Integer.MIN_VALUE);
+    final static BigInteger BI_MAX_INT = BigInteger.valueOf(Integer.MAX_VALUE);
+
+    final static BigInteger BI_MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
+    final static BigInteger BI_MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+    
     final static BigDecimal BD_MIN_LONG = new BigDecimal(Long.MIN_VALUE);
     final static BigDecimal BD_MAX_LONG = new BigDecimal(Long.MAX_VALUE);
 
@@ -388,15 +394,14 @@ public class CsvDecoder
     public JsonLocation getCurrentLocation()
     {
         int ptr = _inputPtr;
-        /* One twist: when dealing with a "pending LF", need to
-         * go back one position when calculating location
-         */
+        // One twist: when dealing with a "pending LF", need to
+        // go back one position when calculating location
         if (_pendingLF > 1) { // 1 is used as marker for end-of-input
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
         return new JsonLocation(_ioContext.contentReference(),
-                _currInputProcessed + ptr - 1, _currInputRow, col);
+                _currInputProcessed + ptr - 1L, _currInputRow, col);
     }
 
     public final int getCurrentRow() {
@@ -465,7 +470,7 @@ public class CsvDecoder
             _inputReader = null;
         }
     }
-    
+
     protected final boolean loadMore() throws IOException
     {
         _currInputProcessed += _inputEnd;
@@ -474,13 +479,12 @@ public class CsvDecoder
         if (_inputReader != null) {
             int count = _inputReader.read(_inputBuffer, 0, _inputBuffer.length);
             _inputEnd = count;
+            _inputPtr = 0;
             if (count > 0) {
-                _inputPtr = 0;
                 return true;
             }
-            /* End of input; close here --  but note, do NOT yet call releaseBuffers()
-             * as there may be buffered input to handle
-             */
+            // End of input; close here --  but note, do NOT yet call releaseBuffers()
+            // as there may be buffered input to handle
             _closeInput();
             // Should never return 0, so let's fail
             if (count == 0) {
@@ -1372,8 +1376,12 @@ public class CsvDecoder
             }
             _numberInt = result;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
-            // !!! Should check for range...
-            _numberInt = _getBigInteger().intValue();
+            final BigInteger bigInteger = _getBigInteger();
+            if (BI_MIN_INT.compareTo(bigInteger) > 0
+                    || BI_MAX_INT.compareTo(bigInteger) < 0) {
+                reportOverflowInt();
+            }
+            _numberInt = bigInteger.intValue();
         } else if ((_numTypesValid & NR_DOUBLE) != 0) {
             // Need to check boundaries
             if (_numberDouble < MIN_INT_D || _numberDouble > MAX_INT_D) {
@@ -1399,8 +1407,12 @@ public class CsvDecoder
         if ((_numTypesValid & NR_INT) != 0) {
             _numberLong = _numberInt;
         } else if ((_numTypesValid & NR_BIGINT) != 0) {
-            // !!! Should check for range...
-            _numberLong = _getBigInteger().longValue();
+            final BigInteger bigInteger = _getBigInteger();
+            if (BI_MIN_LONG.compareTo(bigInteger) > 0
+                    || BI_MAX_LONG.compareTo(bigInteger) < 0) {
+                reportOverflowLong();
+            }
+            _numberLong = bigInteger.longValue();
         } else if ((_numTypesValid & NR_DOUBLE) != 0) {
             // Need to check boundaries
             if (_numberDouble < MIN_LONG_D || _numberDouble > MAX_LONG_D) {
@@ -1444,11 +1456,10 @@ public class CsvDecoder
     protected void convertNumberToDouble()
         throws IOException
     {
-        /* 05-Aug-2008, tatus: Important note: this MUST start with
-         *   more accurate representations, since we don't know which
-         *   value is the original one (others get generated when
-         *   requested)
-         */
+        // 05-Aug-2008, tatus: Important note: this MUST start with
+        //   more accurate representations, since we don't know which
+        //   value is the original one (others get generated when
+        //   requested)
     
         if ((_numTypesValid & NR_BIGDECIMAL) != 0) {
             _numberDouble = _getBigDecimal().doubleValue();
@@ -1468,9 +1479,8 @@ public class CsvDecoder
     protected void convertNumberToBigDecimal() throws IOException
     {
         if ((_numTypesValid & NR_DOUBLE) != 0) {
-            /* Let's actually parse from String representation, to avoid
-             * rounding errors that non-decimal floating operations could incur
-             */
+            // Let's actually parse from String representation, to avoid
+            // rounding errors that non-decimal floating operations could incur
             final String text = getText();
             _ioContext.streamReadConstraints().validateFPLength(text.length());
             _numberBigDecimal = NumberInput.parseBigDecimal(

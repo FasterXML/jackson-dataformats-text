@@ -271,3 +271,14 @@ David Pujol (@PujolDavid)
 * Contributed #469: (csv) Allow CSV to differentiate between `null` and empty
   fields (foo,,bar vs. foo,"",bar)
  (2.18.0)
+
+Heiko Boettger (@HeikoBoettger)
+
+* Contributed #482: (yaml) Allow passing `ParserImpl` by a subclass or overwrite the events
+ (2.18.0)
+
+Burdyug Pavel (@Pavel38l)
+
+* Reported #485: (csv) CSVDecoder: No Long and Int out of range exceptions
+ (2.18.0)
+

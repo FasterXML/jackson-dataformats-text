@@ -179,7 +179,6 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
-
     /**
      * @deprecated since 2.14, use other constructor
      */
@@ -192,16 +191,28 @@ public class YAMLParser extends ParserBase
     }
 
     public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
-                      LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
+            LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
+    {
+        this(ctxt, parserFeatures, formatFeatures, codec, reader,
+             new ParserImpl(new StreamReader(reader),
+                     (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
+    }
+
+    /**
+     * Constructor to overload by custom parser sub-classes that want to replace
+     * {@link ParserImpl} passed.
+     *
+     * @since 2.18
+     */
+    protected YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
+            ObjectCodec codec, Reader reader,
+            ParserImpl yamlParser)
     {
         super(ctxt, parserFeatures);
         _objectCodec = codec;
         _formatFeatures = formatFeatures;
         _reader = reader;
-        if (loaderOptions == null) {
-            loaderOptions = new LoaderOptions();
-        }
-        _yamlParser = new ParserImpl(new StreamReader(reader), loaderOptions);
+        _yamlParser = yamlParser;
         _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
     }
 
@@ -294,8 +305,10 @@ public class YAMLParser extends ParserBase
          *   Reader (granted, we only do that for UTF-32...) this
          *   means that buffer recycling won't work correctly.
          */
-        if (_ioContext.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
-            _reader.close();
+        if (_reader != null) {
+            if (_ioContext.isResourceManaged() || isEnabled(JsonParser.Feature.AUTO_CLOSE_SOURCE)) {
+                _reader.close();
+            }
         }
     }
 
@@ -434,7 +447,7 @@ public class YAMLParser extends ParserBase
         while (true) {
             Event evt;
             try {
-                evt = _yamlParser.getEvent();
+                evt = getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
                 if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
@@ -562,6 +575,19 @@ public class YAMLParser extends ParserBase
                 return _updateTokenToNull();
             }
         }
+    }
+
+    /**
+     * Since the parserImpl cannot be replaced allow subclasses to at least be able to
+     * influence the events being consumed.
+     *
+     * A particular use case is working around the lack of anchor and alias support to
+     * emit additional events.
+     *
+     * @since 2.18
+     */
+    protected Event getEvent() {
+        return _yamlParser.getEvent();
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
