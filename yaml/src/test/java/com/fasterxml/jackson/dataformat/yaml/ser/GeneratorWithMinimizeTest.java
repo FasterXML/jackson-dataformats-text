@@ -264,7 +264,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     // [dataformats-text#246]
     public void testMinimizeQuotesSpecialCharsMultiLine() throws Exception
     {
-        Map<String, Object> content = new HashMap<String, Object>();
+        Map<String, Object> content = new HashMap<>();
         content.put("key", "first\nsecond: third");
         String yaml = MINIM_MAPPER.writeValueAsString(content).trim();
 
@@ -277,7 +277,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     // in minimized mode
     public void testQuotingOfTilde() throws Exception
     {
-        Map<String, Object> content = new HashMap<String, Object>();
+        Map<String, Object> content = new HashMap<>();
         content.put("key", "~");
 
         assertEquals("---\n" +
@@ -287,5 +287,18 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertEquals("---\n" +
                 "key: \"~\"",
                 MINIM_MAPPER.writeValueAsString(content).trim());
+    }
+
+    // [dataformats-text#492]: too aggressive dropping of quoting?
+    // (wrt [dataformats-text#465] change in 2.17)
+    public void testMinimalHashQuoting492() throws Exception
+    {
+        Map<String, String> content = Collections.singletonMap("$ref",
+                "core-api.yaml#/components/responses/ClientError");
+        String yaml = MINIM_MAPPER.writeValueAsString(content);
+
+        Map<?, ?> result = MINIM_MAPPER.readValue(yaml, Map.class);
+
+        assertEquals(content, result);
     }
 }
