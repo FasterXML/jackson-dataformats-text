@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.fuzz;
+package com.fasterxml.jackson.dataformat.csv.failing;
 
 import java.net.URL;
 
@@ -10,8 +10,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
-public class ReadBracketedArrayTest extends ModuleTestBase
+// [dataformats-text#442]
+public class ReadBracketedArray442Test extends ModuleTestBase
 {
+    // [dataformats-text#442]
     @JsonPropertyOrder({"id", "title", "url", "score", "time", "comments", "author",
         "embeddings"
     })
@@ -32,6 +34,7 @@ public class ReadBracketedArrayTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    // [dataformats-text#442]
     public void testArrayWithBracketsRead() throws Exception
     {
         byte[] input = readResource("/data/story-100.csv");
