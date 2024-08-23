@@ -52,9 +52,9 @@ public interface CsvValueDecorator
      *
      * @return Value after removing decorations, if any.
      *
-     * @throws IOException if attempt to undecorate the value fails
+     * @throws IOException if attempt to un-decorate the value fails
      *    (typically a {@link com.fasterxml.jackson.core.exc.StreamReadException})
      */
-        public String undecorateValue(CsvParser parser, String decoratedValue)
+    public String undecorateValue(CsvParser parser, String decoratedValue)
         throws IOException;
 }
