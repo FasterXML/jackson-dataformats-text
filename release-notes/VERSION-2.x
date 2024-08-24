@@ -16,6 +16,8 @@ Active Maintainers:
 
 2.18.0 (not yet released)
 
+#442: (csv) Allow configuring "value decorators" (like `[` and `]` for arrays)
+  for `CsvSchema` columns
 #468: (csv) Remove synchronization from `CsvMapper`
  (contributed by @pjfanning)
 #469: (csv) Allow CSV to differentiate between `null` and empty
