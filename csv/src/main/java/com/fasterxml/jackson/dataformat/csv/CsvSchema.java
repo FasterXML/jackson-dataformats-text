@@ -403,6 +403,11 @@ public class CsvSchema
          */
         public String getArrayElementSeparator() { return _arrayElementSeparator; }
 
+        /**
+         * @since 2.18
+         */
+        public CsvValueDecorator getValueDecorator() { return _valueDecorator; }
+
         public boolean isArray() {
             return (_type == ColumnType.ARRAY);
         }
@@ -1285,8 +1290,37 @@ public class CsvSchema
     public CsvSchema withColumn(String columnName, UnaryOperator<Column> transformer) {
         Column old = column(columnName);
         if (old == null) {
-            throw new IllegalArgumentException("No column '"+columnName+"' in CsvSchema");
+            throw new IllegalArgumentException("No column '"+columnName+"' in CsvSchema (known columns: "
+                    +getColumnNames()+")");
         }
+        Column newColumn = transformer.apply(old);
+        if (newColumn == old) {
+            return this;
+        }
+        return _withColumn(old.getIndex(), newColumn);
+    }
+
+    /**
+     * Mutant factory method that will try to replace specified column with
+     * changed definition (but same name), leaving other columns as-is.
+     *<p>
+     * As with all `withXxx()` methods this method never modifies `this` but either
+     * returns it unmodified (if no change to column), or constructs
+     * a new schema instance and returns that.
+     *
+     * @param columnIndex Index of column to replace
+     * @param transformer Transformation to apply to the column
+     *
+     * @return Either this schema (if column did not change), or newly constructed {@link CsvSchema}
+     *  with changed column
+     *
+     * @since 2.18
+     */
+    public CsvSchema withColumn(int columnIndex, UnaryOperator<Column> transformer) {
+        if (columnIndex < 0 || columnIndex >= size()) {
+            throw new IllegalArgumentException("Illegal index "+columnIndex+"; `CsvSchema` has "+size()+" columns");
+        }
+        Column old = _columns[columnIndex];
         Column newColumn = transformer.apply(old);
         if (newColumn == old) {
             return this;

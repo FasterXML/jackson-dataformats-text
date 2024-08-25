@@ -5,15 +5,12 @@ import java.io.IOException;
 /**
  * Interface defining API for handlers that can add and remove "decorations"
  * to CSV values: for example, brackets around Array (List) values encoded
- * in a single physical column.
+ * in a single physical String column.
  *<p>
  * Decorations are handled after handling other encoding aspects such as
  * optional quoting and/or escaping.
  *<p>
- * Decorators can be handled at both {@link CsvSchema} level (as defaults
- * for specific column types or classes) and {@link CsvSchema.Column} level (specific
- * to values of given column): if both defined, more specific -- latter, per-Column
- * -- is used.
+ * Decorators can be registered on specific columns of {@link CsvSchema}.
  *
  * @since 2.18
  */

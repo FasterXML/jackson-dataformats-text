@@ -10,6 +10,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.ColumnType;
 import com.fasterxml.jackson.dataformat.csv.CsvValueDecorator;
+import com.fasterxml.jackson.dataformat.csv.CsvValueDecorators;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 // [dataformats-text#442]
@@ -42,22 +43,25 @@ public class ReadBracketedArray442Test extends ModuleTestBase
         byte[] input = readResource("/data/story-100.csv");
 
         // Test with schema constructed a few different ways
-        _testArrayWithBracketsRead(input, _automaticSchema());
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING));
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY));
+        _testArrayWithBracketsRead(input, _automaticSchema(true));
+        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY, true));
+        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
     }
 
-    private CsvSchema _automaticSchema()
+    private CsvSchema _automaticSchema(boolean required)
     {
         return MAPPER.schemaFor(Article.class)
                 .withHeader()
-                .withArrayElementSeparator(",");
+                .withArrayElementSeparator(",")
+                .withColumn("embeddings",
+                        col -> col.withValueDecorator(_bracketDecorator(required)));
     }
 
-    private CsvSchema _manualSchema(ColumnType ct)
+    private CsvSchema _manualSchema(ColumnType ct, boolean required)
     {
         // second schema: manual construction
         return CsvSchema.builder()
+                .setUseHeader(true)
                 .addColumn("id", ColumnType.STRING)
                 .addColumn("title", ColumnType.STRING)
                 .addColumn("author", ColumnType.STRING)
@@ -65,13 +69,15 @@ public class ReadBracketedArray442Test extends ModuleTestBase
                 .addColumn("score", ColumnType.NUMBER)
                 .addColumn("time", ColumnType.NUMBER)
                 // and then the interesting one; may mark as "String" or "Array"
-                .addColumn("embedding", ct,
-                        col -> col.withValueDecorator(_bracketDecorator()))
+                .addColumn("embeddings", ct,
+                        col -> col.withValueDecorator(_bracketDecorator(required)))
                 .build();
     }
 
-    private CsvValueDecorator _bracketDecorator() {
-        return null;
+    private CsvValueDecorator _bracketDecorator(boolean required) {
+        return required
+                ? CsvValueDecorators.STRICT_BRACKETS_DECORATOR
+                        : CsvValueDecorators.OPTIONAL_BRACKETS_DECORATOR;
     }
 
     private void _testArrayWithBracketsRead(byte[] input, CsvSchema schema) throws Exception
