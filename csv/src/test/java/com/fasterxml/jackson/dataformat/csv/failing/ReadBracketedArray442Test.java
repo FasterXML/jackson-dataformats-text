@@ -21,10 +21,12 @@ public class ReadBracketedArray442Test extends ModuleTestBase
         "embeddings"
     })
     static class Article {
-        public String id, title, author;
+        public String id, title;
         public URL url;
-        public int comments, score;
+        public int score;
         public long time; // Unix time
+        public int comments;
+        public String author;
 
         public double[] embeddings;
     }
@@ -38,16 +40,20 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#442]
-    public void testArrayWithBracketsRead() throws Exception
+    public void testBracketsReadAutoSchema() throws Exception
     {
         byte[] input = readResource("/data/story-100.csv");
-
-        // Test with schema constructed a few different ways
         _testArrayWithBracketsRead(input, _automaticSchema(true));
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY, true));
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
     }
 
+    // [dataformats-text#442]
+    public void testBracketsManualSchema() throws Exception
+    {
+        byte[] input = readResource("/data/story-100.csv");
+        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
+        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY, true));
+    }
+    
     private CsvSchema _automaticSchema(boolean required)
     {
         return MAPPER.schemaFor(Article.class)
@@ -59,15 +65,21 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
     private CsvSchema _manualSchema(ColumnType ct, boolean required)
     {
+        /*
+         *     @JsonPropertyOrder({"id", "title", "url", "score", "time", "comments", "author",
+        "embeddings"
+
+         */
         // second schema: manual construction
         return CsvSchema.builder()
                 .setUseHeader(true)
                 .addColumn("id", ColumnType.STRING)
                 .addColumn("title", ColumnType.STRING)
-                .addColumn("author", ColumnType.STRING)
-                .addColumn("comments", ColumnType.NUMBER)
+                .addColumn("url", ColumnType.STRING)
                 .addColumn("score", ColumnType.NUMBER)
                 .addColumn("time", ColumnType.NUMBER)
+                .addColumn("comments", ColumnType.NUMBER)
+                .addColumn("author", ColumnType.STRING)
                 // and then the interesting one; may mark as "String" or "Array"
                 .addColumn("embeddings", ct,
                         col -> col.withValueDecorator(_bracketDecorator(required)))
