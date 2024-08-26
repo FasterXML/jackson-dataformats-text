@@ -906,12 +906,20 @@ public class CsvParser
             }
             return _handleObjectRowEnd();
         }
-        _currentValue = next;
         if (_columnIndex >= _columnCount) {
+            _currentValue = next;
             return _handleExtraColumn(next);
         }
+        final CsvSchema.Column column = _schema.column(_columnIndex);
         _state = STATE_NAMED_VALUE;
-        _currentName = _schema.columnName(_columnIndex);
+        _currentName = column.getName();
+        // 25-Aug-2024, tatu: [dataformats-text#442] May have value decorator
+        CsvValueDecorator dec = column.getValueDecorator();
+        if (dec == null) {
+            _currentValue = next;
+        } else {
+            _currentValue = dec.undecorateValue(this, next);
+        }
         return JsonToken.PROPERTY_NAME;
     }
 
