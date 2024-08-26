@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
