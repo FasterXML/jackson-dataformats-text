@@ -2,6 +2,7 @@
 package com.fasterxml.jackson.dataformat.csv;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 import com.fasterxml.jackson.core.FormatSchema;
 
@@ -264,6 +265,15 @@ public class CsvSchema
         private final String _arrayElementSeparator;
 
         /**
+         * Value decorator used for this column, if any; {@code null} if none.
+         * Used to add decoration on serialization (writing) and remove decoration
+         * on deserialization (reading).
+         *
+         * @since 2.18
+         */
+        private final CsvValueDecorator _valueDecorator;
+
+        /**
          * Link to the next column within schema, if one exists;
          * null for the last column.
          * 
@@ -285,22 +295,39 @@ public class CsvSchema
             _name = name;
             _type = type;
             _arrayElementSeparator = _validArrayElementSeparator(arrayElementSep);
+            _valueDecorator = null;
             _next = null;
         }
 
         public Column(Column src, Column next) {
-            this(src, src._index, next);
+            this(src, src._index, src._valueDecorator, next);
         }
 
-        protected Column(Column src, int index, Column next)
+        protected Column(Column src, int index, Column next) {
+            this(src, index, src._valueDecorator, next);
+        }
+
+        /**
+         * @since 2.18
+         */
+        protected Column(Column src, CsvValueDecorator valueDecorator) {
+            this(src, src._index, valueDecorator, src._next);
+        }
+
+        /**
+         * @since 2.18
+         */
+        protected Column(Column src, int index, CsvValueDecorator valueDecorator,
+                Column next)
         {
             _index = index;
             _name = src._name;
             _type = src._type;
             _arrayElementSeparator = src._arrayElementSeparator;
+            _valueDecorator = valueDecorator;
             _next = next;
         }
-        
+
         public Column withName(String newName) {
             if (_name == newName) {
                 return this;
@@ -321,6 +348,16 @@ public class CsvSchema
                 return this;
             }
             return new Column(_index, _name, _type, sep);
+        }
+
+        /**
+         * @since 2.18
+         */
+        public Column withValueDecorator(CsvValueDecorator valueDecorator) {
+            if (valueDecorator == _valueDecorator) {
+                return this;
+            }
+            return new Column(this, valueDecorator);
         }
 
         public Column withNext(Column next) {
@@ -365,6 +402,11 @@ public class CsvSchema
          * @since 2.5
          */
         public String getArrayElementSeparator() { return _arrayElementSeparator; }
+
+        /**
+         * @since 2.18
+         */
+        public CsvValueDecorator getValueDecorator() { return _valueDecorator; }
 
         public boolean isArray() {
             return (_type == ColumnType.ARRAY);
@@ -446,12 +488,46 @@ public class CsvSchema
         }
 
         /**
+         * Add column with given name, and with changes to apply (as specified
+         * by second argument, {@code transformer}).
+         * NOTE: does NOT check for duplicate column names so it is possibly to
+         * accidentally add duplicates.
+         *
+         * @param name Name of column to add
+         * @param transformer Changes to apply to column definition
+         *
+         * @since 2.18
+         */
+        public Builder addColumn(String name, UnaryOperator<Column> transformer) {
+            Column col = transformer.apply(new Column(_columns.size(), name));
+            return addColumn(col);
+        }
+
+        /**
          * NOTE: does NOT check for duplicate column names so it is possibly to
          * accidentally add duplicates.
          */
         public Builder addColumn(String name, ColumnType type) {
             int index = _columns.size();
             return addColumn(new Column(index, name, type));
+        }
+
+        /**
+         * Add column with given name, and with changes to apply (as specified
+         * by second argument, {@code transformer}).
+         * NOTE: does NOT check for duplicate column names so it is possibly to
+         * accidentally add duplicates.
+         *
+         * @param name Name of column to add
+         * @param type Type of the column to add
+         * @param transformer Changes to apply to column definition
+         *
+         * @since 2.18
+         */
+        public Builder addColumn(String name, ColumnType type,
+                UnaryOperator<Column> transformer) {
+            Column col = transformer.apply(new Column(_columns.size(), name, type));
+            return addColumn(col);
         }
 
         /**
@@ -1175,6 +1251,9 @@ public class CsvSchema
      * returns it unmodified (if no new columns found from `toAppend`), or constructs
      * a new instance and returns that.
      *
+     * @return Either this schema (if nothing changed), or newly constructed {@link CsvSchema}
+     *  with appended columns.
+     *
      * @since 2.9
      */
     public CsvSchema withColumnsFrom(CsvSchema toAppend) {
@@ -1190,6 +1269,77 @@ public class CsvSchema
             }
         }
         return b.build();
+    }
+
+    /**
+     * Mutant factory method that will try to replace specified column with
+     * changed definition (but same name), leaving other columns as-is.
+     *<p>
+     * As with all `withXxx()` methods this method never modifies `this` but either
+     * returns it unmodified (if no change to column), or constructs
+     * a new schema instance and returns that.
+     *
+     * @param columnName Name of column to replace
+     * @param transformer Transformation to apply to the column
+     *
+     * @return Either this schema (if column did not change), or newly constructed {@link CsvSchema}
+     *  with changed column
+     *
+     * @since 2.18
+     */
+    public CsvSchema withColumn(String columnName, UnaryOperator<Column> transformer) {
+        Column old = column(columnName);
+        if (old == null) {
+            throw new IllegalArgumentException("No column '"+columnName+"' in CsvSchema (known columns: "
+                    +getColumnNames()+")");
+        }
+        Column newColumn = transformer.apply(old);
+        if (newColumn == old) {
+            return this;
+        }
+        return _withColumn(old.getIndex(), newColumn);
+    }
+
+    /**
+     * Mutant factory method that will try to replace specified column with
+     * changed definition (but same name), leaving other columns as-is.
+     *<p>
+     * As with all `withXxx()` methods this method never modifies `this` but either
+     * returns it unmodified (if no change to column), or constructs
+     * a new schema instance and returns that.
+     *
+     * @param columnIndex Index of column to replace
+     * @param transformer Transformation to apply to the column
+     *
+     * @return Either this schema (if column did not change), or newly constructed {@link CsvSchema}
+     *  with changed column
+     *
+     * @since 2.18
+     */
+    public CsvSchema withColumn(int columnIndex, UnaryOperator<Column> transformer) {
+        if (columnIndex < 0 || columnIndex >= size()) {
+            throw new IllegalArgumentException("Illegal index "+columnIndex+"; `CsvSchema` has "+size()+" columns");
+        }
+        Column old = _columns[columnIndex];
+        Column newColumn = transformer.apply(old);
+        if (newColumn == old) {
+            return this;
+        }
+        return _withColumn(old.getIndex(), newColumn);
+    }
+
+    /**
+     * @since 2.18
+     */
+    protected CsvSchema _withColumn(int ix, Column toReplace) {
+        Objects.requireNonNull(toReplace);
+        if (ix < 0 || ix >= size()) {
+            throw new IllegalArgumentException("Illegal index for column '"+toReplace.getName()+"': "
+                    +ix+" (column count: "+size()+")");
+        }
+        return rebuild()
+                .replaceColumn(ix, toReplace)
+                .build();
     }
 
     /**
@@ -1350,6 +1500,19 @@ public class CsvSchema
      */
     public Column column(int index) {
         return _columns[index];
+    }
+
+    /**
+     * Method for finding index of a named column within this schema.
+     *
+     * @param name Name of column to find
+     * @return Index of the specified column, if one exists; {@code -1} if not
+     *
+     * @since 2.18
+     */
+    public int columnIndex(String name) {
+        Column col = column(name);
+        return (col == null) ? -1 : col.getIndex();
     }
 
     /**
