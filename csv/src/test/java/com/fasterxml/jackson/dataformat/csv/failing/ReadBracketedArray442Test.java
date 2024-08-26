@@ -84,6 +84,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
         // second schema: manual construction
         return CsvSchema.builder()
                 .setUseHeader(true)
+                .setArrayElementSeparator(",")
                 .addColumn("id", ColumnType.STRING)
                 .addColumn("title", ColumnType.STRING)
                 .addColumn("url", ColumnType.STRING)
