@@ -77,7 +77,7 @@ public class CsvValueDecorators
             if (!decoratedValue.startsWith(_prefix)) {
                 if (!_optional) {
                     parser._reportParsingError(String.format(
-                            "Decorated value for column '%s' does not start with expected prefix (\"%s\"); value: \"%s\"",
+                            "Decorated value of column '%s' does not start with expected prefix (\"%s\"); value: \"%s\"",
                             parser.currentName(), _prefix, decoratedValue));
                 }
                 return decoratedValue;
@@ -85,7 +85,7 @@ public class CsvValueDecorators
             if (!decoratedValue.endsWith(_suffix)) {
                 if (!_optional) {
                     parser._reportParsingError(String.format(
-                            "Decorated value for column '%s' does not end with expected suffix (\"%s\"); value: \"%s\"",
+                            "Decorated value of column '%s' does not end with expected suffix (\"%s\"); value: \"%s\"",
                             parser.currentName(), _suffix, decoratedValue));
                 }
                 return decoratedValue;

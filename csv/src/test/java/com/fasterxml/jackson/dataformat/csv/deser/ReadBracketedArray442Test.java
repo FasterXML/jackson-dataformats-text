@@ -4,7 +4,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.*;
-
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.MappingIterator;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -34,7 +34,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
     /*
     /**********************************************************************
-    /* Test methods
+    /* Test methods, success cases
     /**********************************************************************
      */
 
@@ -73,6 +73,46 @@ public class ReadBracketedArray442Test extends ModuleTestBase
         _testArrayWithBracketsRead1(schema);
         _testArrayWithBracketsRead100(schema);
     }
+
+    /*
+    /**********************************************************************
+    /* Test methods, fail cases
+    /**********************************************************************
+     */
+
+    public void testBracketReadAutoSchemaFail() throws Exception
+    {
+        final CsvSchema schema = _automaticSchema(true);
+        MappingIterator<Article> it = MAPPER.readerFor(Article.class)
+                .with(schema)
+                .readValues("id,title,url,score,time,comments,author,embeddings\n"
+                        + "a1,Cool title,http://foo.org,123,0,3,unknown,\"1.0, 2.0\"\n");
+
+        try {
+            /*Article first =*/ it.nextValue();
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            verifyException(e, "Decorated value of column 'embeddings' does not start with");
+        }
+
+        it = MAPPER.readerFor(Article.class)
+                .with(schema)
+                .readValues("id,title,url,score,time,comments,author,embeddings\n"
+                        + "a1,Cool title,http://foo.org,123,0,3,unknown,\"[1.0, 2.0\"\n");
+
+        try {
+            /*Article first =*/ it.nextValue();
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            verifyException(e, "Decorated value of column 'embeddings' does not end with");
+        }
+    }
+
+    /*
+    /**********************************************************************
+    /* Helper methods
+    /**********************************************************************
+     */
 
     private CsvSchema _automaticSchema(boolean required)
     {
