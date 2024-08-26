@@ -47,13 +47,19 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     }
 
     // [dataformats-text#442]
-    public void testBracketsManualSchema() throws Exception
+    public void testBracketsManualSchemaArray() throws Exception
     {
         byte[] input = readResource("/data/story-100.csv");
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
         _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY, true));
     }
     
+    // [dataformats-text#442]
+    public void testBracketsManualSchemaString() throws Exception
+    {
+        byte[] input = readResource("/data/story-100.csv");
+        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
+    }
+
     private CsvSchema _automaticSchema(boolean required)
     {
         return MAPPER.schemaFor(Article.class)
@@ -100,5 +106,14 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
         Article first = it.nextValue();
         assertNotNull(first);
+
+        int count = 1;
+
+        while (it.hasNextValue()) {
+            assertNotNull(it.nextValue());
+            ++count;
+        }
+
+        assertEquals(100, count);
     }
 }
