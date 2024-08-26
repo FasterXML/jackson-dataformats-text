@@ -39,25 +39,24 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    private final byte[] FILE_100 = readResource("/data/story-100.csv");
+
     // [dataformats-text#442]
     public void testBracketsReadAutoSchema() throws Exception
     {
-        byte[] input = readResource("/data/story-100.csv");
-        _testArrayWithBracketsRead(input, _automaticSchema(true));
+        _testArrayWithBracketsRead(FILE_100, _automaticSchema(true));
     }
 
     // [dataformats-text#442]
     public void testBracketsManualSchemaArray() throws Exception
     {
-        byte[] input = readResource("/data/story-100.csv");
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.ARRAY, true));
+        _testArrayWithBracketsRead(FILE_100, _manualSchema(ColumnType.ARRAY, true));
     }
     
     // [dataformats-text#442]
     public void testBracketsManualSchemaString() throws Exception
     {
-        byte[] input = readResource("/data/story-100.csv");
-        _testArrayWithBracketsRead(input, _manualSchema(ColumnType.STRING, true));
+        _testArrayWithBracketsRead(FILE_100, _manualSchema(ColumnType.STRING, true));
     }
 
     private CsvSchema _automaticSchema(boolean required)
@@ -71,11 +70,6 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
     private CsvSchema _manualSchema(ColumnType ct, boolean required)
     {
-        /*
-         *     @JsonPropertyOrder({"id", "title", "url", "score", "time", "comments", "author",
-        "embeddings"
-
-         */
         // second schema: manual construction
         return CsvSchema.builder()
                 .setUseHeader(true)
