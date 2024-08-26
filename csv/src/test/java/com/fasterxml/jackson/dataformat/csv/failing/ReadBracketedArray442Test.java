@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.annotation.*;
 
@@ -41,22 +42,32 @@ public class ReadBracketedArray442Test extends ModuleTestBase
 
     private final byte[] FILE_100 = readResource("/data/story-100.csv");
 
+    private final byte[] STRING_1 = ("id,title,url,score,time,comments,author,embeddings\n"
+            + "a1,Cool title,http://foo.org,123,0,3,unknown,\"[1.0, 2.0]\"\n")
+            .getBytes(StandardCharsets.UTF_8);
+
     // [dataformats-text#442]
     public void testBracketsReadAutoSchema() throws Exception
     {
-        _testArrayWithBracketsRead(FILE_100, _automaticSchema(true));
+        final CsvSchema schema = _automaticSchema(true);
+        _testArrayWithBracketsRead1(schema);
+        _testArrayWithBracketsRead100(schema);
     }
 
     // [dataformats-text#442]
     public void testBracketsManualSchemaArray() throws Exception
     {
-        _testArrayWithBracketsRead(FILE_100, _manualSchema(ColumnType.ARRAY, true));
+        final CsvSchema schema = _manualSchema(ColumnType.ARRAY, true);
+        _testArrayWithBracketsRead1(schema);
+        _testArrayWithBracketsRead100(schema);
     }
     
     // [dataformats-text#442]
     public void testBracketsManualSchemaString() throws Exception
     {
-        _testArrayWithBracketsRead(FILE_100, _manualSchema(ColumnType.STRING, true));
+        final CsvSchema schema = _manualSchema(ColumnType.STRING, true);
+        _testArrayWithBracketsRead1(schema);
+        _testArrayWithBracketsRead100(schema);
     }
 
     private CsvSchema _automaticSchema(boolean required)
@@ -92,19 +103,38 @@ public class ReadBracketedArray442Test extends ModuleTestBase
                         : CsvValueDecorators.OPTIONAL_BRACKETS_DECORATOR;
     }
 
-    private void _testArrayWithBracketsRead(byte[] input, CsvSchema schema) throws Exception
+    private void _testArrayWithBracketsRead1(CsvSchema schema) throws Exception
     {
         MappingIterator<Article> it = MAPPER.readerFor(Article.class)
                 .with(schema)
-                .readValues(input);
+                .readValues(STRING_1);
 
         Article first = it.nextValue();
         assertNotNull(first);
+        assertNotNull(first.embeddings);
+        assertEquals(2, first.embeddings.length);
+
+        assertFalse(it.hasNextValue());
+    }
+
+    private void _testArrayWithBracketsRead100(CsvSchema schema) throws Exception
+    {
+        MappingIterator<Article> it = MAPPER.readerFor(Article.class)
+                .with(schema)
+                .readValues(FILE_100);
+
+        Article first = it.nextValue();
+        assertNotNull(first);
+        assertNotNull(first.embeddings);
+        assertEquals(1536, first.embeddings.length);
 
         int count = 1;
 
         while (it.hasNextValue()) {
-            assertNotNull(it.nextValue());
+            Article article = it.nextValue();
+            assertNotNull(article);
+            assertNotNull(article.embeddings);
+            assertEquals(1536, article.embeddings.length);
             ++count;
         }
 
