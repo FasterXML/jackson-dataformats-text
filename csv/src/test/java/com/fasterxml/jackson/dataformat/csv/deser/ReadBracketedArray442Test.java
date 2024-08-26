@@ -49,9 +49,13 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     // [dataformats-text#442]
     public void testBracketsReadAutoSchema() throws Exception
     {
-        final CsvSchema schema = _automaticSchema(true);
-        _testArrayWithBracketsRead1(schema);
-        _testArrayWithBracketsRead100(schema);
+        final CsvSchema schema1 = _automaticSchema(true);
+        final CsvSchema schema2 = _automaticSchema(false);
+
+        _testArrayWithBracketsRead1(schema1);
+        _testArrayWithBracketsRead1(schema2);
+        _testArrayWithBracketsRead100(schema1);
+        _testArrayWithBracketsRead100(schema2);
     }
 
     // [dataformats-text#442]
