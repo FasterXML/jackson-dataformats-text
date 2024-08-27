@@ -25,7 +25,23 @@ public class CsvValueDecorators
      */
     public final static CsvValueDecorator STRICT_BRACKETS_DECORATOR
         = new StringPrefixSuffixDecorator("[", "]", false);
-    
+
+    /**
+     * Factory method for constructing a {@link StringPrefixSuffixDecorator} with
+     * given prefix and suffix, both optional.
+     */
+    public static CsvValueDecorator optionalPrefixSuffixDecorator(String prefix, String suffix) {
+        return new StringPrefixSuffixDecorator(prefix, suffix, true);
+    }
+
+    /**
+     * Factory method for constructing a {@link StringPrefixSuffixDecorator} with
+     * given prefix and suffix, both required.
+     */
+    public static CsvValueDecorator requiredPrefixSuffixDecorator(String prefix, String suffix) {
+        return new StringPrefixSuffixDecorator(prefix, suffix, false);
+    }
+
     /**
      * Decorated that adds static prefix and suffix around value to decorate value;
      * removes the same when un-decorating. Handling of the case where decoration
