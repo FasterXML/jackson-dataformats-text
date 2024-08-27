@@ -18,7 +18,6 @@ Active Maintainers:
 
 #442: (csv) Allow use of "value decorators" (like `[` and `]` for arrays)
   for reading `CsvSchema` columns
-
 #468: (csv) Remove synchronization from `CsvMapper`
  (contributed by @pjfanning)
 #469: (csv) Allow CSV to differentiate between `null` and empty
@@ -30,6 +29,7 @@ Active Maintainers:
  (reported by @RafeArnold)
 #485: (csv) CSVDecoder: No Long and Int out of range exceptions
  (reported by Burdyug P)
+#495: (csv) Support use of `CsvValueDecorator` for writing CSV column values
 
 2.17.2 (05-Jul-2024)
 

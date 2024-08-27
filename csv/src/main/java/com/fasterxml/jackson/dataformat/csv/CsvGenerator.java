@@ -222,6 +222,14 @@ public class CsvGenerator extends GeneratorBase
     protected int _nextColumnByName = -1;
 
     /**
+     * Decorator to use for decorating the column value to follow, if any;
+     * {@code null} if none.
+     *
+     * @since 2.18
+     */
+    protected CsvValueDecorator _nextColumnDecorator;
+
+    /**
      * Flag set when property to write is unknown, and the matching value
      * is to be skipped quietly.
      *
@@ -461,14 +469,16 @@ public class CsvGenerator extends GeneratorBase
         if (_skipWithin != null) { // new in 2.7
             _skipValue = true;
             _nextColumnByName = -1;
+            _nextColumnDecorator = null;
             return;
         }
         // note: we are likely to get next column name, so pass it as hint
         CsvSchema.Column col = _schema.column(name, _nextColumnByName+1);
         if (col == null) {
+            _nextColumnByName = -1;
+            _nextColumnDecorator = null;
             if (isEnabled(JsonGenerator.Feature.IGNORE_UNKNOWN)) {
                 _skipValue = true;
-                _nextColumnByName = -1;
                 return;
             }
             // not a low-level error, so:
@@ -477,6 +487,7 @@ public class CsvGenerator extends GeneratorBase
         _skipValue = false;
         // and all we do is just note index to use for following value write
         _nextColumnByName = col.getIndex();
+        _nextColumnDecorator = col.getValueDecorator();
     }
 
     /*
@@ -606,8 +617,13 @@ public class CsvGenerator extends GeneratorBase
             return;
         }
         if (!_arraySeparator.isEmpty()) {
+            String value = _arrayContents.toString();
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+            if (_nextColumnDecorator != null) {
+                value = _nextColumnDecorator.decorateValue(this, value);
+            }
             _arraySeparator = CsvSchema.NO_ARRAY_ELEMENT_SEPARATOR;
-            _writer.write(_columnIndex(), _arrayContents.toString());
+            _writer.write(_columnIndex(), value);
         }
         // 20-Nov-2014, tatu: When doing "untyped"/"raw" output, this means that row
         //    is now done. But not if writing such an array field, so:
@@ -673,6 +689,10 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(text);
             } else {
+                // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+                if (_nextColumnDecorator != null) {
+                    text = _nextColumnDecorator.decorateValue(this, text);
+                }
                 _writer.write(_columnIndex(), text);
             }
         }
@@ -681,6 +701,12 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public void writeString(char[] text, int offset, int len) throws IOException
     {
+        // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+        if (_nextColumnDecorator != null) {
+            writeString(new String(text, offset, len));
+            return;
+        }
+
         _verifyValueWrite("write String value");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
@@ -699,7 +725,12 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(sstr.getValue());
             } else {
-                _writer.write(_columnIndex(), sstr.getValue());
+                // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+                String text = sstr.getValue();
+                if (_nextColumnDecorator != null) {
+                    text = _nextColumnDecorator.decorateValue(this, text);
+                }
+                _writer.write(_columnIndex(), text);
             }
         }
     }
@@ -780,6 +811,7 @@ public class CsvGenerator extends GeneratorBase
             writeNull();
             return;
         }
+
         _verifyValueWrite("write Binary value");
         if (!_skipValue) {
             // ok, better just Base64 encode as a String...
@@ -791,6 +823,10 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(encoded);
             } else {
+                // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+                if (_nextColumnDecorator != null) {
+                    encoded = _nextColumnDecorator.decorateValue(this, encoded);
+                }
                 _writer.write(_columnIndex(), encoded);
             }
         }
@@ -810,7 +846,13 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(state ? "true" : "false");
             } else {
-                _writer.write(_columnIndex(), state);
+                // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+                if (_nextColumnDecorator != null) {
+                    String text = _nextColumnDecorator.decorateValue(this, state ? "true" : "false");
+                    _writer.write(_columnIndex(), text);
+                } else {
+                    _writer.write(_columnIndex(), state);
+                }
             }
         }
     }
@@ -824,6 +866,15 @@ public class CsvGenerator extends GeneratorBase
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(_schema.getNullValueOrEmpty());
             } else if (_tokenWriteContext.inObject()) {
+                // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+                if (_nextColumnDecorator != null) {
+                    String nvl = _nextColumnDecorator.decorateNull(this);
+                    if (nvl != null) {
+                        _writer.write(_columnIndex(), nvl);
+                        return;
+                    }
+                }
+
                 _writer.writeNull(_columnIndex());
             } else if (_tokenWriteContext.inArray()) {
                 // [dataformat-csv#106]: Need to make sure we don't swallow nulls in arrays either
@@ -833,6 +884,14 @@ public class CsvGenerator extends GeneratorBase
                 //   based on either schema property, or CsvGenerator.Feature.
                 //  Note: if nulls are to be written that way, would need to call `finishRow()` right after `writeNull()`
                 if (!_tokenWriteContext.getParent().inRoot()) {
+                    // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+                    if (_nextColumnDecorator != null) {
+                        String nvl = _nextColumnDecorator.decorateNull(this);
+                        if (nvl != null) {
+                            _writer.write(_columnIndex(), nvl);
+                            return;
+                        }
+                    }
                     _writer.writeNull(_columnIndex());
                 }
 
@@ -852,6 +911,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, String.valueOf(v)));
             } else {
                 _writer.write(_columnIndex(), v);
             }
@@ -870,6 +933,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, String.valueOf(v)));
             } else {
                 _writer.write(_columnIndex(), v);
             }
@@ -887,6 +954,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, String.valueOf(v)));
             } else {
                 _writer.write(_columnIndex(), v);
 
@@ -901,6 +972,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, String.valueOf(v)));
             } else {
                 _writer.write(_columnIndex(), v);
             }
@@ -914,6 +989,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(String.valueOf(v));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, String.valueOf(v)));
             } else {
                 _writer.write(_columnIndex(), v);
             }
@@ -932,6 +1011,11 @@ public class CsvGenerator extends GeneratorBase
             boolean plain = isEnabled(JsonGenerator.Feature.WRITE_BIGDECIMAL_AS_PLAIN);
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(plain ? v.toPlainString() : v.toString());
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                String numStr = plain ? v.toPlainString() : v.toString();
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, numStr));
             } else {
                 _writer.write(_columnIndex(), v, plain);
             }
@@ -949,6 +1033,10 @@ public class CsvGenerator extends GeneratorBase
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(encodedValue);
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
+            } else if (_nextColumnDecorator != null) {
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, encodedValue));
             } else {
                 _writer.write(_columnIndex(), encodedValue);
             }

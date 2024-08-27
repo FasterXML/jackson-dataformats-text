@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
 
@@ -16,17 +16,19 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 // [dataformats-text#495]
 public class WriteBracketedArray495Test extends ModuleTestBase
 {
- // [dataformats-text#495]
-    @JsonPropertyOrder({"id", "embeddings", "title" })
+ // [dataformats-text#495]: 
+    @JsonPropertyOrder({"id", "embeddings", "title", "extra" })
     static class Article {
         public int id;
         public String title;
         public double[] embeddings;
+        public int extra;
 
         protected Article() { }
-        public Article(int id, String title, double[] embeddings) {
+        public Article(int id, String title, int extra, double[] embeddings) {
             this.id = id;
             this.title = title;
+            this.extra = extra;
             this.embeddings = embeddings;
         }
     }
@@ -64,6 +66,10 @@ public class WriteBracketedArray495Test extends ModuleTestBase
                 .withHeader()
                 .withArrayElementSeparator(",")
                 .withColumn("embeddings",
+                        col -> col.withValueDecorator(_bracketDecorator(required)))
+                .withColumn("extra",
+                        col -> col.withValueDecorator(_bracketDecorator(required)))
+                .withColumn("title",
                         col -> col.withValueDecorator(_bracketDecorator(required)));
     }
 
@@ -72,11 +78,14 @@ public class WriteBracketedArray495Test extends ModuleTestBase
         return CsvSchema.builder()
                 .setUseHeader(true)
                 .setArrayElementSeparator(",")
-                .addColumn("id", ColumnType.STRING)
+                .addColumn("id", ColumnType.NUMBER)
                 // and then the interesting one; may mark as "String" or "Array"
                 .addColumn("embeddings", ct,
                         col -> col.withValueDecorator(_bracketDecorator(required)))
-                .addColumn("title", ColumnType.STRING)
+                .addColumn("title", ColumnType.STRING,
+                        col -> col.withValueDecorator(_bracketDecorator(required)))
+                .addColumn("extra", ColumnType.NUMBER,
+                        col -> col.withValueDecorator(_bracketDecorator(required)))
                 .build();
     }
 
@@ -93,11 +102,11 @@ public class WriteBracketedArray495Test extends ModuleTestBase
                 .with(schema)
                 .writeValues(stringW);
 
-        sw.write(new Article(123, "Title!", new double[] { 0.5, -0.25, 2.5 }));
+        sw.write(new Article(123, "Title!", 42, new double[] { 0.5, -0.25, 2.5 }));
         sw.close();
 
-        assertEquals("id,embeddings,title\n"
-                +"123,\"[0.5,-0.25,2.5]\",\"Title!\"",
+        assertEquals("id,embeddings,title,extra\n"
+                +"123,\"[0.5,-0.25,2.5]\",\"[Title!]\",[42]",
                 stringW.toString().trim());
     }
 }
