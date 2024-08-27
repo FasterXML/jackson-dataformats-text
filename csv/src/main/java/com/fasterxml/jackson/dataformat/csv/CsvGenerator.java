@@ -701,16 +701,15 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public void writeString(char[] text, int offset, int len) throws IOException
     {
-        // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
-        if (_nextColumnDecorator != null) {
-            writeString(new String(text, offset, len));
-            return;
-        }
-
         _verifyValueWrite("write String value");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
                 _addToArray(new String(text, offset, len));
+            // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
+            } else if (_nextColumnDecorator != null) {
+                String str = new String(text, offset, len);
+                _writer.write(_columnIndex(),
+                        _nextColumnDecorator.decorateValue(this, str));
             } else {
                 _writer.write(_columnIndex(), text, offset, len);
             }
