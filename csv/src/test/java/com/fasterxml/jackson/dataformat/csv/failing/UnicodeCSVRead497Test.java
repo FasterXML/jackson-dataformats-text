@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
 // [dataformats-text#497]: 3-byte UTF-8 character at end of content
-public class UnicodeRead497Test extends ModuleTestBase
+public class UnicodeCSVRead497Test extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
