@@ -23,5 +23,8 @@ public class UnicodeRead497Test extends ModuleTestBase
         JsonNode o = MAPPER.reader() //.with(schema)
                 .readTree(doc.getBytes(StandardCharsets.UTF_8));
         assertNotNull(o);
+        assertTrue(o.isArray());
+        assertEquals(1, o.size());
+        assertEquals(o.get(0).textValue(), doc);
     }
 }
