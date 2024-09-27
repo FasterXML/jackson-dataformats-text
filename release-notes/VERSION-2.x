@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.18.0 (not yet released)
+2.18.0 (26-Sep-2024)
 
 #442: (csv) Allow use of "value decorators" (like `[` and `]` for arrays)
   for reading `CsvSchema` columns
