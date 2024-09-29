@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.18.1 (not yet released)
+
+#499: (yaml) SnakeYAML upgrade to 2.3
+ (contributed by @pjfanning)
+
 2.18.0 (26-Sep-2024)
 
 #442: (csv) Allow use of "value decorators" (like `[` and `]` for arrays)

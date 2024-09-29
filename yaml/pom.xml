@@ -34,7 +34,7 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>2.2</version>
+      <version>2.3</version>
     </dependency>
 
      <!-- and for testing need annotations; but should be available via `jackson-databind` above
