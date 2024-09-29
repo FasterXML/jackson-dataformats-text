@@ -18,6 +18,11 @@ Active Maintainers:
 
 -
 
+2.18.1 (not yet released)
+
+#499: (yaml) SnakeYAML upgrade to 2.3
+ (contributed by @pjfanning)
+
 2.18.0 (26-Sep-2024)
 
 #442: (csv) Allow use of "value decorators" (like `[` and `]` for arrays)
@@ -34,6 +39,11 @@ Active Maintainers:
 #485: (csv) CSVDecoder: No Long and Int out of range exceptions
  (reported by Burdyug P)
 #495: (csv) Support use of `CsvValueDecorator` for writing CSV column values
+
+2.17.3 (not yet released)
+
+#499: (yaml) SnakeYAML upgrade to 2.3
+ (contributed by @pjfanning)
 
 2.17.2 (05-Jul-2024)
 
