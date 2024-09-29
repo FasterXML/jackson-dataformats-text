@@ -18,6 +18,11 @@ Active Maintainers:
 
 No changes since 2.17
 
+2.17.3 (not yet released)
+
+#499: (yaml) SnakeYAML upgrade to 2.3
+ (contributed by @pjfanning)
+
 2.17.2 (05-Jul-2024)
 
 #481: (csv) Fix issue in `setSchema()`
