@@ -1,8 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -33,23 +31,5 @@ public class SimpleGeneration215Test extends ModuleTestBase
         final String output = mapper.writeValueAsString(Collections.singletonMap("key", "value"))
             .trim();
         assertEquals("key: \"value\"", output);
-    }
-
-    public void testLiteralBlockStyleMultilineWithTrailingSpace() throws Exception
-    {
-        YAMLFactory f = new YAMLFactory();
-        // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
-
-        YAMLMapper mapper = YAMLMapper.builder()
-                .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true)
-                .build();
-
-        Map<String, Object> content = new HashMap<String, Object>();
-        content.put("text", "Hello\nWorld ");
-        String yaml = mapper.writeValueAsString(content).trim();
-
-        assertEquals("---\n" +
-                "text: |-\n  Hello\n  World ", yaml);
     }
 }
