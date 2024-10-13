@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 /**
  * Micro-benchmark for comparing performance of bean deserialization
  */
-public final class DeserPerf
+public final class YAMLDeserPerf
 {
     /*
     /**********************************************************
@@ -18,7 +18,7 @@ public final class DeserPerf
 
     private final int REPS;
 
-    private DeserPerf() {
+    private YAMLDeserPerf() {
         // Let's try to guestimate suitable size
         REPS = 9000;
     }
@@ -115,7 +115,7 @@ public final class DeserPerf
     protected int testDeser(ObjectMapper mapper, byte[] input, int reps)
         throws Exception
     {
-        JavaType type = TypeFactory.defaultInstance().constructType(MediaItem.class);
+        JavaType type = mapper.constructType(MediaItem.class);
         MediaItem item = null;
         for (int i = 0; i < reps; ++i) {
             item = mapper.readValue(input, 0, input.length, type);
@@ -123,20 +123,20 @@ public final class DeserPerf
         return item.hashCode(); // just to get some non-optimizable number
     }
 
-    protected int testDeser(JsonFactory jf, byte[] input, int reps)
+    protected int testDeser(JsonFactory f, byte[] input, int reps)
         throws Exception
     {
         MediaItem item = null;
         for (int i = 0; i < reps; ++i) {
-            JsonParser jp = jf.createParser(input);
-            item = MediaItem.deserialize(jp);
-            jp.close();
+            JsonParser p = f.createParser(input);
+            item = MediaItem.deserialize(p);
+            p.close();
         }
         return item.hashCode(); // just to get some non-optimizable number
     }
     
     public static void main(String[] args) throws Exception
     {
-        new DeserPerf().test();
+        new YAMLDeserPerf().test();
     }
 }
