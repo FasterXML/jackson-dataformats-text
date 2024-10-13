@@ -7,7 +7,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
-public final class SerPerf
+public final class YAMLSerPerf
 {
     /*
     /**********************************************************
@@ -17,7 +17,7 @@ public final class SerPerf
 
     private final int REPS;
 
-    private SerPerf() throws Exception
+    private YAMLSerPerf() throws Exception
     {
         // Let's try to guesstimate suitable size...
         REPS = 6000;
@@ -139,6 +139,6 @@ public final class SerPerf
     
     public static void main(String[] args) throws Exception
     {
-        new SerPerf().test();
+        new YAMLSerPerf().test();
     }
 }

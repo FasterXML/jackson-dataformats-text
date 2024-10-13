@@ -9,7 +9,7 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
 /**
  * Micro-benchmark for comparing performance of bean deserialization
  */
-public final class DeserPerf
+public final class YAMLDeserPerf
 {
     /*
     /**********************************************************
@@ -19,7 +19,7 @@ public final class DeserPerf
 
     private final int REPS;
 
-    private DeserPerf() {
+    private YAMLDeserPerf() {
         // Let's try to guestimate suitable size
         REPS = 9000;
     }
@@ -114,7 +114,7 @@ public final class DeserPerf
     protected int testDeser(ObjectMapper mapper, byte[] input, int reps)
         throws Exception
     {
-        JavaType type = TypeFactory.defaultInstance().constructType(MediaItem.class);
+        JavaType type = mapper.constructType(MediaItem.class);
         MediaItem item = null;
         for (int i = 0; i < reps; ++i) {
             item = mapper.readValue(input, 0, input.length, type);
@@ -136,6 +136,6 @@ public final class DeserPerf
     
     public static void main(String[] args) throws Exception
     {
-        new DeserPerf().test();
+        new YAMLDeserPerf().test();
     }
 }
