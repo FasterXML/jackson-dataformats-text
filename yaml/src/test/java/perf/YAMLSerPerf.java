@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
-public final class SerPerf
+public final class YAMLSerPerf
 {
     /*
     /**********************************************************
@@ -17,7 +17,7 @@ public final class SerPerf
 
     private final int REPS;
 
-    private SerPerf() throws Exception
+    private YAMLSerPerf() throws Exception
     {
         // Let's try to guesstimate suitable size...
         REPS = 6000;
@@ -141,6 +141,6 @@ public final class SerPerf
     
     public static void main(String[] args) throws Exception
     {
-        new SerPerf().test();
+        new YAMLSerPerf().test();
     }
 }
