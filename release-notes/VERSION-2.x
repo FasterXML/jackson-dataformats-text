@@ -18,6 +18,10 @@ Active Maintainers:
 
 -
 
+2.18.2 (27-Nov-2024)
+
+No changes since 2.18.1
+
 2.18.1 (28-Oct-2024)
 
 #499: (yaml) SnakeYAML upgrade to 2.3
