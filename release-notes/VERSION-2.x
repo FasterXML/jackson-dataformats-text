@@ -18,7 +18,11 @@ Active Maintainers:
 
 -
 
-2.18.1 (not yet released)
+2.18.2 (27-Nov-2024)
+
+No changes since 2.18.1
+
+2.18.1 (28-Oct-2024)
 
 #499: (yaml) SnakeYAML upgrade to 2.3
  (contributed by @pjfanning)
@@ -40,7 +44,7 @@ Active Maintainers:
  (reported by Burdyug P)
 #495: (csv) Support use of `CsvValueDecorator` for writing CSV column values
 
-2.17.3 (not yet released)
+2.17.3 (01-Nov-2024)
 
 #499: (yaml) SnakeYAML upgrade to 2.3
  (contributed by @pjfanning)
