@@ -359,7 +359,7 @@ public class JavaPropsMapper extends ObjectMapper
         if (target == null) {
             throw new IllegalArgumentException("Can not pass `null` target");
         }
-        SerializationContextExt prov = _serializerProvider();
+        SerializationContextExt prov = _serializationContext();
         try (JavaPropsGenerator g = tokenStreamFactory().createGenerator(prov, null, target)) {
             writeValue(g, value);
         }
@@ -375,7 +375,7 @@ public class JavaPropsMapper extends ObjectMapper
         if (target == null) {
             throw new IllegalArgumentException("Can not pass `null` target");
         }
-        SerializationContextExt prov = _serializerProvider();
+        SerializationContextExt prov = _serializationContext();
         try (JavaPropsGenerator g = tokenStreamFactory().createGenerator(prov, schema, target)) {
             writeValue(g, value);
         }

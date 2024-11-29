@@ -436,7 +436,7 @@ public class CsvMapper extends ObjectMapper
             return s;
         }
         // 15-Oct-2019, tatu: Since 3.0, need context for introspection
-        final SerializerProvider ctxt = _serializerProvider();
+        final SerializationContext ctxt = _serializationContext();
         CsvSchema.Builder builder = CsvSchema.builder();
         _addSchemaProperties(ctxt, builder, typed, pojoType, null, view);
         CsvSchema result = builder.build();
@@ -472,7 +472,7 @@ public class CsvMapper extends ObjectMapper
         return false;
     }
 
-    protected void _addSchemaProperties(SerializerProvider ctxt, CsvSchema.Builder builder,
+    protected void _addSchemaProperties(SerializationContext ctxt, CsvSchema.Builder builder,
             boolean typed, JavaType pojoType, NameTransformer unwrapper, Class<?> view)
     {
         // 09-Aug-2015, tatu: From [dataformat-csv#87], realized that one can not have
