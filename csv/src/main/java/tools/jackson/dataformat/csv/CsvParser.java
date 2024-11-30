@@ -383,12 +383,12 @@ public class CsvParser
     @Override public Object currentValue() { return _streamReadContext.currentValue(); }
 
     @Override
-    public JsonLocation currentTokenLocation() {
+    public TokenStreamLocation currentTokenLocation() {
         return _reader.getTokenLocation();
     }
 
     @Override
-    public JsonLocation currentLocation() {
+    public TokenStreamLocation currentLocation() {
         return _reader.getCurrentLocation();
     }
 

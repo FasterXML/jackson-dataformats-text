@@ -1,6 +1,6 @@
 package tools.jackson.dataformat.toml;
 
-import tools.jackson.core.JsonLocation;
+import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.ContentReference;
@@ -10,11 +10,11 @@ public class TomlStreamReadException
 {
     private static final long serialVersionUID = 1L;
 
-    TomlStreamReadException(JsonParser p, String msg, JsonLocation loc) {
+    TomlStreamReadException(JsonParser p, String msg, TokenStreamLocation loc) {
         super(p, msg, loc);
     }
 
-    TomlStreamReadException(JsonParser p, String msg, JsonLocation loc, Throwable rootCause) {
+    TomlStreamReadException(JsonParser p, String msg, TokenStreamLocation loc, Throwable rootCause) {
         super(p, msg, loc, rootCause);
     }
 
@@ -38,10 +38,10 @@ public class TomlStreamReadException
         }
 
         class ErrorBuilder {
-            private final JsonLocation location;
+            private final TokenStreamLocation location;
 
             ErrorBuilder(Lexer lexer) {
-                this.location = new JsonLocation(
+                this.location = new TokenStreamLocation(
                         contentReference,
                         -1,
                         lexer.getCharPos(),

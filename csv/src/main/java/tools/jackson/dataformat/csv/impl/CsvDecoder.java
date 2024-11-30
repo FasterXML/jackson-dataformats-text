@@ -365,14 +365,14 @@ public class CsvDecoder
         return context.createChildObjectContext(_currInputRow, col);
     }
 
-    public JsonLocation getTokenLocation()
+    public TokenStreamLocation getTokenLocation()
     {
-        return new JsonLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_ioContext.contentReference(),
                 getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
 
-    public JsonLocation getCurrentLocation() {
+    public TokenStreamLocation getCurrentLocation() {
         int ptr = _inputPtr;
         // One twist: when dealing with a "pending LF", need to
         // go back one position when calculating location
@@ -380,7 +380,7 @@ public class CsvDecoder
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_ioContext.contentReference(),
                 _currInputProcessed + ptr - 1L, _currInputRow, col);
     }
 
