@@ -6,8 +6,8 @@ import java.util.Map;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
@@ -15,7 +15,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     private final static YAMLMapper MINIM_MAPPER;
     static {
         MINIM_MAPPER = new YAMLMapper(YAMLFactory.builder()
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
                 .build()
         );
     }
@@ -23,12 +23,12 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
     public void testDefaultSetting() {
         YAMLFactory f = new YAMLFactory();
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
+        assertFalse(f.isEnabled(YAMLWriteFeature.MINIMIZE_QUOTES));
 
         f = YAMLFactory.builder()
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
                 .build();
-        assertTrue(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
+        assertTrue(f.isEnabled(YAMLWriteFeature.MINIMIZE_QUOTES));
     }
 
     public void testLiteralStringsSingleLine() throws Exception
@@ -187,12 +187,12 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
         YAMLFactory f = new YAMLFactory();
         // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.MINIMIZE_QUOTES));
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS));
+        assertFalse(f.isEnabled(YAMLWriteFeature.MINIMIZE_QUOTES));
+        assertFalse(f.isEnabled(YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS));
 
         f = YAMLFactory.builder()
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES,
-                        YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES,
+                        YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
                 .build();
         YAMLMapper mapper = new YAMLMapper(f);
 

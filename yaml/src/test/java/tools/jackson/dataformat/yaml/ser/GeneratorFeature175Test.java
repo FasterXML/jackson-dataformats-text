@@ -1,8 +1,8 @@
 package tools.jackson.dataformat.yaml.ser;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class GeneratorFeature175Test extends ModuleTestBase
             "      name: \"Mathematics\"";
 
         YAMLMapper defaultArrayMapper = YAMLMapper.builder()
-            .enable(YAMLGenerator.Feature.INDENT_ARRAYS)
+            .enable(YAMLWriteFeature.INDENT_ARRAYS)
             .build();
         Map<?, ?> stuff = defaultArrayMapper.readValue(yamlBefore, Map.class);
         String defaultYaml = defaultArrayMapper.writeValueAsString(stuff);
@@ -36,8 +36,8 @@ public class GeneratorFeature175Test extends ModuleTestBase
         assertNotSame(yamlBefore, defaultYaml);
 
         YAMLMapper arrayWithIndicatorMapper = YAMLMapper.builder()
-            .enable(YAMLGenerator.Feature.INDENT_ARRAYS)
-            .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR)
+            .enable(YAMLWriteFeature.INDENT_ARRAYS)
+            .enable(YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR)
             .build();
 
         String arrayWithIndicatorYaml = arrayWithIndicatorMapper.writeValueAsString(stuff);

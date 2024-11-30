@@ -22,6 +22,8 @@ implementations)
  (suggested by @SebastianSolidwork)
 #510: JSTEP-8: rename `CsvParser.Feature` as `CsvReadFeature`,
   `CsvGenerator.Feature` as `CsvWriteFeature`
+#512: JSTEP-8: rename `YAMLParser.Feature` as `YAMLReadFeature`,
+  `YAMLGenerator.Feature` as `YAMLWriteFeature`
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 
 CSV:

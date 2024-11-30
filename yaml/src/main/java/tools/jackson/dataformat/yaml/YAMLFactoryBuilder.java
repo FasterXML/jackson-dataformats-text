@@ -56,9 +56,9 @@ public class YAMLFactoryBuilder
     /**
      * Configuration for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
-     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * the dumper options are derived based on {@link YAMLWriteFeature}s).
      * <p>
-     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     These {@link YAMLWriteFeature}s are ignored if you provide your own DumperOptions:
      *     <ul>
      *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
      *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
@@ -97,33 +97,33 @@ public class YAMLFactoryBuilder
     /**********************************************************
      */
 
-    public YAMLFactoryBuilder enable(YAMLGenerator.Feature f) {
+    public YAMLFactoryBuilder enable(YAMLWriteFeature f) {
         _formatWriteFeatures |= f.getMask();
         return this;
     }
 
-    public YAMLFactoryBuilder enable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
+    public YAMLFactoryBuilder enable(YAMLWriteFeature first, YAMLWriteFeature... other) {
         _formatWriteFeatures |= first.getMask();
-        for (YAMLGenerator.Feature f : other) {
+        for (YAMLWriteFeature f : other) {
             _formatWriteFeatures |= f.getMask();
         }
         return this;
     }
 
-    public YAMLFactoryBuilder disable(YAMLGenerator.Feature f) {
+    public YAMLFactoryBuilder disable(YAMLWriteFeature f) {
         _formatWriteFeatures &= ~f.getMask();
         return this;
     }
 
-    public YAMLFactoryBuilder disable(YAMLGenerator.Feature first, YAMLGenerator.Feature... other) {
+    public YAMLFactoryBuilder disable(YAMLWriteFeature first, YAMLWriteFeature... other) {
         _formatWriteFeatures &= ~first.getMask();
-        for (YAMLGenerator.Feature f : other) {
+        for (YAMLWriteFeature f : other) {
             _formatWriteFeatures &= ~f.getMask();
         }
         return this;
     }
 
-    public YAMLFactoryBuilder configure(YAMLGenerator.Feature f, boolean state) {
+    public YAMLFactoryBuilder configure(YAMLWriteFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
 
@@ -133,33 +133,33 @@ public class YAMLFactoryBuilder
     /**********************************************************
      */
 
-    public YAMLFactoryBuilder enable(YAMLParser.Feature f) {
+    public YAMLFactoryBuilder enable(YAMLReadFeature f) {
         _formatReadFeatures |= f.getMask();
         return this;
     }
 
-    public YAMLFactoryBuilder enable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+    public YAMLFactoryBuilder enable(YAMLReadFeature first, YAMLReadFeature... other) {
         _formatReadFeatures |= first.getMask();
-        for (YAMLParser.Feature f : other) {
+        for (YAMLReadFeature f : other) {
             _formatReadFeatures |= f.getMask();
         }
         return this;
     }
 
-    public YAMLFactoryBuilder disable(YAMLParser.Feature f) {
+    public YAMLFactoryBuilder disable(YAMLReadFeature f) {
         _formatReadFeatures &= ~f.getMask();
         return this;
     }
 
-    public YAMLFactoryBuilder disable(YAMLParser.Feature first, YAMLParser.Feature... other) {
+    public YAMLFactoryBuilder disable(YAMLReadFeature first, YAMLReadFeature... other) {
         _formatReadFeatures &= ~first.getMask();
-        for (YAMLParser.Feature f : other) {
+        for (YAMLReadFeature f : other) {
             _formatReadFeatures &= ~f.getMask();
         }
         return this;
     }
 
-    public YAMLFactoryBuilder configure(YAMLParser.Feature f, boolean state) {
+    public YAMLFactoryBuilder configure(YAMLReadFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
 
@@ -226,9 +226,9 @@ public class YAMLFactoryBuilder
     /**
      * Configuration for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
-     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * the dumper options are derived based on {@link YAMLWriteFeature}s).
      * <p>
-     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     These {@link YAMLWriteFeature}s are ignored if you provide your own DumperOptions:
      *     <ul>
      *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
      *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
@@ -283,9 +283,9 @@ public class YAMLFactoryBuilder
     /**
      * Configuration for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
-     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * the dumper options are derived based on {@link YAMLWriteFeature}s).
      * <p>
-     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     These {@link YAMLWriteFeature}s are ignored if you provide your own DumperOptions:
      *     <ul>
      *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
      *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>

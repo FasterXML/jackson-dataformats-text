@@ -5,8 +5,8 @@ import java.util.Collections;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 @SuppressWarnings("serial")
@@ -30,14 +30,14 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 // null -> use default:
                 .stringQuotingChecker(null)
                 .build())
-            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
             .build();
 
     private final YAMLMapper CUSTOM_MAPPER = YAMLMapper.builder(
             YAMLFactory.builder()
                 .stringQuotingChecker(new CustomChecker())
                 .build())
-            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
             .build();
 
     public void testNameQuotingDefault() throws Exception

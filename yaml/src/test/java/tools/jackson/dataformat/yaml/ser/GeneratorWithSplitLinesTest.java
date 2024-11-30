@@ -11,7 +11,7 @@ public class GeneratorWithSplitLinesTest extends ModuleTestBase
         YAMLFactory f = new YAMLFactory();
 
         // verify default settings
-        assertTrue(f.isEnabled(YAMLGenerator.Feature.SPLIT_LINES));
+        assertTrue(f.isEnabled(YAMLWriteFeature.SPLIT_LINES));
 
         // and first write with splitting enabled
         YAMLMapper mapper = new YAMLMapper(f);
@@ -24,7 +24,7 @@ public class GeneratorWithSplitLinesTest extends ModuleTestBase
 
         // and then with splitting disabled
         yaml = mapper.writer()
-                .without(YAMLGenerator.Feature.SPLIT_LINES)
+                .without(YAMLWriteFeature.SPLIT_LINES)
                 .writeValueAsString(INPUT).trim();
         assertEquals("---\n" +
                 "- \"1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890\"",

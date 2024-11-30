@@ -5,8 +5,8 @@ import tools.jackson.core.ObjectReadContext;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.util.TokenBuffer;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class TypeIdTest extends ModuleTestBase
 {
@@ -46,7 +46,7 @@ public class TypeIdTest extends ModuleTestBase
     {
         YAMLMapper mapper = new YAMLMapper();
         String yaml = mapper.writer()
-            .without(YAMLGenerator.Feature.USE_NATIVE_TYPE_ID)
+            .without(YAMLWriteFeature.USE_NATIVE_TYPE_ID)
             .writeValueAsString(new Impl(13));
         yaml = yaml.trim();
         assertEquals("---\ntype: \"impl\"\na: 13", yaml);

@@ -79,18 +79,18 @@ public class SimpleGenerationTest extends ModuleTestBase
         StringWriter w = new StringWriter();
         ObjectWriter ow = MAPPER.writer();
 
-        assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLWriteFeature.WRITE_DOC_START_MARKER));
         YAMLGenerator gen = (YAMLGenerator) MAPPER.createGenerator(w);
-        assertTrue(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        assertTrue(gen.isEnabled(YAMLWriteFeature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         String yaml = w.toString().trim();
         assertEquals("---\nname: \"Brad\"\nage: 39", yaml);
 
         // and then, disabling, and not any more
-        ow = ow.without(YAMLGenerator.Feature.WRITE_DOC_START_MARKER);
+        ow = ow.without(YAMLWriteFeature.WRITE_DOC_START_MARKER);
         w = new StringWriter();
         gen = (YAMLGenerator)ow.createGenerator(w);
-        assertFalse(gen.isEnabled(YAMLGenerator.Feature.WRITE_DOC_START_MARKER));
+        assertFalse(gen.isEnabled(YAMLWriteFeature.WRITE_DOC_START_MARKER));
         _writeBradDoc(gen);
         yaml = w.toString().trim();
         assertEquals("name: \"Brad\"\nage: 39", yaml);
@@ -100,14 +100,14 @@ public class SimpleGenerationTest extends ModuleTestBase
     {
         YAMLFactory f = new YAMLFactory();
         // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
+        assertFalse(f.isEnabled(YAMLWriteFeature.LITERAL_BLOCK_STYLE));
 
-        f = f.rebuild().enable(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE)
+        f = f.rebuild().enable(YAMLWriteFeature.LITERAL_BLOCK_STYLE)
                 .build();
-        assertTrue(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
+        assertTrue(f.isEnabled(YAMLWriteFeature.LITERAL_BLOCK_STYLE));
 
         YAMLMapper mapper = new YAMLMapper(f);
-        assertTrue(mapper.tokenStreamFactory().isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
+        assertTrue(mapper.tokenStreamFactory().isEnabled(YAMLWriteFeature.LITERAL_BLOCK_STYLE));
 
         Map<String, Object> content = new HashMap<String, Object>();
         content.put("text", "Hello\nWorld");
