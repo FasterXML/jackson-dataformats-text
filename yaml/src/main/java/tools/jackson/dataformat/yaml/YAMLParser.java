@@ -252,31 +252,31 @@ public class YAMLParser extends ParserBase
      */
 
     @Override
-    public JsonLocation currentTokenLocation()
+    public TokenStreamLocation currentTokenLocation()
     {
         if (_lastEvent == null) {
-            return JsonLocation.NA;
+            return TokenStreamLocation.NA;
         }
         return _locationFor(_lastEvent.getStartMark());
     }
 
     @Override
-    public JsonLocation currentLocation() {
+    public TokenStreamLocation currentLocation() {
         // can assume we are at the end of token now...
         if (_lastEvent == null) {
-            return JsonLocation.NA;
+            return TokenStreamLocation.NA;
         }
         return _locationFor(_lastEvent.getEndMark());
     }
 
-    protected JsonLocation _locationFor(Optional<Mark> option)
+    protected TokenStreamLocation _locationFor(Optional<Mark> option)
     {
         if (!option.isPresent()) {
-            return new JsonLocation(_ioContext.contentReference(),
+            return new TokenStreamLocation(_ioContext.contentReference(),
                     -1, -1, -1);
         }
         Mark m = option.get();
-        return new JsonLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_ioContext.contentReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1); // ditto

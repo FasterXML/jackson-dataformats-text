@@ -5,7 +5,7 @@ import java.math.BigInteger;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
-import tools.jackson.core.JsonLocation;
+import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.dataformat.yaml.JacksonYAMLParseException;
@@ -38,7 +38,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getText());
-        JsonLocation loc = p.currentTokenLocation();
+        TokenStreamLocation loc = p.currentTokenLocation();
         assertEquals(1, loc.getLineNr());
         assertEquals(9, loc.getColumnNr());
         assertEquals(8, loc.getCharOffset());
