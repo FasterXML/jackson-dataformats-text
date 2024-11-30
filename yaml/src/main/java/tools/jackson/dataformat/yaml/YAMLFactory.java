@@ -29,13 +29,13 @@ public class YAMLFactory
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
      */
-    protected final static int DEFAULT_YAML_PARSER_FEATURE_FLAGS = YAMLParser.Feature.collectDefaults();
+    protected final static int DEFAULT_YAML_PARSER_FEATURE_FLAGS = YAMLReadFeature.collectDefaults();
 
     /**
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
      */
-    protected final static int DEFAULT_YAML_GENERATOR_FEATURE_FLAGS = YAMLGenerator.Feature.collectDefaults();
+    protected final static int DEFAULT_YAML_GENERATOR_FEATURE_FLAGS = YAMLWriteFeature.collectDefaults();
 
     /*
     /**********************************************************************
@@ -64,9 +64,9 @@ public class YAMLFactory
     /**
      * Configuration for underlying generator to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
-     * the dumper options are derived based on {@link YAMLGenerator.Feature}s).
+     * the dumper options are derived based on {@link YAMLWriteFeature}s).
      * <p>
-     *     These {@link YAMLGenerator.Feature}s are ignored if you provide your own DumperOptions:
+     *     These {@link YAMLWriteFeature}s are ignored if you provide your own DumperOptions:
      *     <ul>
      *         <li>{@code YAMLGenerator.Feature.ALLOW_LONG_KEYS}</li>
      *         <li>{@code YAMLGenerator.Feature.CANONICAL_OUTPUT}</li>
@@ -204,13 +204,13 @@ public class YAMLFactory
     }
 
     @Override
-    public Class<YAMLParser.Feature> getFormatReadFeatureType() {
-        return YAMLParser.Feature.class;
+    public Class<YAMLReadFeature> getFormatReadFeatureType() {
+        return YAMLReadFeature.class;
     }
 
     @Override
-    public Class<YAMLGenerator.Feature> getFormatWriteFeatureType() {
-        return YAMLGenerator.Feature.class;
+    public Class<YAMLWriteFeature> getFormatWriteFeatureType() {
+        return YAMLWriteFeature.class;
     }
 
     @Override
@@ -219,11 +219,11 @@ public class YAMLFactory
     @Override
     public int getFormatWriteFeatures() { return _formatWriteFeatures; }
 
-    public boolean isEnabled(YAMLParser.Feature f) {
+    public boolean isEnabled(YAMLReadFeature f) {
         return (_formatReadFeatures & f.getMask()) != 0;
     }
 
-    public boolean isEnabled(YAMLGenerator.Feature f) {
+    public boolean isEnabled(YAMLWriteFeature f) {
         return (_formatWriteFeatures & f.getMask()) != 0;
     }
 

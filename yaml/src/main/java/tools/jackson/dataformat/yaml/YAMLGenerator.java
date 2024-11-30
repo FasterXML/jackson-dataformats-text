@@ -29,156 +29,6 @@ import org.snakeyaml.engine.v2.nodes.Tag;
 
 public class YAMLGenerator extends GeneratorBase
 {
-    /**
-     * Enumeration that defines all togglable features for YAML generators
-     */
-    public enum Feature implements FormatFeature
-    {
-        /**
-         * Whether we are to write an explicit document start marker ("---")
-         * or not.
-         */
-        WRITE_DOC_START_MARKER(true),
-
-        /**
-         * Whether to use YAML native Object Id construct for indicating type (true);
-         * or "generic" Object Id mechanism (false). Former works better for systems that
-         * are YAML-centric; latter may be better choice for interoperability, when
-         * converting between formats or accepting other formats.
-         */
-        USE_NATIVE_OBJECT_ID(true),
-
-        /**
-         * Whether to use YAML native Type Id construct for indicating type (true);
-         * or "generic" type property (false). Former works better for systems that
-         * are YAML-centric; latter may be better choice for interoperability, when
-         * converting between formats or accepting other formats.
-         */
-        USE_NATIVE_TYPE_ID(true),
-
-        /**
-         * Do we try to force so-called canonical output or not.
-         * <p>
-         *     Ignored if you provide your own {@code DumperOptions}.
-         * </p>
-         */
-        CANONICAL_OUTPUT(false),
-
-        /**
-         * Options passed to SnakeYAML that determines whether longer textual content
-         * gets automatically split into multiple lines or not.
-         * <p>
-         *     Feature is enabled by default to conform to SnakeYAML defaults as well as
-         *     backwards compatibility with 2.5 and earlier versions.
-         * </p>
-         * <p>
-         *     Ignored if you provide your own {@code DumperOptions}.
-         * </p>
-         */
-        SPLIT_LINES(true),
-
-        /**
-         * Whether strings will be rendered without quotes (true) or
-         * with quotes (false, default).
-         * <p>
-         *     Minimized quote usage makes for more human readable output; however, content is
-         *     limited to printable characters according to the rules of
-         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         * </p>
-         */
-        MINIMIZE_QUOTES(false),
-
-        /**
-         * Whether numbers stored as strings will be rendered with quotes (true) or
-         * without quotes (false, default) when MINIMIZE_QUOTES is enabled.
-         * <p>
-         *     Minimized quote usage makes for more human readable output; however, content is
-         *     limited to printable characters according to the rules of
-         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         * </p>
-         */
-        ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
-
-        /**
-         * Whether for string containing newlines a
-         * <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>
-         * should be used. This automatically enabled when {@link #MINIMIZE_QUOTES} is set.
-         * <p>
-         *     The content of such strings is limited to printable characters according to the rules of
-         *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
-         * </p>
-         */
-        LITERAL_BLOCK_STYLE(false),
-
-        /**
-         * Feature enabling of which adds indentation for array entry generation
-         * (default indentation being 2 spaces).
-         * <p>
-         *     Default value is {@code false} for backwards compatibility
-         * </p>
-         * <p>
-         *     Ignored if you provide your own {@code DumperOptions}.
-         * </p>
-         *
-         */
-        INDENT_ARRAYS(false),
-
-        /**
-         * Feature enabling of which adds indentation with indicator for array entry generation
-         * (default indentation being 2 spaces).
-         * <p>
-         *     Default value is {@code false} for backwards compatibility
-         * </p>
-         * <p>
-         *     Ignored if you provide your own {@code DumperOptions}.
-         * </p>
-         *
-         */
-        INDENT_ARRAYS_WITH_INDICATOR(false),
-
-        /**
-         * Option passed to SnakeYAML to allows writing key longer that 128 characters
-         * (up to 1024 characters).
-         * If disabled, the max key length is left as 128 characters: longer names
-         * are truncated. If enabled, limit is raised to 1024 characters.
-         * <p>
-         *     Ignored if you provide your own {@code DumperOptions}.
-         * </p>
-         */
-        ALLOW_LONG_KEYS(false),
-        ;
-
-        protected final boolean _defaultState;
-        protected final int _mask;
-
-        /**
-         * Method that calculates bit set (flags) of all features that
-         * are enabled by default.
-         */
-        public static int collectDefaults()
-        {
-            int flags = 0;
-            for (Feature f : values()) {
-                if (f.enabledByDefault()) {
-                    flags |= f.getMask();
-                }
-            }
-            return flags;
-        }
-
-        private Feature(boolean defaultState) {
-            _defaultState = defaultState;
-            _mask = (1 << ordinal());
-        }
-
-        @Override
-        public boolean enabledByDefault() { return _defaultState; }
-        @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
-        @Override
-        public int getMask() { return _mask; }
-    }
-
     /*
     /**********************************************************************
     /* Internal constants
@@ -213,7 +63,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     /**
-     * Bit flag composed of bits that indicate which {@link YAMLGenerator.Feature}s
+     * Bit flag composed of bits that indicate which {@link YAMLWriteFeature}s
      * are enabled.
      */
     protected int _formatWriteFeatures;
@@ -270,7 +120,7 @@ public class YAMLGenerator extends GeneratorBase
         _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
 
         _formatWriteFeatures = yamlFeatures;
-        _cfgMinimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
+        _cfgMinimizeQuotes = YAMLWriteFeature.MINIMIZE_QUOTES.enabledIn(_formatWriteFeatures);
         _quotingChecker = quotingChecker;
         _writer = out;
         _docVersion = version;
@@ -291,7 +141,7 @@ public class YAMLGenerator extends GeneratorBase
     {
         DumpSettingsBuilder opt = DumpSettings.builder();
         // would we want canonical?
-        if (Feature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
+        if (YAMLWriteFeature.CANONICAL_OUTPUT.enabledIn(_formatWriteFeatures)) {
             opt.setCanonical(true);
         } else {
             opt.setCanonical(false);
@@ -299,9 +149,9 @@ public class YAMLGenerator extends GeneratorBase
             opt.setDefaultFlowStyle(FlowStyle.BLOCK);
         }
         // split-lines for text blocks?
-        opt.setSplitLines(Feature.SPLIT_LINES.enabledIn(_formatWriteFeatures));
+        opt.setSplitLines(YAMLWriteFeature.SPLIT_LINES.enabledIn(_formatWriteFeatures));
         // array indentation?
-        if (Feature.INDENT_ARRAYS.enabledIn(_formatWriteFeatures)) {
+        if (YAMLWriteFeature.INDENT_ARRAYS.enabledIn(_formatWriteFeatures)) {
             // But, wrt [dataformats-text#34]: need to set both to diff values to work around bug
             // (otherwise indentation level is "invisible". Note that this should NOT be necessary
             // but is needed up to at least SnakeYAML 1.18.
@@ -310,11 +160,11 @@ public class YAMLGenerator extends GeneratorBase
             opt.setIndent(2);
         }
         // [dataformats-text#175]: further configurability that overrides prev setting
-        if (Feature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatWriteFeatures)) {
+        if (YAMLWriteFeature.INDENT_ARRAYS_WITH_INDICATOR.enabledIn(_formatWriteFeatures)) {
             opt.setIndicatorIndent(2);
             opt.setIndentWithIndicator(true);
         }
-        if (Feature.ALLOW_LONG_KEYS.enabledIn(_formatWriteFeatures)) {
+        if (YAMLWriteFeature.ALLOW_LONG_KEYS.enabledIn(_formatWriteFeatures)) {
             opt.setMaxSimpleKeyLength(1024);
         }
 
@@ -385,7 +235,7 @@ public class YAMLGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    public final boolean isEnabled(Feature f) {
+    public final boolean isEnabled(YAMLWriteFeature f) {
         return (_formatWriteFeatures & f.getMask()) != 0;
     }
 
@@ -594,7 +444,7 @@ public class YAMLGenerator extends GeneratorBase
                 style = STYLE_LITERAL;
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
             } else if (_quotingChecker.needToQuoteValue(text)
-                || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
+                || (YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
                         && PLAIN_NUMBER_P.matcher(text).matches())
                 ) {
                 style = STYLE_QUOTED;
@@ -602,7 +452,7 @@ public class YAMLGenerator extends GeneratorBase
                 style = STYLE_PLAIN;
             }
         } else {
-            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures)
+            if (YAMLWriteFeature.LITERAL_BLOCK_STYLE.enabledIn(_formatWriteFeatures)
                     && text.indexOf('\n') >= 0) {
                 style = STYLE_LITERAL;
             } else {
@@ -809,14 +659,14 @@ public class YAMLGenerator extends GeneratorBase
     public boolean canWriteObjectId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#23] might not want to...
-        return Feature.USE_NATIVE_OBJECT_ID.enabledIn(_formatWriteFeatures);
+        return YAMLWriteFeature.USE_NATIVE_OBJECT_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
     public boolean canWriteTypeId() {
         // yes, YAML does support Native Type Ids!
         // 10-Sep-2014, tatu: Except as per [#22] might not want to...
-        return Feature.USE_NATIVE_TYPE_ID.enabledIn(_formatWriteFeatures);
+        return YAMLWriteFeature.USE_NATIVE_TYPE_ID.enabledIn(_formatWriteFeatures);
     }
 
     @Override
@@ -927,7 +777,7 @@ public class YAMLGenerator extends GeneratorBase
     protected void _emitStartDocument() throws JacksonException
     {
         Map<String,String> noTags = Collections.emptyMap();
-        boolean startMarker = Feature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
+        boolean startMarker = YAMLWriteFeature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
         _emit(new DocumentStartEvent(startMarker, _outputOptions.getYamlDirective(),
                  // for 1.10 was: ((version == null) ? null : version.getArray()),
                 noTags));

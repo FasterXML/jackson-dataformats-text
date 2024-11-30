@@ -12,10 +12,10 @@ public class SimpleGeneration366Test extends ModuleTestBase
     {
         YAMLFactory f = new YAMLFactory();
         // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
+        assertFalse(f.isEnabled(YAMLWriteFeature.LITERAL_BLOCK_STYLE));
 
         YAMLMapper mapper = YAMLMapper.builder()
-                .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true)
+                .configure(YAMLWriteFeature.LITERAL_BLOCK_STYLE, true)
                 .build();
 
         Map<String, Object> content = new HashMap<String, Object>();
@@ -31,10 +31,10 @@ public class SimpleGeneration366Test extends ModuleTestBase
     {
         YAMLFactory f = new YAMLFactory();
         // verify default settings
-        assertFalse(f.isEnabled(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE));
+        assertFalse(f.isEnabled(YAMLWriteFeature.LITERAL_BLOCK_STYLE));
 
         YAMLMapper mapper = YAMLMapper.builder()
-                .configure(YAMLGenerator.Feature.LITERAL_BLOCK_STYLE, true)
+                .configure(YAMLWriteFeature.LITERAL_BLOCK_STYLE, true)
                 .build();
 
         Map<String, Object> content = new HashMap<String, Object>();

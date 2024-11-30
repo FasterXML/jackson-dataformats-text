@@ -6,7 +6,8 @@ import tools.jackson.core.FormatFeature;
  * Enumeration that defines all togglable features for TOML parsers.
  */
 public enum TomlReadFeature
-        implements FormatFeature {
+    implements FormatFeature
+{
     /**
      * TOML has special syntax for time types corresponding to {@link java.time.LocalDate}, {@link java.time.LocalTime},
      * {@link java.time.LocalDateTime} and {@link java.time.OffsetDateTime}. By default, the TOML parser just returns
@@ -17,8 +18,8 @@ public enum TomlReadFeature
      */
     PARSE_JAVA_TIME(false);
 
-    final boolean _defaultState;
-    final int _mask;
+    private final boolean _defaultState;
+    private final int _mask;
 
     // Method that calculates bit set (flags) of all features that
     // are enabled by default.

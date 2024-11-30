@@ -35,59 +35,6 @@ import org.snakeyaml.engine.v2.scanner.StreamReader;
  */
 public class YAMLParser extends ParserBase
 {
-    /**
-     * Enumeration that defines all togglable features for YAML parsers.
-     */
-    public enum Feature implements FormatFeature
-    {
-        /**
-         * Feature that determines whether an empty {@link String} will be parsed
-         * as {@code null}. Logic is part of YAML 1.1 
-         * <a href="https://yaml.org/type/null.html">Null Language-Independent Type</a>.
-         *<p>
-         * Feature is enabled by default in Jackson 2.12 for backwards-compatibility
-         * reasons.
-         */
-        EMPTY_STRING_AS_NULL(true)
-        ;
-
-        private final boolean _defaultState;
-        private final int _mask;
-
-        // Method that calculates bit set (flags) of all features that
-        // are enabled by default.
-        public static int collectDefaults()
-        {
-            int flags = 0;
-            for (Feature f : values()) {
-                if (f.enabledByDefault()) {
-                    flags |= f.getMask();
-                }
-            }
-            return flags;
-        }
-
-        private Feature(boolean defaultState) {
-            _defaultState = defaultState;
-            _mask = (1 << ordinal());
-        }
-
-        @Override
-        public boolean enabledByDefault() { return _defaultState; }
-        @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
-        @Override
-        public int getMask() { return _mask; }
-    }
-
-    // note: does NOT include '0', handled separately
-//    private final static Pattern PATTERN_INT = Pattern.compile("-?[1-9][0-9]*");
-
-    // 22-Nov-2020, tatu: Not needed as of 2.12 since SnakeYAML tags
-    //    doubles correctly
-//    private final static Pattern PATTERN_FLOAT = Pattern.compile(
-//            "[-+]?([0-9][0-9_]*)?\\.[0-9]*([eE][-+][0-9]+)?");
-    
     /*
     /**********************************************************************
     /* Configuration
@@ -190,7 +137,7 @@ public class YAMLParser extends ParserBase
         _formatFeatures = formatFeatures;
         _reader = reader;
         _yamlParser = yamlParser;
-        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
+        _cfgEmptyStringsToNull = YAMLReadFeature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
@@ -289,10 +236,10 @@ public class YAMLParser extends ParserBase
      */
 
     /**
-     * Method for checking whether specified {@link YAMLParser.Feature}
+     * Method for checking whether specified {@link YAMLReadFeature}
      * is enabled.
      */
-    public boolean isEnabled(YAMLParser.Feature f) {
+    public boolean isEnabled(YAMLReadFeature f) {
         return (_formatFeatures & f.getMask()) != 0;
     }
 

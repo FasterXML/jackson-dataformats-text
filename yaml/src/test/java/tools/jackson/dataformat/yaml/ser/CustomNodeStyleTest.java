@@ -3,8 +3,8 @@ package tools.jackson.dataformat.yaml.ser;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
@@ -49,8 +49,8 @@ public class CustomNodeStyleTest extends ModuleTestBase {
         }
         YAMLFactory yamlFactory = YAMLFactory.builder().dumperOptions(dumperOptions).build();
         return YAMLMapper.builder(yamlFactory)
-                .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
-                .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
+                .disable(YAMLWriteFeature.WRITE_DOC_START_MARKER)
                 .build();
     }
 }

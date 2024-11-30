@@ -2,7 +2,7 @@ package tools.jackson.dataformat.yaml.deser;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLParser;
+import tools.jackson.dataformat.yaml.YAMLReadFeature;
 
 public class NullFromEmptyString130Test extends ModuleTestBase
 {
@@ -20,7 +20,7 @@ public class NullFromEmptyString130Test extends ModuleTestBase
     public void testEmptyValueToNull130() throws Exception
     {
         // by default, empty Strings are coerced:
-        assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLParser.Feature.EMPTY_STRING_AS_NULL));
+        assertTrue(MAPPER.tokenStreamFactory().isEnabled(YAMLReadFeature.EMPTY_STRING_AS_NULL));
 
         {
             Value130 v = MAPPER.readValue("value:   \n", Value130.class);
@@ -33,7 +33,7 @@ public class NullFromEmptyString130Test extends ModuleTestBase
         // but can change that:
         {
             Value130 v = MAPPER.readerFor(Value130.class)
-                .without(YAMLParser.Feature.EMPTY_STRING_AS_NULL)
+                .without(YAMLReadFeature.EMPTY_STRING_AS_NULL)
                 .readValue("value:   \n");
             assertEquals("", v.value);
         }

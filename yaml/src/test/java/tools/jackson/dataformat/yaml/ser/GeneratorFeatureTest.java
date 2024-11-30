@@ -10,8 +10,8 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class GeneratorFeatureTest extends ModuleTestBase
 {
@@ -43,7 +43,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("words:\n- \"first\"\n- \"second\"\n- \"third\"", yaml);
 
         // and then with different config
-        ObjectWriter w = MAPPER.writer().with(YAMLGenerator.Feature.INDENT_ARRAYS);
+        ObjectWriter w = MAPPER.writer().with(YAMLWriteFeature.INDENT_ARRAYS);
 
         yaml = w.writeValueAsString(input);
         if (yaml.startsWith("---")) {
@@ -70,7 +70,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
         assertEquals("---\n? " + LONG_KEY + "\n: \"value\"",
         _trim(defaultMapper.writeValueAsString(inputValue)));
         
-        ObjectMapper longKeysMapper = YAMLMapper.builder().enable(YAMLGenerator.Feature.ALLOW_LONG_KEYS).build();
+        ObjectMapper longKeysMapper = YAMLMapper.builder().enable(YAMLWriteFeature.ALLOW_LONG_KEYS).build();
         assertEquals("---\n" + LONG_KEY + ": \"value\"",
                 _trim(longKeysMapper.writeValueAsString(inputValue)));
     }

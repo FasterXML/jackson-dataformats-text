@@ -5,8 +5,8 @@ import tools.jackson.core.ObjectReadContext;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.util.TokenBuffer;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
-import tools.jackson.dataformat.yaml.YAMLGenerator;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 public class ObjectIdTest extends ModuleTestBase
 {
@@ -134,7 +134,7 @@ public class ObjectIdTest extends ModuleTestBase
         first.next = second;
         second.next = first;
         String yaml = mapper.writer()
-                .without(YAMLGenerator.Feature.USE_NATIVE_OBJECT_ID)
+                .without(YAMLWriteFeature.USE_NATIVE_OBJECT_ID)
                 .writeValueAsString(first);
         assertYAML(SIMPLE_YAML_NON_NATIVE, yaml);
     }

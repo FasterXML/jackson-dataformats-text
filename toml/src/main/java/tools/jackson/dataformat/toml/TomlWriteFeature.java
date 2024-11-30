@@ -6,7 +6,8 @@ import tools.jackson.core.JsonGenerator;
 /**
  * Enumeration that defines all togglable features for TOML generators.
  */
-public enum TomlWriteFeature implements FormatFeature {
+public enum TomlWriteFeature implements FormatFeature
+{
     /**
      * The TOML spec does not allow null values. We instead write an empty string when
      * {@link JsonGenerator#writeNull()} by default.
@@ -20,8 +21,8 @@ public enum TomlWriteFeature implements FormatFeature {
      */
     static final int INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE = 0x80000000;
 
-    final boolean _defaultState;
-    final int _mask;
+    private final boolean _defaultState;
+    private final int _mask;
 
     // Method that calculates bit set (flags) of all features that
     // are enabled by default.
