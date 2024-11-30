@@ -2,7 +2,7 @@ package tools.jackson.dataformat.csv.deser;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
 import java.util.Map;
@@ -21,9 +21,9 @@ public class CommentsTest extends ModuleTestBase
         String[] row;
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
                 // to handle comments that follow leading spaces
-                .with(CsvParser.Feature.TRIM_SPACES)
+                .with(CsvReadFeature.TRIM_SPACES)
                 // should not be needed but seems to be...
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .with(mapper.schema().withoutComments()).readValues(CSV_WITH_COMMENTS);
 
         row = it.nextValue();
@@ -57,9 +57,9 @@ public class CommentsTest extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
                 .with(mapper.schema().withComments())
-                .with(CsvParser.Feature.TRIM_SPACES)
+                .with(CsvReadFeature.TRIM_SPACES)
                 // should not be needed but seems to be...
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(CSV_WITH_COMMENTS);
 
         // first row the same
@@ -86,7 +86,7 @@ public class CommentsTest extends ModuleTestBase
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
                 .with(mapper.schema().withComments())
                 // should not be needed but seems to be...
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("# first\n#second\n1,2\n");
 
         // first row the same
@@ -122,13 +122,13 @@ public class CommentsTest extends ModuleTestBase
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
         CsvMapper mapper = mapperBuilder()
-                .enable(CsvParser.Feature.ALLOW_COMMENTS)
-                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                .enable(CsvReadFeature.ALLOW_COMMENTS)
+                .enable(CsvReadFeature.WRAP_AS_ARRAY)
                 .build();
         final String CSV = "# comment!\na,b\n";
         
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(CSV);
         String[] row = it.nextValue();
 //        assertEquals(2, row.length);

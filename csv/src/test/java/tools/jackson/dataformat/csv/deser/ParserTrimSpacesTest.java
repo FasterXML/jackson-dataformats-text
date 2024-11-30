@@ -29,7 +29,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class)
-                .without(CsvParser.Feature.TRIM_SPACES)
+                .without(CsvReadFeature.TRIM_SPACES)
                 .readValues(
                 "a,  b,  c  \n 1,2,\"3 \"\n"
                 );
@@ -52,7 +52,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
 
         // [dataformat-csv#81]: also need to be able to re-enable
         it = mapper.readerWithSchemaFor(Entry.class)
-                .with(CsvParser.Feature.TRIM_SPACES)
+                .with(CsvReadFeature.TRIM_SPACES)
                 .readValues("a,  b,  c  \n");
         assertTrue(it.hasNext());
         assertNotNull(entry = it.nextValue());
@@ -67,7 +67,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class)
-                .with(CsvParser.Feature.TRIM_SPACES)
+                .with(CsvReadFeature.TRIM_SPACES)
                 .readValues(
                 "a,  b,  c\t\n 1,2,\" 3\" \n\"ab\t\" ,\"c\",  \n"
                 );
@@ -101,7 +101,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(Entry.class).withColumnSeparator('\t');
         MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema)
-            .with(CsvParser.Feature.TRIM_SPACES)
+            .with(CsvReadFeature.TRIM_SPACES)
             .readValues(
                     "a\t\t  c\n 1\t2\t\" 3\" \n\"ab\" \t\"c  \t\"\t  \n"
         );

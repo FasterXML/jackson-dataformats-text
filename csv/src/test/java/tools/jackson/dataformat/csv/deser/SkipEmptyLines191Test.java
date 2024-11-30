@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
@@ -71,7 +71,7 @@ public class SkipEmptyLines191Test extends ModuleTestBase {
 
         ObjectReader objectReader = MAPPER
                 .readerFor(Row174.class)
-                .with(CsvParser.Feature.SKIP_EMPTY_LINES)
+                .with(CsvReadFeature.SKIP_EMPTY_LINES)
                 .with(MAPPER.schemaFor(Row174.class));
 
         MappingIterator<Row174> iterator = objectReader.readValues(doc);

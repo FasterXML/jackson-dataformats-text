@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
 import tools.jackson.dataformat.csv.CsvReadException;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
@@ -30,7 +30,7 @@ public class TrailingCommaCSVTest extends ModuleTestBase
 
         MappingIterator<StringPair> it = MAPPER.readerFor(StringPair.class)
                 .with(schema)
-                .without(CsvParser.Feature.ALLOW_TRAILING_COMMA)
+                .without(CsvReadFeature.ALLOW_TRAILING_COMMA)
                 .readValues(INPUT);
 
         it.nextValue();
@@ -55,7 +55,7 @@ public class TrailingCommaCSVTest extends ModuleTestBase
 
         MappingIterator<Person> persons = MAPPER
                 .readerFor(Person.class)
-                .with(CsvParser.Feature.ALLOW_TRAILING_COMMA)
+                .with(CsvReadFeature.ALLOW_TRAILING_COMMA)
                 .with(schema)
                 .<Person> readValues(INPUT);
         assertTrue(persons.hasNextValue());

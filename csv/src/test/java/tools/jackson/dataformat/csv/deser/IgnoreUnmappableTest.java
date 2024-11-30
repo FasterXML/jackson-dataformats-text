@@ -25,7 +25,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         // first: throw exception(s) with default settings
         MappingIterator<StringPair> it = MAPPER.readerFor(StringPair.class)
                 .with(schema)
-                .without(CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE)
+                .without(CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE)
                 .readValues(INPUT);
         
         try {
@@ -52,7 +52,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         // But with settings...
         it = MAPPER.readerFor(StringPair.class)
                 .with(schema)
-                .with(CsvParser.Feature.IGNORE_TRAILING_UNMAPPABLE)
+                .with(CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE)
                 .readValues(INPUT);
 
         pair = it.nextValue();

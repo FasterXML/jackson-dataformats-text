@@ -7,8 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.*;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
 
 public class TestParserEscapes extends ModuleTestBase
 {
@@ -69,9 +67,9 @@ public class TestParserEscapes extends ModuleTestBase
         CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(';')
                 .withEscapeChar('\\');
         CsvMapper mapper = CsvMapper.builder()
-                .enable(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
-                .enable(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
-                .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                .enable(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
+                .enable(CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                .enable(CsvReadFeature.WRAP_AS_ARRAY)
                 .build();
 
         List<String> row1 = Arrays.asList("\"The\"", "foo");

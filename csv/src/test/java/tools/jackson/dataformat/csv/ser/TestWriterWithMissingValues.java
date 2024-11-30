@@ -38,13 +38,13 @@ public class TestWriterWithMissingValues extends ModuleTestBase
 
     public void testWrite_NullThirdColumn()
     {
-        assertFalse(MAPPER.tokenStreamFactory().isEnabled(CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS));
+        assertFalse(MAPPER.tokenStreamFactory().isEnabled(CsvWriteFeature.OMIT_MISSING_TAIL_COLUMNS));
         String csv = MAPPER.writer(SCHEMA).writeValueAsString(
                 mapOf("timestamp", "2014-03-10T23:32:47+00:00",
                         "value", 42));
 
         assertEquals("\"2014-03-10T23:32:47+00:00\",42,\n", csv);
-        ObjectWriter w = MAPPER.writer().with(CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS);
+        ObjectWriter w = MAPPER.writer().with(CsvWriteFeature.OMIT_MISSING_TAIL_COLUMNS);
         csv = w.with(SCHEMA).writeValueAsString(
                 mapOf("timestamp", "2014-03-10T23:32:47+00:00",
                         "value", 42));

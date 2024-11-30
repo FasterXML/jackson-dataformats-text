@@ -34,170 +34,6 @@ public class CsvParser
     // Just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
 
-    /**
-     * Enumeration that defines all togglable features for CSV parsers
-     */
-    public enum Feature
-        implements FormatFeature
-    {
-        /**
-         * Feature determines whether spaces around separator characters
-         * (commas) are to be automatically trimmed before being reported
-         * or not.
-         * Note that this does NOT force trimming of possible white space from
-         * within double-quoted values, but only those surrounding unquoted
-         * values (white space outside of double-quotes is never included regardless
-         * of trimming).
-         *<p>
-         * Default value is false, as per <a href="http://tools.ietf.org/html/rfc4180">RFC-4180</a>.
-         */
-        TRIM_SPACES(false),
-
-        /**
-         * Feature that determines how stream of records (usually CSV lines, but sometimes
-         * multiple lines when linefeeds are included in quoted values) is exposed:
-         * either as a sequence of Objects (false), or as an Array of Objects (true).
-         * Using stream of Objects is convenient when using
-         * <code>ObjectMapper.readValues(...)</code>
-         * and array of Objects convenient when binding to <code>List</code>s or
-         * arrays of values.
-         *<p>
-         * Default value is false, meaning that by default a CSV document is exposed as
-         * a sequence of root-level Object entries.
-         */
-        WRAP_AS_ARRAY(false),
-
-        /**
-         * Feature that allows ignoring of unmappable "extra" columns; that is, values for
-         * columns that appear after columns for which types are defined. When disabled,
-         * an exception is thrown for such column values, but if enabled, they are
-         * silently ignored.
-         *<p>
-         * Feature is disabled by default.
-         */
-        IGNORE_TRAILING_UNMAPPABLE(false),
-
-        /**
-         * Feature that allows skipping input lines that are completely empty or blank (composed only of whitespace),
-         * instead of being decoded as lines of just a single column with an empty/blank String value (or,
-         * depending on binding, `null`).
-         *<p>
-         * Feature is disabled by default.
-         *
-         * @since 2.10
-         */
-        SKIP_EMPTY_LINES(false),
-
-        /**
-         * Feature that allows there to be a trailing single extraneous data
-         * column that is empty. When this feature is disabled, any extraneous
-         * column, regardless of content will cause an exception to be thrown.
-         * Disabling this feature is only useful when
-         * IGNORE_TRAILING_UNMAPPABLE is also disabled.
-         */
-        ALLOW_TRAILING_COMMA(true),
-
-        /**
-         * Feature that allows accepting "hash comments" by default, similar to
-         * {@link CsvSchema#withAllowComments(boolean)}. If enabled, such comments
-         * are by default allowed on all columns of all documents.
-         */
-        ALLOW_COMMENTS(false),
-        
-        /**
-         * Feature that allows failing (with a {@link CsvReadException}) in cases
-         * where number of column values encountered is less than number of columns
-         * declared in the active schema ("missing columns").
-         *<p>
-         * Note that this feature has precedence over {@link #INSERT_NULLS_FOR_MISSING_COLUMNS}
-         *<p>
-         * Feature is disabled by default.
-         */
-        FAIL_ON_MISSING_COLUMNS(false),
-
-        /**
-         * Feature that allows failing (with a {@link CsvReadException}) in cases
-         * where number of header columns encountered is less than number of columns
-         * declared in the active schema (if there is one).
-         *<p>
-         * Feature is enabled by default
-         *
-         * @since 2.14
-         */
-        FAIL_ON_MISSING_HEADER_COLUMNS(true),
-
-        /**
-         * Feature that allows "inserting" virtual key / `null` value pairs in case
-         * a row contains fewer columns than declared by configured schema.
-         * This typically has the effect of forcing an explicit `null` assigment (or
-         * corresponding "null value", if so configured) at databinding level.
-         * If disabled, no extra work is done and values for "missing" columns are
-         * not exposed as part of the token stream.
-         *<p>
-         * Note that this feature is only considered if
-         * {@link #FAIL_ON_MISSING_COLUMNS}
-         * is disabled.
-         *<p>
-         * Feature is disabled by default.
-         */
-        INSERT_NULLS_FOR_MISSING_COLUMNS(false),
-
-        /**
-         * Feature that enables coercing an empty {@link String} to `null`.
-         *<p>
-         * Note that if this setting is enabled, {@link #EMPTY_UNQUOTED_STRING_AS_NULL}
-         * has no effect.
-         *
-         * Feature is disabled by default for backwards compatibility.
-         */
-        EMPTY_STRING_AS_NULL(false),
-
-        /**
-         * Feature that enables coercing an empty un-quoted {@link String} to `null`.
-         * This feature allow differentiating between an empty quoted {@link String} and an empty un-quoted {@link String}.
-         *<p>
-         * Note that this feature is only considered if
-         * {@link #EMPTY_STRING_AS_NULL}
-         * is disabled.
-         *<p>
-         * Feature is disabled by default for backwards compatibility.
-         *
-         * @since 2.18
-         */
-        EMPTY_UNQUOTED_STRING_AS_NULL(false),
-        ;
-
-        final boolean _defaultState;
-        final int _mask;
-        
-        /**
-         * Method that calculates bit set (flags) of all features that
-         * are enabled by default.
-         */
-        public static int collectDefaults()
-        {
-            int flags = 0;
-            for (Feature f : values()) {
-                if (f.enabledByDefault()) {
-                    flags |= f.getMask();
-                }
-            }
-            return flags;
-        }
-        
-        private Feature(boolean defaultState) {
-            _defaultState = defaultState;
-            _mask = (1 << ordinal());
-        }
-
-        @Override
-        public boolean enabledByDefault() { return _defaultState; }
-        @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
-        @Override
-        public int getMask() { return _mask; }
-    }
-
     private final static CsvSchema EMPTY_SCHEMA;
     static {
         EMPTY_SCHEMA = CsvSchema.emptySchema();
@@ -271,14 +107,14 @@ public class CsvParser
     /**
      * State in which we should expose name token for a "missing column"
      * (for which placeholder `null` value is to be added as well);
-     * see {@link Feature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
+     * see {@link CsvReadFeature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
      */
     protected final static int STATE_MISSING_NAME = 7;
 
     /**
      * State in which we should expose `null` value token as a value for
      * "missing" column;
-     * see {@link Feature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
+     * see {@link CsvReadFeature#INSERT_NULLS_FOR_MISSING_COLUMNS} for details.
      */
     protected final static int STATE_MISSING_VALUE = 8;
 
@@ -414,8 +250,8 @@ public class CsvParser
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
                 stdFeatures, csvFeatures);
         _setSchema(schema);
-        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
-        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
@@ -481,33 +317,33 @@ public class CsvParser
 
     /**
      * Method for enabling specified CSV feature
-     * (check {@link Feature} for list of features)
+     * (check {@link CsvReadFeature} for list of features)
      */
-    public JsonParser enable(CsvParser.Feature f)
+    public JsonParser enable(CsvReadFeature f)
     {
         _formatFeatures |= f.getMask();
-        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
-        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
     /**
      * Method for disabling specified  CSV feature
-     * (check {@link Feature} for list of features)
+     * (check {@link CsvReadFeature} for list of features)
      */
-    public JsonParser disable(CsvParser.Feature f)
+    public JsonParser disable(CsvReadFeature f)
     {
         _formatFeatures &= ~f.getMask();
-        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
-        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
     /**
      * Method for enabling or disabling specified CSV feature
-     * (check {@link Feature} for list of features)
+     * (check {@link CsvReadFeature} for list of features)
      */
-    public JsonParser configure(CsvParser.Feature f, boolean state)
+    public JsonParser configure(CsvReadFeature f, boolean state)
     {
         if (state) {
             enable(f);
@@ -518,10 +354,10 @@ public class CsvParser
     }
 
     /**
-     * Method for checking whether specified CSV {@link Feature}
+     * Method for checking whether specified CSV {@link CsvReadFeature}
      * is enabled.
      */
-    public boolean isEnabled(CsvParser.Feature f) {
+    public boolean isEnabled(CsvReadFeature f) {
         return (_formatFeatures & f.getMask()) != 0;
     }
 
@@ -802,7 +638,7 @@ public class CsvParser
         }
 
         // [dataformats-text#204]: Drop trailing empty name if so instructed
-        if (CsvParser.Feature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
+        if (CsvReadFeature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
             builder.dropLastColumnIfEmpty();
         }
 
@@ -817,7 +653,7 @@ public class CsvParser
         }
         // [dataformats-text#285]: Are we missing something?
         int diff = schemaColumnCount - newColumnCount;
-        if ((diff > 0) && Feature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)) {
+        if ((diff > 0) && CsvReadFeature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)) {
             Set<String> oldColumnNames = new LinkedHashSet<>();
             _schema.getColumnNames(oldColumnNames);
             oldColumnNames.removeAll(newSchema.getColumnNames());
@@ -852,7 +688,7 @@ public class CsvParser
         
         // Only one real complication, actually; empty documents (zero bytes).
         // Those have no entries. Should be easy enough to detect like so:
-        final boolean wrapAsArray = Feature.WRAP_AS_ARRAY.enabledIn(_formatFeatures);
+        final boolean wrapAsArray = CsvReadFeature.WRAP_AS_ARRAY.enabledIn(_formatFeatures);
         if (!_reader.hasMoreInput()) {
             _state = STATE_DOC_END;
             // but even empty sequence must still be wrapped in logical array
@@ -995,7 +831,7 @@ public class CsvParser
             _currentValue = _arrayValue.substring(offset, end);
             _arrayValueStart = end+_arraySeparator.length();
         }
-        if (isEnabled(Feature.TRIM_SPACES)) {
+        if (isEnabled(CsvReadFeature.TRIM_SPACES)) {
             _currentValue = _currentValue.trim();
         }
         if (_isNullValue(_currentValue)) {
@@ -1027,7 +863,7 @@ public class CsvParser
         }
         _currentName = null;
         // With [dataformat-csv#95] we'll simply ignore extra
-        if (Feature.IGNORE_TRAILING_UNMAPPABLE.enabledIn(_formatFeatures)) {
+        if (CsvReadFeature.IGNORE_TRAILING_UNMAPPABLE.enabledIn(_formatFeatures)) {
             _state = STATE_SKIP_EXTRA_COLUMNS;
             return _skipUntilEndOfLine();
         }
@@ -1035,7 +871,7 @@ public class CsvParser
         // 14-Mar-2012, tatu: As per [dataformat-csv#1], let's allow one specific case
         // of extra: if we get just one all-whitespace entry, that can be just skipped
         _state = STATE_SKIP_EXTRA_COLUMNS;
-        if (_columnIndex == _columnCount && Feature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
+        if (_columnIndex == _columnCount && CsvReadFeature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
             value = value.trim();
             if (value.isEmpty()) {
                 // if so, need to verify we then get the end-of-record;
@@ -1063,14 +899,14 @@ public class CsvParser
      */
     protected JsonToken _handleMissingColumns() throws JacksonException
     {
-        if (Feature.FAIL_ON_MISSING_COLUMNS.enabledIn(_formatFeatures)) {
+        if (CsvReadFeature.FAIL_ON_MISSING_COLUMNS.enabledIn(_formatFeatures)) {
             // First: to allow recovery, set states to expose next line, if any
             _handleObjectRowEnd();
             // and then report actual problem
             return _reportCsvReadError("Not enough column values: expected %d, found %d",
                     _columnCount, _columnIndex);
         }
-        if (Feature.INSERT_NULLS_FOR_MISSING_COLUMNS.enabledIn(_formatFeatures)) {
+        if (CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS.enabledIn(_formatFeatures)) {
             _state = STATE_MISSING_VALUE;
             _currentName = _schema.columnName(_columnIndex);
             _currentValue = null;

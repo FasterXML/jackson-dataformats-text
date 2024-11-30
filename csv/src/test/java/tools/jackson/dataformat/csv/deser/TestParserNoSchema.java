@@ -32,7 +32,7 @@ public class TestParserNoSchema extends ModuleTestBase
         // how `MappingIterator` works
         MappingIterator<Object[]> it = mapper
                 .readerFor(Object[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(CSV);
 
         Object[] row;
@@ -64,7 +64,7 @@ public class TestParserNoSchema extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         // when wrapped as an array, we'll get array of Lists:
         Object[] rows = mapper.readerFor(Object[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValue(
             "1,\"xyz\"\n\ntrue,\n"
                 );
@@ -92,7 +92,7 @@ public class TestParserNoSchema extends ModuleTestBase
         // when wrapped as an array, we'll get array of Lists:
         String[][] rows = mapper
                 .readerFor(String[][].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValue("1,\"xyz\"\n\ntrue,\n");
         assertEquals(3, rows.length);
         String[] row;
@@ -116,7 +116,7 @@ public class TestParserNoSchema extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("1,\"xyz\"\n\ntrue,\n");
         assertTrue(it.hasNextValue());
         String[] row = it.nextValue();
@@ -173,7 +173,7 @@ public class TestParserNoSchema extends ModuleTestBase
         //    are trying to read Array/Collection values.
         MappingIterator<String[]> it = mapper
                 .readerFor(String[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(CSV);
 
         Object[] row;
@@ -210,8 +210,8 @@ public class TestParserNoSchema extends ModuleTestBase
         //    are trying to read Array/Collection values.
         String content = col1 + "     ," + col2 +"\n" + col2 + "," + col1 + "\n";
         MappingIterator<Object[]> it = mapper.readerFor(Object[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                .with(CsvParser.Feature.TRIM_SPACES)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.TRIM_SPACES)
                 .readValues(content);
 
         Object[] row;

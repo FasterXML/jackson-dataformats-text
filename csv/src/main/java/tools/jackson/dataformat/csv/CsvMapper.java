@@ -55,21 +55,21 @@ public class CsvMapper extends ObjectMapper
         /******************************************************************
          */
 
-        public Builder enable(CsvParser.Feature... features) {
-            for (CsvParser.Feature f : features) {
+        public Builder enable(CsvReadFeature... features) {
+            for (CsvReadFeature f : features) {
                 _formatReadFeatures |= f.getMask();
             }
             return this;
         }
 
-        public Builder disable(CsvParser.Feature... features) {
-            for (CsvParser.Feature f : features) {
+        public Builder disable(CsvReadFeature... features) {
+            for (CsvReadFeature f : features) {
                 _formatReadFeatures &= ~f.getMask();
             }
             return this;
         }
 
-        public Builder configure(CsvParser.Feature feature, boolean state)
+        public Builder configure(CsvReadFeature feature, boolean state)
         {
             if (state) {
                 _formatReadFeatures |= feature.getMask();
@@ -79,21 +79,21 @@ public class CsvMapper extends ObjectMapper
             return this;
         }
 
-        public Builder enable(CsvGenerator.Feature... features) {
-            for (CsvGenerator.Feature f : features) {
+        public Builder enable(CsvWriteFeature... features) {
+            for (CsvWriteFeature f : features) {
                 _formatWriteFeatures |= f.getMask();
             }
             return this;
         }
 
-        public Builder disable(CsvGenerator.Feature... features) {
-            for (CsvGenerator.Feature f : features) {
+        public Builder disable(CsvWriteFeature... features) {
+            for (CsvWriteFeature f : features) {
                 _formatWriteFeatures &= ~f.getMask();
             }
             return this;
         }
 
-        public Builder configure(CsvGenerator.Feature feature, boolean state)
+        public Builder configure(CsvWriteFeature feature, boolean state)
         {
             if (state) {
                 _formatWriteFeatures |= feature.getMask();

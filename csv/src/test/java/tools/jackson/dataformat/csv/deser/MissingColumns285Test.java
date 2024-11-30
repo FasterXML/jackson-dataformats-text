@@ -51,7 +51,7 @@ public class MissingColumns285Test extends ModuleTestBase
         MappingIterator<Map<String, Object>> it = MAPPER
                 .readerFor(Map.class)
                 .with(csvSchema)
-                .without(CsvParser.Feature.FAIL_ON_MISSING_HEADER_COLUMNS)
+                .without(CsvReadFeature.FAIL_ON_MISSING_HEADER_COLUMNS)
                 .readValues(CSV);
         assertTrue(it.hasNext());
         Map<?, ?> result = it.nextValue();
