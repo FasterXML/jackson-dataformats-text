@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
 /**
@@ -55,7 +55,7 @@ public class EmptyStringAsNullTest
         ObjectReader objectReader = MAPPER
                 .readerFor(TestUser.class)
                 .with(MAPPER.schemaFor(TestUser.class))
-                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL);
+                .with(CsvReadFeature.EMPTY_STRING_AS_NULL);
         String csv = "Grace,,Hopper";
 
         // execute
@@ -74,8 +74,8 @@ public class EmptyStringAsNullTest
         String csv = "Grace,,Hopper";
 
         ObjectReader r = MAPPER.reader()
-                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY);
+                .with(CsvReadFeature.EMPTY_STRING_AS_NULL)
+                .with(CsvReadFeature.WRAP_AS_ARRAY);
 
         try (MappingIterator<Object[]> it1 =  r.forType(Object[].class).readValues(csv)) {
             Object[] array1 = it1.next();

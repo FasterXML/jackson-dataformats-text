@@ -9,7 +9,7 @@ import tools.jackson.databind.MappingIterator;
 
 import tools.jackson.dataformat.csv.CsvFactory;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
 public class CSVBigStringsTest extends ModuleTestBase
@@ -31,7 +31,7 @@ public class CSVBigStringsTest extends ModuleTestBase
         try {
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
-                    .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                    .with(CsvReadFeature.WRAP_AS_ARRAY)
                     .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected StreamConstraintsException");
@@ -47,7 +47,7 @@ public class CSVBigStringsTest extends ModuleTestBase
         try {
             MappingIterator<List<String>> it = MAPPER
                     .readerForListOf(String.class)
-                    .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                    .with(CsvReadFeature.WRAP_AS_ARRAY)
                     .readValues(generateCsv(TOO_LONG_STRING_VALUE_LEN));
             it.readAll();
             fail("expected StreamConstraintsException");
@@ -65,7 +65,7 @@ public class CSVBigStringsTest extends ModuleTestBase
         final int len = TOO_LONG_STRING_VALUE_LEN;
         MappingIterator<List<String>> it = newCsvMapperWithUnlimitedStringSizeSupport()
                 .readerForListOf(String.class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(generateCsv(len));
         List<List<String>> results = it.readAll();
         assertEquals(1, results.size());

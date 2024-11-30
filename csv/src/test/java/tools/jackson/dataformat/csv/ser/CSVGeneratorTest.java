@@ -93,7 +93,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         // 14-Jan-2024, tatu: [dataformats-text#45] allow suppressing trailing LF:
         assertEquals("Silu,Seppala,MALE,AQIDBAU=,false",
                 MAPPER.writer(schema)
-                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .without(CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW)
                     .writeValueAsString(user));
     }
 
@@ -115,7 +115,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("firstName,lastName,gender,verified,userImage\n"
                 +"Barbie,Benton,FEMALE,false,",
                 MAPPER.writer(schema)
-                    .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW)
+                    .without(CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW)
                     .writeValueAsString(user));
 }
 
@@ -240,13 +240,13 @@ public class CSVGeneratorTest extends ModuleTestBase
                                     .addColumn("amount")
                                     .build();
         String result = mapper.writer(schema)
-                .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                .with(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
                 .writeValueAsString(new Entry("abc", 1.25));
         assertEquals("\"abc\",1.25\n", result);
 
         // Also, as per [dataformat-csv#81], should be possible to change dynamically
         result = mapper.writer(schema)
-                       .without(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                       .without(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
                        .writeValueAsString(new Entry("xyz", 2.5));
         assertEquals("xyz,2.5\n", result);
     }
@@ -260,13 +260,13 @@ public class CSVGeneratorTest extends ModuleTestBase
                                     .addColumn("enabled")
                                     .build();
         String result = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                .with(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
                 .writeValueAsString(new Entry3("abc", BigDecimal.valueOf(2.5), true));
         assertEquals("\"abc\",2.5,true\n", result);
 
         // Also, as per [dataformat-csv#81], should be possible to change dynamically
         result = MAPPER.writer(schema)
-                       .without(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
+                       .without(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
                        .writeValueAsString(new Entry3("xyz", BigDecimal.valueOf(1.5), false));
         assertEquals("xyz,1.5,false\n", result);
     }
@@ -280,8 +280,8 @@ public class CSVGeneratorTest extends ModuleTestBase
                                     .setEscapeChar('\\')
                                     .build();
         String result = mapper.writer(schema)
-                .with(CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS)
-                .with(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                .with(CsvWriteFeature.ALWAYS_QUOTE_STRINGS)
+                .with(CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
                 .writeValueAsString(new Entry("\"abc\"", 1.25));
         assertEquals("\"\\\"abc\\\"\",1.25\n", result);
     }
@@ -296,7 +296,7 @@ public class CSVGeneratorTest extends ModuleTestBase
                                     .build();
         try {
             String result = MAPPER.writer(schema)
-                    .with(CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
+                    .with(CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR)
                     .writeValueAsString(new Entry("\"abc\"", 1.25));
             fail("Should not pass, got: "+result);
         } catch (CsvWriteException e) {
@@ -312,13 +312,13 @@ public class CSVGeneratorTest extends ModuleTestBase
                                     .addColumn("amount")
                                     .build();
         String result = mapper.writer(schema)
-                .with(CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS)
+                .with(CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS)
                 .writeValueAsString(new Entry("", 1.25));
         assertEquals("\"\",1.25\n", result);
 
         // Also, as per [dataformat-csv#81], should be possible to change dynamically
         result = mapper.writer(schema)
-                       .without(CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS)
+                       .without(CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS)
                        .writeValueAsString(new Entry("", 2.5));
         assertEquals(",2.5\n", result);
     }
@@ -334,7 +334,7 @@ public class CSVGeneratorTest extends ModuleTestBase
 
         // then with strict/optimal
         csv = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("\"#123\",Foo\n", csv);
     }
@@ -350,7 +350,7 @@ public class CSVGeneratorTest extends ModuleTestBase
 
         // then with strict/optimal
         csv = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("123", "#Foo"));
         assertEquals("123,#Foo\n", csv);
     }
@@ -366,7 +366,7 @@ public class CSVGeneratorTest extends ModuleTestBase
 
         // then with strict/optimal
         csv = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("#123", "Foo"));
         assertEquals("#123,Foo\n", csv);
     }
@@ -460,18 +460,18 @@ public class CSVGeneratorTest extends ModuleTestBase
             NumberEntry<?> bean) throws Exception
     {
         // First verify with quoting
-        ObjectWriter w2 = w.with(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+        ObjectWriter w2 = w.with(CsvWriteFeature.ALWAYS_QUOTE_NUMBERS);
         assertEquals(String.format("%s,\"%s\",%s\n", bean.id, bean.amount, bean.enabled),
                 w2.writeValueAsString(bean));
 
         // And then dynamically disabled variant
-        ObjectWriter w3 = w2.without(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+        ObjectWriter w3 = w2.without(CsvWriteFeature.ALWAYS_QUOTE_NUMBERS);
         assertEquals(String.format("%s,%s,%s\n", bean.id, bean.amount, bean.enabled),
                 w3.writeValueAsString(bean));
 
         // And then quoted but reordered to force buffering
         ObjectWriter w4 = MAPPER.writer(reorderedSchema)
-                .with(CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS);
+                .with(CsvWriteFeature.ALWAYS_QUOTE_NUMBERS);
         assertEquals(String.format("\"%s\",%s,%s\n", bean.amount, bean.id, bean.enabled),
                 w4.writeValueAsString(bean));
     }

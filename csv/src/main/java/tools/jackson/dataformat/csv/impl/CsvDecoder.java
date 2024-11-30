@@ -15,6 +15,7 @@ import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.SimpleStreamReadContext;
 import tools.jackson.core.util.TextBuffer;
 import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
@@ -295,10 +296,10 @@ public class CsvDecoder
         _inputReader = r;
         _textBuffer = textBuffer;
         _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
-        _allowComments = CsvParser.Feature.ALLOW_COMMENTS.enabledIn(csvFeatures);
-        _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
-        _skipBlankLines = CsvParser.Feature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
-        _trimSpaces = CsvParser.Feature.TRIM_SPACES.enabledIn(csvFeatures);
+        _allowComments = CsvReadFeature.ALLOW_COMMENTS.enabledIn(csvFeatures);
+        _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
+        _skipBlankLines = CsvReadFeature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
+        _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
         _tokenInputRow = -1;

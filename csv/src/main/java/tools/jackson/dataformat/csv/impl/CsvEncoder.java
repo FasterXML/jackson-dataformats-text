@@ -12,10 +12,9 @@ import tools.jackson.core.io.CharTypes;
 import tools.jackson.core.io.CharacterEscapes;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberOutput;
-
-import tools.jackson.dataformat.csv.CsvGenerator;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.CsvWriteException;
+import tools.jackson.dataformat.csv.CsvWriteFeature;
 
 /**
  * Helper class that handles actual low-level construction of
@@ -193,13 +192,13 @@ public class CsvEncoder
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
         _cfgUseFastDoubleWriter = useFastDoubleWriter;
-        _cfgOptimalQuoting = CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
-        _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
-        _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
-        _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
-        _cfgAlwaysQuoteNumbers = CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS.enabledIn(csvFeatures);
-        _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
-        _cfgEscapeControlCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
+        _cfgOptimalQuoting = CsvWriteFeature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
+        _cfgIncludeMissingTail = !CsvWriteFeature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(_csvFeatures);
+        _cfgAlwaysQuoteStrings = CsvWriteFeature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
+        _cfgAlwaysQuoteEmptyStrings = CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
+        _cfgAlwaysQuoteNumbers = CsvWriteFeature.ALWAYS_QUOTE_NUMBERS.enabledIn(csvFeatures);
+        _cfgEscapeQuoteCharWithEscapeChar = CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
+        _cfgEscapeControlCharWithEscapeChar = CsvWriteFeature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
         _outputBuffer = ctxt.allocConcatBuffer();
         _bufferRecyclable = true;
@@ -1097,7 +1096,7 @@ public class CsvEncoder
     {
         // May need to remove the linefeed appended after the last row written
         // (if not yet done)
-        if (!CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW.enabledIn(_csvFeatures)) {
+        if (!CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW.enabledIn(_csvFeatures)) {
             _removeTrailingLF();
         }
         _flushBuffer();

@@ -17,140 +17,6 @@ import tools.jackson.core.util.JacksonFeatureSet;
 
 public class CsvGenerator extends GeneratorBase
 {
-    /**
-     * Enumeration that defines all togglable features for CSV writers
-     * (if any: currently none)
-     */
-    public enum Feature
-        implements FormatFeature
-    {
-        /**
-         * Feature that determines how much work is done before determining that
-         * a column value requires quoting: when set as <code>true</code>, full
-         * check is made to only use quoting when it is strictly necessary;
-         * but when <code>false</code>, a faster but more conservative check
-         * is made, and possibly quoting is used for values that might not need it.
-         * Trade-offs is basically between optimal/minimal quoting (true), and
-         * faster handling (false).
-         * Faster check involves only checking first N characters of value, as well
-         * as possible looser checks.
-         *<p>
-         * Note, however, that regardless setting, all values that need to be quoted
-         * will be: it is just that when set to <code>false</code>, other values may
-         * also be quoted (to avoid having to do more expensive checks).
-         *<p>
-         * Default value is <code>false</code> for "loose" (approximate, conservative)
-         * checking.
-         */
-        STRICT_CHECK_FOR_QUOTING(false),
-
-        /**
-         * Feature that determines whether columns without matching value may be omitted,
-         * when they are the last values of the row.
-         * If <code>true</code>, values and separators between values may be omitted, to slightly reduce
-         * length of the row; if <code>false</code>, separators need to stay in place and values
-         * are indicated by empty Strings.
-         */
-        OMIT_MISSING_TAIL_COLUMNS(false),
-
-        /**
-         * Feature that determines whether values written as Strings (from <code>java.lang.String</code>
-         * valued POJO properties) should be forced to be quoted, regardless of whether they
-         * actually need this.
-         * Note that this feature has precedence over {@link #STRICT_CHECK_FOR_QUOTING}, when
-         * both would be applicable.
-<<<<<<< HEAD:csv/src/main/java/tools/jackson/dataformat/csv/CsvGenerator.java
-=======
-         * Note that this setting does NOT affect quoting of typed values like {@code Number}s
-         * or {@code Boolean}s.
-         *
-         * @since 2.5
->>>>>>> 2.16:csv/src/main/java/com/fasterxml/jackson/dataformat/csv/CsvGenerator.java
-         */
-        ALWAYS_QUOTE_STRINGS(false),
-
-        /**
-         * Feature that determines whether values written as empty Strings (from <code>java.lang.String</code>
-         * valued POJO properties) should be forced to be quoted.
-         */
-        ALWAYS_QUOTE_EMPTY_STRINGS(false),
-
-        /**
-         * Feature that determines whether values written as Nymbers (from {@code java.lang.Number}
-         * valued POJO properties) should be forced to be quoted, regardless of whether they
-         * actually need this.
-         *
-         * @since 2.16
-         */
-        ALWAYS_QUOTE_NUMBERS(false),
-        
-        /**
-         * Feature that determines whether quote characters within quoted String values are escaped
-         * using configured escape character, instead of being "doubled up" (that is: a quote character
-         * is written twice in a row).
-         *<p>
-         * Default value is false so that quotes are doubled as necessary, not escaped.
-         */
-        ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR(false),
-
-        /**
-         * Feature that determines whether control characters (non-printable) are escaped using the
-         * configured escape character. This feature allows LF and CR characters to be output as <pre>\n</pre>
-         * and <pre>\r</pre> instead of being echoed out. This is a compatibility feature for some
-         * parsers that can not read such output back in.
-         * <p>
-         * Default value is false so that control characters are echoed out (backwards compatible).
-         */
-        ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR(false),
-
-        /**
-         * Feature that determines whether a line-feed will be written at the end of content,
-         * after the last row of output.
-         *<p>
-         * NOTE! When disabling this feature it is important that
-         * {@link #flush()} is NOT called before {@link #close()} is called;
-         * the current implementation relies on ability to essentially remove the
-         * last linefeed that was appended in the output buffer.
-         *<p>
-         * Default value is {@code true} so all rows, including the last, are terminated by
-         * a line feed.
-         *
-         * @since 2.17
-         */
-        WRITE_LINEFEED_AFTER_LAST_ROW(true)
-        ;
-
-        protected final boolean _defaultState;
-        protected final int _mask;
-        
-        /**
-         * Method that calculates bit set (flags) of all features that
-         * are enabled by default.
-         */
-        public static int collectDefaults()
-        {
-            int flags = 0;
-            for (Feature f : values()) {
-                if (f.enabledByDefault()) {
-                    flags |= f.getMask();
-                }
-            }
-            return flags;
-        }
-
-        private Feature(boolean defaultState) {
-            _defaultState = defaultState;
-            _mask = (1 << ordinal());
-        }
-
-        @Override
-        public boolean enabledIn(int flags) { return (flags & _mask) != 0; }
-        @Override
-        public boolean enabledByDefault() { return _defaultState; }
-        @Override
-        public int getMask() { return _mask; }
-    }
-
     protected final static long MIN_INT_AS_LONG = Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = Integer.MAX_VALUE;
     
@@ -164,7 +30,7 @@ public class CsvGenerator extends GeneratorBase
 
     /**
      * Bit flag composed of bits that indicate which
-     * {@link CsvGenerator.Feature}s
+     * {@link CsvWriteFeature}s
      * are enabled.
      */
     protected int _formatFeatures;
@@ -431,7 +297,7 @@ public class CsvGenerator extends GeneratorBase
     /**********************************************************************
      */
 
-    public final boolean isEnabled(Feature f) {
+    public final boolean isEnabled(CsvWriteFeature f) {
         return (_formatFeatures & f.getMask()) != 0;
     }
 

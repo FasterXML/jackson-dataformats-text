@@ -3,7 +3,6 @@ package tools.jackson.dataformat.csv;
 import tools.jackson.core.SerializableString;
 import tools.jackson.core.io.CharTypes;
 import tools.jackson.core.io.CharacterEscapes;
-import tools.jackson.dataformat.csv.CsvGenerator.Feature;
 
 /**
  * Character escapes for CSV. There are multiple types of escapes.
@@ -81,8 +80,8 @@ public final class CsvCharacterEscapes extends CharacterEscapes
     public static CsvCharacterEscapes fromCsvFeatures(int csvFeatures)
     {
         int idx = 0;
-        idx |= CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures) ? 1 : 0;
-        idx |= Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures) ? 2 : 0;
+        idx |= CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures) ? 1 : 0;
+        idx |= CsvWriteFeature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures) ? 2 : 0;
 
         return sEscapes[idx];
     }

@@ -56,7 +56,7 @@ public class EmptyUnquotedStringAsNullTest
         ObjectReader objectReader = MAPPER
                 .readerFor(TestUser.class)
                 .with(MAPPER.schemaFor(TestUser.class))
-                .with(CsvParser.Feature.EMPTY_UNQUOTED_STRING_AS_NULL);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL);
         String csv = "Grace,,Hopper";
 
         // execute
@@ -79,7 +79,7 @@ public class EmptyUnquotedStringAsNullTest
         ObjectReader objectReader = MAPPER
                 .readerFor(TestUser.class)
                 .with(MAPPER.schemaFor(TestUser.class))
-                .with(CsvParser.Feature.EMPTY_UNQUOTED_STRING_AS_NULL);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL);
         String csv = "Grace,\"\",Hopper";
 
         // execute
@@ -98,8 +98,8 @@ public class EmptyUnquotedStringAsNullTest
         String csv = "Grace,,Hopper";
 
         ObjectReader r = MAPPER.reader()
-                .with(CsvParser.Feature.EMPTY_UNQUOTED_STRING_AS_NULL)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL)
+                .with(CsvReadFeature.WRAP_AS_ARRAY);
 
         try (MappingIterator<Object[]> it1 =  r.forType(Object[].class).readValues(csv)) {
             Object[] array1 = it1.next();
@@ -122,8 +122,8 @@ public class EmptyUnquotedStringAsNullTest
         String csv = "Grace,\"\",Hopper";
 
         ObjectReader r = MAPPER.reader()
-                .with(CsvParser.Feature.EMPTY_UNQUOTED_STRING_AS_NULL)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL)
+                .with(CsvReadFeature.WRAP_AS_ARRAY);
 
         try (MappingIterator<Object[]> it1 =  r.forType(Object[].class).readValues(csv)) {
             Object[] array1 = it1.next();

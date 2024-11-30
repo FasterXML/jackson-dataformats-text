@@ -48,65 +48,65 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
 
     // // // Parser features
 
-    public CsvFactoryBuilder enable(CsvParser.Feature f) {
+    public CsvFactoryBuilder enable(CsvReadFeature f) {
         _formatReadFeatures |= f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder enable(CsvParser.Feature first, CsvParser.Feature... other) {
+    public CsvFactoryBuilder enable(CsvReadFeature first, CsvReadFeature... other) {
         _formatReadFeatures |= first.getMask();
-        for (CsvParser.Feature f : other) {
+        for (CsvReadFeature f : other) {
             _formatReadFeatures |= f.getMask();
         }
         return _this();
     }
 
-    public CsvFactoryBuilder disable(CsvParser.Feature f) {
+    public CsvFactoryBuilder disable(CsvReadFeature f) {
         _formatReadFeatures &= ~f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder disable(CsvParser.Feature first, CsvParser.Feature... other) {
+    public CsvFactoryBuilder disable(CsvReadFeature first, CsvReadFeature... other) {
         _formatReadFeatures &= ~first.getMask();
-        for (CsvParser.Feature f : other) {
+        for (CsvReadFeature f : other) {
             _formatReadFeatures &= ~f.getMask();
         }
         return _this();
     }
 
-    public CsvFactoryBuilder configure(CsvParser.Feature f, boolean state) {
+    public CsvFactoryBuilder configure(CsvReadFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
 
     // // // Generator features
 
-    public CsvFactoryBuilder enable(CsvGenerator.Feature f) {
+    public CsvFactoryBuilder enable(CsvWriteFeature f) {
         _formatWriteFeatures |= f.getMask();
         return _this();
     }
 
-    public CsvFactoryBuilder enable(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
+    public CsvFactoryBuilder enable(CsvWriteFeature first, CsvWriteFeature... other) {
         _formatWriteFeatures |= first.getMask();
-        for (CsvGenerator.Feature f : other) {
+        for (CsvWriteFeature f : other) {
             _formatWriteFeatures |= f.getMask();
         }
         return _this();
     }
 
-    public CsvFactoryBuilder disable(CsvGenerator.Feature f) {
+    public CsvFactoryBuilder disable(CsvWriteFeature f) {
         _formatWriteFeatures &= ~f.getMask();
         return _this();
     }
     
-    public CsvFactoryBuilder disable(CsvGenerator.Feature first, CsvGenerator.Feature... other) {
+    public CsvFactoryBuilder disable(CsvWriteFeature first, CsvWriteFeature... other) {
         _formatWriteFeatures &= ~first.getMask();
-        for (CsvGenerator.Feature f : other) {
+        for (CsvWriteFeature f : other) {
             _formatWriteFeatures &= ~f.getMask();
         }
         return _this();
     }
 
-    public CsvFactoryBuilder configure(CsvGenerator.Feature f, boolean state) {
+    public CsvFactoryBuilder configure(CsvWriteFeature f, boolean state) {
         return state ? enable(f) : disable(f);
     }
 

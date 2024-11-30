@@ -8,10 +8,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.core.JsonGenerator;
 
 import tools.jackson.databind.*;
-
-import tools.jackson.dataformat.csv.CsvGenerator;
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.dataformat.csv.CsvWriteFeature;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
 public class MultipleWritesTest extends ModuleTestBase
@@ -90,7 +89,7 @@ public class MultipleWritesTest extends ModuleTestBase
         // NOTE! Any form of `flush()` will prevent ability to "remove" trailing LF so...
         writer = writer
                 .without(SerializationFeature.FLUSH_AFTER_WRITE_VALUE)
-                .without(CsvGenerator.Feature.WRITE_LINEFEED_AFTER_LAST_ROW);
+                .without(CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW);
         sw = new StringWriter();
         try (SequenceWriter seqw = writer.writeValues(sw)) {
             seqw.write(new Pojo(1, 2, 3));

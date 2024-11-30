@@ -17,7 +17,7 @@ public class StreamingDecoratorsTest extends ModuleTestBase
         final byte[] DOC = utf8("foo,");
         final CsvMapper mapper = mapperBuilder(
                 streamFactoryBuilder().inputDecorator(new PrefixInputDecorator(DOC))
-                        .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                        .enable(CsvReadFeature.WRAP_AS_ARRAY)
                 .build())
                 .build();
         try (MappingIterator<String[]> r = mapper.readerFor(String[].class)
@@ -47,7 +47,7 @@ public class StreamingDecoratorsTest extends ModuleTestBase
         final byte[] DOC = utf8("a,b\n");
         final CsvMapper mapper = mapperBuilder(
                 streamFactoryBuilder().outputDecorator(new PrefixOutputDecorator(DOC))
-                        .enable(CsvParser.Feature.WRAP_AS_ARRAY)
+                        .enable(CsvReadFeature.WRAP_AS_ARRAY)
                 .build())
                 .build();
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

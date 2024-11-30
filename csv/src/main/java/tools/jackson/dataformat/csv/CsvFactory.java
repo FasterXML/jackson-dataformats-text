@@ -25,13 +25,13 @@ public class CsvFactory
      * Bitfield (set of flags) of all parser features that are enabled
      * by default.
      */
-    protected final static int DEFAULT_CSV_PARSER_FEATURE_FLAGS = CsvParser.Feature.collectDefaults();
+    protected final static int DEFAULT_CSV_PARSER_FEATURE_FLAGS = CsvReadFeature.collectDefaults();
 
     /**
      * Bitfield (set of flags) of all generator features that are enabled
      * by default.
      */
-    protected final static int DEFAULT_CSV_GENERATOR_FEATURE_FLAGS = CsvGenerator.Feature.collectDefaults();
+    protected final static int DEFAULT_CSV_GENERATOR_FEATURE_FLAGS = CsvWriteFeature.collectDefaults();
 
     // could make it use Platform default too but...
     protected final static char[] DEFAULT_LF = { '\n' };
@@ -172,13 +172,13 @@ public class CsvFactory
     }
 
     @Override
-    public Class<CsvParser.Feature> getFormatReadFeatureType() {
-        return CsvParser.Feature.class;
+    public Class<CsvReadFeature> getFormatReadFeatureType() {
+        return CsvReadFeature.class;
     }
 
     @Override
-    public Class<CsvGenerator.Feature> getFormatWriteFeatureType() {
-        return CsvGenerator.Feature.class;
+    public Class<CsvWriteFeature> getFormatWriteFeatureType() {
+        return CsvWriteFeature.class;
     }
 
     @Override
@@ -190,14 +190,14 @@ public class CsvFactory
     /**
      * Checked whether specified parser feature is enabled.
      */
-    public final boolean isEnabled(CsvParser.Feature f) {
+    public final boolean isEnabled(CsvReadFeature f) {
         return (_formatReadFeatures & f.getMask()) != 0;
     }
 
     /**
      * Check whether specified generator feature is enabled.
      */
-    public boolean isEnabled(CsvGenerator.Feature f) {
+    public boolean isEnabled(CsvWriteFeature f) {
         return (_formatWriteFeatures & f.getMask()) != 0;
     }
 

@@ -65,7 +65,7 @@ public class MissingColumnsTest extends ModuleTestBase
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)
                 .with(SCHEMA_ABC)
-                .with(CsvParser.Feature.INSERT_NULLS_FOR_MISSING_COLUMNS);
+                .with(CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS);
         
         // check with various number of missing; but first with no missing
         ABC result = r.readValue("first,second,third\n");
@@ -95,7 +95,7 @@ public class MissingColumnsTest extends ModuleTestBase
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)
                 .with(SCHEMA_ABC)
-                .with(CsvParser.Feature.FAIL_ON_MISSING_COLUMNS);
+                .with(CsvReadFeature.FAIL_ON_MISSING_COLUMNS);
         
         // check with various number of missing, as well as recovery
         MappingIterator<ABC> it = r.readValues(

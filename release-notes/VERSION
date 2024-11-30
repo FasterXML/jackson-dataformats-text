@@ -20,6 +20,8 @@ implementations)
 #374: Should verify that escape character set if enabling
   `CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR`
  (suggested by @SebastianSolidwork)
+#510: JSTEP-8: rename `CsvParser.Feature` as `CsvReadFeature`,
+  `CsvGenerator.Feature` as `CsvWriteFeature`
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 
 CSV:

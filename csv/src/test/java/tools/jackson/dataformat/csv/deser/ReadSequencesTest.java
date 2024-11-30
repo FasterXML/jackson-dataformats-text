@@ -47,7 +47,7 @@ public class ReadSequencesTest extends ModuleTestBase
     public void testAsSequence() throws Exception
     {
         MappingIterator<Entry> it = MAPPER.readerWithSchemaFor(Entry.class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(
                 "1,2\n-3,0\n5,6\n");
         Entry entry;
@@ -72,7 +72,7 @@ public class ReadSequencesTest extends ModuleTestBase
     public void testAsWrappedArray() throws Exception
     {
         Entry[] entries = MAPPER.readerWithSchemaFor(Entry.class).forType(Entry[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValue("1,2\n0,0\n123,123456789\n");
         assertEquals(3, entries.length);
         assertEquals(1, entries[0].x);
@@ -98,7 +98,7 @@ public class ReadSequencesTest extends ModuleTestBase
         assertEquals(EXPECTED_BYTES, bytes.length);
 
         MappingIterator<Entry> it = MAPPER.readerFor(Entry.class).with(schema)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(bytes, 0, bytes.length);
         verifySame(it, entries);
         bytes = null;
@@ -109,7 +109,7 @@ public class ReadSequencesTest extends ModuleTestBase
         it.close();
 
         it = MAPPER.readerFor(Entry.class).with(schema)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(text);
         verifySame(it, entries);
         it.close();
@@ -121,7 +121,7 @@ public class ReadSequencesTest extends ModuleTestBase
     {
         final String CSV = "a,b\nc,d\ne,f\n";
         MappingIterator<Object[]> it = MAPPER.readerFor(Object[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(CSV);
 
         assertTrue(it.hasNext());

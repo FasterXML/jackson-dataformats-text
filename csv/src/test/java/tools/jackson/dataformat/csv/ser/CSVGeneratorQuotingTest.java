@@ -20,21 +20,21 @@ public class CSVGeneratorQuotingTest extends ModuleTestBase
         String csv;
 
         csv = MAPPER.writer(schema)
-                .without(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("12\n3", "Foo"));
         assertEquals("\"12\n3\",Foo\n", csv);
 
         csv = MAPPER.writer(schema.withEscapeChar('\\'))
-                .without(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("12\n3", "Foo"));
         assertEquals("\"12\n3\",Foo\n", csv);
         
         csv = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("12\n3", "Foo"));
         assertEquals("\"12\n3\",Foo\n", csv);
         csv = MAPPER.writer(schema.withEscapeChar('\\'))
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(new IdDesc("12\n3", "Foo"));
         assertEquals("\"12\n3\",Foo\n", csv);
     }
@@ -48,25 +48,25 @@ public class CSVGeneratorQuotingTest extends ModuleTestBase
 
         // with loose(default) quoting
         String csv = MAPPER.writer(schema)
-                .without(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(value);
         assertEquals("\"12-3\",Foo-", csv);
 
         // with loose(default) quoting and escape char
         csv = MAPPER.writer(schema.withEscapeChar('\\'))
-            .without(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+            .without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
             .writeValueAsString(value);
         assertEquals("\"12-3\",Foo-", csv);
 
         // with strict/optimal
         csv = MAPPER.writer(schema)
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(value);
         assertEquals("\"12-3\",Foo-", csv);
 
         // with strict/optimal and escape char
         csv = MAPPER.writer(schema.withEscapeChar('\\'))
-                .with(CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
                 .writeValueAsString(value);
         assertEquals("\"12-3\",Foo-", csv);
     }

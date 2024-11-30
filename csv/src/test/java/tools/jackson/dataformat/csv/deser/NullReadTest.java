@@ -152,7 +152,7 @@ public class NullReadTest extends ModuleTestBase
 
         MappingIterator<Row330> iterator = MAPPER
                 .readerFor(Row330.class)
-                .with(CsvParser.Feature.EMPTY_STRING_AS_NULL)
+                .with(CsvReadFeature.EMPTY_STRING_AS_NULL)
                 .with(headerSchema)
                 .readValues(DOC);
         Row330 row = iterator.next();

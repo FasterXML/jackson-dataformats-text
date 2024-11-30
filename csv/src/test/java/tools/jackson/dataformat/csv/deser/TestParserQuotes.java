@@ -44,7 +44,7 @@ public class TestParserQuotes extends ModuleTestBase
         CsvMapper mapper = mapperForCsv();
         CsvSchema schema = mapper.schemaFor(AgeName.class);
         MappingIterator<AgeName> it = mapper.reader(schema).forType(AgeName.class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(
                 "-3,\"\"\"Unknown\"\"\"\n\"13\"  ,\"Joe \"\"Sixpack\"\" Paxson\"");
         assertTrue(it.hasNext());
@@ -73,7 +73,7 @@ public class TestParserQuotes extends ModuleTestBase
         final String RAW_NAME2 = "a\"b";
         
         MappingIterator<AgeName> it = mapper.reader(schema).forType(AgeName.class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("38,"+RAW_NAME+"\n"
                         +"27,"+RAW_NAME2+"\n");
         assertTrue(it.hasNext());
@@ -98,7 +98,7 @@ public class TestParserQuotes extends ModuleTestBase
 
         // first without array wrapping:
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("\"te,st\"");
         assertTrue(it.hasNextValue());
         String[] row = it.nextValue();
@@ -113,7 +113,7 @@ public class TestParserQuotes extends ModuleTestBase
         // then with array wrapping
         mapper = mapperForCsv();
         it = mapper.readerFor(String[].class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("\"te,st\"");
         assertTrue(it.hasNextValue());
         row = it.nextValue();

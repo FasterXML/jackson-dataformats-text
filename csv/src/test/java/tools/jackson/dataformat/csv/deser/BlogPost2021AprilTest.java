@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvParser;
+import tools.jackson.dataformat.csv.CsvReadFeature;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
@@ -36,7 +36,7 @@ public class BlogPost2021AprilTest
     {
         List<List<String>> all = MAPPER
                 .readerFor(new TypeReference<List<List<String>>>() {} )
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValue(SIMPLE_CSV);
         _assertListOfLists(all);
     }
@@ -45,7 +45,7 @@ public class BlogPost2021AprilTest
     {
         MappingIterator<List<String>> it = MAPPER
                 .readerForListOf(String.class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
+                .with(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(SIMPLE_CSV);
         List<List<String>> all = it.readAll();
 /*        while (it.hasNextValue()) {

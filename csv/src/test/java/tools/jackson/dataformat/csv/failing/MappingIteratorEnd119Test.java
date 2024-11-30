@@ -10,7 +10,7 @@ public class MappingIteratorEnd119Test extends ModuleTestBase
     {
         CsvMapper mapper = mapperForCsv();
         MappingIterator<String[]> it = mapper.readerFor(String[].class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues("\"te,st\"");
         assertTrue(it.hasNextValue());
         String[] row = it.nextValue();

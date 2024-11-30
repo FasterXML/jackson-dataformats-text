@@ -43,7 +43,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
         // can not reuse shared instance because we need:
         CsvMapper mapper = mapperForCsv();
         MappingIterator<Entry> it = mapper.readerWithSchemaFor(Entry.class)
-                .without(CsvParser.Feature.WRAP_AS_ARRAY)
+                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .readValues(
                 "1,2\n3,invalid\n5,6\n1,2,3,5\n13,-4\ngarbage\n");
         Entry entry;
