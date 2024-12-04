@@ -16,21 +16,16 @@ implementations)
 
 3.0.0 (not yet released)
 
+#106: (yaml) Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)
+ (contributed by Andrey S)
 #320: Rename "com.fasterxml.jackson" -> "tools.jackson"
-#374: Should verify that escape character set if enabling
+#374: (csv) Should verify that escape character set if enabling
   `CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR`
  (suggested by @SebastianSolidwork)
-#510: JSTEP-8: rename `CsvParser.Feature` as `CsvReadFeature`,
+#510: (csv) JSTEP-8: rename `CsvParser.Feature` as `CsvReadFeature`,
   `CsvGenerator.Feature` as `CsvWriteFeature`
-#512: JSTEP-8: rename `YAMLParser.Feature` as `YAMLReadFeature`,
+#512: (yaml) JSTEP-8: rename `YAMLParser.Feature` as `YAMLReadFeature`,
   `YAMLGenerator.Feature` as `YAMLWriteFeature`
+- (csv) Remove `CsvMappingException` (replaced by `CsvRead-/-WriteException`)
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
-
-CSV:
-
-- Remove `CsvMappingException` (replaced by `CsvRead-/-WriteException`)
-
-YAML:
-
-#106: Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)
- (contributed by Andrey S)
+- Minimum Java baseline: Java 17
