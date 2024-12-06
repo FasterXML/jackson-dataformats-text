@@ -43,6 +43,26 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
     }
 
     /**
+     *  the maximum number of events that can be replayed
+     */
+    public static final int MAX_EVENTS = 9999;
+
+    /**
+     * the maximum limit of anchors to remember
+     */
+    public static final int MAX_ANCHORS = 9999;
+
+    /**
+     * the maximum limit of merges to follow
+     */
+    public static final int MAX_MERGES = 9999;
+
+    /**
+     * the maximum limit of references to remember
+     */
+    public static final int MAX_REFS = 9999;
+
+    /**
      * Remembers when a merge has been started in order to skip the corresponding
      * sequence end which needs to be excluded
      */
@@ -73,9 +93,12 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
     }
 
     private void finishContext(AnchorContext context) {
+        if (referencedObjects.size() + 1 > MAX_REFS) throw new IllegalStateException("too many references in the document");
         referencedObjects.put(context.anchor, context.events);
         if (!tokenStack.isEmpty()) {
-            tokenStack.peek().events.addAll(context.events);
+            List<Event> events = tokenStack.peek().events;
+            if (events.size() + context.events.size() > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
+            events.addAll(context.events);
         }
     }
 
@@ -118,6 +141,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
             AliasEvent alias = (AliasEvent) event;
             List<Event> events = referencedObjects.get(alias.getAnchor());
             if (events != null) {
+                if (refEvents.size() + events.size() > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
                 refEvents.addAll(events);
                 return refEvents.removeFirst();
             }
@@ -130,6 +154,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                 AnchorContext context = new AnchorContext(anchor);
                 context.events.add(event);
                 if (event instanceof CollectionStartEvent) {
+                    if (tokenStack.size() + 1 > MAX_ANCHORS) throw new IllegalStateException("too many anchors in the document");
                     tokenStack.push(context);
                 } else {
                     // directly store it
@@ -145,6 +170,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                 // expect next node to be a map
                 Event next = getEvent();
                 if (next instanceof MappingStartEvent) {
+                    if (mergeStack.size() + 1 > MAX_MERGES) throw new IllegalStateException("too many merges in the document");
                     mergeStack.push(globalDepth);
                     return getEvent();
                 }
@@ -154,6 +180,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
 
         if (!tokenStack.isEmpty()) {
             AnchorContext context = tokenStack.peek();
+            if (context.events.size() + 1 > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
             context.events.add(event);
             if (event instanceof CollectionStartEvent) {
                 ++context.depth;
