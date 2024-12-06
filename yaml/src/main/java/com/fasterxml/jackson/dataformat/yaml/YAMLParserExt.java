@@ -46,22 +46,22 @@ public class YAMLParserExt extends YAMLParser {
      * Remembers when a merge has been started in order to skip the corresponding
      * sequence end which needs to be excluded
      */
-    private ArrayDeque<Integer> mergeStack = new ArrayDeque<>();
+    private final ArrayDeque<Integer> mergeStack = new ArrayDeque<>();
 
     /**
      * Collects nested anchor definitions
      */
-    private ArrayDeque<AnchorContext> tokenStack = new ArrayDeque<>();
+    private final ArrayDeque<AnchorContext> tokenStack = new ArrayDeque<>();
 
     /**
      * Keeps track of the last sequentially found definition of each anchor
      */
-    private Map<String, List<Event>> referencedObjects = new HashMap<>();
+    private final Map<String, List<Event>> referencedObjects = new HashMap<>();
 
     /**
      * Keeps track of events that have been insert when processing alias
      */
-    private ArrayDeque<Event> refEvents = new ArrayDeque<>();
+    private final ArrayDeque<Event> refEvents = new ArrayDeque<>();
 
     /**
      * keeps track of the global depth of nested collections
