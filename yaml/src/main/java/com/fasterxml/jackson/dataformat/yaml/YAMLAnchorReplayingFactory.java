@@ -10,53 +10,53 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.io.IOContext;
 
 /**
- * A subclass of YAMLFactory with the only purpose to replace the YAMLParser by the YAMLParserExt subclass
+ * A subclass of YAMLFactory with the only purpose to replace the YAMLParser by the YAMLAnchorReplayingParser subclass
  */
-public class YAMLFactoryExt extends YAMLFactory {
-    public YAMLFactoryExt() {
+public class YAMLAnchorReplayingFactory extends YAMLFactory {
+    public YAMLAnchorReplayingFactory() {
         super();
     }
 
-    public YAMLFactoryExt(ObjectCodec oc) {
+    public YAMLAnchorReplayingFactory(ObjectCodec oc) {
         super(oc);
     }
 
-    public YAMLFactoryExt(YAMLFactory src, ObjectCodec oc) {
+    public YAMLAnchorReplayingFactory(YAMLFactory src, ObjectCodec oc) {
         super(src, oc);
     }
 
-    protected YAMLFactoryExt(YAMLFactoryBuilder b) {
+    protected YAMLAnchorReplayingFactory(YAMLFactoryBuilder b) {
         super(b);
     }
 
     @Override
-    public YAMLFactoryExt copy() {
-        this._checkInvalidCopy(YAMLFactoryExt.class);
-        return new YAMLFactoryExt(this, (ObjectCodec) null);
+    public YAMLAnchorReplayingFactory copy() {
+        this._checkInvalidCopy(YAMLAnchorReplayingFactory.class);
+        return new YAMLAnchorReplayingFactory(this, (ObjectCodec) null);
     }
 
     @Override
     protected Object readResolve() {
-        return new YAMLFactoryExt(this, this._objectCodec);
+        return new YAMLAnchorReplayingFactory(this, this._objectCodec);
     }
 
     @Override
     protected YAMLParser _createParser(InputStream input, IOContext ctxt) throws IOException {
-        return new YAMLParserExt(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(input, (JsonEncoding) null, ctxt));
+        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(input, (JsonEncoding) null, ctxt));
     }
 
     @Override
     protected YAMLParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new YAMLParserExt(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, r);
+        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, r);
     }
 
     @Override
     protected YAMLParser _createParser(char[] data, int offset, int len, IOContext ctxt, boolean recyclable) throws IOException {
-        return new YAMLParserExt(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, new CharArrayReader(data, offset, len));
+        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, new CharArrayReader(data, offset, len));
     }
 
     @Override
     protected YAMLParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return new YAMLParserExt(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(data, offset, len, (JsonEncoding) null, ctxt));
+        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(data, offset, len, (JsonEncoding) null, ctxt));
     }
 }

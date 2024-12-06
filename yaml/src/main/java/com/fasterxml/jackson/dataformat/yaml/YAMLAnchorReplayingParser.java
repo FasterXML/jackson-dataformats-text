@@ -31,7 +31,7 @@ import com.fasterxml.jackson.core.io.IOContext;
  * Note: this overwrites the getEvent() since the base `super.nextToken()` manages to much state and
  * it seems to be much simpler to re-emit the events.
  */
-public class YAMLParserExt extends YAMLParser {
+public class YAMLAnchorReplayingParser extends YAMLParser {
     private static class AnchorContext {
         public final String anchor;
         public final List<Event> events = new ArrayList<>();
@@ -68,7 +68,7 @@ public class YAMLParserExt extends YAMLParser {
      */
     private int globalDepth = 0;
 
-    public YAMLParserExt(IOContext ctxt, int parserFeatures, int formatFeatures, LoaderOptions loaderOptions, ObjectCodec codec, Reader reader) {
+    public YAMLAnchorReplayingParser(IOContext ctxt, int parserFeatures, int formatFeatures, LoaderOptions loaderOptions, ObjectCodec codec, Reader reader) {
         super(ctxt, parserFeatures, formatFeatures, loaderOptions, codec, reader);
     }
 
