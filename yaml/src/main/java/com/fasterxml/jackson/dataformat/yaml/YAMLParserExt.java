@@ -46,12 +46,12 @@ public class YAMLParserExt extends YAMLParser {
      * Remembers when a merge has been started in order to skip the corresponding
      * sequence end which needs to be excluded
      */
-    private Stack<Integer> mergeStack = new Stack<>();
+    private ArrayDeque<Integer> mergeStack = new ArrayDeque<>();
 
     /**
      * Collects nested anchor definitions
      */
-    private Stack<AnchorContext> tokenStack = new Stack<>();
+    private ArrayDeque<AnchorContext> tokenStack = new ArrayDeque<>();
 
     /**
      * Keeps track of the last sequentially found definition of each anchor
@@ -66,7 +66,7 @@ public class YAMLParserExt extends YAMLParser {
     /**
      * keeps track of the global depth of nested collections
      */
-    private int global_depth = 0;
+    private int globalDepth = 0;
 
     public YAMLParserExt(IOContext ctxt, int parserFeatures, int formatFeatures, LoaderOptions loaderOptions, ObjectCodec codec, Reader reader) {
         super(ctxt, parserFeatures, formatFeatures, loaderOptions, codec, reader);
@@ -81,9 +81,9 @@ public class YAMLParserExt extends YAMLParser {
 
     protected Event trackDepth(Event event) {
         if (event instanceof CollectionStartEvent) {
-            ++global_depth;
+            ++globalDepth;
         } else if (event instanceof CollectionEndEvent) {
-            --global_depth;
+            --globalDepth;
         }
         return event;
     }
@@ -91,7 +91,7 @@ public class YAMLParserExt extends YAMLParser {
     protected Event filterEvent(Event event) {
         if (event instanceof MappingEndEvent) {
             if (!mergeStack.isEmpty()) {
-                if (mergeStack.peek() > global_depth) {
+                if (mergeStack.peek() > globalDepth) {
                     mergeStack.pop();
                     return null;
                 }
@@ -102,7 +102,7 @@ public class YAMLParserExt extends YAMLParser {
 
     @Override
     protected Event getEvent() {
-        while(!refEvents.isEmpty()) {;
+        while(!refEvents.isEmpty()) {
             Event event = filterEvent(trackDepth(refEvents.removeFirst()));
             if (event != null) return event;
         }
@@ -145,7 +145,7 @@ public class YAMLParserExt extends YAMLParser {
                 // expect next node to be a map
                 Event next = getEvent();
                 if (next instanceof MappingStartEvent) {
-                    mergeStack.push(global_depth);
+                    mergeStack.push(globalDepth);
                     return getEvent();
                 }
                 throw new IllegalStateException("found field '<<' but value isn't a map");
