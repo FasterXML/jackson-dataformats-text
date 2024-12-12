@@ -586,7 +586,7 @@ public class YAMLParser extends ParserBase
      *
      * @since 2.18
      */
-    protected Event getEvent() {
+    protected Event getEvent() throws IOException {
         return _yamlParser.getEvent();
     }
 
