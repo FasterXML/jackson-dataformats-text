@@ -21,7 +21,10 @@ import org.yaml.snakeyaml.events.CollectionEndEvent;
 import org.yaml.snakeyaml.events.CollectionStartEvent;
 import org.yaml.snakeyaml.nodes.MappingNode;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
+
 import com.fasterxml.jackson.core.io.IOContext;
 
 /**
@@ -92,12 +95,12 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
         super(ctxt, parserFeatures, formatFeatures, loaderOptions, codec, reader);
     }
 
-    private void finishContext(AnchorContext context) {
-        if (referencedObjects.size() + 1 > MAX_REFS) throw new IllegalStateException("too many references in the document");
+    private void finishContext(AnchorContext context) throws StreamConstraintsException {
+        if (referencedObjects.size() + 1 > MAX_REFS) throw new StreamConstraintsException("too many references in the document");
         referencedObjects.put(context.anchor, context.events);
         if (!tokenStack.isEmpty()) {
             List<Event> events = tokenStack.peek().events;
-            if (events.size() + context.events.size() > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
+            if (events.size() + context.events.size() > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
             events.addAll(context.events);
         }
     }
@@ -124,7 +127,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
     }
 
     @Override
-    protected Event getEvent() {
+    protected Event getEvent() throws IOException {
         while(!refEvents.isEmpty()) {
             Event event = filterEvent(trackDepth(refEvents.removeFirst()));
             if (event != null) return event;
@@ -141,11 +144,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
             AliasEvent alias = (AliasEvent) event;
             List<Event> events = referencedObjects.get(alias.getAnchor());
             if (events != null) {
-                if (refEvents.size() + events.size() > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
+                if (refEvents.size() + events.size() > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
                 refEvents.addAll(events);
                 return refEvents.removeFirst();
             }
-            throw new IllegalStateException("invalid alias " + alias.getAnchor());
+            throw new JsonParseException("invalid alias " + alias.getAnchor());
         }
 
         if (event instanceof NodeEvent) {
@@ -154,7 +157,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                 AnchorContext context = new AnchorContext(anchor);
                 context.events.add(event);
                 if (event instanceof CollectionStartEvent) {
-                    if (tokenStack.size() + 1 > MAX_ANCHORS) throw new IllegalStateException("too many anchors in the document");
+                    if (tokenStack.size() + 1 > MAX_ANCHORS) throw new StreamConstraintsException("too many anchors in the document");
                     tokenStack.push(context);
                 } else {
                     // directly store it
@@ -170,17 +173,17 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                 // expect next node to be a map
                 Event next = getEvent();
                 if (next instanceof MappingStartEvent) {
-                    if (mergeStack.size() + 1 > MAX_MERGES) throw new IllegalStateException("too many merges in the document");
+                    if (mergeStack.size() + 1 > MAX_MERGES) throw new StreamConstraintsException("too many merges in the document");
                     mergeStack.push(globalDepth);
                     return getEvent();
                 }
-                throw new IllegalStateException("found field '<<' but value isn't a map");
+                throw new JsonParseException("found field '<<' but value isn't a map");
             }
         }
 
         if (!tokenStack.isEmpty()) {
             AnchorContext context = tokenStack.peek();
-            if (context.events.size() + 1 > MAX_EVENTS) throw new IllegalStateException("too many events to replay");
+            if (context.events.size() + 1 > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
             context.events.add(event);
             if (event instanceof CollectionStartEvent) {
                 ++context.depth;
