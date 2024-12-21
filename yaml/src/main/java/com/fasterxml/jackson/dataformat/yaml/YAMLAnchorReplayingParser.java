@@ -3,38 +3,27 @@ package com.fasterxml.jackson.dataformat.yaml;
 import java.io.Reader;
 import java.io.IOException;
 
-import java.util.ArrayList;
-import java.util.ArrayDeque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.events.AliasEvent;
-import org.yaml.snakeyaml.events.Event;
-import org.yaml.snakeyaml.events.MappingEndEvent;
-import org.yaml.snakeyaml.events.MappingStartEvent;
-import org.yaml.snakeyaml.events.NodeEvent;
-import org.yaml.snakeyaml.events.ScalarEvent;
-import org.yaml.snakeyaml.events.CollectionEndEvent;
-import org.yaml.snakeyaml.events.CollectionStartEvent;
-import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.events.*;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
-
 import com.fasterxml.jackson.core.io.IOContext;
 
 /**
  * A parser that remembers the events of anchored parts in yaml and repeats them
  * to inline these parts when an alias if found instead of only returning an alias.
- *
+ *<p>
  * Note: this overwrites the getEvent() since the base `super.nextToken()` manages to much state and
  * it seems to be much simpler to re-emit the events.
+ *
+ * @since 2.19
  */
-public class YAMLAnchorReplayingParser extends YAMLParser {
+public class YAMLAnchorReplayingParser extends YAMLParser
+{
     private static class AnchorContext {
         public final String anchor;
         public final List<Event> events = new ArrayList<>();

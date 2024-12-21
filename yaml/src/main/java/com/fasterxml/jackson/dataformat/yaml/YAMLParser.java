@@ -580,9 +580,12 @@ public class YAMLParser extends ParserBase
     /**
      * Since the parserImpl cannot be replaced allow subclasses to at least be able to
      * influence the events being consumed.
-     *
+     *<p>
      * A particular use case is working around the lack of anchor and alias support to
      * emit additional events.
+     *<p>
+     * NOTE: since 2.18, declared to throw {@link IOException} to allow sub-classes
+     * to do so.
      *
      * @since 2.18
      */

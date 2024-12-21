@@ -10,9 +10,14 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.io.IOContext;
 
 /**
- * A subclass of YAMLFactory with the only purpose to replace the YAMLParser by the YAMLAnchorReplayingParser subclass
+ * A subclass of YAMLFactory with the only purpose to replace the YAMLParser by
+ * the YAMLAnchorReplayingParser subclass.
+ *
+ * @since 2.19
  */
 public class YAMLAnchorReplayingFactory extends YAMLFactory {
+    private static final long serialVersionUID = 1L;
+
     public YAMLAnchorReplayingFactory() {
         super();
     }
@@ -31,32 +36,37 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
 
     @Override
     public YAMLAnchorReplayingFactory copy() {
-        this._checkInvalidCopy(YAMLAnchorReplayingFactory.class);
+        _checkInvalidCopy(YAMLAnchorReplayingFactory.class);
         return new YAMLAnchorReplayingFactory(this, (ObjectCodec) null);
     }
 
     @Override
     protected Object readResolve() {
-        return new YAMLAnchorReplayingFactory(this, this._objectCodec);
+        return new YAMLAnchorReplayingFactory(this, _objectCodec);
     }
 
     @Override
     protected YAMLParser _createParser(InputStream input, IOContext ctxt) throws IOException {
-        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(input, (JsonEncoding) null, ctxt));
+        return new YAMLAnchorReplayingParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec,
+                _createReader(input, (JsonEncoding) null, ctxt));
     }
 
     @Override
     protected YAMLParser _createParser(Reader r, IOContext ctxt) throws IOException {
-        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, r);
+        return new YAMLAnchorReplayingParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, r);
     }
 
     @Override
     protected YAMLParser _createParser(char[] data, int offset, int len, IOContext ctxt, boolean recyclable) throws IOException {
-        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, new CharArrayReader(data, offset, len));
+        return new YAMLAnchorReplayingParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, new CharArrayReader(data, offset, len));
     }
 
     @Override
     protected YAMLParser _createParser(byte[] data, int offset, int len, IOContext ctxt) throws IOException {
-        return new YAMLAnchorReplayingParser(ctxt, this._parserFeatures, this._yamlParserFeatures, this._loaderOptions, this._objectCodec, this._createReader(data, offset, len, (JsonEncoding) null, ctxt));
+        return new YAMLAnchorReplayingParser(ctxt, _parserFeatures, _yamlParserFeatures,
+                _loaderOptions, _objectCodec, _createReader(data, offset, len, (JsonEncoding) null, ctxt));
     }
 }
