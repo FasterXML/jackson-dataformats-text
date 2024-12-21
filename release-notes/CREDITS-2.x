@@ -276,6 +276,9 @@ Heiko Boettger (@HeikoBoettger)
 
 * Contributed #482: (yaml) Allow passing `ParserImpl` by a subclass or overwrite the events
  (2.18.0)
+* Contributed #502: (yaml) Add an optional extended parser subclass (`YAMLAnchorReplayingFactory`)
+   able to inline anchors
+ (2.19.0)
 
 Burdyug Pavel (@Pavel38l)
 
