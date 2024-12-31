@@ -118,7 +118,7 @@ public class ComplianceValidTest extends TomlMapperTestBase {
             }
         } else {
             ObjectNode object = expected.objectNode();
-            for (Map.Entry<String, JsonNode> field : (Iterable<? extends Map.Entry<String, JsonNode>>) expected::fields) {
+            for (Map.Entry<String, JsonNode> field : expected.properties()) {
                 object.set(field.getKey(), mapFromComplianceNode((ObjectNode) field.getValue()));
             }
             return object;

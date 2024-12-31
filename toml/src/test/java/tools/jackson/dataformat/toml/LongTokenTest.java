@@ -98,7 +98,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         String expectedKey = toml.toString();
         toml.append(" = 0");
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertEquals(expectedKey, node.propertyNames().next());
+        Assert.assertEquals(expectedKey, node.propertyNames().iterator().next());
     }
 
     @Test
