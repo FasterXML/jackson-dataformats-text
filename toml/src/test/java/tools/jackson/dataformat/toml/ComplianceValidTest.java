@@ -77,14 +77,14 @@ public class ComplianceValidTest extends TomlMapperTestBase {
         final JsonNodeCreator nodeF = expected;
         if (expected.has("type") && expected.has("value")) {
             JsonNode value = expected.get("value");
-            switch (expected.get("type").textValue()) {
+            switch (expected.get("type").stringValue()) {
                 case "string":
                     // for some reason, the compliance tests escape these values. this makes some tests fail right now
-                    return nodeF.textNode(value.textValue());
+                    return nodeF.textNode(value.stringValue());
                 case "integer":
-                    return nodeF.numberNode(NumberInput.parseBigInteger(value.textValue(), false));
+                    return nodeF.numberNode(NumberInput.parseBigInteger(value.stringValue(), false));
                 case "float":
-                    switch (value.textValue()) {
+                    switch (value.stringValue()) {
                         case "inf":
                             return nodeF.numberNode(Double.POSITIVE_INFINITY);
                         case "-inf":
@@ -92,21 +92,21 @@ public class ComplianceValidTest extends TomlMapperTestBase {
                         case "nan":
                             return nodeF.numberNode(Double.NaN);
                         default:
-                            return nodeF.numberNode(NumberInput.parseBigDecimal(value.textValue(), false));
+                            return nodeF.numberNode(NumberInput.parseBigDecimal(value.stringValue(), false));
                     }
                 case "boolean":
-                    return nodeF.booleanNode(Boolean.parseBoolean(value.textValue()));
+                    return nodeF.booleanNode(Boolean.parseBoolean(value.stringValue()));
                 case "offset datetime":
-                    return nodeF.pojoNode(OffsetDateTime.parse(value.textValue()));
+                    return nodeF.pojoNode(OffsetDateTime.parse(value.stringValue()));
                 case "local datetime":
                 case "datetime-local":
-                    return nodeF.pojoNode(LocalDateTime.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalDateTime.parse(value.stringValue()));
                 case "local date":
                 case "date":
-                    return nodeF.pojoNode(LocalDate.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalDate.parse(value.stringValue()));
                 case "local time":
                 case "time":
-                    return nodeF.pojoNode(LocalTime.parse(value.textValue()));
+                    return nodeF.pojoNode(LocalTime.parse(value.stringValue()));
                 case "array":
                     ArrayNode array = nodeF.arrayNode();
                     for (JsonNode member : value) {

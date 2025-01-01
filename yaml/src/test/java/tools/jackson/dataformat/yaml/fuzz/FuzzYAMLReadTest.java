@@ -41,7 +41,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
         //    tag basically ignored, returned as empty String otken
         JsonNode n = YAML_MAPPER.readTree("!!int");
         assertEquals(JsonToken.VALUE_STRING, n.asToken());
-        assertEquals("", n.textValue());
+        assertEquals("", n.stringValue());
     }
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50339

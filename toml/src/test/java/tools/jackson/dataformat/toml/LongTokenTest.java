@@ -109,7 +109,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         }
         toml.append("'");
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertEquals(SCALE, node.get("foo").textValue().length());
+        Assert.assertEquals(SCALE, node.get("foo").stringValue().length());
     }
 
     @Test
@@ -124,6 +124,6 @@ public class LongTokenTest extends TomlMapperTestBase {
         ObjectNode node = TomlParser.parse(FACTORY, testIOContext(),
                 TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
-        Assert.assertEquals(SCALE, node.get("foo").textValue().length());
+        Assert.assertEquals(SCALE, node.get("foo").stringValue().length());
     }
 }

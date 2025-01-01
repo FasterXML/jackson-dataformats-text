@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
-import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.ObjectMapper;
 
 // Tests copied from databind "JDKNumberDeserTest" (only a small subset)

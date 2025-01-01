@@ -28,16 +28,16 @@ public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
 
         JsonNode root = mapper.readTree(YAML);
         assertEquals(root.get("one").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("one").textValue(), "Yes");
+        assertEquals(root.get("one").stringValue(), "Yes");
 
         assertEquals(root.get("two").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("two").textValue(), "No");
+        assertEquals(root.get("two").stringValue(), "No");
 
         assertEquals(root.get("three").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("three").textValue(), "Off");
+        assertEquals(root.get("three").stringValue(), "Off");
 
         assertEquals(root.get("four").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("four").textValue(), "On");
+        assertEquals(root.get("four").stringValue(), "On");
 
         assertEquals(root.get("five").getNodeType(), JsonNodeType.BOOLEAN);
         assertTrue(root.get("five").booleanValue());
@@ -46,9 +46,9 @@ public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
         assertFalse(root.get("six").booleanValue());
 
         assertEquals(root.get("seven").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("seven").textValue(), "Y");
+        assertEquals(root.get("seven").stringValue(), "Y");
 
         assertEquals(root.get("eight").getNodeType(), JsonNodeType.STRING);
-        assertEquals(root.get("eight").textValue(), "N");
+        assertEquals(root.get("eight").stringValue(), "N");
     }
 }

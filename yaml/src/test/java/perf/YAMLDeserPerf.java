@@ -3,7 +3,6 @@ package perf;
 import tools.jackson.core.*;
 import tools.jackson.databind.JavaType;
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.type.TypeFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 /**
