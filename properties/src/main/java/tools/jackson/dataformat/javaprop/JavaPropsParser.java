@@ -211,7 +211,7 @@ System.err.println("\n>>");
     }
 
     @Override
-    public String getText() throws JacksonException {
+    public String getString() throws JacksonException {
         JsonToken t = _currToken;
         if (t == JsonToken.VALUE_STRING) {
             return _streamReadContext.getCurrentText();
@@ -224,31 +224,31 @@ System.err.println("\n>>");
     }
 
     @Override
-    public boolean hasTextCharacters() {
+    public boolean hasStringCharacters() {
         return false;
     }
     
     @Override
-    public char[] getTextCharacters() throws JacksonException {
-        String text = getText();
+    public char[] getStringCharacters() throws JacksonException {
+        String text = getString();
         return (text == null) ? null : text.toCharArray();
     }
 
     @Override
-    public int getTextLength() throws JacksonException {
-        String text = getText();
+    public int getStringLength() throws JacksonException {
+        String text = getString();
         return (text == null) ? 0 : text.length();
     }
 
     @Override
-    public int getTextOffset() throws JacksonException {
+    public int getStringOffset() throws JacksonException {
         return 0;
     }
 
     @Override
-    public int getText(Writer writer) throws JacksonException
+    public int getString(Writer writer) throws JacksonException
     {
-        String str = getText();
+        String str = getString();
         if (str == null) {
             return 0;
         }
@@ -269,7 +269,7 @@ System.err.println("\n>>");
                 _reportError("Current token ("+_currToken+") not VALUE_STRING, can not access as binary");
             }
             ByteArrayBuilder builder = _getByteArrayBuilder();
-            _decodeBase64(getText(), builder, variant);
+            _decodeBase64(getString(), builder, variant);
             _binaryValue = builder.toByteArray();
         }
         return _binaryValue;

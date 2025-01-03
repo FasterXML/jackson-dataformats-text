@@ -41,7 +41,7 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
             assertToken(JsonToken.START_OBJECT, p.nextToken());
             assertEquals("key", p.nextName());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals(valueBuffer.toString(), p.getText());
+            assertEquals(valueBuffer.toString(), p.getString());
         }
     }
 }

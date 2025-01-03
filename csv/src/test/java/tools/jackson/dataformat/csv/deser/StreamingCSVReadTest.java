@@ -79,23 +79,23 @@ public class StreamingCSVReadTest extends ModuleTestBase
         assertEquals("a", parser.currentName());
 
         StringWriter w = new StringWriter();
-        assertEquals(1, parser.getText(w));
+        assertEquals(1, parser.getString(w));
         assertEquals("a", w.toString());
 
         String numStr = String.valueOf(a);
-        assertEquals(numStr, parser.nextTextValue());
-        char[] ch = parser.getTextCharacters();
-        String str2 = new String(ch, parser.getTextOffset(), parser.getTextLength());
+        assertEquals(numStr, parser.nextStringValue());
+        char[] ch = parser.getStringCharacters();
+        String str2 = new String(ch, parser.getStringOffset(), parser.getStringLength());
         assertEquals(numStr, str2);
         w = new StringWriter();
-        assertEquals(numStr.length(), parser.getText(w));
+        assertEquals(numStr.length(), parser.getString(w));
         assertEquals(numStr, w.toString());
 
         assertEquals(a, parser.getIntValue());
         assertEquals((long) a, parser.getLongValue());
 
         assertEquals("b", parser.nextName());
-        assertEquals(""+b, parser.nextTextValue());
+        assertEquals(""+b, parser.nextStringValue());
         assertEquals((long) b, parser.getLongValue());
         assertEquals(b, parser.getIntValue());
 
@@ -151,11 +151,11 @@ public class StreamingCSVReadTest extends ModuleTestBase
 
         assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
-        assertEquals(""+a, parser.nextTextValue());
+        assertEquals(""+a, parser.nextStringValue());
         assertEquals(a, parser.getLongValue());
 
         assertEquals("b", parser.nextName());
-        assertEquals(""+b, parser.nextTextValue());
+        assertEquals(""+b, parser.nextStringValue());
         assertEquals(b, parser.getLongValue());
 
         assertToken(JsonToken.END_OBJECT, parser.nextToken());
@@ -173,12 +173,12 @@ public class StreamingCSVReadTest extends ModuleTestBase
 
         assertToken(JsonToken.PROPERTY_NAME, parser.nextToken());
         assertEquals("a", parser.currentName());
-        assertEquals(""+a, parser.nextTextValue());
+        assertEquals(""+a, parser.nextStringValue());
         assertEquals(a, parser.getDoubleValue());
         assertEquals((float) a, parser.getFloatValue());
 
         assertEquals("b", parser.nextName());
-        assertEquals(""+b, parser.nextTextValue());
+        assertEquals(""+b, parser.nextStringValue());
         assertEquals((float) b, parser.getFloatValue());
         assertEquals(b, parser.getDoubleValue());
 

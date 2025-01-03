@@ -31,10 +31,10 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertNotNull(p.currentLocation()); // N/A
         assertNotNull(p.currentTokenLocation()); // N/A
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
-        assertEquals("foo", p.getText());
+        assertEquals("foo", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         StringWriter sw = new StringWriter();
-        assertEquals(3, p.getText(sw));
+        assertEquals(3, p.getString(sw));
         assertEquals("bar", sw.toString());
         p.close();
         assertTrue(p.isClosed());
@@ -43,7 +43,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         p = MAPPER.createParser("foo = bar");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertEquals("foo", p.nextName());
-        assertEquals("bar", p.nextTextValue());
+        assertEquals("bar", p.nextStringValue());
         assertNull(p.nextName());
         p.close();
 

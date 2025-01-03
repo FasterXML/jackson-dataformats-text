@@ -176,10 +176,10 @@ public class MediaItem
               if (I != null) {
                   switch (I.intValue()) {
                   case F_URI:
-                      photo.setUri(p.getText());
+                      photo.setUri(p.getString());
                       continue;
                   case F_TITLE:
-                      photo.setTitle(p.getText());
+                      photo.setTitle(p.getString());
                       continue;
                   case F_WIDTH:
                       photo.setWidth(p.getIntValue());
@@ -188,7 +188,7 @@ public class MediaItem
                       photo.setHeight(p.getIntValue());
                       continue;
                   case F_SIZE:
-                      photo.setSize(findSize(p.getText()));
+                      photo.setSize(findSize(p.getString()));
                       continue;
                   }
               }
@@ -312,12 +312,12 @@ public class MediaItem
                 if (I != null) {
                     switch (I.intValue()) {
                     case F_PLAYER:
-                        content.setPlayer(findPlayer(p.getText()));
+                        content.setPlayer(findPlayer(p.getString()));
                     case F_URI:
-                        content.setUri(p.getText());
+                        content.setUri(p.getString());
                         continue;
                     case F_TITLE:
-                        content.setTitle(p.getText());
+                        content.setTitle(p.getString());
                         continue;
                     case F_WIDTH:
                         content.setWidth(p.getIntValue());
@@ -326,7 +326,7 @@ public class MediaItem
                         content.setHeight(p.getIntValue());
                         continue;
                     case F_FORMAT:
-                        content.setCopyright(p.getText());
+                        content.setCopyright(p.getString());
                         continue;
                     case F_DURATION:
                         content.setDuration(p.getLongValue());
@@ -341,7 +341,7 @@ public class MediaItem
                         content.setPersons(deserializePersons(p));
                         continue;
                     case F_COPYRIGHT:
-                        content.setCopyright(p.getText());
+                        content.setCopyright(p.getString());
                         continue;
                     }
                 }
@@ -360,7 +360,7 @@ public class MediaItem
             }
             ArrayList<String> persons = new ArrayList<String>(4);
             while (p.nextToken() == JsonToken.VALUE_STRING) {
-                persons.add(p.getText());
+                persons.add(p.getString());
             }
             if (p.currentToken() != JsonToken.END_ARRAY) {
                 throw new IOException("Need END_ARRAY to complete List of Persons");

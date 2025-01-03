@@ -24,7 +24,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(42, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("42", p.getText());
+        assertEquals("42", p.getString());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
@@ -32,7 +32,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(-42, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("-42", p.getText());
+        assertEquals("-42", p.getString());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         p.close();
     }

@@ -44,7 +44,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         _verifyVersion(p);
         assertFalse(p.canReadObjectId());
         assertFalse(p.canReadTypeId());
-        assertFalse(p.hasTextCharacters());
+        assertFalse(p.hasStringCharacters());
 
         p.close();
     }

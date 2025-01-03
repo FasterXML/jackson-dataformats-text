@@ -539,7 +539,7 @@ public class CsvParser
     }
 
     @Override
-    public String nextTextValue() throws JacksonException
+    public String nextStringValue() throws JacksonException
     {
         _binaryValue = null;
         JsonToken t;
@@ -556,7 +556,7 @@ public class CsvParser
         } else {
             t = nextToken();
             if (t == JsonToken.VALUE_STRING) {
-                return getText();
+                return getString();
             }
         }
         return null;
@@ -975,7 +975,7 @@ public class CsvParser
     
     // For now we do not store char[] representation...
     @Override
-    public boolean hasTextCharacters() {
+    public boolean hasStringCharacters() {
         if (_currToken == JsonToken.PROPERTY_NAME) {
             return false;
         }
@@ -983,7 +983,7 @@ public class CsvParser
     }
 
     @Override
-    public String getText() throws JacksonException {
+    public String getString() throws JacksonException {
         if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName;
         }
@@ -993,7 +993,7 @@ public class CsvParser
     }
 
     @Override
-    public char[] getTextCharacters() throws JacksonException {
+    public char[] getStringCharacters() throws JacksonException {
         if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName.toCharArray();
         }
@@ -1001,7 +1001,7 @@ public class CsvParser
     }
 
     @Override
-    public int getTextLength() throws JacksonException {
+    public int getStringLength() throws JacksonException {
         if (_currToken == JsonToken.PROPERTY_NAME) {
             return _currentName.length();
         }
@@ -1009,12 +1009,12 @@ public class CsvParser
     }
 
     @Override
-    public int getTextOffset() throws JacksonException {
+    public int getStringOffset() throws JacksonException {
         return 0;
     }
 
     @Override
-    public int getText(Writer w) throws JacksonException {
+    public int getString(Writer w) throws JacksonException {
         String value = (_currToken == JsonToken.PROPERTY_NAME) ?
                 _currentName : _currentValue;
         if (value == null) {

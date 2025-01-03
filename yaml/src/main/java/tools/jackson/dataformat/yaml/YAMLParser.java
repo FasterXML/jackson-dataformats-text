@@ -785,12 +785,12 @@ public class YAMLParser extends ParserBase
 
     // For now we do not store char[] representation...
     @Override
-    public boolean hasTextCharacters() {
+    public boolean hasStringCharacters() {
         return false;
     }
 
     @Override
-    public String getText() throws JacksonException
+    public String getString() throws JacksonException
     {
         if (_currToken == JsonToken.VALUE_STRING) {
             return _textValue;
@@ -823,26 +823,26 @@ public class YAMLParser extends ParserBase
     }
 
     @Override
-    public char[] getTextCharacters() throws JacksonException {
-        String text = getText();
+    public char[] getStringCharacters() throws JacksonException {
+        String text = getString();
         return (text == null) ? null : text.toCharArray();
     }
 
     @Override
-    public int getTextLength() throws JacksonException {
-        String text = getText();
+    public int getStringLength() throws JacksonException {
+        String text = getString();
         return (text == null) ? 0 : text.length();
     }
 
     @Override
-    public int getTextOffset() throws JacksonException {
+    public int getStringOffset() throws JacksonException {
         return 0;
     }
 
     @Override
-    public int getText(Writer writer) throws JacksonException
+    public int getString(Writer writer) throws JacksonException
     {
-        String str = getText();
+        String str = getString();
         if (str == null) {
             return 0;
         }

@@ -37,7 +37,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals("text", p.getText());
+        assertEquals("text", p.getString());
         TokenStreamLocation loc = p.currentTokenLocation();
         assertEquals(1, loc.getLineNr());
         assertEquals(9, loc.getColumnNr());
@@ -46,7 +46,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        assertEquals("true", p.getText());
+        assertEquals("true", p.getString());
         loc = p.currentTokenLocation();
         assertEquals(2, loc.getLineNr());
         assertEquals(7, loc.getColumnNr());
@@ -55,17 +55,17 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_FALSE, p.nextToken());
-        assertEquals("false", p.getText());
+        assertEquals("false", p.getString());
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_NULL, p.nextToken());
-        assertEquals("null", p.getText());
+        assertEquals("null", p.getString());
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
-        assertEquals("123", p.getText());
+        assertEquals("123", p.getString());
         assertEquals(123, p.getIntValue());
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_NUMBER_FLOAT, p.nextToken());
-        assertEquals("1.25", p.getText());
+        assertEquals("1.25", p.getString());
         assertEquals(1.25, p.getDoubleValue());
         assertEquals(1, p.getIntValue());
 
@@ -91,7 +91,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("2147483647", p.getText());
+        assertEquals("2147483647", p.getString());
         p.close();
 
         // Test negative max-int
@@ -103,7 +103,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("-2147483648", p.getText());
+        assertEquals("-2147483648", p.getString());
         p.close();
 
         // Test positive max-int + 1
@@ -115,7 +115,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE + 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("2147483648", p.getText());
+        assertEquals("2147483648", p.getString());
         p.close();
 
         // Test negative max-int - 1
@@ -127,7 +127,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE - 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("-2147483649", p.getText());
+        assertEquals("-2147483649", p.getString());
         p.close();
 
         // Test positive max-long
@@ -139,7 +139,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MAX_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("9223372036854775807", p.getText());
+        assertEquals("9223372036854775807", p.getString());
         p.close();
 
         // Test negative max-long
@@ -151,7 +151,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MIN_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("-9223372036854775808", p.getText());
+        assertEquals("-9223372036854775808", p.getString());
         p.close();
 
         // Test positive max-long + 1
@@ -163,7 +163,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
-        assertEquals("9223372036854775808", p.getText());
+        assertEquals("9223372036854775808", p.getString());
         p.close();
 
         // Test negative max-long - 1
@@ -175,7 +175,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
-        assertEquals("-9223372036854775809", p.getText());
+        assertEquals("-9223372036854775809", p.getString());
         p.close();
     }
 
@@ -190,7 +190,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(10345, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-            assertEquals("10_345", p.getText());
+            assertEquals("10_345", p.getString());
             assertToken(JsonToken.END_OBJECT, p.nextToken());
         }
 
@@ -201,7 +201,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(-11222, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-            assertEquals("-11_222", p.getText());
+            assertEquals("-11_222", p.getString());
             assertToken(JsonToken.END_OBJECT, p.nextToken());
         }
 
@@ -212,7 +212,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
             assertEquals(8192, p.getIntValue());
             assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-            assertEquals("+8_192", p.getText());
+            assertEquals("+8_192", p.getString());
             assertToken(JsonToken.END_OBJECT, p.nextToken());
         }
 
@@ -228,7 +228,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("2_147_483_647", p.getText());
+        assertEquals("2_147_483_647", p.getString());
         p.close();
 
         // Test negative max-int
@@ -240,7 +240,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
-        assertEquals("-2_147_483_648", p.getText());
+        assertEquals("-2_147_483_648", p.getString());
         p.close();
 
         // Test positive max-int + 1
@@ -252,7 +252,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MAX_VALUE + 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("2_147_483_648", p.getText());
+        assertEquals("2_147_483_648", p.getString());
         p.close();
 
         // Test negative max-int - 1
@@ -264,7 +264,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Integer.MIN_VALUE - 1L, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("-2_147_483_649", p.getText());
+        assertEquals("-2_147_483_649", p.getString());
         p.close();
 
         // Test positive max-long
@@ -276,7 +276,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MAX_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("9_223_372_036_854_775_807", p.getText());
+        assertEquals("9_223_372_036_854_775_807", p.getString());
         p.close();
 
         // Test negative max-long
@@ -288,7 +288,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(Long.MIN_VALUE, p.getLongValue());
         assertEquals(JsonParser.NumberType.LONG, p.getNumberType());
-        assertEquals("-9_223_372_036_854_775_808", p.getText());
+        assertEquals("-9_223_372_036_854_775_808", p.getString());
         p.close();
 
         // Test positive max-long + 1
@@ -300,7 +300,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
-        assertEquals("9_223372036854775_808", p.getText());
+        assertEquals("9_223372036854775_808", p.getString());
         p.close();
 
         // Test negative max-long - 1
@@ -312,7 +312,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), p.getBigIntegerValue());
         assertEquals(JsonParser.NumberType.BIG_INTEGER, p.getNumberType());
-        assertEquals("-92233_72036_85477_5809", p.getText());
+        assertEquals("-92233_72036_85477_5809", p.getString());
         p.close();
     }
 
@@ -346,12 +346,12 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertEquals("num", p.currentName());
 
         StringWriter w = new StringWriter();
-        assertEquals(3, p.getText(w));
+        assertEquals(3, p.getString(w));
         assertEquals("num", w.toString());
 
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         // let's retain exact representation text however:
-        assertEquals("+1000.25", p.getText());
+        assertEquals("+1000.25", p.getString());
         p.close();
 
         // and then non-number that may be mistaken
@@ -366,10 +366,10 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
 
         w = new StringWriter();
-        assertEquals(IP.length(), p.getText(w));
+        assertEquals(IP.length(), p.getString(w));
         assertEquals(IP, w.toString());
 
-        assertEquals(IP, p.getText());
+        assertEquals(IP, p.getString());
         p.close();
     }
 
@@ -389,7 +389,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("text", p.currentName());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
-        assertEquals("foo:bar", p.getText());
+        assertEquals("foo:bar", p.getString());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertNull(p.nextToken());
@@ -427,7 +427,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, yp.nextToken());
         assertEquals("name", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
-        assertEquals("Bob", yp.getText());
+        assertEquals("Bob", yp.getString());
         assertFalse(yp.isCurrentAlias());
         assertToken(JsonToken.END_OBJECT, yp.nextToken());
 
@@ -440,11 +440,11 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.PROPERTY_NAME, yp.nextToken());
         assertEquals("name", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
-        assertEquals("Bill", yp.getText());
+        assertEquals("Bill", yp.getString());
         assertToken(JsonToken.PROPERTY_NAME, yp.nextToken());
         assertEquals("parentRef", yp.currentName());
         assertToken(JsonToken.VALUE_STRING, yp.nextToken());
-        assertEquals("id1", yp.getText());
+        assertEquals("id1", yp.getString());
         assertTrue(yp.isCurrentAlias());
         assertToken(JsonToken.END_OBJECT, yp.nextToken());
 
@@ -466,10 +466,10 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals(0, p.streamReadContext().getCurrentIndex());
-        assertEquals("true", p.getText());
+        assertEquals("true", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals(1, p.streamReadContext().getCurrentIndex());
-        assertEquals("false", p.getText());
+        assertEquals("false", p.getString());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertNull(p.nextToken());
@@ -540,10 +540,10 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals(0, p.streamReadContext().getCurrentIndex());
-        assertEquals("Foo Bar", p.getText());
+        assertEquals("Foo Bar", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals(1, p.streamReadContext().getCurrentIndex());
-        assertEquals("Max Power", p.getText());
+        assertEquals("Max Power", p.getString());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -600,7 +600,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
           assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
           assertEquals("value", p.currentName());
           assertToken(JsonToken.VALUE_STRING, p.nextToken());
-          assertEquals("3:00", p.getText());
+          assertEquals("3:00", p.getString());
           assertToken(JsonToken.END_OBJECT, p.nextToken());
           assertNull(p.nextToken());
           p.close();
