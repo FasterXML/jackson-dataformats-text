@@ -36,8 +36,14 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.START_OBJECT, p.nextToken());
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("string", p.currentName());
+        assertEquals("string", p.getString());
+        assertEquals("string", p.getValueAsString());
+        assertEquals("string", p.getValueAsString("x"));
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
+        assertEquals("text", p.getValueAsString());
+        assertEquals("text", p.getValueAsString("x"));
         TokenStreamLocation loc = p.currentTokenLocation();
         assertEquals(1, loc.getLineNr());
         assertEquals(9, loc.getColumnNr());

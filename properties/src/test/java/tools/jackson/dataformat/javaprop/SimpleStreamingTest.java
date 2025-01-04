@@ -31,7 +31,10 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertNotNull(p.currentLocation()); // N/A
         assertNotNull(p.currentTokenLocation()); // N/A
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("foo", p.currentName());
         assertEquals("foo", p.getString());
+        assertEquals("foo", p.getValueAsString());
+        assertEquals("foo", p.getValueAsString("x"));
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         StringWriter sw = new StringWriter();
         assertEquals(3, p.getString(sw));
