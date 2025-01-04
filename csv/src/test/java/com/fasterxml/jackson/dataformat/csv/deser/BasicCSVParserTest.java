@@ -252,8 +252,13 @@ public class BasicCSVParserTest extends ModuleTestBase
         assertEquals(JsonToken.START_OBJECT, parser.nextToken());
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("b", parser.currentName());
+        assertEquals("b", parser.getText());
+        assertEquals("b", parser.getValueAsString());
+        assertEquals("b", parser.getValueAsString("x"));
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());
         assertEquals("vb", parser.getValueAsString());
+        assertEquals("vb", parser.getValueAsString());
+        assertEquals("vb", parser.getValueAsString("x"));
         assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
         assertEquals("a",parser.currentName());
         assertEquals(JsonToken.VALUE_STRING, parser.nextToken());

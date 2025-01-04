@@ -4,14 +4,11 @@ import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLAnchorReplayingParser;
-import org.yaml.snakeyaml.LoaderOptions;
 
-public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
-
+public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
+{
     private final YAMLAnchorReplayingFactory YAML_F = new YAMLAnchorReplayingFactory();
 
     public void testBasic() throws Exception
