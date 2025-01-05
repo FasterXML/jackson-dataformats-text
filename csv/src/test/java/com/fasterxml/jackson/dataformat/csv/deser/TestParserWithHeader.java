@@ -22,9 +22,11 @@ public class TestParserWithHeader extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final CsvMapper MAPPER = mapperForCsv();
+
     public void testSimpleHeader() throws Exception
     {
-        CsvParser parser = new CsvFactory().createParser(
+        CsvParser parser = (CsvParser) MAPPER.createParser(
                 "name, age,  other\nfoo,2,xyz\n");
         // need to enable first-line-as-schema handling:
         parser.setSchema(CsvSchema.emptySchema().withHeader());
@@ -41,10 +43,8 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSimpleQuotes() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        Entry entry = mapper.readerFor(Entry.class).with(schema).readValue(
+        Entry entry = MAPPER.readerFor(Entry.class).with(schema).readValue(
                 "name,age,\"cute\"   \nLeo,4,true\n");
         assertEquals("Leo", entry.name);
         assertEquals(4, entry.age);
@@ -53,10 +53,8 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSkipFirstDataLine() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
-        CsvSchema schema = mapper.schemaFor(Entry.class).withSkipFirstDataRow(true);
-        MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema).readValues(
+        CsvSchema schema = MAPPER.schemaFor(Entry.class).withSkipFirstDataRow(true);
+        MappingIterator<Entry> it = MAPPER.readerFor(Entry.class).with(schema).readValues(
                 "12354\n6,Lila,true");
         Entry entry;
         
@@ -86,11 +84,9 @@ public class TestParserWithHeader extends ModuleTestBase
 
 
         // Ok, then, first let's try reading columns:        
-        
-        CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
+
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        CsvParser p = (CsvParser) mapper.getFactory().createParser(CSV);
+        CsvParser p = (CsvParser) MAPPER.getFactory().createParser(CSV);
         p.setSchema(schema);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
@@ -118,11 +114,9 @@ public class TestParserWithHeader extends ModuleTestBase
         final String CSV = sb.toString();
 
         // Ok, then, first let's try reading columns:        
-        
-        CsvMapper mapper = mapperForCsv();
-        mapper.disable(CsvParser.Feature.WRAP_AS_ARRAY);
+
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        CsvParser p = (CsvParser) mapper.getFactory().createParser(CSV);
+        CsvParser p = (CsvParser) MAPPER.getFactory().createParser(CSV);
         p.setSchema(schema);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
@@ -132,7 +126,13 @@ public class TestParserWithHeader extends ModuleTestBase
         assertEquals(COLUMN, actual.columnName(0));
         p.close();
     }
-    
+
+    // [dataformats-text#31]: Allow disabling header name trimming
+    public void testHeaderNamePadding() throws Exception
+    {
+        // TODO
+    }
+
     /*
     /**********************************************************************
     /* Test methods, fail
@@ -141,9 +141,8 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testInvalidMissingHeader() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         try {
-            mapper.readerFor(Entry.class).with(CsvSchema.emptySchema().withHeader()).readValue("  \nJoseph,57,false");
+            MAPPER.readerFor(Entry.class).with(CsvSchema.emptySchema().withHeader()).readValue("  \nJoseph,57,false");
             fail("Should have failed with exception");
         } catch (Exception e) {
             verifyException(e, "Empty header line");
