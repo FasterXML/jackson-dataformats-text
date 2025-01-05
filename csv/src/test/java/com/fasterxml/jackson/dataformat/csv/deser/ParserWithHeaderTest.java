@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
 
-public class TestParserWithHeader extends ModuleTestBase
+public class ParserWithHeaderTest extends ModuleTestBase
 {
     @JsonPropertyOrder({ "age", "name", "cute" })
     protected static class Entry {
