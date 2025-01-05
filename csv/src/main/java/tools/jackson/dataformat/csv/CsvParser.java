@@ -624,6 +624,7 @@ public class CsvParser
 
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
+            // TODO!!! [dataformats-text#31]: Allow disabling of trimming
             name = name.trim();
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);

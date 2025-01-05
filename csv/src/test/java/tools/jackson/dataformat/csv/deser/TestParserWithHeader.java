@@ -23,10 +23,11 @@ public class TestParserWithHeader extends ModuleTestBase
     /**********************************************************************
      */
 
+    private final CsvMapper MAPPER = mapperForCsv();
+
     public void testSimpleHeader() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        CsvParser parser = (CsvParser) mapper.reader(CsvSchema.emptySchema().withHeader())
+        CsvParser parser = (CsvParser) MAPPER.reader(CsvSchema.emptySchema().withHeader())
                 .createParser("name, age,  other\nfoo,2,xyz\n");
         // need to enable first-line-as-schema handling:
         assertToken(JsonToken.START_OBJECT, parser.nextToken());
@@ -42,11 +43,8 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSimpleQuotes() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        Entry entry = mapper.readerFor(Entry.class).with(schema)
-                .without(CsvReadFeature.WRAP_AS_ARRAY)
-                .readValue(
+        Entry entry = MAPPER.readerFor(Entry.class).with(schema).readValue(
                 "name,age,\"cute\"   \nLeo,4,true\n");
         assertEquals("Leo", entry.name);
         assertEquals(4, entry.age);
@@ -55,11 +53,8 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testSkipFirstDataLine() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
-        CsvSchema schema = mapper.schemaFor(Entry.class).withSkipFirstDataRow(true);
-        MappingIterator<Entry> it = mapper.readerFor(Entry.class).with(schema)
-                .without(CsvReadFeature.WRAP_AS_ARRAY)
-                .readValues(
+        CsvSchema schema = MAPPER.schemaFor(Entry.class).withSkipFirstDataRow(true);
+        MappingIterator<Entry> it = MAPPER.readerFor(Entry.class).with(schema).readValues(
                 "12354\n6,Lila,true");
         Entry entry;
         
@@ -88,13 +83,10 @@ public class TestParserWithHeader extends ModuleTestBase
         final String CSV = sb.toString();
 
 
-        // Ok, then, first let's try reading columns:        
-        
-        CsvMapper mapper = mapperForCsv();
+        // Ok, then, first let's try reading columns:
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        CsvParser p = (CsvParser) mapper.reader()
+        CsvParser p = (CsvParser) MAPPER.reader()
                 .with(schema)
-                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .createParser(CSV);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
@@ -121,13 +113,10 @@ public class TestParserWithHeader extends ModuleTestBase
         sb.append("\nabc\n");
         final String CSV = sb.toString();
 
-        // Ok, then, first let's try reading columns:        
-        
-        CsvMapper mapper = mapperForCsv();
+        // Ok, then, first let's try reading columns:
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        CsvParser p = (CsvParser) mapper.reader()
+        CsvParser p = (CsvParser) MAPPER.reader()
                 .with(schema)
-                .without(CsvReadFeature.WRAP_AS_ARRAY)
                 .createParser(CSV);
         // need to read something to ensure header line is processed
         assertEquals(JsonToken.START_OBJECT, p.nextToken());
@@ -138,6 +127,12 @@ public class TestParserWithHeader extends ModuleTestBase
         p.close();
     }
 
+    // [dataformats-text#31]: Allow disabling header name trimming
+    public void testHeaderNamePadding() throws Exception
+    {
+        // TODO
+    }
+
     /*
     /**********************************************************************
     /* Test methods, fail
@@ -146,13 +141,11 @@ public class TestParserWithHeader extends ModuleTestBase
 
     public void testInvalidMissingHeader() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         try {
-            mapper.readerFor(Entry.class).with(CsvSchema.emptySchema().withHeader()).readValue("  \nJoseph,57,false");
+            MAPPER.readerFor(Entry.class).with(CsvSchema.emptySchema().withHeader()).readValue("  \nJoseph,57,false");
             fail("Should have failed with exception");
         } catch (Exception e) {
             verifyException(e, "Empty header line");
         }
     }
-
 }
