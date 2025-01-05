@@ -3,9 +3,9 @@ package com.fasterxml.jackson.dataformat.csv.failing;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
-public class MappingIteratorEnd119Test extends ModuleTestBase
+public class MappingIteratorEnd9Test extends ModuleTestBase
 {
-    // for [dataformat-csv#119]
+    // for [dataformats-text#9] (was [dataformat-csv#119])
     public void testDefaultSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
