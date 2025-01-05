@@ -49,7 +49,30 @@ public class ParserWithHeaderTest extends ModuleTestBase
         }
 
         // But! Can change header name trimming:
-        // [dataformats-text#31]: Allow disabling header name trimming
+        // [dataformats-text#31]: Allow disabling header row trimming
+        try (CsvParser parser = (CsvParser) MAPPER.reader()
+                .without(CsvParser.Feature.TRIM_HEADER_SPACES)
+                .createParser(
+                "name, age,other  \nfoo,2,xyz\n")) {
+            // need to enable first-line-as-schema handling:
+            parser.setSchema(CsvSchema.emptySchema().withHeader());
+            assertToken(JsonToken.START_OBJECT, parser.nextToken());
+            CsvSchema schema = parser.getSchema();
+            assertEquals(3, schema.size());
+    
+            // Verify header names are NOT trimmed when disabled
+            assertEquals("name", schema.columnName(0));
+            assertEquals(" age", schema.columnName(1));
+            assertEquals("other  ", schema.columnName(2));
+
+            assertEquals("name", parser.nextFieldName());
+            assertEquals("foo", parser.nextTextValue());
+            assertEquals(" age", parser.nextFieldName());
+            assertEquals("2", parser.nextTextValue());
+            assertEquals("other  ", parser.nextFieldName());
+            assertEquals("xyz", parser.nextTextValue());
+            assertToken(JsonToken.END_OBJECT, parser.nextToken());
+        }
     }
 
     public void testSimpleQuotes() throws Exception

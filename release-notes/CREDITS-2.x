@@ -285,3 +285,7 @@ Burdyug Pavel (@Pavel38l)
 * Reported #485: (csv) CSVDecoder: No Long and Int out of range exceptions
  (2.18.0)
 
+Robert DiFalco (@rdifalco)
+
+* Reported #31: Header names seem to be trimmed
+ (2.19.0)
