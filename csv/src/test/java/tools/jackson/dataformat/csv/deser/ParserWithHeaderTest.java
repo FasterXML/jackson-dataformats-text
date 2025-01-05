@@ -8,7 +8,7 @@ import tools.jackson.core.JsonToken;
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.*;
 
-public class TestParserWithHeader extends ModuleTestBase
+public class ParserWithHeaderTest extends ModuleTestBase
 {
     @JsonPropertyOrder({ "age", "name", "cute" })
     protected static class Entry {
