@@ -24,8 +24,21 @@ public enum CsvReadFeature
     TRIM_SPACES(false),
 
     /**
+     * Feature determines whether spaces around separator characters
+     * (commas) in header line entries (header names) are to be automatically
+     * trimmed before being reported or not.
+     * Note that this does NOT force trimming of possible white space from
+     * within double-quoted values, but only those surrounding unquoted
+     * values (white space outside of double-quotes is never included regardless
+     * of trimming).
+     *<p>
+     * Default value is {@code true}.
+     */
+    TRIM_HEADER_SPACES(true),
+
+    /**
      * Feature that determines how stream of records (usually CSV lines, but sometimes
-     * multiple lines when linefeeds are included in quoted values) is exposed:
+     * multiple lines when line-feeds are included in quoted values) is exposed:
      * either as a sequence of Objects (false), or as an Array of Objects (true).
      * Using stream of Objects is convenient when using
      * <code>ObjectMapper.readValues(...)</code>

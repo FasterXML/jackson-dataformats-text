@@ -622,10 +622,13 @@ public class CsvParser
         CsvSchema.Builder builder = _schema.rebuild().clearColumns();
         int count = 0;
 
+        final boolean trimHeaderNames = CsvReadFeature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
-            // TODO!!! [dataformats-text#31]: Allow disabling of trimming
-            name = name.trim();
+            // [dataformats-text#31]: Allow disabling of trimming
+            if (trimHeaderNames) {
+                name = name.trim();
+            }
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);
             if (prev != null) {
