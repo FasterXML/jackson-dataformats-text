@@ -16,6 +16,8 @@ Active Maintainers:
 
 2.19.0 (not yet released)
 
+#31: Header names seem to be trimmed
+ (reported by Robert D)
 #502: Add an optional extended parser subclass (`YAMLAnchorReplayingFactory`)
   able to inline anchors
  (contributed by Heiko B)

@@ -47,9 +47,28 @@ public class CsvParser
          * values (white space outside of double-quotes is never included regardless
          * of trimming).
          *<p>
+         * NOTE: this setting has no effect on header rows: see {@link #TRIM_HEADER_SPACES}
+         * for corresponding setting.
+         *<p>
          * Default value is false, as per <a href="http://tools.ietf.org/html/rfc4180">RFC-4180</a>.
          */
         TRIM_SPACES(false),
+
+        /**
+         * Feature determines whether spaces around separator characters
+         * (commas) in header line entries (header names) are to be automatically
+         * trimmed before being reported or not.
+         * Note that this does NOT force trimming of possible white space from
+         * within double-quoted values, but only those surrounding unquoted
+         * values (white space outside of double-quotes is never included regardless
+         * of trimming).
+         *<p>
+         * Default value is {@code true} for backwards compatibility (before 2.19 trimming
+         * was always performed)
+         *
+         * @since 2.19
+         */
+        TRIM_HEADER_SPACES(true),
 
         /**
          * Feature that determines how stream of records (usually CSV lines, but sometimes
@@ -898,10 +917,13 @@ public class CsvParser
         CsvSchema.Builder builder = _schema.rebuild().clearColumns();
         int count = 0;
 
+        final boolean trimHeaderNames = Feature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
-            // TODO!!! [dataformats-text#31]: Allow disabling of trimming
-            name = name.trim();
+            // [dataformats-text#31]: Allow disabling of trimming
+            if (trimHeaderNames) {
+                name = name.trim();
+            }
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);
             if (prev != null) {
