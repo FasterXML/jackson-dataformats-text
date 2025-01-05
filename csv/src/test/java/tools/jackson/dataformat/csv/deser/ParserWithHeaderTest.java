@@ -27,18 +27,29 @@ public class ParserWithHeaderTest extends ModuleTestBase
 
     public void testSimpleHeader() throws Exception
     {
-        CsvParser parser = (CsvParser) MAPPER.reader(CsvSchema.emptySchema().withHeader())
-                .createParser("name, age,  other\nfoo,2,xyz\n");
-        // need to enable first-line-as-schema handling:
-        assertToken(JsonToken.START_OBJECT, parser.nextToken());
-        CsvSchema schema = parser.getSchema();
-        assertEquals(3, schema.size());
+        try (CsvParser parser = (CsvParser) MAPPER.reader(CsvSchema.emptySchema().withHeader())
+                .createParser("name, age,  other\nfoo,2,xyz\n")) {
+            // need to enable first-line-as-schema handling:
+            assertToken(JsonToken.START_OBJECT, parser.nextToken());
+            CsvSchema schema = parser.getSchema();
+            assertEquals(3, schema.size());
+    
+            // verify that names from first line are trimmed:
+            assertEquals("name", schema.columnName(0));
+            assertEquals("age", schema.columnName(1));
+            assertEquals("other", schema.columnName(2));
 
-        // verify that names from first line are trimmed:
-        assertEquals("name", schema.columnName(0));
-        assertEquals("age", schema.columnName(1));
-        assertEquals("other", schema.columnName(2));
-        parser.close();
+            assertEquals("name", parser.nextName());
+            assertEquals("foo", parser.nextStringValue());
+            assertEquals("age", parser.nextName());
+            assertEquals("2", parser.nextStringValue());
+            assertEquals("other", parser.nextName());
+            assertEquals("xyz", parser.nextStringValue());
+            assertToken(JsonToken.END_OBJECT, parser.nextToken());
+        }
+
+        // But! Can change header name trimming:
+        // [dataformats-text#31]: Allow disabling header name trimming
     }
 
     public void testSimpleQuotes() throws Exception
@@ -125,12 +136,6 @@ public class ParserWithHeaderTest extends ModuleTestBase
         assertEquals(1, actual.size());
         assertEquals(COLUMN, actual.columnName(0));
         p.close();
-    }
-
-    // [dataformats-text#31]: Allow disabling header name trimming
-    public void testHeaderNamePadding() throws Exception
-    {
-        // TODO
     }
 
     /*
