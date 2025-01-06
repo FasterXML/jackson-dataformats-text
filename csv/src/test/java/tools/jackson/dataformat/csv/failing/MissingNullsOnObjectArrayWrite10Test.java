@@ -30,7 +30,7 @@ public class MissingNullsOnObjectArrayWrite10Test extends ModuleTestBase
 
         final String csv = out.toString().trim();
 
-        assertEquals("\"a\",\"b\"\n" +
+        assertEquals("a,b\n" +
              ",2\n" +
              ",\n" +
              "1,",

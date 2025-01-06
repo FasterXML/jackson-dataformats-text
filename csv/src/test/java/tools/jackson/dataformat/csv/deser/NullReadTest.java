@@ -1,30 +1,10 @@
 package tools.jackson.dataformat.csv.deser;
 
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
 
 public class NullReadTest extends ModuleTestBase
 {
-    final CsvMapper MAPPER = mapperForCsv();
-
-    @JsonPropertyOrder({ "prop1", "prop2", "prop3" })
-    static class Pojo83 {
-        public String prop1;
-        public String prop2;
-        public int prop3;
-
-        protected Pojo83() { }
-        public Pojo83(String a, String b, int c) {
-            prop1 = a;
-            prop2 = b;
-            prop3 = c;
-        }
-    }
-
     // [dataformats-text#330]: empty String as null
     static class Row330 {
         public Integer id;
@@ -37,23 +17,8 @@ public class NullReadTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    public void testNullIssue83() throws Exception
-    {
-        CsvMapper mapper = new CsvMapper();
-        CsvSchema schema = mapper.schemaFor(Pojo83.class);
-        final ObjectWriter writer = mapper.writer(schema);
+    private final CsvMapper MAPPER = mapperForCsv();
 
-        List<Pojo83> list = Arrays.asList(
-                new Pojo83("foo", "bar", 123),
-                null,
-                new Pojo83("test", "abc", 42));
-
-        String expectedCsv = "foo,bar,123\ntest,abc,42\n";
-        String actualCsv = writer.writeValueAsString(list);
-
-        assertEquals(expectedCsv, actualCsv);
-    }
-    
     // For [dataformat-csv#72]: recognize "null value" for reading too
     public void testReadNullValue72() throws Exception
     {

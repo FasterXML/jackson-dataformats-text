@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
 
@@ -15,7 +17,28 @@ public class NullWritingTest extends ModuleTestBase
         public String a, b, c, d;
     }
 
-    private final CsvMapper csv = new CsvMapper();
+    // for [jackson-dataformat-csv#83]
+    @JsonPropertyOrder({ "prop1", "prop2", "prop3" })
+    static class Pojo83 {
+        public String prop1;
+        public String prop2;
+        public int prop3;
+
+        protected Pojo83() { }
+        public Pojo83(String a, String b, int c) {
+            prop1 = a;
+            prop2 = b;
+            prop3 = c;
+        }
+    }
+
+    /*
+    /**********************************************************************
+    /* Test methods
+    /**********************************************************************
+     */
+
+    private final CsvMapper csv = mapperForCsv();
 
     public void testObjectWithNullMembersToString() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);
@@ -57,9 +80,9 @@ public class NullWritingTest extends ModuleTestBase
         writeValues.write(null);
         writeValues.flush();
         String nullObject = sw.toString();
-        /* 11-Feb-2015, tatu: Two ways to go; either nulls get ignored, or they trigger serialization of
-         *   empty Object. For now, former occurs:
-         */
+
+        // 11-Feb-2015, tatu: Two ways to go; either nulls get ignored, or they trigger serialization of
+        //   empty Object. For now, former occurs:
         
         assertEquals("a,b,c,d\n", nullObject);
 //        assertEquals("a,b,c,d\n\n\n", nullObject);
@@ -69,21 +92,33 @@ public class NullWritingTest extends ModuleTestBase
     // [dataformat-csv#53]
     public void testCustomNullValue() throws Exception
     {
-        ObjectMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder()
                 .setNullValue("n/a")
                 .addColumn("id")
                 .addColumn("desc")
                 .build();
         
-        String result = mapper.writer(schema).writeValueAsString(new IdDesc("id", null));
+        String result = csv.writer(schema).writeValueAsString(new IdDesc("id", null));
         // MUST use doubling for quotes!
         assertEquals("id,n/a\n", result);
     }
 
+    // [dataformat-csv#83]
+    public void testNullIssue83() throws Exception
+    {
+        CsvSchema schema = csv.schemaFor(Pojo83.class);
+        final ObjectWriter writer = csv.writer(schema);
+
+        List<Pojo83> list = Arrays.asList(
+                new Pojo83("foo", "bar", 123),
+                null,
+                new Pojo83("test", "abc", 42));
+        String actualCsv = writer.writeValueAsString(list);
+        assertEquals("foo,bar,123\ntest,abc,42\n", actualCsv);
+    }
+
     public void testNullFieldsOfListsContainedByMainLevelListIssue106() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder().build();
 
         List<String> row1 = Arrays.asList("d0", null, "d2");
@@ -92,17 +127,16 @@ public class NullWritingTest extends ModuleTestBase
 
         List<List<String>> dataList = Arrays.asList(row1, row2, row3);
 
-        String result = mapper.writer(schema).writeValueAsString(dataList);
+        String result = csv.writer(schema).writeValueAsString(dataList);
         assertEquals("d0,,d2\n,d1,d2\nd0,d1,\n", result);
 
         schema = schema.withNullValue("n/a");
-        result = mapper.writer(schema).writeValueAsString(dataList);
+        result = csv.writer(schema).writeValueAsString(dataList);
         assertEquals("d0,n/a,d2\nn/a,d1,d2\nd0,d1,n/a\n", result);
     }
 
     public void testNullElementsOfMainLevelListIssue106() throws Exception
     {
-        CsvMapper mapper = mapperForCsv();
         CsvSchema schema = CsvSchema.builder().build();
 
         List<String> row1 = Arrays.asList("d0", null, "d2");
@@ -113,11 +147,11 @@ public class NullWritingTest extends ModuleTestBase
         // should be absent from the output
        List<List<String>> dataList = Arrays.asList(row1, null, row2, null, row3);
 
-        String result = mapper.writer(schema).writeValueAsString(dataList);
+        String result = csv.writer(schema).writeValueAsString(dataList);
         assertEquals("d0,,d2\n,d1,d2\nd0,d1,\n", result);
 
         schema = schema.withNullValue("n/a");
-        result = mapper.writer(schema).writeValueAsString(dataList);
+        result = csv.writer(schema).writeValueAsString(dataList);
         assertEquals("d0,n/a,d2\nn/a,d1,d2\nd0,d1,n/a\n", result);
     }
 }
