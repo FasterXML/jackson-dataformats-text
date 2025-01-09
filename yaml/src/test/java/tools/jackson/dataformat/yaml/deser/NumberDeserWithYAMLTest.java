@@ -70,7 +70,9 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final YAMLMapper MAPPER = newObjectMapper();
+    private final YAMLMapper MAPPER = mapperBuilder()
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+            .build();
 
     public void testNaN() throws Exception
     {

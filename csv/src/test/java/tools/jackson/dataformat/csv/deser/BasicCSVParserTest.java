@@ -183,7 +183,9 @@ public class BasicCSVParserTest extends ModuleTestBase
         CsvSchema schema = MAPPER.typedSchemaFor(Point.class).withoutHeader();
 
         // First: empty value, to be considered as null
-        Point result = MAPPER.readerFor(Point.class).with(schema).readValue(",,\n");
+        Point result = MAPPER.readerFor(Point.class).with(schema)
+                .without(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .readValue(",,\n");
         assertEquals(0, result.x);
         assertNull(result.y);
         assertNull(result.z);
@@ -193,7 +195,9 @@ public class BasicCSVParserTest extends ModuleTestBase
         CsvSchema schema = MAPPER.typedSchemaFor(Point.class).withoutHeader();
 
         // First: empty value, to be considered as null
-        Point result = MAPPER.readerFor(Point.class).with(schema).readValue("null,null,null\n");
+        Point result = MAPPER.readerFor(Point.class).with(schema)
+                .without(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .readValue("null,null,null\n");
         assertEquals(0, result.x);
         assertNull(result.y);
         assertNull(result.z);
