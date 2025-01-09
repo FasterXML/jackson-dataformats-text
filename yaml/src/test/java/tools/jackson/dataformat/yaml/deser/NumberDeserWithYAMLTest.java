@@ -70,9 +70,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    private final YAMLMapper MAPPER = mapperBuilder()
-            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
-            .build();
+    private final YAMLMapper MAPPER = newObjectMapper();
 
     public void testNaN() throws Exception
     {
@@ -123,14 +121,18 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertNull(MAPPER.readValue(NULL_JSON, Float.class));
         assertNull(MAPPER.readValue(NULL_JSON, Double.class));
 
-        assertEquals(Byte.valueOf((byte) 0), MAPPER.readValue(NULL_JSON, Byte.TYPE));
-        assertEquals(Short.valueOf((short) 0), MAPPER.readValue(NULL_JSON, Short.TYPE));
+        final YAMLMapper nullsOkMapper = mapperBuilder()
+                .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES)
+                .build();
+
+        assertEquals(Byte.valueOf((byte) 0), nullsOkMapper.readValue(NULL_JSON, Byte.TYPE));
+        assertEquals(Short.valueOf((short) 0), nullsOkMapper.readValue(NULL_JSON, Short.TYPE));
 
         //        assertEquals(Character.valueOf((char) 0), MAPPER.readValue(JSON, Character.TYPE));
-        assertEquals(Integer.valueOf(0), MAPPER.readValue(NULL_JSON, Integer.TYPE));
-        assertEquals(Long.valueOf(0L), MAPPER.readValue(NULL_JSON, Long.TYPE));
-        assertEquals(Float.valueOf(0f), MAPPER.readValue(NULL_JSON, Float.TYPE));
-        assertEquals(Double.valueOf(0d), MAPPER.readValue(NULL_JSON, Double.TYPE));
+        assertEquals(Integer.valueOf(0), nullsOkMapper.readValue(NULL_JSON, Integer.TYPE));
+        assertEquals(Long.valueOf(0L), nullsOkMapper.readValue(NULL_JSON, Long.TYPE));
+        assertEquals(Float.valueOf(0f), nullsOkMapper.readValue(NULL_JSON, Float.TYPE));
+        assertEquals(Double.valueOf(0d), nullsOkMapper.readValue(NULL_JSON, Double.TYPE));
         
         assertNull(MAPPER.readValue(NULL_JSON, BigInteger.class));
         assertNull(MAPPER.readValue(NULL_JSON, BigDecimal.class));
