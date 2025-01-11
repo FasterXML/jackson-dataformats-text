@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 public class LongTokenTest extends TomlMapperTestBase {
     private static final int SCALE = 10_000; // must be bigger than the default buffer size
 
