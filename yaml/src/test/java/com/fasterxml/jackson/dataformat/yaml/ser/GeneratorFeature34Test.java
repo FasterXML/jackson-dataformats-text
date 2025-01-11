@@ -2,9 +2,12 @@ package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GeneratorFeature34Test extends ModuleTestBase
 {
@@ -15,6 +18,7 @@ public class GeneratorFeature34Test extends ModuleTestBase
      */
 
     // [dataformats-text#34]: busted indentation
+    @Test
     public void testArrayIndentation67() throws Exception
     {
         String yamlBefore = "---\n" +

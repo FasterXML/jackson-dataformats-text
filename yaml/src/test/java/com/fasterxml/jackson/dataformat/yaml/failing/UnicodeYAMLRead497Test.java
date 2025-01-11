@@ -2,10 +2,14 @@ package com.fasterxml.jackson.dataformat.yaml.failing;
 
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
-import com.fasterxml.jackson.dataformat.yaml.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // [dataformats-text#497]: 3-byte UTF-8 character at end of content
 public class UnicodeYAMLRead497Test extends ModuleTestBase
@@ -13,6 +17,7 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
     private final YAMLMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#497]
+    @Test
     public void testUnicodeAtEnd() throws Exception
     {
         // Had to find edge condition, these would do:

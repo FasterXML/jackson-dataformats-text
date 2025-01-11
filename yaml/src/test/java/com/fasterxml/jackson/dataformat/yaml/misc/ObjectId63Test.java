@@ -1,9 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.*;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // for [dataformats-text#63], problem with YAML, Object Ids
 public class ObjectId63Test extends ModuleTestBase
@@ -32,6 +36,7 @@ public class ObjectId63Test extends ModuleTestBase
 
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testIssue63() throws Exception
     {
         final SimplePojo simplePojoWithId = new SimplePojo();

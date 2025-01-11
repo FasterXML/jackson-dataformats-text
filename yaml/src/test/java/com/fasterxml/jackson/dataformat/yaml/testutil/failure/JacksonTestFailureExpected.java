@@ -1,11 +1,8 @@
 package com.fasterxml.jackson.dataformat.yaml.testutil.failure;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import java.lang.annotation.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * <p>
@@ -24,7 +21,8 @@ import java.lang.annotation.Target;
  *
  *     &#64;Test
  *     &#64;JacksonTestFailureExpected
- *     public void testFeatureNotYetImplemented() {
+ *     @Test
+    public void testFeatureNotYetImplemented() {
  *         // Test code that is expected to fail
  *     }
  * }

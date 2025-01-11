@@ -3,9 +3,13 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class DatabindAdvancedTest extends ModuleTestBase
 {
     enum Size { SMALL, LARGE; }    
@@ -136,6 +140,7 @@ public class DatabindAdvancedTest extends ModuleTestBase
     /**********************************************************
      */
 
+    @Test
     public void testReadComplexPojo() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();

@@ -1,11 +1,10 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.format.DataFormatDetector;
-import com.fasterxml.jackson.core.format.DataFormatMatcher;
-import com.fasterxml.jackson.core.format.MatchStrength;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.format.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FormatDetectionTest extends ModuleTestBase
 {

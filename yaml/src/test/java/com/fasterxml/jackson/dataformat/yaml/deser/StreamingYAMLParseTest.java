@@ -3,15 +3,13 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import java.io.StringWriter;
 import java.math.BigInteger;
 
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-
-import com.fasterxml.jackson.dataformat.yaml.JacksonYAMLParseException;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.LoaderOptions;
+
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for checking functioning of the underlying
@@ -21,6 +19,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 {
     private final YAMLFactory YAML_F = new YAMLFactory();
 
+    @Test
     public void testBasic() throws Exception
     {
         final String YAML =
@@ -83,6 +82,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 
     // @since 2.17
     @SuppressWarnings("deprecation")
+    @Test
     public void testDeprecatedMethods() throws Exception
     {
         final String YAML =
@@ -91,8 +91,8 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 ;
         try (JsonParser p = YAML_F.createParser(YAML)) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
-            assertNull("string", p.getCurrentName());
-            assertNull("string", p.currentName());
+            assertNull(p.getCurrentName(), "string");
+            assertNull(p.currentName(), "string");
             assertNull(p.getCurrentValue());
     
             assertToken(JsonToken.FIELD_NAME, p.nextToken());
@@ -126,6 +126,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // Parsing large numbers around the transition from int->long and long->BigInteger
+    @Test
     public void testIntParsingWithLimits() throws Exception
     {
         String YAML;
@@ -229,6 +230,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // Testing addition of underscores
+    @Test
     public void testIntParsingUnderscoresSm() throws Exception
     {
         // First, couple of simple small values
@@ -366,6 +368,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // for [dataformats-text#146]
+    @Test
     public void testYamlLongWithUnderscores() throws Exception
     {
         try (JsonParser p = YAML_F.createParser("v: 1_000_000")) {
@@ -378,6 +381,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // accidental recognition as double, with multiple dots
+    @Test
     public void testDoubleParsing() throws Exception
     {
         // First, test out valid use case.
@@ -422,6 +426,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 
     // [Issue#7]
     // looks like colons in content can be problematic, if unquoted
+    @Test
     public void testColons() throws Exception
     {
         // First, test out valid use case. NOTE: spaces matter!
@@ -447,6 +452,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     /**
      * How should YAML Anchors be exposed?
      */
+    @Test
     public void testAnchorParsing() throws Exception
     {
         // silly doc, just to expose an id (anchor) and ref to it
@@ -502,6 +508,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // Scalars should not be parsed when not in the plain flow style.
+    @Test
     public void testQuotedStyles() throws Exception
     {
         String YAML = "strings: [\"true\", 'false']";
@@ -525,6 +532,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // Scalars should be parsed when in the plain flow style.
+    @Test
     public void testUnquotedStyles() throws Exception
     {
         String YAML = "booleans: [true, false]";
@@ -543,6 +551,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testObjectWithNumbers() throws Exception
     {
         String YAML = "---\n"
@@ -600,6 +609,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testNulls() throws Exception
     {
         String YAML = "nulls: [!!null \"null\" ]";
@@ -617,6 +627,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testTildeNulls() throws Exception
     {
         String YAML = "nulls: [~ ]";
@@ -635,6 +646,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
     }
 
     // for [dataformat-yaml#69]
+    @Test
     public void testTimeLikeValues() throws Exception
     {
           final String YAML = "value: 3:00\n";
@@ -650,6 +662,7 @@ public class StreamingYAMLParseTest extends ModuleTestBase
           p.close();
     }
 
+    @Test
     public void testYamlParseFailsWhenCodePointLimitVerySmall() throws Exception
     {
         final String YAML = "---\n"

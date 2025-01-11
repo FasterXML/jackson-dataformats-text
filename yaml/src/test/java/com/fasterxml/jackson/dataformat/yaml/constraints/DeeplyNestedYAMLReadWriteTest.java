@@ -1,12 +1,16 @@
 package com.fasterxml.jackson.dataformat.yaml.constraints;
 
+
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit test(s) for verifying handling of maximum nesting depth
@@ -25,6 +29,7 @@ public class DeeplyNestedYAMLReadWriteTest
             .build()
             );
 
+    @Test
     public void testDeepNestingRead() throws Exception
     {
         final String DOC = YAML_MAPPER.writeValueAsString(createDeepNestedDoc(11));
@@ -44,6 +49,7 @@ public class DeeplyNestedYAMLReadWriteTest
         }
     }
     
+    @Test
     public void testDeepNestingWrite() throws Exception
     {
         final JsonNode docRoot = createDeepNestedDoc(13);

@@ -5,18 +5,21 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.*;
-
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryReadTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testBinaryViaTree() throws Exception
     {
         final String BASE64 = " R0lGODlhDAAMAIQAAP//9/X1\n"
@@ -43,10 +46,11 @@ public class BinaryReadTest extends ModuleTestBase
         assertEquals(65, gif.length);
         final byte[] actualFileHeader = Arrays.copyOfRange(gif, 0, 6);
         final byte[] expectedFileHeader = new byte[]{'G', 'I', 'F', '8', '9', 'a'};    
-        Assert.assertArrayEquals(expectedFileHeader, actualFileHeader);
+        assertArrayEquals(expectedFileHeader, actualFileHeader);
     }
 
     // [dataformats-text#90]
+    @Test
     public void testReadLongBinary() throws Exception {
         final byte[] data = new byte[1000];
         new Random(1234).nextBytes(data);
@@ -65,7 +69,7 @@ public class BinaryReadTest extends ModuleTestBase
             assertEquals(JsonToken.FIELD_NAME, parser.nextToken());
             assertEquals("data", parser.currentName());
             assertEquals(JsonToken.VALUE_EMBEDDED_OBJECT, parser.nextToken());
-            Assert.assertArrayEquals(data, parser.getBinaryValue());
+            assertArrayEquals(data, parser.getBinaryValue());
             assertEquals(JsonToken.END_OBJECT, parser.nextToken());
             assertNull(parser.nextToken());
         }

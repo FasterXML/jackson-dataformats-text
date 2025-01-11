@@ -1,14 +1,20 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReservedValuesTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testQuotingOfBooleanValues() throws Exception
     {
         for (String value : new String[] {

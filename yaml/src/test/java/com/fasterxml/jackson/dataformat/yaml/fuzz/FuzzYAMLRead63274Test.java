@@ -1,15 +1,18 @@
 package com.fasterxml.jackson.dataformat.yaml.fuzz;
 
-import com.fasterxml.jackson.core.JacksonException;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.fail;
 public class FuzzYAMLRead63274Test extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=63274
+    @Test
     public void testMalformedNumber63274() throws Exception
     {
         // As bytes:
