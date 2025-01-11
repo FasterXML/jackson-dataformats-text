@@ -1,21 +1,16 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
-import java.util.*;
-
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.CsvWriteException;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
-
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class GeneratorIgnoreUnknown51Test extends ModuleTestBase

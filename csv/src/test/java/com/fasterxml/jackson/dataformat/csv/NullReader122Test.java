@@ -1,14 +1,13 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import java.io.*;
+import java.io.Reader;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectReader;
-
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.ObjectReader;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class NullReader122Test extends ModuleTestBase

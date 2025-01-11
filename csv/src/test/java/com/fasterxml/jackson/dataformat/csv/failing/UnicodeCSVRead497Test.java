@@ -2,13 +2,11 @@ package com.fasterxml.jackson.dataformat.csv.failing;
 
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.databind.*;
-
-import com.fasterxml.jackson.dataformat.csv.*;
-
-
-
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 import static org.junit.jupiter.api.Assertions.*;
 

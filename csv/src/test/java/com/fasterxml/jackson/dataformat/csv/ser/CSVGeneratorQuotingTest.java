@@ -1,11 +1,10 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
-import com.fasterxml.jackson.dataformat.csv.*;
-
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class CSVGeneratorQuotingTest extends ModuleTestBase

@@ -1,13 +1,12 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import java.io.*;
-
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.databind.MapperFeature;
-
-
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.Versioned;
+import com.fasterxml.jackson.databind.MapperFeature;
 
 import static org.junit.jupiter.api.Assertions.*;
 

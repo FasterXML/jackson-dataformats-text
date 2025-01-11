@@ -1,10 +1,9 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.dataformat.csv.*;
-
-
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 

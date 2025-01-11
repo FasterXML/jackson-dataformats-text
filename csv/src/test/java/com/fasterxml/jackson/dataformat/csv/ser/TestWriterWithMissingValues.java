@@ -1,18 +1,13 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
 import com.fasterxml.jackson.dataformat.csv.*;
 
-import org.junit.jupiter.api.Test;
-
-import java.lang.String;
-
-
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // [Issue#33]
 public class TestWriterWithMissingValues extends ModuleTestBase

@@ -3,14 +3,13 @@ package com.fasterxml.jackson.dataformat.csv.filter;
 import java.io.*;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
 import com.fasterxml.jackson.dataformat.csv.testutil.PrefixInputDecorator;
 import com.fasterxml.jackson.dataformat.csv.testutil.PrefixOutputDecorator;
-
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 

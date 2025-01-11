@@ -2,14 +2,13 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.ByteArrayOutputStream;
 
-import com.fasterxml.jackson.databind.*;
-
-import com.fasterxml.jackson.dataformat.csv.*;
-
-
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 /**

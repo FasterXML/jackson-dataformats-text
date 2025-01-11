@@ -2,8 +2,9 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.io.IOException;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 
 import static org.assertj.core.api.Assertions.fail;
 
