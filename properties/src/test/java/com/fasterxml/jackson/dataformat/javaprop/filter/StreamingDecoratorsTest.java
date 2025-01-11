@@ -6,8 +6,6 @@ import java.util.*;
 import com.fasterxml.jackson.databind.*;
 
 import com.fasterxml.jackson.dataformat.javaprop.*;
-import com.fasterxml.jackson.dataformat.javaprop.testutil.PrefixInputDecorator;
-import com.fasterxml.jackson.dataformat.javaprop.testutil.PrefixOutputDecorator;
 
 public class StreamingDecoratorsTest extends ModuleTestBase
 {
