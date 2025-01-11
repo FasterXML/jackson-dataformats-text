@@ -1,7 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv.schema;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Trying to reproduce [dataformats-text#207], with mixed success
 public class SchemaFromBuilder207Test extends ModuleTestBase

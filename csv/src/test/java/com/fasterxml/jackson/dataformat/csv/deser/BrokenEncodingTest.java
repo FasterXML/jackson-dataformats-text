@@ -6,8 +6,10 @@ import java.io.CharConversionException;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonToken;
+
 import com.fasterxml.jackson.dataformat.csv.*;
 
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenEncodingTest extends ModuleTestBase
 {

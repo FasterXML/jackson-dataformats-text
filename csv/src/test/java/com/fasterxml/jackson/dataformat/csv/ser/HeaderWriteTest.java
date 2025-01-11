@@ -12,7 +12,6 @@ import com.fasterxml.jackson.dataformat.csv.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 // Tests for verifying that headers are emitted
 public class HeaderWriteTest extends ModuleTestBase
 {
@@ -31,7 +30,8 @@ public class HeaderWriteTest extends ModuleTestBase
         List<List<String>> dataSource = Arrays.asList();
         String result = runTest(headers, dataSource);
         
-        assertEquals("Headers should have been written even with no other data", "TestHeader1,TestHeader2\n", result);
+        assertEquals("TestHeader1,TestHeader2\n", result,
+                    "Headers should have been written even with no other data");
     }
     
     @Test
@@ -41,7 +41,8 @@ public class HeaderWriteTest extends ModuleTestBase
         List<List<String>> dataSource = Arrays.asList(Arrays.asList("TestValue1", "TestValue2"));
         String result = runTest(headers, dataSource);
         
-        assertEquals("Headers should have been written before line", "TestHeader1,TestHeader2\nTestValue1,TestValue2\n", result);
+        assertEquals("TestHeader1,TestHeader2\nTestValue1,TestValue2\n", result,
+                    "Headers should have been written before line");
     }
     
     private String runTest(List<String> headers, List<List<String>> dataSource) throws IOException 

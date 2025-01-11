@@ -70,7 +70,8 @@ public class EmptyStringAsNullTest
         // test
         assertNotNull(actualTestUser);
         assertEquals(expectedTestUser.firstName, actualTestUser.firstName);
-        assertNull("The column that contains an empty String should be deserialized as null ", actualTestUser.middleName);
+        assertNull(actualTestUser.middleName,
+                "The column that contains an empty String should be deserialized as null ");
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
