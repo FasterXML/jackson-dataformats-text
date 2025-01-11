@@ -1,6 +1,5 @@
 package com.fasterxml.jackson.dataformat.yaml.testutil.failure;
 
-import com.fasterxml.jackson.dataformat.csv.testutil.failure.JacksonTestShouldFailException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
