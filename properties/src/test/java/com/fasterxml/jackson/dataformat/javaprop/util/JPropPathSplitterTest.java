@@ -1,10 +1,15 @@
 package com.fasterxml.jackson.dataformat.javaprop.util;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class JPropPathSplitterTest extends ModuleTestBase
 {
+    @Test
     public void testSplitters()
     {
         JPropPathSplitter sp = JPropPathSplitter.create(JavaPropsSchema.emptySchema());

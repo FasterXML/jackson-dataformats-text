@@ -3,10 +3,16 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+
 public class SimpleGenerationTest extends ModuleTestBase
 {
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testSimpleEmployee() throws Exception
     {
         FiveMinuteUser input = new FiveMinuteUser("Bob", "Palmer", true, Gender.MALE,
@@ -32,6 +38,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testSimpleRectangle() throws Exception
     {
         Rectangle input = new Rectangle(new Point(1, -2), new Point(5, 10));
@@ -53,6 +60,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testRectangleWithCustomKeyValueSeparator() throws Exception
     {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()
@@ -76,6 +84,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testRectangleWithHeader() throws Exception
     {
         final String HEADER = "# SUPER IMPORTANT!\n";
@@ -92,6 +101,7 @@ public class SimpleGenerationTest extends ModuleTestBase
                 ,output);
     }
 
+    @Test
     public void testRectangleWithIndent() throws Exception
     {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()

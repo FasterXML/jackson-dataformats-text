@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop.io;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonStreamContext;
 //import com.fasterxml.jackson.core.json.JsonWriteContext;
 
 public class JPropWriteContext

@@ -1,8 +1,10 @@
 package com.fasterxml.jackson.dataformat.javaprop.io;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.JsonStreamContext;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.javaprop.util.JPropNode;
 
 /**

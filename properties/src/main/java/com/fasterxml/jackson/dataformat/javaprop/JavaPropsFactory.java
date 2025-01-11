@@ -2,13 +2,13 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.*;
 import java.net.URL;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
-
 import com.fasterxml.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import com.fasterxml.jackson.dataformat.javaprop.io.Latin1Reader;

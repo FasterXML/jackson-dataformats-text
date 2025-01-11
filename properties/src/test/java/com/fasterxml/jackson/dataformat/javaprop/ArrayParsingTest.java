@@ -4,11 +4,13 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ArrayParsingTest extends ModuleTestBase
 {
@@ -57,6 +59,7 @@ public class ArrayParsingTest extends ModuleTestBase
 
     private final ObjectMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testArrayWithBranch() throws Exception
     {
         // basically "extra" branch should become as first element, and
@@ -92,6 +95,7 @@ public class ArrayParsingTest extends ModuleTestBase
         assertTrue(ob instanceof Map);
     }
 
+    @Test
     public void testPointList() throws Exception
     {
         _testPointList(false, false);
@@ -129,6 +133,7 @@ public class ArrayParsingTest extends ModuleTestBase
         assertEquals(6, result.p.get(2).y);
     }
 
+    @Test
     public void testPointListWithIndex() throws Exception
     {
         _testPointListWithIndex(false);
@@ -153,6 +158,7 @@ public class ArrayParsingTest extends ModuleTestBase
         assertEquals(4, result.p.get(1).y);
     }
 
+    @Test
     public void testZKPojo() throws Exception
     {
         _testZKPojo(false, false);

@@ -1,20 +1,18 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonStreamContext;
-import com.fasterxml.jackson.core.JsonToken;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleStreamingTest extends ModuleTestBase
 {
@@ -22,6 +20,7 @@ public class SimpleStreamingTest extends ModuleTestBase
 
     private final JavaPropsFactory F = new JavaPropsFactory();
 
+    @Test
     public void testParsing() throws Exception
     {
         JsonParser p = F.createParser("foo = bar");
@@ -62,6 +61,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testStreamingGeneration() throws Exception
     {
         StringWriter strw = new StringWriter();
@@ -110,6 +110,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("10", stuff.get("long"));
     }
 
+    @Test
     public void testStreamingGenerationRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
@@ -137,6 +138,7 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("true", stuff.get("enabled"));
     }        
 
+    @Test
     public void testStreamingLongRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
