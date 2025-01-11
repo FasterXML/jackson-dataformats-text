@@ -7,8 +7,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeCreator;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.UncheckedIOException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -25,14 +26,16 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ComplianceValidTest extends TomlMapperTestBase {
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() throws IOException {
+
+    public static Stream<Object[]> data() throws IOException {
         Path folder = Paths.get("compliance", "valid");
         if (!Files.exists(folder)) {
-            return Collections.emptyList();
+            return Stream.empty();
         }
         return Files.walk(folder)
                 .filter(Files::isRegularFile)
@@ -57,8 +60,7 @@ public class ComplianceValidTest extends TomlMapperTestBase {
                     */
                     return null;
                 })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull);
     }
 
     private final Path path;
@@ -69,12 +71,13 @@ public class ComplianceValidTest extends TomlMapperTestBase {
         this.expected = expected;
     }
 
-    @Test
+    @MethodSource("data")
+    @ParameterizedTest
     public void test() throws IOException {
         JsonNode actual = TomlMapper.builder()
                 .enable(TomlReadFeature.PARSE_JAVA_TIME)
                 .build().readTree(path.toFile());
-        Assert.assertEquals(mapFromComplianceNode(expected), actual);
+        assertEquals(mapFromComplianceNode(expected), actual);
     }
 
     private static JsonNode mapFromComplianceNode(ObjectNode expected) {

@@ -5,11 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.StringWriter;
 import java.time.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TomlGeneratorTest extends TomlMapperTestBase {
     @Test
@@ -21,7 +22,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeNumber(123);
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = 123\n", w.toString());
+        assertEquals("abc = 123\n", w.toString());
     }
 
     @Test
@@ -33,7 +34,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeBoolean(true);
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = true\n", w.toString());
+        assertEquals("abc = true\n", w.toString());
     }
 
     @Test
@@ -45,7 +46,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeNumber(1.23);
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = 1.23\n", w.toString());
+        assertEquals("abc = 1.23\n", w.toString());
     }
 
     @Test
@@ -57,7 +58,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = 'foo'\n", w.toString());
+        assertEquals("abc = 'foo'\n", w.toString());
     }
 
     @Test
@@ -69,7 +70,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo'");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = \"foo'\"\n", w.toString());
+        assertEquals("abc = \"foo'\"\n", w.toString());
     }
 
     @Test
@@ -81,7 +82,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo\"");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = 'foo\"'\n", w.toString());
+        assertEquals("abc = 'foo\"'\n", w.toString());
     }
 
     @Test
@@ -93,7 +94,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo\"'");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = \"foo\\\"'\"\n", w.toString());
+        assertEquals("abc = \"foo\\\"'\"\n", w.toString());
     }
 
     @Test
@@ -105,7 +106,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo\u0001");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = \"foo\\u0001\"\n", w.toString());
+        assertEquals("abc = \"foo\\u0001\"\n", w.toString());
     }
 
     @Test
@@ -117,7 +118,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeString("foo\b");
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = \"foo\\b\"\n", w.toString());
+        assertEquals("abc = \"foo\\b\"\n", w.toString());
     }
 
     @Test
@@ -129,7 +130,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeBinary(new byte[] {1,2,3});
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = 'AQID'\n", w.toString());
+        assertEquals("abc = 'AQID'\n", w.toString());
     }
 
     @Test
@@ -142,7 +143,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndObject();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = {}\n", w.toString());
+        assertEquals("abc = {}\n", w.toString());
     }
 
     @Test
@@ -159,7 +160,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndObject();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc.foo = 1\nabc.bar = 2\n", w.toString());
+        assertEquals("abc.foo = 1\nabc.bar = 2\n", w.toString());
     }
 
     @Test
@@ -172,7 +173,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndArray();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = []\n", w.toString());
+        assertEquals("abc = []\n", w.toString());
     }
 
     @Test
@@ -188,7 +189,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndArray();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = [1, 2, 3]\n", w.toString());
+        assertEquals("abc = [1, 2, 3]\n", w.toString());
     }
 
     @Test
@@ -208,7 +209,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndArray();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = [1, {foo = 1, bar = 2}]\n", w.toString());
+        assertEquals("abc = [1, {foo = 1, bar = 2}]\n", w.toString());
     }
 
     @Test
@@ -225,7 +226,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndArray();
             generator.writeEndObject();
         }
-        Assert.assertEquals("abc = [2021-03-27, 18:40:15.123456789, 2021-03-27T18:40:15.123456789, 2021-03-27T18:40:15.123456789+01:23]\n", w.toString());
+        assertEquals("abc = [2021-03-27, 18:40:15.123456789, 2021-03-27T18:40:15.123456789, 2021-03-27T18:40:15.123456789+01:23]\n", w.toString());
     }
 
     @Test
@@ -237,7 +238,7 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeNumber(123);
             generator.writeEndObject();
         }
-        Assert.assertEquals("'foo bar' = 123\n", w.toString());
+        assertEquals("'foo bar' = 123\n", w.toString());
     }
 
     // [dataformats-text#258]: byte-backed output not flushing?
@@ -253,13 +254,13 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         try (JsonGenerator tomlG = mapper.createGenerator(sw)) {
             _writeNested(tomlG);
         }
-        Assert.assertEquals(EXP_TOML, sw.toString());
+        assertEquals(EXP_TOML, sw.toString());
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try (JsonGenerator tomlG = mapper.createGenerator(bytes)) {
             _writeNested(tomlG);
         }
-        Assert.assertEquals(EXP_TOML, bytes.toString("UTF-8"));
+        assertEquals(EXP_TOML, bytes.toString("UTF-8"));
     }
 
     private void _writeNested(JsonGenerator g) throws IOException {
@@ -283,17 +284,19 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeNull();
             generator.writeEndObject();
         }
-        Assert.assertEquals("foo = ''\n", w.toString());
+        assertEquals("foo = ''\n", w.toString());
     }
 
-    @Test(expected = TomlStreamWriteException.class)
+    @Test
     public void nullDisable() throws IOException {
-        StringWriter w = new StringWriter();
-        try (JsonGenerator generator = newTomlMapper().enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).createGenerator(w)) {
-            generator.writeStartObject();
-            generator.writeFieldName("foo");
-            generator.writeNull();
-            generator.writeEndObject();
-        }
+        assertThrows(TomlStreamWriteException.class, () -> {
+            StringWriter w = new StringWriter();
+            try (JsonGenerator generator = newTomlMapper().enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).createGenerator(w)) {
+                generator.writeStartObject();
+                generator.writeFieldName("foo");
+                generator.writeNull();
+                generator.writeEndObject();
+            }
+        });
     }
 }
