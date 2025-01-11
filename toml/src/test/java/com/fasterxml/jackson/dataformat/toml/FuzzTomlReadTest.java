@@ -4,15 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamWriteConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
-import org.junit.jupiter.api.Test;
-
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
  */

@@ -3,15 +3,15 @@ package com.fasterxml.jackson.dataformat.toml.dos;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.StreamWriteConstraints;
-
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.toml.TomlMapperTestBase;
-import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Simple unit tests to verify that we fail gracefully if you attempt to serialize

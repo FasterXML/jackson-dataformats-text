@@ -2,10 +2,12 @@ package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.StringReader;
 
-import com.fasterxml.jackson.core.io.IOContext;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import com.fasterxml.jackson.core.io.IOContext;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringOutputUtilTest extends TomlMapperTestBase {
     @Test

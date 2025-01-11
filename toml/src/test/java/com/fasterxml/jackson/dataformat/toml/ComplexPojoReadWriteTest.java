@@ -1,14 +1,14 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 // Copied from YAML modules "DatabindAdvancedTest"
 public class ComplexPojoReadWriteTest extends TomlMapperTestBase

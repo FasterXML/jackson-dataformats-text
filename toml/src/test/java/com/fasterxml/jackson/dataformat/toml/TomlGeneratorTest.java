@@ -1,16 +1,15 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import java.io.*;
+import java.time.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import org.junit.jupiter.api.Test;
-
-import java.io.StringWriter;
-import java.time.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TomlGeneratorTest extends TomlMapperTestBase {
     @Test

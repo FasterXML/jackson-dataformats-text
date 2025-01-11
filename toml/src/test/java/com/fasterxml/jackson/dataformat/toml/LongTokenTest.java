@@ -1,14 +1,16 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import static org.junit.jupiter.api.Assertions.*;
 public class LongTokenTest extends TomlMapperTestBase {
     private static final int SCALE = 10_000; // must be bigger than the default buffer size

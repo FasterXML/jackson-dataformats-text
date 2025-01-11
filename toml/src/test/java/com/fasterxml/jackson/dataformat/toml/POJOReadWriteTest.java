@@ -1,14 +1,8 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +10,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+
+import static org.junit.Assert.*;
 
 // Composed of pieces from other format modules' tests
 public class POJOReadWriteTest extends TomlMapperTestBase
