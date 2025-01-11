@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -59,6 +60,9 @@ public class ComplianceValidTest extends TomlMapperTestBase {
         this.expected = expected;
     }
 
+    // JUnit 5 throws error when methodSource provides empty `Stream` which
+    // seems to always be the case....
+    @Disabled
     @MethodSource("data")
     @ParameterizedTest
     public void test() throws IOException {
