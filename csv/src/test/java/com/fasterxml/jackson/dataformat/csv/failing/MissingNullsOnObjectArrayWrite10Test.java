@@ -8,11 +8,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class MissingNullsOnObjectArrayWrite10Test extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
     // for [dataformats-text#10]
+    @Test
     public void testNullsOnObjectArrayWrites2Col() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()

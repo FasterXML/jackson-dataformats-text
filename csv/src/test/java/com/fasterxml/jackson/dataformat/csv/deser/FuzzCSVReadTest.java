@@ -3,6 +3,9 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.io.IOException;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Collection of OSS-Fuzz found issues for CSV format module.
@@ -12,6 +15,7 @@ public class FuzzCSVReadTest extends StreamingCSVReadTest
     private final CsvMapper CSV_MAPPER = mapperForCsv();
 
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+    @Test
     public void testUTF8Decoding50036() throws Exception
     {
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };

@@ -6,6 +6,12 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class SchemaReorderTest extends ModuleTestBase
 {
     // should work ok since CsvMapper forces alphabetic ordering as default:
@@ -18,6 +24,7 @@ public class SchemaReorderTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = new CsvMapper();
 
+    @Test
     public void testSchemaWithOrdering() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Reordered.class);

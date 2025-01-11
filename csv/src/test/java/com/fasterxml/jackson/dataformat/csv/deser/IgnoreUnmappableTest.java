@@ -6,6 +6,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 
 import com.fasterxml.jackson.dataformat.csv.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test(s) for [dataformat-csv#95]
@@ -19,6 +22,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         public String first, second;
     }
     
+    @Test
     public void testSimpleIgnoral() throws Exception
     {
         final String INPUT = "a,b,c,foo\nd,e\nf,g,h,i\n";

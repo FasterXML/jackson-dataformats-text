@@ -13,7 +13,9 @@ import java.util.Map;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-public abstract class ModuleTestBase extends junit.framework.TestCase
+import static org.junit.jupiter.api.Assertions.*;
+
+public abstract class ModuleTestBase
 {
     public enum Gender { MALE, FEMALE };
 
@@ -332,4 +334,5 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
        }
        return bytes.toByteArray();
     }
+
 }

@@ -1,5 +1,9 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -7,7 +11,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
-import java.io.IOException;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@code CsvParser.Feature.EMPTY_STRING_AS_NULL}
@@ -29,6 +33,7 @@ public class EmptyStringAsNullTest
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testDefaultParseAsEmptyString() throws IOException {
         // setup test data
         TestUser expectedTestUser = new TestUser();
@@ -48,6 +53,7 @@ public class EmptyStringAsNullTest
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
+    @Test
     public void testSimpleParseEmptyStringAsNull() throws IOException {
         // setup test data
         TestUser expectedTestUser = new TestUser();
@@ -71,6 +77,7 @@ public class EmptyStringAsNullTest
     }
 
     // [dataformats-text#222]
+    @Test
     public void testEmptyStringAsNullNonPojo() throws Exception
     {
         String csv = "Grace,,Hopper";

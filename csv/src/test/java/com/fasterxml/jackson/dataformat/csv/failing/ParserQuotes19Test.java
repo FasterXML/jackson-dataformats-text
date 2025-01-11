@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // for [dataformat-csv#19]
 public class ParserQuotes19Test extends ModuleTestBase
 {
@@ -19,6 +25,7 @@ public class ParserQuotes19Test extends ModuleTestBase
      */
 
     // For #19: need to handle spaces outside quotes, even if not trimming?
+    @Test
     public void testSimpleQuotesWithSpaces() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -13,6 +13,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema.ColumnType;
 import com.fasterxml.jackson.dataformat.csv.CsvValueDecorator;
 import com.fasterxml.jackson.dataformat.csv.CsvValueDecorators;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // [dataformats-text#442]
 public class ReadBracketedArray442Test extends ModuleTestBase
@@ -47,6 +50,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
             .getBytes(StandardCharsets.UTF_8);
 
     // [dataformats-text#442]
+    @Test
     public void testBracketsReadAutoSchema() throws Exception
     {
         final CsvSchema schema1 = _automaticSchema(true);
@@ -59,6 +63,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     }
 
     // [dataformats-text#442]
+    @Test
     public void testBracketsManualSchemaArray() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.ARRAY, true);
@@ -67,6 +72,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     }
     
     // [dataformats-text#442]
+    @Test
     public void testBracketsManualSchemaString() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.STRING, true);
@@ -80,6 +86,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testBracketReadAutoSchemaFail() throws Exception
     {
         final CsvSchema schema = _automaticSchema(true);

@@ -9,6 +9,12 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.Column;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class CsvSchemaTest extends ModuleTestBase
 {
     @JsonPropertyOrder({ "a", "b", "c", "d" })
@@ -62,6 +68,7 @@ public class CsvSchemaTest extends ModuleTestBase
 
     final CsvMapper MAPPER = mapperForCsv();
     
+    @Test
     public void testUserWithTypedAutoSchema() throws Exception
     {
         CsvSchema schema = MAPPER.typedSchemaFor(FiveMinuteUser.class);
@@ -101,6 +108,7 @@ public class CsvSchemaTest extends ModuleTestBase
         assertEquals(4, b.build().size());
     }
 
+    @Test
     public void testArrayWithTypedAutoSchema() throws Exception
     {
         CsvSchema schema = MAPPER.typedSchemaFor(ArrayWrapper.class);
@@ -126,6 +134,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
     
     // for [dataformat-csv#42]
+    @Test
     public void testReorderByName() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -138,6 +147,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#42]
+    @Test
     public void testReorderWithComparator() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Mixed.class);
@@ -147,6 +157,7 @@ public class CsvSchemaTest extends ModuleTestBase
         _verifyLinks(schema);
     }
 
+    @Test
     public void testColumnDescForEmptyScheme() throws Exception
     {
         CsvSchema schema = CsvSchema.emptySchema();
@@ -169,6 +180,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
 
     // For [dataformat-csv#74]: problems applying default do-sort handling
+    @Test
     public void testSchemaWithOrdering() throws Exception
     {
         CsvSchema schema1 = MAPPER.schemaFor(Point.class);
@@ -179,6 +191,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
 
     // For pull request 89
+    @Test
     public void testSchemaWithReordering()
     {
         // Checks flags are handled properly through builder, getters
@@ -194,6 +207,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
 
     // For [dataformat-csv#142]: append columns from POJOs
+    @Test
     public void testSchemaComposition() throws Exception
     {
         CsvSchema pointSchema = MAPPER.typedSchemaFor(Point.class);
@@ -231,6 +245,7 @@ public class CsvSchemaTest extends ModuleTestBase
     }
 
     // For [dataformat-csv#115]: honor JsonProperty index
+    @Test
     public void testSchemaWithExplicitIndices()
     {
         CsvSchema pointSchema = MAPPER.typedSchemaFor(PointWithExplicitIndices115.class);

@@ -8,6 +8,12 @@ import java.util.List;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 // Tests for verifying that headers are emitted
 public class HeaderWriteTest extends ModuleTestBase
 {
@@ -19,6 +25,7 @@ public class HeaderWriteTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
     
+    @Test
     public void testNoLines() throws Exception
     {
         List<String> headers = Arrays.asList("TestHeader1", "TestHeader2");
@@ -28,6 +35,7 @@ public class HeaderWriteTest extends ModuleTestBase
         assertEquals("Headers should have been written even with no other data", "TestHeader1,TestHeader2\n", result);
     }
     
+    @Test
     public void testOneLine() throws Exception
     {
         List<String> headers = Arrays.asList("TestHeader1", "TestHeader2");

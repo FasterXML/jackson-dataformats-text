@@ -3,6 +3,12 @@ package com.fasterxml.jackson.dataformat.csv;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class SchemaCaching288Test extends ModuleTestBase
 {
     static class ViewA { }
@@ -28,6 +34,7 @@ public class SchemaCaching288Test extends ModuleTestBase
      */
 
     // [dataformats-text#288]: caching should not overlap with View
+    @Test
     public void testCachingNoViewFirst() throws Exception
     {
         CsvMapper mapper1 = mapperForCsv();
@@ -52,6 +59,7 @@ public class SchemaCaching288Test extends ModuleTestBase
     }
 
     // [dataformats-text#288]: caching should not overlap with View
+    @Test
     public void testCachingWithViewFirst() throws Exception
     {
         CsvMapper mapper1 = mapperForCsv();

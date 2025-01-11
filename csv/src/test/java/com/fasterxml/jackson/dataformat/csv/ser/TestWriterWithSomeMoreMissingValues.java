@@ -9,10 +9,17 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
     
+    @Test
     public void testWithAStringAndAUuid() throws Exception
     {
         final CsvSchema schema = new CsvSchema.Builder()
@@ -31,6 +38,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithTwoStringsAndAUuid() throws Exception
     {
 
@@ -52,6 +60,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithANullAStringAndAUuid() throws Exception
     {
 
@@ -72,6 +81,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals(",world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithAStringANullAndAUuid() throws Exception
     {
 
@@ -92,6 +102,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithThreeStringsAndAUuid() throws Exception
     {
 
@@ -115,6 +126,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,dear,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithANullAStringAStringAndAUuid() throws Exception
     {
         final CsvSchema schema = new CsvSchema.Builder()
@@ -135,6 +147,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals(",hello,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithAStringANullAStringAndAUuid() throws Exception
     {
 
@@ -157,6 +170,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,,world,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithTwoStringsANullAndAUuid() throws Exception
     {
         final CsvSchema schema = new CsvSchema.Builder()
@@ -178,6 +192,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
         assertEquals("hello,world,,\"2a36b911-9699-45d2-abd5-b9f2d2c9c4a3\"\n", csv);
     }
 
+    @Test
     public void testWithTwoStringsANullAndAString() throws Exception
     {
 
@@ -200,6 +215,7 @@ public class TestWriterWithSomeMoreMissingValues extends ModuleTestBase
     }
 
     // [Issue#45]
+    @Test
     public void testWriteNullThirdColumn() throws Exception
     {
         final CsvSchema.Builder csvSchemaBuilder = new CsvSchema.Builder();

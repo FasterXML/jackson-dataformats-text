@@ -5,8 +5,15 @@ import java.io.*;
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.MapperFeature;
 
+
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestVersions extends ModuleTestBase
 {
+    @Test
     public void testMapperVersions() throws IOException
     {
         CsvFactory f = new CsvFactory();
@@ -20,6 +27,7 @@ public class TestVersions extends ModuleTestBase
     }
 
     // Mostly to verify #11
+    @Test
     public void testMapperDefaults()
     {
         CsvMapper mapper = new CsvMapper();
@@ -28,6 +36,7 @@ public class TestVersions extends ModuleTestBase
 
     // Also, not strictly related to version but...
 
+    @Test
     public void testMapperCopy() 
     {
         CsvMapper mapper = new CsvMapper();

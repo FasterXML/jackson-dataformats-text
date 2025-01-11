@@ -12,6 +12,12 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.CsvWriteException;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
 {
     // [dataformats-text#51]
@@ -53,6 +59,7 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
      */
 
     // for [dataformats-text#51]
+    @Test
     public void testIgnoreEmbeddedObject() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -2,14 +2,19 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.io.IOException;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.format.DataFormatDetector;
 import com.fasterxml.jackson.core.format.DataFormatMatcher;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.dataformat.csv.CsvFactory;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class FormatDetectionTest extends ModuleTestBase
 {
+    @Test
     public void testSimpleObjectWithHeader() throws IOException
     {
         CsvFactory f = new CsvFactory();

@@ -4,6 +4,9 @@ import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.dataformat.csv.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AnySetterTest extends ModuleTestBase
 {
@@ -29,6 +32,7 @@ public class AnySetterTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testSimpleHeader() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -42,6 +46,7 @@ public class AnySetterTest extends ModuleTestBase
     }
 
     // [dataformat-csv@109]: allow "any-setter-like"
+    @Test
     public void testWithMapToAny() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

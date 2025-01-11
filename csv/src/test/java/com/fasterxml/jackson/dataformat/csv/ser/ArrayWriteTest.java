@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 // Tests for verifying that it is possible to write "simple" arrays
 // (ones with scalar serializations) as CSV
 public class ArrayWriteTest extends ModuleTestBase
@@ -38,6 +43,7 @@ public class ArrayWriteTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
     
+    @Test
     public void testSimpleExplicit() throws Exception
     {
         ValueEntry input = new ValueEntry("foo", "stuff", 1, 2, 3);
@@ -47,6 +53,7 @@ public class ArrayWriteTest extends ModuleTestBase
         assertEquals("foo,1;2;3,stuff", csv);
     }
 
+    @Test
     public void testSeparatorOverride() throws Exception
     {
         ValueEntry input = new ValueEntry("foo", "stuff", 1, 2, 3);
@@ -61,6 +68,7 @@ public class ArrayWriteTest extends ModuleTestBase
         assertEquals("foo,\"1 2 3\",stuff", csv);
     }
 
+    @Test
     public void testArraysWithNulls() throws Exception
     {
         Pojo90 value = new Pojo90();

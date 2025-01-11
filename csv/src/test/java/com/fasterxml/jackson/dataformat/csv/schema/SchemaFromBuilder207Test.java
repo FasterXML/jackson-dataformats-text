@@ -51,6 +51,7 @@ public class SchemaFromBuilder207Test extends ModuleTestBase
 
     private final CsvMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testSimple() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(ValueClassXY.class).withHeader();        

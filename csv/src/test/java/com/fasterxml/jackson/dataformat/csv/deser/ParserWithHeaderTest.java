@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserWithHeaderTest extends ModuleTestBase
 {
@@ -24,6 +27,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testSimpleHeader() throws Exception
     {
         try (CsvParser parser = (CsvParser) MAPPER.createParser(
@@ -75,6 +79,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testSimpleQuotes() throws Exception
     {
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
@@ -85,6 +90,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
         assertTrue(entry.cute);
     }
 
+    @Test
     public void testSkipFirstDataLine() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Entry.class).withSkipFirstDataRow(true);
@@ -100,6 +106,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
         it.close();
     }
 
+    @Test
     public void testLongHeader() throws Exception
     {
         StringBuilder sb = new StringBuilder(650);
@@ -134,6 +141,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testLongColumnName() throws Exception
     {
         StringBuilder sb = new StringBuilder(650);
@@ -167,6 +175,7 @@ public class ParserWithHeaderTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testInvalidMissingHeader() throws Exception
     {
         try {

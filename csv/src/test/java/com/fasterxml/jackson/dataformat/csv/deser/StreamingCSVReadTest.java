@@ -4,10 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Container for some low-level tests that use parser directly;
@@ -29,6 +33,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         return CSV_F;
     }
 
+    @Test
     public void testIntRead() throws Exception
     {
         _testInts(1, 59, -8);
@@ -37,6 +42,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         _testInts(Integer.MAX_VALUE, Integer.MIN_VALUE, 3);
     }
 
+    @Test
     public void testLongRead() throws Exception
     {
         _testLongs(1L, -3L);
@@ -44,6 +50,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         _testLongs(Long.MIN_VALUE, Long.MAX_VALUE);
     }
     
+    @Test
     public void testFloatRead() throws Exception
     {
         _testDoubles(1.0, 125.375, -900.5);

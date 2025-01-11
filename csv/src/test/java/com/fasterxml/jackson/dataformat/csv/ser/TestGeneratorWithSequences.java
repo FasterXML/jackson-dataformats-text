@@ -7,6 +7,12 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class TestGeneratorWithSequences extends ModuleTestBase
 {
     @JsonPropertyOrder({"x", "y"})
@@ -30,6 +36,7 @@ public class TestGeneratorWithSequences extends ModuleTestBase
      * Verify that we should be able to just serialize sequences as is
      * because any "array" markers are all but ignored by generator.
      */
+    @Test
     public void testAsSequence() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -7,6 +7,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 /**
  * Tests to verify that most core Jackson components can be serialized
  * using default JDK serialization: this feature is useful for some
@@ -43,6 +48,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
 
     private final CsvSchema SCHEMA_POJO = MAPPER.schemaFor(MyPojo.class);
 
+    @Test
     public void testSchema() throws IOException
     {
         byte[] ser = jdkSerialize(SCHEMA_POJO);
@@ -50,6 +56,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
         assertNotNull(out);
     }
     
+    @Test
     public void testObjectMapper() throws IOException
     {
         final String EXP_CSV = "2,3";

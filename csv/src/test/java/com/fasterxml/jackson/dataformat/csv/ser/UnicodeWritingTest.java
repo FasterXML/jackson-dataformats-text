@@ -6,6 +6,12 @@ import com.fasterxml.jackson.databind.*;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 /**
  * Tests to try to see if Unicode writing, reading work as expected.
  */
@@ -19,6 +25,7 @@ public class UnicodeWritingTest extends ModuleTestBase
 
     final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testSimpleStringSequence() throws Exception
     {
         // 16-Mar-2017, tatu: Actually, this assumes that read/write defaults are the same,

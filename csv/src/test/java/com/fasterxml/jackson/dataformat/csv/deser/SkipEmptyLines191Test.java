@@ -17,6 +17,10 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 // [dataformats-text#191]
 // [dataformats-text#174]
 public class SkipEmptyLines191Test extends ModuleTestBase {
@@ -58,6 +62,7 @@ public class SkipEmptyLines191Test extends ModuleTestBase {
     private final static CsvMapper MAPPER = new CsvMapper();
 
     // [dataformats-text#174]
+    @Test
     public void testEmptyLines174() throws Exception
     {
         final StringWriter sw = new StringWriter(50000);
@@ -98,6 +103,7 @@ public class SkipEmptyLines191Test extends ModuleTestBase {
     }
 
     // [dataformats-text#191]: IndexArrayOutOfBounds at 4000
+    @Test
     public void testBigCsvFile() throws Exception
     {
         final String COL_1 = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";

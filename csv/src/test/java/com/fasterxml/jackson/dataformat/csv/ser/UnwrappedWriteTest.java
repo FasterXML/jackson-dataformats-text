@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.*;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class UnwrappedWriteTest extends ModuleTestBase
 {
     @JsonPropertyOrder({ "f1", "f2", "f3" })
@@ -22,6 +27,7 @@ public class UnwrappedWriteTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#125]
+    @Test
     public void testWriteUnwrapped() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

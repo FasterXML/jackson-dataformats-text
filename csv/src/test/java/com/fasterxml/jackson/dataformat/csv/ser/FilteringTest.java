@@ -13,6 +13,11 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @SuppressWarnings("serial")
 public class FilteringTest extends ModuleTestBase
 {
@@ -60,6 +65,7 @@ public class FilteringTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testWriteObjects() throws Exception {
         List<Entity> entities = new ArrayList<Entity>();
         entities.add( new Entity("Test entity 1", "Test description 1", "Test unused field"));

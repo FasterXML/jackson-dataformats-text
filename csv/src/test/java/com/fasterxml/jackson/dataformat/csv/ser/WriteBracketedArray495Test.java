@@ -13,6 +13,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvValueDecorator;
 import com.fasterxml.jackson.dataformat.csv.CsvValueDecorators;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 // [dataformats-text#495]
 public class WriteBracketedArray495Test extends ModuleTestBase
 {
@@ -42,18 +47,21 @@ public class WriteBracketedArray495Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#495]
+    @Test
     public void testBracketsWriteAutoSchema() throws Exception
     {
         final CsvSchema schema = _automaticSchema();
         _testArrayWithBracketsWrite(schema);
     }
 
+    @Test
     public void testBracketsManualSchemaArray() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.ARRAY);
         _testArrayWithBracketsWrite(schema);
     }
 
+    @Test
     public void testBracketsManualSchemaString() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.STRING);

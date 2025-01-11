@@ -4,6 +4,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+
 public class TestParserQuotes extends ModuleTestBase
 {
     @JsonPropertyOrder({"age", "name"})
@@ -29,6 +35,7 @@ public class TestParserQuotes extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -38,6 +45,7 @@ public class TestParserQuotes extends ModuleTestBase
         assertEquals("Joe \"Sixpack\" Paxson", user.name);
     }
 
+    @Test
     public void testSimpleMultiLine() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -58,6 +66,7 @@ public class TestParserQuotes extends ModuleTestBase
     }
 
     // [dataformat-csv#32]
+    @Test
     public void testDisablingQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -90,6 +99,7 @@ public class TestParserQuotes extends ModuleTestBase
     }
 
     // for [dataformat-csv#117]
+    @Test
     public void testDefaultSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

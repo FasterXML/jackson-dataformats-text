@@ -9,6 +9,11 @@ import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Tests that verify that various minor workarounds
  * work as expected.
@@ -19,6 +24,7 @@ public class TestParserWorkarounds extends ModuleTestBase
      * Test for [#1]; in case we get an extra empty element,
      * we can just ignore it.
      */
+    @Test
     public void testIgnoringOptionalTrailing() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
@@ -62,6 +68,7 @@ public class TestParserWorkarounds extends ModuleTestBase
     }
 
     // also ensure [databind-csv#1] also works appropriately for failing case
+    @Test
     public void testOptionalTrailFailing() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();

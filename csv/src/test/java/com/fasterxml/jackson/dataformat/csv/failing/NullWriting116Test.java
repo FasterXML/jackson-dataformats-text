@@ -6,11 +6,17 @@ import com.fasterxml.jackson.databind.*;
 
 import com.fasterxml.jackson.dataformat.csv.*;
 
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class NullWriting116Test extends ModuleTestBase
 {
     private final CsvMapper csv = mapperForCsv();
 
     // [dataformat#116]
+    @Test
     public void testWithObjectArray() throws Exception 
     {
         CsvSchema schema = CsvSchema.builder()
