@@ -1,15 +1,17 @@
 package com.fasterxml.jackson.dataformat.toml;
 
-import com.fasterxml.jackson.core.StreamReadConstraints;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LongTokenTest extends TomlMapperTestBase {
     private static final int SCALE = 10_000; // must be bigger than the default buffer size
@@ -31,8 +33,8 @@ public class LongTokenTest extends TomlMapperTestBase {
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigDecimal decimal = node.get("foo").decimalValue();
 
-        Assert.assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
-        Assert.assertTrue(decimal.compareTo(BigDecimal.ONE) < 0);
+        assertTrue(decimal.compareTo(BigDecimal.ZERO) > 0);
+        assertTrue(decimal.compareTo(BigDecimal.ONE) < 0);
     }
 
     @Test
@@ -47,9 +49,9 @@ public class LongTokenTest extends TomlMapperTestBase {
 
         try {
             mapper.readTree(toml.toString());
-            Assert.fail("expected TomlStreamReadException");
+            fail("expected TomlStreamReadException");
         } catch (TomlStreamReadException e) {
-            Assert.assertTrue("exception message contains truncated number", e.getMessage().contains("[truncated]"));
+            assertTrue(e.getMessage().contains("[truncated]"), "exception message contains truncated number");
         }
     }
 
@@ -63,7 +65,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
         BigInteger integer = node.get("foo").bigIntegerValue();
 
-        Assert.assertEquals(SCALE + 1, integer.bitLength());
+        assertEquals(SCALE + 1, integer.bitLength());
     }
 
     @Test
@@ -74,7 +76,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         }
 
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertTrue(node.isEmpty());
+        assertTrue(node.isEmpty());
     }
 
     @Test
@@ -85,7 +87,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         }
         toml.append(']');
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertEquals(0, node.get("foo").size());
+        assertEquals(0, node.get("foo").size());
     }
 
     @Test
@@ -97,7 +99,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         String expectedKey = toml.toString();
         toml.append(" = 0");
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertEquals(expectedKey, node.fieldNames().next());
+        assertEquals(expectedKey, node.fieldNames().next());
     }
 
     @Test
@@ -108,7 +110,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         }
         toml.append("'");
         ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml.toString());
-        Assert.assertEquals(SCALE, node.get("foo").textValue().length());
+        assertEquals(SCALE, node.get("foo").textValue().length());
     }
 
     @Test
@@ -123,6 +125,6 @@ public class LongTokenTest extends TomlMapperTestBase {
         ObjectNode node = Parser.parse(FACTORY, testIOContext(),
                 new StringReader(toml.toString()));
 
-        Assert.assertEquals(SCALE, node.get("foo").textValue().length());
+        assertEquals(SCALE, node.get("foo").textValue().length());
     }
 }
