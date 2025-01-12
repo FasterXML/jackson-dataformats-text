@@ -2,10 +2,12 @@ package tools.jackson.dataformat.toml;
 
 import java.io.StringReader;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.io.IOContext;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringOutputUtilTest extends TomlMapperTestBase {
     @Test
@@ -33,7 +35,7 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
                 nUnquoted++;
                 Lexer lexer = new Lexer(new StringReader(rawString), _ioContext(builder), errorContext);
                 lexer.yybegin(Lexer.EXPECT_INLINE_KEY);
-                Assert.assertEquals(TomlToken.UNQUOTED_KEY, lexer.yylex());
+                assertEquals(TomlToken.UNQUOTED_KEY, lexer.yylex());
                 lexer.releaseBuffers();
             }
 
@@ -48,8 +50,8 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()), _ioContext(builder), errorContext);
 
                 lexer.yybegin(Lexer.EXPECT_VALUE);
-                Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
+                assertEquals(TomlToken.STRING, lexer.yylex());
+                assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
 
@@ -64,8 +66,8 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()), _ioContext(builder), errorContext);
 
                 lexer.yybegin(Lexer.EXPECT_VALUE);
-                Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
+                assertEquals(TomlToken.STRING, lexer.yylex());
+                assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
 
@@ -85,16 +87,16 @@ public class StringOutputUtilTest extends TomlMapperTestBase {
                 Lexer lexer = new Lexer(new StringReader(builder.toString()),
                         _ioContext(builder), errorContext);
                 lexer.yybegin(Lexer.EXPECT_VALUE);
-                Assert.assertEquals(TomlToken.STRING, lexer.yylex());
-                Assert.assertEquals(rawString, lexer.textBuffer.contentsAsString());
+                assertEquals(TomlToken.STRING, lexer.yylex());
+                assertEquals(rawString, lexer.textBuffer.contentsAsString());
                 lexer.releaseBuffers();
             }
         }
 
-        Assert.assertEquals(26 * 2 + 10 + 2, nUnquoted);
-        Assert.assertTrue(nBasic > 10000);
-        Assert.assertTrue(nBasicNoEscape > 10000);
-        Assert.assertTrue(nLiteral > 10000);
+        assertEquals(26 * 2 + 10 + 2, nUnquoted);
+        assertTrue(nBasic > 10000);
+        assertTrue(nBasicNoEscape > 10000);
+        assertTrue(nLiteral > 10000);
     }
 
     private IOContext _ioContext(CharSequence toml) {

@@ -1,18 +1,15 @@
 package tools.jackson.dataformat.toml;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
-import java.util.Collection;
-import java.util.Collections;
+import java.nio.file.*;
+import java.time.*;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.databind.JsonNode;
@@ -21,18 +18,14 @@ import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.JsonNodeCreator;
 import tools.jackson.databind.node.ObjectNode;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
-public class ComplianceValidTest extends TomlMapperTestBase {
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() throws IOException {
+public class ComplianceValidTest extends TomlMapperTestBase
+{
+    public static Stream<Object[]> data() throws IOException {
         Path folder = Paths.get("compliance", "valid");
         if (!Files.exists(folder)) {
-            return Collections.emptyList();
+            return Stream.empty();
         }
         return Files.walk(folder)
                 .filter(Files::isRegularFile)
@@ -53,8 +46,7 @@ public class ComplianceValidTest extends TomlMapperTestBase {
                     */
                     return null;
                 })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull);
     }
 
     private final Path path;
@@ -65,12 +57,16 @@ public class ComplianceValidTest extends TomlMapperTestBase {
         this.expected = expected;
     }
 
-    @Test
-    public void test() {
+    // JUnit 5 throws error when methodSource provides empty `Stream` which
+    // seems to always be the case....
+    @Disabled
+    @MethodSource("data")
+    @ParameterizedTest
+    public void test() throws Exception {
         JsonNode actual = TomlMapper.builder()
                 .enable(TomlReadFeature.PARSE_JAVA_TIME)
-                .build().readTree(path);
-        Assert.assertEquals(mapFromComplianceNode(expected), actual);
+                .build().readTree(path.toFile());
+        assertEquals(mapFromComplianceNode(expected), actual);
     }
 
     private static JsonNode mapFromComplianceNode(ObjectNode expected) {

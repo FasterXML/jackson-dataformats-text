@@ -1,13 +1,11 @@
 package tools.jackson.dataformat.toml;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TomlBigStringsTest extends TomlMapperTestBase
 {
@@ -43,8 +41,8 @@ public class TomlBigStringsTest extends TomlMapperTestBase
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             final String message = e.getMessage();
-            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
+            assertTrue(message.startsWith("String value length"), "unexpected exception message: " + message);
+            assertTrue(message.contains("exceeds the maximum allowed ("), "unexpected exception message: " + message);
         }
     }
 
@@ -58,8 +56,8 @@ public class TomlBigStringsTest extends TomlMapperTestBase
             final String message = e.getMessage();
             // this test fails when the TextBuffer is being resized, so we don't yet know just how big the string is
             // so best not to assert that the String length value in the message is the full 6000000 value
-            assertTrue("unexpected exception message: " + message, message.startsWith("String value length"));
-            assertTrue("unexpected exception message: " + message, message.contains("exceeds the maximum allowed ("));
+            assertTrue(message.startsWith("String value length"), "unexpected exception message: " + message);
+            assertTrue(message.contains("exceeds the maximum allowed ("), "unexpected exception message: " + message);
         }
     }
 

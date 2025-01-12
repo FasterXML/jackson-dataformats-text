@@ -3,6 +3,8 @@ package tools.jackson.dataformat.toml;
 import java.io.InputStream;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamWriteConstraints;
@@ -11,9 +13,7 @@ import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import org.junit.Assert;
-import org.junit.Test;
-
+import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
  */
@@ -31,7 +31,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 ;
         try {
             JsonNode n = TOML_MAPPER.readTree(INPUT);
-            Assert.fail("Should not pass, got: "+n);
+            fail("Should not pass, got: "+n);
         } catch (StreamReadException e) {
             verifyException(e, "Premature end of file");
             // NOTE: decoding of token for error message seems wrong, cannot
@@ -46,7 +46,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
             TOML_MAPPER.readTree(INPUT);
-            Assert.fail("Should not pass");
+            fail("Should not pass");
         } catch (JacksonException e) {
             verifyException(e, "End-of-input after first 1 byte");
             verifyException(e, "of a UTF-8 character");
@@ -61,7 +61,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                              "/clusterfuzz-testcase-minimized-TOMLFuzzer-6370486359031808")) {
             try {
                 TOML_MAPPER.readTree(is);
-                Assert.fail("Should not pass");
+                fail("Should not pass");
             } catch (StreamConstraintsException e) {
                 String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                         StreamReadConstraints.DEFAULT_MAX_DEPTH + 1);
@@ -78,7 +78,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 "/clusterfuzz-testcase-minimized-TOMLFuzzer-5068015447703552")) {
             try {
                 TOML_MAPPER.readTree(is);
-                Assert.fail("Should not pass");
+                fail("Should not pass");
             } catch (StreamReadException e) {
                 verifyException(e, "EOF in wrong state");
             }
@@ -92,7 +92,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         String INPUT = "q=8E8188888888";
         try {
             TOML_MAPPER.readTree(INPUT);
-            Assert.fail("Should not pass");
+            fail("Should not pass");
         } catch (JacksonException e) {
             verifyException(e, "Invalid number");
             verifyException(e, "8E8188888888");
@@ -106,7 +106,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         String INPUT = "j=427\n-03b-";
         try {
             TOML_MAPPER.readTree(INPUT);
-            Assert.fail("Should not pass");
+            fail("Should not pass");
         } catch (StreamReadException e) {
             verifyException(e, "Premature end of file");
         }
@@ -121,7 +121,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         }
         try {
             TOML_MAPPER.readTree(input.toString());
-            Assert.fail("Should not pass");
+            fail("Should not pass");
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
@@ -139,7 +139,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 return;
             }
         }
-        Assert.fail("Expected an exception with one of substrings ("+Arrays.asList(matches)+"): got one with message \""+msg+"\"");
+        fail("Expected an exception with one of substrings ("+Arrays.asList(matches)+"): got one with message \""+msg+"\"");
     }
 
 }

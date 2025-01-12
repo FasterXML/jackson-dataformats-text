@@ -1,14 +1,13 @@
 package tools.jackson.dataformat.toml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Copied from YAML modules "DatabindAdvancedTest"
 public class ComplexPojoReadWriteTest extends TomlMapperTestBase

@@ -3,12 +3,13 @@ package tools.jackson.dataformat.toml;
 import java.io.InputStream;
 import java.util.Arrays;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.exc.StreamReadException;
 
 import tools.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Collection of OSS-Fuzz found issues for TOML format module.
@@ -25,7 +26,7 @@ public class FuzzTomlRead57237Test extends TomlMapperTestBase
                 "/clusterfuzz-testcase-minimized-TOMLFuzzer-6542204348006400")) {
             try {
                 TOML_MAPPER.readTree(is);
-                Assert.fail("Should not pass");
+                fail("Should not pass");
             } catch (StreamReadException e) {
                 // Possibly not what we should get; tweak once working
                 verifyException(e, "Premature end of file");
@@ -43,6 +44,6 @@ public class FuzzTomlRead57237Test extends TomlMapperTestBase
                 return;
             }
         }
-        Assert.fail("Expected an exception with one of substrings ("+Arrays.asList(matches)+"): got one with message \""+msg+"\"");
+        fail("Expected an exception with one of substrings ("+Arrays.asList(matches)+"): got one with message \""+msg+"\"");
     }
 }
