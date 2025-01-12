@@ -1,12 +1,18 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-import com.fasterxml.jackson.core.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.Versioned;
 import com.fasterxml.jackson.databind.MapperFeature;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestVersions extends ModuleTestBase
 {
+    @Test
     public void testMapperVersions() throws IOException
     {
         CsvFactory f = new CsvFactory();
@@ -20,6 +26,7 @@ public class TestVersions extends ModuleTestBase
     }
 
     // Mostly to verify #11
+    @Test
     public void testMapperDefaults()
     {
         CsvMapper mapper = new CsvMapper();
@@ -28,6 +35,7 @@ public class TestVersions extends ModuleTestBase
 
     // Also, not strictly related to version but...
 
+    @Test
     public void testMapperCopy() 
     {
         CsvMapper mapper = new CsvMapper();

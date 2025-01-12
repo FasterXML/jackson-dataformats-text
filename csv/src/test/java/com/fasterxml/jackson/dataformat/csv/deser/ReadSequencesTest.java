@@ -1,13 +1,16 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for verifying behavior of enclosing input stream as
@@ -42,6 +45,7 @@ public class ReadSequencesTest extends ModuleTestBase
      */
 
     // Test using non-wrapped sequence of entries
+    @Test
     public void testAsSequence() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -67,6 +71,7 @@ public class ReadSequencesTest extends ModuleTestBase
     }
 
     // Test using sequence of entries wrapped in a logical array.
+    @Test
     public void testAsWrappedArray() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -83,6 +88,7 @@ public class ReadSequencesTest extends ModuleTestBase
     }
 
     // Test for teasing out buffer-edge conditions...
+    @Test
     public void testLongerUnwrapped() throws Exception
     {
         // how many? about 10-20 bytes per entry, so try to get at ~100k -> about 10k entries
@@ -114,6 +120,7 @@ public class ReadSequencesTest extends ModuleTestBase
     }
 
     // Verify that code sample from the page works:
+    @Test
     public void testRawObjectArrays() throws Exception
     {
         CsvMapper mapper = new CsvMapper();

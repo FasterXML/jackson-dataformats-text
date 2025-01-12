@@ -1,10 +1,12 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // for [dataformat-csv#57]
 public class ArrayReadTest extends ModuleTestBase
@@ -32,6 +34,7 @@ public class ArrayReadTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testSimpleExplicitLooseTyping() throws Exception
     {
         ValueEntry value = MAPPER.readerWithSchemaFor(ValueEntry.class)
@@ -48,6 +51,7 @@ public class ArrayReadTest extends ModuleTestBase
     }
 
     // Same as above, but Array value in double-quotes:
+    @Test
     public void testSimpleExplicitLooseTypingWithQuotes() throws Exception
     {
         ValueEntry value = MAPPER.readerWithSchemaFor(ValueEntry.class)
@@ -63,6 +67,7 @@ public class ArrayReadTest extends ModuleTestBase
         assertEquals(3, v[2]);
     }
 
+    @Test
     public void testSimpleExplicitStrictTyping() throws Exception
     {
         ValueEntry value = MAPPER.readerWithTypedSchemaFor(ValueEntry.class)
@@ -88,6 +93,7 @@ public class ArrayReadTest extends ModuleTestBase
         assertEquals(0, v.length);
     }
 
+    @Test
     public void testSeparatorOverrideSpace() throws Exception
     {
         ValueEntry input = new ValueEntry("foo", "stuff", new int[] {1, 2, 3});
@@ -113,6 +119,7 @@ public class ArrayReadTest extends ModuleTestBase
         assertEquals(3, v[2]);
     }
 
+    @Test
     public void testSeparatorOverrideMulti() throws Exception
     {
         ValueEntry input = new ValueEntry("foo", "stuff", new int[] {1, 2, 3});

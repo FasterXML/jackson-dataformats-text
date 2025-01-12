@@ -1,6 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class CSVGeneratorQuotingTest extends ModuleTestBase
 {
@@ -13,6 +18,7 @@ public class CSVGeneratorQuotingTest extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#220]
+    @Test
     public void testQuotingOfLinefeedsStd() throws Exception
     {
         final CsvSchema schema = MAPPER.schemaFor(IdDesc.class)
@@ -39,6 +45,7 @@ public class CSVGeneratorQuotingTest extends ModuleTestBase
         assertEquals("\"12\n3\",Foo\n", csv);
     }
 
+    @Test
     public void testQuotingOfLinefeedsCustom() throws Exception
     {
         // '-' is bigger than max('"', ','):

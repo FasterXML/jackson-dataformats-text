@@ -1,14 +1,15 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ListField199Test extends ModuleTestBase
 {
@@ -50,6 +51,7 @@ public class ListField199Test extends ModuleTestBase
             .withEscapeChar('"');
     
     // [dataformats-text#199]
+    @Test
     public void testReadEmptyStringList() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ModelString199.class)
@@ -72,6 +74,7 @@ public class ListField199Test extends ModuleTestBase
     }
 
     // [dataformats-text#199]
+    @Test
     public void testReadEmptyLongList() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ModelLong199.class)
@@ -95,6 +98,7 @@ public class ListField199Test extends ModuleTestBase
         assertEquals(Collections.emptyList(), result.longs);
     }
 
+    @Test
     public void testReadEmptyEnumSet() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ModelEnums199.class)

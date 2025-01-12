@@ -1,13 +1,13 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
 import com.fasterxml.jackson.dataformat.csv.*;
 
-import org.junit.Test;
-
-import java.lang.String;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // [Issue#33]
 public class TestWriterWithMissingValues extends ModuleTestBase
@@ -18,7 +18,7 @@ public class TestWriterWithMissingValues extends ModuleTestBase
         .addColumn("id", CsvSchema.ColumnType.STRING)
         .build();
     final ObjectWriter WRITER = new CsvMapper().writer().with(SCHEMA);
-    
+
     @Test
     public void testWrite_NoNulls() throws JsonProcessingException {
         final String csv = WRITER.writeValueAsString(

@@ -2,14 +2,19 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Tests for [csv#56]
 public class CommentsTest extends ModuleTestBase
 {
     final String CSV_WITH_COMMENTS = "x,y\n# comment!\na,b\n   # another...\n";
 
+    @Test
     public void testWithoutComments() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -52,6 +57,7 @@ public class CommentsTest extends ModuleTestBase
         it.close();
     }
 
+    @Test
     public void testSimpleComments() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -81,6 +87,7 @@ public class CommentsTest extends ModuleTestBase
        it.close();
     }
 
+    @Test
     public void testLeadingComments() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -101,6 +108,7 @@ public class CommentsTest extends ModuleTestBase
         it.close();
     }
 
+    @Test
     public void testCommentsWithHeaderRow() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -120,6 +128,7 @@ public class CommentsTest extends ModuleTestBase
     }
     
     // Alternate test to ensure comments may be enabled
+    @Test
     public void testSimpleCommentsWithDefaultProp() throws Exception
     {
         CsvMapper mapper = mapperBuilder()
@@ -137,4 +146,5 @@ public class CommentsTest extends ModuleTestBase
         assertFalse(it.hasNext());
         it.close();
     }
+
 }

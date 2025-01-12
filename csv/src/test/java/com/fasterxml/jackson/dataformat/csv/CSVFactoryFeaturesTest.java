@@ -1,13 +1,20 @@
 package com.fasterxml.jackson.dataformat.csv;
 
-import com.fasterxml.jackson.core.StreamReadFeature;
-import com.fasterxml.jackson.core.StreamWriteFeature;
-
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.StreamWriteFeature;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
 public class CSVFactoryFeaturesTest extends ModuleTestBase
 {
+    @Test
     public void testFactoryFeatures() throws Exception
     {
         CsvFactory f = new CsvFactory();
@@ -31,6 +38,7 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         g.close();
     }
 
+    @Test
     public void testFactoryFastFeatures() throws Exception
     {
         CsvFactory f = new CsvFactory();
@@ -46,6 +54,7 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 
+    @Test
     public void testFactoryFastBigNumberFeature() throws Exception
     {
         CsvFactory f = new CsvFactory();
@@ -57,6 +66,7 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
     }
 
+    @Test
     public void testFactoryBuilderFastFeatures() throws Exception
     {
         CsvFactory f = CsvFactory.builder()
@@ -73,6 +83,7 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         assertTrue(generator.isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER));
     }
 
+    @Test
     public void testFactoryBuilderFastBigNumberFeature() throws Exception
     {
         CsvFactory f = CsvFactory.builder()

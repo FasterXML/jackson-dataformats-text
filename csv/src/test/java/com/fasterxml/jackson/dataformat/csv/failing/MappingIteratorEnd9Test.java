@@ -1,11 +1,17 @@
 package com.fasterxml.jackson.dataformat.csv.failing;
 
-import com.fasterxml.jackson.databind.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class MappingIteratorEnd9Test extends ModuleTestBase
 {
     // for [dataformats-text#9] (was [dataformat-csv#119])
+    @Test
     public void testDefaultSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -3,8 +3,13 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.io.ByteArrayOutputStream;
 import java.io.CharConversionException;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonToken;
+
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenEncodingTest extends ModuleTestBase
 {
@@ -15,6 +20,7 @@ public class BrokenEncodingTest extends ModuleTestBase
      */
 
     // Simple test where a Latin-1 character is encountered; first byte wrong
+    @Test
     public void testLatin1AsUTF8() throws Exception
     {
         CsvFactory factory = new CsvFactory();
@@ -54,6 +60,7 @@ public class BrokenEncodingTest extends ModuleTestBase
     }
 
     // Then a test with "middle" byte broken
+    @Test
     public void testBrokenUTF8MiddleByte() throws Exception
     {
         CsvFactory factory = new CsvFactory();

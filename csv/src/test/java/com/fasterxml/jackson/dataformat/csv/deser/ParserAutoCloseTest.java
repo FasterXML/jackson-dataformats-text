@@ -1,39 +1,42 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class ParserAutoCloseTest extends ModuleTestBase
 {
 
+    @Test
     public void testParseReaderWithAutoClose() throws IOException {
         ObjectMapper mapper = mapperForCsv();
 
         CloseTrackerReader reader = new CloseTrackerReader("foo,bar");
         mapper.readTree(reader);
 
-        Assert.assertEquals(true, reader.isClosed());
+        assertEquals(true, reader.isClosed());
         reader.close();
     }
 
+    @Test
     public void testParseStreamWithAutoClose() throws IOException {
         ObjectMapper mapper = mapperForCsv();
 
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo,bar");
         mapper.readTree(stream);
 
-        Assert.assertEquals(true, stream.isClosed());
+        assertEquals(true, stream.isClosed());
         stream.close();
     }
 
+    @Test
     public void testParseReaderWithoutAutoClose() throws IOException {
         ObjectMapper mapper = mapperBuilder()
                 .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
@@ -42,11 +45,12 @@ public class ParserAutoCloseTest extends ModuleTestBase
         CloseTrackerReader reader = new CloseTrackerReader("foo,bar");
         mapper.readTree(reader);
 
-        Assert.assertEquals(false, reader.isClosed());
+        assertEquals(false, reader.isClosed());
         reader.close();
     }
 
 
+    @Test
     public void testParseStreamWithoutAutoClose() throws IOException {
         ObjectMapper mapper = mapperBuilder()
                 .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
@@ -55,7 +59,7 @@ public class ParserAutoCloseTest extends ModuleTestBase
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo,bar");
         mapper.readTree(stream);
 
-        Assert.assertEquals(false, stream.isClosed());
+        assertEquals(false, stream.isClosed());
         stream.close();
     }
 

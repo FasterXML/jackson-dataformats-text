@@ -1,13 +1,15 @@
 package com.fasterxml.jackson.dataformat.csv.ser;
 
-import java.io.*;
+import java.io.StringWriter;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvGenerator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class TestGeneratorNoSchema extends ModuleTestBase
 {
@@ -21,6 +23,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testUntypedAsSequenceStreaming() throws Exception
     {
         StringWriter sw = new StringWriter();
@@ -55,6 +58,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
                 csv);
     }
 
+    @Test
     public void testUntypedAsSequenceDatabind() throws Exception
     {
         ObjectWriter writer = MAPPER.writer(SCHEMA);
@@ -68,6 +72,7 @@ public class TestGeneratorNoSchema extends ModuleTestBase
                 csv);
     }
 
+    @Test
     public void testUntypedWithSequenceWriter() throws Exception
     {
         try (StringWriter strW = new StringWriter()) {

@@ -2,9 +2,12 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.MappingIterator;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for cases where one more of schema-declared columns is
@@ -29,6 +32,7 @@ public class MissingColumns285Test extends ModuleTestBase
     private final String CSV = "name\nRoger\n";
 
     // [dataformats-text#285]: fail by default
+    @Test
     public void testFailOnMissingWithReorder() throws Exception
     {
         // Need to have it all inside try block since construction tries to read
@@ -46,6 +50,7 @@ public class MissingColumns285Test extends ModuleTestBase
     }
 
     // [dataformats-text#285]: optionally allow
+    @Test
     public void testAllowMissingWithReorder() throws Exception
     {
         MappingIterator<Map<String, Object>> it = MAPPER

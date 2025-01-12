@@ -2,16 +2,15 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.SequenceWriter;
-
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.dataformat.csv.*;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema.ColumnType;
-import com.fasterxml.jackson.dataformat.csv.CsvValueDecorator;
-import com.fasterxml.jackson.dataformat.csv.CsvValueDecorators;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 // [dataformats-text#495]
 public class WriteBracketedArray495Test extends ModuleTestBase
@@ -42,18 +41,21 @@ public class WriteBracketedArray495Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#495]
+    @Test
     public void testBracketsWriteAutoSchema() throws Exception
     {
         final CsvSchema schema = _automaticSchema();
         _testArrayWithBracketsWrite(schema);
     }
 
+    @Test
     public void testBracketsManualSchemaArray() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.ARRAY);
         _testArrayWithBracketsWrite(schema);
     }
 
+    @Test
     public void testBracketsManualSchemaString() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.STRING);

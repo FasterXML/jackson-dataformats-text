@@ -2,9 +2,12 @@ package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.util.Arrays;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class SchemaReorderTest extends ModuleTestBase
 {
@@ -18,6 +21,7 @@ public class SchemaReorderTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = new CsvMapper();
 
+    @Test
     public void testSchemaWithOrdering() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Reordered.class);

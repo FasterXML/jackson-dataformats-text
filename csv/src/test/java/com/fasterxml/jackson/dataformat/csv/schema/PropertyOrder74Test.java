@@ -1,10 +1,12 @@
 package com.fasterxml.jackson.dataformat.csv.schema;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 // For [dataformat-csv#74]: problems applying default do-sort handling
 public class PropertyOrder74Test extends ModuleTestBase
@@ -17,6 +19,7 @@ public class PropertyOrder74Test extends ModuleTestBase
     @JsonPropertyOrder()
     public static class PointWithAnnotation extends Point {}
 
+    @Test
     public void testSchemaWithOrdering() throws Exception
     {
         final CsvMapper mapper = mapperForCsv();

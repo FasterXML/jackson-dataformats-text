@@ -2,17 +2,20 @@ package com.fasterxml.jackson.dataformat.csv.failing;
 
 import java.io.StringWriter;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MissingNullsOnObjectArrayWrite10Test extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
     // for [dataformats-text#10]
+    @Test
     public void testNullsOnObjectArrayWrites2Col() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()

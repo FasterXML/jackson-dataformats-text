@@ -2,15 +2,20 @@ package com.fasterxml.jackson.dataformat.csv.failing;
 
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.databind.*;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NullWriting116Test extends ModuleTestBase
 {
     private final CsvMapper csv = mapperForCsv();
 
     // [dataformat#116]
+    @Test
     public void testWithObjectArray() throws Exception 
     {
         CsvSchema schema = CsvSchema.builder()

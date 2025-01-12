@@ -1,12 +1,13 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // for [dataformats-text#15]: Allow skipping of empty lines
 public class SkipEmptyLines15Test extends ModuleTestBase {
@@ -25,6 +26,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
     }
 
     // for [dataformats-text#15]: Allow skipping of empty lines
+    @Test
     public void testSkipEmptyLinesFeature() throws Exception
     {
         final String CSV = "1,\"xyz\"\n\ntrue,\n";
@@ -72,6 +74,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         assertEquals("", row[1]);
     }
 
+    @Test
     public void testCsvWithEmptyLineSkipBlankLinesFeatureDisabled() throws Exception {
         String[][] rows = mapperForCsvAsArray().readValue(CSV_WITH_EMPTY_LINE);
         // First, verify default behavior:
@@ -82,6 +85,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithEmptyLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -94,6 +98,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
     }
 
 
+    @Test
     public void testCsvWithBlankLineSkipBlankLinesFeatureDisabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .readValue(CSV_WITH_BLANK_LINE);
@@ -105,6 +110,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -116,6 +122,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureDisabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .readValue(CSV_WITH_BLANK_LINE_AND_COMMENT);
@@ -131,6 +138,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
 
     // 14-Apr-2020, tatu: Due to [dataformats-text#191], can not retain leading spaces
     //   when trimming empty lines and/or comments, so test changed for 2.11
+    @Test
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -145,6 +153,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithBlankLineAndCommentSkipBlankLinesFeatureEnabledAndAllowComments() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -158,6 +167,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithFirstBlankLineSkipBlankLinesFeatureDisabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .readValue(CSV_WITH_FIRST_BLANK_LINE);
@@ -169,6 +179,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithFirstBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)
@@ -181,6 +192,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
     }
 
 
+    @Test
     public void testCsvWithTrailingBlankLineSkipBlankLinesFeatureDisabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .readValue(CSV_WITH_TRAILING_BLANK_LINES);
@@ -193,6 +205,7 @@ public class SkipEmptyLines15Test extends ModuleTestBase {
         ), rows);
     }
 
+    @Test
     public void testCsvWithTrailingBlankLineSkipBlankLinesFeatureEnabled() throws Exception {
         String[][] rows = mapperForCsvAsArray()
                 .with(CsvParser.Feature.SKIP_EMPTY_LINES)

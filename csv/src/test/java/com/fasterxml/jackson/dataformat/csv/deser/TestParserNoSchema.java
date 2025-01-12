@@ -3,8 +3,12 @@ package com.fasterxml.jackson.dataformat.csv.deser;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test to verify that CSV content can be parsed without schema
@@ -20,6 +24,7 @@ public class TestParserNoSchema extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testUntypedAsSequence() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -58,6 +63,7 @@ public class TestParserNoSchema extends ModuleTestBase
         it.close();
     }
 
+    @Test
     public void testUntypedAsObjectArray() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -84,6 +90,7 @@ public class TestParserNoSchema extends ModuleTestBase
         assertEquals("", row.get(1));
     }
 
+    @Test
     public void testUntypedAsStringArray() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -108,6 +115,7 @@ public class TestParserNoSchema extends ModuleTestBase
         assertEquals("", row[1]);
     }
 
+    @Test
     public void testUntypedViaReadValues() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -135,6 +143,7 @@ public class TestParserNoSchema extends ModuleTestBase
         it.close();
     }
     
+    @Test
     public void testUntypedWithHeaderAsMap() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -160,6 +169,7 @@ public class TestParserNoSchema extends ModuleTestBase
     /* Let's also allow varying number of columns, if no
      * schema has been defined.
      */
+    @Test
     public void testUntypedAsSequenceVarLengths() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -196,6 +206,7 @@ public class TestParserNoSchema extends ModuleTestBase
     }
 
     // [Issue#54]
+    @Test
     public void testDelimiterAtBufferBoundary() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

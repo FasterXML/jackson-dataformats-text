@@ -1,12 +1,14 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class TrailingCommaCSVTest extends ModuleTestBase
 {
@@ -22,6 +24,7 @@ public class TrailingCommaCSVTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testDisallowTrailingComma() throws Exception
     {
         final String INPUT = "s,t\nd,e,\n";
@@ -45,6 +48,7 @@ public class TrailingCommaCSVTest extends ModuleTestBase
 
     // [dataformats-text#204]: should also work for header line
 
+    @Test
     public void testWithTrailingHeaderComma() throws Exception
     {
         final String INPUT = "name,age,\n" + 

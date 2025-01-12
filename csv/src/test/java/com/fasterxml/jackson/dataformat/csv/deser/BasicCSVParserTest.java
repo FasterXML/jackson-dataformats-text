@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
-
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.*;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BasicCSVParserTest extends ModuleTestBase
 {
@@ -39,6 +40,7 @@ public class BasicCSVParserTest extends ModuleTestBase
 
     final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testSimpleExplicit() throws Exception
     {
         ObjectReader r = MAPPER.reader(SIMPLE_SCHEMA);
@@ -63,6 +65,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         assertArrayEquals(new byte[]{1, 2, 3, 4, 5}, user.getUserImage());
     }
 
+    @Test
     public void testSimpleExplicitWithBOM() throws Exception {
         ObjectReader r = MAPPER.reader(SIMPLE_SCHEMA);
         r = r.forType(FiveMinuteUser.class);
@@ -87,6 +90,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         assertArrayEquals(new byte[]{1, 2, 3, 4, 5}, user.getUserImage());
     }
 
+    @Test
     public void testSimpleWithAutoSchema() throws Exception {
         CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class);
         // NOTE: order different from above test (as per POJO def!)
@@ -102,6 +106,7 @@ public class BasicCSVParserTest extends ModuleTestBase
      * Test to verify that we can mix "untyped" access as Maps
      * with schema information...
      */
+    @Test
     public void testSimpleAsMaps() throws Exception {
         CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class);
         MappingIterator<Map<?, ?>> it = MAPPER.reader(schema).forType(Map.class).readValues(
@@ -121,6 +126,7 @@ public class BasicCSVParserTest extends ModuleTestBase
     }
 
     // Test for [Issue#10]
+    @Test
     public void testMapsWithLinefeeds() throws Exception {
         _testMapsWithLinefeeds(false);
         _testMapsWithLinefeeds(true);
@@ -178,6 +184,7 @@ public class BasicCSVParserTest extends ModuleTestBase
     }
 
     // [dataformat-csv#12]
+    @Test
     public void testEmptyHandlingForInteger() throws Exception {
         CsvSchema schema = MAPPER.typedSchemaFor(Point.class).withoutHeader();
 
@@ -188,6 +195,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         assertNull(result.z);
     }
 
+    @Test
     public void testStringNullHandlingForInteger() throws Exception {
         CsvSchema schema = MAPPER.typedSchemaFor(Point.class).withoutHeader();
 
@@ -198,6 +206,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         assertNull(result.z);
     }
 
+    @Test
     public void testLeadingZeroesForInts() throws Exception {
         CsvSchema schema = MAPPER.typedSchemaFor(Point.class).withoutHeader();
         Point result = MAPPER.readerFor(Point.class).with(schema).readValue("012,\"090\",\n");
@@ -207,6 +216,7 @@ public class BasicCSVParserTest extends ModuleTestBase
     }
 
     // [dataformat-csv#41]
+    @Test
     public void testIncorrectDups41() throws Exception {
         final String INPUT = "\"foo\",\"bar\",\"foo\"";
         CsvSchema schema = CsvSchema.builder().addColumn("Col1").addColumn("Col2")
@@ -228,6 +238,7 @@ public class BasicCSVParserTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#89]
+    @Test
     public void testColumnReordering() throws IOException {
         CsvFactory factory = new CsvFactory();
         String CSV = "b,a,c\nvb,va,vc\n";
@@ -348,6 +359,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         parser.close();
     }
 
+    @Test
     public void testColumnFailsOnOutOfOrder() throws IOException {
         CsvFactory factory = new CsvFactory();
         String CSV = "b,a,c\nvb,va,vc\n";
@@ -373,6 +385,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         parser.close();
     }
 
+    @Test
     public void testColumnFailsOnTooFew() throws IOException {
         CsvFactory factory = new CsvFactory();
         String CSV = "a,b\nvb,va,vc\n";
@@ -398,6 +411,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         parser.close();
     }
 
+    @Test
     public void testColumnFailsOnTooMany() throws IOException {
         CsvFactory factory = new CsvFactory();
         String CSV = "a,b,c,d\nvb,va,vc\n";
@@ -423,6 +437,7 @@ public class BasicCSVParserTest extends ModuleTestBase
         parser.close();
     }
 
+    @Test
     public void testStrictColumnReturnsExpectedData() throws IOException {
         CsvSchema schema = MAPPER.schemaFor(Point.class).withHeader().withStrictHeaders(true);
 

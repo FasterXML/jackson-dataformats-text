@@ -1,16 +1,15 @@
 package com.fasterxml.jackson.dataformat.csv.deser;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MappingIterator;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvParser;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Tests written to support a blog post written about Jackson
 // CSV module...
@@ -32,6 +31,7 @@ public class BlogPost2021AprilTest
     
     private final CsvMapper MAPPER = new CsvMapper();
 
+    @Test
     public void testAsListOfLists() throws Exception
     {
         List<List<String>> all = MAPPER
@@ -41,6 +41,7 @@ public class BlogPost2021AprilTest
         _assertListOfLists(all);
     }
 
+    @Test
     public void testAsSequenceOfListsOfStrings() throws Exception
     {
         MappingIterator<List<String>> it = MAPPER
@@ -63,6 +64,7 @@ public class BlogPost2021AprilTest
         assertEquals(Arrays.asList("-13", "0", "true"), all.get(2));
     }
 
+    @Test
     public void testAsSequenceOfMaps() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -99,6 +101,7 @@ public class BlogPost2021AprilTest
         }
     }
 
+    @Test
     public void testAsSequenceOfPOJOsWithHeader() throws Exception
     {
         CsvSchema schemaWithHeader = CsvSchema.emptySchema().withHeader();
