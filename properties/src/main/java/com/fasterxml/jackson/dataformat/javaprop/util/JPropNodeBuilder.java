@@ -3,7 +3,7 @@ package com.fasterxml.jackson.dataformat.javaprop.util;
 import java.util.Map;
 import java.util.Properties;
 
-import com.fasterxml.jackson.dataformat.javaprop.*;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class JPropNodeBuilder
 {

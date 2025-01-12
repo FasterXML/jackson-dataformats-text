@@ -1,13 +1,19 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GenerationEscapingTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testKeyEscaping() throws Exception
     {
         Map<String,String> input = new HashMap<>();
@@ -23,6 +29,7 @@ public class GenerationEscapingTest extends ModuleTestBase
         assertEquals("combo\\tkey=value\n", MAPPER.writeValueAsString(input));
     }
 
+    @Test
     public void testValueEscaping() throws Exception
     {
         /*

@@ -2,15 +2,17 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.StringWriter;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.Versioned;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultConfigsTest extends ModuleTestBase
 {
     private final String ARTIFACT_ID = "jackson-dataformat-properties";
     
+    @Test
     public void testMapperBaseConfig()
     {
         JavaPropsMapper mapper = newPropertiesMapper();
@@ -19,6 +21,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertNotSame(mapper, copy);
     }
 
+    @Test
     public void testFactoryBaseConfig()
     {
         JavaPropsFactory f = JavaPropsFactory.builder().build();
@@ -32,6 +35,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(f.canUseCharArrays());
     }
 
+    @Test
     public void testGeneratorConfig() throws Exception
     {
         JavaPropsFactory f = JavaPropsFactory.builder().build();
@@ -49,6 +53,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         gen.close();
     }
 
+    @Test
     public void testParserConfig() throws Exception
     {
         JavaPropsFactory f = new JavaPropsFactory();

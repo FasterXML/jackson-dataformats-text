@@ -1,18 +1,12 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.CoercionAction;
-import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
-import com.fasterxml.jackson.databind.cfg.MapperBuilder;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.cfg.*;
 
 public class JavaPropsMapper extends ObjectMapper
 {

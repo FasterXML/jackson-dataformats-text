@@ -3,10 +3,16 @@ package com.fasterxml.jackson.dataformat.javaprop;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+
 public class PrefixTest extends ModuleTestBase
 {
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testPrefixParsing() throws Exception {
         final String INPUT = "org.o1.firstName=Bob\n"
                 +"org.o1.lastName=Palmer\n"
@@ -21,6 +27,7 @@ public class PrefixTest extends ModuleTestBase
         assertEquals("Black", result2.lastName);
     }
 
+    @Test
     public void testPrefixGeneration() throws Exception
     {
         FiveMinuteUser input = new FiveMinuteUser("Bob", "Palmer", true, Gender.MALE,

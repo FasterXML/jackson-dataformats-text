@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;

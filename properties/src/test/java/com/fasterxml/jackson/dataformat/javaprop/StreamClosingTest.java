@@ -1,9 +1,13 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.CloseStateInputStream;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.CloseStateReader;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SuppressWarnings("resource")
 public class StreamClosingTest extends ModuleTestBase
@@ -17,6 +21,7 @@ public class StreamClosingTest extends ModuleTestBase
 
     private final ObjectMapper PROPS_MAPPER = newPropertiesMapper();
 
+    @Test
     public void testInputStreamClosing() throws Exception
     {
         // by default, SHOULD close it:
@@ -36,6 +41,7 @@ public class StreamClosingTest extends ModuleTestBase
         assertTrue(in.closed);
     }
 
+    @Test
     public void testReaderClosing() throws Exception
     {
         // by default, SHOULD close it:

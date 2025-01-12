@@ -1,11 +1,19 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
-import com.fasterxml.jackson.core.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.Versioned;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TestVersions extends ModuleTestBase
 {
+    @Test
     public void testMapperVersions() throws IOException
     {
         JavaPropsFactory f = new JavaPropsFactory();

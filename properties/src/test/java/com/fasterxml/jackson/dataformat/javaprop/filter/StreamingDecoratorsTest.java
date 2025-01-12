@@ -1,17 +1,23 @@
 package com.fasterxml.jackson.dataformat.javaprop.filter;
 
 import java.io.*;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import com.fasterxml.jackson.databind.*;
+import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.dataformat.javaprop.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.PrefixInputDecorator;
 import com.fasterxml.jackson.dataformat.javaprop.testutil.PrefixOutputDecorator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 public class StreamingDecoratorsTest extends ModuleTestBase
 {
     @SuppressWarnings("unchecked")
+    @Test
     public void testInputDecorators() throws IOException
     {
         final byte[] DOC = utf8("secret=mum\n");
@@ -32,6 +38,7 @@ public class StreamingDecoratorsTest extends ModuleTestBase
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testOutputDecorators() throws IOException
     {
         final byte[] DOC = utf8("prefix=p\n");

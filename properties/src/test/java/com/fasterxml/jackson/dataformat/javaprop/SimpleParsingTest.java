@@ -2,8 +2,12 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SimpleParsingTest extends ModuleTestBase
 {
@@ -11,21 +15,25 @@ public class SimpleParsingTest extends ModuleTestBase
 
     private final ObjectMapper JSON_MAPPER = new JsonMapper();
 
+    @Test
     public void testSimpleNonNested() throws Exception {
         _testSimpleNonNested(false);
         _testSimpleNonNested(true);
     }
 
+    @Test
     public void testSimpleNested() throws Exception {
         _testSimpleNested(false);
         _testSimpleNested(true);
     }
 
+    @Test
     public void testSimpleRectangle() throws Exception {
         _testSimpleRectangle(false);
         _testSimpleRectangle(true);
     }
 
+    @Test
     public void testNonSplittingParsing() throws Exception {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()
                 .withoutPathSeparator();

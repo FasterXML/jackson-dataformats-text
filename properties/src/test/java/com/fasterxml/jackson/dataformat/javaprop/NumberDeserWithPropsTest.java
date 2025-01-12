@@ -2,14 +2,14 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Tests copied from databind "JDKNumberDeserTest" (only a small subset)
 public class NumberDeserWithPropsTest extends ModuleTestBase
@@ -59,6 +59,7 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     // [databind#2644]
+    @Test
     public void testBigDecimalSubtypes() throws Exception
     {
         ObjectMapper mapper = propertiesMapperBuilder()
@@ -74,6 +75,7 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
     }
 
     // [databind#2784]
+    @Test
     public void testBigDecimalUnwrapped() throws Exception
     {
         // mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -82,6 +84,7 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
         assertEquals(new BigDecimal("5.00"), result.holder.value);
     }
 
+    @Test
     public void testVeryBigDecimalUnwrapped() throws Exception
     {
         final int len = 1200;
@@ -95,11 +98,12 @@ public class NumberDeserWithPropsTest extends ModuleTestBase
             MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
             fail("expected JsonMappingException");
         } catch (JsonMappingException jme) {
-            assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
+            assertTrue(jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"),
+                    "unexpected message: " + jme.getMessage());
         }
     }
 
+    @Test
     public void testVeryBigDecimalUnwrappedWithNumLenUnlimited() throws Exception
     {
         final int len = 1200;

@@ -1,19 +1,20 @@
 package com.fasterxml.jackson.dataformat.javaprop;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-public abstract class ModuleTestBase extends junit.framework.TestCase
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public abstract class ModuleTestBase
 {
     @JsonPropertyOrder({ "topLeft", "bottomRight" })
     protected static class Rectangle {

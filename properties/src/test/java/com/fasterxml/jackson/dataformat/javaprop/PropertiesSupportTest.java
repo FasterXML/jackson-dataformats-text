@@ -2,6 +2,10 @@ package com.fasterxml.jackson.dataformat.javaprop;
 
 import java.util.*;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Tests for extended functionality to work with JDK `Properties` Object
  * (as well as {@code java.util.Map}, since 2.10)
@@ -20,6 +24,7 @@ public class PropertiesSupportTest extends ModuleTestBase
 
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testSimpleEmployeeFromProperties() throws Exception
     {
         Properties props = new Properties();
@@ -29,6 +34,7 @@ public class PropertiesSupportTest extends ModuleTestBase
     }
 
     // for [dataformats-text#139]
+    @Test
     public void testSimpleEmployeeFromMap() throws Exception
     {
         Map<String, String> map = new LinkedHashMap<>();
@@ -50,6 +56,7 @@ public class PropertiesSupportTest extends ModuleTestBase
         assertEquals("14", m2.get("b"));
     }
 
+    @Test
     public void testWithCustomSchemaFromProperties() throws Exception
     {
         Properties props = new Properties();
@@ -63,6 +70,7 @@ public class PropertiesSupportTest extends ModuleTestBase
     }
 
     // for [dataformats-text#139]
+    @Test
     public void testWithCustomSchemaFromMap() throws Exception
     {
         Map<String, String> map = new LinkedHashMap<>();
@@ -95,6 +103,7 @@ public class PropertiesSupportTest extends ModuleTestBase
     }
 
     // [dataformats-text#91]
+    @Test
     public void testEscapingWithReadPropertiesAs() throws Exception
     {
         TestObject91 expected = new TestObject91();
