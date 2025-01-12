@@ -4,7 +4,12 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collections;
 
-import com.fasterxml.jackson.databind.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SequenceWriter;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // for [dataformats-text#163]
 public class MultipleDocumentsWriteTest extends ModuleTestBase
@@ -15,6 +20,7 @@ public class MultipleDocumentsWriteTest extends ModuleTestBase
         public POJO163(int v) { value = v; }
     }
     
+    @Test
     public void testWriteMultipleDocsBeans() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
@@ -29,6 +35,7 @@ public class MultipleDocumentsWriteTest extends ModuleTestBase
         assertEquals("---\nvalue: 42\n---\nvalue: 28", yaml);
     }
 
+    @Test
     public void testWriteMultipleDocsLists() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();

@@ -1,11 +1,14 @@
 package perf;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
 
 public final class YAMLSerPerf
 {
@@ -47,6 +50,7 @@ public final class YAMLSerPerf
         return item;
     }
     
+    @Test
     public void test()
         throws Exception
     {

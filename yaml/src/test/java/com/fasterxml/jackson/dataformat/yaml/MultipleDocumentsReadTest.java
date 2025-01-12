@@ -2,10 +2,14 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.core.*;
-import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MappingIterator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultipleDocumentsReadTest extends ModuleTestBase
 {
@@ -13,6 +17,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
 
     private final YAMLFactory YAML_F = MAPPER.getFactory();
 
+    @Test
     public void testMultipleDocumentsViaParser() throws Exception
     {
         final String YAML = "num: 42\n"
@@ -39,6 +44,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testMultipleDocumentsViaIterator() throws Exception
     {
         final String YAML = "num: 42\n"

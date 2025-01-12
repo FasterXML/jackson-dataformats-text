@@ -1,16 +1,14 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.DumperOptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GeneratorFeatureTest extends ModuleTestBase
 {
@@ -30,6 +28,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
 
     private final ObjectMapper MAPPER = newObjectMapper();
     
+    @Test
     public void testArrayIndentation() throws Exception
     {
         Words input = new Words("first", "second", "third");
@@ -65,6 +64,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     }
 
     //@since 2.14
+    @Test
     public void testLongKeys() throws Exception
     {
         final String LONG_KEY = "key_longer_than_128_characters_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
@@ -80,6 +80,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     }
 
     // @since 2.12
+    @Test
     public void testYAMLSpecVersionDefault() throws Exception
     {
         ObjectMapper defaultMapper = YAMLMapper.builder().build();
@@ -90,6 +91,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     }
         
     // @since 2.12
+    @Test
     public void testYAMLSpecVersion10() throws Exception
     {
         ObjectMapper mapper10 = YAMLMapper.builder(
@@ -103,6 +105,7 @@ public class GeneratorFeatureTest extends ModuleTestBase
     }
 
     // @since 2.12
+    @Test
     public void testYAMLSpecVersion11() throws Exception
     {
         ObjectMapper mapper11 = YAMLMapper.builder(

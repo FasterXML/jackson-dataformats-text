@@ -3,8 +3,12 @@ package com.fasterxml.jackson.dataformat.yaml.deser;
 import java.util.Collections;
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // for [dataformats-text#306]
 public class NameQuoting306Test extends ModuleTestBase
@@ -12,6 +16,7 @@ public class NameQuoting306Test extends ModuleTestBase
     private final YAMLMapper MAPPER = newObjectMapper();
 
     // for [dataformats-text#306]
+    @Test
     public void testComplexName() throws Exception
     {
         final String key = "SomeKey:\nOtherLine";

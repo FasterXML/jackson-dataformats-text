@@ -2,15 +2,15 @@ package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ObjectAndTypeId232Test extends ModuleTestBase
 {
@@ -39,6 +39,7 @@ public class ObjectAndTypeId232Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#232]
+    @Test
     public void testTypedYAML232() throws Exception
     {
         String yaml = "list:\n" +

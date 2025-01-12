@@ -1,19 +1,21 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.dataformat.yaml.*;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleGenerationTest extends ModuleTestBase
 {
     private final YAMLFactory YAML_F = new YAMLFactory();
 
+    @Test
     public void testStreamingArray() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -31,6 +33,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("- 3\n- \"foobar\"", yaml);
     }
 
+    @Test
     public void testStreamingObject() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -44,6 +47,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         gen.close();
     }
 
+    @Test
     public void testStreamingNested() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -76,6 +80,7 @@ public class SimpleGenerationTest extends ModuleTestBase
     }
 
     @SuppressWarnings("resource")
+    @Test
     public void testStartMarker() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -100,6 +105,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("name: \"Brad\"\nage: 39", yaml);
     }
 
+    @Test
     public void testLiteralBlockStyle() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -125,6 +131,7 @@ public class SimpleGenerationTest extends ModuleTestBase
                      "text: \"Hello World\"", yaml);
     }
 
+    @Test
     public void testSimpleNullProperty() throws Exception
     {
         StringWriter w = new StringWriter();

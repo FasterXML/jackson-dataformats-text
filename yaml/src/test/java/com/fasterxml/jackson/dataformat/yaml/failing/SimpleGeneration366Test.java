@@ -1,16 +1,19 @@
 package com.fasterxml.jackson.dataformat.yaml.failing;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SimpleGeneration366Test extends ModuleTestBase
 {
     // [dataformats-text#366]: multiline literal block with trailing spaces does not work
+    @Test
     public void testLiteralBlockStyleMultilineWithTrailingSpace() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -30,6 +33,7 @@ public class SimpleGeneration366Test extends ModuleTestBase
     }
 
     // [dataformats-text#366]: multiline literal block without trailing spaces actually works
+    @Test
     public void testLiteralBlockStyleMultiline() throws Exception
     {
         YAMLFactory f = new YAMLFactory();

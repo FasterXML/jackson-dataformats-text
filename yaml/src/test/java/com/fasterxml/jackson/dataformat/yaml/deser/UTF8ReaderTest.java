@@ -1,15 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import org.junit.Test;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.dataformat.yaml.UTF8Reader;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UTF8ReaderTest {
 

@@ -1,11 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
 {
@@ -19,6 +21,7 @@ public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
             "seven: Y\n" +
             "eight: N\n";
 
+    @Test
     public void testParseBooleanLikeWordsAsString_disabledFF() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -51,6 +54,7 @@ public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase
         assertEquals(root.get("eight").textValue(), "N");
     }
 
+    @Test
     public void testParseBooleanLikeWordsAsString_enabledFF() throws Exception
     {
         YAMLFactory f = YAMLFactory.builder()
