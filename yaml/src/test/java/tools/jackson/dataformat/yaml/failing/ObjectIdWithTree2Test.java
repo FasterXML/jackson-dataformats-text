@@ -1,10 +1,14 @@
 package tools.jackson.dataformat.yaml.failing;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.*;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.*;
 /**
  * Although native Object Ids work in general, Tree Model currently
  * has issues with it (see [dataformats-text#2])
@@ -40,6 +44,7 @@ public class ObjectIdWithTree2Test extends ModuleTestBase
             ;
 
     // [dataformats-text#2]
+    @Test
     public void testRoundtripViaTree() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
@@ -62,7 +67,7 @@ public class ObjectIdWithTree2Test extends ModuleTestBase
         assertEquals("first", first.name);
         assertNotNull(first.next);
         assertEquals("second", first.next.name);
-        assertNotNull("Should not have null for 'first.next.next'", first.next.next);
+        assertNotNull(first.next.next, "Should not have null for 'first.next.next'");
         assertSame(first, first.next.next);
     }
 }

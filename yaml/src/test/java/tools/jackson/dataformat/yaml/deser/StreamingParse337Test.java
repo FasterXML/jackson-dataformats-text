@@ -10,6 +10,8 @@ import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Unit tests for checking functioning of the underlying
  * parser implementation.

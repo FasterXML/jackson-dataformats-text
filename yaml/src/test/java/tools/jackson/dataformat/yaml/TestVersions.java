@@ -4,6 +4,8 @@ import java.io.*;
 
 import tools.jackson.core.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class TestVersions extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = newObjectMapper();

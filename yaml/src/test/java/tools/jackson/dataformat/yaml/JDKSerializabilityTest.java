@@ -3,6 +3,11 @@ package tools.jackson.dataformat.yaml;
 import java.io.*;
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class JDKSerializabilityTest extends ModuleTestBase
 {
     public void testApacheMapperWithModule() throws Exception {
@@ -37,8 +42,7 @@ public class JDKSerializabilityTest extends ModuleTestBase
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(serializedBytes);
         ObjectInputStream inputStream = new ObjectInputStream(byteArrayInputStream);
         Object deserializedObject = inputStream.readObject();
-        assertTrue("Deserialized object should be an instance of YAMLMapper",
-                deserializedObject instanceof YAMLMapper);
+        assertTrue(deserializedObject instanceof YAMLMapper);
         return (YAMLMapper) deserializedObject;
     }
 

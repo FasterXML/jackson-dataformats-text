@@ -1,8 +1,12 @@
 package tools.jackson.dataformat.yaml.deser;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NullFromEmptyString130Test extends ModuleTestBase
 {
@@ -17,6 +21,7 @@ public class NullFromEmptyString130Test extends ModuleTestBase
     private final YAMLMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#130]
+    @Test
     public void testEmptyValueToNull130() throws Exception
     {
         // by default, empty Strings are coerced:

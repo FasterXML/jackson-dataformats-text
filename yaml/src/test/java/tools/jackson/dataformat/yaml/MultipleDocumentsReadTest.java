@@ -2,15 +2,20 @@ package tools.jackson.dataformat.yaml;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.*;
 import tools.jackson.core.type.TypeReference;
 
 import tools.jackson.databind.MappingIterator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class MultipleDocumentsReadTest extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = YAMLMapper.shared();
 
+    @Test
     public void testMultipleDocumentsViaParser() throws Exception
     {
         final String YAML = "num: 42\n"
@@ -37,6 +42,7 @@ public class MultipleDocumentsReadTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testMultipleDocumentsViaIterator() throws Exception
     {
         final String YAML = "num: 42\n"

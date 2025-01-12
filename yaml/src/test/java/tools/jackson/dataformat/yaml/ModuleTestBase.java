@@ -1,14 +1,15 @@
 package tools.jackson.dataformat.yaml;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import tools.jackson.core.*;
 
-public abstract class ModuleTestBase extends junit.framework.TestCase
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public abstract class ModuleTestBase
 {
     /**
      * Slightly modified sample class from Jackson tutorial ("JacksonInFiveMinutes")

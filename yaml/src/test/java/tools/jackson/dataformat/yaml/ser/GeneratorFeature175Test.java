@@ -1,10 +1,14 @@
 package tools.jackson.dataformat.yaml.ser;
 
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
-import java.util.Map;
+import static org.junit.jupiter.api.Assertions.*;
 
 // 11-Nov-2020, tatu: Failing for 3.x until (and if) `snakeyaml-engine`
 //    adds support ot make feature work.
@@ -17,6 +21,7 @@ public class GeneratorFeature175Test extends ModuleTestBase
      */
 
     // [dataformats-text#175]: arrays indentation with indicator
+    @Test
     public void testArrayWithIndicatorIndentation() throws Exception {
         String yamlBefore = "---\n" +
             "tags:\n" +

@@ -1,16 +1,23 @@
 package tools.jackson.dataformat.yaml.filter;
 
 import java.io.*;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.yaml.*;
 import tools.jackson.dataformat.yaml.testutil.PrefixInputDecorator;
 import tools.jackson.dataformat.yaml.testutil.PrefixOutputDecorator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 public class StreamingDecoratorsTest extends ModuleTestBase
 {
     @SuppressWarnings("unchecked")
+    @Test
     public void testInputDecorators() throws IOException
     {
         final byte[] DOC = utf8("secret: mum\n");
@@ -30,6 +37,7 @@ public class StreamingDecoratorsTest extends ModuleTestBase
         assertEquals("mum", value.get("secret"));
     }
 
+    @Test
     public void testOutputDecorators() throws IOException
     {
         final String PREFIX = "///////";

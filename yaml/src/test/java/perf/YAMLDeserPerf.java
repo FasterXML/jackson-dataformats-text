@@ -46,7 +46,7 @@ public final class YAMLDeserPerf
 
         return item;
     }
-    
+
     public void test() throws Exception
     {
         int sum = 0;

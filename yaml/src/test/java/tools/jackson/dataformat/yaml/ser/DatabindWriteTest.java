@@ -1,18 +1,16 @@
 package tools.jackson.dataformat.yaml.ser;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DatabindWriteTest extends ModuleTestBase
 {
@@ -29,6 +27,7 @@ public class DatabindWriteTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testBasicPOJO() throws Exception
     {
         FiveMinuteUser user = new FiveMinuteUser("Bob", "Dabolito", false,
@@ -59,6 +58,7 @@ public class DatabindWriteTest extends ModuleTestBase
     }
 
     // Related to [dataformats-text#68], escaping of "reserved" names
+    @Test
     public void testBasicDatabind2() throws Exception
     {
         String yaml = trimDocMarker(MAPPER.writeValueAsString(new Point(1, 2)));
@@ -73,6 +73,7 @@ public class DatabindWriteTest extends ModuleTestBase
         assertEquals(2, p.y);
     }
     
+    @Test
     public void testWithFile() throws Exception
     {
         File f = File.createTempFile("test", ".yml");
@@ -94,6 +95,7 @@ public class DatabindWriteTest extends ModuleTestBase
         f.delete();
     }
 
+    @Test
     public void testWithFile2() throws Exception
     {
         File f = File.createTempFile("test", ".yml");

@@ -1,6 +1,6 @@
 package perf;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
 
 import tools.jackson.core.*;
 import tools.jackson.databind.JsonNode;
@@ -46,7 +46,7 @@ public final class YAMLSerPerf
 
         return item;
     }
-    
+
     public void test() throws Exception
     {
         int i = 0;

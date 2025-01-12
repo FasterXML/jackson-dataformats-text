@@ -1,16 +1,22 @@
 package tools.jackson.dataformat.yaml.ser;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.dataformat.yaml.*;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class SimpleGenerationTest extends ModuleTestBase
 {
     private final YAMLMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testStreamingArray() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -28,6 +34,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("- 3\n- \"foobar\"", yaml);
     }
 
+    @Test
     public void testStreamingObject() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -41,6 +48,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         gen.close();
     }
 
+    @Test
     public void testStreamingNested() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -73,6 +81,7 @@ public class SimpleGenerationTest extends ModuleTestBase
     }
 
     @SuppressWarnings("resource")
+    @Test
     public void testStartMarker() throws Exception
     {
         // Ok, first, assume we do get the marker:
@@ -96,6 +105,7 @@ public class SimpleGenerationTest extends ModuleTestBase
         assertEquals("name: \"Brad\"\nage: 39", yaml);
     }
 
+    @Test
     public void testLiteralBlockStyle() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -124,6 +134,7 @@ public class SimpleGenerationTest extends ModuleTestBase
                      "text: \"Hello World\"", yaml);
     }
 
+    @Test
     public void testSimpleNullProperty() throws Exception
     {
         StringWriter w = new StringWriter();

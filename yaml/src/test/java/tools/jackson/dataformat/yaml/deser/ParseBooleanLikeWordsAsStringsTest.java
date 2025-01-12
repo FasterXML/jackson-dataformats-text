@@ -6,6 +6,8 @@ import tools.jackson.databind.node.JsonNodeType;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 // NOTE: Jackson 3.0 behavior differs from 2.x due to changes in the
 // underlying "snakeyaml-engine" behavior
 public class ParseBooleanLikeWordsAsStringsTest extends ModuleTestBase

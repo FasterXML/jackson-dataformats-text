@@ -3,6 +3,8 @@ package tools.jackson.dataformat.yaml.failing;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 // for [dataformat-text#146]: cannot handle underscores in numbers
 public class IntegerWithUnderscoresReadTest extends ModuleTestBase {
     static class IntegerHolder

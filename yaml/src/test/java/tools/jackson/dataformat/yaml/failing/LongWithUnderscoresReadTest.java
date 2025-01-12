@@ -4,6 +4,8 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 // for [dataformat-text#146]: cannot handle underscores in numbers
 public class LongWithUnderscoresReadTest extends ModuleTestBase
 {

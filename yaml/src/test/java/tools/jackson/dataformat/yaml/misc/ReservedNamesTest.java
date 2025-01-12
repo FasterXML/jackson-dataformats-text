@@ -1,15 +1,21 @@
 package tools.jackson.dataformat.yaml.misc;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // [dataformats-text#68]: should quote reserved names
 public class ReservedNamesTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testQuotingOfBooleanKeys() throws Exception
     {
         for (String value : new String[] {

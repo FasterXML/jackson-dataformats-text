@@ -1,21 +1,19 @@
 package tools.jackson.dataformat.yaml.ser;
 
-import org.junit.Test;
-
-import tools.jackson.dataformat.yaml.UTF8Writer;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
 
-public class UTF8WriterTest {
+import tools.jackson.dataformat.yaml.UTF8Writer;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+public class UTF8WriterTest
+{
     @Test
     public void canUseMultipleUTF8WritersInSameThread() throws IOException {
         final String message1 = "First message";

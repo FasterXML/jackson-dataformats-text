@@ -1,9 +1,15 @@
 package tools.jackson.dataformat.yaml.ser;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeneratorWithSplitLinesTest extends ModuleTestBase
 {
+    @Test
     public void testSplitLines() throws Exception
     {
         final String TEXT = "1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890 1234567890";

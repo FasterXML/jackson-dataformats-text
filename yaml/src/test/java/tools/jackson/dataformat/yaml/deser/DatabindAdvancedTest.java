@@ -3,8 +3,13 @@ package tools.jackson.dataformat.yaml.deser;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DatabindAdvancedTest extends ModuleTestBase
 {
@@ -136,6 +141,7 @@ public class DatabindAdvancedTest extends ModuleTestBase
     /**********************************************************
      */
 
+    @Test
     public void testReadComplexPojo() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();

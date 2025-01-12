@@ -2,12 +2,16 @@ package tools.jackson.dataformat.yaml.ser;
 
 import java.util.Collections;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("serial")
 public class CustomStringQuoting229Test extends ModuleTestBase
@@ -40,6 +44,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
             .enable(YAMLWriteFeature.MINIMIZE_QUOTES)
             .build();
 
+    @Test
     public void testNameQuotingDefault() throws Exception
     {
         // First, default quoting
@@ -60,6 +65,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(MINIMIZING_MAPPER, Collections.singletonMap("specialKey", "value")));
     }
 
+    @Test
     public void testNameQuotingCustom() throws Exception
     {
         // Then with custom rules
@@ -78,6 +84,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(CUSTOM_MAPPER, Collections.singletonMap("specialKey", "value")));
     }
 
+    @Test
     public void testValueQuotingDefault() throws Exception
     {
         // First, default quoting
@@ -96,6 +103,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(MINIMIZING_MAPPER, Collections.singletonMap("key", "specialValue")));
     }
 
+    @Test
     public void testValueQuotingCustom() throws Exception
     {
         // Then with custom rules

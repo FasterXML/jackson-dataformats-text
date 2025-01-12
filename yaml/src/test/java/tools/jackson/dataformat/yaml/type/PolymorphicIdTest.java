@@ -1,10 +1,12 @@
 package tools.jackson.dataformat.yaml.type;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.*;
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PolymorphicIdTest extends ModuleTestBase
 {
@@ -41,7 +43,7 @@ public class PolymorphicIdTest extends ModuleTestBase
         top = MAPPER.readValue(YAML, Wrapper.class);
         assertNotNull(top);
         assertEquals(NestedImpl.class, top.nested.getClass());
-        assertNull("whatever", ((NestedImpl) top.nested).value);
+        assertNull(((NestedImpl) top.nested).value, "whatever");
     }
 
     @Test

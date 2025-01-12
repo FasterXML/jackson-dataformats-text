@@ -11,6 +11,8 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 public class ParserDupHandlingTest extends ModuleTestBase
 {
     private final static String YAML_WITH_DUPS =

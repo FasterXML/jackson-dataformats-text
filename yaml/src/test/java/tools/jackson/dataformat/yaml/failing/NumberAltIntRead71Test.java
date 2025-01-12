@@ -2,8 +2,12 @@ package tools.jackson.dataformat.yaml.failing;
 
 import java.math.BigInteger;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // [dataformats-text#71]: hex numbers
 // [dataformats-text#233]: also binary, octal (with/without underscores)
@@ -28,6 +32,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
     
     // [dataformats-text#71]
+    @Test
     public void testDeserHexInt71() throws Exception
     {
         _verifyNumber(Integer.parseInt("48", 16), "0x48");
@@ -41,6 +46,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(new BigInteger("-11112222333344445555ACDC", 16), "-0x11112222333344445555acdc");
     }
 
+    @Test
     public void testDeserHexUnderscores() throws Exception
     {
         _verifyNumber(Integer.parseInt("1F3", 16), "0x01_F3");
@@ -51,6 +57,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Long.parseLong("12345678c0", 16), "-0x12_3456_78c0");
     }
 
+    @Test
     public void testDeserOctal() throws Exception
     {
         _verifyNumber(Integer.parseInt("24", 8), "024");
@@ -64,6 +71,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(new BigInteger("-123456771234567712345677", 8), "-0123456771234567712345677");
     }
 
+    @Test
     public void testDeserOctalUnderscores() throws Exception
     {
         _verifyNumber(Integer.parseInt("24", 8), "0_24");
@@ -74,6 +82,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Long.parseLong("1234567712345677", 8), "-01_234_567_712_345_677");
     }
 
+    @Test
     public void testDeserBinary() throws Exception
     {
         _verifyNumber(Integer.parseInt("1010", 2), "0b1010");
@@ -81,6 +90,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Integer.parseInt("1010", 2), "-0b1010");
     }
 
+    @Test
     public void testDeserBinaryUnderscores() throws Exception
     {
         _verifyNumber(Integer.parseInt("1010", 2), "0b10_10");
@@ -92,6 +102,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
     //    least not yet, due to likely backwards-compatibility issues
     //    with IP numbers
     /*
+    @Test
     public void testDeserBase60() throws Exception
     {
         IntHolder result = MAPPER.readerFor(IntHolder.class)

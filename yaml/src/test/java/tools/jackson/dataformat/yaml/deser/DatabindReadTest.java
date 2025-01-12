@@ -1,16 +1,16 @@
 package tools.jackson.dataformat.yaml.deser;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for checking functioning of the databinding
@@ -74,6 +74,7 @@ public class DatabindReadTest extends ModuleTestBase
 
     private final ObjectMapper MAPPER = newObjectMapper();
     
+    @Test
     public void testSimpleNested() throws Exception
     {
         final String YAML =
@@ -100,6 +101,7 @@ public class DatabindReadTest extends ModuleTestBase
         
     }
     
+    @Test
     public void testBasicUntyped() throws Exception
     {
         final String YAML =
@@ -122,6 +124,7 @@ public class DatabindReadTest extends ModuleTestBase
         assertEquals(EXP, json);
     }
 
+    @Test
     public void testBasicPOJO() throws Exception
     {
         final String YAML =
@@ -138,9 +141,10 @@ public class DatabindReadTest extends ModuleTestBase
         assertTrue(user.isVerified());
         byte[] data = user.getUserImage();
         assertNotNull(data);
-        Assert.assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, data);
+        assertArrayEquals(new byte[] { 1, 2, 3, 4, 5 }, data);
     }
 
+    @Test
     public void testIssue1() throws Exception
     {
         final byte[] YAML = "firstName: Billy".getBytes("UTF-8");
@@ -150,6 +154,7 @@ public class DatabindReadTest extends ModuleTestBase
         assertEquals("Billy", user.firstName);
     }
 
+    @Test
     public void testUUIDs() throws Exception
     {
         UUID uuid = new UUID(0, 0);
@@ -159,6 +164,7 @@ public class DatabindReadTest extends ModuleTestBase
         assertEquals(uuid, result);
     }
 
+    @Test
     public void testEmptyBean() throws Exception
     {
         String yaml = MAPPER.writer()
@@ -175,6 +181,7 @@ public class DatabindReadTest extends ModuleTestBase
     }
 
     // [dataformats-text#205]
+    @Test
     public void testRenamingIssue205() throws Exception
     {
         final String YAML =

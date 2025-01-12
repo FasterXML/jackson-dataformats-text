@@ -6,10 +6,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.*;
 
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
@@ -22,6 +21,8 @@ import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Tests copied from databind "JDKNumberDeserTest": may need more clean up
 // work remove useless ones, make more YAML-y (YAML parsers can typically
@@ -72,6 +73,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
 
     private final YAMLMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testNaN() throws Exception
     {
         Float result = MAPPER.readValue(" \"NaN\"", Float.class);
@@ -84,6 +86,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(Double.valueOf(Double.NaN), num);
     }
 
+    @Test
     public void testDoubleInf() throws Exception
     {
         Double result = MAPPER.readValue(" \""+Double.POSITIVE_INFINITY+"\"", Double.class);
@@ -95,6 +98,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
 
     // 01-Mar-2017, tatu: This is bit tricky... in some ways, mapping to "empty value"
     //    would be best; but due to legacy reasons becomes `null` at this point
+    @Test
     public void testEmptyAsNumber() throws Exception
     {
         assertNull(MAPPER.readValue(quote(""), Byte.class));
@@ -109,6 +113,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertNull(MAPPER.readValue(quote(""), BigDecimal.class));
     }
 
+    @Test
     public void testTextualNullAsNumber() throws Exception
     {
         final String NULL_JSON = quote("null");
@@ -158,6 +163,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     }
 
     // [databind#852]
+    @Test
     public void testScientificNotationAsStringForNumber() throws Exception
     {
         Object ob = MAPPER.readValue("\"3E-8\"", Number.class);
@@ -170,6 +176,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(Long.class, ob.getClass());
     }
 
+    @Test
     public void testIntAsNumber() throws Exception
     {
         // Even if declared as 'generic' type, should return using most
@@ -178,6 +185,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(Integer.valueOf(123), result);
     }
 
+    @Test
     public void testLongAsNumber() throws Exception
     {
         // And beyond int range, should get long
@@ -186,6 +194,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(Long.valueOf(exp), result);
     }
 
+    @Test
     public void testBigIntAsNumber() throws Exception
     {
         // and after long, BigInteger
@@ -195,6 +204,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(biggie, result);
     }
 
+    @Test
     public void testIntTypeOverride() throws Exception
     {
         // Slight twist; as per [JACKSON-100], can also request binding
@@ -219,12 +229,14 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(123, node.asInt());
     }
 
+    @Test
     public void testDoubleAsNumber() throws Exception
     {
         Number result = MAPPER.readValue(new StringReader(" 1.0 "), Number.class);
         assertEquals(Double.valueOf(1.0), result);
     }
 
+    @Test
     public void testFpTypeOverrideSimple() throws Exception
     {
         ObjectReader r = MAPPER.reader(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -245,6 +257,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(dec.doubleValue(), node.asDouble());
     }
 
+    @Test
     public void testFpTypeOverrideStructured() throws Exception
     {
         ObjectReader r = MAPPER.reader(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -267,6 +280,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     }
 
     // [databind#504]
+    @Test
     public void testForceIntsToLongs() throws Exception
     {
         ObjectReader r = MAPPER.reader(DeserializationFeature.USE_LONG_FOR_INTS);
@@ -288,6 +302,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     }
 
     // [databind#2644]
+    @Test
     public void testBigDecimalSubtypes() throws Exception
     {
         ObjectMapper mapper = mapperBuilder()
@@ -304,6 +319,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
     }
 
     // [databind#2784]
+    @Test
     public void testBigDecimalUnwrapped() throws Exception
     {
         // mapper.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
@@ -312,6 +328,7 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
         assertEquals(new BigDecimal("5.00"), result.holder.value);
     }
 
+    @Test
     public void testVeryBigDecimalUnwrapped() throws Exception
     {
         final int len = 1200;
@@ -325,11 +342,13 @@ public class NumberDeserWithYAMLTest extends ModuleTestBase
             MAPPER.readValue(DOC, NestedBigDecimalHolder2784.class);
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException jme) {
-            assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
+            assertTrue(
+                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"),
+                    "unexpected message: " + jme.getMessage());
         }
     }
 
+    @Test
     public void testVeryBigDecimalUnwrappedWithNumLenUnlimited() throws Exception
     {
         final int len = 1200;

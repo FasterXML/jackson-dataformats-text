@@ -5,6 +5,8 @@ import tools.jackson.core.JsonToken;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class StreamingParse146Test extends ModuleTestBase
 {
     final YAMLMapper MAPPER = newObjectMapper();

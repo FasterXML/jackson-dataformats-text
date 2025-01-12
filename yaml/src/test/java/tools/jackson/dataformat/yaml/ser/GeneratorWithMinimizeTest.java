@@ -1,13 +1,15 @@
 package tools.jackson.dataformat.yaml.ser;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GeneratorWithMinimizeTest extends ModuleTestBase
 {
@@ -21,6 +23,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     }
     
 
+    @Test
     public void testDefaultSetting() {
         YAMLFactory f = new YAMLFactory();
         assertFalse(f.isEnabled(YAMLWriteFeature.MINIMIZE_QUOTES));
@@ -31,6 +34,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         assertTrue(f.isEnabled(YAMLWriteFeature.MINIMIZE_QUOTES));
     }
 
+    @Test
     public void testLiteralStringsSingleLine() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();
@@ -41,6 +45,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: some value", yaml);
     }
 
+    @Test
     public void testMinimizeQuotesWithBooleanContent() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();
@@ -72,6 +77,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: true", yaml);
     }
 
+    @Test
     public void testMinimizeQuotesWithNulls() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();
@@ -100,6 +106,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: nuLL", yaml);
     }
 
+    @Test
     public void testMinimizeQuotesWithStringsContainingSpecialChars() throws Exception {
         Map<String, String> content;
 
@@ -171,6 +178,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
     }
 
+    @Test
     public void testLiteralStringsMultiLine() throws Exception
     {
         Map<String, Object> content = new HashMap<String, Object>();
@@ -181,6 +189,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: |-\n  first\n  second\n  third", yaml);
     }
 
+    @Test
     public void testQuoteNumberStoredAsString() throws Exception
     {
         // [dataformats-text#182]
@@ -222,6 +231,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: \"+125\"", yaml);
     }
 
+    @Test
     public void testNonQuoteNumberStoredAsString() throws Exception
     {
         String yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "20")).trim();
@@ -238,6 +248,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     }
 
     // [dataformats-test#50]
+    @Test
     public void testEmptyStringWithMinimizeQuotes() throws Exception
     {
         String yaml = MINIM_MAPPER.writeValueAsString(Collections.singletonMap("key", "")).trim();
@@ -245,6 +256,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     }
 
     // [dataformats-text#140]
+    @Test
     public void testNumberKey() throws Exception
     {
         // First, test with Strings that happen to look like Integer
@@ -272,6 +284,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     }
 
     // [dataformats-text#246]
+    @Test
     public void testMinimizeQuotesSpecialCharsMultiLine() throws Exception
     {
         Map<String, Object> content = new HashMap<>();
@@ -285,6 +298,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
     // [dataformats-text#274]: tilde is an alias for null values, must quote
     // if written as String. Was already quoted by default but also must be quoted
     // in minimized mode
+    @Test
     public void testQuotingOfTilde() throws Exception
     {
         Map<String, Object> content = new HashMap<>();
@@ -301,6 +315,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
     // [dataformats-text#492]: too aggressive dropping of quoting?
     // (wrt [dataformats-text#465] change in 2.17)
+    @Test
     public void testMinimalHashQuoting492() throws Exception
     {
         Map<String, String> content = Collections.singletonMap("$ref",

@@ -1,12 +1,19 @@
 package tools.jackson.dataformat.yaml.type;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.*;
+
 import tools.jackson.core.ObjectReadContext;
+
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.util.TokenBuffer;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TypeIdTest extends ModuleTestBase
 {
@@ -34,6 +41,7 @@ public class TypeIdTest extends ModuleTestBase
     /**********************************************************
      */
 
+    @Test
     public void testNativeSerialization() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
@@ -42,6 +50,7 @@ public class TypeIdTest extends ModuleTestBase
         assertEquals("--- !<impl>\na: 13", yaml);
     }
 
+    @Test
     public void testNonNativeSerialization() throws Exception
     {
         YAMLMapper mapper = new YAMLMapper();
@@ -57,6 +66,7 @@ public class TypeIdTest extends ModuleTestBase
         assertEquals(Impl.class, back.getClass());
     }
     
+    @Test
     public void testDeserialization() throws Exception
     {
         /* Looks like there are couple of alternative ways to indicate
@@ -78,6 +88,7 @@ public class TypeIdTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testRoundtripWithBuffer() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();

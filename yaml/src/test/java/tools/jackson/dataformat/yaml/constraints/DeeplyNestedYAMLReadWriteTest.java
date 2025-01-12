@@ -1,5 +1,7 @@
 package tools.jackson.dataformat.yaml.constraints;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.*;
 import tools.jackson.core.exc.StreamConstraintsException;
 
@@ -9,6 +11,9 @@ import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Unit test(s) for verifying handling of maximum nesting depth
@@ -27,6 +32,7 @@ public class DeeplyNestedYAMLReadWriteTest
             .build()
             );
 
+    @Test
     public void testDeepNestingRead() throws Exception
     {
         final String DOC = YAML_MAPPER.writeValueAsString(createDeepNestedDoc(11));
@@ -46,6 +52,7 @@ public class DeeplyNestedYAMLReadWriteTest
         }
     }
     
+    @Test
     public void testDeepNestingWrite() throws Exception
     {
         final JsonNode docRoot = createDeepNestedDoc(13);
