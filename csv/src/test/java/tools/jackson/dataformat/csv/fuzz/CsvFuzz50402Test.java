@@ -6,7 +6,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.csv.ModuleTestBase;
 
-public class CsvFuzzTest extends ModuleTestBase
+public class CsvFuzz50402Test extends ModuleTestBase
 {
     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50402
     @Test
