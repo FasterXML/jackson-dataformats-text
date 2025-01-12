@@ -2,8 +2,12 @@ package tools.jackson.dataformat.csv.ser;
 
 import java.io.ByteArrayOutputStream;
 
-import tools.jackson.databind.*;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.databind.SequenceWriter;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests to try to see if Unicode writing, reading work as expected.
@@ -16,8 +20,9 @@ public class UnicodeWritingTest extends ModuleTestBase
     /**********************************************************************
      */
 
-    final CsvMapper MAPPER = mapperForCsv();
+    private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testSimpleStringSequence() throws Exception
     {
         // 16-Mar-2017, tatu: Actually, this assumes that read/write defaults are the same,

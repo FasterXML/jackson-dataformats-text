@@ -1,12 +1,15 @@
 package tools.jackson.dataformat.csv.ser;
 
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestGeneratorWithCustomSeparators extends ModuleTestBase
 {
-    // #17
+    // [dataformats-text#17]
+    @Test
     public void testOtherSeparator() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -16,6 +19,7 @@ public class TestGeneratorWithCustomSeparators extends ModuleTestBase
         assertEquals("Barbie;Benton;FEMALE;false;\n", result);
     }
 
+    @Test
     public void testTSV() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

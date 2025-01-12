@@ -1,15 +1,18 @@
 package perf;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.*;
-import tools.jackson.dataformat.csv.*;
+
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 
 /**
- * Simple manual performance micro-benchmark that compares compress and
- * decompress speeds of this LZF implementation with other codecs.
+ * Simple manual performance micro-benchmark for testing of CSV
+ * reading and writing performance.
  */
 @SuppressWarnings("resource")
 public final class ManualPerfComparison

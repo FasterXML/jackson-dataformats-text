@@ -1,20 +1,17 @@
 package tools.jackson.dataformat.csv;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import tools.jackson.core.*;
+import java.util.*;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-public abstract class ModuleTestBase extends junit.framework.TestCase
+import tools.jackson.core.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public abstract class ModuleTestBase
 {
     public enum Gender { MALE, FEMALE };
 
@@ -334,4 +331,5 @@ public abstract class ModuleTestBase extends junit.framework.TestCase
        }
        return bytes.toByteArray();
     }
+
 }

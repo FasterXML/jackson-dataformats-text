@@ -1,8 +1,13 @@
 package tools.jackson.dataformat.csv.ser;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UnwrappedWriteTest extends ModuleTestBase
 {
@@ -22,6 +27,7 @@ public class UnwrappedWriteTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#125]
+    @Test
     public void testWriteUnwrapped() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -3,6 +3,8 @@ package tools.jackson.dataformat.csv.filter;
 import java.io.*;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.SequenceWriter;
 
@@ -10,8 +12,11 @@ import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.testutil.PrefixInputDecorator;
 import tools.jackson.dataformat.csv.testutil.PrefixOutputDecorator;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class StreamingDecoratorsTest extends ModuleTestBase
 {
+    @Test
     public void testInputDecorators() throws IOException
     {
         final byte[] DOC = utf8("foo,");
@@ -42,6 +47,7 @@ public class StreamingDecoratorsTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testOutputDecorators() throws IOException
     {
         final byte[] DOC = utf8("a,b\n");

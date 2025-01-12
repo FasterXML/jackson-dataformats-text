@@ -1,12 +1,17 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.exc.StreamReadException;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.exc.InvalidFormatException;
+
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SequenceRecoveryTest extends ModuleTestBase
 {
@@ -38,6 +43,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = new CsvMapper();
     
+    @Test
     public void testSequenceRecovery() throws Exception
     {
         // can not reuse shared instance because we need:
@@ -97,6 +103,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#91]: ensure recovery works for extra columns
+    @Test
     public void testRecoverFromExtraColumns91() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Entry.class);
@@ -143,6 +150,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#91]: ensure recovery works for extra columns
+    @Test
     public void testRecoveryFromMissingQuote91() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(IdDesc.class);
@@ -184,6 +192,7 @@ public class SequenceRecoveryTest extends ModuleTestBase
 
     // Additional test for [dataformat-csv#91]: should skip only line with error
     // and do not fail on next line
+    @Test
     public void testRecoveryFromUnclosedQuotes() throws Exception
     {
         String toParse = a2q(

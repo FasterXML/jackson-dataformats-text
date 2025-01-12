@@ -1,9 +1,13 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ParserTrimSpacesTest extends ModuleTestBase
 {
@@ -25,6 +29,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
      */
 
     // Test to verify default behavior of not trimming spaces
+    @Test
     public void testNonTrimming() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -63,6 +68,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
         it.close();
     }
 
+    @Test
     public void testTrimming() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -96,6 +102,7 @@ public class ParserTrimSpacesTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#100]: Do not eat tabs when trimming space
+    @Test
     public void testTrimmingTabSeparated() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

@@ -1,8 +1,13 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 // Tests for [dataformat-csv#26]
 public class TestParserStrictQuoting extends ModuleTestBase
@@ -24,6 +29,7 @@ public class TestParserStrictQuoting extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testStrictQuoting() throws Exception
     {
         final String NUMS = "12345 6789";

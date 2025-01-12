@@ -3,18 +3,17 @@ package tools.jackson.dataformat.csv.deser;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.MappingIterator;
 
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvReadException;
-import tools.jackson.dataformat.csv.CsvSchema;
+import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.CsvSchema.ColumnType;
-import tools.jackson.dataformat.csv.CsvValueDecorator;
-import tools.jackson.dataformat.csv.CsvValueDecorators;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // [dataformats-text#442]
 public class ReadBracketedArray442Test extends ModuleTestBase
@@ -49,6 +48,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
             .getBytes(StandardCharsets.UTF_8);
 
     // [dataformats-text#442]
+    @Test
     public void testBracketsReadAutoSchema() throws Exception
     {
         final CsvSchema schema1 = _automaticSchema(true);
@@ -61,6 +61,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     }
 
     // [dataformats-text#442]
+    @Test
     public void testBracketsManualSchemaArray() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.ARRAY, true);
@@ -69,6 +70,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     }
     
     // [dataformats-text#442]
+    @Test
     public void testBracketsManualSchemaString() throws Exception
     {
         final CsvSchema schema = _manualSchema(ColumnType.STRING, true);
@@ -82,6 +84,7 @@ public class ReadBracketedArray442Test extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testBracketReadAutoSchemaFail() throws Exception
     {
         final CsvSchema schema = _automaticSchema(true);

@@ -1,11 +1,14 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectReader;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvReadFeature;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@code CsvParser.Feature.EMPTY_STRING_AS_NULL}
@@ -27,6 +30,7 @@ public class EmptyStringAsNullTest
 
     private final CsvMapper MAPPER = mapperForCsv();
 
+    @Test
     public void testEmptyStringAsNullDisabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
@@ -46,6 +50,7 @@ public class EmptyStringAsNullTest
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
+    @Test
     public void testEmptyStringAsNullEnabled() throws Exception {
         // setup test data
         TestUser expectedTestUser = new TestUser();
@@ -64,11 +69,13 @@ public class EmptyStringAsNullTest
         // test
         assertNotNull(actualTestUser);
         assertEquals(expectedTestUser.firstName, actualTestUser.firstName);
-        assertNull("The column that contains an empty String should be deserialized as null ", actualTestUser.middleName);
+        assertNull(actualTestUser.middleName,
+                "The column that contains an empty String should be deserialized as null ");
         assertEquals(expectedTestUser.lastName, actualTestUser.lastName);
     }
 
     // [dataformats-text#222]
+    @Test
     public void testEmptyStringAsNullNonPojo() throws Exception
     {
         String csv = "Grace,,Hopper";

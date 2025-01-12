@@ -2,9 +2,13 @@ package tools.jackson.dataformat.csv.failing;
 
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.*;
 
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // [dataformats-text#497]: 3-byte UTF-8 character at end of content
 public class UnicodeCSVRead497Test extends ModuleTestBase
@@ -12,6 +16,7 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#497]
+    @Test
     public void testUnicodeAtEnd() throws Exception
     {
         StringBuilder sb = new StringBuilder(4001);

@@ -1,9 +1,14 @@
 package tools.jackson.dataformat.csv.ser;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.dataformat.csv.*;
 
-// [dataformats-text#33]
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+//[dataformats-text#33]
 public class TestWriterWithMissingValues extends ModuleTestBase
 {
     private final CsvSchema SCHEMA = new CsvSchema.Builder()
@@ -11,9 +16,11 @@ public class TestWriterWithMissingValues extends ModuleTestBase
         .addColumn("value", CsvSchema.ColumnType.NUMBER)
         .addColumn("id", CsvSchema.ColumnType.STRING)
         .build();
+
     private final CsvMapper MAPPER = mapperForCsv();
     final ObjectWriter WRITER = MAPPER.writer().with(SCHEMA);
 
+    @Test
     public void testWrite_NoNulls() {
         final String csv = WRITER.writeValueAsString(
                 mapOf("timestamp", "2014-03-10T23:32:47+00:00",

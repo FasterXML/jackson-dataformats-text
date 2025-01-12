@@ -2,11 +2,15 @@ package tools.jackson.dataformat.csv.ser;
 
 import java.io.*;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests to verify that most core Jackson components can be serialized
@@ -44,14 +48,16 @@ public class CSVJDKSerializationTest extends ModuleTestBase
 
     private final CsvSchema SCHEMA_POJO = MAPPER.schemaFor(MyPojo.class);
 
-    public void testSchema() throws IOException
+    @Test
+    public void testSchema() throws Exception
     {
         byte[] ser = jdkSerialize(SCHEMA_POJO);
         CsvSchema out = (CsvSchema) jdkDeserialize(ser);
         assertNotNull(out);
     }
     
-    public void testMapperJDKSerialization() throws IOException
+    @Test
+    public void testMapperJDKSerialization() throws Exception
     {
         final String EXP_CSV = "2,3";
         final MyPojo p = new MyPojo(2, 3);
@@ -74,7 +80,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
         assertNotNull(csv);
     }
 
-    public void testMapperCopy() throws IOException
+    public void testMapperCopy() throws Exception
     {
         CsvMapper mapper2 = MAPPER.rebuild().build();
         assertNotSame(MAPPER, mapper2);
@@ -88,7 +94,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
     /**********************************************************
      */
     
-    protected byte[] jdkSerialize(Object o) throws IOException
+    protected byte[] jdkSerialize(Object o) throws Exception
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream(1000);
         ObjectOutputStream obOut = new ObjectOutputStream(bytes);
@@ -98,7 +104,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T jdkDeserialize(byte[] raw) throws IOException
+    protected <T> T jdkDeserialize(byte[] raw) throws Exception
     {
         ObjectInputStream objIn = new ObjectInputStream(new ByteArrayInputStream(raw));
         try {
@@ -110,5 +116,4 @@ public class CSVJDKSerializationTest extends ModuleTestBase
             objIn.close();
         }
     }
-
 }

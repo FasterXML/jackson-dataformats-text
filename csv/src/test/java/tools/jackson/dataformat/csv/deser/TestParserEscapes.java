@@ -3,10 +3,14 @@ package tools.jackson.dataformat.csv.deser;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestParserEscapes extends ModuleTestBase
 {
@@ -21,6 +25,7 @@ public class TestParserEscapes extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testSimpleEscapesInQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -37,6 +42,7 @@ public class TestParserEscapes extends ModuleTestBase
      * but since escape themselves are not officially supported, let's allow
      * them for now (can add a config setting if need be)
      */
+    @Test
     public void testSimpleEscapesInUnquoted() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -49,6 +55,7 @@ public class TestParserEscapes extends ModuleTestBase
         assertEquals("Desc with\nlinefeed", result.desc);
     }
 
+    @Test
     public void testEscapesAtStartInUnquoted() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -62,6 +69,7 @@ public class TestParserEscapes extends ModuleTestBase
     }
 
     // [dataformats-text#374]: suspected bug, was missing enabling of escape char
+    @Test
     public void testEscaping374() throws Exception
     {
         CsvSchema schema = CsvSchema.emptySchema().withColumnSeparator(';')

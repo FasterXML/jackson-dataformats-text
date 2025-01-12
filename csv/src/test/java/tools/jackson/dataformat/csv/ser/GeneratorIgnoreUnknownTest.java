@@ -2,11 +2,16 @@ package tools.jackson.dataformat.csv.ser;
 
 import java.util.*;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.StreamWriteFeature;
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class GeneratorIgnoreUnknownTest extends ModuleTestBase
 {
@@ -54,6 +59,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
     /**********************************************************
      */
 
+    @Test
     public void testSimpleIgnore() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
@@ -69,6 +75,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
     }
 
     // Also verify that it is possible to ignore more complex object output too
+    @Test
     public void testIgnorePOJO() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
@@ -84,6 +91,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
         assertEquals("1,2\n", csv);
     }
 
+    @Test
     public void testIgnoreObject() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();
@@ -107,6 +115,7 @@ public class GeneratorIgnoreUnknownTest extends ModuleTestBase
         assertEquals("1,2\n", csv);
     }
 
+    @Test
     public void testIgnoreNested() throws Exception
     {
         ObjectMapper mapper = mapperForCsv();

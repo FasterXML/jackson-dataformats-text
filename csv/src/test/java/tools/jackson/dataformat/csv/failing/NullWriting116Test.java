@@ -2,14 +2,19 @@ package tools.jackson.dataformat.csv.failing;
 
 import java.io.StringWriter;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NullWriting116Test extends ModuleTestBase
 {
     private final CsvMapper csv = mapperForCsv();
 
     // [dataformat#116]
+    @Test
     public void testWithObjectArray() throws Exception 
     {
         CsvSchema schema = CsvSchema.builder()

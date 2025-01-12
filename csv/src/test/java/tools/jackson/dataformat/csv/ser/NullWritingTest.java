@@ -5,10 +5,14 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 // for [dataformat-csv#69], other null value serialization
 public class NullWritingTest extends ModuleTestBase
@@ -40,6 +44,7 @@ public class NullWritingTest extends ModuleTestBase
 
     private final CsvMapper csv = mapperForCsv();
 
+    @Test
     public void testObjectWithNullMembersToString() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);
         ObjectWriter writer = csv.writer(schema);
@@ -47,6 +52,7 @@ public class NullWritingTest extends ModuleTestBase
         assertEquals("a,b,c,d\n,,,\n", nullMembers);
     }
 
+    @Test
     public void testNullToString() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);
         ObjectWriter writer = csv.writer(schema);
@@ -54,6 +60,7 @@ public class NullWritingTest extends ModuleTestBase
         assertEquals("a,b,c,d\n", nullObject);
     }
 
+    @Test
     public void testObjectWithNullMembersToStream() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);
         ObjectWriter writer = csv.writer(schema);
@@ -69,6 +76,7 @@ public class NullWritingTest extends ModuleTestBase
         writeValues.close();
     }
 
+    @Test
     public void testNullToStream() throws Exception {
         CsvSchema schema = csv.schemaFor(Nullable.class).withUseHeader(true);
         ObjectWriter writer = csv.writer(schema);
@@ -90,6 +98,7 @@ public class NullWritingTest extends ModuleTestBase
     }
 
     // [dataformat-csv#53]
+    @Test
     public void testCustomNullValue() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -104,6 +113,7 @@ public class NullWritingTest extends ModuleTestBase
     }
 
     // [dataformat-csv#83]
+    @Test
     public void testNullIssue83() throws Exception
     {
         CsvSchema schema = csv.schemaFor(Pojo83.class);
@@ -117,6 +127,7 @@ public class NullWritingTest extends ModuleTestBase
         assertEquals("foo,bar,123\ntest,abc,42\n", actualCsv);
     }
 
+    @Test
     public void testNullFieldsOfListsContainedByMainLevelListIssue106() throws Exception
     {
         CsvSchema schema = CsvSchema.builder().build();
@@ -135,6 +146,7 @@ public class NullWritingTest extends ModuleTestBase
         assertEquals("d0,n/a,d2\nn/a,d1,d2\nd0,d1,n/a\n", result);
     }
 
+    @Test
     public void testNullElementsOfMainLevelListIssue106() throws Exception
     {
         CsvSchema schema = CsvSchema.builder().build();

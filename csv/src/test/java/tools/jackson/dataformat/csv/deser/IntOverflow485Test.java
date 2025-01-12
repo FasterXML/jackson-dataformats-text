@@ -1,5 +1,7 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.exc.StreamReadException;
@@ -8,6 +10,9 @@ import tools.jackson.databind.ObjectReader;
 
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class IntOverflow485Test extends ModuleTestBase
 {
@@ -24,6 +29,7 @@ public class IntOverflow485Test extends ModuleTestBase
     // [dataformats-text#485]
 
     // First test that regular parsing works
+    @Test
     public void testNoOverflow485() throws Exception
     {
         Numbers485 result = READER.readValue(csv485(13, 42L));
@@ -31,6 +37,7 @@ public class IntOverflow485Test extends ModuleTestBase
         assertEquals(42L, result.longValue);
     }
 
+    @Test
     public void testIntOverflow() throws Exception
     {
         try {
@@ -42,6 +49,7 @@ public class IntOverflow485Test extends ModuleTestBase
         }
     }
 
+    @Test
     public void testLongOverflow() throws Exception
     {
         try {

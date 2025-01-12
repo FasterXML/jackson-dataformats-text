@@ -1,9 +1,13 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test(s) for [dataformat-csv#95]
@@ -17,6 +21,7 @@ public class IgnoreUnmappableTest extends ModuleTestBase
         public String first, second;
     }
     
+    @Test
     public void testSimpleIgnoral() throws Exception
     {
         final String INPUT = "a,b,c,foo\nd,e\nf,g,h,i\n";

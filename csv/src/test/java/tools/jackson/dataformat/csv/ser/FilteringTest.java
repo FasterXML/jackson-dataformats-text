@@ -1,9 +1,9 @@
 package tools.jackson.dataformat.csv.ser;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.*;
 import tools.jackson.databind.cfg.MapperConfig;
@@ -13,6 +13,8 @@ import tools.jackson.databind.ser.FilterProvider;
 import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
 import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("serial")
 public class FilteringTest extends ModuleTestBase
@@ -62,6 +64,7 @@ public class FilteringTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testWriteObjects() throws Exception {
         List<Entity> entities = new ArrayList<Entity>();
         entities.add( new Entity("Test entity 1", "Test description 1", "Test unused field"));

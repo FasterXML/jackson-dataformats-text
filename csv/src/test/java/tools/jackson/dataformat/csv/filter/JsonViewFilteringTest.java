@@ -5,17 +5,18 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter.FilterExceptFilter;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvReadException;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import tools.jackson.dataformat.csv.*;
 import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ser.std.SimpleFilterProvider;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JsonViewFilteringTest extends ModuleTestBase
 {
@@ -63,6 +64,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = mapperForCsv();
     
+    @Test
     public void testWithJsonView() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Bean.class).withLineSeparator("\n").withHeader();
@@ -87,6 +89,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
         assertEquals("7", result.b);
     }
 
+    @Test
     public void testSchemaWithJsonViewSerialization() throws Exception
     {
         CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
@@ -99,6 +102,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
         assertNull(br.readLine());
     }
 
+    @Test
     public void testSchemaWithJsonViewDeserialization() throws Exception
     {
         CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
@@ -111,6 +115,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
         assertEquals("7", result.b);
     }
 
+    @Test
     public void testSchemaWithJsonViewDeserializationFail() throws Exception
     {
         CsvSchema schema = MAPPER.schemaForWithView(Bean.class, ViewB.class).withLineSeparator("\n").withHeader();
@@ -123,6 +128,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
         }
     }
     
+    @Test
     public void testWithJsonFilter() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Company.class).withLineSeparator("\n").withHeader();
@@ -145,6 +151,7 @@ public class JsonViewFilteringTest extends ModuleTestBase
         assertNull(br.readLine());
     }    
 
+    @Test
     public void testWithJsonFilterFieldSuppressed() throws Exception
     {
         final CsvSchema schema = new CsvSchema.Builder()

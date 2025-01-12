@@ -1,11 +1,16 @@
 package tools.jackson.dataformat.csv.failing;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class MappingIteratorEnd9Test extends ModuleTestBase
 {
     // for [dataformats-text#9] (was [dataformat-csv#119])
+    @Test
     public void testDefaultSimpleQuotes() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

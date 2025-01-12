@@ -2,9 +2,11 @@ package tools.jackson.dataformat.csv.ser;
 
 import java.util.Arrays;
 
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SchemaReorderTest extends ModuleTestBase
 {
@@ -18,6 +20,7 @@ public class SchemaReorderTest extends ModuleTestBase
 
     private final CsvMapper MAPPER = new CsvMapper();
 
+    @Test
     public void testSchemaWithOrdering() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(Reordered.class);

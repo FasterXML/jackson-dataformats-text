@@ -1,14 +1,18 @@
 package tools.jackson.dataformat.csv.deser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.*;
 import tools.jackson.core.JsonParser.NumberType;
 import tools.jackson.core.io.SerializedString;
+
 import tools.jackson.databind.ObjectReader;
+
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Container for some low-level tests that use parser directly;
@@ -30,6 +34,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         return VANILLA_CSV_MAPPER;
     }
 
+    @Test
     public void testIntRead() throws Exception
     {
         _testInts(1, 59, -8);
@@ -38,6 +43,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         _testInts(Integer.MAX_VALUE, Integer.MIN_VALUE, 3);
     }
 
+    @Test
     public void testLongRead() throws Exception
     {
         _testLongs(1L, -3L);
@@ -45,6 +51,7 @@ public class StreamingCSVReadTest extends ModuleTestBase
         _testLongs(Long.MIN_VALUE, Long.MAX_VALUE);
     }
     
+    @Test
     public void testFloatRead() throws Exception
     {
         _testDoubles(1.0, 125.375, -900.5);

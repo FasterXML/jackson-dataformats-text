@@ -1,7 +1,10 @@
 package tools.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -11,6 +14,8 @@ import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.CsvWriteException;
 import tools.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
 {
@@ -53,6 +58,7 @@ public class GeneratorIgnoreUnknown51Test extends ModuleTestBase
      */
 
     // for [dataformats-text#51]
+    @Test
     public void testIgnoreEmbeddedObject() throws Exception
     {
         CsvMapper mapper = CsvMapper.builder()

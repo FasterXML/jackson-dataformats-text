@@ -2,11 +2,15 @@ package tools.jackson.dataformat.csv.deser;
 
 import java.io.ByteArrayOutputStream;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BrokenEncodingTest extends ModuleTestBase
 {
@@ -19,6 +23,7 @@ public class BrokenEncodingTest extends ModuleTestBase
     private final ObjectMapper MAPPER = mapperForCsv();
 
     // Simple test where a Latin-1 character is encountered; first byte wrong
+    @Test
     public void testLatin1AsUTF8() throws Exception
     {
         String CSV = "1,2\nabc,\u00A0\n";
@@ -57,6 +62,7 @@ public class BrokenEncodingTest extends ModuleTestBase
     }
 
     // Then a test with "middle" byte broken
+    @Test
     public void testBrokenUTF8MiddleByte() throws Exception
     {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();

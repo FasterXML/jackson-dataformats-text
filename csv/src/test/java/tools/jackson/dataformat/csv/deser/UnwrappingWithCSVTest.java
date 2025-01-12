@@ -1,11 +1,15 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 // for #12
 public class UnwrappingWithCSVTest extends ModuleTestBase
@@ -46,6 +50,7 @@ public class UnwrappingWithCSVTest extends ModuleTestBase
      * Simple test to verify that explicit schema mapping works fine
      * with unwrapped entities
      */
+    @Test
     public void testSimpleUnwrappingRoundtrip() throws Exception
     {
         final String CSV = "Joe,15,27\n";
@@ -75,6 +80,7 @@ public class UnwrappingWithCSVTest extends ModuleTestBase
      * available via BeanProperty/POJOPropertyBuilder. But it needs to be
      * made; and when this occurs, we can handle this case reasonably well.
      */
+    @Test
     public void testSimpleWithAutoSchema() throws Exception
     {
         final String CSV = "Henry,28,12\n";

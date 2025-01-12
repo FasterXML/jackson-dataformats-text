@@ -2,15 +2,16 @@ package tools.jackson.dataformat.csv.deser;
 
 import java.math.BigDecimal;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
 
-import tools.jackson.dataformat.csv.CsvFactory;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Tests copied from databind "JDKNumberDeserTest" (only a small subset)
 public class NumberDeserWithCSVTest extends ModuleTestBase
@@ -52,6 +53,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
     private final CsvMapper MAPPER = newObjectMapper();
 
     // [databind#2784]
+    @Test
     public void testBigDecimalUnwrapped() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(NestedBigDecimalHolder2784.class).withHeader()
@@ -63,6 +65,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
         assertEquals(new BigDecimal("5.123"), result.holder.value);
     }
 
+    @Test
     public void testVeryBigDecimalUnwrapped() throws Exception
     {
         final int len = 1200;
@@ -80,11 +83,13 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
                     .readValue(DOC);
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException jme) {
-            assertTrue("unexpected message: " + jme.getMessage(),
-                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"));
+            assertTrue(
+                    jme.getMessage().startsWith("Number value length (1200) exceeds the maximum allowed"),
+                    "unexpected message: " + jme.getMessage());
         }
     }
 
+    @Test
     public void testVeryBigDecimalUnwrappedWithNumLenUnlimited() throws Exception
     {
         final int len = 1200;
@@ -106,6 +111,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
         assertEquals(new BigDecimal(value), result.holder.value);
     }
 
+    @Test
     public void testDoubleUnwrapped() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(NestedDoubleHolder2784.class).withHeader()
@@ -117,6 +123,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
         assertEquals(Double.parseDouble("125.123456789"), result.holder.value);
     }
 
+    @Test
     public void testFloatUnwrapped() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(NestedFloatHolder2784.class).withHeader()
@@ -128,6 +135,7 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
         assertEquals(Float.parseFloat("125.123"), result.holder.value);
     }
 
+    @Test
     public void testFloatEdgeCase() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(NestedFloatHolder2784.class).withHeader()

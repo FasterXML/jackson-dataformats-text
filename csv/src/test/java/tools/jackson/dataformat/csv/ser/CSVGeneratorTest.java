@@ -5,14 +5,19 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.JsonGenerator;
-
 import tools.jackson.core.StreamWriteFeature;
+
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.node.ObjectNode;
+
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CSVGeneratorTest extends ModuleTestBase
 {
@@ -71,7 +76,8 @@ public class CSVGeneratorTest extends ModuleTestBase
      */
 
     private final CsvMapper MAPPER = mapperForCsv();
-    
+
+    @Test
     public void testSimpleExplicit() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -97,12 +103,14 @@ public class CSVGeneratorTest extends ModuleTestBase
                     .writeValueAsString(user));
     }
 
+    @Test
     public void testSimpleWithAutoSchema() throws Exception
     {
         _testSimpleWithAutoSchema(false);
         _testSimpleWithAutoSchema(true);
     }
 
+    @Test
     public void testWriteHeaders() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(FiveMinuteUser.class).withHeader();
@@ -123,6 +131,7 @@ public class CSVGeneratorTest extends ModuleTestBase
      * Test that verifies that if a header line is needed, configured schema
      * MUST contain at least one column
      */
+    @Test
     public void testFailedWriteHeaders() throws Exception
     {
         CsvSchema schema = CsvSchema.builder().setUseHeader(true).build();
@@ -135,6 +144,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testExplicitWithDouble() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -146,6 +156,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("abc,1.25\n", result);
     }
 
+    @Test
     public void testExplicitWithFloat() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -159,6 +170,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("abc,1.89\n", result);
     }
 
+    @Test
     public void testExplicitWithFastFloat() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -173,6 +185,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("abc,1.89\n", result);
     }
 
+    @Test
     public void testExplicitWithQuoted() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -187,6 +200,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // [dataformat-csv#14]: String values that cross buffer boundary won't be quoted properly
+    @Test
     public void testLongerWithQuotes() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -213,6 +227,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals(expOutput, result);
     }
 
+    @Test
     public void testWriteInFile() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -232,6 +247,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testForcedQuoting60() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -252,6 +268,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // [dataformats-csv#438]: Should not quote BigInteger/BigDecimal (or booleans)
+    @Test
     public void testForcedQuotingOfBigDecimal() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -271,6 +288,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("xyz,1.5,false\n", result);
     }
 
+    @Test
     public void testForcedQuotingWithQuoteEscapedWithBackslash() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -287,6 +305,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // [dataformats-text#374]: require escape char if needed
+    @Test
     public void testMissingEscapeCharacterSetting() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -304,6 +323,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         }
     }
     
+    @Test
     public void testForcedQuotingEmptyStrings() throws Exception
     {
         CsvMapper mapper = mapperForCsv();
@@ -324,6 +344,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // Must quote '#' when it starts the line
+    @Test
     public void testQuotingOfCommentCharForFirstColumn() throws Exception
     {
         // First, with default quoting
@@ -340,6 +361,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // In strict mode when the second column starts with '#', does not have to quote it
+    @Test
     public void testQuotingOfCommentCharForSecondColumn() throws Exception
     {
         // First, with default quoting
@@ -356,6 +378,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // In strict mode when comments are disabled, does not have to quote '#'
+    @Test
     public void testQuotingOfCommentCharWhenCommentsAreDisabled() throws Exception
     {
         // First, with default quoting
@@ -372,6 +395,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#98]
+    @Test
     public void testBackslashEscape() throws Exception
     {
         // First, with default quoting
@@ -383,6 +407,7 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("123,\"a\\\\b\"\n", csv);
     }
 
+    @Test
     public void testRawWrites() throws Exception
     {
         StringWriter w = new StringWriter();
@@ -409,6 +434,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }
 
     // for [dataformat-csv#87]
+    @Test
     public void testSerializationOfPrimitivesToCsv() throws Exception
     {
         CsvMapper mapper = new CsvMapper();
@@ -431,6 +457,7 @@ public class CSVGeneratorTest extends ModuleTestBase
     }    
 
     // [dataformats-csv#198]: Verify quoting of Numbers
+    @Test
     public void testForcedQuotingOfNumbers() throws Exception
     {
         final CsvSchema schema = CsvSchema.builder()

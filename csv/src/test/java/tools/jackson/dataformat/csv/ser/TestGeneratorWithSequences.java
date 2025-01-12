@@ -1,12 +1,15 @@
 package tools.jackson.dataformat.csv.ser;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import tools.jackson.dataformat.csv.ModuleTestBase;
+import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestGeneratorWithSequences extends ModuleTestBase
 {
@@ -31,6 +34,7 @@ public class TestGeneratorWithSequences extends ModuleTestBase
      * Verify that we should be able to just serialize sequences as is
      * because any "array" markers are all but ignored by generator.
      */
+    @Test
     public void testAsSequence() throws Exception
     {
         CsvMapper mapper = mapperForCsv();

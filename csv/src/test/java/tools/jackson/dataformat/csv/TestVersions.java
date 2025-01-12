@@ -6,6 +6,9 @@ import tools.jackson.core.*;
 
 import tools.jackson.databind.MapperFeature;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class TestVersions extends ModuleTestBase
 {
     public void testMapperVersions() throws IOException

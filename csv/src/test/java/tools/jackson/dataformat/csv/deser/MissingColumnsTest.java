@@ -1,10 +1,14 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for cases where one more of schema-declared columns is
@@ -31,6 +35,7 @@ public class MissingColumnsTest extends ModuleTestBase
     private final CsvSchema SCHEMA_ABC = MAPPER.schemaFor(ABC.class);
 
     // by default, just... ignore
+    @Test
     public void testDefaultMissingHandling() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ABC.class).with(SCHEMA_ABC);
@@ -61,6 +66,7 @@ public class MissingColumnsTest extends ModuleTestBase
     }
     
     // [dataformat-csv#137]: inject `null`s in place of missing
+    @Test
     public void testInjectMissingAsNulls() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)
@@ -91,6 +97,7 @@ public class MissingColumnsTest extends ModuleTestBase
     }
 
     // [dataformat-csv#140]: report error for missing columns
+    @Test
     public void testFailOnMissingColumns() throws Exception
     {
         ObjectReader r = MAPPER.readerFor(ABC.class)

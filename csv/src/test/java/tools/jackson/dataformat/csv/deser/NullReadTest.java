@@ -1,7 +1,11 @@
 package tools.jackson.dataformat.csv.deser;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.*;
 import tools.jackson.dataformat.csv.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class NullReadTest extends ModuleTestBase
 {
@@ -20,6 +24,7 @@ public class NullReadTest extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // For [dataformat-csv#72]: recognize "null value" for reading too
+    @Test
     public void testReadNullValue72() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
@@ -50,6 +55,7 @@ public class NullReadTest extends ModuleTestBase
         assertEquals("Whatevs", result.desc);
     }
 
+    @Test
     public void testReadNullValueFromEmptyString() throws Exception
     {
         // first: empty String should work as default
@@ -109,6 +115,7 @@ public class NullReadTest extends ModuleTestBase
     }
 
     // [dataformats-text#330]: empty String as null
+    @Test
     public void testEmptyStringAsNull330() throws Exception
     {
         CsvSchema headerSchema = CsvSchema.emptySchema().withHeader();

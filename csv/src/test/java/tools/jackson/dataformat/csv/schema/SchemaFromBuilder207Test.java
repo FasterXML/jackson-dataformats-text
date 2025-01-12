@@ -1,9 +1,14 @@
 package tools.jackson.dataformat.csv.schema;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.annotation.JsonDeserialize;
+
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
 import tools.jackson.dataformat.csv.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // Trying to reproduce [dataformats-text#207], with mixed success
 public class SchemaFromBuilder207Test extends ModuleTestBase
@@ -51,6 +56,7 @@ public class SchemaFromBuilder207Test extends ModuleTestBase
 
     private final CsvMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testSimple() throws Exception
     {
         CsvSchema schema = MAPPER.schemaFor(ValueClassXY.class).withHeader();        
