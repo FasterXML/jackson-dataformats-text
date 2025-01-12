@@ -1,12 +1,18 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.StringReader;
 
-import com.fasterxml.jackson.core.*;
+import org.junit.jupiter.api.Test;
+import org.yaml.snakeyaml.LoaderOptions;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.yaml.snakeyaml.LoaderOptions;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ParserDupHandlingTest extends ModuleTestBase
 {
@@ -15,6 +21,7 @@ public class ParserDupHandlingTest extends ModuleTestBase
 +"  first: Bob\n"
 +"  first: Dup\n";
 
+    @Test
     public void testDupChecksDisabled() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -25,6 +32,7 @@ public class ParserDupHandlingTest extends ModuleTestBase
         _verifyDupsOk(mapper, YAML_WITH_DUPS, true);
     }
 
+    @Test
     public void testDupChecksEnabled() throws Exception
     {
         YAMLFactory f = new YAMLFactory();
@@ -34,6 +42,7 @@ public class ParserDupHandlingTest extends ModuleTestBase
         _verifyDupsFail(mapper, YAML_WITH_DUPS, true);
     }
 
+    @Test
     public void testDupChecksEnabledLoaderOptions() throws Exception
     {
         LoaderOptions loaderOptions = new LoaderOptions();

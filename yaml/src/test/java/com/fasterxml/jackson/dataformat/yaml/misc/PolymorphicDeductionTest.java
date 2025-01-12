@@ -2,12 +2,13 @@ package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 
 import static com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.DEDUCTION;
+import static org.junit.jupiter.api.Assertions.*;
 
 // Copied from [databind#43], deduction-based polymorphism
 public class PolymorphicDeductionTest extends ModuleTestBase

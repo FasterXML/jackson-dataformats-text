@@ -2,10 +2,14 @@ package com.fasterxml.jackson.dataformat.yaml.misc;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.*;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ObjectAndTypeId231Test extends ModuleTestBase
 {
@@ -29,6 +33,7 @@ public class ObjectAndTypeId231Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#231]
+    @Test
     public void testTypeAndObjectId231() throws Exception
     {
         String yaml = "list:\n" +

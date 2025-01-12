@@ -1,51 +1,55 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("resource")
 public class ParserAutoCloseTest extends ModuleTestBase
 {
     private final ObjectMapper YAML_MAPPER = newObjectMapper();
 
+    @Test
     public void testParseReaderWithAutoClose() throws IOException {
 
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
         YAML_MAPPER.readTree(reader);
 
-        Assert.assertEquals(true, reader.isClosed());
+        assertEquals(true, reader.isClosed());
     }
 
+    @Test
     public void testParseStreamWithAutoClose() throws IOException {
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
         YAML_MAPPER.readTree(stream);
 
-        Assert.assertEquals(true, stream.isClosed());
+        assertEquals(true, stream.isClosed());
     }
 
+    @Test
     public void testParseReaderWithoutAutoClose() throws IOException {
         CloseTrackerReader reader = new CloseTrackerReader("foo:bar");
         YAML_MAPPER.reader()
             .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
             .readTree(reader);
 
-        Assert.assertEquals(false, reader.isClosed());
+        assertEquals(false, reader.isClosed());
     }
 
+    @Test
     public void testParseStreamWithoutAutoClose() throws IOException {
         CloseTrackerOutputStream stream = new CloseTrackerOutputStream("foo:bar");
         YAML_MAPPER.reader()
             .without(JsonParser.Feature.AUTO_CLOSE_SOURCE)
             .readTree(stream);
 
-        Assert.assertEquals(false, stream.isClosed());
+        assertEquals(false, stream.isClosed());
     }
 
     public static class CloseTrackerReader extends StringReader {
