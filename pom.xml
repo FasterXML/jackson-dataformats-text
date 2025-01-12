@@ -54,12 +54,8 @@
       <artifactId>jackson-core</artifactId>
     </dependency>
 
-    <!-- 20-Apr-2024, tatu: JUnit4 no longer from jackson-base, so: -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
+    <!-- 12-Jan-2025, tatu: JUnit4 no longer needed (as per JSTEP-10): -->
+
     <!-- 11-Jan-2025, joohyukkim: JSTEP-10, part 1, migrate to JUnit5 -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
