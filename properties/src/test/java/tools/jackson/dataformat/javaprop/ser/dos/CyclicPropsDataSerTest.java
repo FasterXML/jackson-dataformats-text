@@ -3,11 +3,16 @@ package tools.jackson.dataformat.javaprop.ser.dos;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.exc.StreamConstraintsException;
 
 import tools.jackson.dataformat.javaprop.JavaPropsMapper;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Simple unit tests to verify that we fail gracefully if you attempt to serialize
@@ -17,6 +22,7 @@ public class CyclicPropsDataSerTest extends ModuleTestBase
 {
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testListWithSelfReference() throws Exception {
         List<Object> list = new ArrayList<>();
         list.add(list);
@@ -26,8 +32,9 @@ public class CyclicPropsDataSerTest extends ModuleTestBase
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamWriteConstraints.DEFAULT_MAX_DEPTH + 1);
-            assertTrue("JsonMappingException message is as expected?",
-                    e.getMessage().startsWith(exceptionPrefix));
+            assertTrue(e.getMessage().startsWith(exceptionPrefix),
+                    "JsonMapping" +
+                                        "Exception message is as expected?");
         }
     }
 }

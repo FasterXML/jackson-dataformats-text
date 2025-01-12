@@ -1,15 +1,13 @@
 package tools.jackson.dataformat.javaprop;
 
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Map;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.TokenStreamContext;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.core.*;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.JsonToken;
 import tools.jackson.core.io.SerializedString;
@@ -17,11 +15,14 @@ import tools.jackson.core.io.SerializedString;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.javaprop.io.JPropWriteContext;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 public class SimpleStreamingTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newPropertiesMapper();
 
-    public void testParsing()
+    @Test
+    public void testParsing() throws Exception
     {
         JsonParser p = MAPPER.createParser("foo = bar");
         Object src = p.streamReadInputSource();
@@ -69,7 +70,8 @@ public class SimpleStreamingTest extends ModuleTestBase
         p.close();
     }
 
-    public void testStreamingGeneration()
+    @Test
+    public void testStreamingGeneration() throws Exception
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
@@ -117,7 +119,8 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("10", stuff.get("long"));
     }
 
-    public void testStreamingGenerationRaw()
+    @Test
+    public void testStreamingGenerationRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);
@@ -144,7 +147,8 @@ public class SimpleStreamingTest extends ModuleTestBase
         assertEquals("true", stuff.get("enabled"));
     }        
 
-    public void testStreamingLongRaw()
+    @Test
+    public void testStreamingLongRaw() throws Exception
     {
         StringWriter strw = new StringWriter();
         JsonGenerator gen = MAPPER.createGenerator(strw);

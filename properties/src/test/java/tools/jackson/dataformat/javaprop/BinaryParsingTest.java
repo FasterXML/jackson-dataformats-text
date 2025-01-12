@@ -1,10 +1,12 @@
 package tools.jackson.dataformat.javaprop;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.Properties;
+
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryParsingTest extends ModuleTestBase
 {
@@ -31,6 +33,7 @@ public class BinaryParsingTest extends ModuleTestBase
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
     // [dataformats-text#74]
+    @Test
     public void testMultipleBinaryFields() throws Exception
     {
         final MyBean src = new MyBean(true);

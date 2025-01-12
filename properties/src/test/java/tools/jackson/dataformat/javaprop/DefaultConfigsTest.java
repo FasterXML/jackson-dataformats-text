@@ -2,17 +2,17 @@ package tools.jackson.dataformat.javaprop;
 
 import java.io.StringWriter;
 
-import tools.jackson.core.JsonGenerator;
-import tools.jackson.core.JsonParser;
-import tools.jackson.core.ObjectReadContext;
-import tools.jackson.core.ObjectWriteContext;
-import tools.jackson.core.Version;
-import tools.jackson.core.Versioned;
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.core.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultConfigsTest extends ModuleTestBase
 {
     private final String ARTIFACT_ID = "jackson-dataformat-properties";
 
+    @Test
     public void testFactoryBaseConfig()
     {
         JavaPropsFactory f = new JavaPropsFactory();
@@ -25,6 +25,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         assertFalse(f.canUseCharArrays());
     }
 
+    @Test
     public void testGeneratorConfig() throws Exception
     {
         JavaPropsFactory f = new JavaPropsFactory();
@@ -37,6 +38,7 @@ public class DefaultConfigsTest extends ModuleTestBase
         gen.close();
     }
 
+    @Test
     public void testParserConfig() throws Exception
     {
         JavaPropsFactory f = new JavaPropsFactory();

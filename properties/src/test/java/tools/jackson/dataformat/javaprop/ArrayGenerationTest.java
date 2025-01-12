@@ -3,12 +3,17 @@ package tools.jackson.dataformat.javaprop;
 import java.util.Map;
 import java.util.Properties;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.dataformat.javaprop.util.Markers;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ArrayGenerationTest extends ModuleTestBase
 {
     private final JavaPropsMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testPointListSimple() throws Exception
     {
         Points input = new Points
@@ -35,6 +40,7 @@ public class ArrayGenerationTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testPointListWithIndex() throws Exception
     {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()
@@ -65,6 +71,7 @@ public class ArrayGenerationTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testPointListWithCustomMarkers() throws Exception
     {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()

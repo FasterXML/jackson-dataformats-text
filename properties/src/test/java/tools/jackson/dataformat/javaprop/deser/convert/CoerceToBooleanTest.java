@@ -3,12 +3,16 @@ package tools.jackson.dataformat.javaprop.deser.convert;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.*;
 import tools.jackson.databind.cfg.CoercionAction;
 import tools.jackson.databind.cfg.CoercionInputShape;
 import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.databind.type.LogicalType;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // 2020-12-18, tatu: Modified from "jackson-databind" version: Properties
 //   backend MUST NOT prevent coercion from String since Properties
@@ -55,6 +59,7 @@ public class CoerceToBooleanTest
      */
 
     // for [databind#403]
+    @Test
     public void testEmptyStringFailForBooleanPrimitive() throws IOException
     {
         final ObjectReader reader = MAPPER_EMPTY_TO_BOOLEAN_FAIL
@@ -68,6 +73,7 @@ public class CoerceToBooleanTest
         }
     }
 
+    @Test
     public void testDefaultStringToBooleanCoercionOk() throws Exception {
         _verifyStringToBooleanOk(DEFAULT_MAPPER);
     }
@@ -78,6 +84,7 @@ public class CoerceToBooleanTest
     /**********************************************************
      */
 
+    @Test
     public void testStringToBooleanOkDespiteCoercionConfig() throws Exception {
         _verifyStringToBooleanOk(MAPPER_STRING_TO_BOOLEAN_FAIL);
     }

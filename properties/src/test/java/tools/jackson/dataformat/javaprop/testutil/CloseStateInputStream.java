@@ -1,9 +1,6 @@
 package tools.jackson.dataformat.javaprop.testutil;
 
-import java.io.ByteArrayInputStream;
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class CloseStateInputStream extends FilterInputStream
 {

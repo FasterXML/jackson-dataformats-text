@@ -1,11 +1,16 @@
 package tools.jackson.dataformat.javaprop;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomSeparatorsTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newPropertiesMapper();
 
+    @Test
     public void testCustomPathSeparator() throws Exception
     {
         JavaPropsSchema schema = JavaPropsSchema.emptySchema()

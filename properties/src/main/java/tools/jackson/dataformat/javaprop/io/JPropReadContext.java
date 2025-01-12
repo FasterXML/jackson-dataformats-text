@@ -1,8 +1,10 @@
 package tools.jackson.dataformat.javaprop.io;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
-import tools.jackson.core.*;
+import tools.jackson.core.TokenStreamContext;
+import tools.jackson.core.JsonToken;
 import tools.jackson.dataformat.javaprop.util.JPropNode;
 
 /**

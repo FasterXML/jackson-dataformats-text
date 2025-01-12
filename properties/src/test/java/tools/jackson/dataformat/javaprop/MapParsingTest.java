@@ -2,7 +2,12 @@ package tools.jackson.dataformat.javaprop;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.ObjectMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class MapParsingTest extends ModuleTestBase
 {
@@ -16,6 +21,7 @@ public class MapParsingTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testMapWithBranchNoEscaping() throws Exception
     {
         ObjectMapper mapper = newPropertiesMapper();
@@ -36,6 +42,7 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("fourth", ((Map<?,?>) w.map.get("ab\\")).get("c"));
     }
 
+    @Test
     public void testMapWithBranchBackslashEscape() throws Exception
     {
         JavaPropsMapper mapper = newPropertiesMapper();
@@ -73,6 +80,7 @@ public class MapParsingTest extends ModuleTestBase
         assertEquals("twelfth", ((Map<?,?>) w.map.get("xy\\.d")).get("ij"));
     }
 
+    @Test
     public void testMapWithBranchHashEscape() throws Exception
     {
         JavaPropsMapper mapper = newPropertiesMapper();

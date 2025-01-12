@@ -4,8 +4,13 @@ import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class JDKSerializabilityTest extends ModuleTestBase
 {
+    @Test
     public void testApacheMapperWithModule() throws Exception {
         // very simple validation: should still work wrt serialization
         JavaPropsMapper unfrozenMapper = serializeAndDeserialize(new JavaPropsMapper());
@@ -29,6 +34,7 @@ public class JDKSerializabilityTest extends ModuleTestBase
         assertEquals(input, result2);
     }
 
+    @Test
     private JavaPropsMapper serializeAndDeserialize(JavaPropsMapper mapper) throws Exception {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream);
@@ -38,8 +44,9 @@ public class JDKSerializabilityTest extends ModuleTestBase
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(serializedBytes);
         ObjectInputStream inputStream = new ObjectInputStream(byteArrayInputStream);
         Object deserializedObject = inputStream.readObject();
-        assertTrue("Deserialized object should be an instance of JavaPropsMapper",
-                deserializedObject instanceof JavaPropsMapper);
+        assertTrue(deserializedObject instanceof JavaPropsMapper,
+                "Deserialized object should be an instance of JavaPropsMapper"
+                );
         return (JavaPropsMapper) deserializedObject;
     }
 

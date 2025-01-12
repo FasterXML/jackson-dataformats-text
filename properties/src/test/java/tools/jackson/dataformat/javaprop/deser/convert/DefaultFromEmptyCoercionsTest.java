@@ -1,12 +1,14 @@
 package tools.jackson.dataformat.javaprop.deser.convert;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectReader;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // 09-Apr-2021, tatu: Since Properties format has very loose typing
 //   many coercions are needed and are enabled by default. Let's
@@ -48,6 +50,7 @@ public class DefaultFromEmptyCoercionsTest extends ModuleTestBase
     /**********************************************************************
      */
     
+    @Test
     public void testJDKPrimitives() throws Exception
     {
         SomePrimitives p;
@@ -69,6 +72,7 @@ public class DefaultFromEmptyCoercionsTest extends ModuleTestBase
         assertEquals((double) 0, p.d);
     }
 
+    @Test
     public void testJDKWrappers() throws Exception {
         SomeWrappers w;
         final ObjectReader r = DEFAULT_MAPPER.readerFor(SomeWrappers.class);
@@ -92,6 +96,7 @@ public class DefaultFromEmptyCoercionsTest extends ModuleTestBase
         assertEquals(Double.valueOf(0), w.d);
     }
 
+    @Test
     public void testJDKStringTypes() throws Exception
     {
         StringBean v;
@@ -105,6 +110,7 @@ public class DefaultFromEmptyCoercionsTest extends ModuleTestBase
         assertEquals("", v.str);
     }
 
+    @Test
     public void testJDKContainerTypes() throws Exception {
         SomeContainers w;
         final ObjectReader r = DEFAULT_MAPPER.readerFor(SomeContainers.class);
@@ -140,6 +146,7 @@ public class DefaultFromEmptyCoercionsTest extends ModuleTestBase
     /**********************************************************************
      */
 
+    @Test
     public void testPOJOs() throws Exception
     {
         final ObjectReader r = DEFAULT_MAPPER.readerFor(Rectangle.class);

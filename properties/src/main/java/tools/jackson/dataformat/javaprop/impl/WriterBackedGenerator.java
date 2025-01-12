@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.javaprop.impl;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Writer;
 
 import tools.jackson.core.*;
 import tools.jackson.core.io.IOContext;

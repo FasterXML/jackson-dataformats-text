@@ -3,12 +3,16 @@ package tools.jackson.dataformat.javaprop.constraints;
 import tools.jackson.core.*;
 import tools.jackson.core.exc.StreamConstraintsException;
 
+import org.junit.jupiter.api.Test;
+
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import tools.jackson.dataformat.javaprop.JavaPropsMapper;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DeeplyNestedPropsReadWriteTest extends ModuleTestBase
 {
@@ -24,6 +28,7 @@ public class DeeplyNestedPropsReadWriteTest extends ModuleTestBase
             .build()
             );
 
+    @Test
     public void testDeepNestingRead() throws Exception
     {
         final String DOC = PROPS_MAPPER_CONSTR.writeValueAsString(createDeepNestedDoc(11));
@@ -43,6 +48,7 @@ public class DeeplyNestedPropsReadWriteTest extends ModuleTestBase
         }
     }
     
+    @Test
     public void testDeepNestingWrite() throws Exception
     {
         final JsonNode docRoot = createDeepNestedDoc(13);
@@ -55,6 +61,7 @@ public class DeeplyNestedPropsReadWriteTest extends ModuleTestBase
         }
     }
     
+    @Test
     public void testDeeplyNestedReadVanilla() throws Exception {
         final int depth = 1500;
         final String doc = createDeepNestedString(depth);
@@ -64,11 +71,12 @@ public class DeeplyNestedPropsReadWriteTest extends ModuleTestBase
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",
                     StreamReadConstraints.DEFAULT_MAX_DEPTH + 1);
-            assertTrue("unexpected exception message: " + e.getMessage(),
-                    e.getMessage().startsWith(exceptionPrefix));
+            assertTrue(e.getMessage().startsWith(exceptionPrefix),
+                    "unexpected exception message: " + e.getMessage());
         }
     }
 
+    @Test
     public void testDeeplyNestedReadWithUnconstrainedMapper() throws Exception {
         final int depth = 1500;
         final String doc = createDeepNestedString(depth);

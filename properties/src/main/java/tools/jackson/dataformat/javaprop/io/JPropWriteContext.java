@@ -1,7 +1,6 @@
 package tools.jackson.dataformat.javaprop.io;
 
-import tools.jackson.core.*;
-//import tools.jackson.core.json.JsonWriteContext;
+import tools.jackson.core.TokenStreamContext;
 
 public class JPropWriteContext
     extends TokenStreamContext

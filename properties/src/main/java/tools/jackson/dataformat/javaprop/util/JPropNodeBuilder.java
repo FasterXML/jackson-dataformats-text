@@ -2,7 +2,7 @@ package tools.jackson.dataformat.javaprop.util;
 
 import java.util.Map;
 
-import tools.jackson.dataformat.javaprop.*;
+import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 
 public class JPropNodeBuilder
 {
