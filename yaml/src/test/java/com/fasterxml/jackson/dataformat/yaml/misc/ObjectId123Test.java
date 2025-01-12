@@ -1,14 +1,21 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.*;
+import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 //for [dataformats-text#123], problem with YAML, Object Ids
 public class ObjectId123Test extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
     
+    @Test
     public void testObjectIdUsingNative() throws Exception
     {
         final String YAML_CONTENT =

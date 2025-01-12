@@ -1,5 +1,9 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
  * Tests to try to ensure that SnakeYAML exceptions are not leaked,
  * both because they are problematic on OSGi runtimes (depending on 
@@ -8,6 +12,7 @@ package com.fasterxml.jackson.dataformat.yaml;
  */
 public class ExceptionConversionTest extends ModuleTestBase
 {
+    @Test
     public void testSimpleParsingLeakage() throws Exception
     {
         YAMLMapper mapper = newObjectMapper();

@@ -3,18 +3,22 @@ package com.fasterxml.jackson.dataformat.yaml.ser;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BinaryWriteTest extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testBinaryViaTree() throws Exception
     {
         byte[] srcPayload = new byte[] { 1, 2, 3, 4, 5 };
@@ -28,9 +32,10 @@ public class BinaryWriteTest extends ModuleTestBase
         assertNotNull(data);
         assertEquals(JsonNodeType.BINARY, data.getNodeType());
         final byte[] b = data.binaryValue();
-        Assert.assertArrayEquals(srcPayload, b);
+        assertArrayEquals(srcPayload, b);
     }
 
+    @Test
     public void testWriteLongBinary() throws Exception {
         final int length = 200;
         final byte[] data = new byte[length];
@@ -46,7 +51,7 @@ public class BinaryWriteTest extends ModuleTestBase
         }
 
         String yaml = w.toString();
-        Assert.assertEquals("---\n" +
+        assertEquals("---\n" +
                 "array: !!binary |-\n" +
                 "  AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB\n" +
                 "  AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB\n" +
