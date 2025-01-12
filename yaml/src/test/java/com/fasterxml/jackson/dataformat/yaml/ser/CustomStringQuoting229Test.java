@@ -2,13 +2,13 @@ package com.fasterxml.jackson.dataformat.yaml.ser;
 
 import java.util.Collections;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
 import com.fasterxml.jackson.dataformat.yaml.util.StringQuotingChecker;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings("serial")
 public class CustomStringQuoting229Test extends ModuleTestBase
@@ -41,6 +41,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .build();
 
+    @Test
     public void testNameQuotingDefault() throws Exception
     {
         // First, default quoting
@@ -61,6 +62,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(MINIMIZING_MAPPER, Collections.singletonMap("specialKey", "value")));
     }
 
+    @Test
     public void testNameQuotingCustom() throws Exception
     {
         // Then with custom rules
@@ -79,6 +81,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(CUSTOM_MAPPER, Collections.singletonMap("specialKey", "value")));
     }
 
+    @Test
     public void testValueQuotingDefault() throws Exception
     {
         // First, default quoting
@@ -97,6 +100,7 @@ public class CustomStringQuoting229Test extends ModuleTestBase
                 _asYaml(MINIMIZING_MAPPER, Collections.singletonMap("key", "specialValue")));
     }
 
+    @Test
     public void testValueQuotingCustom() throws Exception
     {
         // Then with custom rules

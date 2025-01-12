@@ -1,18 +1,16 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
-import org.junit.Test;
-
-import com.fasterxml.jackson.dataformat.yaml.UTF8Writer;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.UTF8Writer;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UTF8WriterTest {
 

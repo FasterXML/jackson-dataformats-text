@@ -1,16 +1,19 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import com.fasterxml.jackson.core.JsonLocation;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
 {
     private final YAMLAnchorReplayingFactory YAML_F = new YAMLAnchorReplayingFactory();
 
+    @Test
     public void testBasic() throws Exception
     {
         final String YAML =
@@ -65,6 +68,7 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testScalarAnchor() throws Exception
     {
         final String YAML =
@@ -124,6 +128,7 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testSequenceAnchor() throws Exception
     {
         final String YAML =
@@ -203,6 +208,7 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testObjectAnchor() throws Exception
     {
         final String YAML =
@@ -281,6 +287,7 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
         p.close();
     }
 
+    @Test
     public void testMergeAnchor() throws Exception
     {
         final String YAML =

@@ -1,12 +1,14 @@
 package com.fasterxml.jackson.dataformat.yaml.type;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TypeIdTest extends ModuleTestBase
 {
@@ -34,6 +36,7 @@ public class TypeIdTest extends ModuleTestBase
     /**********************************************************
      */
 
+    @Test
     public void testNativeSerialization() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();
@@ -42,6 +45,7 @@ public class TypeIdTest extends ModuleTestBase
         assertEquals("--- !<impl>\na: 13", yaml);
     }
 
+    @Test
     public void testNonNativeSerialization() throws Exception
     {
         YAMLMapper mapper = newObjectMapper();
@@ -56,6 +60,7 @@ public class TypeIdTest extends ModuleTestBase
         assertEquals(Impl.class, back.getClass());
     }
     
+    @Test
     public void testDeserialization() throws Exception
     {
         /* Looks like there are couple of alternative ways to indicate
@@ -77,6 +82,7 @@ public class TypeIdTest extends ModuleTestBase
         }
     }
 
+    @Test
     public void testRoundtripWithBuffer() throws Exception
     {
         ObjectMapper mapper = newObjectMapper();

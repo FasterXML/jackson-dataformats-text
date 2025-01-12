@@ -1,14 +1,14 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.DumperOptions;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomNodeStyleTest extends ModuleTestBase {
 
@@ -16,6 +16,7 @@ public class CustomNodeStyleTest extends ModuleTestBase {
     private final ObjectMapper BLOCK_STYLE_MAPPER = createMapper(DumperOptions.FlowStyle.BLOCK);
     private final ObjectMapper FLOW_STYLE_MAPPER = createMapper(DumperOptions.FlowStyle.FLOW);
 
+    @Test
     public void testFlowStyles() throws Exception {
         // list
         assertEquals("key_default:\n- value",

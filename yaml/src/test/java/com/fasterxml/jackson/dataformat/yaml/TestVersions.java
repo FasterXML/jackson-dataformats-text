@@ -2,11 +2,16 @@ package com.fasterxml.jackson.dataformat.yaml;
 
 import java.io.*;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestVersions extends ModuleTestBase
 {
     @SuppressWarnings("resource")
+    @Test
     public void testMapperVersions() throws IOException
     {
         YAMLFactory f = new YAMLFactory();
@@ -18,6 +23,7 @@ public class TestVersions extends ModuleTestBase
         assertVersion(jgen);
     }
 
+    @Test
     public void testDefaults() throws Exception
     {
         YAMLFactory f = new YAMLFactory();

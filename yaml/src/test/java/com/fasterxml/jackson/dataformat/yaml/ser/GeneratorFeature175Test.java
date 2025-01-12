@@ -1,11 +1,12 @@
 package com.fasterxml.jackson.dataformat.yaml.ser;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-
 import java.util.Map;
 
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 public class GeneratorFeature175Test extends ModuleTestBase {
     /*
     /**********************************************************
@@ -14,6 +15,7 @@ public class GeneratorFeature175Test extends ModuleTestBase {
      */
 
     // [dataformats-text#175]: arrays indentation with indicator
+    @Test
     public void testArrayWithIndicatorIndentation() throws Exception {
         String yamlBefore = "---\n" +
             "tags:\n" +

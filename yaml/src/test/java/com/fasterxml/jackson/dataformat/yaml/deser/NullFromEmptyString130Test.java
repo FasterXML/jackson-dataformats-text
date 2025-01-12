@@ -1,8 +1,10 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
+import org.junit.jupiter.api.Test;
+
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // [dataformats-text#130]: Easy enough to fix, if we choose to,
 //  but due to timing cannot include in 2.12 (too close to release
@@ -23,6 +25,7 @@ public class NullFromEmptyString130Test extends ModuleTestBase
     private final YAMLMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#130]
+    @Test
     public void testEmptyValueToNull130() throws Exception
     {
         // by default, empy Strings are coerced:

@@ -1,12 +1,13 @@
 package com.fasterxml.jackson.dataformat.yaml.misc;
 
-import com.fasterxml.jackson.annotation.*;
+import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
-import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.*;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectIdTest extends ModuleTestBase
 {
@@ -115,6 +116,7 @@ public class ObjectIdTest extends ModuleTestBase
 
     private final ObjectMapper MAPPER = newObjectMapper();
 
+    @Test
     public void testNativeSerialization() throws Exception
     {
         Node first = new Node("first");
@@ -126,6 +128,7 @@ public class ObjectIdTest extends ModuleTestBase
     }
 
     // [dataformat-yaml#23]
+    @Test
     public void testNonNativeSerialization() throws Exception
     {
         YAMLMapper mapper = YAMLMapper.builder()
@@ -139,6 +142,7 @@ public class ObjectIdTest extends ModuleTestBase
         assertYAML(SIMPLE_YAML_NON_NATIVE, yaml);
     }
 
+    @Test
     public void testBasicDeserialization() throws Exception
     {
         Node first = MAPPER.readValue(SIMPLE_YAML_NATIVE, Node.class);
@@ -151,6 +155,7 @@ public class ObjectIdTest extends ModuleTestBase
 
     // More complex example with string-prefixed id
     // [dataformat-yaml#45]
+    @Test
     public void testDeserializationIssue45() throws Exception
     {
         NodeWithStringId node = MAPPER.readValue(SIMPLE_YAML_NATIVE_B, NodeWithStringId.class);
@@ -163,6 +168,7 @@ public class ObjectIdTest extends ModuleTestBase
         assertSame(node, node.next.next);
     }
 
+    @Test
     public void testRoundtripWithBuffer() throws Exception
     {
         TokenBuffer tbuf = MAPPER.readValue(SIMPLE_YAML_NATIVE, TokenBuffer.class);
