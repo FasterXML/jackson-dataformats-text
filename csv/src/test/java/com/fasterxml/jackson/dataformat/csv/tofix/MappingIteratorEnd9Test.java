@@ -1,9 +1,10 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.tofix;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.*;
+import com.fasterxml.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MappingIteratorEnd9Test extends ModuleTestBase
 {
     // for [dataformats-text#9] (was [dataformat-csv#119])
+    @JacksonTestFailureExpected
     @Test
     public void testDefaultSimpleQuotes() throws Exception
     {
