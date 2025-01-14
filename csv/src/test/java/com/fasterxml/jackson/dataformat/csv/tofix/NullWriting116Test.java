@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.tofix;
 
 import java.io.StringWriter;
 
@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
+import com.fasterxml.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,6 +16,7 @@ public class NullWriting116Test extends ModuleTestBase
     private final CsvMapper csv = mapperForCsv();
 
     // [dataformat#116]
+    @JacksonTestFailureExpected
     @Test
     public void testWithObjectArray() throws Exception 
     {

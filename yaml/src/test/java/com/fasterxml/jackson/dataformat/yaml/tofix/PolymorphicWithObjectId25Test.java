@@ -1,10 +1,11 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.tofix;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,6 +40,7 @@ public class PolymorphicWithObjectId25Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
     
     // [dataformats-text#25]
+    @JacksonTestFailureExpected
     @Test
     public void testPolymorphicAndObjectId25() throws Exception
     {
