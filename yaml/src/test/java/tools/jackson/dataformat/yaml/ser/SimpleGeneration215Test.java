@@ -4,10 +4,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
-import tools.jackson.dataformat.yaml.ModuleTestBase;
-import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLWriteFeature;
+import tools.jackson.dataformat.yaml.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -15,7 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SimpleGeneration215Test extends ModuleTestBase
 {
     // [dataformats-text#215]: trying to disable WRITE_DOC_START_MARKER
-    // via ObjectWriter does not work
+    // (works for 3.0, fails with 2.x like 2.19)
+    //@JacksonTestFailureExpected
     @Test
     public void testStartMarkerViaWriter() throws Exception
     {

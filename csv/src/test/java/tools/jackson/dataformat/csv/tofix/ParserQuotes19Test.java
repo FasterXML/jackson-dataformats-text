@@ -1,10 +1,11 @@
-package tools.jackson.dataformat.csv.failing;
+package tools.jackson.dataformat.csv.tofix;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.dataformat.csv.*;
+import tools.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,6 +24,7 @@ public class ParserQuotes19Test extends ModuleTestBase
      */
 
     // For #19: need to handle spaces outside quotes, even if not trimming?
+    @JacksonTestFailureExpected
     @Test
     public void testSimpleQuotesWithSpaces() throws Exception
     {

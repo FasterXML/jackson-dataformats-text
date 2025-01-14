@@ -1,12 +1,13 @@
-package tools.jackson.dataformat.csv.failing;
+package tools.jackson.dataformat.csv.tofix;
 
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
-import tools.jackson.databind.*;
+import tools.jackson.databind.JsonNode;
 
 import tools.jackson.dataformat.csv.*;
+import tools.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +17,7 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#497]
+    @JacksonTestFailureExpected
     @Test
     public void testUnicodeAtEnd() throws Exception
     {

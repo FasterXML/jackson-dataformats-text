@@ -1,15 +1,13 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.tofix;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 
 import tools.jackson.databind.ObjectMapper;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,6 +42,7 @@ public class PolymorphicWithObjectId25Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
     
     // [dataformats-text#25]
+    @JacksonTestFailureExpected
     @Test
     public void testPolymorphicAndObjectId25() throws Exception
     {

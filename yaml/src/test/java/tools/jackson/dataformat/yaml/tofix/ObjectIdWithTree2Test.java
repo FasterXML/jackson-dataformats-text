@@ -1,12 +1,15 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.tofix;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+
+import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 /**
@@ -44,6 +47,7 @@ public class ObjectIdWithTree2Test extends ModuleTestBase
             ;
 
     // [dataformats-text#2]
+    @JacksonTestFailureExpected
     @Test
     public void testRoundtripViaTree() throws Exception
     {

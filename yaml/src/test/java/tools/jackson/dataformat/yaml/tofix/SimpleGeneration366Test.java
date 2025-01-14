@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.tofix;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.dataformat.yaml.*;
+import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -13,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 public class SimpleGeneration366Test extends ModuleTestBase
 {
     // [dataformats-text#366]: multiline literal block with trailing spaces does not work
+    @JacksonTestFailureExpected
     @Test
     public void testLiteralBlockStyleMultilineWithTrailingSpace() throws Exception
     {
