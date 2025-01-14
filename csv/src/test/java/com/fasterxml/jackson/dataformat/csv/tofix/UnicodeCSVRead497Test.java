@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.failing;
+package com.fasterxml.jackson.dataformat.csv.tofix;
 
 import java.nio.charset.StandardCharsets;
 
@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
+import com.fasterxml.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +17,7 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#497]
+    @JacksonTestFailureExpected
     @Test
     public void testUnicodeAtEnd() throws Exception
     {

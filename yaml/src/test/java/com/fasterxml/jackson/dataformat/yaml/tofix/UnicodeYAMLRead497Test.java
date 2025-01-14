@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.tofix;
 
 import java.nio.charset.StandardCharsets;
 
@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import com.fasterxml.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,6 +18,7 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
     private final YAMLMapper MAPPER = newObjectMapper();
 
     // [dataformats-text#497]
+    @JacksonTestFailureExpected
     @Test
     public void testUnicodeAtEnd() throws Exception
     {

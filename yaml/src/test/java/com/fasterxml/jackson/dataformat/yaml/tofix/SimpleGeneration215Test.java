@@ -1,10 +1,11 @@
-package com.fasterxml.jackson.dataformat.yaml.failing;
+package com.fasterxml.jackson.dataformat.yaml.tofix;
 
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.dataformat.yaml.*;
+import com.fasterxml.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 // NOTE: fails only on 2.x (2.12) -- fixed for 3.0
@@ -12,6 +13,7 @@ public class SimpleGeneration215Test extends ModuleTestBase
 {
     // [dataformats-text#215]: trying to disable WRITE_DOC_START_MARKER
     // via ObjectWriter does not work
+    @JacksonTestFailureExpected
     @Test
     public void testStartMarkerViaWriter() throws Exception
     {
