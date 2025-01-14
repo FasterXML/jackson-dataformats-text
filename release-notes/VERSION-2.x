@@ -21,6 +21,8 @@ Active Maintainers:
 #502: Add an optional extended parser subclass (`YAMLAnchorReplayingFactory`)
   able to inline anchors
  (contributed by Heiko B)
+#523: JSTEP-10: Unify testing structure/tools
+ (contributed by Joo-Hyuk K)
 
 2.18.2 (27-Nov-2024)
 
