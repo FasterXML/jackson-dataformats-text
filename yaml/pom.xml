@@ -32,7 +32,11 @@
   </properties>
 
   <dependencies>
-    <!-- Extends Jackson core, databind (optional); uses SnakeYAML for parsing, generation -->
+    <!-- Extends Jackson core, databind; uses SnakeYAML for parsing, generation -->
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
     <dependency>
       <groupId>tools.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>

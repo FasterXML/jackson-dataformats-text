@@ -1,7 +1,10 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.tofix;
+
+import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,10 +25,13 @@ public class IntegerWithUnderscoresReadTest extends ModuleTestBase {
         }
     }
 
+    private final ObjectMapper MAPPER = newObjectMapper();
+
+    @JacksonTestFailureExpected
+    @Test
     public void testJsonIntegerWithUnderscores() throws Exception
     {
-        ObjectMapper mapper = new ObjectMapper();
-        IntegerHolder integerHolder = mapper.readValue("{\"v\": \"1_000_000\"}", IntegerHolder.class);
+        IntegerHolder integerHolder = MAPPER.readValue("{\"v\": \"1_000_000\"}", IntegerHolder.class);
         assertNotNull(integerHolder);
         assertEquals(Integer.valueOf(1000000), integerHolder.getV());
     }

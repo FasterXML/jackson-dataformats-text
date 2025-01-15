@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.failing;
+package tools.jackson.dataformat.yaml.tofix;
 
 import java.math.BigInteger;
 
@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
+import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,6 +33,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
     private final ObjectMapper MAPPER = newObjectMapper();
     
     // [dataformats-text#71]
+    @JacksonTestFailureExpected
     @Test
     public void testDeserHexInt71() throws Exception
     {
@@ -46,6 +48,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(new BigInteger("-11112222333344445555ACDC", 16), "-0x11112222333344445555acdc");
     }
 
+    @JacksonTestFailureExpected
     @Test
     public void testDeserHexUnderscores() throws Exception
     {
@@ -57,6 +60,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Long.parseLong("12345678c0", 16), "-0x12_3456_78c0");
     }
 
+    @JacksonTestFailureExpected
     @Test
     public void testDeserOctal() throws Exception
     {
@@ -71,6 +75,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(new BigInteger("-123456771234567712345677", 8), "-0123456771234567712345677");
     }
 
+    @JacksonTestFailureExpected
     @Test
     public void testDeserOctalUnderscores() throws Exception
     {
@@ -82,6 +87,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Long.parseLong("1234567712345677", 8), "-01_234_567_712_345_677");
     }
 
+    @JacksonTestFailureExpected
     @Test
     public void testDeserBinary() throws Exception
     {
@@ -90,6 +96,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
         _verifyNumber(-Integer.parseInt("1010", 2), "-0b1010");
     }
 
+    @JacksonTestFailureExpected
     @Test
     public void testDeserBinaryUnderscores() throws Exception
     {
@@ -102,6 +109,7 @@ public class NumberAltIntRead71Test extends ModuleTestBase
     //    least not yet, due to likely backwards-compatibility issues
     //    with IP numbers
     /*
+    @JacksonTestFailureExpected
     @Test
     public void testDeserBase60() throws Exception
     {
