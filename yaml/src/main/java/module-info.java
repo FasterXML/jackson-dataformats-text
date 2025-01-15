@@ -1,9 +1,11 @@
-module tools.jackson.dataformat.yaml {
+// YAML Main artifact Module descriptor
+module tools.jackson.dataformat.yaml
+{
     requires tools.jackson.core;
     requires tools.jackson.databind;
 
-    // Not sure what canonical module name is for SnakeYAML?
-    requires org.yaml.snakeyaml;
+    // Jackson 3.0 uses snakeyaml-engine (2.x snakeyaml)
+    requires org.snakeyaml.engine.v2;
 
     exports tools.jackson.dataformat.yaml;
     exports tools.jackson.dataformat.yaml.util;

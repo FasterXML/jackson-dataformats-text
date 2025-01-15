@@ -1,4 +1,6 @@
-module tools.jackson.dataformat.toml {
+// TOML Main artifact Module descriptor
+module tools.jackson.dataformat.toml
+{
     requires tools.jackson.core;
     requires tools.jackson.databind;
 

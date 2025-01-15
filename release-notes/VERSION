@@ -26,6 +26,7 @@ implementations)
   `CsvGenerator.Feature` as `CsvWriteFeature`
 #512: (yaml) JSTEP-8: rename `YAMLParser.Feature` as `YAMLReadFeature`,
   `YAMLGenerator.Feature` as `YAMLWriteFeature`
+#531: Change 3.0 to use `module-info.java` directly [JSTEP-11]
 - (csv) Remove `CsvMappingException` (replaced by `CsvRead-/-WriteException`)
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 - Minimum Java baseline: Java 17
