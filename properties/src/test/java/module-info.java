@@ -1,5 +1,5 @@
 // Properties unit test Module descriptor
-module tools.jackson.dataformat.javaprop
+module tools.jackson.dataformat.properties
 {
     // Since we are not split from Main artifact, will not
     // need to depend on Main artifact -- but need its dependencies

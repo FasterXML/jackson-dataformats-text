@@ -1,5 +1,5 @@
 // Properties Main artifact Module descriptor
-module tools.jackson.dataformat.javaprop
+module tools.jackson.dataformat.properties
 {
     requires tools.jackson.core;
     requires tools.jackson.databind;

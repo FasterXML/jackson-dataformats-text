@@ -30,3 +30,4 @@ implementations)
 - (csv) Remove `CsvMappingException` (replaced by `CsvRead-/-WriteException`)
 - Add `XxxMapper.shared()` methods for getting globally shared default instances
 - Minimum Java baseline: Java 17
+- Properties module name now: "tools.jackson.dataformat.properties" (not "...javaprop")
