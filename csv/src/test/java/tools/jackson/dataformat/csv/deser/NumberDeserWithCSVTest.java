@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import tools.jackson.core.StreamReadConstraints;
@@ -42,6 +43,24 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
     static class NestedFloatHolder2784 {
         @JsonUnwrapped
         public FloatHolder2784 holder;
+    }
+
+    static class DeserializationIssue4917 {
+        public DecimalHolder4917 decimalHolder;
+        public double number;
+    }
+
+    static class DecimalHolder4917 {
+        public BigDecimal value;
+
+        private DecimalHolder4917(BigDecimal value) {
+            this.value = value;
+        }
+
+        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
+        static DecimalHolder4917 of(BigDecimal value) {
+            return new DecimalHolder4917(value);
+        }
     }
 
     /*
@@ -145,5 +164,19 @@ public class NumberDeserWithCSVTest extends ModuleTestBase
                 .with(schema)
                 .readValue(DOC);
         assertEquals(Float.parseFloat("1.199999988079071"), result.holder.value);
+    }
+
+    // [databind#4917]
+    @Test
+    public void bigDecimal4917() throws Exception
+    {
+        CsvSchema schema = MAPPER.schemaFor(DeserializationIssue4917.class).withHeader()
+                .withStrictHeaders(true);
+        DeserializationIssue4917 issue = MAPPER
+                .readerFor(DeserializationIssue4917.class)
+                .with(schema)
+                .readValue("decimalHolder,number\n100.00,50\n");
+        assertEquals(new BigDecimal("100.00"), issue.decimalHolder.value);
+        assertEquals(50.0, issue.number);
     }
 }
