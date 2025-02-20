@@ -2,6 +2,7 @@ package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.Arrays;
 
@@ -30,6 +31,10 @@ public class TomlParserTest extends TomlMapperTestBase {
 
     static ObjectNode toml(@Language("toml") String toml) throws Exception {
         return (ObjectNode) TOML_MAPPER.readTree(toml);
+    }
+
+    static ObjectNode tomlBytes(@Language("toml") String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(toml.getBytes(StandardCharsets.UTF_8));
     }
 
     static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws Exception {
@@ -1057,9 +1062,33 @@ public class TomlParserTest extends TomlMapperTestBase {
         assertEquals(123, node.get("bar").intValue());
     }
 
+    // https://github.com/FasterXML/jackson-dataformats-text/issues/497
+    @Test
+    public void issue497() throws Exception {
+        final String testValue = createIssue497String();
+        final String tomlText = "test = \"" + testValue + "\"";
+
+        ObjectNode node = toml(tomlText);
+        assertEquals(testValue, node.get("test").asText());
+
+        // test again with byte[]
+        node = tomlBytes(tomlText);
+        assertEquals(testValue, node.get("test").asText());
+
+    }
+
     private static String repeat(char c, int n) {
         char[] chars = new char[n];
         Arrays.fill(chars, c);
         return new String(chars);
+    }
+
+    private static String createIssue497String() {
+        StringBuilder sb = new StringBuilder(4001);
+        for (int i = 0; i < 4000; ++i) {
+            sb.append('a');
+        }
+        sb.append('\u5496');
+        return sb.toString();
     }
 }
