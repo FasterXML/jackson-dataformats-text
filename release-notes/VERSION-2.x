@@ -16,13 +16,15 @@ Active Maintainers:
 
 2.19.0 (not yet released)
 
-#31: Header names seem to be trimmed
+#31: (csv) Header names seem to be trimmed
  (reported by Robert D)
-#502: Add an optional extended parser subclass (`YAMLAnchorReplayingFactory`)
+#502: (yaml) Add an optional extended parser subclass (`YAMLAnchorReplayingFactory`)
   able to inline anchors
  (contributed by Heiko B)
 #523: JSTEP-10: Unify testing structure/tools
  (contributed by Joo-Hyuk K)
+#537: (yaml) Snakeyaml 2.4
+ (contributed by @pjfanning)
 
 2.18.2 (27-Nov-2024)
 
