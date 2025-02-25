@@ -2,10 +2,8 @@ package tools.jackson.dataformat.toml;
 
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.nio.charset.StandardCharsets;
+import java.time.*;
 import java.util.Arrays;
 import java.util.Map.Entry;
 
@@ -54,6 +52,10 @@ public class TomlParserTest extends TomlMapperTestBase {
                 options,
                 new StringReader(toml)
         );
+    }
+
+    static ObjectNode tomlBytes(String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(toml.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
@@ -1087,9 +1089,33 @@ public class TomlParserTest extends TomlMapperTestBase {
         assertEquals(123, node.get("bar").intValue());
     }
 
+    // https://github.com/FasterXML/jackson-dataformats-text/issues/497
+    @Test
+    public void issue497() throws Exception {
+        final String testValue = createIssue497String();
+        final String tomlText = "test = \"" + testValue + "\"";
+
+        ObjectNode node = toml(tomlText);
+        assertEquals(testValue, node.get("test").asText());
+
+        // test again with byte[]
+        node = tomlBytes(tomlText);
+        assertEquals(testValue, node.get("test").asText());
+
+    }
+
     private static String repeat(char c, int n) {
         char[] chars = new char[n];
         Arrays.fill(chars, c);
         return new String(chars);
+    }
+
+    private static String createIssue497String() {
+        StringBuilder sb = new StringBuilder(4001);
+        for (int i = 0; i < 4000; ++i) {
+            sb.append('a');
+        }
+        sb.append('\u5496');
+        return sb.toString();
     }
 }

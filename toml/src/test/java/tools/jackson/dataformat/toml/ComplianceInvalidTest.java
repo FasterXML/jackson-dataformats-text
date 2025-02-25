@@ -29,7 +29,6 @@ public class ComplianceInvalidTest extends TomlMapperTestBase
     @ParameterizedTest
     public void test(Path path) throws IOException {
         // Test implementation
-        ObjectMapper MAPPER = newTomlMapper();
         assertThrows(
                 TomlStreamReadException.class,
                 () -> MAPPER.readTree(path.toFile())
