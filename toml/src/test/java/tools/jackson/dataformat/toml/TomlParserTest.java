@@ -1,5 +1,6 @@
 package tools.jackson.dataformat.toml;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -51,7 +52,16 @@ public class TomlParserTest extends TomlMapperTestBase {
                 testIOContext(),
                 options,
                 new StringReader(toml)
-        );
+                );
+    }
+
+    static ObjectNode tomlInputStream(String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(
+                new ByteArrayInputStream(toml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    static ObjectNode tomlReader(String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(new StringReader(toml));
     }
 
     static ObjectNode tomlBytes(String toml) throws Exception {
@@ -1096,12 +1106,19 @@ public class TomlParserTest extends TomlMapperTestBase {
         final String tomlText = "test = \"" + testValue + "\"";
 
         ObjectNode node = toml(tomlText);
-        assertEquals(testValue, node.get("test").asText());
+        assertEquals(testValue, node.get("test").asString());
 
         // test again with byte[]
         node = tomlBytes(tomlText);
-        assertEquals(testValue, node.get("test").asText());
+        assertEquals(testValue, node.get("test").asString());
 
+        // test again with InputStream
+        node = tomlInputStream(tomlText);
+        assertEquals(testValue, node.get("test").asString());
+
+        // test again with Reader
+        node = tomlReader(tomlText);
+        assertEquals(testValue, node.get("test").asString());
     }
 
     private static String repeat(char c, int n) {
