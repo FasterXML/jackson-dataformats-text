@@ -33,7 +33,6 @@ public class FuzzCSVReadTest extends StreamingCSVReadTest
     @Test
     public void testUTF8Decoding50036Stream() throws Exception
     {
-        byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
         try {
             CSV_MAPPER.readTree(new ByteArrayInputStream(INPUT));
             fail("Should not pass");
