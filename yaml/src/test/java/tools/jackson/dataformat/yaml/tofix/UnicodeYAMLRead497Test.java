@@ -54,7 +54,7 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
 
         try (JsonParser p = MAPPER.createParser(new ByteArrayInputStream(doc))) {
             assertToken(JsonToken.START_OBJECT, p.nextToken());
-            assertEquals("key", p.nextFieldName());
+            assertEquals("key", p.nextName());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
             assertEquals(valueBuffer.toString(), p.getText());
         }
