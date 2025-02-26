@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -35,6 +36,15 @@ public class TomlParserTest extends TomlMapperTestBase {
 
     static ObjectNode tomlBytes(@Language("toml") String toml) throws Exception {
         return (ObjectNode) TOML_MAPPER.readTree(toml.getBytes(StandardCharsets.UTF_8));
+    }
+
+    static ObjectNode tomlInputStream(@Language("toml") String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(
+                new ByteArrayInputStream(toml.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    static ObjectNode tomlReader(@Language("toml") String toml) throws Exception {
+        return (ObjectNode) TOML_MAPPER.readTree(new StringReader(toml));
     }
 
     static ObjectNode toml(TomlFactory factory, @Language("toml") String toml) throws Exception {
@@ -1075,6 +1085,13 @@ public class TomlParserTest extends TomlMapperTestBase {
         node = tomlBytes(tomlText);
         assertEquals(testValue, node.get("test").asText());
 
+        // test again with InputStream
+        node = tomlInputStream(tomlText);
+        assertEquals(testValue, node.get("test").asText());
+
+        // test again with Reader
+        node = tomlReader(tomlText);
+        assertEquals(testValue, node.get("test").asText());
     }
 
     private static String repeat(char c, int n) {
