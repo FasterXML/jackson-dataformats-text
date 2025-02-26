@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.yaml.deser;
 
+import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
@@ -47,5 +48,13 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
             assertEquals(valueBuffer.toString(), p.getText());
         }
+
+        try (JsonParser p = MAPPER.createParser(new ByteArrayInputStream(doc))) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertEquals("key", p.nextFieldName());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals(valueBuffer.toString(), p.getText());
+        }
     }
+
 }
