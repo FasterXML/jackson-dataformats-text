@@ -192,7 +192,7 @@ class TomlParser {
             case STRING:
                 String text = lexer.textBuffer.contentsAsString();
                 pollExpected(TomlToken.STRING, nextState);
-                return factory.textNode(text);
+                return factory.stringNode(text);
             case TRUE:
                 pollExpected(TomlToken.TRUE, nextState);
                 return factory.booleanNode(true);
@@ -243,7 +243,7 @@ class TomlParser {
             }
             return factory.pojoNode(value);
         } else {
-            return factory.textNode(text);
+            return factory.stringNode(text);
         }
     }
 

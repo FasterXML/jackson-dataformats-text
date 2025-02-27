@@ -76,7 +76,7 @@ public class ComplianceValidTest extends TomlMapperTestBase
             switch (expected.get("type").stringValue()) {
                 case "string":
                     // for some reason, the compliance tests escape these values. this makes some tests fail right now
-                    return nodeF.textNode(value.stringValue());
+                    return nodeF.stringNode(value.stringValue());
                 case "integer":
                     return nodeF.numberNode(NumberInput.parseBigInteger(value.stringValue(), false));
                 case "float":
