@@ -3,12 +3,12 @@
   <parent>
     <groupId>tools.jackson</groupId>
     <artifactId>jackson-base</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0-rc1-SNAPSHOT</version>
   </parent>
   <groupId>tools.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
   <name>Jackson dataformats: Text</name>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0-rc1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <description>Parent pom for Jackson text-based dataformats (as opposed to binary).
   </description>
@@ -39,12 +39,8 @@
   </issueManagement>
 
   <properties>
-    <!-- [databind#4820]: Java 17 baseline -->
-    <javac.src.version>17</javac.src.version>
-    <javac.target.version>17</javac.target.version>
-    
     <!-- for Reproducible Builds -->
-    <project.build.outputTimestamp>2022-11-28T00:00:00Z</project.build.outputTimestamp>
+    <project.build.outputTimestamp>2025-02-27T00:17:01Z</project.build.outputTimestamp>
   </properties>
 
   <dependencies>
