@@ -57,12 +57,12 @@
         <!-- Inherited from oss-base. Generate PackageVersion.java.-->
         <groupId>com.google.code.maven-replacer-plugin</groupId>
         <artifactId>replacer</artifactId>
-        <executions>
-          <execution>
-            <id>process-packageVersion</id>
-            <phase>generate-sources</phase>
-          </execution>
-        </executions>
+      </plugin>
+      <!-- 05-Jul-2020, tatu: Add generation of Gradle Module Metadata -->
+      <!-- 28-Feb-2025, jjohannes: Apply plugin last as it has to be the last of all 'package phase' plugins -->
+      <plugin>
+        <groupId>org.gradlex</groupId>
+        <artifactId>gradle-module-metadata-maven-plugin</artifactId>
       </plugin>
     </plugins>
   </build>
