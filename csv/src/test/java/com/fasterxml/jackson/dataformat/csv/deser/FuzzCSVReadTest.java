@@ -25,8 +25,7 @@ public class FuzzCSVReadTest extends StreamingCSVReadTest
             CSV_MAPPER.readTree(INPUT);
             fail("Should not pass");
         } catch (IOException e) {
-            verifyException(e, "End-of-input after first 1 byte");
-            verifyException(e, "of a UTF-8 character");
+            verifyException(e, "Unexpected EOF in the middle of a multi-byte UTF-8 character");
         }
     }
 
