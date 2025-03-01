@@ -26,6 +26,7 @@ Active Maintainers:
 #537: (yaml) Snakeyaml 2.4
  (contributed by @pjfanning)
 
+2.18.3 (28-Feb-2025)
 2.18.2 (27-Nov-2024)
 
 No changes since 2.18.1
