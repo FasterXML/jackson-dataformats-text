@@ -32,6 +32,18 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     }
 
     @Test
+    public void testUnicodeAtEnd2() throws Exception
+    {
+        String doc = buildTestString2();
+        JsonNode o = MAPPER.reader() //.with(schema)
+                .readTree(doc.getBytes(StandardCharsets.UTF_8));
+        assertNotNull(o);
+        assertTrue(o.isArray());
+        assertEquals(1, o.size());
+        assertEquals(o.get(0).textValue(), doc);
+    }
+
+    @Test
     public void testUnicodeAtEndStream() throws Exception
     {
         String doc = buildTestString();
@@ -43,12 +55,34 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
         assertEquals(o.get(0).stringValue(), doc);
     }
 
+    @Test
+    public void testUnicodeAtEndStream2() throws Exception
+    {
+        String doc = buildTestString2();
+        JsonNode o = MAPPER.reader() //.with(schema)
+                .readTree(new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8)));
+        assertNotNull(o);
+        assertTrue(o.isArray());
+        assertEquals(1, o.size());
+        assertEquals(o.get(0).textValue(), doc);
+    }
+
     private static String buildTestString() {
         StringBuilder sb = new StringBuilder(4001);
         for (int i = 0; i < 4000; ++i) {
             sb.append('a');
         }
         sb.append('\u5496');
+        return sb.toString();
+    }
+
+    private static String buildTestString2() {
+        StringBuilder sb = new StringBuilder(4001);
+        for (int i = 0; i < 3999; ++i) {
+            sb.append('a');
+        }
+        sb.append('\u5496');
+        sb.append('b');
         return sb.toString();
     }
 }
