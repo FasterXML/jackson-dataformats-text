@@ -40,7 +40,7 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
         assertNotNull(o);
         assertTrue(o.isArray());
         assertEquals(1, o.size());
-        assertEquals(o.get(0).textValue(), doc);
+        assertEquals(o.get(0).stringValue(), doc);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
         assertNotNull(o);
         assertTrue(o.isArray());
         assertEquals(1, o.size());
-        assertEquals(o.get(0).textValue(), doc);
+        assertEquals(o.get(0).stringValue(), doc);
     }
 
     private static String buildTestString() {
