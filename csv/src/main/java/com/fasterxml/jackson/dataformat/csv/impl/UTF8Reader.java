@@ -403,6 +403,17 @@ public final class UTF8Reader
         // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
             if (_inputPtr > 0) {
+                if (!canModifyBuffer()) {
+                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
+                    //     characters; uncovered by:
+                    //
+                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
+                    //
+                    // _inputBuffer needs to be cloned to avoid modifying original
+                    if (_inputSource == null) {
+                        _inputBuffer = _inputBuffer.clone();
+                    }
+                }
                 for (int i = 0; i < available; ++i) {
                     _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                 }
