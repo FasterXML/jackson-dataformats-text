@@ -33,12 +33,15 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     public void testUnicodeAtEnd2() throws Exception
     {
         String doc = buildTestString2();
+        final byte[] bytes = doc.getBytes(StandardCharsets.UTF_8);
         JsonNode o = MAPPER.reader() //.with(schema)
-                .readTree(doc.getBytes(StandardCharsets.UTF_8));
+                .readTree(bytes);
         assertNotNull(o);
         assertTrue(o.isArray());
         assertEquals(1, o.size());
         assertEquals(o.get(0).textValue(), doc);
+        // check byte array was not modified
+        assertArrayEquals(doc.getBytes(StandardCharsets.UTF_8), bytes);
     }
 
     @Test
