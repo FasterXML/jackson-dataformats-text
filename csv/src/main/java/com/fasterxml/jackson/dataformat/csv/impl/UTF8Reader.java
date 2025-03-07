@@ -409,11 +409,9 @@ public final class UTF8Reader
                     //
                     // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
                     //
-                    // and need to be reported as IOException
+                    // _inputBuffer needs to be cloned to avoid modifying original
                     if (_inputSource == null) {
-                        throw new IOException(String.format(
-"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
-available));
+                        _inputBuffer = _inputBuffer.clone();
                     }
                 }
                 for (int i = 0; i < available; ++i) {
