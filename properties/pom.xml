@@ -9,7 +9,7 @@
   <parent>
     <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformats-text</artifactId>
-    <version>3.0.0-rc1</version>
+    <version>3.0.0-rc2-SNAPSHOT</version>
   </parent>
   <artifactId>jackson-dataformat-properties</artifactId>
   <name>Jackson-dataformat-Properties</name>
