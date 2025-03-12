@@ -26,6 +26,16 @@ public final class UTF8Reader
     private byte[] _inputBuffer;
 
     /**
+     * Flag set to indicate {@code inputBuffer} is read-only, and its
+     * content should not be modified. This is the case when caller
+     * has passed in a buffer of contents already read, instead of Jackson
+     * allocating read buffer.
+     *
+     * @since 2.19
+     */
+    private final boolean _inputBufferReadOnly;
+
+    /**
      * Pointer to the next available byte (if any), iff less than
      * <code>mByteBufferEnd</code>
      */
@@ -73,7 +83,10 @@ public final class UTF8Reader
         _inputBuffer = buf;
         _inputPtr = ptr;
         _inputEnd = ptr+len;
-        _autoClose = autoClose; 
+        _autoClose = autoClose;
+        // Unmodifiable if there is no stream to actually read from
+        // (ideally caller should pass explicitly)
+        _inputBufferReadOnly = (in == null);
     }
 
     public UTF8Reader(IOContext ctxt, byte[] buf, int ptr, int len)
@@ -85,6 +98,8 @@ public final class UTF8Reader
         _inputPtr = ptr;
         _inputEnd = ptr+len;
         _autoClose = true;
+        // This is the case when we have a buffer of contents already read
+        _inputBufferReadOnly = true;
     }
 
     public UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose)
@@ -96,15 +111,8 @@ public final class UTF8Reader
         _inputPtr = 0;
         _inputEnd = 0;
         _autoClose = autoClose; 
-    }
-
-    /**
-     * Method that can be used to see if we can actually modify the
-     * underlying buffer. This is the case if we are managing the buffer,
-     * but not if it was just given to us.
-     */
-    protected final boolean canModifyBuffer() {
-        return (_ioContext != null);
+        // Buffer allocated above, modifiable as needed
+        _inputBufferReadOnly = false;
     }
 
     /*
@@ -400,27 +408,17 @@ public final class UTF8Reader
     {
         _byteCount += (_inputEnd - available);
 
-        // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
+            // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
-                if (!canModifyBuffer()) {
-                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
-                    //     characters; uncovered by:
-                    //
-                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
-                    //
-                    // and need to be reported as IOException
-                    if (_inputSource == null) {
-                        throw new IOException(String.format(
-"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
-available));
+                // Can only do so if buffer mutable
+                if (!_inputBufferReadOnly) {
+                    for (int i = 0; i < available; ++i) {
+                        _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
+                    _inputPtr = 0;
+                    _inputEnd = available;
                 }
-                for (int i = 0; i < available; ++i) {
-                    _inputBuffer[i] = _inputBuffer[_inputPtr+i];
-                }
-                _inputPtr = 0;
-                _inputEnd = available;
             }
         } else {
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
