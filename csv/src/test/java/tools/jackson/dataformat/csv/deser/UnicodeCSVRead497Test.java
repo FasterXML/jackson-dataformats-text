@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.fuzz;
+package tools.jackson.dataformat.csv.deser;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
