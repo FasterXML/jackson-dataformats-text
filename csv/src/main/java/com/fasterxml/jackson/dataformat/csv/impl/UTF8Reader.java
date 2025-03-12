@@ -1,7 +1,6 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
 import java.io.*;
-import java.util.Arrays;
 
 import com.fasterxml.jackson.core.io.IOContext;
 
@@ -34,7 +33,7 @@ public final class UTF8Reader
      *
      * @since 2.19
      */
-    private boolean _inputBufferReadOnly;
+    private final boolean _inputBufferReadOnly;
 
     /**
      * Pointer to the next available byte (if any), iff less than
@@ -409,20 +408,17 @@ public final class UTF8Reader
     {
         _byteCount += (_inputEnd - available);
 
-        // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
+            // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
-                if (_inputBufferReadOnly) {
-                    // _inputBuffer needs to be copied to avoid modifying original
-                    _inputBuffer = Arrays.copyOfRange(_inputBuffer, _inputPtr, _inputEnd);
-                    _inputBufferReadOnly = false;
-                } else {
+                // Can only do so if buffer mutable
+                if (!_inputBufferReadOnly) {
                     for (int i = 0; i < available; ++i) {
                         _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
+                    _inputPtr = 0;
+                    _inputEnd = available;
                 }
-                _inputPtr = 0;
-                _inputEnd = available;
             }
         } else {
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
