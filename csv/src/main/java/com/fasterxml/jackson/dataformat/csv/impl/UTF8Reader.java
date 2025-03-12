@@ -84,8 +84,8 @@ public final class UTF8Reader
         _inputPtr = ptr;
         _inputEnd = ptr+len;
         _autoClose = autoClose;
-        // Unmodifiable if there is no stream to actually read
-        // (ideally should pass explicitly)
+        // Unmodifiable if there is no stream to actually read from
+        // (ideally caller should pass explicitly)
         _inputBufferReadOnly = (in == null);
     }
 
