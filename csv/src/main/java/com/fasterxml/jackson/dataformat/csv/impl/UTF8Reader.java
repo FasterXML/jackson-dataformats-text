@@ -1,6 +1,7 @@
 package com.fasterxml.jackson.dataformat.csv.impl;
 
 import java.io.*;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.core.io.IOContext;
 
@@ -24,6 +25,16 @@ public final class UTF8Reader
     private final boolean _autoClose;
 
     private byte[] _inputBuffer;
+
+    /**
+     * Flag set to indicate {@code inputBuffer} is read-only, and its
+     * content should not be modified. This is the case when caller
+     * has passed in a buffer of contents already read, instead of Jackson
+     * allocating read buffer.
+     *
+     * @since 2.19
+     */
+    private boolean _inputBufferReadOnly;
 
     /**
      * Pointer to the next available byte (if any), iff less than
@@ -73,7 +84,10 @@ public final class UTF8Reader
         _inputBuffer = buf;
         _inputPtr = ptr;
         _inputEnd = ptr+len;
-        _autoClose = autoClose; 
+        _autoClose = autoClose;
+        // Unmodifiable if there is no stream to actually read
+        // (ideally should pass explicitly)
+        _inputBufferReadOnly = (in == null);
     }
 
     public UTF8Reader(IOContext ctxt, byte[] buf, int ptr, int len)
@@ -85,6 +99,8 @@ public final class UTF8Reader
         _inputPtr = ptr;
         _inputEnd = ptr+len;
         _autoClose = true;
+        // This is the case when we have a buffer of contents already read
+        _inputBufferReadOnly = true;
     }
 
     public UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose)
@@ -96,15 +112,8 @@ public final class UTF8Reader
         _inputPtr = 0;
         _inputEnd = 0;
         _autoClose = autoClose; 
-    }
-
-    /**
-     * Method that can be used to see if we can actually modify the
-     * underlying buffer. This is the case if we are managing the buffer,
-     * but not if it was just given to us.
-     */
-    protected final boolean canModifyBuffer() {
-        return (_ioContext != null);
+        // Buffer allocated above, modifiable as needed
+        _inputBufferReadOnly = false;
     }
 
     /*
@@ -403,19 +412,14 @@ public final class UTF8Reader
         // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
             if (_inputPtr > 0) {
-                if (!canModifyBuffer()) {
-                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
-                    //     characters; uncovered by:
-                    //
-                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
-                    //
-                    // _inputBuffer needs to be cloned to avoid modifying original
-                    if (_inputSource == null) {
-                        _inputBuffer = _inputBuffer.clone();
+                if (_inputBufferReadOnly) {
+                    // _inputBuffer needs to be copied to avoid modifying original
+                    _inputBuffer = Arrays.copyOfRange(_inputBuffer, _inputPtr, _inputEnd);
+                    _inputBufferReadOnly = false;
+                } else {
+                    for (int i = 0; i < available; ++i) {
+                        _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
-                }
-                for (int i = 0; i < available; ++i) {
-                    _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                 }
                 _inputPtr = 0;
                 _inputEnd = available;

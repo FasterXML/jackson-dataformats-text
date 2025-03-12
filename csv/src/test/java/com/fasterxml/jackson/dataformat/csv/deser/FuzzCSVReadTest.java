@@ -6,15 +6,15 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Collection of OSS-Fuzz found issues for CSV format module.
  */
-public class FuzzCSVReadTest extends StreamingCSVReadTest
+public class FuzzCSVReadTest extends ModuleTestBase
 {
     private final CsvMapper CSV_MAPPER = mapperForCsv();
     private final byte[] INPUT = new byte[] { 0x20, (byte) 0xCD };
