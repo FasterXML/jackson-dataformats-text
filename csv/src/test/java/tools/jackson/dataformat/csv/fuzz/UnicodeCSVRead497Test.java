@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.tofix;
+package tools.jackson.dataformat.csv.fuzz;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.JsonNode;
 
 import tools.jackson.dataformat.csv.*;
-import tools.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,7 +17,6 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     private final CsvMapper MAPPER = mapperForCsv();
 
     // [dataformats-text#497]
-    @JacksonTestFailureExpected
     @Test
     public void testUnicodeAtEnd() throws Exception
     {
@@ -35,12 +33,15 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     public void testUnicodeAtEnd2() throws Exception
     {
         String doc = buildTestString2();
+        final byte[] bytes = doc.getBytes(StandardCharsets.UTF_8);
         JsonNode o = MAPPER.reader() //.with(schema)
-                .readTree(doc.getBytes(StandardCharsets.UTF_8));
+                .readTree(bytes);
         assertNotNull(o);
         assertTrue(o.isArray());
         assertEquals(1, o.size());
         assertEquals(o.get(0).stringValue(), doc);
+        // check byte array was not modified
+        assertArrayEquals(doc.getBytes(StandardCharsets.UTF_8), bytes);
     }
 
     @Test
