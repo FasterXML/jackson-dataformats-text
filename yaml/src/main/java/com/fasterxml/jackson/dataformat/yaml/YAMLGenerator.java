@@ -653,8 +653,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws IOException,JsonGenerationException
-    {
+    public void writeString(String text) throws IOException, JsonGenerationException {
         if (text == null) {
             writeNull();
             return;
@@ -666,27 +665,31 @@ public class YAMLGenerator extends GeneratorBase
             _writeScalar(text, "string", STYLE_QUOTED);
             return;
         }
+
         DumperOptions.ScalarStyle style;
-        if (Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures)) {
-            if (text.indexOf('\n') >= 0) {
+        boolean hasNewline = text.indexOf('\n') >= 0;
+        boolean minimizeQuotes = Feature.MINIMIZE_QUOTES.enabledIn(_formatFeatures);
+        boolean literalBlockStyle = Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures);
+        boolean alwaysQuoteNumbers = Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures);
+
+        if (minimizeQuotes) {
+            if (hasNewline) {
                 style = STYLE_LITERAL;
-            // If one of reserved values ("true", "null"), or, number, preserve quoting:
-            } else if (_quotingChecker.needToQuoteValue(text)
-                || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
-                        && PLAIN_NUMBER_P.matcher(text).matches())
-                ) {
+            } else if (_quotingChecker.needToQuoteValue(text)) {
+                style = STYLE_QUOTED;
+            } else if (alwaysQuoteNumbers && PLAIN_NUMBER_P.matcher(text).matches()) {
                 style = STYLE_QUOTED;
             } else {
                 style = STYLE_PLAIN;
             }
         } else {
-            if (Feature.LITERAL_BLOCK_STYLE.enabledIn(_formatFeatures)
-                    && text.indexOf('\n') >= 0) {
+            if (literalBlockStyle && hasNewline) {
                 style = STYLE_LITERAL;
             } else {
                 style = STYLE_QUOTED;
             }
         }
+
         _writeScalar(text, "string", style);
     }
 

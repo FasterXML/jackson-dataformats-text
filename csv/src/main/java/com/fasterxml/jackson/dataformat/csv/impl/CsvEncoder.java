@@ -553,21 +553,8 @@ public class CsvEncoder
     public void endRow() throws IOException
     {
         // First things first; any buffered?
-        if (_lastBuffered >= 0) {
-            final int last = _lastBuffered;
-            _lastBuffered = -1;
-            for (; _nextColumnToWrite <= last; ++_nextColumnToWrite) {
-                BufferedValue value = _buffered[_nextColumnToWrite];
-                if (value != null) {
-                    _buffered[_nextColumnToWrite] = null;
-                    value.write(this);
-                } else if (_nextColumnToWrite > 0) { // ) {
-                    // note: write method triggers prepending of separator; but for missing
-                    // values we need to do it explicitly.
-                    appendColumnSeparator();
-                } 
-            }
-        } else if (_nextColumnToWrite <= 0) { // empty line; do nothing
+        handleBufferedValues();
+        if (_nextColumnToWrite <= 0) { // empty line; do nothing
             return;
         }
         // Any missing values?
@@ -585,6 +572,25 @@ public class CsvEncoder
         }
         System.arraycopy(_cfgLineSeparator, 0, _outputBuffer, _outputTail, _cfgLineSeparatorLength);
         _outputTail += _cfgLineSeparatorLength;
+    }
+
+    private void handleBufferedValues() throws IOException {
+        if (_lastBuffered < 0) {
+            return;
+        }
+
+        final int last = _lastBuffered;
+        _lastBuffered = -1;
+
+        for (; _nextColumnToWrite <= last; ++_nextColumnToWrite) {
+            BufferedValue value = _buffered[_nextColumnToWrite];
+            if (value != null) {
+                _buffered[_nextColumnToWrite] = null;
+                value.write(this);
+            } else if (_nextColumnToWrite > 0) {
+                appendColumnSeparator();
+            }
+        }
     }
 
     /*
