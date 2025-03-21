@@ -33,7 +33,6 @@ older branches and tags do not exist in this repository.
 
 ## Textual formats included
 
-
 Currently included backends are:
 
 * [CSV](csv/)
