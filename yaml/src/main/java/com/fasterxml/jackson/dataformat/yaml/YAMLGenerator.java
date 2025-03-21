@@ -653,7 +653,7 @@ public class YAMLGenerator extends GeneratorBase
      */
 
     @Override
-    public void writeString(String text) throws IOException,JsonGenerationException
+    public void writeString(String text) throws IOException, JsonGenerationException
     {
         if (text == null) {
             writeNull();
