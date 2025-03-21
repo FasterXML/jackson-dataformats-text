@@ -17,6 +17,7 @@ public abstract class StringQuotingChecker
     implements java.io.Serializable
 {
     private static final long serialVersionUID = 1L;
+    private static final int SPACE_CODE_POINT = 0x0020;
 
     /**
      * As per YAML <a href="https://yaml.org/type/null.html">null</a>
@@ -194,7 +195,7 @@ public abstract class StringQuotingChecker
         final int end = inputStr.length();
         for (int i = 0; i < end; ++i) {
             int ch = inputStr.charAt(i);
-            if (ch < 0x0020) {
+            if (ch < SPACE_CODE_POINT) {
                 return true;
             }
         }
