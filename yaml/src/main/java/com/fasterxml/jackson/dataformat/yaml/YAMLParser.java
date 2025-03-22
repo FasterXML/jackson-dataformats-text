@@ -4,6 +4,9 @@ import java.io.*;
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.io.NumberInput;
+import com.fasterxml.jackson.dataformat.csv.TextFormatParser;
+import com.fasterxml.jackson.dataformat.yaml.impl.RestrictedBooleanMatcher;
+import com.fasterxml.jackson.dataformat.yaml.impl.StandardBooleanMatcher;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
@@ -18,13 +21,14 @@ import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
+import org.yaml.snakeyaml.scanner.Scanner;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
  * in form that allows other Jackson functionality to process YAML content,
  * such as binding POJOs to and from it, and building tree representations.
  */
-public class YAMLParser extends ParserBase
+public class YAMLParser extends TextFormatParser
 {
     /**
      * Enumeration that defines all togglable features for YAML parsers.
@@ -123,6 +127,9 @@ public class YAMLParser extends ParserBase
     protected final ParserImpl _yamlParser;
     protected final Resolver _yamlResolver = new Resolver();
 
+    private final BooleanMatcher standardMatcher = new StandardBooleanMatcher();
+    private final BooleanMatcher restrictedMatcher = new RestrictedBooleanMatcher();
+
     /*
     /**********************************************************************
     /* State
@@ -196,6 +203,31 @@ public class YAMLParser extends ParserBase
         this(ctxt, parserFeatures, formatFeatures, codec, reader,
              new ParserImpl(new StreamReader(reader),
                      (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
+    }
+
+    public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
+                      ObjectCodec codec, Reader reader) {
+        super(ctxt, parserFeatures);
+        _formatFeatures = formatFeatures;
+        _objectCodec = codec;
+        _reader = reader;
+        _yamlParser = new ParserImpl((Scanner) new StreamReader(reader));
+        updateFeatureDependentState();
+    }
+
+    @Override
+    protected void updateFeatureDependentState() {
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+    }
+
+    @Override
+    protected String getCurrentFieldName() {
+        return _currentFieldName;
+    }
+
+    @Override
+    protected String getCurrentScalarValue() {
+        return _textValue;
     }
 
     /**
@@ -686,34 +718,10 @@ public class YAMLParser extends ParserBase
 
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
-        if (isEnabled(Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)) {
-            if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-            if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-        } else {
-            switch (len) {
-                case 1:
-                    switch (value.charAt(0)) {
-                        case 'y': case 'Y': return Boolean.TRUE;
-                        case 'n': case 'N': return Boolean.FALSE;
-                    }
-                    break;
-                case 2:
-                    if ("no".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    if ("on".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    break;
-                case 3:
-                    if ("yes".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    if ("off".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    break;
-                case 4:
-                    if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    break;
-                case 5:
-                    if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    break;
-            }
-        }
-        return null;
+        BooleanMatcher matcher = isEnabled(Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)
+                ? restrictedMatcher
+                : standardMatcher;
+        return matcher.match(value);
     }
 
     protected JsonToken _decodeNumberScalar(String value, final int len)
