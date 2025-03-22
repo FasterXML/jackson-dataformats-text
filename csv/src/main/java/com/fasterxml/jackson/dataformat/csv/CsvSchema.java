@@ -1272,6 +1272,103 @@ public class CsvSchema
     }
 
     /**
+     * Processes a header row and returns an updated schema based on the provided values.
+     * @param headerRow Array of header names from the CSV file
+     * @param trimHeaderSpaces Whether to trim spaces from header names
+     * @param allowTrailingComma Whether to drop a trailing empty column
+     * @param failOnMissingHeaderColumns Whether to fail if fewer columns are found than expected
+     * @return Updated CsvSchema instance
+     * @throws IllegalStateException if validation fails
+     */
+    public CsvSchema processHeaderRow(String[] headerRow, boolean trimHeaderSpaces,
+                                      boolean allowTrailingComma, boolean failOnMissingHeaderColumns) throws IllegalStateException {
+        if (!usesHeader()) {
+            return this;
+        }
+        if (headerRow == null || headerRow.length == 0) {
+            if (size() > 0 && failOnMissingHeaderColumns) {
+                throw new IllegalStateException("Empty header line: expected at least one column");
+            }
+            return this;
+        }
+
+        // Trim header names if requested
+        String[] processedHeaders = headerRow;
+        if (trimHeaderSpaces) {
+            processedHeaders = new String[headerRow.length];
+            for (int i = 0; i < headerRow.length; i++) {
+                processedHeaders[i] = headerRow[i] != null ? headerRow[i].trim() : null;
+            }
+        }
+
+        // Case 1: Strict headers or no reordering
+        if (size() > 0 && !reordersColumns()) {
+            if (strictHeaders()) {
+                if (processedHeaders.length < size()) {
+                    throw new IllegalStateException(String.format(
+                            "Missing header columns: expected %d, found %d", size(), processedHeaders.length));
+                }
+                for (int i = 0; i < size(); i++) {
+                    String expected = columnName(i);
+                    String actual = processedHeaders[i];
+                    if (!expected.equals(actual)) {
+                        throw new IllegalStateException(String.format(
+                                "Mismatched header column #%d: expected \"%s\", actual \"%s\"",
+                                i + 1, expected, actual));
+                    }
+                }
+                if (processedHeaders.length > size()) {
+                    throw new IllegalStateException(String.format(
+                            "Extra header column \"%s\"", processedHeaders[size()]));
+                }
+            }
+            return this; // No changes needed if skipping or strict validation passes
+        }
+
+        // Case 2: Empty schema or reordering
+        Builder builder = rebuild().clearColumns();
+        for (String name : processedHeaders) {
+            if (name != null) {
+                CsvSchema.Column prev = column(name);
+                if (prev != null) {
+                    builder.addColumn(name, prev.getType());
+                } else {
+                    builder.addColumn(name);
+                }
+            }
+        }
+
+        // Handle trailing comma
+        if (allowTrailingComma) {
+            builder.dropLastColumnIfEmpty();
+        }
+
+        CsvSchema newSchema = builder.build();
+        int newColumnCount = newSchema.size();
+        if (newColumnCount < 2) {
+            String first = (newColumnCount == 0) ? "" : newSchema.columnName(0).trim();
+            if (first.isEmpty()) {
+                throw new IllegalStateException("Empty header line: can not bind data");
+            }
+        }
+
+        // Check for missing columns
+        if (size() > 0 && failOnMissingHeaderColumns) {
+            int diff = size() - newColumnCount;
+            if (diff > 0) {
+                Set<String> oldColumnNames = new LinkedHashSet<>();
+                getColumnNames(oldColumnNames);
+                oldColumnNames.removeAll(newSchema.getColumnNames());
+                throw new IllegalStateException(String.format(
+                        "Missing %d header column%s: [\"%s\"]",
+                        diff, (diff == 1) ? "" : "s", String.join("\",\"", oldColumnNames)));
+            }
+        }
+
+        return newSchema;
+    }
+
+    /**
      * Mutant factory method that will try to replace specified column with
      * changed definition (but same name), leaving other columns as-is.
      *<p>

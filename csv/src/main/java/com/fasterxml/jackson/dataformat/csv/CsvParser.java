@@ -3,9 +3,7 @@ package com.fasterxml.jackson.dataformat.csv;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserMinimalBase;
@@ -27,7 +25,7 @@ import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
  * using {@link CsvDecoder}.
  */
 public class CsvParser
-    extends ParserMinimalBase
+        extends TextFormatParser
 {
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
@@ -446,7 +444,7 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+    /*public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
                      ObjectCodec codec, Reader reader)
     {
         super(stdFeatures, ctxt.streamReadConstraints());
@@ -462,6 +460,46 @@ public class CsvParser
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+    }*/
+
+    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+                     ObjectCodec codec, Reader reader)
+    {
+        super(ctxt, stdFeatures);
+        _formatFeatures = csvFeatures;
+        _objectCodec = codec;
+        _ioContext = ctxt;
+        _textBuffer = ctxt.constructReadConstrainedTextBuffer();
+        DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _reader = new CsvDecoder(this, ctxt, reader, EMPTY_SCHEMA, _textBuffer, stdFeatures, csvFeatures);
+        _parsingContext = JsonReadContext.createRootContext(dups);
+        updateFeatureDependentState();
+    }
+
+
+    @Override
+    protected void updateFeatureDependentState() {
+        _cfgEmptyStringAsNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+    }
+
+    @Override
+    protected void _closeInput() throws IOException {
+        if (!_reader.isClosed()) {
+            _reader.close();
+            _ioContext.close();
+        }
+    }
+
+    @Override
+    protected String getCurrentFieldName() {
+        return _currentName;
+    }
+
+    @Override
+    protected String getCurrentScalarValue() {
+        return _currentValue;
     }
 
     /*
@@ -641,7 +679,7 @@ public class CsvParser
      */
     
     @Override
-    public JsonStreamContext getParsingContext() {
+    public JsonReadContext getParsingContext() {
         return _parsingContext;
     }
 
@@ -882,87 +920,33 @@ public class CsvParser
                default schema based on the columns found in the header.
          */
 
-        final int schemaColumnCount = _schema.size();
-        if (schemaColumnCount > 0 && !_schema.reordersColumns()) {
-            if (_schema.strictHeaders()) {
-                String name;
-                int ix = 0;
-                for (CsvSchema.Column column : _schema._columns) {
-                    name = _reader.nextString();
-                    ++ix;
-                    if (name == null) {
-                        _reportError(String.format("Missing header column #%d, expecting \"%s\"", ix, column.getName()));
-                    } else if (!column.getName().equals(name)) {
-                        _reportError(String.format(
-"Mismatched header column #%d: expected \"%s\", actual \"%s\"", ix, column.getName(), name));
-                }
-                }
-                if ((name = _reader.nextString()) != null) {
-                    _reportError(String.format("Extra header column \"%s\"", name));
-                }
-            } else {
-                int allowed = MAX_COLUMNS;
-                while (_reader.nextString() != null) {
-                    // If we don't care about validation, just skip. But protect against infinite loop
-                    if (--allowed < 0) {
-                        _reportError("Internal error: skipped "+MAX_COLUMNS+" header columns");
-                    }
-                }
-            }
+        if (!_schema.usesHeader()) {
             return;
         }
 
-        // either the schema is empty or reorder columns flag is set
+        // Collect header values
+        List<String> headerValues = new ArrayList<>();
         String name;
-        CsvSchema.Builder builder = _schema.rebuild().clearColumns();
         int count = 0;
-
-        final boolean trimHeaderNames = Feature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
-            // one more thing: always trim names, regardless of config settings
-            // [dataformats-text#31]: Allow disabling of trimming
-            if (trimHeaderNames) {
-                name = name.trim();
-            }
-            // See if "old" schema defined type; if so, use that type...
-            CsvSchema.Column prev = _schema.column(name);
-            if (prev != null) {
-                builder.addColumn(name, prev.getType());
-            } else {
-                builder.addColumn(name);
-            }
+            headerValues.add(name);
             if (++count > MAX_COLUMNS) {
-                _reportError("Internal error: reached maximum of "+MAX_COLUMNS+" header columns");
+                _reportCsvMappingError("Internal error: reached maximum of %d header columns", MAX_COLUMNS);
             }
         }
 
-        // [dataformats-text#204]: Drop trailing empty name if so instructed
-        if (CsvParser.Feature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures)) {
-            builder.dropLastColumnIfEmpty();
+        // Delegate to CsvSchema for processing
+        try {
+            _schema = _schema.processHeaderRow(
+                    headerValues.toArray(new String[0]),
+                    Feature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures),
+                    Feature.ALLOW_TRAILING_COMMA.enabledIn(_formatFeatures),
+                    Feature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)
+            );
+            _columnCount = _schema.size(); // Update column count
+        } catch (IllegalStateException e) {
+            _reportCsvMappingError(e.getMessage());
         }
-
-        // Ok: did we get any  columns?
-        CsvSchema newSchema = builder.build();
-        int newColumnCount = newSchema.size();
-        if (newColumnCount < 2) { // 1 just because we may get 'empty' header name
-            String first = (newColumnCount == 0) ? "" : newSchema.columnName(0).trim();
-            if (first.isEmpty()) {
-                _reportCsvMappingError("Empty header line: can not bind data");
-            }
-        }
-        // [dataformats-text#285]: Are we missing something?
-        int diff = schemaColumnCount - newColumnCount;
-        if ((diff > 0) && Feature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)) {
-            Set<String> oldColumnNames = new LinkedHashSet<>();
-            _schema.getColumnNames(oldColumnNames);
-            oldColumnNames.removeAll(newSchema.getColumnNames());
-            _reportCsvMappingError(String.format("Missing %d header column%s: [\"%s\"]",
-                    diff, (diff == 1) ? "" : "s",
-                            String.join("\",\"", oldColumnNames)));
-        }
-
-        // otherwise we will use what we got
-        setSchema(builder.build());
     }
 
     /**
