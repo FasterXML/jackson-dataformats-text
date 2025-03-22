@@ -5,6 +5,8 @@ import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.dataformat.csv.TextFormatParser;
+import com.fasterxml.jackson.dataformat.yaml.impl.RestrictedBooleanMatcher;
+import com.fasterxml.jackson.dataformat.yaml.impl.StandardBooleanMatcher;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
@@ -124,6 +126,9 @@ public class YAMLParser extends TextFormatParser
 
     protected final ParserImpl _yamlParser;
     protected final Resolver _yamlResolver = new Resolver();
+
+    private final BooleanMatcher standardMatcher = new StandardBooleanMatcher();
+    private final BooleanMatcher restrictedMatcher = new RestrictedBooleanMatcher();
 
     /*
     /**********************************************************************
@@ -713,34 +718,10 @@ public class YAMLParser extends TextFormatParser
 
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
-        if (isEnabled(Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)) {
-            if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-            if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-        } else {
-            switch (len) {
-                case 1:
-                    switch (value.charAt(0)) {
-                        case 'y': case 'Y': return Boolean.TRUE;
-                        case 'n': case 'N': return Boolean.FALSE;
-                    }
-                    break;
-                case 2:
-                    if ("no".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    if ("on".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    break;
-                case 3:
-                    if ("yes".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    if ("off".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    break;
-                case 4:
-                    if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-                    break;
-                case 5:
-                    if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-                    break;
-            }
-        }
-        return null;
+        BooleanMatcher matcher = isEnabled(Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS)
+                ? restrictedMatcher
+                : standardMatcher;
+        return matcher.match(value);
     }
 
     protected JsonToken _decodeNumberScalar(String value, final int len)
