@@ -4,6 +4,7 @@ import java.io.*;
 import java.math.BigInteger;
 
 import com.fasterxml.jackson.core.io.NumberInput;
+import com.fasterxml.jackson.dataformat.csv.TextFormatParser;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
@@ -18,13 +19,14 @@ import com.fasterxml.jackson.core.base.ParserBase;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
+import org.yaml.snakeyaml.scanner.Scanner;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
  * in form that allows other Jackson functionality to process YAML content,
  * such as binding POJOs to and from it, and building tree representations.
  */
-public class YAMLParser extends ParserBase
+public class YAMLParser extends TextFormatParser
 {
     /**
      * Enumeration that defines all togglable features for YAML parsers.
@@ -196,6 +198,31 @@ public class YAMLParser extends ParserBase
         this(ctxt, parserFeatures, formatFeatures, codec, reader,
              new ParserImpl(new StreamReader(reader),
                      (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
+    }
+
+    public YAMLParser(IOContext ctxt, int parserFeatures, int formatFeatures,
+                      ObjectCodec codec, Reader reader) {
+        super(ctxt, parserFeatures);
+        _formatFeatures = formatFeatures;
+        _objectCodec = codec;
+        _reader = reader;
+        _yamlParser = new ParserImpl((Scanner) new StreamReader(reader));
+        updateFeatureDependentState();
+    }
+
+    @Override
+    protected void updateFeatureDependentState() {
+        _cfgEmptyStringsToNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+    }
+
+    @Override
+    protected String getCurrentFieldName() {
+        return _currentFieldName;
+    }
+
+    @Override
+    protected String getCurrentScalarValue() {
+        return _textValue;
     }
 
     /**

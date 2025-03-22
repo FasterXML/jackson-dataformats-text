@@ -36,9 +36,13 @@
       <artifactId>snakeyaml</artifactId>
       <version>2.4</version>
     </dependency>
+      <dependency>
+          <groupId>com.fasterxml.jackson.dataformat</groupId>
+          <artifactId>jackson-dataformat-csv</artifactId>
+      </dependency>
 
-     <!-- and for testing need annotations; but should be available via `jackson-databind` above
-       -->
+      <!-- and for testing need annotations; but should be available via `jackson-databind` above
+        -->
   </dependencies>
 
   <build>

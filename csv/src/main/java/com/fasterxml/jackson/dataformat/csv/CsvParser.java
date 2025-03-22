@@ -27,7 +27,7 @@ import com.fasterxml.jackson.dataformat.csv.impl.CsvDecoder;
  * using {@link CsvDecoder}.
  */
 public class CsvParser
-    extends ParserMinimalBase
+        extends TextFormatParser
 {
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
     private final static int MAX_COLUMNS = 99999;
@@ -446,7 +446,7 @@ public class CsvParser
     /**********************************************************************
      */
 
-    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+    /*public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
                      ObjectCodec codec, Reader reader)
     {
         super(stdFeatures, ctxt.streamReadConstraints());
@@ -462,6 +462,46 @@ public class CsvParser
                 stdFeatures, csvFeatures);
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+    }*/
+
+    public CsvParser(IOContext ctxt, int stdFeatures, int csvFeatures,
+                     ObjectCodec codec, Reader reader)
+    {
+        super(ctxt, stdFeatures);
+        _formatFeatures = csvFeatures;
+        _objectCodec = codec;
+        _ioContext = ctxt;
+        _textBuffer = ctxt.constructReadConstrainedTextBuffer();
+        DupDetector dups = JsonParser.Feature.STRICT_DUPLICATE_DETECTION.enabledIn(stdFeatures)
+                ? DupDetector.rootDetector(this) : null;
+        _reader = new CsvDecoder(this, ctxt, reader, EMPTY_SCHEMA, _textBuffer, stdFeatures, csvFeatures);
+        _parsingContext = JsonReadContext.createRootContext(dups);
+        updateFeatureDependentState();
+    }
+
+
+    @Override
+    protected void updateFeatureDependentState() {
+        _cfgEmptyStringAsNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+    }
+
+    @Override
+    protected void _closeInput() throws IOException {
+        if (!_reader.isClosed()) {
+            _reader.close();
+            _ioContext.close();
+        }
+    }
+
+    @Override
+    protected String getCurrentFieldName() {
+        return _currentName;
+    }
+
+    @Override
+    protected String getCurrentScalarValue() {
+        return _currentValue;
     }
 
     /*
@@ -641,7 +681,7 @@ public class CsvParser
      */
     
     @Override
-    public JsonStreamContext getParsingContext() {
+    public JsonReadContext getParsingContext() {
         return _parsingContext;
     }
 
