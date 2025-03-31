@@ -25,6 +25,8 @@ Active Maintainers:
  (contributed by Joo-Hyuk K)
 #537: (yaml) Snakeyaml 2.4
  (contributed by @pjfanning)
+#554: (csv) Enforce, document thread-safety of `CsvSchema`
+ (requested by Gili T)
 
 2.18.3 (28-Feb-2025)
 2.18.2 (27-Nov-2024)

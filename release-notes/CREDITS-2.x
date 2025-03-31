@@ -289,3 +289,9 @@ Robert DiFalco (@rdifalco)
 
 * Reported #31: Header names seem to be trimmed
  (2.19.0)
+
+Gili Tzabari (@cowwoc)
+
+* Requested #554: (csv) Enforce, document thread-safety of `CsvSchema`
+ (2.19.0)
+
