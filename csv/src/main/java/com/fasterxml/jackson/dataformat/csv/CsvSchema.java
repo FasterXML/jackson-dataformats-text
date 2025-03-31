@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.FormatSchema;
  * Simple {@link FormatSchema} sub-type that defines properties of
  * a CSV document to read or write.
  * Instances are thread-safe and immutable (explicitly immutable since 2.19,
- * but in practice since the beginning).
+ * but thread-safe since 2.0).
  * <p>
  * Properties supported currently are:
  *<ul>
