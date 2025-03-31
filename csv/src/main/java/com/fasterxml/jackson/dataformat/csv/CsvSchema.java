@@ -9,6 +9,9 @@ import com.fasterxml.jackson.core.FormatSchema;
 /**
  * Simple {@link FormatSchema} sub-type that defines properties of
  * a CSV document to read or write.
+ * Instances are thread-safe and immutable (explicitly immutable since 2.19,
+ * but thread-safe since 2.0).
+ * <p>
  * Properties supported currently are:
  *<ul>
  * <li>{@code columns} (List of ColumnDef) [default: empty List]: Ordered list of columns (which may be empty, see below).
@@ -885,9 +888,9 @@ public class CsvSchema
     /**
      * Bitflag for general-purpose on/off features.
      * 
-     * @since 2.5
+     * @since 2.5 (final since 2.19)
      */
-    protected int _features = DEFAULT_ENCODING_FEATURES;
+    protected final int _features;
 
     protected final char _columnSeparator;
 
