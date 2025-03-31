@@ -9,8 +9,7 @@ import tools.jackson.core.FormatSchema;
 /**
  * Simple {@link FormatSchema} sub-type that defines properties of
  * a CSV document to read or write.
- * Instances are thread-safe and immutable (explicitly immutable since 2.19,
- * but thread-safe since 2.0).
+ * Instances are thread-safe and immutable.
  * <p>
  * Properties supported currently are:
  *<ul>
@@ -89,9 +88,9 @@ import tools.jackson.core.FormatSchema;
 public class CsvSchema 
     implements FormatSchema,
         Iterable<CsvSchema.Column>,
-        java.io.Serializable // since 2.5
+        java.io.Serializable
 {
-    private static final long serialVersionUID = 1L; // 2.5
+    private static final long serialVersionUID = 3L;
 
     /*
     /**********************************************************************
@@ -220,8 +219,6 @@ public class CsvSchema
          * or "null", or empty String (equivalent to null).
          * Values are trimmed (leading/trailing white space).
          * Values other than indicated above may result in an exception.
-         * 
-         * @since 2.5
          */
         BOOLEAN,
         
@@ -234,8 +231,6 @@ public class CsvSchema
          * Note that this type is used for generic concept of multiple values, and
          * not specifically to match Java arrays: data-binding may match such columns
          * to {@link java.util.Collection}s as well, or even other types as necessary.
-         * 
-         * @since 2.5
          */
         ARRAY,
         
@@ -245,7 +240,7 @@ public class CsvSchema
     /**
      * Representation of info for a single column
      */
-    public static class Column implements java.io.Serializable // since 2.4.3
+    public static class Column implements java.io.Serializable
     {
         private static final long serialVersionUID = 1L;
 
@@ -255,27 +250,18 @@ public class CsvSchema
         private final int _index;
         private final ColumnType _type;
 
-        /**
-         * NOTE: type changed from `char` to `java.lang.String` in 2.7
-         *
-         * @since 2.5
-         */
         private final String _arrayElementSeparator;
 
         /**
          * Value decorator used for this column, if any; {@code null} if none.
          * Used to add decoration on serialization (writing) and remove decoration
          * on deserialization (reading).
-         *
-         * @since 2.18
          */
         private final CsvValueDecorator _valueDecorator;
 
         /**
          * Link to the next column within schema, if one exists;
          * null for the last column.
-         * 
-         * @since 2.6
          */
         private final Column _next;
         
@@ -305,16 +291,10 @@ public class CsvSchema
             this(src, index, src._valueDecorator, next);
         }
 
-        /**
-         * @since 2.18
-         */
         protected Column(Column src, CsvValueDecorator valueDecorator) {
             this(src, src._index, valueDecorator, src._next);
         }
 
-        /**
-         * @since 2.18
-         */
         protected Column(Column src, int index, CsvValueDecorator valueDecorator,
                 Column next)
         {
@@ -348,9 +328,6 @@ public class CsvSchema
             return new Column(_index, _name, _type, sep);
         }
 
-        /**
-         * @since 2.18
-         */
         public Column withValueDecorator(CsvValueDecorator valueDecorator) {
             if (valueDecorator == _valueDecorator) {
                 return this;
@@ -365,9 +342,6 @@ public class CsvSchema
             return new Column(this, next);
         }
 
-        /**
-         * @since 2.7
-         */
         public Column withNext(int index, Column next) {
             if ((_index == index) && (_next == next)) {
                 return this;
@@ -395,15 +369,9 @@ public class CsvSchema
         public boolean hasName(String n) {
             return (_name == n) || _name.equals(n);
         }
-        
-        /**
-         * @since 2.5
-         */
+
         public String getArrayElementSeparator() { return _arrayElementSeparator; }
 
-        /**
-         * @since 2.18
-         */
         public CsvValueDecorator getValueDecorator() { return _valueDecorator; }
 
         public boolean isArray() {
@@ -420,8 +388,6 @@ public class CsvSchema
 
         /**
          * Bit-flag for general-purpose on/off features.
-         * 
-         * @since 2.5
          */
         protected int _encodingFeatures = DEFAULT_ENCODING_FEATURES;
         
@@ -437,8 +403,6 @@ public class CsvSchema
          * is thrown, depending on other settings); setting it to a non-null
          * String value will expose all extra properties under one specified
          * name. 
-         * 
-         * @since 2.7
          */
         protected String _anyPropertyName = DEFAULT_ANY_PROPERTY_NAME;
         
@@ -450,9 +414,6 @@ public class CsvSchema
         
         protected char[] _lineSeparator = DEFAULT_LINEFEED;
 
-        /**
-         * @since 2.5
-         */
         protected char[] _nullValue = DEFAULT_NULL_VALUE;
 
         public Builder() { }
@@ -493,8 +454,6 @@ public class CsvSchema
          *
          * @param name Name of column to add
          * @param transformer Changes to apply to column definition
-         *
-         * @since 2.18
          */
         public Builder addColumn(String name, UnaryOperator<Column> transformer) {
             Column col = transformer.apply(new Column(_columns.size(), name));
@@ -519,8 +478,6 @@ public class CsvSchema
          * @param name Name of column to add
          * @param type Type of the column to add
          * @param transformer Changes to apply to column definition
-         *
-         * @since 2.18
          */
         public Builder addColumn(String name, ColumnType type,
                 UnaryOperator<Column> transformer) {
@@ -540,8 +497,6 @@ public class CsvSchema
         /**
          * NOTE: does NOT check for duplicate column names so it is possibly to
          * accidentally add duplicates.
-         *
-         * @since 2.9
          */
         public Builder addColumns(Iterable<Column> cs) {
             for (Column c : cs) {
@@ -553,8 +508,6 @@ public class CsvSchema
         /**
          * NOTE: does NOT check for duplicate column names so it is possibly to
          * accidentally add duplicates.
-         *
-         * @since 2.9
          */
         public Builder addColumns(Iterable<String> names, ColumnType type) {
             Builder result = this;
@@ -569,8 +522,6 @@ public class CsvSchema
          * discard, possible duplicate columns: that is, if this builder already
          * has a column with same name as column to be added, existing column
          * is retained and new column ignored.
-         *
-         * @since 2.9
          */
         public Builder addColumnsFrom(CsvSchema schema) {
             Builder result = this;
