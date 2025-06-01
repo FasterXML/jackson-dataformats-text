@@ -16,6 +16,8 @@ Active Maintainers:
 
 2.20.0 (not yet released)
 
+#564: (csv) `CsvParser.getNumberValue()`, related, do not throw exception
+ for non-numeric tokens
 - Generate SBOMs [JSTEP-14]
 
 2.19.0 (24-Apr-2025)

@@ -1219,7 +1219,6 @@ public class CsvDecoder
     protected void _parseNumericValue(boolean exactNumber)
         throws IOException
     {
-        // Int or float?
         if (looksLikeInt()) {
             _parseIntValue();
             return;

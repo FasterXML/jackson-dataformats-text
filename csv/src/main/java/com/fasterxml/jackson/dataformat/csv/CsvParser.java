@@ -544,6 +544,10 @@ public class CsvParser
         if (!isClosed()) {
             _reader.close();
             _ioContext.close();
+            // 30-May-2025, tatu: was missing before 2.20
+            if (JsonParser.Feature.CLEAR_CURRENT_TOKEN_ON_CLOSE.enabledIn(_features)) {
+                _currToken = null;
+            }
         }
     }
 
@@ -1363,6 +1367,7 @@ public class CsvParser
 
     @Override
     public NumberType getNumberType() throws IOException {
+        _verifyNumberToken();
         return _reader.getNumberType();
     }
 
@@ -1374,41 +1379,49 @@ public class CsvParser
 
     @Override
     public Number getNumberValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getNumberValue(false);
     }
 
     @Override
     public Number getNumberValueExact() throws IOException {
+        _verifyNumberToken();
         return _reader.getNumberValue(true);
     }
 
     @Override
     public int getIntValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getIntValue();
     }
 
     @Override
     public long getLongValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getLongValue();
     }
 
     @Override
     public BigInteger getBigIntegerValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getBigIntegerValue();
     }
 
     @Override
     public float getFloatValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getFloatValue();
     }
 
     @Override
     public double getDoubleValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getDoubleValue();
     }
 
     @Override
     public BigDecimal getDecimalValue() throws IOException {
+        _verifyNumberToken();
         return _reader.getDecimalValue();
     }
 
@@ -1444,12 +1457,24 @@ public class CsvParser
         throw CsvReadException.from(this, msg, _schema);
     }
 
-    public void _reportParsingError(String msg)  throws JsonProcessingException {
+    public void _reportParsingError(String msg) throws JsonProcessingException {
         super._reportError(msg);
     }
 
-    public void _reportUnexpectedCsvChar(int ch, String msg)  throws JsonProcessingException {
+    public void _reportUnexpectedCsvChar(int ch, String msg) throws JsonProcessingException {
         super._reportUnexpectedChar(ch, msg);
+    }
+
+    protected void _verifyNumberToken() throws IOException {
+        if (_currToken != JsonToken.VALUE_NUMBER_INT) {
+            _reportNotNumericError();
+        }
+    }
+
+    protected <T> T _reportNotNumericError() throws IOException {
+        _reportError("Current token (%s) not numeric, can not use numeric value accessors",
+                _currToken);
+        return null;
     }
 
     /*
