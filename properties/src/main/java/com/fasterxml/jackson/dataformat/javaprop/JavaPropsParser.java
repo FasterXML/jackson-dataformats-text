@@ -151,6 +151,10 @@ public class JavaPropsParser extends ParserMinimalBase
             _ioContext.close();
             _closed = true;
             _readContext = null;
+            // 30-May-2025, tatu: was missing before 2.20
+            if (JsonParser.Feature.CLEAR_CURRENT_TOKEN_ON_CLOSE.enabledIn(_features)) {
+                _currToken = null;
+            }
         }
     }
 
@@ -229,7 +233,6 @@ public class JavaPropsParser extends ParserMinimalBase
             if (_closed) {
                 return null;
             }
-            _closed = true;
             JPropNode root = JPropNodeBuilder.build(_sourceContent, _schema);
             _readContext = JPropReadContext.create(root);
 

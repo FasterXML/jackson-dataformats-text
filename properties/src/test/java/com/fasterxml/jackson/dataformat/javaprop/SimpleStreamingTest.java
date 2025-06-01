@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.core.io.SerializedString;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.javaprop.io.JPropWriteContext;
@@ -26,10 +27,12 @@ public class SimpleStreamingTest extends ModuleTestBase
         JsonParser p = F.createParser("foo = bar");
         Object src = p.getInputSource();
         assertTrue(src instanceof Reader);
+        _verifyGetNumberTypeFail(p, "null");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
         assertNull(p.getEmbeddedObject());
         assertNotNull(p.currentLocation()); // N/A
         assertNotNull(p.currentTokenLocation()); // N/A
+        _verifyGetNumberTypeFail(p, "START_OBJECT");
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("foo", p.currentName());
         assertEquals("foo", p.getText());
@@ -39,8 +42,17 @@ public class SimpleStreamingTest extends ModuleTestBase
         StringWriter sw = new StringWriter();
         assertEquals(3, p.getText(sw));
         assertEquals("bar", sw.toString());
+        try {
+            // try just one arbitrary one; all should fail similarly
+            p.getLongValue();
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            _verifyNonNumberTypeException(e, "VALUE_STRING");
+        }
+
         p.close();
         assertTrue(p.isClosed());
+        _verifyGetNumberTypeFail(p, "null");
 
         // one more thing, verify handling of non-binary
         p = F.createParser("foo = bar");
@@ -56,8 +68,12 @@ public class SimpleStreamingTest extends ModuleTestBase
             p.getDoubleValue();
             fail("Should not pass");
         } catch (JsonProcessingException e) {
-            verifyException(e, "can not use numeric");
+            _verifyNonNumberTypeException(e, "FIELD_NAME");
         }
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
+        assertFalse(p.isClosed());
+        assertNull(p.nextToken());
         p.close();
     }
 
@@ -153,5 +169,21 @@ public class SimpleStreamingTest extends ModuleTestBase
         gen.close();
 
         assertEquals(sb.toString(), strw.toString());
-    }        
+    }
+
+    // In Jackson 2.x, non-Number token should throw exception for parser.getNumberType()
+    private void _verifyGetNumberTypeFail(JsonParser p, String token) throws Exception
+    {
+        try {
+            p.getNumberType();
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            _verifyNonNumberTypeException(e, token);
+        }
+    }
+
+    private void _verifyNonNumberTypeException(Exception e, String token) throws Exception
+    {
+        verifyException(e, "Current token ("+token+") not numeric, can not use numeric");
+    }
 }
