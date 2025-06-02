@@ -440,6 +440,7 @@ public class YAMLParser extends ParserBase
     {
         _currentIsAlias = false;
         _binaryValue = null;
+        _numTypesValid = NR_UNKNOWN;
         if (_closed) {
             return null;
         }

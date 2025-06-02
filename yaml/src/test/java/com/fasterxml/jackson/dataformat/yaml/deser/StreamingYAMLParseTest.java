@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.LoaderOptions;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.dataformat.yaml.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +32,9 @@ public class StreamingYAMLParseTest extends ModuleTestBase
 +"d: 1.25\n"
 ;
         JsonParser p = YAML_F.createParser(YAML);
+        _verifyGetNumberTypeFail(p, "null");
         assertToken(JsonToken.START_OBJECT, p.nextToken());
+        _verifyGetNumberTypeFail(p, "START_OBJECT");
 
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertEquals("string", p.currentName());
@@ -67,6 +70,8 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("123", p.getText());
         assertEquals(123, p.getIntValue());
+        assertEquals(JsonParser.NumberType.INT, p.getNumberType());
+
         assertToken(JsonToken.FIELD_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_NUMBER_FLOAT, p.nextToken());
         assertEquals("1.25", p.getText());
@@ -77,6 +82,8 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertNull(p.nextToken());
         assertNull(p.nextToken());
         assertNull(p.nextToken());
+        _verifyGetNumberTypeFail(p, "null");
+
         p.close();
     }
 
@@ -142,7 +149,12 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertEquals(Integer.MAX_VALUE, p.getIntValue());
         assertEquals(JsonParser.NumberType.INT, p.getNumberType());
         assertEquals("2147483647", p.getText());
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
         p.close();
+
+        // 02-Jun-2025, tatu: [core#1438] Close should clear token
+        assertNull(p.currentToken());
+        _verifyGetNumberTypeFail(p, "null");
 
         // Test negative max-int
         YAML = "num: -2147483648";
@@ -687,4 +699,21 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             assertTrue(e.getMessage().startsWith("The incoming YAML document exceeds the limit: 5 code points."));
         }
     }
+
+    // In Jackson 2.x, non-Number token should throw exception for parser.getNumberType()
+    private void _verifyGetNumberTypeFail(JsonParser p, String token) throws Exception
+    {
+        try {
+            p.getNumberType();
+            fail("Should not pass");
+        } catch (StreamReadException e) {
+            _verifyNonNumberTypeException(e, token);
+        }
+    }
+
+    private void _verifyNonNumberTypeException(Exception e, String token) throws Exception
+    {
+        verifyException(e, "Current token ("+token+") not numeric, can not use numeric");
+    }
+
 }
