@@ -14,6 +14,10 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.0.0-rc7 (not yet released)
+
+- (yaml) `snakeyaml-engine` to 2.10 (from 2.8)
+
 3.0.0-rc6 (18-Jul-2025)
 3.0.0-rc5 (22-May-2025)
 3.0.0-rc4 (10-May-2025)
