@@ -24,15 +24,18 @@ public class UnicodeYAMLRead497Test extends ModuleTestBase
     public void testUnicodeAtEnd() throws Exception
     {
         // Had to find edge condition, these would do:
-        // (but not, there seems to be some fluctuation wrt exact boundary condition)
-//        _testUnicodeAtEnd(1023);
+        // (but there seems to be some fluctuation wrt exact boundary condition)
+        _testUnicodeAtEnd(1023);
         _testUnicodeAtEnd(1024);
         _testUnicodeAtEnd(1025);
  
+        _testUnicodeAtEnd(2046);
         _testUnicodeAtEnd(2047);
         _testUnicodeAtEnd(2048);
         _testUnicodeAtEnd(2049);
 
+        _testUnicodeAtEnd(3069);
+        _testUnicodeAtEnd(3070);
         _testUnicodeAtEnd(3071);
         _testUnicodeAtEnd(3072);
         _testUnicodeAtEnd(3073);

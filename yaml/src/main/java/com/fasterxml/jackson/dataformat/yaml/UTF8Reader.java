@@ -30,6 +30,16 @@ public final class UTF8Reader
     protected byte[] _inputBuffer;
 
     /**
+     * Flag set to indicate {@code inputBuffer} is read-only, and its
+     * content should not be modified. This is the case when caller
+     * has passed in a buffer of contents already read, instead of Jackson
+     * allocating read buffer.
+     *
+     * @since 2.20
+     */
+    private final boolean _inputBufferReadOnly;
+
+    /**
      * Pointer to the next available byte (if any), iff less than
      * <code>mByteBufferEnd</code>
      */
@@ -74,6 +84,8 @@ public final class UTF8Reader
             _bufferHolder[0] = null;
         }
         _inputBuffer = buffer;
+        // 07-Aug-2025, tatu: Since we manage the buffer, we can modify it
+        _inputBufferReadOnly = false;
         _inputPtr = 0;
         _inputEnd = 0;
         _autoClose = autoClose;
@@ -84,6 +96,8 @@ public final class UTF8Reader
         super(new Object());
         _inputSource = null;
         _inputBuffer = buf;
+        // 07-Aug-2025, tatu: Buffer is given to us, so it is read-only
+        _inputBufferReadOnly = true;
         _inputPtr = ptr;
         _inputEnd = ptr+len;
         _autoClose = autoClose; 
@@ -102,15 +116,6 @@ public final class UTF8Reader
             _bufferRecycler.set(new SoftReference<byte[][]>(bufs));
         }
         return bufs;
-    }
-
-    /**
-     * Method that can be used to see if we can actually modify the
-     * underlying buffer. This is the case if we are managing the buffer,
-     * but not if it was just given to us.
-     */
-    protected final boolean canModifyBuffer() {
-        return (_bufferHolder != null);
     }
 
     /*
@@ -440,27 +445,17 @@ public final class UTF8Reader
     {
         _byteCount += (_inputEnd - available);
 
-        // Bytes that need to be moved to the beginning of buffer?
         if (available > 0) {
+            // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
-                if (!canModifyBuffer()) {
-                    // 15-Aug-2022, tatu: Occurs (only) if we have half-decoded UTF-8
-                    //     characters; uncovered by:
-                    //
-                    // https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=50036
-                    //
-                    // and need to be reported as IOException
-                    if (_inputSource == null) {
-                        throw new IOException(String.format(
-"End-of-input after first %d byte(s) of a UTF-8 character: needed at least one more",
-available));
+                // Can only do so if buffer mutable
+                if (!_inputBufferReadOnly) {
+                    for (int i = 0; i < available; ++i) {
+                        _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
+                    _inputPtr = 0;
+                    _inputEnd = available;
                 }
-                for (int i = 0; i < available; ++i) {
-                    _inputBuffer[i] = _inputBuffer[_inputPtr+i];
-                }
-                _inputPtr = 0;
-                _inputEnd = available;
             }
         } else {
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
