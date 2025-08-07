@@ -464,7 +464,7 @@ public final class UTF8Reader
             if (count < 1) {
                 if (count < 0) { // -1, EOF... no good!
                     freeBuffers();
-                    reportUnexpectedEOF(_inputEnd, needed);
+                    reportUnexpectedEOF(_inputEnd - _inputPtr, needed);
                 }
                 // 0 count is no good; let's err out
                 reportStrangeStream();
