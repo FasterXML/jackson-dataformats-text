@@ -49,8 +49,8 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
             fail("Should not pass");
         // NOTE! This is an actual IOException in Jackson 2.x
         } catch (IOException e) {
-            verifyException(e, "End-of-input after first 1 byte");
-            verifyException(e, "of a UTF-8 character");
+            verifyException(e, "Unexpected EOF in the middle of a multi-byte");
+            verifyException(e, "got 1, needed 2");
         }
     }
 
