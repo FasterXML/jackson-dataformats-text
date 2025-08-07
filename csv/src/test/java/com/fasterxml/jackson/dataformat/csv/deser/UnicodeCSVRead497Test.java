@@ -18,9 +18,15 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
 
     // [dataformats-text#497]
     @Test
-    public void testUnicodeAtEnd() throws Exception
+    public void testUnicodeAtEnd() throws Exception {
+        _testUnicodeAtEnd(3999);
+        _testUnicodeAtEnd(4000);
+        _testUnicodeAtEnd(4001);
+    }
+
+    private void _testUnicodeAtEnd(int len) throws Exception
     {
-        String doc = buildTestString();
+        String doc = buildTestString(len);
         JsonNode o = MAPPER.reader() //.with(schema)
                 .readTree(doc.getBytes(StandardCharsets.UTF_8));
         assertNotNull(o);
@@ -32,7 +38,14 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     @Test
     public void testUnicodeAtEnd2() throws Exception
     {
-        String doc = buildTestString2();
+        _testUnicodeAtEnd2(3999);
+        _testUnicodeAtEnd2(4000);
+        _testUnicodeAtEnd2(4001);
+    }
+
+    private void _testUnicodeAtEnd2(int len) throws Exception
+    {
+        String doc = buildTestString2(len);
         final byte[] bytes = doc.getBytes(StandardCharsets.UTF_8);
         JsonNode o = MAPPER.reader() //.with(schema)
                 .readTree(bytes);
@@ -47,7 +60,14 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     @Test
     public void testUnicodeAtEndStream() throws Exception
     {
-        String doc = buildTestString();
+        _testUnicodeAtEndStream(3999);
+        _testUnicodeAtEndStream(4000);
+        _testUnicodeAtEndStream(4001);
+    }
+
+    private void _testUnicodeAtEndStream(int len) throws Exception
+    {
+        String doc = buildTestString(len);
         JsonNode o = MAPPER.reader() //.with(schema)
                 .readTree(new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8)));
         assertNotNull(o);
@@ -59,7 +79,15 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
     @Test
     public void testUnicodeAtEndStream2() throws Exception
     {
-        String doc = buildTestString2();
+        _testUnicodeAtEndStream2(3998);
+        _testUnicodeAtEndStream2(3999);
+        _testUnicodeAtEndStream2(4000);
+        _testUnicodeAtEndStream2(4001);
+    }
+
+    private void _testUnicodeAtEndStream2(int len) throws Exception
+    {
+        String doc = buildTestString2(len);
         JsonNode o = MAPPER.reader() //.with(schema)
                 .readTree(new ByteArrayInputStream(doc.getBytes(StandardCharsets.UTF_8)));
         assertNotNull(o);
@@ -68,18 +96,20 @@ public class UnicodeCSVRead497Test extends ModuleTestBase
         assertEquals(o.get(0).textValue(), doc);
     }
 
-    private static String buildTestString() {
-        StringBuilder sb = new StringBuilder(4001);
-        for (int i = 0; i < 4000; ++i) {
+    // // // Helper methods
+
+    private static String buildTestString(int len) {
+        StringBuilder sb = new StringBuilder(len + 1);
+        for (int i = 0; i < len; ++i) {
             sb.append('a');
         }
         sb.append('\u5496');
         return sb.toString();
     }
 
-    private static String buildTestString2() {
-        StringBuilder sb = new StringBuilder(4001);
-        for (int i = 0; i < 3999; ++i) {
+    private static String buildTestString2(int len) {
+        StringBuilder sb = new StringBuilder(len + 2);
+        for (int i = 0; i < len; ++i) {
             sb.append('a');
         }
         sb.append('\u5496');
