@@ -16,9 +16,9 @@ Active Maintainers:
 
 (not yet released)
 
-#497: (csv, yaml): `UTF8Reader` throws "Need to move partially decoded character;
+#497: (csv, toml, yaml): `UTF8Reader` throws "Need to move partially decoded character;
   buffer not modifiable" when read only one chinese char
- NOTE: csv part fixed in 2.19.0, yaml in 2.20.0
+ NOTE: csv part fixed in 2.19.0, toml and yaml in 2.20.0
  (reported by @mrtaolili)
 
 2.20.0-rc1 (04-Aug-2025)
