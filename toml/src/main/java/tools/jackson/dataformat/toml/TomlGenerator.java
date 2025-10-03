@@ -345,6 +345,17 @@ final class TomlGenerator extends GeneratorBase
 
     /*
     /**********************************************************************
+    /* Overrides: config access
+    /**********************************************************************
+     */
+
+    @Override
+    public PrettyPrinter getPrettyPrinter() {
+        return null;
+    }
+
+    /*
+    /**********************************************************************
     /* Overridden methods; writing property names
     /**********************************************************************
      */

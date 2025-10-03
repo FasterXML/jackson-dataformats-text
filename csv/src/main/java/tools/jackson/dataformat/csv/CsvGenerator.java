@@ -33,7 +33,7 @@ public class CsvGenerator extends GeneratorBase
      * {@link CsvWriteFeature}s
      * are enabled.
      */
-    protected int _formatFeatures;
+    protected final int _formatFeatures;
 
     /**
      * Definition of columns being written, if available.
@@ -203,6 +203,12 @@ public class CsvGenerator extends GeneratorBase
 
     @Override
     public CharacterEscapes getCharacterEscapes() {
+        // Not really true but... we have no access to full original escapes
+        return null;
+    }
+
+    @Override
+    public PrettyPrinter getPrettyPrinter() {
         return null;
     }
 

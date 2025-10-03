@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JDKSerializabilityTest extends ModuleTestBase
 {
     @Test
-    public void testApacheMapperWithModule() throws Exception {
+    void testMapperSerializability() throws Exception {
         // very simple validation: should still work wrt serialization
         JavaPropsMapper unfrozenMapper = serializeAndDeserialize(new JavaPropsMapper());
 
@@ -34,8 +34,8 @@ public class JDKSerializabilityTest extends ModuleTestBase
         assertEquals(input, result2);
     }
 
-    @Test
-    private JavaPropsMapper serializeAndDeserialize(JavaPropsMapper mapper) throws Exception {
+    private JavaPropsMapper serializeAndDeserialize(JavaPropsMapper mapper) throws Exception
+    {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream outputStream = new ObjectOutputStream(byteArrayOutputStream);
         outputStream.writeObject(mapper);

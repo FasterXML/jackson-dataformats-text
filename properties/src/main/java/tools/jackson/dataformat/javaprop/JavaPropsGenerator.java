@@ -135,6 +135,11 @@ public abstract class JavaPropsGenerator
     */
 
     @Override
+    public PrettyPrinter getPrettyPrinter() {
+        return null;
+    }
+    
+    @Override
     public FormatSchema getSchema() { return _schema; }
 
     /*

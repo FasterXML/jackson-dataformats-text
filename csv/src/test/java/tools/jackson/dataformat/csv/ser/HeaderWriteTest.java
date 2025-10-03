@@ -55,15 +55,14 @@ public class HeaderWriteTest extends ModuleTestBase
         }
         
         CsvSchema schema = builder.setUseHeader(true).build();
-        try (SequenceWriter csvWriter = MAPPER.writerWithDefaultPrettyPrinter()
+        try (SequenceWriter csvWriter = MAPPER.writerFor(List.class)
                                               .with(schema)
-                                              .forType(List.class)
-                                              .writeValues(writer);) {
+                                              .writeValues(writer)) {
             for(List<String> nextRow : dataSource) {
                 csvWriter.write(nextRow);
             }
         }
-        
+
         return writer.toString();
     }
 }
