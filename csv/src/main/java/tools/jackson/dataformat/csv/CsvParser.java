@@ -655,15 +655,17 @@ public class CsvParser
                 _reportCsvReadError("Empty header line: can not bind data");
             }
         }
-        // [dataformats-text#285]: Are we missing something?
-        int diff = schemaColumnCount - newColumnCount;
-        if ((diff > 0) && CsvReadFeature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)) {
+
+        if (CsvReadFeature.FAIL_ON_MISSING_HEADER_COLUMNS.enabledIn(_formatFeatures)) {
             Set<String> oldColumnNames = new LinkedHashSet<>();
             _schema.getColumnNames(oldColumnNames);
             oldColumnNames.removeAll(newSchema.getColumnNames());
-            _reportCsvReadError(String.format("Missing %d header column%s: [\"%s\"]",
-                    diff, (diff == 1) ? "" : "s",
-                            String.join("\",\"", oldColumnNames)));
+            var diff = oldColumnNames.size();
+            if (diff > 0) {
+                _reportCsvReadError(String.format("Missing %d header column%s: [\"%s\"]",
+                    diff, (diff == 1) ? "" : "s", String.join("\",\"", oldColumnNames)
+                ));
+            }
         }
 
         // otherwise we will use what we got
