@@ -228,6 +228,20 @@ public class CsvMapper extends ObjectMapper
 
     /*
     /**********************************************************************
+    /* Format-specific
+    /**********************************************************************
+     */
+
+    public boolean isEnabled(CsvReadFeature f) {
+        return _deserializationConfig.hasFormatFeature(f);
+    }
+
+    public boolean isEnabled(CsvWriteFeature f) {
+        return _serializationConfig.hasFormatFeature(f);
+    }
+
+    /*
+    /**********************************************************************
     /* Additional ObjectReader factory methods
     /**********************************************************************
      */
