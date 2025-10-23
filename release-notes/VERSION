@@ -14,6 +14,11 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.1.0 (not yet released)
+
+#581: (csv, toml, yaml) Add `isEnabled()` methods for format-specific
+  features to mappers 
+
 3.0.1 (21-Oct-2025)
 
 No changes since 3.0.0
