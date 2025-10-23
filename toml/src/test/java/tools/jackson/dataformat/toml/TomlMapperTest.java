@@ -16,8 +16,8 @@ import tools.jackson.databind.node.JsonNodeFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TomlMapperTest extends TomlMapperTestBase {
-
+public class TomlMapperTest extends TomlMapperTestBase
+{
     private static final String TEST_STRING = "foo = 'bar'\n[nested]\nfoo = 4";
     private static final TestClass TEST_OBJECT;
 
@@ -198,5 +198,13 @@ public class TomlMapperTest extends TomlMapperTestBase {
                     .enable(TomlWriteFeature.FAIL_ON_NULL_WRITE)
                     .build().writeValueAsString(cf));
         });
+    }
+
+    // for [dataformats-text#581]
+    @Test
+    void testFormatFeatureDefaults() {
+        TomlMapper mapper = TomlMapper.shared();
+        assertFalse(mapper.isEnabled(TomlReadFeature.PARSE_JAVA_TIME));
+        assertFalse(mapper.isEnabled(TomlWriteFeature.FAIL_ON_NULL_WRITE));
     }
 }

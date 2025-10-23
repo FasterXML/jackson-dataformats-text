@@ -15,6 +15,8 @@ public enum TomlReadFeature
      * <p>
      * When this option is set, these time types will be parsed to their proper {@code java.time} counterparts and
      * appear as {@link tools.jackson.core.JsonToken#VALUE_EMBEDDED_OBJECT} tokens.
+     *<p>
+     * Feature is disabled by default.
      */
     PARSE_JAVA_TIME(false);
 

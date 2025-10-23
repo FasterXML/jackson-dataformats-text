@@ -186,6 +186,20 @@ public class TomlMapper extends ObjectMapper
 
     /*
     /**********************************************************************
+    /* Format-specific
+    /**********************************************************************
+     */
+
+    public boolean isEnabled(TomlReadFeature f) {
+        return _deserializationConfig.hasFormatFeature(f);
+    }
+
+    public boolean isEnabled(TomlWriteFeature f) {
+        return _serializationConfig.hasFormatFeature(f);
+    }
+    
+    /*
+    /**********************************************************************
     /* Helper class(es)
     /**********************************************************************
      */

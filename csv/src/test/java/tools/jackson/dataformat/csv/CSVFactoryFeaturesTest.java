@@ -110,5 +110,4 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         assertFalse(mapper.isEnabled(CsvReadFeature.ALLOW_COMMENTS));
         assertFalse(mapper.isEnabled(CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS));
     }
-
 }

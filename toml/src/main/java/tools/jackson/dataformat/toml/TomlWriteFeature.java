@@ -13,6 +13,8 @@ public enum TomlWriteFeature implements FormatFeature
      * {@link JsonGenerator#writeNull()} by default.
      * <p>
      * When this option is set, any attempt to write a null value will error instead.
+     *<p>
+     * Feature is disabled by default.
      */
     FAIL_ON_NULL_WRITE(false);
 
