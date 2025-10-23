@@ -198,6 +198,20 @@ public class YAMLMapper extends ObjectMapper
     }
 
     /*
+    /**********************************************************************
+    /* Format-specific
+    /**********************************************************************
+     */
+
+    public boolean isEnabled(YAMLReadFeature f) {
+        return _deserializationConfig.hasFormatFeature(f);
+    }
+
+    public boolean isEnabled(YAMLWriteFeature f) {
+        return _serializationConfig.hasFormatFeature(f);
+    }
+
+    /*
     /**********************************************************
     /* Helper class(es)
     /**********************************************************
