@@ -1,4 +1,4 @@
-package com.fasterxml.jackson.dataformat.csv.tofix;
+package com.fasterxml.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
 
@@ -7,16 +7,14 @@ import org.junit.jupiter.api.Test;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SequenceWriter;
 import com.fasterxml.jackson.dataformat.csv.*;
-import com.fasterxml.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MissingNullsOnObjectArrayWrite10Test extends ModuleTestBase
+public class ObjectArrayNullWrite10Test extends ModuleTestBase
 {
     private final CsvMapper MAPPER = mapperForCsv();
 
     // for [dataformats-text#10]
-    @JacksonTestFailureExpected
     @Test
     public void testNullsOnObjectArrayWrites2Col() throws Exception
     {
