@@ -51,6 +51,22 @@ public class YAMLParser extends ParserBase
          * @since 2.15
          */
         PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS(false),
+
+        /**
+         * Feature that determines whether empty YAML documents (documents with only
+         * comments or whitespace, or completely empty) should be treated as empty
+         * Object ({@code START_OBJECT}/{@code END_OBJECT} token pair) instead of
+         * causing "No content to map" error.
+         *<p>
+         * This is useful for deserializing to POJOs with default values, where an
+         * empty configuration file should create an object with all default values
+         * rather than failing.
+         *<p>
+         * Feature is disabled by default for backwards-compatibility.
+         *
+         * @since 2.21
+         */
+        USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT(false),
         ;
 
         final boolean _defaultState;
@@ -172,6 +188,22 @@ public class YAMLParser extends ParserBase
      * structured types, value whose first token current token is.
      */
     protected String _currentAnchor;
+
+    /**
+     * Flag to track whether we have seen any actual content (not just
+     * Document/Stream start/end events) to detect empty documents.
+     *
+     * @since 2.21
+     */
+    protected boolean _hasContent;
+
+    /**
+     * Flag to track whether we're currently emitting a synthetic empty object
+     * for an empty document (when USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT is enabled).
+     *
+     * @since 2.21
+     */
+    protected boolean _emittingSyntheticEmptyObject;
 
     /*
     /**********************************************************************
@@ -445,6 +477,16 @@ public class YAMLParser extends ParserBase
             return null;
         }
 
+        // [dataformats-text#154]: Handle synthetic empty object for empty documents
+        if (_emittingSyntheticEmptyObject) {
+            _emittingSyntheticEmptyObject = false;
+            _parsingContext = _parsingContext.getParent();
+            JsonToken token = _updateToken(JsonToken.END_OBJECT);
+            // Now close since we've emitted the complete empty object
+            close();
+            return token;
+        }
+
         while (true) {
             Event evt;
             try {
@@ -521,11 +563,13 @@ public class YAMLParser extends ParserBase
 
             // scalar values are probably the commonest:
             if (evt.is(Event.ID.Scalar)) {
+                _hasContent = true;
                 return _updateToken(_decodeScalar((ScalarEvent) evt));
             }
 
             // followed by maps, then arrays
             if (evt.is(Event.ID.MappingStart)) {
+                _hasContent = true;
                 Mark m = evt.getStartMark();
                 MappingStartEvent map = (MappingStartEvent) evt;
                 _currentAnchor = map.getAnchor();
@@ -536,6 +580,7 @@ public class YAMLParser extends ParserBase
                 _reportError("Not expecting END_OBJECT but a value");
             }
             if (evt.is(Event.ID.SequenceStart)) {
+                _hasContent = true;
                 Mark m = evt.getStartMark();
                 _currentAnchor = ((NodeEvent)evt).getAnchor();
                 createChildArrayContext(m.getLine(), m.getColumn());
@@ -572,6 +617,14 @@ public class YAMLParser extends ParserBase
                 return _updateToken(JsonToken.VALUE_STRING);
             }
             if (evt.is(Event.ID.StreamEnd)) { // end-of-input; force closure
+                // [dataformats-text#154]: If we have no content and feature is enabled,
+                // emit a synthetic empty object instead of null
+                if (!_hasContent && (_formatFeatures & Feature.USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT.getMask()) != 0) {
+                    _emittingSyntheticEmptyObject = true;
+                    // Don't close yet - we need to emit END_OBJECT first
+                    createChildObjectContext(0, 0);
+                    return _updateToken(JsonToken.START_OBJECT);
+                }
                 close();
                 return _updateTokenToNull();
             }
