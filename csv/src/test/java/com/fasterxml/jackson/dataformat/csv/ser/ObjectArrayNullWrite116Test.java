@@ -12,8 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ObjectArrayNullWrite116Test extends ModuleTestBase
 {
-    private final CsvMapper MAPPER = mapperForCsv();
-
     // for [dataformats-text#116]
     @Test
     public void testWithObjectArray() throws Exception
@@ -23,18 +21,19 @@ public class ObjectArrayNullWrite116Test extends ModuleTestBase
                                     .addColumn("b", CsvSchema.ColumnType.NUMBER)
                                     .setUseHeader(true)
                                     .build();
-        ObjectWriter writer = MAPPER.writer(schema);
+        ObjectWriter writer = mapperForCsv().writer(schema);
         StringWriter out = new StringWriter();
-        SequenceWriter sequence = writer.writeValues(out);
 
-        sequence.write(new Object[]{ 1, 2 });
-        sequence.write(new Object[]{ null, null });
-        sequence.write(new Object[]{ 1, null });
-
-        sequence.close();
+        try (SequenceWriter sequence = writer.writeValues(out)) {
+            sequence.write(new Object[]{ 1, 2 });
+            sequence.write(new Object[]{ null, 2 });
+            sequence.write(new Object[]{ null, null });
+            sequence.write(new Object[]{ 1, null });
+        }
 
         assertEquals("a,b\n" +
                      "1,2\n" +
+                     ",2\n" +
                      ",\n" +
                      "1,\n", out.toString());
     }
