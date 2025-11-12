@@ -240,6 +240,7 @@ public class CsvGenerator extends GeneratorBase
     /**
      * Flag set when a row has just been finished, used to distinguish between
      * null values within a row vs null rows.
+     * Only relevant for Array-wrapped rows.
      *
      * @since 2.21
      */
@@ -645,6 +646,8 @@ public class CsvGenerator extends GeneratorBase
     public final void writeStartObject() throws IOException
     {
         _verifyValueWrite("start an object");
+        _justFinishedRow = false;
+
         // No nesting for objects; can write Objects inside logical root-level arrays.
         // 14-Dec-2015, tatu: ... except, should be fine if we are ignoring the property
         if (_tokenWriteContext.inObject() ||
