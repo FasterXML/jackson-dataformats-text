@@ -21,7 +21,7 @@ public class EmptyDocumentDeser154Test extends ModuleTestBase
 
     private final YAMLMapper MAPPER = newObjectMapper();
     private final YAMLMapper MAPPER_WITH_EMPTY_AS_OBJECT = YAMLMapper.builder()
-            .enable(YAMLParser.Feature.USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT)
+            .enable(YAMLParser.Feature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT)
             .build();
 
     // First, verify the default behavior (should still fail for backwards compatibility)

@@ -232,18 +232,15 @@ Matteo Giordano (malteo@github)
  (2.14.1)
 
 Axel Niklasson (axelniklasson@github)
-
 * Contributed #388: (yaml) Add `YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS`
   to allow parsing "boolean" words as strings instead of booleans
  (2.15.0)
 
 Niels Basjes (nielsbasjes@github)
-
 * Contributed #415: (yaml) Use `LoaderOptions.allowDuplicateKeys` to enforce duplicate key detection
  (2.15.0)
 
 Peter Haumer (phaumer@github)
-
 * Reported #404: (yaml) Cannot serialize YAML with Deduction-Based Polymorphism
  (2.15.1)
 
@@ -295,3 +292,7 @@ Gili Tzabari (@cowwoc)
 * Requested #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (2.19.0)
 
+Sergio Delgado (@serandel)
+* Reported #154: (yaml) YAML file with no content throws `MismatchedInputException`
+  when binding to Object type (POJO etc)
+ (2.21.0)

@@ -16,7 +16,12 @@ Active Maintainers:
 
 2.21.0 (not yet released)
 
-#10: Missing `null` writes when writing `Object[]` values
+#10: (csv) Missing `null` writes when writing `Object[]` values
+ (reported by @georgewfraser)
+ (fix by @cowtowncoder, w/ Claude code)
+#154: (yaml) YAML file with no content throws `MismatchedInputException`
+  when binding to Object type (POJO etc)
+ (reported by Sergio D)
  (fix by @cowtowncoder, w/ Claude code)
 
 2.20.1 (30-Oct-2025)

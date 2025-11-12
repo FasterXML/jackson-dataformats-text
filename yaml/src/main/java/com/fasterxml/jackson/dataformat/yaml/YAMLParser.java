@@ -32,6 +32,22 @@ public class YAMLParser extends ParserBase
     public enum Feature implements FormatFeature // in 2.9
     {
         /**
+         * Feature that determines whether empty YAML documents (documents with only
+         * comments or whitespace, or completely empty) should be exposed as empty
+         * Object ({@code START_OBJECT}/{@code END_OBJECT} token pair) instead of
+         * causing "No content to map" error.
+         *<p>
+         * This is useful for example for deserializing to POJOs with default values,
+         * where an  empty configuration file should create an object with all default
+         * values rather than failing.
+         *<p>
+         * Feature is disabled by default for backwards-compatibility.
+         *
+         * @since 2.21
+         */
+        EMPTY_DOCUMENT_AS_EMPTY_OBJECT(false),
+
+        /**
          * Feature that determines whether an empty {@link String} will be parsed
          * as {@code null}. Logic is part of YAML 1.1 
          * <a href="https://yaml.org/type/null.html">Null Language-Independent Type</a>.
@@ -51,22 +67,6 @@ public class YAMLParser extends ParserBase
          * @since 2.15
          */
         PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS(false),
-
-        /**
-         * Feature that determines whether empty YAML documents (documents with only
-         * comments or whitespace, or completely empty) should be treated as empty
-         * Object ({@code START_OBJECT}/{@code END_OBJECT} token pair) instead of
-         * causing "No content to map" error.
-         *<p>
-         * This is useful for deserializing to POJOs with default values, where an
-         * empty configuration file should create an object with all default values
-         * rather than failing.
-         *<p>
-         * Feature is disabled by default for backwards-compatibility.
-         *
-         * @since 2.21
-         */
-        USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT(false),
         ;
 
         final boolean _defaultState;
@@ -619,7 +619,7 @@ public class YAMLParser extends ParserBase
             if (evt.is(Event.ID.StreamEnd)) { // end-of-input; force closure
                 // [dataformats-text#154]: If we have no content and feature is enabled,
                 // emit a synthetic empty object instead of null
-                if (!_hasContent && (_formatFeatures & Feature.USE_EMPTY_OBJECT_FOR_EMPTY_DOCUMENT.getMask()) != 0) {
+                if (!_hasContent && (_formatFeatures & Feature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT.getMask()) != 0) {
                     _emittingSyntheticEmptyObject = true;
                     // Don't close yet - we need to emit END_OBJECT first
                     createChildObjectContext(0, 0);
