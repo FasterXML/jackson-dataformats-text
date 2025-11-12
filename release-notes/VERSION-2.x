@@ -16,7 +16,8 @@ Active Maintainers:
 
 2.21.0 (not yet released)
 
-No changes since 2.20
+#10: Missing `null` writes when writing `Object[]` values
+ (fix by @cowtowncoder, w/ Claude code)
 
 2.20.1 (30-Oct-2025)
 
