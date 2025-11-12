@@ -238,6 +238,15 @@ public class CsvGenerator extends GeneratorBase
     protected boolean _skipValue;
 
     /**
+     * Flag set when a row has just been finished, used to distinguish between
+     * null values within a row vs null rows.
+     * Only relevant for Array-wrapped rows.
+     *
+     * @since 2.21
+     */
+    protected boolean _justFinishedRow = false;
+
+    /**
      * Separator to use during writing of (simple) array value, to be encoded as a
      * single column value, if any.
      *
@@ -562,6 +571,7 @@ public class CsvGenerator extends GeneratorBase
     public final void writeStartArray() throws IOException
     {
         _verifyValueWrite("start an array");
+        _justFinishedRow = false; // Clear flag when starting new array
         // Ok to create root-level array to contain Objects/Arrays, but
         // can not nest arrays in objects
         if (_tokenWriteContext.inObject()) {
@@ -636,6 +646,8 @@ public class CsvGenerator extends GeneratorBase
     public final void writeStartObject() throws IOException
     {
         _verifyValueWrite("start an object");
+        _justFinishedRow = false;
+
         // No nesting for objects; can write Objects inside logical root-level arrays.
         // 14-Dec-2015, tatu: ... except, should be fine if we are ignoring the property
         if (_tokenWriteContext.inObject() ||
@@ -882,7 +894,12 @@ public class CsvGenerator extends GeneratorBase
                 //   just skip; can change, if so desired, to expose "root null" as empty rows, possibly
                 //   based on either schema property, or CsvGenerator.Feature.
                 //  Note: if nulls are to be written that way, would need to call `finishRow()` right after `writeNull()`
-                if (!_tokenWriteContext.getParent().inRoot()) {
+                // [dataformats-text#10]: When we have a schema and we haven't just finished a row,
+                //   it means we're inside an array-as-row (like Object[]), so null is a column value
+                boolean writeNullValue = !_tokenWriteContext.getParent().inRoot()
+                    || (_schema.size() > 0 && !_justFinishedRow);
+
+                if (writeNullValue) {
                     // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
                     if (_nextColumnDecorator != null) {
                         String nvl = _nextColumnDecorator.decorateNull(this);
@@ -1132,6 +1149,7 @@ public class CsvGenerator extends GeneratorBase
     {
         _writer.endRow();
         _nextColumnByName = -1;
+        _justFinishedRow = true;
     }
 
     protected void _handleFirstLine() throws IOException
