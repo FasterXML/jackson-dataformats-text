@@ -7,7 +7,7 @@ module tools.jackson.dataformat.yaml
     requires tools.jackson.core;
     requires tools.jackson.databind;
 
-    requires org.snakeyaml.engine.v2;
+    requires org.snakeyaml.engine;
 
     // Additional test lib/framework dependencies
     requires org.assertj.core;

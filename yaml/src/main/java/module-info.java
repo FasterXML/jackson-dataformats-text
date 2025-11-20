@@ -5,7 +5,7 @@ module tools.jackson.dataformat.yaml
     requires tools.jackson.databind;
 
     // Jackson 3.0 uses snakeyaml-engine (2.x snakeyaml)
-    requires org.snakeyaml.engine.v2;
+    requires org.snakeyaml.engine;
 
     exports tools.jackson.dataformat.yaml;
     exports tools.jackson.dataformat.yaml.util;
