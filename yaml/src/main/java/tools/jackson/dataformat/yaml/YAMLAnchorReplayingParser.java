@@ -118,11 +118,31 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
         return event;
     }
 
+    protected void recordEvent(Event event) {
+	    if (tokenStack.isEmpty()) return;
+	    AnchorContext context = tokenStack.peek();
+	    if (context.events.size() + 1 > MAX_EVENTS)
+	        throw new StreamConstraintsException("too many events to replay");
+	    context.events.add(event);
+	    if (event instanceof CollectionStartEvent) {
+	        ++context.depth;
+	    } else if (event instanceof CollectionEndEvent) {
+	        --context.depth;
+	        if (context.depth == 0) {
+	            tokenStack.pop();
+	            finishContext(context);
+	        }
+	    }
+    }
+
     @Override
     protected Event nextEvent() {
         while (!refEvents.isEmpty()) {
             Event event = filterEvent(trackDepth(refEvents.removeFirst()));
-            if (event != null) return event;
+            if (event != null) {
+                recordEvent(event);
+                return event;
+            }
         }
 
         Event event = null;
@@ -138,7 +158,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                 if (refEvents.size() + events.size() > MAX_EVENTS)
 					throw new StreamConstraintsException("too many events to replay");
                 refEvents.addAll(events);
-                return refEvents.removeFirst();
+                return nextEvent();
             }
             _reportError("invalid alias: " + alias.getAlias());
         }
@@ -156,6 +176,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
                     // directly store it
                     finishContext(context);
                 }
+                // no need to record this event as it was handled above
                 return event;
             }
         }
@@ -174,21 +195,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
             }
         }
 
-        if (!tokenStack.isEmpty()) {
-            AnchorContext context = tokenStack.peek();
-            if (context.events.size() + 1 > MAX_EVENTS)
-				throw new StreamConstraintsException("too many events to replay");
-            context.events.add(event);
-            if (event instanceof CollectionStartEvent) {
-                ++context.depth;
-            } else if (event instanceof CollectionEndEvent) {
-                --context.depth;
-                if (context.depth == 0) {
-                    tokenStack.pop();
-                    finishContext(context);
-                }
-            }
-        }
+        recordEvent(event);
         return event;
     }
 }
