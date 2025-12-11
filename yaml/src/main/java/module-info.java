@@ -11,7 +11,8 @@ module tools.jackson.dataformat.yaml
     exports tools.jackson.dataformat.yaml.util;
 
     provides tools.jackson.core.TokenStreamFactory with
-        tools.jackson.dataformat.yaml.YAMLFactory;
+        tools.jackson.dataformat.yaml.YAMLFactory,
+        tools.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
     provides tools.jackson.databind.ObjectMapper with
         tools.jackson.dataformat.yaml.YAMLMapper;
 }
