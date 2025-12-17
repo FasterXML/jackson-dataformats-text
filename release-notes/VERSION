@@ -23,6 +23,9 @@ implementations)
   features to mappers 
 #590: (yaml) Upgrade to the latest version of SnakeYAML Engine (3.0.1)
  (contributed by Andrey S)
+#596: (yaml) Port `YAMLAnchorReplayingFactory` from 2.x and improve it
+  to handle nested anchors
+ (contributed by Théo S)
 
 3.0.3 (28-Nov-2025)
 3.0.2 (07-Nov-2025)
