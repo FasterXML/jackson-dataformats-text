@@ -23,6 +23,9 @@ Active Maintainers:
   when binding to Object type (POJO etc)
  (reported by Sergio D)
  (fix by @cowtowncoder, w/ Claude code)
+#479: (csv) `STRICT_CHECK_FOR_QUOTING` does not quote value that contains newline character
+ (reported by @zhuhw)
+ (fix by @cowtowncoder, w/ Claude code)
 
 2.20.1 (30-Oct-2025)
 
