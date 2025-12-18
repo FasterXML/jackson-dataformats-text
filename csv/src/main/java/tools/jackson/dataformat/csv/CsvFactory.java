@@ -22,19 +22,16 @@ public class CsvFactory
     public final static String FORMAT_NAME_CSV = "CSV";
     
     /**
-     * Bitfield (set of flags) of all parser features that are enabled
+     * Bit field (set of flags) of all parser features that are enabled
      * by default.
      */
     protected final static int DEFAULT_CSV_PARSER_FEATURE_FLAGS = CsvReadFeature.collectDefaults();
 
     /**
-     * Bitfield (set of flags) of all generator features that are enabled
+     * Bit field (set of flags) of all generator features that are enabled
      * by default.
      */
     protected final static int DEFAULT_CSV_GENERATOR_FEATURE_FLAGS = CsvWriteFeature.collectDefaults();
-
-    // could make it use Platform default too but...
-    protected final static char[] DEFAULT_LF = { '\n' };
 
     protected final static CsvSchema DEFAULT_SCHEMA = CsvSchema.emptySchema();
     
