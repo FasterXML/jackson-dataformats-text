@@ -16,6 +16,8 @@ implementations)
 
 3.1.0 (not yet released)
 
+#479: (csv) `STRICT_CHECK_FOR_QUOTING` does not quote value that contains newline character
+ (reported by @zhuhw)
 #568: (yaml) YAML - ScannerException on block scalar "\n"
  (reported by @benken-parasoft)
  (fix by Andrey S)
