@@ -1226,7 +1226,7 @@ public class CsvEncoder
         final int escLen = escCodes.length;
         // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
         //   leads to quoting
-        // 17-Dec-2024, tatu: [dataformats-text#479] Must check for ALL line separators
+        // 17-Dec-2025, tatu: [dataformats-text#479] Must check for ALL line separators
         //   (LF, CR) per RFC 4180, not just the configured schema line separator.
         //   NOTE: escCodes is empty by default (unless custom CharacterEscapes provided),
         //   so we cannot rely on `escCodes[c] != 0` check to catch newlines - we must
