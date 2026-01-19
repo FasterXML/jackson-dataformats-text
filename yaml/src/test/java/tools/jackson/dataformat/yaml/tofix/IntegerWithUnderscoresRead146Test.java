@@ -9,7 +9,7 @@ import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected
 import static org.junit.jupiter.api.Assertions.*;
 
 // for [dataformat-text#146]: cannot handle underscores in numbers
-public class IntegerWithUnderscoresReadTest extends ModuleTestBase {
+public class IntegerWithUnderscoresRead146Test extends ModuleTestBase {
     static class IntegerHolder
     {
         private Integer v;

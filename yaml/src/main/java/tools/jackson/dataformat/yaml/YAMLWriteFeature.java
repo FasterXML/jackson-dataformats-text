@@ -12,22 +12,28 @@ public enum YAMLWriteFeature implements FormatFeature
     /**
      * Whether we are to write an explicit document start marker ("---")
      * or not.
+     *<p>
+     * Feature is enabled by default.
      */
     WRITE_DOC_START_MARKER(true),
 
     /**
      * Whether to use YAML native Object Id construct for indicating type (true);
      * or "generic" Object Id mechanism (false). Former works better for systems that
-     * are YAML-centric; latter may be better choice for interoperability, when
+     * are YAML-centric; latter may be better choice for inter-operability, when
      * converting between formats or accepting other formats.
+     *<p>
+     * Feature is enabled by default.
      */
     USE_NATIVE_OBJECT_ID(true),
 
     /**
      * Whether to use YAML native Type Id construct for indicating type (true);
      * or "generic" type property (false). Former works better for systems that
-     * are YAML-centric; latter may be better choice for interoperability, when
+     * are YAML-centric; latter may be better choice for inter-operability, when
      * converting between formats or accepting other formats.
+     *<p>
+     * Feature is enabled by default.
      */
     USE_NATIVE_TYPE_ID(true),
 
@@ -36,6 +42,8 @@ public enum YAMLWriteFeature implements FormatFeature
      * <p>
      *     Ignored if you provide your own {@code DumperOptions}.
      * </p>
+     *<p>
+     * Feature is disabled by default.
      */
     CANONICAL_OUTPUT(false),
 
@@ -48,6 +56,8 @@ public enum YAMLWriteFeature implements FormatFeature
      * <p>
      *     Ignored if you provide your own {@code DumperOptions}.
      * </p>
+     *<p>
+     * Feature is enabled by default.
      */
     SPLIT_LINES(true),
 
@@ -59,6 +69,8 @@ public enum YAMLWriteFeature implements FormatFeature
      *     limited to printable characters according to the rules of
      *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
      * </p>
+     *<p>
+     * Feature is disabled by default.
      */
     MINIMIZE_QUOTES(false),
 
@@ -70,6 +82,8 @@ public enum YAMLWriteFeature implements FormatFeature
      *     limited to printable characters according to the rules of
      *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
      * </p>
+     *<p>
+     * Feature is disabled by default.
      */
     ALWAYS_QUOTE_NUMBERS_AS_STRINGS(false),
 
@@ -81,6 +95,8 @@ public enum YAMLWriteFeature implements FormatFeature
      *     The content of such strings is limited to printable characters according to the rules of
      *     <a href="http://www.yaml.org/spec/1.2/spec.html#style/block/literal">literal block style</a>.
      * </p>
+     *<p>
+     * Feature is disabled by default.
      */
     LITERAL_BLOCK_STYLE(false),
 
@@ -93,7 +109,8 @@ public enum YAMLWriteFeature implements FormatFeature
      * <p>
      *     Ignored if you provide your own {@code DumperOptions}.
      * </p>
-     *
+     *<p>
+     * Feature is disabled by default.
      */
     INDENT_ARRAYS(false),
 
@@ -106,7 +123,8 @@ public enum YAMLWriteFeature implements FormatFeature
      * <p>
      *     Ignored if you provide your own {@code DumperOptions}.
      * </p>
-     *
+     *<p>
+     * Feature is disabled by default.
      */
     INDENT_ARRAYS_WITH_INDICATOR(false),
 
@@ -118,6 +136,8 @@ public enum YAMLWriteFeature implements FormatFeature
      * <p>
      *     Ignored if you provide your own {@code DumperOptions}.
      * </p>
+     *<p>
+     * Feature is disabled by default.
      */
     ALLOW_LONG_KEYS(false),
     ;

@@ -10,7 +10,8 @@ import tools.jackson.dataformat.yaml.*;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-//for [dataformats-text#123], problem with YAML, Object Ids
+// for [dataformats-text#123], problem with YAML, Object Ids
+// (and also see [dataformats-text#296] for related case)
 public class ObjectId123Test extends ModuleTestBase
 {
     private final ObjectMapper MAPPER = newObjectMapper();

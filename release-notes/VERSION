@@ -14,6 +14,23 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.1.0 (not yet released)
+
+#479: (csv) `STRICT_CHECK_FOR_QUOTING` does not quote value that contains newline character
+ (reported by @zhuhw)
+#568: (yaml) YAML - ScannerException on block scalar "\n"
+ (reported by @benken-parasoft)
+ (fix by Andrey S)
+#581: (csv, toml, yaml) Add `isEnabled()` methods for format-specific
+  features to mappers 
+#590: (yaml) Upgrade to the latest version of SnakeYAML Engine (3.0.1)
+ (contributed by Andrey S)
+#596: (yaml) Port `YAMLAnchorReplayingFactory` from 2.x and improve it
+  to handle nested anchors
+ (contributed by Théo S)
+
+3.0.3 (28-Nov-2025)
+3.0.2 (07-Nov-2025)
 3.0.1 (21-Oct-2025)
 
 No changes since 3.0.0
@@ -22,6 +39,9 @@ No changes since 3.0.0
 
 #106: (yaml) Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)
  (contributed by Andrey S)
+#215: (yaml) .without(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+  seems to be ignored
+ (reported by @jdimeo)
 #320: Rename "com.fasterxml.jackson" -> "tools.jackson"
 #374: (csv) Should verify that escape character set if enabling
   `CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR`

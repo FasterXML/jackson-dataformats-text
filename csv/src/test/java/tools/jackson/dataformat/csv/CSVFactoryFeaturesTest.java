@@ -102,4 +102,12 @@ public class CSVFactoryFeaturesTest extends ModuleTestBase
         assertFalse(parser.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
         assertTrue(parser.isEnabled(StreamReadFeature.USE_FAST_DOUBLE_PARSER));
     }
+
+    // for [dataformats-text#581]
+    @Test
+    void testFormatFeatureDefaults() {
+        CsvMapper mapper = CsvMapper.shared();
+        assertFalse(mapper.isEnabled(CsvReadFeature.ALLOW_COMMENTS));
+        assertFalse(mapper.isEnabled(CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS));
+    }
 }

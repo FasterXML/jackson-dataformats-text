@@ -15,7 +15,7 @@ public abstract class ModuleTestBase
 {
     public enum Gender { MALE, FEMALE };
 
-    protected static class Address {
+    public static class Address {
         private String streetName;
 
         private String city;
@@ -42,7 +42,7 @@ public abstract class ModuleTestBase
         }
     }
 
-    protected static class LocalizedValue {
+    public static class LocalizedValue {
         private String value;
 
         public LocalizedValue(String value) {
@@ -62,7 +62,7 @@ public abstract class ModuleTestBase
      * Slightly modified sample class from Jackson tutorial ("JacksonInFiveMinutes")
      */
     @JsonPropertyOrder({"firstName", "lastName", "gender" ,"verified", "userImage"})
-    protected static class FiveMinuteUser
+    public static class FiveMinuteUser
     {
         private Gender _gender;
 
@@ -155,7 +155,7 @@ public abstract class ModuleTestBase
     }
 
     @JsonPropertyOrder({"id", "desc"})
-    protected static class IdDesc {
+    public static class IdDesc {
         public String id, desc;
 
         protected IdDesc() { }
@@ -166,7 +166,7 @@ public abstract class ModuleTestBase
     }
 
     @JsonPropertyOrder({ "x", "y" })
-    protected static class Point {
+    public static class Point {
         public int x, y;
 
         protected Point() { }
@@ -176,7 +176,7 @@ public abstract class ModuleTestBase
         }
     }
 
-    protected static class Points {
+    public static class Points {
         public List<Point> p;
 
         protected Points() { }

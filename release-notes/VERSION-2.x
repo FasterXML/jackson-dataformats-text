@@ -14,9 +14,22 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.21.0 (not yet released)
+2.21.0 (18-Jan-2026)
 
-No changes since 2.20
+#10: (csv) Missing `null` writes when writing `Object[]` values
+ (reported by @georgewfraser)
+ (fix by @cowtowncoder, w/ Claude code)
+#154: (yaml) YAML file with no content throws `MismatchedInputException`
+  when binding to Object type (POJO etc)
+ (reported by Sergio D)
+ (fix by @cowtowncoder, w/ Claude code)
+#479: (csv) `STRICT_CHECK_FOR_QUOTING` does not quote value that contains newline character
+ (reported by @zhuhw)
+ (fix by @cowtowncoder, w/ Claude code)
+
+2.20.1 (30-Oct-2025)
+
+No changes since 2.20.0
 
 2.20.0 (28-Aug-2025)
 
@@ -28,6 +41,8 @@ No changes since 2.20
  for non-numeric tokens
 - Generate SBOMs [JSTEP-14]
 
+2.19.4 (29-Oct-2025)
+2.19.3 (29-Oct-2025)
 2.19.2 (18-Jul-2025)
 2.19.1 (13-Jun-2025)
 
@@ -47,6 +62,7 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
+2.18.5 (27-Oct-2025)
 2.18.4 (06-May-2025)
 2.18.3 (28-Feb-2025)
 2.18.2 (27-Nov-2024)
@@ -154,6 +170,8 @@ No changes since 2.15.1
   to allow parsing "boolean" words as strings instead of booleans
  (contributed by Axel N)
 #390: (yaml) Upgrade to Snakeyaml 2.0 (resolves CVE-2022-1471)
+ (contributed by @pjfanning)
+#398 (tom) TOML: check nesting depth (CVE-2023-3894)
  (contributed by @pjfanning)
 #411: (toml) Fuzzer-found issue #57237 (buffer boundary condition)
  (contributed by @yawkat)

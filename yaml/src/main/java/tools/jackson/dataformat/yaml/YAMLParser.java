@@ -113,6 +113,19 @@ public class YAMLParser extends ParserBase
      */
     protected Optional<Anchor> _currentAnchor;
 
+    /**
+     * Flag to track whether we have seen any actual content (not just
+     * Document/Stream start/end events) to detect empty documents.
+     */
+    protected boolean _hasContent;
+
+    /**
+     * Flag to track whether we're currently emitting a synthetic empty object
+     * for an empty document (when {@link YAMLReadFeature#EMPTY_DOCUMENT_AS_EMPTY_OBJECT}
+     * is enabled).
+     */
+    protected boolean _emittingSyntheticEmptyObject;    
+
     /*
     /**********************************************************************
     /* Life-cycle
@@ -300,6 +313,16 @@ public class YAMLParser extends ParserBase
             return null;
         }
 
+        // [dataformats-text#154]: Handle synthetic empty object for empty documents
+        if (_emittingSyntheticEmptyObject) {
+            _emittingSyntheticEmptyObject = false;
+            _streamReadContext = _streamReadContext.getParent();
+            JsonToken token = _updateToken(JsonToken.END_OBJECT);
+            // Now close since we've emitted the complete empty object
+            close();
+            return token;
+        }
+
         while (true /*_yamlParser.hasNext()*/) {
             Event evt;
             try {
@@ -372,10 +395,12 @@ public class YAMLParser extends ParserBase
             switch (evt.getEventId()) {
                 case Scalar:
                     // scalar values are probably the commonest:
+                    _hasContent = true;
                     JsonToken t = _decodeScalar((ScalarEvent) evt);
                     return _updateToken(t);
                 case MappingStart:
                     // followed by maps, then arrays
+                    _hasContent = true;
                     Optional<Mark> m = evt.getStartMark();
                     MappingStartEvent map = (MappingStartEvent) evt;
                     _currentAnchor = map.getAnchor();
@@ -389,6 +414,7 @@ public class YAMLParser extends ParserBase
                     _reportError("Not expecting END_OBJECT but a value");
 
                 case SequenceStart:
+                    _hasContent = true;
                     Optional<Mark> mrk = evt.getStartMark();
                     _currentAnchor = ((NodeEvent) evt).getAnchor();
                     _streamReadContext = _streamReadContext.createChildArrayContext(
@@ -426,6 +452,15 @@ public class YAMLParser extends ParserBase
 
                 case StreamEnd:
                     // end-of-input; force closure
+                    // [dataformats-text#154]: If we have no content and feature is enabled,
+                    // emit a synthetic empty object instead of null
+                    if (!_hasContent
+                            && YAMLReadFeature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT.enabledIn(_formatFeatures)) {
+                        _emittingSyntheticEmptyObject = true;
+                        // Don't close yet - we need to emit END_OBJECT first
+                        _streamReadContext.createChildObjectContext(0, 0);
+                        return _updateToken(JsonToken.START_OBJECT);
+                    }
                     close();
                     return _updateTokenToNull();
 

@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.csv.tofix;
+package tools.jackson.dataformat.csv.ser;
 
 import java.io.StringWriter;
 
@@ -7,41 +7,34 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.SequenceWriter;
 import tools.jackson.dataformat.csv.*;
-import tools.jackson.dataformat.csv.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NullWriting116Test extends ModuleTestBase
+public class ObjectArrayNullWrite116Test extends ModuleTestBase
 {
-    private final CsvMapper csv = mapperForCsv();
-
-    // [dataformat#116]
-    @JacksonTestFailureExpected
+    // for [dataformats-text#116]
     @Test
-    public void testWithObjectArray() throws Exception 
+    public void testWithObjectArray() throws Exception
     {
         CsvSchema schema = CsvSchema.builder()
                                     .addColumn("a", CsvSchema.ColumnType.NUMBER)
                                     .addColumn("b", CsvSchema.ColumnType.NUMBER)
                                     .setUseHeader(true)
                                     .build();
-        ObjectWriter writer = csv.writer(schema);
+        ObjectWriter writer = mapperForCsv().writer(schema);
         StringWriter out = new StringWriter();
-        SequenceWriter sequence = writer.writeValues(out);
 
-        sequence.write(new Object[]{ 1, 2 });
-//        sequence.write(new Object[]{ null, 2 });
-        sequence.write(new Object[]{ null, null });
-        sequence.write(new Object[]{ 1, null });
+        try (SequenceWriter sequence = writer.writeValues(out)) {
+            sequence.write(new Object[]{ 1, 2 });
+            sequence.write(new Object[]{ null, 2 });
+            sequence.write(new Object[]{ null, null });
+            sequence.write(new Object[]{ 1, null });
+        }
 
-        sequence.close();
-
-//System.err.println("CSV:\n"+out);
         assertEquals("a,b\n" +
                      "1,2\n" +
-//                     ",2\n" +
+                     ",2\n" +
                      ",\n" +
                      "1,\n", out.toString());
     }
-
 }

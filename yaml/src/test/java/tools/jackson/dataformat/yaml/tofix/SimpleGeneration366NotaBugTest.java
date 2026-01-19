@@ -11,9 +11,10 @@ import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class SimpleGeneration366Test extends ModuleTestBase
+//!!! 11-Nov-2025, tatu: Closed as "Not a Bug", test left for reference
+public class SimpleGeneration366NotaBugTest extends ModuleTestBase
 {
-    // [dataformats-text#366]: multiline literal block with trailing spaces does not work
+    // [dataformats-text#366]: multi-line literal block with trailing spaces does not work
     @JacksonTestFailureExpected
     @Test
     public void testLiteralBlockStyleMultilineWithTrailingSpace() throws Exception
@@ -34,7 +35,7 @@ public class SimpleGeneration366Test extends ModuleTestBase
                 "text: |-\n  Hello\n  World ", yaml);
     }
 
-    // [dataformats-text#366]: multiline literal block without trailing spaces actually works
+    // [dataformats-text#366]: multi-line literal block without trailing spaces actually works
     @Test
     public void testLiteralBlockStyleMultiline() throws Exception
     {

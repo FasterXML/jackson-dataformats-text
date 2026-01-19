@@ -14,18 +14,18 @@ public enum CsvWriteFeature
      * Feature that determines how much work is done before determining that
      * a column value requires quoting: when set as <code>true</code>, full
      * check is made to only use quoting when it is strictly necessary;
-     * but when <code>false</code>, a faster but more conservative check
+     * but when {@code false}, a faster but more conservative check
      * is made, and possibly quoting is used for values that might not need it.
-     * Trade-offs is basically between optimal/minimal quoting (true), and
-     * faster handling (false).
+     * Trade-off is basically between optimal/minimal quoting ({@code true}), and
+     * faster handling ({@code false}).
      * Faster check involves only checking first N characters of value, as well
      * as possible looser checks.
      *<p>
      * Note, however, that regardless setting, all values that need to be quoted
-     * will be: it is just that when set to <code>false</code>, other values may
+     * will be: it is just that when set to {@code false}, other values may
      * also be quoted (to avoid having to do more expensive checks).
      *<p>
-     * Default value is <code>false</code> for "loose" (approximate, conservative)
+     * Default value is {@code false} for "loose" (approximate, conservative)
      * checking.
      */
     STRICT_CHECK_FOR_QUOTING(false),
@@ -33,8 +33,8 @@ public enum CsvWriteFeature
     /**
      * Feature that determines whether columns without matching value may be omitted,
      * when they are the last values of the row.
-     * If <code>true</code>, values and separators between values may be omitted, to slightly reduce
-     * length of the row; if <code>false</code>, separators need to stay in place and values
+     * If {@code true}, values and separators between values may be omitted, to slightly reduce
+     * length of the row; if {@code false}, separators need to stay in place and values
      * are indicated by empty Strings.
      */
     OMIT_MISSING_TAIL_COLUMNS(false),
