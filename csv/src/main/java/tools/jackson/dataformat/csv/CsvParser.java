@@ -1243,9 +1243,7 @@ public class CsvParser
             if (_nullValue.equals(value)) {
                 // [dataformats-text#601]: If NULL_VALUE_UNQUOTED_AS_NULL is enabled,
                 // only treat unquoted values as null
-                if (!_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted()) {
-                    return true;
-                }
+                return !_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted();
             }
         }
         if (value.isEmpty()) {
