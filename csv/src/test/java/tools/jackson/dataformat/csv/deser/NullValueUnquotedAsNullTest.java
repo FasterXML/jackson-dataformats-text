@@ -47,7 +47,7 @@ public class NullValueUnquotedAsNullTest extends ModuleTestBase
         CsvSchema schema = MAPPER.schemaFor(TestUser.class).withNullValue("N/A");
         ObjectReader reader = MAPPER.readerFor(TestUser.class)
                 .with(schema)
-                .with(CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL);
+                .with(CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL);
 
         // Unquoted N/A -> null
         TestUser user1 = reader.readValue("Grace,N/A,Hopper");
@@ -68,7 +68,7 @@ public class NullValueUnquotedAsNullTest extends ModuleTestBase
         CsvSchema schema = CsvSchema.emptySchema().withNullValue("null");
         ObjectReader reader = MAPPER.reader()
                 .with(schema)
-                .with(CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL)
+                .with(CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL)
                 .with(CsvReadFeature.WRAP_AS_ARRAY);
 
         // Unquoted null -> null
@@ -98,7 +98,7 @@ public class NullValueUnquotedAsNullTest extends ModuleTestBase
         CsvSchema schema = CsvSchema.emptySchema().withNullValue("NULL");
         ObjectReader reader = MAPPER.reader()
                 .with(schema)
-                .with(CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL)
+                .with(CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL)
                 .with(CsvReadFeature.WRAP_AS_ARRAY);
 
         // Unquoted NULL -> null
@@ -128,7 +128,7 @@ public class NullValueUnquotedAsNullTest extends ModuleTestBase
         CsvSchema schema = MAPPER.schemaFor(TestUser.class).withNullValue("N/A");
         ObjectReader reader = MAPPER.readerFor(TestUser.class)
                 .with(schema)
-                .without(CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL);
+                .without(CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL);
 
         // Both quoted and unquoted should become null
         TestUser user1 = reader.readValue("Grace,N/A,Hopper");

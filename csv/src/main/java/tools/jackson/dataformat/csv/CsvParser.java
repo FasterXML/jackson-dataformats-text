@@ -153,9 +153,9 @@ public class CsvParser
     protected boolean _cfgEmptyUnquotedStringAsNull;
 
     /**
-     * @since 2.19
+     * @since 3.1
      */
-    protected boolean _cfgNullValueUnquotedAsNull;
+    protected boolean _cfgOnlyUnquotedNullValuesAsNull;
 
     /*
     /**********************************************************************
@@ -257,7 +257,7 @@ public class CsvParser
         _setSchema(schema);
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
-        _cfgNullValueUnquotedAsNull = CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL.enabledIn(csvFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
@@ -1243,15 +1243,15 @@ public class CsvParser
             if (_nullValue.equals(value)) {
                 // [dataformats-text#601]: If NULL_VALUE_UNQUOTED_AS_NULL is enabled,
                 // only treat unquoted values as null
-                if (_cfgNullValueUnquotedAsNull && _reader.isCurrentTokenQuoted()) {
-                    return false; // quoted null value stays as string
+                if (!_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted()) {
+                    return true;
                 }
-                return true;
             }
         }
-        if (_cfgEmptyStringAsNull && value.isEmpty()) {
-            return true;
+        if (value.isEmpty()) {
+            return _cfgEmptyStringAsNull
+                    || (_cfgEmptyUnquotedStringAsNull && !_reader.isCurrentTokenQuoted());
         }
-        return _cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted();
+        return false;
     }
 }
