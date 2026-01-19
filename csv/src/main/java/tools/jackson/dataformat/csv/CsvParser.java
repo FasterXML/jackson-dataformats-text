@@ -152,6 +152,11 @@ public class CsvParser
      */
     protected boolean _cfgEmptyUnquotedStringAsNull;
 
+    /**
+     * @since 2.19
+     */
+    protected boolean _cfgNullValueUnquotedAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -252,6 +257,7 @@ public class CsvParser
         _setSchema(schema);
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgNullValueUnquotedAsNull = CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
@@ -1235,6 +1241,11 @@ public class CsvParser
     protected boolean _isNullValue(String value) {
         if (_nullValue != null) {
             if (_nullValue.equals(value)) {
+                // [dataformats-text#601]: If NULL_VALUE_UNQUOTED_AS_NULL is enabled,
+                // only treat unquoted values as null
+                if (_cfgNullValueUnquotedAsNull && _reader.isCurrentTokenQuoted()) {
+                    return false; // quoted null value stays as string
+                }
                 return true;
             }
         }
