@@ -191,6 +191,26 @@ public class CsvParser
          * @since 2.18
          */
         EMPTY_UNQUOTED_STRING_AS_NULL(false),
+
+        /**
+         * Feature that enables treating only un-quoted values matching the configured
+         * "null value" String (see {@link CsvSchema#getNullValueString()}) as {@code null},
+         * but not quoted values:
+         * differentiating between a quoted null value String (like {@code "null"})
+         * which remains as a String, and an unquoted null value (like {@code null})
+         * which becomes {@code null}.
+         *<p>
+         * This is similar to {@link #EMPTY_UNQUOTED_STRING_AS_NULL} but applies to the
+         * explicitly configured null value rather than empty strings.
+         *<p>
+         * Note: This feature only has an effect if a null value is configured via
+         * {@link CsvSchema.Builder#setNullValue(String)}.
+         *<p>
+         * Feature is disabled by default for backwards compatibility.
+         *
+         * @since 2.22
+         */
+        ONLY_UNQUOTED_NULL_VALUES_AS_NULL(false),        
         ;
 
         final boolean _defaultState;
@@ -364,6 +384,11 @@ public class CsvParser
      */
     protected boolean _cfgEmptyUnquotedStringAsNull;
 
+    /**
+     * @since 2.22
+     */
+    protected boolean _cfgOnlyUnquotedNullValuesAsNull;
+
     /*
     /**********************************************************************
     /* State
@@ -460,8 +485,9 @@ public class CsvParser
         _textBuffer = ctxt.constructReadConstrainedTextBuffer();
         _reader = new CsvDecoder(this, ctxt, reader, _schema, _textBuffer,
                 stdFeatures, csvFeatures);
-        _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyStringAsNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = Feature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
