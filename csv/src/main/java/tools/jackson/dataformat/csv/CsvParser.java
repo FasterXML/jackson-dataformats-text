@@ -145,17 +145,17 @@ public class CsvParser
      */
     protected int _columnCount = 0;
 
-    protected boolean _cfgEmptyStringAsNull;
+    protected final boolean _cfgEmptyStringAsNull;
 
     /**
      * @since 2.18
      */
-    protected boolean _cfgEmptyUnquotedStringAsNull;
+    protected final boolean _cfgEmptyUnquotedStringAsNull;
 
     /**
      * @since 3.1
      */
-    protected boolean _cfgOnlyUnquotedNullValuesAsNull;
+    protected final boolean _cfgOnlyUnquotedNullValuesAsNull;
 
     /*
     /**********************************************************************
@@ -321,10 +321,8 @@ public class CsvParser
     /**********************************************************************
      */
 
-    /**
-     * Method for enabling specified CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
+    // [dataformats-text#604]: remove these 3 methods from 3.1
+    /*
     public JsonParser enable(CsvReadFeature f)
     {
         _formatFeatures |= f.getMask();
@@ -334,10 +332,6 @@ public class CsvParser
         return this;
     }
 
-    /**
-     * Method for disabling specified  CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
     public JsonParser disable(CsvReadFeature f)
     {
         _formatFeatures &= ~f.getMask();
@@ -347,10 +341,6 @@ public class CsvParser
         return this;
     }
 
-    /**
-     * Method for enabling or disabling specified CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
     public JsonParser configure(CsvReadFeature f, boolean state)
     {
         if (state) {
@@ -360,6 +350,7 @@ public class CsvParser
         }
         return this;
     }
+    */
 
     /**
      * Method for checking whether specified CSV {@link CsvReadFeature}
