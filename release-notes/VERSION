@@ -21,6 +21,9 @@ implementations)
 #568: (yaml) YAML - ScannerException on block scalar "\n"
  (reported by @benken-parasoft)
  (fix by Andrey S)
+#579: (csv): Incorrect detection of missed columns in header line if columns
+  reordering is enabled
+ (fix by Alexander F)
 #581: (csv, toml, yaml) Add `isEnabled()` methods for format-specific
   features to mappers 
 #590: (yaml) Upgrade to the latest version of SnakeYAML Engine (3.0.1)

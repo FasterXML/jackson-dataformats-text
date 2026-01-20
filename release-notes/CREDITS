@@ -26,3 +26,10 @@ Dmitry Bufistov (@dmitry-workato)
 * Requested #601: (csv) Reader should allow separating plain `nullValue`
   and quoted value `"nullValue"`
  (3.1.0)
+
+Alexander Filimanov (@lodik)
+
+* Contributed fix for #579: (csv): Incorrect detection of missed columns in
+  header line if columns reordering is enabled
+ (3.1.0)
+  
