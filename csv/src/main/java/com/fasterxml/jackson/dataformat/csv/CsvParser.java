@@ -596,8 +596,10 @@ public class CsvParser
         if (oldF != newF) {
             _formatFeatures = newF;
             _reader.overrideFormatFeatures(newF);
-            _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
+            _cfgEmptyStringAsNull = Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
             _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+            _cfgOnlyUnquotedNullValuesAsNull = Feature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
+        
         }
         return this;
     }
@@ -617,6 +619,7 @@ public class CsvParser
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = Feature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -629,6 +632,7 @@ public class CsvParser
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvParser.Feature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = Feature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = Feature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -1543,12 +1547,15 @@ public class CsvParser
     protected boolean _isNullValue(String value) {
         if (_nullValue != null) {
             if (_nullValue.equals(value)) {
-                return true;
+                // [dataformats-text#601]: If `ONLY_UNQUOTED_NULL_VALUES_AS_NULL` is enabled,
+                // only treat unquoted values as null
+                return !_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted();
             }
         }
-        if (_cfgEmptyStringAsNull && value.isEmpty()) {
-            return true;
+        if (value.isEmpty()) {
+            return _cfgEmptyStringAsNull
+                    || (_cfgEmptyUnquotedStringAsNull && !_reader.isCurrentTokenQuoted());
         }
-        return _cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted();
+        return false;
     }
 }
