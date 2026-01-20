@@ -659,7 +659,7 @@ public class CsvParser
             Set<String> oldColumnNames = new LinkedHashSet<>();
             _schema.getColumnNames(oldColumnNames);
             oldColumnNames.removeAll(newSchema.getColumnNames());
-            var diff = oldColumnNames.size();
+            int diff = oldColumnNames.size();
             if (diff > 0) {
                 _reportCsvReadError(String.format("Missing %d header column%s: [\"%s\"]",
                     diff, (diff == 1) ? "" : "s", String.join("\",\"", oldColumnNames)
