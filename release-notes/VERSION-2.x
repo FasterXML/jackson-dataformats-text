@@ -14,6 +14,12 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.22.0 (not yet released)
+
+#601: (csv) Reader should allow separating plain `nullValue` and quoted
+  value `"nullValue"`
+ (requested by Dmitry B)
+
 2.21.0 (18-Jan-2026)
 
 #10: (csv) Missing `null` writes when writing `Object[]` values

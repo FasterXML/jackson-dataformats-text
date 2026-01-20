@@ -296,3 +296,9 @@ Sergio Delgado (@serandel)
 * Reported #154: (yaml) YAML file with no content throws `MismatchedInputException`
   when binding to Object type (POJO etc)
  (2.21.0)
+
+Dmitry Bufistov (@dmitry-workato)
+
+* Requested #601: (csv) Reader should allow separating plain `nullValue`
+  and quoted value `"nullValue"`
+ (2.22.0)

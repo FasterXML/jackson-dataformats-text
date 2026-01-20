@@ -142,6 +142,26 @@ public enum CsvReadFeature
      * Feature is disabled by default for backwards compatibility.
      */
     EMPTY_UNQUOTED_STRING_AS_NULL(false),
+
+    /**
+     * Feature that enables treating only un-quoted values matching the configured
+     * "null value" String (see {@link CsvSchema#getNullValueString()}) as {@code null},
+     * but not quoted values:
+     * differentiating between a quoted null value String (like {@code "null"})
+     * which remains as a String, and an unquoted null value (like {@code null})
+     * which becomes {@code null}.
+     *<p>
+     * This is similar to {@link #EMPTY_UNQUOTED_STRING_AS_NULL} but applies to the
+     * explicitly configured null value rather than empty strings.
+     *<p>
+     * Note: This feature only has an effect if a null value is configured via
+     * {@link CsvSchema.Builder#setNullValue(String)}.
+     *<p>
+     * Feature is disabled by default for backwards compatibility.
+     *
+     * @since 3.1
+     */
+    ONLY_UNQUOTED_NULL_VALUES_AS_NULL(false),
     ;
 
     private final boolean _defaultState;

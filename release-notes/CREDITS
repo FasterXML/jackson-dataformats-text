@@ -20,3 +20,9 @@ Théo SZANTO (@indyteo)
 * Contributed #596: (yaml) Port `YAMLAnchorReplayingFactory` from 2.x and improve it
   to handle nested anchors
  (3.1.0)
+
+Dmitry Bufistov (@dmitry-workato)
+
+* Requested #601: (csv) Reader should allow separating plain `nullValue`
+  and quoted value `"nullValue"`
+ (3.1.0)

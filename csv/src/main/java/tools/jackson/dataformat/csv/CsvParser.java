@@ -145,12 +145,17 @@ public class CsvParser
      */
     protected int _columnCount = 0;
 
-    protected boolean _cfgEmptyStringAsNull;
+    protected final boolean _cfgEmptyStringAsNull;
 
     /**
      * @since 2.18
      */
-    protected boolean _cfgEmptyUnquotedStringAsNull;
+    protected final boolean _cfgEmptyUnquotedStringAsNull;
+
+    /**
+     * @since 3.1
+     */
+    protected final boolean _cfgOnlyUnquotedNullValuesAsNull;
 
     /*
     /**********************************************************************
@@ -252,6 +257,7 @@ public class CsvParser
         _setSchema(schema);
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(csvFeatures);
     }
 
     /*
@@ -315,34 +321,26 @@ public class CsvParser
     /**********************************************************************
      */
 
-    /**
-     * Method for enabling specified CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
+    // [dataformats-text#604]: remove these 3 methods from 3.1
+    /*
     public JsonParser enable(CsvReadFeature f)
     {
         _formatFeatures |= f.getMask();
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
-    /**
-     * Method for disabling specified  CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
     public JsonParser disable(CsvReadFeature f)
     {
         _formatFeatures &= ~f.getMask();
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
+        _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
         return this;
     }
 
-    /**
-     * Method for enabling or disabling specified CSV feature
-     * (check {@link CsvReadFeature} for list of features)
-     */
     public JsonParser configure(CsvReadFeature f, boolean state)
     {
         if (state) {
@@ -352,6 +350,7 @@ public class CsvParser
         }
         return this;
     }
+    */
 
     /**
      * Method for checking whether specified CSV {@link CsvReadFeature}
@@ -1237,12 +1236,15 @@ public class CsvParser
     protected boolean _isNullValue(String value) {
         if (_nullValue != null) {
             if (_nullValue.equals(value)) {
-                return true;
+                // [dataformats-text#601]: If `ONLY_UNQUOTED_NULL_VALUES_AS_NULL` is enabled,
+                // only treat unquoted values as null
+                return !_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted();
             }
         }
-        if (_cfgEmptyStringAsNull && value.isEmpty()) {
-            return true;
+        if (value.isEmpty()) {
+            return _cfgEmptyStringAsNull
+                    || (_cfgEmptyUnquotedStringAsNull && !_reader.isCurrentTokenQuoted());
         }
-        return _cfgEmptyUnquotedStringAsNull && value.isEmpty() && !_reader.isCurrentTokenQuoted();
+        return false;
     }
 }
