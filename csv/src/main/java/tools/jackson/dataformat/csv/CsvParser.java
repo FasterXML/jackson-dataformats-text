@@ -1241,7 +1241,7 @@ public class CsvParser
     protected boolean _isNullValue(String value) {
         if (_nullValue != null) {
             if (_nullValue.equals(value)) {
-                // [dataformats-text#601]: If NULL_VALUE_UNQUOTED_AS_NULL is enabled,
+                // [dataformats-text#601]: If `ONLY_UNQUOTED_NULL_VALUES_AS_NULL` is enabled,
                 // only treat unquoted values as null
                 return !_cfgOnlyUnquotedNullValuesAsNull || !_reader.isCurrentTokenQuoted();
             }
