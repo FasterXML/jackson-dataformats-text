@@ -47,4 +47,30 @@ public class MissingColumns579Test extends ModuleTestBase
             verifyException(e, "Missing 1 header column: [\"age\"]");
         }
     }
+
+    // [dataformats-text#579]: fail when all columns differ but count is the same
+    @Test
+    public void testFailOnAllColumnsDifferent() throws Exception
+    {
+        CsvSchema schema = CsvSchema.builder()
+                .setUseHeader(true)
+                .setReorderColumns(true)
+                .addColumn("a")
+                .addColumn("b")
+                .build();
+        String csv = "c,d\n1,2\n";
+
+        try {
+            MappingIterator<Map<String, Object>> it = MAPPER
+                .readerFor(Map.class)
+                .with(schema)
+                .readValues(csv);
+            it.nextValue();
+            fail("Should not pass with all columns different");
+        } catch (CsvReadException e) {
+            verifyException(e, "Missing 2 header columns");
+            verifyException(e, "\"a\"");
+            verifyException(e, "\"b\"");
+        }
+    }
 }
