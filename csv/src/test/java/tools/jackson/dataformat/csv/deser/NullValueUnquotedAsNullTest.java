@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for {@code CsvReadFeature.NULL_VALUE_UNQUOTED_AS_NULL}
+ * (see [dataformats-text#601])
  */
 public class NullValueUnquotedAsNullTest extends ModuleTestBase
 {

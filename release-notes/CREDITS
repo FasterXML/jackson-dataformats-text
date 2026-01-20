@@ -23,6 +23,6 @@ Théo SZANTO (@indyteo)
 
 Dmitry Bufistov (@dmitry-workato)
 
-* Requestd #601: (csv) Reader should allow separating plain `nullValue`
+* Requested #601: (csv) Reader should allow separating plain `nullValue`
   and quoted value `"nullValue"`
  (3.1.0)
