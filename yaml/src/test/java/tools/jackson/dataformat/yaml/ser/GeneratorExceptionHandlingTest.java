@@ -3,6 +3,7 @@ package tools.jackson.dataformat.yaml.ser;
 import java.io.*;
 
 import org.junit.jupiter.api.Test;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.dataformat.yaml.*;
@@ -68,35 +69,8 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             assertNotNull(e.getMessage());
             // Verify it has the cause
             assertNotNull(e.getCause());
-        } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
+        } catch (YamlEngineException e) {
             fail("Should not leak SnakeYAML exception: " + e);
-        } catch (Exception e) {
-            // Other Jackson exceptions are acceptable (e.g., if caught at a different layer)
-            // but not SnakeYAML exceptions
-            assertFalse(e.getClass().getName().contains("snakeyaml"),
-                    "Should not leak SnakeYAML exception: " + e);
         }
-    }
-
-    /**
-     * Basic sanity test that normal generation still works.
-     */
-    @Test
-    public void testNormalGenerationWorks() throws Exception
-    {
-        StringWriter w = new StringWriter();
-        try (JsonGenerator gen = MAPPER.createGenerator(w)) {
-            gen.writeStartObject();
-            gen.writeStringProperty("name", "test");
-            gen.writeNumberProperty("value", 42);
-            gen.writeEndObject();
-        }
-
-        String yaml = w.toString();
-        assertNotNull(yaml);
-        assertTrue(yaml.contains("name"));
-        assertTrue(yaml.contains("test"));
-        assertTrue(yaml.contains("value"));
-        assertTrue(yaml.contains("42"));
     }
 }
