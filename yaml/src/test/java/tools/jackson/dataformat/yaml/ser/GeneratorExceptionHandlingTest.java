@@ -26,9 +26,11 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
     @Test
     public void testWriterFailureWrapping() throws Exception
     {
+        // We need to let initial writes through for document start markers,
+        // then fail to trigger YamlEngineException during actual content emission
+        final int ALLOWED_INITIAL_WRITES = 5;
+        
         // Create a writer that will fail during write operations
-        // We need to let some initial writes through (for document start)
-        // then fail to trigger the YamlEngineException during actual content emission
         Writer failingWriter = new Writer() {
             private int callCount = 0;
             
@@ -37,7 +39,7 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
                 callCount++;
                 // Let a few initial writes through (document markers, etc)
                 // then fail to trigger exception during content emission
-                if (callCount > 5) {
+                if (callCount > ALLOWED_INITIAL_WRITES) {
                     throw new IOException("Simulated write failure");
                 }
             }
@@ -53,8 +55,9 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             }
         };
 
+        JsonGenerator gen = null;
         try {
-            JsonGenerator gen = MAPPER.createGenerator(failingWriter);
+            gen = MAPPER.createGenerator(failingWriter);
             // Try to write something that will trigger the emitter
             gen.writeStartObject();
             gen.writeStringProperty("test", "value");
@@ -75,6 +78,14 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             // but not SnakeYAML exceptions
             assertFalse(e.getClass().getName().contains("snakeyaml"),
                     "Should not leak SnakeYAML exception: " + e);
+        } finally {
+            if (gen != null) {
+                try {
+                    gen.close();
+                } catch (Exception e) {
+                    // Ignore close exceptions in cleanup
+                }
+            }
         }
     }
 
