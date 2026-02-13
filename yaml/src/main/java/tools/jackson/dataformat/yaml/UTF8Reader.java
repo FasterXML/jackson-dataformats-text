@@ -174,6 +174,10 @@ public final class UTF8Reader
 
         // Ok, first; do we have a surrogate from last round?
         if (_surrogate >= 0) {
+            // Check if there's space in the output buffer for pending surrogate.
+            // Per Reader contract, returning 0 for zero-length buffer is correct.
+            // This won't cause endless loop: caller must provide buffer with len > 0
+            // on next call to make progress (surrogate remains pending until consumed).
             if (outPtr >= len) { // no space to write pending surrogate
                 return 0;
             }
