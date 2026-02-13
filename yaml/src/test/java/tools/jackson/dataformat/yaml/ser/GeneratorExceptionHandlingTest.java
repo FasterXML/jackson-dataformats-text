@@ -55,16 +55,13 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             }
         };
 
-        JsonGenerator gen = null;
-        try {
-            gen = MAPPER.createGenerator(failingWriter);
+        try (JsonGenerator gen = MAPPER.createGenerator(failingWriter)) {
             // Try to write something that will trigger the emitter
             gen.writeStartObject();
             gen.writeStringProperty("test", "value");
             gen.writeStringProperty("test2", "value2"); 
             gen.writeStringProperty("test3", "value3"); // More writes to trigger failure
             gen.writeEndObject();
-            gen.close();
             fail("Should have thrown an exception");
         } catch (JacksonYAMLWriteException e) {
             // Expected: our custom exception wrapping the underlying failure
@@ -78,14 +75,6 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             // but not SnakeYAML exceptions
             assertFalse(e.getClass().getName().contains("snakeyaml"),
                     "Should not leak SnakeYAML exception: " + e);
-        } finally {
-            if (gen != null) {
-                try {
-                    gen.close();
-                } catch (Exception e) {
-                    // Ignore close exceptions in cleanup
-                }
-            }
         }
     }
 

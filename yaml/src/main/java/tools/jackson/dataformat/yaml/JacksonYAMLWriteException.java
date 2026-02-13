@@ -9,7 +9,7 @@ import tools.jackson.core.exc.StreamWriteException;
  * This wrapping prevents SnakeYAML implementation details from leaking to callers,
  * which is important for OSGi runtime compatibility and proper abstraction.
  *
- * @since 2.19
+ * @since 3.1
  */
 public class JacksonYAMLWriteException extends StreamWriteException
 {
