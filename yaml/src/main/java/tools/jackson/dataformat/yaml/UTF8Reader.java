@@ -174,6 +174,9 @@ public final class UTF8Reader
 
         // Ok, first; do we have a surrogate from last round?
         if (_surrogate >= 0) {
+            if (outPtr >= len) { // no space to write pending surrogate
+                return 0;
+            }
             cbuf[outPtr++] = (char) _surrogate;
             _surrogate = -1;
             // No need to load more, already got one char
