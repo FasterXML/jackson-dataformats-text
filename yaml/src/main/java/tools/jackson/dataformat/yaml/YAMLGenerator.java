@@ -798,7 +798,12 @@ public class YAMLGenerator extends GeneratorBase
         _emit(new DocumentEndEvent(false));
     }
 
-    protected final void _emit(Event e) {
-        _emitter.emit(e);
+    protected final void _emit(Event e) throws JacksonException {
+        try {
+            _emitter.emit(e);
+        } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException ex) {
+            // Wrap SnakeYAML exception as Jackson exception
+            throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
+        }
     }
 }
