@@ -20,37 +20,54 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
     /**
      * This test verifies that if the underlying writer fails,
      * we get a Jackson exception, not a SnakeYAML exception.
+     * The test triggers an IOException during emission which should cause
+     * SnakeYAML to throw a YamlEngineException, which we then wrap.
      */
     @Test
     public void testWriterFailureWrapping() throws Exception
     {
         // Create a writer that will fail during write operations
+        // We need to let some initial writes through (for document start)
+        // then fail to trigger the YamlEngineException during actual content emission
         Writer failingWriter = new Writer() {
+            private int callCount = 0;
+            
             @Override
             public void write(char[] cbuf, int off, int len) throws IOException {
-                throw new IOException("Simulated write failure");
+                callCount++;
+                // Let a few initial writes through (document markers, etc)
+                // then fail to trigger exception during content emission
+                if (callCount > 5) {
+                    throw new IOException("Simulated write failure");
+                }
             }
 
             @Override
             public void flush() throws IOException {
-                throw new IOException("Simulated flush failure");
+                // Allow flush
             }
 
             @Override
             public void close() throws IOException {
-                throw new IOException("Simulated close failure");
+                // Allow close
             }
         };
 
-        try (JsonGenerator gen = MAPPER.createGenerator(failingWriter)) {
+        try {
+            JsonGenerator gen = MAPPER.createGenerator(failingWriter);
             // Try to write something that will trigger the emitter
             gen.writeStartObject();
             gen.writeStringProperty("test", "value");
+            gen.writeStringProperty("test2", "value2"); 
+            gen.writeStringProperty("test3", "value3"); // More writes to trigger failure
             gen.writeEndObject();
+            gen.close();
             fail("Should have thrown an exception");
         } catch (JacksonYAMLWriteException e) {
             // Expected: our custom exception wrapping the underlying failure
             assertNotNull(e.getMessage());
+            // Verify it has the cause
+            assertNotNull(e.getCause());
         } catch (org.snakeyaml.engine.v2.exceptions.YamlEngineException e) {
             fail("Should not leak SnakeYAML exception: " + e);
         } catch (Exception e) {
