@@ -71,6 +71,8 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             assertNotNull(e.getCause());
         } catch (YamlEngineException e) {
             fail("Should not leak SnakeYAML exception: " + e);
+        } catch (UncheckedIOException e) {
+            fail("Should not leak UncheckedIOException: " + e);
         }
     }
 }

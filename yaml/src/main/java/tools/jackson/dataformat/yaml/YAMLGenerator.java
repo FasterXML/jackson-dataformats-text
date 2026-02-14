@@ -805,6 +805,9 @@ public class YAMLGenerator extends GeneratorBase
         } catch (YamlEngineException ex) {
             // Wrap SnakeYAML exception as Jackson exception
             throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
+        } catch (UncheckedIOException ex) {
+            // Wrap UncheckedIOException (e.g., from WriterWrapper) as Jackson exception
+            throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
         }
     }
 }
