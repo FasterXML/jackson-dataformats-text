@@ -16,7 +16,7 @@ Active Maintainers:
 
 2.21.1 (not yet released)
 
-#: (yaml) Snakeyaml 2.5 (from 2.4)
+#610: (yaml) Snakeyaml 2.5 (from 2.4)
 
 2.21.0 (18-Jan-2026)
 
