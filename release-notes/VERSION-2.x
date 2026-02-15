@@ -20,6 +20,10 @@ Active Maintainers:
   value `"nullValue"`
  (requested by Dmitry B)
 
+2.21.1 (not yet released)
+
+#610: (yaml) Snakeyaml 2.5 (from 2.4)
+
 2.21.0 (18-Jan-2026)
 
 #10: (csv) Missing `null` writes when writing `Object[]` values
@@ -33,6 +37,7 @@ Active Maintainers:
  (reported by @zhuhw)
  (fix by @cowtowncoder, w/ Claude code)
 
+2.20.2 (19-Jan-2026)
 2.20.1 (30-Oct-2025)
 
 No changes since 2.20.0
