@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.dataformat.yaml.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,10 +38,9 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             
             @Override
             public void write(char[] cbuf, int off, int len) throws IOException {
-                callCount++;
                 // Let a few initial writes through (document markers, etc)
                 // then fail to trigger exception during content emission
-                if (callCount > ALLOWED_INITIAL_WRITES) {
+                if (++callCount > ALLOWED_INITIAL_WRITES) {
                     throw new IOException("Simulated write failure");
                 }
             }
@@ -64,7 +64,7 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             gen.writeStringProperty("test3", "value3"); // More writes to trigger failure
             gen.writeEndObject();
             fail("Should have thrown an exception");
-        } catch (JacksonYAMLWriteException e) {
+        } catch (JacksonIOException e) {
             // Expected: our custom exception wrapping the underlying failure
             assertNotNull(e.getMessage());
             // Verify it has the cause
