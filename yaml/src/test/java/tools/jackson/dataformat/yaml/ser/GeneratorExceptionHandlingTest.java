@@ -3,7 +3,6 @@ package tools.jackson.dataformat.yaml.ser;
 import java.io.*;
 
 import org.junit.jupiter.api.Test;
-import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.exc.JacksonIOException;
@@ -26,7 +25,7 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
      * SnakeYAML to throw a YamlEngineException, which we then wrap.
      */
     @Test
-    public void testWriterFailureWrapping() throws Exception
+    public void testWriterIOExceptionWrapping() throws Exception
     {
         // We need to let initial writes through for document start markers,
         // then fail to trigger YamlEngineException during actual content emission
@@ -69,10 +68,6 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             assertNotNull(e.getMessage());
             // Verify it has the cause
             assertNotNull(e.getCause());
-        } catch (YamlEngineException e) {
-            fail("Should not leak SnakeYAML exception: " + e);
-        } catch (UncheckedIOException e) {
-            fail("Should not leak UncheckedIOException: " + e);
         }
     }
 }

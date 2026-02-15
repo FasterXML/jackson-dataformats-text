@@ -802,12 +802,12 @@ public class YAMLGenerator extends GeneratorBase
     protected final void _emit(Event e) throws JacksonException {
         try {
             _emitter.emit(e);
-        } catch (YamlEngineException ex) {
-            // Wrap SnakeYAML exception as Jackson exception
-            throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
         } catch (UncheckedIOException ex) {
             // throws `JacksonIOException`:
             throw _wrapIOFailure(ex.getCause());
+        } catch (YamlEngineException ex) {
+            // Wrap SnakeYAML exception as Jackson exception
+            throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
         }
     }
 }
