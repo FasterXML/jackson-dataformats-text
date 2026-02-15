@@ -14,6 +14,10 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.21.1 (not yet released)
+
+#: (yaml) Snakeyaml 2.5 (from 2.4)
+
 2.21.0 (18-Jan-2026)
 
 #10: (csv) Missing `null` writes when writing `Object[]` values
