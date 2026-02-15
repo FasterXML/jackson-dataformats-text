@@ -32,4 +32,8 @@ Alexander Filimanov (@lodik)
 * Contributed fix for #579: (csv): Incorrect detection of missed columns in
   header line if columns reordering is enabled
  (3.1.0)
-  
+
+PJ Fanning (@pjfanning)
+
+* Fixed #609: (yaml) Catch and rethrow yaml engine internal exception on generation
+ (3.1.0)
