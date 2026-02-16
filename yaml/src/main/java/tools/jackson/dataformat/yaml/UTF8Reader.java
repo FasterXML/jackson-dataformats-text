@@ -2,6 +2,7 @@ package tools.jackson.dataformat.yaml;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
+import java.util.Objects;
 
 /**
  * Optimized Reader that reads UTF-8 encoded content from an input stream.
@@ -165,22 +166,21 @@ public final class UTF8Reader
     @Override
     public int read(final char[] cbuf, final int start, int len) throws IOException
     {
+        // validate input parameters
+        Objects.requireNonNull(cbuf, "cbuf == null");
+        Objects.checkFromIndexSize(start, len, cbuf.length);
         // Already EOF?
         if (_inputBuffer == null) {
             return -1;
+        } else if (len == 0) {
+            // if len=0, we don't need to return anything
+            return 0;
         }
         len += start;
         int outPtr = start;
 
         // Ok, first; do we have a surrogate from last round?
         if (_surrogate >= 0) {
-            // Check if there's space in the output buffer for pending surrogate.
-            // Per Reader contract, returning 0 for zero-length buffer is correct.
-            // This won't cause endless loop: caller must provide buffer with len > 0
-            // on next call to make progress (surrogate remains pending until consumed).
-            if (outPtr >= len) { // no space to write pending surrogate
-                return 0;
-            }
             cbuf[outPtr++] = (char) _surrogate;
             _surrogate = -1;
             // No need to load more, already got one char
