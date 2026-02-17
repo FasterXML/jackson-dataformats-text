@@ -35,5 +35,7 @@ Alexander Filimanov (@lodik)
 
 PJ Fanning (@pjfanning)
 
+* Fixed #608: (csv, toml, yaml) Fix issue with UTF-8 surrogate pair decoding
+ (3.1.0)
 * Fixed #609: (yaml) Catch and rethrow yaml engine internal exception on generation
  (3.1.0)

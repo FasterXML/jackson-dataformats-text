@@ -34,6 +34,8 @@ implementations)
 #601: (csv) Reader should allow separating plain `nullValue` and quoted value `"nullValue"`
  (requested by Dmitry B)
 #604: (csv) Remove `CsvParser.enable()`/`.disable()`/`.configure()` (reduce mutability)
+#608: (csv, toml, yaml) Fix issue with UTF-8 surrogate pair decoding
+ (fixed by @pjfanning)
 #609: (yaml) Catch and rethrow yaml engine internal exception on generation
  (fixed by @pjfanning)
 
