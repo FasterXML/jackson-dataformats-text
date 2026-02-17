@@ -25,6 +25,7 @@ import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.common.SpecVersion;
 import org.snakeyaml.engine.v2.emitter.Emitter;
 import org.snakeyaml.engine.v2.events.*;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 import org.snakeyaml.engine.v2.nodes.Tag;
 
 public class YAMLGenerator extends GeneratorBase
@@ -804,6 +805,9 @@ public class YAMLGenerator extends GeneratorBase
         } catch (UncheckedIOException ex) {
             // throws `JacksonIOException`:
             throw _wrapIOFailure(ex.getCause());
+        } catch (YamlEngineException ex) {
+            // Wrap SnakeYAML exception as Jackson exception
+            throw new JacksonYAMLWriteException(this, ex.getMessage(), ex);
         }
     }
 }

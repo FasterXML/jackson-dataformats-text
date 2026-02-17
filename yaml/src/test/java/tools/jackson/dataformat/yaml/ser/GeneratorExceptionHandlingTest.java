@@ -4,6 +4,9 @@ import java.io.*;
 
 import org.junit.jupiter.api.Test;
 
+import org.snakeyaml.engine.v2.common.SpecVersion;
+import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
+
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.dataformat.yaml.*;
@@ -68,6 +71,38 @@ public class GeneratorExceptionHandlingTest extends ModuleTestBase
             assertNotNull(e.getMessage());
             // Verify it has the cause
             assertNotNull(e.getCause());
+        }
+    }
+
+    /**
+     * Test that a {@link YamlEngineException} thrown by the SnakeYAML emitter
+     * (not caused by an IOException) is caught and wrapped as a
+     * {@link JacksonYAMLWriteException}.
+     *<p>
+     * We trigger this by configuring an unsupported YAML version (major != 1),
+     * which causes the emitter to throw an {@code EmitterException}
+     * (subclass of {@code YamlEngineException}) when it tries to emit the
+     * document start event.
+     */
+    @Test
+    public void testYamlEngineExceptionWrapping() throws Exception
+    {
+        // SpecVersion with major=2 is unsupported by the emitter
+        YAMLFactory factory = YAMLFactory.builder()
+                .yamlVersionToWrite(new SpecVersion(2, 0))
+                .build();
+        YAMLMapper mapper = YAMLMapper.builder(factory).build();
+
+        try {
+            mapper.writeValueAsString(java.util.Map.of("key", "value"));
+            fail("Should have thrown an exception");
+        } catch (JacksonYAMLWriteException e) {
+            // Expected: SnakeYAML EmitterException wrapped as JacksonYAMLWriteException
+            assertTrue(e.getMessage().contains("unsupported YAML version"),
+                    "Message should mention unsupported YAML version, got: " + e.getMessage());
+            assertInstanceOf(YamlEngineException.class, e.getCause());
+        } catch (YamlEngineException e) {
+            fail("YamlEngineException should not leak; should be wrapped as JacksonYAMLWriteException: " + e);
         }
     }
 }

@@ -34,6 +34,8 @@ implementations)
 #601: (csv) Reader should allow separating plain `nullValue` and quoted value `"nullValue"`
  (requested by Dmitry B)
 #604: (csv) Remove `CsvParser.enable()`/`.disable()`/`.configure()` (reduce mutability)
+#609: (yaml) Catch and rethrow yaml engine internal exception on generation
+ (fixed by @pjfanning)
 
 3.0.3 (28-Nov-2025)
 3.0.2 (07-Nov-2025)
