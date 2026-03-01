@@ -1,6 +1,8 @@
 package tools.jackson.dataformat.csv.deser;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -147,6 +149,40 @@ public class EmptyUnquotedStringAsNullTest
             assertEquals("Grace", array2[0]);
             assertEquals("", array2[1]);
             assertEquals("Hopper", array2[2]);
+        }
+    }
+
+    // [dataformats-text#615]: EMPTY_UNQUOTED_STRING_AS_NULL fails when preceding column is quoted
+    @Test
+    public void testEmptyUnquotedStringAsNullAfterQuotedColumn615() throws Exception
+    {
+        // Column C is always empty unquoted (trailing comma); columns A and B vary in quoting.
+        // With EMPTY_UNQUOTED_STRING_AS_NULL enabled, C must be null in all rows.
+        String csv = "A,B,C\n"
+                + "1,2,\n"        // row 1: all unquoted  -> C should be null (currently works)
+                + "1,\"2\",\n"    // row 2: B quoted      -> C should be null (currently broken)
+                + "\"1\",2,\n"    // row 3: A quoted      -> C should be null (currently works)
+                + "\"1\",\"2\","; // row 4: A+B quoted    -> C should be null (currently broken)
+
+        CsvSchema schema = CsvSchema.builder()
+                .addColumn("A")
+                .addColumn("B")
+                .addColumn("C")
+                .build()
+                .withHeader();
+
+        ObjectReader r = MAPPER.readerFor(Map.class)
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL)
+                .with(schema);
+
+        try (MappingIterator<Map<String, Object>> it = r.readValues(csv)) {
+            List<Map<String, Object>> rows = it.readAll();
+            assertEquals(4, rows.size());
+            for (int i = 0; i < rows.size(); i++) {
+                Map<String, Object> row = rows.get(i);
+                assertNull(row.get("C"),
+                        "Row " + (i + 1) + ": expected C=null but got C=" + q(String.valueOf(row.get("C"))));
+            }
         }
     }
 }

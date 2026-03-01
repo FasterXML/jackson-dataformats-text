@@ -625,6 +625,7 @@ public class CsvDecoder
      */
     public String nextString() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
+        _currInputQuoted = false;  // Reset; set to true below only if opening quote found
 
         if (_pendingLF > 0) { // either pendingLF, or closed
             if (_inputReader != null) { // if closed, we just need to return null

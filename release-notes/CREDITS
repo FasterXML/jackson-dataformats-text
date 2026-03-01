@@ -39,3 +39,8 @@ PJ Fanning (@pjfanning)
  (3.1.0)
 * Fixed #609: (yaml) Catch and rethrow yaml engine internal exception on generation
  (3.1.0)
+
+Henning Langhorst (@HenningLanghorst)
+
+* Reported #615: (csv) Feature `CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL` ignored
+ (3.1.1)
