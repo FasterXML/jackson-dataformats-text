@@ -14,6 +14,12 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.18.7 (not yet released)
+
+#615: (csv) Feature `CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL` ignored
+  when preceding column is quoted
+ (reported by Henning L)
+
 2.18.6 (22-Feb-2026)
 
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
