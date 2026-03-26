@@ -5,7 +5,6 @@
     <artifactId>jackson-base</artifactId>
     <version>3.2.0-SNAPSHOT</version>
   </parent>
-
   <groupId>tools.jackson.dataformat</groupId>
   <artifactId>jackson-dataformats-text</artifactId>
   <name>Jackson dataformats: Text</name>
