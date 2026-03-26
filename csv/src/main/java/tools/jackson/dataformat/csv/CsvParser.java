@@ -283,6 +283,10 @@ public class CsvParser
     @Override
     public boolean canReadTypeId() { return false; }
 
+    // @since 3.2
+    @Override
+    public boolean willInternPropertyNames() { return false; }
+
     @Override
     public JacksonFeatureSet<StreamReadCapability> streamReadCapabilities() {
         return STREAM_READ_CAPABILITIES;

@@ -204,6 +204,10 @@ public class YAMLParser extends ParserBase
         return true; // yes, YAML got 'em
     }
 
+    // @since 3.2
+    @Override
+    public boolean willInternPropertyNames() { return false; }
+
     @Override
     public JacksonFeatureSet<StreamReadCapability> streamReadCapabilities() {
         // Defaults are fine; YAML actually has typed scalars (to a degree)
