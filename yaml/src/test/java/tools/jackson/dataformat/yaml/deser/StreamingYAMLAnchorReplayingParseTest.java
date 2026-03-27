@@ -333,4 +333,94 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
 
         p.close();
     }
+
+    @Test
+    public void testMergeInsideAnchor() {
+        final String YAML = """
+            objToMerge: &mergeAnchor
+              val1: a
+              val2: b
+            obj1: &objAnchor
+              <<: *mergeAnchor
+              val3: c
+            obj2: *objAnchor
+            """;
+        JsonParser p = MAPPER.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("objToMerge", p.getString());
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertLocation(p, 1, 13, 12, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val1", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("a", p.getString());
+        assertLocation(p, 2, 9, 33, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val2", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("b", p.getString());
+        assertLocation(p, 3, 9, 43, -1);
+
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("obj1", p.getString());
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertLocation(p, 4, 7, 51, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val1", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("a", p.getString());
+        assertLocation(p, 2, 9, 33, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val2", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("b", p.getString());
+        assertLocation(p, 3, 9, 43, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val3", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("c", p.getString());
+        assertLocation(p, 6, 9, 89, -1);
+
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("obj2", p.getString());
+        assertToken(JsonToken.START_OBJECT, p.nextToken());
+        assertLocation(p, 4, 7, 51, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val1", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("a", p.getString());
+        assertLocation(p, 2, 9, 33, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val2", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("b", p.getString());
+        assertLocation(p, 3, 9, 43, -1);
+
+        assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+        assertEquals("val3", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("c", p.getString());
+        assertLocation(p, 6, 9, 89, -1);
+
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+        assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+        assertNull(p.nextToken());
+
+        p.close();
+    }
 }
