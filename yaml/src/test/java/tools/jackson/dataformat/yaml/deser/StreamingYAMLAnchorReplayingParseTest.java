@@ -1,7 +1,6 @@
 package tools.jackson.dataformat.yaml.deser;
 
 import org.junit.jupiter.api.Test;
-import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 
@@ -31,20 +30,12 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(8, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 9, 8, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
         assertEquals("true", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(21, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 7, 21, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_FALSE, p.nextToken());
@@ -85,41 +76,25 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertEquals("string1", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("textValue", p.getString());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(10, loc.getColumnNr());
-        assertEquals(9, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 10, 9, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string2", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("textValue", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(10, loc.getColumnNr());
-        assertEquals(9, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 10, 9, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("int1", p.getString());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("123", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(64, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 7, 64, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("int2", p.getString());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("123", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(64, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 7, 64, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
         assertNull(p.nextToken());
@@ -146,27 +121,15 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("1", p.getString());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(23, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 5, 23, -1);
 
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("2", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(29, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 5, 29, -1);
 
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("3", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(4, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(35, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 4, 5, 35, -1);
 
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 
@@ -176,27 +139,15 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("1", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(23, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 5, 23, -1);
 
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("2", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(29, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 5, 29, -1);
 
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
         assertEquals("3", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(4, loc.getLineNr());
-        assertEquals(5, loc.getColumnNr());
-        assertEquals(35, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 4, 5, 35, -1);
 
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 
@@ -221,60 +172,36 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj1", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(6, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 7, 6, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(11, loc.getColumnNr());
-        assertEquals(27, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 11, 27, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(42, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 9, 42, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj2", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(6, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 7, 6, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(11, loc.getColumnNr());
-        assertEquals(27, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 11, 27, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(42, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 9, 42, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 
@@ -301,69 +228,41 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj1", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(6, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 7, 6, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(11, loc.getColumnNr());
-        assertEquals(27, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 11, 27, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(42, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 9, 42, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj2", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(5, loc.getLineNr());
-        assertEquals(3, loc.getColumnNr());
-        assertEquals(55, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 5, 3, 55, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(11, loc.getColumnNr());
-        assertEquals(27, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 11, 27, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(3, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(42, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 3, 9, 42, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("int", p.getString());
         assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(6, loc.getLineNr());
-        assertEquals(8, loc.getColumnNr());
-        assertEquals(77, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 6, 8, 77, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 
@@ -390,69 +289,41 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase {
         assertEquals("value", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(8, loc.getColumnNr());
-        assertEquals(7, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 8, 7, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj1", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(31, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 7, 31, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(8, loc.getColumnNr());
-        assertEquals(7, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 8, 7, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(4, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(71, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 4, 9, 71, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("obj2", p.getString());
         assertToken(JsonToken.START_OBJECT, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(31, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 7, 31, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("string", p.getString());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("text", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(8, loc.getColumnNr());
-        assertEquals(7, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 8, 7, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertEquals("bool", p.getString());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
-        loc = p.currentTokenLocation();
-        assertEquals(4, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(71, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 4, 9, 71, -1);
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
 

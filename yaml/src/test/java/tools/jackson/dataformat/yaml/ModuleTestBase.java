@@ -134,6 +134,15 @@ public abstract class ModuleTestBase
             assertEquals(expOrig, actOrig);
         }
     }
+
+    protected void assertLocation(JsonParser jp, int lineNr, int columnNr, int charOffset, int byteOffset)
+    {
+        TokenStreamLocation loc = jp.currentTokenLocation();
+        assertEquals(lineNr, loc.getLineNr());
+        assertEquals(columnNr, loc.getColumnNr());
+        assertEquals(charOffset, loc.getCharOffset());
+        assertEquals(byteOffset, loc.getByteOffset());
+    }
     
     /**
      * Method that gets textual contents of the current token using

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import org.snakeyaml.engine.v2.api.LoadSettings;
 
-import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
 import tools.jackson.dataformat.yaml.JacksonYAMLParseException;
@@ -52,20 +51,12 @@ public class StreamingYAMLParseTest extends ModuleTestBase
         assertEquals("text", p.getString());
         assertEquals("text", p.getValueAsString());
         assertEquals("text", p.getValueAsString("x"));
-        TokenStreamLocation loc = p.currentTokenLocation();
-        assertEquals(1, loc.getLineNr());
-        assertEquals(9, loc.getColumnNr());
-        assertEquals(8, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 1, 9, 8, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_TRUE, p.nextToken());
         assertEquals("true", p.getString());
-        loc = p.currentTokenLocation();
-        assertEquals(2, loc.getLineNr());
-        assertEquals(7, loc.getColumnNr());
-        assertEquals(21, loc.getCharOffset());
-        assertEquals(-1, loc.getByteOffset());
+        assertLocation(p, 2, 7, 21, -1);
 
         assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
         assertToken(JsonToken.VALUE_FALSE, p.nextToken());
