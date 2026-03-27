@@ -20,9 +20,10 @@ import tools.jackson.core.util.BufferRecycler;
  * Note: this overwrites the nextEvent() since the base {@code super.nextToken()}
  * manages too much state, and it seems to be much simpler to re-emit the events.
  *
- * @since 2.19
+ * @since 2.19 / 3.1
  */
-public class YAMLAnchorReplayingParser extends YAMLParser {
+public class YAMLAnchorReplayingParser extends YAMLParser
+{
     private static class AnchorContext {
         public final String anchor;
         public final List<Event> events = new ArrayList<>();
@@ -140,12 +141,14 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
         return nextEvent(true);
     }
 
+    // @since 3.1.1
     protected Event nextEvent(boolean recordEvents) {
         while (!refEvents.isEmpty()) {
             Event event = filterEvent(trackDepth(refEvents.removeFirst()));
             if (event != null) {
-                if (recordEvents)
+                if (recordEvents) {
                     recordEvent(event);
+                }
                 return event;
             }
         }
@@ -201,8 +204,9 @@ public class YAMLAnchorReplayingParser extends YAMLParser {
             }
         }
 
-        if (recordEvents)
+        if (recordEvents) {
             recordEvent(event);
+        }
         return event;
     }
 }

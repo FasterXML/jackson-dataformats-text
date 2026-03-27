@@ -22,6 +22,9 @@ No changes since 3.1
 
 #615: (csv) Feature `CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL` ignored
  (reported by Henning L)
+#624: (yaml) Fix YAML anchor replaying parser producing invalid sequence of events
+  when using the merge operator inside an anchor
+ (fix by Théo S)
 
 3.1.0 (23-Feb-2026)
 

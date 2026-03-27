@@ -20,6 +20,9 @@ Théo SZANTO (@indyteo)
 * Contributed #596: (yaml) Port `YAMLAnchorReplayingFactory` from 2.x and improve it
   to handle nested anchors
  (3.1.0)
+* Fixed #624: (yaml) Fix YAML anchor replaying parser producing invalid sequence of events
+  when using the merge operator inside an anchor
+ (3.1.1)
 
 Dmitry Bufistov (@dmitry-workato)
 
