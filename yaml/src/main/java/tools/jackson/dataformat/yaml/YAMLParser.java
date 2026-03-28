@@ -24,7 +24,6 @@ import org.snakeyaml.engine.v2.events.ScalarEvent;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.Tag;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
-import org.snakeyaml.engine.v2.resolver.JsonScalarResolver;
 import org.snakeyaml.engine.v2.resolver.ScalarResolver;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
 
@@ -59,7 +58,7 @@ public class YAMLParser extends ParserBase
     protected final Reader _reader;
 
     protected final ParserImpl _yamlParser;
-    protected final ScalarResolver _yamlResolver = new JsonScalarResolver();
+    protected final ScalarResolver _yamlResolver;
 
     /*
     /**********************************************************************
@@ -136,31 +135,19 @@ public class YAMLParser extends ParserBase
             int streamReadFeatures, int formatFeatures,
             LoadSettings loadSettings, Reader reader)
     {
-        this(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures,
-                        reader,
-                        _defaultParserImpl(loadSettings, reader));
-    }
-    
-    protected YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
-            int streamReadFeatures, int formatFeatures,
-            Reader reader,
-            ParserImpl yamlParser)
-    {
         super(readCtxt, ioCtxt, streamReadFeatures);
+        if (loadSettings == null) {
+            loadSettings = LoadSettings.builder().build();
+        }
         _formatFeatures = formatFeatures;
         _reader = reader;
-        _yamlParser = yamlParser;
+        _yamlParser = new ParserImpl(loadSettings, new StreamReader(loadSettings, reader));
+        _yamlResolver = loadSettings.getSchema().getScalarResolver();
+
         _cfgEmptyStringsToNull = YAMLReadFeature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
-    }
-
-    private static ParserImpl _defaultParserImpl(LoadSettings settings, Reader r) {
-        if (settings == null) {
-            settings = LoadSettings.builder().build();
-        }
-        return new ParserImpl(settings, new StreamReader(settings, r));
     }
 
     /*
