@@ -3,6 +3,8 @@ package tools.jackson.dataformat.yaml;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.Optional;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.ParserBase;
@@ -124,6 +126,12 @@ public class YAMLParser extends ParserBase
      * is enabled).
      */
     protected boolean _emittingSyntheticEmptyObject;    
+
+    /**
+     * Patterns for matching YAML's notation for Infinity and NaN values.
+     */
+    protected final Pattern _patternInf = Pattern.compile("([-+]?)\\.(?:inf|Inf|INF)");
+    protected final Pattern _patternNaN = Pattern.compile("\\.(?:nan|NaN|NAN)");
 
     /*
     /**********************************************************************
@@ -1152,6 +1160,19 @@ public class YAMLParser extends ParserBase
 
     private JsonToken _cleanYamlFloat(String str)
     {
+        // Convert infinity strings to Java notation, preserving the sign if present
+        Matcher matcher = _patternInf.matcher(str);
+        if (matcher.matches()) {
+            _cleanedTextValue = matcher.group(1) + "Infinity";
+            return JsonToken.VALUE_NUMBER_FLOAT;
+        }
+
+        // Convert not-a-number (NaN) strings to Java notation
+        if (_patternNaN.matcher(str).matches()) {
+            _cleanedTextValue = "NaN";
+            return JsonToken.VALUE_NUMBER_FLOAT;
+        }
+
         // Here we do NOT yet know whether we might have underscores so check
         final int len = str.length();
         int ix = str.indexOf('_');
