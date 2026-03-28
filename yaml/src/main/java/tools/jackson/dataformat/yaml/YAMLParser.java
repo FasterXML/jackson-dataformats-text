@@ -616,6 +616,8 @@ public class YAMLParser extends ParserBase
             switch (ch) {
             case 'b': case 'B': // binary
                 return _decodeNumberIntBinary(value, i+1, len, _numberNegative);
+            case 'o':
+                return _decodeNumberIntOctal(value, i+1, len, _numberNegative);
             case 'x': case 'X': // hex
                 return _decodeNumberIntHex(value, i+1, len, _numberNegative);
             case '0': case '1': case '2': case '3': case '4':
