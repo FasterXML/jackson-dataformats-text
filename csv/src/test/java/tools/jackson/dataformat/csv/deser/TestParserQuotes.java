@@ -114,9 +114,8 @@ public class TestParserQuotes extends ModuleTestBase
         assertEquals(1, row.length);
         assertEquals("te,st", row[0]);
 
-        // 21-Feb-2016, tatu: Surprisingly this fails; not directly related to
-        //    reported problem, so covered by a separate unit test, left commented out here
-//        assertFalse(it.hasNextValue());
+        // [dataformats-text#9] fixed
+        assertFalse(it.hasNextValue());
         it.close();
 
         // then with array wrapping

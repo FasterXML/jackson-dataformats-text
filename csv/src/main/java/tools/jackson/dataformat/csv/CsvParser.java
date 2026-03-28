@@ -815,8 +815,13 @@ public class CsvParser
         int offset = _arrayValueStart;
         if (offset < 0) { // just returned last value
             _streamReadContext = _streamReadContext.clearAndGetParent();
-            // no arrays in arrays (at least for now), so must be back to named value
-            _state = STATE_NEXT_ENTRY;
+            // [dataformats-text#9]: for schema-less case (unnamed values),
+            // need to go back to unnamed value state, not named entry state
+            if (_columnCount == 0) {
+                _state = STATE_UNNAMED_VALUE;
+            } else {
+                _state = STATE_NEXT_ENTRY;
+            }
              return JsonToken.END_ARRAY;
         }
         int end = _arrayValue.indexOf(_arraySeparator, offset);
