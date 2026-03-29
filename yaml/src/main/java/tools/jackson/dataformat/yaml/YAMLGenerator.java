@@ -617,7 +617,20 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
+        if (Double.isNaN(d)) {
+            _writeScalar(".nan", "double", STYLE_PLAIN);
+        }
+        else if (Double.isInfinite(d)) {
+            if (d > 0.0) {
+                _writeScalar(".inf", "double", STYLE_PLAIN);
+            }
+            else {
+                _writeScalar("-.inf", "double", STYLE_PLAIN);
+            }
+        }
+        else {
+            _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
+        }
         return this;
     }
 
@@ -625,7 +638,20 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
+        if (Float.isNaN(f)) {
+            _writeScalar(".nan", "float", STYLE_PLAIN);
+        }
+        else if (Float.isInfinite(f)) {
+            if (f > 0.0f) {
+                _writeScalar(".inf", "float", STYLE_PLAIN);
+            }
+            else {
+                _writeScalar("-.inf", "float", STYLE_PLAIN);
+            }
+        }
+        else {
+            _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
+        }
         return this;
     }
 
