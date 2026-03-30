@@ -130,8 +130,8 @@ public class YAMLParser extends ParserBase
     /**
      * Patterns for matching YAML's notation for Infinity and NaN values.
      */
-    protected final Pattern _patternInf = Pattern.compile("([-+]?)\\.(?:inf|Inf|INF)");
-    protected final Pattern _patternNaN = Pattern.compile("\\.(?:nan|NaN|NAN)");
+    protected final static Pattern _patternInf = Pattern.compile("([-+]?)\\.(?:inf|Inf|INF)");
+    protected final static Pattern _patternNaN = Pattern.compile("\\.(?:nan|NaN|NAN)");
 
     /*
     /**********************************************************************
