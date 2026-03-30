@@ -617,15 +617,20 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
-        if (Double.isNaN(d)) {
-            _writeScalar(".nan", "double", STYLE_PLAIN);
-        }
-        else if (Double.isInfinite(d)) {
-            if (d > 0.0) {
-                _writeScalar(".inf", "double", STYLE_PLAIN);
+        if (isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
+            if (Double.isNaN(d)) {
+                _writeScalar(".nan", "double", STYLE_PLAIN);
+            }
+            else if (Double.isInfinite(d)) {
+                if (d > 0.0) {
+                    _writeScalar(".inf", "double", STYLE_PLAIN);
+                }
+                else {
+                    _writeScalar("-.inf", "double", STYLE_PLAIN);
+                }
             }
             else {
-                _writeScalar("-.inf", "double", STYLE_PLAIN);
+                _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
             }
         }
         else {
@@ -638,18 +643,23 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
-        if (Float.isNaN(f)) {
-            _writeScalar(".nan", "float", STYLE_PLAIN);
-        }
-        else if (Float.isInfinite(f)) {
-            if (f > 0.0f) {
-                _writeScalar(".inf", "float", STYLE_PLAIN);
+        if (isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
+            if (Float.isNaN(f)) {
+                _writeScalar(".nan", "float", STYLE_PLAIN);
+            }
+            else if (Float.isInfinite(f)) {
+                if (f > 0.0f) {
+                    _writeScalar(".inf", "float", STYLE_PLAIN);
+                }
+                else {
+                    _writeScalar("-.inf", "float", STYLE_PLAIN);
+                }
             }
             else {
-                _writeScalar("-.inf", "float", STYLE_PLAIN);
+                _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
             }
         }
-        else {
+        else {  
             _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
         }
         return this;
