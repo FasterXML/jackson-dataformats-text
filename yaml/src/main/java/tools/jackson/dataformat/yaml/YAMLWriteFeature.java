@@ -146,12 +146,12 @@ public enum YAMLWriteFeature implements FormatFeature
      * emitted using YAML notation ({@code .inf}, {@code -.inf}, {@code .nan})
      * or Java notation ({@code Infinity}, {@code -Infinity}, {@code NaN}).
      * <p>
-     *     Default value is {@code false} for backwards compatibility.
-     * </p>
-     * <p>
-     * Feature is disabled by default.
+     * Feature is enabled by default. Disable it for backwards compatibility
+     * (pre-3.2 behavior).
+     *
+     * @since 3.2
      */
-    USE_YAML_NONFINITE_NOTATION(false),
+    USE_YAML_NONFINITE_NOTATION(true),
     ;
 
     private final boolean _defaultState;
