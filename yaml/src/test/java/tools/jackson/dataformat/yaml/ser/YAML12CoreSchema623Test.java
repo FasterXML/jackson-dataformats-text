@@ -13,12 +13,11 @@ import org.snakeyaml.engine.v2.schema.CoreSchema;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
-import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 // Tests serialization of YAML 1.2 core schema.
 public class YAML12CoreSchema623Test extends ModuleTestBase {
     private final LoadSettings SETTINGS = LoadSettings.builder().setSchema(new CoreSchema()).build();
-    private final YAMLFactory  FACTORY  = YAMLFactory.builder().loadSettings(SETTINGS).enable(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION).build();
+    private final YAMLFactory  FACTORY  = YAMLFactory.builder().loadSettings(SETTINGS).build();
     private final YAMLMapper   MAPPER   = YAMLMapper.builder(FACTORY).build();
 
     @Test
