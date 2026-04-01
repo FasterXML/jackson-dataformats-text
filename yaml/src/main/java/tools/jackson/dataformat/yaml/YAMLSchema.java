@@ -2,6 +2,8 @@ package tools.jackson.dataformat.yaml;
 
 /**
  * Enum of YAML 1.2 schemas that can be used for parsing YAML documents.
+ *
+ * @since 3.2
  */
 public enum YAMLSchema {
     /**
