@@ -102,6 +102,7 @@ public class YAMLFactoryBuilder
     public YAMLFactoryBuilder(YAMLFactory base) {
         super(base);
         _version = base._version;
+        _schema  = base._schema;
         _quotingChecker = base._quotingChecker;
         _loadSettings = base._loadSettings;
         _dumpSettings = base._dumpSettings;

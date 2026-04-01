@@ -49,6 +49,12 @@ public class YAMLFactory
     protected final SpecVersion _version;
 
     /**
+     * YAML schema for underlying parser to follow, if specified.
+     * @since 3.2
+     */
+    protected final YAMLSchema _schema;
+
+    /**
      * Helper object used to determine whether property names, String values
      * must be quoted or not.
      */
@@ -98,6 +104,7 @@ public class YAMLFactory
         // 26-Jul-2013, tatu: Seems like we should force output as 1.1 but
         //  that adds version declaration which looks ugly...
         _version = null;
+        _schema  = null;
         _quotingChecker = StringQuotingChecker.Default.instance();
         _loadSettings = null;
         _dumpSettings = null;
@@ -107,6 +114,7 @@ public class YAMLFactory
     {
         super(src);
         _version = src._version;
+        _schema  = src._schema;
         _quotingChecker = src._quotingChecker;
         _loadSettings = src._loadSettings;
         _dumpSettings = src._dumpSettings;
@@ -121,6 +129,7 @@ public class YAMLFactory
     {
         super(b);
         _version = b.yamlVersionToWrite();
+        _schema  = b.yamlSchema();
         _quotingChecker = b.stringQuotingChecker();
         _loadSettings = b.loadSettings();
         _dumpSettings = b.dumpSettings();
