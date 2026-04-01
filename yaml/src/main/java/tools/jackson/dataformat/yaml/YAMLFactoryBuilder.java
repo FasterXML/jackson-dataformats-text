@@ -330,7 +330,7 @@ public class YAMLFactoryBuilder
                         break;
                 }
             }
-            _loadSettings = builder.build();
+            return builder.build();
         }
         return _loadSettings;
     }
