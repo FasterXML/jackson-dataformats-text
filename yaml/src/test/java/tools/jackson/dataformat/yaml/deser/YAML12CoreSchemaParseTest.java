@@ -63,6 +63,14 @@ public class YAML12CoreSchemaParseTest extends ModuleTestBase {
         - .NAN
         strings:
         - hello, world!
+        - Infinity
+        - NaN
+        - 'null'
+        - 'false'
+        - '0'
+        - '-1.0'
+        - '0o644'
+        - '0xFF'
         """;
 
         YAMLParser p = (YAMLParser) MAPPER.createParser(YAML);
@@ -156,6 +164,22 @@ public class YAML12CoreSchemaParseTest extends ModuleTestBase {
         assertToken(JsonToken.START_ARRAY, p.nextToken());
         assertToken(JsonToken.VALUE_STRING, p.nextToken());
         assertEquals("hello, world!", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("Infinity", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("NaN", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("null", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("false", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("0", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("-1.0", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("0o644", p.getString());
+        assertToken(JsonToken.VALUE_STRING, p.nextToken());
+        assertEquals("0xFF", p.getString());
         assertToken(JsonToken.END_ARRAY, p.nextToken());
 
         assertToken(JsonToken.END_OBJECT, p.nextToken());
