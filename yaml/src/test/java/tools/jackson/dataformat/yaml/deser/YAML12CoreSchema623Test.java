@@ -3,18 +3,16 @@ package tools.jackson.dataformat.yaml.deser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.schema.CoreSchema;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLSchema;
 
 // Tests deserialization of YAML 1.2 core schema.
 public class YAML12CoreSchema623Test extends ModuleTestBase {
-    private final LoadSettings SETTINGS = LoadSettings.builder().setSchema(new CoreSchema()).build();
-    private final YAMLFactory  FACTORY  = YAMLFactory.builder().loadSettings(SETTINGS).build();
-    private final YAMLMapper   MAPPER   = YAMLMapper.builder(FACTORY).build();
+    private final YAMLFactory FACTORY = YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).build();
+    private final YAMLMapper  MAPPER  = YAMLMapper.builder(FACTORY).build();
 
     @Test
     public void testNull() throws Exception

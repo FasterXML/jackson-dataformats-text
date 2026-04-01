@@ -3,8 +3,6 @@ package tools.jackson.dataformat.yaml.deser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
-import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.schema.CoreSchema;
 
 import tools.jackson.core.JsonToken;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
@@ -12,14 +10,14 @@ import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 import tools.jackson.dataformat.yaml.YAMLParser;
 import tools.jackson.dataformat.yaml.YAMLReadFeature;
+import tools.jackson.dataformat.yaml.YAMLSchema;
 
 /**
  * Test YAML parsing when using the YAML 1.2 core schema (i.e. CoreScalarResolver).
  */
 public class YAML12CoreSchemaParseTest extends ModuleTestBase {
-    private final LoadSettings SETTINGS = LoadSettings.builder().setSchema(new CoreSchema()).build();
-    private final YAMLFactory  FACTORY  = YAMLFactory.builder().loadSettings(SETTINGS).enable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
-    private final YAMLMapper   MAPPER   = YAMLMapper.builder(FACTORY).build();
+    private final YAMLFactory FACTORY = YAMLFactory.builder().yamlSchema(YAMLSchema.CORE).enable(YAMLReadFeature.EMPTY_STRING_AS_NULL).build();
+    private final YAMLMapper  MAPPER  = YAMLMapper.builder(FACTORY).build();
 
     @Test
     public void testTokens() throws Exception {
