@@ -9,7 +9,11 @@ import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v2.common.SpecVersion;
+import org.snakeyaml.engine.v2.schema.CoreSchema;
+import org.snakeyaml.engine.v2.schema.JsonSchema;
+import org.snakeyaml.engine.v2.schema.FailsafeSchema;
 
 /**
  * {@link tools.jackson.core.TSFBuilder}
@@ -40,6 +44,16 @@ public class YAMLFactoryBuilder
      * </p>
      */
     protected SpecVersion _version;
+
+    /**
+     * YAML schema for underlying parser to follow, if specified;
+     * left as {@code null} for backwards compatibility (which means
+     * whatever default settings {@code SnakeYAML} deems best).
+     * <p>
+     *     Ignored if you provide your own {@code LoadSettings}.
+     * </p>
+     */
+    protected YAMLSchema _schema;
 
     /**
      * Configuration for underlying parser to follow, if specified;
@@ -201,6 +215,20 @@ public class YAMLFactoryBuilder
     }
 
     /**
+     * Method for specifying the YAML schema to use during parsing; if
+     * {@code null} passed, will let {@code SnakeYAML} use its default settings.
+     *
+     * @param schema YAML schema to use for parsing, if not-null;
+     *    {@code null} for default handling
+     *
+     * @return This builder instance, to allow chaining
+     */
+    public YAMLFactoryBuilder yamlSchema(YAMLSchema schema) {
+        _schema = schema;
+        return this;
+    }
+
+    /**
      * Configuration for underlying parser to follow, if specified;
      * left as {@code null} for backwards compatibility (which means
      * whatever default settings {@code SnakeYAML} deems best).
@@ -257,6 +285,10 @@ public class YAMLFactoryBuilder
         return _version;
     }
 
+    public YAMLSchema yamlSchema() {
+        return _schema;
+    }
+
     public StringQuotingChecker stringQuotingChecker() {
         if (_quotingChecker != null) {
             return _quotingChecker;
@@ -277,6 +309,25 @@ public class YAMLFactoryBuilder
      * @return the {@code SnakeYAML} configuration to use when parsing YAML
      */
     public LoadSettings loadSettings() {
+        if (_loadSettings == null) {
+            LoadSettingsBuilder builder = LoadSettings.builder();
+            if (_schema != null) {
+                switch (_schema) {
+                    case FAILSAFE:
+                        builder.setSchema(new FailsafeSchema());
+                        break;
+                    case JSON:
+                        builder.setSchema(new JsonSchema());
+                        break;
+                    case CORE:
+                        builder.setSchema(new CoreSchema());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            _loadSettings = builder.build();
+        }
         return _loadSettings;
     }
 
