@@ -9,11 +9,7 @@ import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v2.common.SpecVersion;
-import org.snakeyaml.engine.v2.schema.CoreSchema;
-import org.snakeyaml.engine.v2.schema.JsonSchema;
-import org.snakeyaml.engine.v2.schema.FailsafeSchema;
 
 /**
  * {@link tools.jackson.core.TSFBuilder}
@@ -314,25 +310,6 @@ public class YAMLFactoryBuilder
      * @return the {@code SnakeYAML} configuration to use when parsing YAML
      */
     public LoadSettings loadSettings() {
-        if (_loadSettings == null) {
-            LoadSettingsBuilder builder = LoadSettings.builder();
-            if (_schema != null) {
-                switch (_schema) {
-                    case FAILSAFE:
-                        builder.setSchema(new FailsafeSchema());
-                        break;
-                    case JSON:
-                        builder.setSchema(new JsonSchema());
-                        break;
-                    case CORE:
-                        builder.setSchema(new CoreSchema());
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return builder.build();
-        }
         return _loadSettings;
     }
 

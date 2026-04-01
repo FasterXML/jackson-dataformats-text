@@ -4,7 +4,11 @@ import java.io.*;
 
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
+import org.snakeyaml.engine.v2.api.LoadSettingsBuilder;
 import org.snakeyaml.engine.v2.common.SpecVersion;
+import org.snakeyaml.engine.v2.schema.CoreSchema;
+import org.snakeyaml.engine.v2.schema.FailsafeSchema;
+import org.snakeyaml.engine.v2.schema.JsonSchema;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
@@ -131,7 +135,30 @@ public class YAMLFactory
         _version = b.yamlVersionToWrite();
         _schema  = b.yamlSchema();
         _quotingChecker = b.stringQuotingChecker();
-        _loadSettings = b.loadSettings();
+
+        if (b.loadSettings() == null) {
+            LoadSettingsBuilder builder = LoadSettings.builder();
+            if (_schema != null) {
+                switch (_schema) {
+                    case FAILSAFE:
+                        builder.setSchema(new FailsafeSchema());
+                        break;
+                    case JSON:
+                        builder.setSchema(new JsonSchema());
+                        break;
+                    case CORE:
+                        builder.setSchema(new CoreSchema());
+                        break;
+                    default:
+                        break;
+                }
+            }
+            _loadSettings = builder.build();
+        }
+        else {
+            _loadSettings = b.loadSettings();
+        }
+
         _dumpSettings = b.dumpSettings();
     }
 
