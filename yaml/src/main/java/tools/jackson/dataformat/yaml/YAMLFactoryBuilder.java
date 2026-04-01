@@ -52,6 +52,8 @@ public class YAMLFactoryBuilder
      * <p>
      *     Ignored if you provide your own {@code LoadSettings}.
      * </p>
+     *
+     * @since 3.2
      */
     protected YAMLSchema _schema;
 
@@ -222,6 +224,8 @@ public class YAMLFactoryBuilder
      *    {@code null} for default handling
      *
      * @return This builder instance, to allow chaining
+     *
+     * @since 3.2
      */
     public YAMLFactoryBuilder yamlSchema(YAMLSchema schema) {
         _schema = schema;
