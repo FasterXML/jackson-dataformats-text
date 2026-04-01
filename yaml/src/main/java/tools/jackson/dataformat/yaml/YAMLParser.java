@@ -1160,17 +1160,18 @@ public class YAMLParser extends ParserBase
 
     private JsonToken _cleanYamlFloat(String str)
     {
-        // Convert infinity strings to Java notation, preserving the sign if present
         Matcher matcher = _patternInf.matcher(str);
         if (matcher.matches()) {
-            _cleanedTextValue = matcher.group(1) + "Infinity";
-            return JsonToken.VALUE_NUMBER_FLOAT;
+            if (matcher.group(1).equals("-")) {
+                return resetAsNaN(str, Double.NEGATIVE_INFINITY);
+            }
+            else {
+                return resetAsNaN(str, Double.POSITIVE_INFINITY);
+            }
         }
 
-        // Convert not-a-number (NaN) strings to Java notation
         if (_patternNaN.matcher(str).matches()) {
-            _cleanedTextValue = "NaN";
-            return JsonToken.VALUE_NUMBER_FLOAT;
+            return resetAsNaN(str, Double.NaN);
         }
 
         // Here we do NOT yet know whether we might have underscores so check
