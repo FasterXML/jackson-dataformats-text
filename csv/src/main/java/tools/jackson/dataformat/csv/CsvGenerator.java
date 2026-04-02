@@ -122,7 +122,8 @@ public class CsvGenerator extends GeneratorBase
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int streamWriteFeatures, int csvFeatures,
-            Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes)
+            Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes,
+            int maxQuoteCheckChars)
     {
         super(writeCtxt, ioCtxt, streamWriteFeatures);
         _formatFeatures = csvFeatures;
@@ -135,7 +136,7 @@ public class CsvGenerator extends GeneratorBase
         }
         boolean useFastDoubleWriter = isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER);
         _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes,
-                useFastDoubleWriter);
+                useFastDoubleWriter, maxQuoteCheckChars);
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,

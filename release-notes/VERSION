@@ -24,6 +24,9 @@ implementations)
 #623: Add support for YAML 1.2 non-finite (Infinite, -Infinite, NaN)
   numbers, Octal notation
  (contributed by Michael C)
+#631: Add `CsvFactory.builder().maxQuoteCheckChars()` for configuring
+  heuristic quoting check
+ (fix by @cowtowncoder, w/ Claude code)
 
 3.1.1 (27-Mar-2026)
 

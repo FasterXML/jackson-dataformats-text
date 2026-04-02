@@ -187,7 +187,8 @@ public class CsvEncoder
      */
 
     public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema,
-            CharacterEscapes esc, boolean useFastDoubleWriter)
+            CharacterEscapes esc, boolean useFastDoubleWriter,
+            int maxQuoteCheckChars)
     {
         _ioContext = ctxt;
         _csvFeatures = csvFeatures;
@@ -218,7 +219,7 @@ public class CsvEncoder
 
         _cfgMinSafeChar = _calcSafeChar();
 
-        _cfgMaxQuoteCheckChars = MAX_QUOTE_CHECK;
+        _cfgMaxQuoteCheckChars = (maxQuoteCheckChars >= 0) ? maxQuoteCheckChars : MAX_QUOTE_CHECK;
 
         _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
                 _cfgEscapeQuoteCharWithEscapeChar,
