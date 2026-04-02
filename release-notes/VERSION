@@ -21,6 +21,9 @@ implementations)
 #22: YAML anchors don't seem to work with `@JsonCreator`
  (reported by Rye G)
  (fix by @cowtowncoder, w/ Claude code)
+#368: Allow skipping csv rows with only empty values (line of commas)
+ (requested by @GitXm123)
+ (fix by @cowtowncoder, w/ Claude code)
 #623: Add support for YAML 1.2 non-finite (Infinite, -Infinite, NaN)
   numbers, Octal notation
  (contributed by Michael C)

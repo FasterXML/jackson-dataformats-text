@@ -162,6 +162,20 @@ public enum CsvReadFeature
      * @since 3.1
      */
     ONLY_UNQUOTED_NULL_VALUES_AS_NULL(false),
+
+    /**
+     * Feature that allows skipping input rows that consist solely of column separator
+     * characters (for example, a line containing only {@code ,,} with the default
+     * comma separator).
+     * This is different from {@link #SKIP_EMPTY_LINES} which only skips lines that are
+     * completely empty or blank (whitespace only): this feature skips lines that
+     * contain only consecutive separator characters followed by a linefeed.
+     *<p>
+     * Feature is disabled by default.
+     *
+     * @since 3.2
+     */
+    SKIP_EMPTY_ROWS(false),
     ;
 
     private final boolean _defaultState;

@@ -76,6 +76,18 @@ public class CsvDecoder
 
     protected boolean _skipBlankLines;
 
+    protected boolean _skipEmptyRows;
+
+    /**
+     * Number of separator characters consumed by {@link #_trySkipEmptyRow()} when
+     * a row starting with separators turns out to contain non-empty values.
+     * These consumed separators are replayed as empty String values by
+     * {@link #nextString()}.
+     *
+     * @since 3.2
+     */
+    protected int _pendingEmptyColumns;
+
     /**
      * Maximum of quote character, linefeeds (\r and \n), escape character.
      */
@@ -299,6 +311,7 @@ public class CsvDecoder
         _allowComments = CsvReadFeature.ALLOW_COMMENTS.enabledIn(csvFeatures);
         _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
         _skipBlankLines = CsvReadFeature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
+        _skipEmptyRows = CsvReadFeature.SKIP_EMPTY_ROWS.enabledIn(csvFeatures);
         _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
@@ -532,11 +545,11 @@ public class CsvDecoder
         if (_allowComments) {
             return _skipCommentLines();
         }
-        if (!_skipBlankLines) {
+        if (!_skipBlankLines && !_skipEmptyRows) {
             return hasMoreInput();
         }
 
-        // only need to skip fully empty lines
+        // only need to skip fully empty lines (and optionally empty rows)
         while (hasMoreInput()) {
             char ch = _inputBuffer[_inputPtr];
             if (ch == '\r' || ch == '\n') {
@@ -545,10 +558,17 @@ public class CsvDecoder
                 _handleLF();
                 continue;
             }
-            if (ch != ' ') {
-                return true; // processing can go on
+            if (ch == ' ' && _skipBlankLines) {
+                ++_inputPtr;
+                continue;
             }
-            ++_inputPtr;
+            // [dataformats-text#368]: Row of only separator characters?
+            if (_skipEmptyRows && ch == _separatorChar) {
+                if (_trySkipEmptyRow()) {
+                    continue;
+                }
+            }
+            return true; // processing can go on
         }
         return false; // end of input
     }
@@ -573,6 +593,12 @@ public class CsvDecoder
                 ++_inputPtr;
                 continue;
             default:
+                // [dataformats-text#368]: Check if line consists only of separators
+                if (_skipEmptyRows && ch == _separatorChar) {
+                    if (_trySkipEmptyRow()) {
+                        continue;
+                    }
+                }
                 return true;
             }
         }
@@ -588,6 +614,53 @@ public class CsvDecoder
                 _handleLF();
                 break;
             }
+        }
+    }
+
+    /**
+     * Helper method called when we see a separator character at the start of a line
+     * and need to determine if the entire row consists only of consecutive separator
+     * characters (no other content) followed by a linefeed or EOF.
+     *<p>
+     * Consumes separator characters one at a time. If a linefeed or EOF is reached,
+     * the row is empty and is skipped (returns {@code true}). If any other character
+     * is found, the consumed separators are recorded in {@link #_pendingEmptyColumns}
+     * so that {@link #nextString()} can replay them as empty values.
+     *
+     * @return {@code true} if the row was determined to be empty and was skipped;
+     *   {@code false} if the row contains non-empty content (consumed separators
+     *   will be replayed via {@link #_pendingEmptyColumns})
+     */
+    private boolean _trySkipEmptyRow() throws JacksonException
+    {
+        int separatorCount = 0;
+        while (true) {
+            // Consume the separator character at current position
+            ++_inputPtr;
+            ++separatorCount;
+
+            // Need more input?
+            if (_inputPtr >= _inputEnd) {
+                if (!loadMore()) {
+                    // EOF after separators only: empty row at end of input
+                    return true;
+                }
+            }
+            char ch = _inputBuffer[_inputPtr];
+            if (ch == _separatorChar) {
+                continue;
+            }
+            if (ch == '\r' || ch == '\n') {
+                // Row consisted only of separators: skip it
+                ++_inputPtr;
+                _pendingLF = ch;
+                _handleLF();
+                return true;
+            }
+            // Found non-separator content: not an empty row.
+            // Record consumed separators so nextString() replays them.
+            _pendingEmptyColumns = separatorCount;
+            return false;
         }
     }
 
@@ -626,6 +699,14 @@ public class CsvDecoder
     public String nextString() throws JacksonException {
         _numTypesValid = NR_UNKNOWN;
         _currInputQuoted = false;  // Reset; set to true below only if opening quote found
+
+        // [dataformats-text#368]: Replay separator characters consumed by _trySkipEmptyRow()
+        // as empty column values
+        if (_pendingEmptyColumns > 0) {
+            --_pendingEmptyColumns;
+            _textBuffer.resetWithString("");
+            return "";
+        }
 
         if (_pendingLF > 0) { // either pendingLF, or closed
             if (_inputReader != null) { // if closed, we just need to return null
