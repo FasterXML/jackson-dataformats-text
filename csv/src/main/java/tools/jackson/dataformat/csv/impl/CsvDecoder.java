@@ -312,7 +312,6 @@ public class CsvDecoder
         _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
         _skipBlankLines = CsvReadFeature.SKIP_EMPTY_LINES.enabledIn(csvFeatures);
         _skipEmptyRows = CsvReadFeature.SKIP_EMPTY_ROWS.enabledIn(csvFeatures);
-        _trimSpaces = CsvReadFeature.TRIM_SPACES.enabledIn(csvFeatures);
         _inputBuffer = ctxt.allocTokenBuffer();
         _bufferRecyclable = true; // since we allocated it
         _tokenInputRow = -1;
@@ -525,6 +524,7 @@ public class CsvDecoder
      * @return True if there is a new data line to handle; false if not
      */
     public boolean startNewLine() throws JacksonException {
+        _pendingEmptyColumns = 0;
         // first: if pending LF, skip it
         if (_pendingLF != 0) {
             if (_inputReader == null) {
