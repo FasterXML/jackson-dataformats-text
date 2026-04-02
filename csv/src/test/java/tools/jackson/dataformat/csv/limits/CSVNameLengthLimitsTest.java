@@ -23,15 +23,13 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
 {
     private final static int MAX_NAME_LEN = 100;
 
-    private CsvMapper mapperWithNameLenLimit(int maxNameLen) {
-        return CsvMapper.builder(
-                CsvFactory.builder()
-                    .streamReadConstraints(StreamReadConstraints.builder()
-                        .maxNameLength(maxNameLen)
-                        .build())
+    private final CsvMapper MAPPER = CsvMapper.builder(
+            CsvFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                    .maxNameLength(MAX_NAME_LEN)
                     .build())
-            .build();
-    }
+                .build())
+        .build();
 
     // Test with header-from-schema path (schema has columns, useHeader, reordersColumns)
     @Test
@@ -40,7 +38,6 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
         final String longName = "a".repeat(MAX_NAME_LEN + 50);
         final String csv = longName + ",b\n1,2\n";
 
-        CsvMapper mapper = mapperWithNameLenLimit(MAX_NAME_LEN);
         CsvSchema schema = CsvSchema.builder()
                 .setUseHeader(true)
                 .setReorderColumns(true)
@@ -49,7 +46,7 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
                 .build();
 
         try {
-            MappingIterator<List<String>> it = mapper.readerForListOf(String.class)
+            MappingIterator<List<String>> it = MAPPER.readerForListOf(String.class)
                     .with(schema)
                     .readValues(csv);
             it.readAll();
@@ -67,7 +64,6 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
         final String longName = "a".repeat(MAX_NAME_LEN + 50);
         final String csv = longName + ",b\n1,2\n";
 
-        CsvMapper mapper = mapperWithNameLenLimit(MAX_NAME_LEN);
         CsvSchema schema = CsvSchema.builder()
                 .setUseHeader(true)
                 .setStrictHeaders(true)
@@ -76,7 +72,7 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
                 .build();
 
         try {
-            MappingIterator<List<String>> it = mapper.readerForListOf(String.class)
+            MappingIterator<List<String>> it = MAPPER.readerForListOf(String.class)
                     .with(schema)
                     .readValues(csv);
             it.readAll();
@@ -94,7 +90,6 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
         final String longName = "a".repeat(MAX_NAME_LEN + 50);
         final String csv = longName + ",b\n1,2\n";
 
-        CsvMapper mapper = mapperWithNameLenLimit(MAX_NAME_LEN);
         CsvSchema schema = CsvSchema.builder()
                 .setUseHeader(true)
                 .addColumn(longName)
@@ -102,7 +97,7 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
                 .build();
 
         try {
-            MappingIterator<List<String>> it = mapper.readerForListOf(String.class)
+            MappingIterator<List<String>> it = MAPPER.readerForListOf(String.class)
                     .with(schema)
                     .readValues(csv);
             it.readAll();
@@ -120,7 +115,6 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
         final String name = "a".repeat(MAX_NAME_LEN);
         final String csv = name + ",b\nvalue1,value2\n";
 
-        CsvMapper mapper = mapperWithNameLenLimit(MAX_NAME_LEN);
         CsvSchema schema = CsvSchema.builder()
                 .setUseHeader(true)
                 .setReorderColumns(true)
@@ -129,7 +123,7 @@ public class CSVNameLengthLimitsTest extends ModuleTestBase
                 .build();
 
         // Should complete without exception
-        MappingIterator<Object> it = mapper.readerFor(Object.class)
+        MappingIterator<Object> it = MAPPER.readerFor(Object.class)
                 .with(schema)
                 .readValues(csv);
         assertTrue(it.hasNextValue());
