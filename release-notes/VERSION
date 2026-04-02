@@ -16,18 +16,18 @@ implementations)
 
 3.2.0 (not yet released)
 
-#9: Incorrect detection of `hasNextValue()` for simple iteration with `String[]`
+#9: (csv) Incorrect detection of `hasNextValue()` for simple iteration with `String[]`
  (fix by @cowtowncoder, w/ Claude code)
-#22: YAML anchors don't seem to work with `@JsonCreator`
+#22: (yaml) YAML anchors don't seem to work with `@JsonCreator`
  (reported by Rye G)
  (fix by @cowtowncoder, w/ Claude code)
-#368: Allow skipping csv rows with only empty values (line of commas)
+#368: (csv) Allow skipping csv rows with only empty values (line of commas)
  (requested by @GitXm123)
  (fix by @cowtowncoder, w/ Claude code)
-#623: Add support for YAML 1.2 non-finite (Infinite, -Infinite, NaN)
+#623: (yaml) Add support for YAML 1.2 non-finite (Infinite, -Infinite, NaN)
   numbers, Octal notation
  (contributed by Michael C)
-#631: Add `CsvFactory.builder().maxQuoteCheckChars()` for configuring
+#631: (csv) Add `CsvFactory.builder().maxQuoteCheckChars()` for configuring
   heuristic quoting check
  (fix by @cowtowncoder, w/ Claude code)
 
