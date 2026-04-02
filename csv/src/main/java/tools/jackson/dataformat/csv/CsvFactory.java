@@ -6,6 +6,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.io.IOContext;
 
+import tools.jackson.dataformat.csv.impl.CsvEncoder;
 import tools.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 import tools.jackson.dataformat.csv.impl.UTF8Writer;
 
@@ -72,7 +73,7 @@ public class CsvFactory
                 DEFAULT_CSV_PARSER_FEATURE_FLAGS,
                 DEFAULT_CSV_GENERATOR_FEATURE_FLAGS);
         _characterEscapes = null; // derive from flags
-        _maxQuoteCheckChars = -1;
+        _maxQuoteCheckChars = CsvEncoder.DEFAULT_MAX_QUOTE_CHECK;
     }
 
     protected CsvFactory(CsvFactory src)

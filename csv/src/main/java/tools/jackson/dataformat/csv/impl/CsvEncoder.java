@@ -39,7 +39,7 @@ public class CsvEncoder
      * Also: only do check for optional quotes for short
      * values; longer ones will always be quoted.
      */
-    protected final static int MAX_QUOTE_CHECK = 24;
+    public final static int DEFAULT_MAX_QUOTE_CHECK = 24;
     
     protected final BufferedValue[] NO_BUFFERED = new BufferedValue[0];
 
@@ -219,7 +219,7 @@ public class CsvEncoder
 
         _cfgMinSafeChar = _calcSafeChar();
 
-        _cfgMaxQuoteCheckChars = (maxQuoteCheckChars >= 0) ? maxQuoteCheckChars : MAX_QUOTE_CHECK;
+        _cfgMaxQuoteCheckChars = maxQuoteCheckChars;
 
         _cfgQuoteCharEscapeChar = _getQuoteCharEscapeChar(
                 _cfgEscapeQuoteCharWithEscapeChar,

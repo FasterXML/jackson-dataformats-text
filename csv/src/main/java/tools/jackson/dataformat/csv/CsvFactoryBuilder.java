@@ -6,6 +6,8 @@ import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.base.DecorableTSFactory.DecorableTSFBuilder;
 
+import tools.jackson.dataformat.csv.impl.CsvEncoder;
+
 /**
  * {@link tools.jackson.core.TSFBuilder}
  * implementation for constructing {@link CsvFactory}
@@ -27,11 +29,11 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
      * Maximum length of a column value for which quoting-need check is performed
      * when not using strict ({@link CsvWriteFeature#STRICT_CHECK_FOR_QUOTING}) checking:
      * values longer than this threshold will always be quoted.
-     * Default value is {@value tools.jackson.dataformat.csv.impl.CsvEncoder#MAX_QUOTE_CHECK}.
+     * Default value is {@value tools.jackson.dataformat.csv.impl.CsvEncoder#DEFAULT_MAX_QUOTE_CHECK}.
      *
      * @since 3.2
      */
-    protected int _maxQuoteCheckChars = -1;
+    protected int _maxQuoteCheckChars = CsvEncoder.DEFAULT_MAX_QUOTE_CHECK;
     
     /*
     /**********************************************************************
@@ -146,22 +148,23 @@ public class CsvFactoryBuilder extends DecorableTSFBuilder<CsvFactory, CsvFactor
      * ({@link CsvWriteFeature#STRICT_CHECK_FOR_QUOTING}).
      * Values longer than this threshold are always quoted without checking content.
      *<p>
-     * Default value is {@value tools.jackson.dataformat.csv.impl.CsvEncoder#MAX_QUOTE_CHECK}.
+     * Default value is {@value tools.jackson.dataformat.csv.impl.CsvEncoder#DEFAULT_MAX_QUOTE_CHECK}.
      *
      * @param maxChars Maximum number of characters to check; values longer
-     *   than this will always be quoted
+     *   than this will always be quoted. Negative values are normalized to
+     *   the default ({@value tools.jackson.dataformat.csv.impl.CsvEncoder#DEFAULT_MAX_QUOTE_CHECK}).
      * @return this builder (for call chaining)
      *
      * @since 3.2
      */
     public CsvFactoryBuilder maxQuoteCheckChars(int maxChars) {
-        _maxQuoteCheckChars = maxChars;
+        _maxQuoteCheckChars = (maxChars >= 0) ? maxChars : CsvEncoder.DEFAULT_MAX_QUOTE_CHECK;
         return this;
     }
 
     /**
-     * @return Currently configured maximum quote check length, or {@code -1}
-     *   for default ({@value tools.jackson.dataformat.csv.impl.CsvEncoder#MAX_QUOTE_CHECK}).
+     * @return Currently configured maximum quote check length; default
+     *   is {@value tools.jackson.dataformat.csv.impl.CsvEncoder#DEFAULT_MAX_QUOTE_CHECK}.
      *
      * @since 3.2
      */
