@@ -32,6 +32,9 @@ implementations)
  (fix by @cowtowncoder, w/ Claude code)
 #634: (csv) Support for `StreamReadConstraints.maxNameLength` for CSV parsing
  (fix by @cowtowncoder, w/ Claude code)
+#636: (yaml) Support for `StreamReadConstraints.maxNameLength` and
+  `maxStringLength` for YAML parsing
+ (fix by @cowtowncoder, w/ Claude code)
 
 3.1.1 (27-Mar-2026)
 
