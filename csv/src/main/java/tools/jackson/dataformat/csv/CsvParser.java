@@ -600,17 +600,24 @@ public class CsvParser
                     ++ix;
                     if (name == null) {
                         _reportError(String.format("Missing header column #%d, expecting \"%s\"", ix, column.getName()));
-                    } else if (!column.getName().equals(name)) {
-                        _reportError(String.format(
+                    } else {
+                        // [dataformats-text#634]: validate header name length
+                        _streamReadConstraints.validateNameLength(name.length());
+                        if (!column.getName().equals(name)) {
+                            _reportError(String.format(
 "Mismatched header column #%d: expected \"%s\", actual \"%s\"", ix, column.getName(), name));
-                }
+                        }
+                    }
                 }
                 if ((name = _reader.nextString()) != null) {
                     _reportError(String.format("Extra header column \"%s\"", name));
                 }
             } else {
                 int allowed = MAX_COLUMNS;
-                while (_reader.nextString() != null) {
+                String name;
+                while ((name = _reader.nextString()) != null) {
+                    // [dataformats-text#634]: validate header name length
+                    _streamReadConstraints.validateNameLength(name.length());
                     // If we don't care about validation, just skip. But protect against infinite loop
                     if (--allowed < 0) {
                         _reportError("Internal error: skipped "+MAX_COLUMNS+" header columns");
@@ -632,6 +639,8 @@ public class CsvParser
             if (trimHeaderNames) {
                 name = name.trim();
             }
+            // [dataformats-text#634]: validate header name length
+            _streamReadConstraints.validateNameLength(name.length());
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);
             if (prev != null) {

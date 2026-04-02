@@ -30,6 +30,8 @@ implementations)
 #631: (csv) Add `CsvFactory.builder().maxQuoteCheckChars()` for configuring
   heuristic quoting check
  (fix by @cowtowncoder, w/ Claude code)
+#634: (csv) Support for `StreamReadConstraints.maxNameLength` for CSV parsing
+ (fix by @cowtowncoder, w/ Claude code)
 
 3.1.1 (27-Mar-2026)
 
