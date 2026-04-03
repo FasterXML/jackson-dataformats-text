@@ -10,7 +10,7 @@ import tools.jackson.dataformat.csv.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for {@link CsvReadFeature#EMPTY_STRING_AS_MISSING}
+ * Tests for {@link CsvReadFeature#EMPTY_UNQUOTED_STRING_AS_MISSING}
  * (see {@code dataformats-text#355}).
  */
 public class EmptyStringAsMissingTest
@@ -44,7 +44,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(PojoWithDefault.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         // Empty cell with trailing comma
         PojoWithDefault result = r.readValue("id,value\n1,");
@@ -59,7 +59,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(PojoWithDefault.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         PojoWithDefault result = r.readValue("id\n1");
         assertEquals(Integer.valueOf(1), result.id);
@@ -73,7 +73,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(PojoWithDefault.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         PojoWithDefault result = r.readValue("id,value\n1,\"\"");
         assertEquals(Integer.valueOf(1), result.id);
@@ -87,7 +87,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(PojoWithDefault.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         PojoWithDefault result = r.readValue("id,value\n1,hello");
         assertEquals(Integer.valueOf(1), result.id);
@@ -101,7 +101,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(ThreeFields.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         ThreeFields result = r.readValue("firstName,middleName,lastName\nGrace,,Hopper");
         assertEquals("Grace", result.firstName);
@@ -129,7 +129,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = MAPPER.schemaFor(PojoWithDefault.class);
         ObjectReader r = MAPPER.readerFor(PojoWithDefault.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         PojoWithDefault result = r.readValue("1,");
         assertEquals(Integer.valueOf(1), result.id);
@@ -143,7 +143,7 @@ public class EmptyStringAsMissingTest
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         ObjectReader r = MAPPER.readerFor(ThreeFields.class)
                 .with(schema)
-                .with(CsvReadFeature.EMPTY_STRING_AS_MISSING);
+                .with(CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING);
 
         ThreeFields result = r.readValue("firstName,middleName,lastName\n,,");
         assertNull(result.firstName);
