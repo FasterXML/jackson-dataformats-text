@@ -183,4 +183,36 @@ public class ParserWithHeaderTest extends ModuleTestBase
             verifyException(e, "Empty header line");
         }
     }
+
+    // [dataformats-text#327]: Detect duplicate column names in header
+    @Test
+    public void testFailOnDuplicateHeaderColumns() throws Exception
+    {
+        final CsvSchema schema = CsvSchema.emptySchema().withHeader();
+        final String CSV = "name,age,name\nfoo,2,bar\n";
+
+        // By default, should fail on duplicate header columns
+        try {
+            MAPPER.readerFor(Entry.class).with(schema).readValue(CSV);
+            fail("Should have failed with exception");
+        } catch (CsvReadException e) {
+            verifyException(e, "Duplicate header column \"name\"");
+        }
+    }
+
+    // [dataformats-text#327]: Allow disabling duplicate header check
+    @Test
+    public void testAllowDuplicateHeaderColumns() throws Exception
+    {
+        final CsvSchema schema = CsvSchema.emptySchema().withHeader();
+        final String CSV = "name,age,name\nfoo,2,bar\n";
+
+        // When disabled, should allow duplicates (last one wins)
+        Entry entry = MAPPER.readerFor(Entry.class)
+                .with(schema)
+                .without(CsvReadFeature.FAIL_ON_DUPLICATE_HEADER_COLUMNS)
+                .readValue(CSV);
+        assertEquals("bar", entry.name);
+        assertEquals(2, entry.age);
+    }
 }

@@ -30,6 +30,9 @@ implementations)
 #292: (yaml) YAML anchor `UnresolvedForwardReference` with builder
  (reported by Aleksandr D)
  (fix by @cowtowncoder, w/ Claude code)
+#327: (csv) Catch and report duplicate column names in header line (add
+  `CsvReadFeature.FAIL_ON_DUPLICATE_HEADER_COLUMNS`)
+ (fix by @cowtowncoder, w/ Claude code)
 #355: (csv) Allow mapping empty cells (columns) as "absent" properties (i.e. skip)
   by `CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_MISSING`
  (requested by @hosswald)

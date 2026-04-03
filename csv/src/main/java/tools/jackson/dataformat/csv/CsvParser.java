@@ -640,6 +640,10 @@ public class CsvParser
         CsvSchema.Builder builder = _schema.rebuild().clearColumns();
         int count = 0;
 
+        // [dataformats-text#327]: Optionally check for duplicate column names
+        final boolean failOnDupHeaders = CsvReadFeature.FAIL_ON_DUPLICATE_HEADER_COLUMNS.enabledIn(_formatFeatures);
+        final Set<String> seenNames = failOnDupHeaders ? new LinkedHashSet<>() : null;
+
         final boolean trimHeaderNames = CsvReadFeature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
@@ -649,6 +653,11 @@ public class CsvParser
             }
             // [dataformats-text#634]: validate header name length
             _streamReadConstraints.validateNameLength(name.length());
+            // [dataformats-text#327]: check for duplicate column names
+            if (failOnDupHeaders && !seenNames.add(name)) {
+                _reportCsvReadError(String.format(
+                        "Duplicate header column \"%s\"", name));
+            }
             // See if "old" schema defined type; if so, use that type...
             CsvSchema.Column prev = _schema.column(name);
             if (prev != null) {

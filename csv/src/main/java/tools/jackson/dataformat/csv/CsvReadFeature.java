@@ -197,6 +197,21 @@ public enum CsvReadFeature
      * @since 3.2
      */
     SKIP_EMPTY_ROWS(false),
+
+    /**
+     * Feature that enables failing (with a {@link CsvReadException}) when
+     * duplicate column names are encountered in the header line.
+     *<p>
+     * When enabled, parsing will fail if the header line contains two or more
+     * columns with the same name. When disabled, duplicates are allowed and
+     * the last column with a given name will be the one accessible by name
+     * (earlier columns with the same name are effectively hidden).
+     *<p>
+     * Feature is enabled by default.
+     *
+     * @since 3.2
+     */
+    FAIL_ON_DUPLICATE_HEADER_COLUMNS(true),
     ;
 
     private final boolean _defaultState;
