@@ -21,6 +21,10 @@ implementations)
 #22: (yaml) YAML anchors don't seem to work with `@JsonCreator`
  (reported by Rye G)
  (fix by @cowtowncoder, w/ Claude code)
+#355: (csv) Allow mapping empty cells (columns) as "absent" properties (i.e. skip)
+  by `CsvReadFeature.EMPTY_STRING_AS_MISSING`
+ (requested by @hosswald)
+ (fix by @cowtowncoder, w/ Claude code)
 #368: (csv) Allow skipping csv rows with only empty values (line of commas)
  (requested by @GitXm123)
  (fix by @cowtowncoder, w/ Claude code)
