@@ -41,6 +41,10 @@ public enum YAMLReadFeature implements FormatFeature
      * Note that explicit YAML 1.2 octal prefix {@code 0o} (like {@code 0o444})
      * is always recognized as octal regardless of this setting.
      *<p>
+     * Note: this feature only has effect when using the
+     * {@link YAMLSchema#CORE CORE} schema, since the default JSON schema
+     * does not resolve {@code 0}-prefixed values as integers.
+     *<p>
      * Feature is enabled by default for backwards-compatibility.
      *
      * @since 3.2
