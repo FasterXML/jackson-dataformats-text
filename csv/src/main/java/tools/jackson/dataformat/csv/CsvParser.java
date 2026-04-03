@@ -5,6 +5,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -642,7 +643,7 @@ public class CsvParser
 
         // [dataformats-text#327]: Optionally check for duplicate column names
         final boolean failOnDupHeaders = CsvReadFeature.FAIL_ON_DUPLICATE_HEADER_COLUMNS.enabledIn(_formatFeatures);
-        final Set<String> seenNames = failOnDupHeaders ? new LinkedHashSet<>() : null;
+        final Set<String> seenNames = failOnDupHeaders ? new HashSet<>() : null;
 
         final boolean trimHeaderNames = CsvReadFeature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
