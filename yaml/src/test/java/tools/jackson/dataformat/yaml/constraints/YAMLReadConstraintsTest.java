@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Tests for {@link StreamReadConstraints} enforcement of max name length
  * and max String value length in YAML parsing.
  *
- * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/634">[dataformats-text#634]</a>
+ * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/634">[dataformats-text#636]</a>
  */
 public class YAMLReadConstraintsTest extends ModuleTestBase
 {

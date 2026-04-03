@@ -380,7 +380,7 @@ public class YAMLParser extends ParserBase
                         _lastTagEvent = evt;
                     }
                     final String name = scalar.getValue();
-                    // [dataformats-text#634]: validate name length
+                    // [dataformats-text#636]: validate name length
                     _streamReadConstraints.validateNameLength(name.length());
                     _currentName = name;
                     _streamReadContext.setCurrentName(name);
@@ -447,7 +447,7 @@ public class YAMLParser extends ParserBase
                     AliasEvent alias = (AliasEvent) evt;
                     _currentIsAlias = true;
                     _textValue = alias.getAnchor().orElseThrow(() -> new RuntimeException("Alias must be provided.")).getValue();
-                    // [dataformats-text#634]: validate string value length
+                    // [dataformats-text#636]: validate string value length
                     _streamReadConstraints.validateStringLength(_textValue.length());
                     _cleanedTextValue = null;
                     // for now, nothing to do: in future, maybe try to expose as ObjectIds?
@@ -487,7 +487,7 @@ public class YAMLParser extends ParserBase
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws JacksonException
     {
         String value = scalar.getValue();
-        // [dataformats-text#634]: validate string value length
+        // [dataformats-text#636]: validate string value length
         _streamReadConstraints.validateStringLength(value.length());
 
         _textValue = value;
