@@ -30,7 +30,22 @@ public enum YAMLReadFeature implements FormatFeature
      *<p>
      * Feature is enabled by default for backwards-compatibility reasons.
      */
-    EMPTY_STRING_AS_NULL(true)
+    EMPTY_STRING_AS_NULL(true),
+
+    /**
+     * Feature that determines whether values starting with {@code 0} followed
+     * by digits (like {@code 0444}) are interpreted as octal numbers.
+     * When enabled (the default), {@code 0444} parses as decimal 292 (octal
+     * interpretation). When disabled, {@code 0444} parses as decimal 444.
+     *<p>
+     * Note that explicit YAML 1.2 octal prefix {@code 0o} (like {@code 0o444})
+     * is always recognized as octal regardless of this setting.
+     *<p>
+     * Feature is enabled by default for backwards-compatibility.
+     *
+     * @since 3.2
+     */
+    PARSE_OCTAL_NUMBERS(true)
     ;
 
     private final boolean _defaultState;

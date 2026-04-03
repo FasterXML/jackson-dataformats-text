@@ -27,6 +27,10 @@ implementations)
 #264: (csv) `CsvMapper` applies alphabetic Property Order  for Java Records
  (reported by @alexpartsch)
  (fix by @cowtowncoder)
+#276: (yaml) Support opting out of octal number interpretation (like "0444");
+  add `YAMLReadFeature.PARSE_OCTAL_NUMBERS`
+ (requested by David X)
+ (fix by @cowtowncoder, w/ Claude code)
 #292: (yaml) YAML anchor `UnresolvedForwardReference` with builder
  (reported by Aleksandr D)
  (fix by @cowtowncoder, w/ Claude code)

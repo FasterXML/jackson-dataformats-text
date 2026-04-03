@@ -631,20 +631,26 @@ public class YAMLParser extends ParserBase
             case 'b': case 'B': // binary
                 return _decodeNumberIntBinary(value, i+1, len, _numberNegative);
             case 'o':
+                // Explicit 0o prefix: always octal (YAML 1.2)
                 return _decodeNumberIntOctal(value, i+1, len, _numberNegative);
             case 'x': case 'X': // hex
                 return _decodeNumberIntHex(value, i+1, len, _numberNegative);
             case '0': case '1': case '2': case '3': case '4':
             case '5': case '6': case '7': case '8': case '9':
             case '_':
-                return _decodeNumberIntOctal(value, i, len, _numberNegative);
+                // Implicit octal (leading 0 followed by digits): check feature flag
+                if (YAMLReadFeature.PARSE_OCTAL_NUMBERS.enabledIn(_formatFeatures)) {
+                    return _decodeNumberIntOctal(value, i, len, _numberNegative);
+                }
+                // When disabled, fall through to decimal parsing below
+                break;
             default:
+                // should never occur, but in abundance of caution, let's not
+                // throw exception but just return as String
+                return JsonToken.VALUE_STRING;
             }
-            // should never occur, but in abundance of caution, let's not
-            // throw exception but just return as String
-            return JsonToken.VALUE_STRING;
         }
-        
+
         // 23-Nov-2020, tatu: will now check and support all formats EXCEPT
         //    for 60-base; 60-base is trickier not just because decoding gets
         //    more involved but also because it can accidentally "detect" values
