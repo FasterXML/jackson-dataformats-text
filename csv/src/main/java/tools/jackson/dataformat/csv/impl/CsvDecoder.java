@@ -730,7 +730,7 @@ public class CsvDecoder
             i = _skipLeadingSpace();
         } else {
             i = _nextChar();
-            // [dataformat-csv#19]: Even without TRIM_SPACES, spaces before
+            // [dataformats-text#643]: Even without TRIM_SPACES, spaces before
             // a quoted value are insignificant and should be skipped.
             // Consume whitespace across buffer boundaries; if a quote follows,
             // discard the spaces and parse as quoted. If not, restore consumed
