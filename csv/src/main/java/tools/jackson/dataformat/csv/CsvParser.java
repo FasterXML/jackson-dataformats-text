@@ -157,6 +157,11 @@ public class CsvParser
      */
     protected final boolean _cfgOnlyUnquotedNullValuesAsNull;
 
+    /**
+     * @since 3.2
+     */
+    protected final boolean _cfgEmptyStringAsMissing;
+
     /*
     /**********************************************************************
     /* State
@@ -258,6 +263,7 @@ public class CsvParser
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(csvFeatures);
+        _cfgEmptyStringAsMissing = CsvReadFeature.EMPTY_STRING_AS_MISSING.enabledIn(csvFeatures);
     }
 
     /*
@@ -333,6 +339,7 @@ public class CsvParser
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyStringAsMissing = CsvReadFeature.EMPTY_STRING_AS_MISSING.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -342,6 +349,7 @@ public class CsvParser
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(_formatFeatures);
         _cfgOnlyUnquotedNullValuesAsNull = CsvReadFeature.ONLY_UNQUOTED_NULL_VALUES_AS_NULL.enabledIn(_formatFeatures);
+        _cfgEmptyStringAsMissing = CsvReadFeature.EMPTY_STRING_AS_MISSING.enabledIn(_formatFeatures);
         return this;
     }
 
@@ -746,24 +754,36 @@ public class CsvParser
         // NOTE: only called when we do have real Schema
         String next;
 
-        try {
-            next = _reader.nextString();
-        } catch (RuntimeException e) {
-            // 12-Oct-2015, tatu: Need to resync here as well...
-            _state = STATE_SKIP_EXTRA_COLUMNS;
-            throw e;
-        }
-
-        if (next == null) { // end of record or input...
-            // 16-Mar-2017, tatu: [dataformat-csv#137] Missing column(s)?
-            if (_columnIndex < _columnCount) {
-                return _handleMissingColumns();
+        // [dataformats-text#355]: loop to skip empty unquoted values when
+        // EMPTY_STRING_AS_MISSING enabled (avoids recursion for consecutive empty cells)
+        while (true) {
+            try {
+                next = _reader.nextString();
+            } catch (RuntimeException e) {
+                // 12-Oct-2015, tatu: Need to resync here as well...
+                _state = STATE_SKIP_EXTRA_COLUMNS;
+                throw e;
             }
-            return _handleObjectRowEnd();
-        }
-        if (_columnIndex >= _columnCount) {
-            _currentValue = next;
-            return _handleExtraColumn(next);
+
+            if (next == null) { // end of record or input...
+                // 16-Mar-2017, tatu: [dataformat-csv#137] Missing column(s)?
+                if (_columnIndex < _columnCount) {
+                    return _handleMissingColumns();
+                }
+                return _handleObjectRowEnd();
+            }
+            if (_columnIndex >= _columnCount) {
+                _currentValue = next;
+                return _handleExtraColumn(next);
+            }
+            // [dataformats-text#355]: skip empty unquoted values when EMPTY_STRING_AS_MISSING enabled
+            if (_cfgEmptyStringAsMissing
+                    && next.isEmpty()
+                    && !_reader.isCurrentTokenQuoted()) {
+                ++_columnIndex;
+                continue;
+            }
+            break;
         }
         final CsvSchema.Column column = _schema.column(_columnIndex);
         _state = STATE_NAMED_VALUE;

@@ -164,6 +164,26 @@ public enum CsvReadFeature
     ONLY_UNQUOTED_NULL_VALUES_AS_NULL(false),
 
     /**
+     * Feature that enables treating empty unquoted cell values as "missing",
+     * effectively suppressing the token pair (property name + value) for such cells.
+     * This means that if the target POJO field has a default value, it will be
+     * preserved instead of being overwritten with an empty String.
+     *<p>
+     * This is different from {@link #EMPTY_STRING_AS_NULL} which coerces the value
+     * to {@code null}: this feature causes the value to not be included in the token
+     * stream at all, similar to how truly missing columns (row shorter than schema)
+     * are handled.
+     *<p>
+     * Only applies to unquoted empty values; a quoted empty string ({@code ""}) is
+     * still reported normally.
+     *<p>
+     * Feature is disabled by default for backwards compatibility.
+     *
+     * @since 3.2
+     */
+    EMPTY_STRING_AS_MISSING(false),
+
+    /**
      * Feature that allows skipping input rows that consist solely of column separator
      * characters (for example, a line containing only {@code ,,} with the default
      * comma separator).
