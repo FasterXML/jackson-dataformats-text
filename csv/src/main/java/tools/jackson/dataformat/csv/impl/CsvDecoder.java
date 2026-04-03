@@ -735,8 +735,8 @@ public class CsvDecoder
             // Consume whitespace across buffer boundaries; if a quote follows,
             // discard the spaces and parse as quoted. If not, restore consumed
             // spaces into the unquoted output.
-            if (i > 0 && i <= ' ' && i != _separatorChar
-                    && i != INT_CR && i != INT_LF) {
+            if (i <= ' ' && i > 0
+                    && i != _separatorChar && i != INT_CR && i != INT_LF) {
                 // Lazily allocate / reuse buffer for consumed whitespace
                 char[] spaceBuf = _leadingSpaceBuf;
                 if (spaceBuf == null) {
@@ -778,9 +778,9 @@ public class CsvDecoder
                     _tokenInputTotal = _currInputProcessed + _inputPtr - 1;
                     _tokenInputRow = _currInputRow;
                     _tokenInputCol = _inputPtr - _currInputRowStart - 1;
-                    char[] outBuf = _textBuffer.emptyAndGetCurrentSegment();
-                    System.arraycopy(spaceBuf, 0, outBuf, 0, spaceCount);
-                    return _nextUnquotedString(outBuf, spaceCount);
+                    _textBuffer.resetWithCopy(spaceBuf, 0, spaceCount);
+                    return _nextUnquotedString(_textBuffer.getBufferWithoutReset(),
+                            spaceCount);
                 }
             }
         }
