@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.yaml.tofix;
+package tools.jackson.dataformat.yaml.misc;
 
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.*;
 import tools.jackson.databind.ObjectMapper;
 
 import tools.jackson.dataformat.yaml.ModuleTestBase;
-import tools.jackson.dataformat.yaml.testutil.failure.JacksonTestFailureExpected;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,13 +14,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PolymorphicWithObjectId25Test extends ModuleTestBase
 {
     // [dataformats-text#25]
-    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, 
-            include = JsonTypeInfo.As.PROPERTY, 
-            property = "type", 
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.PROPERTY,
+            property = "type",
             defaultImpl = NodeWithStringId.class)
     @JsonSubTypes({
         @JsonSubTypes.Type(value = SubNodeWithStringId.class, name= "subnode"),
-        @JsonSubTypes.Type(value = NodeWithStringId.class, name = "node") 
+        @JsonSubTypes.Type(value = NodeWithStringId.class, name = "node")
     })
     @JsonIdentityInfo(generator=ObjectIdGenerators.StringIdGenerator.class)
     static class NodeWithStringId
@@ -40,9 +39,8 @@ public class PolymorphicWithObjectId25Test extends ModuleTestBase
     static class SubNodeWithStringId extends NodeWithStringId { }
 
     private final ObjectMapper MAPPER = newObjectMapper();
-    
+
     // [dataformats-text#25]
-    @JacksonTestFailureExpected
     @Test
     public void testPolymorphicAndObjectId25() throws Exception
     {
@@ -61,6 +59,6 @@ public class PolymorphicWithObjectId25Test extends ModuleTestBase
         assertNotNull(node.next);
         assertEquals("second", node.next.name);
         assertNotNull(node.next.next);
-        assertSame(node, node.next.next);            
+        assertSame(node, node.next.next);
     }
 }

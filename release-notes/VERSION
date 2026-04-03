@@ -21,6 +21,9 @@ implementations)
 #22: (yaml) YAML anchors don't seem to work with `@JsonCreator`
  (reported by Rye G)
  (fix by @cowtowncoder, w/ Claude code)
+#25: (yaml) Yaml anchor error when `@JsonSubTypes` used
+ (reported by @mopsop)
+ (fix by @cowtowncoder, w/ Claude code)
 #292: (yaml) YAML anchor `UnresolvedForwardReference` with builder
  (reported by Aleksandr D)
  (fix by @cowtowncoder, w/ Claude code)
