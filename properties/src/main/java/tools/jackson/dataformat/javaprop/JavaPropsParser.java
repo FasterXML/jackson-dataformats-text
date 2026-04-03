@@ -210,6 +210,18 @@ System.err.println("\n>>");
             }
             streamReadConstraints().validateNestingDepth(_streamReadContext.getNestingDepth());
         }
+        // [dataformats-text#636]: validate name/string value lengths
+        if (t == JsonToken.PROPERTY_NAME) {
+            final String name = _streamReadContext.currentName();
+            if (name != null) {
+                _streamReadConstraints.validateNameLength(name.length());
+            }
+        } else if (t == JsonToken.VALUE_STRING) {
+            final String text = _streamReadContext.getCurrentText();
+            if (text != null) {
+                _streamReadConstraints.validateStringLength(text.length());
+            }
+        }
         return _updateToken(t);
     }
 
