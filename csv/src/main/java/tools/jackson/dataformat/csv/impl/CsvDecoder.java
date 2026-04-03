@@ -720,6 +720,54 @@ public class CsvDecoder
             i = _skipLeadingSpace();
         } else {
             i = _nextChar();
+            // [dataformat-csv#19]: Even without TRIM_SPACES, spaces before
+            // a quoted value are insignificant and should be skipped.
+            // Consume whitespace across buffer boundaries; if a quote follows,
+            // discard the spaces and parse as quoted. If not, restore consumed
+            // spaces into the unquoted output.
+            if (i > 0 && i <= ' ' && i != _separatorChar
+                    && i != INT_CR && i != INT_LF) {
+                char[] spaceBuf = new char[16];
+                int spaceCount = 0;
+                spaceBuf[spaceCount++] = (char) i;
+                boolean foundQuote = false;
+
+                while (true) {
+                    if (_inputPtr >= _inputEnd) {
+                        if (!loadMore()) {
+                            break;
+                        }
+                    }
+                    final char ch = _inputBuffer[_inputPtr];
+                    if (ch == _quoteChar) {
+                        // Found quote: discard leading spaces, proceed as quoted
+                        _inputPtr++;
+                        i = _quoteChar;
+                        foundQuote = true;
+                        break;
+                    }
+                    if (ch > ' ' || ch == _separatorChar
+                            || ch == '\r' || ch == '\n') {
+                        break;
+                    }
+                    // Consume this whitespace character, tracking it for restoration
+                    _inputPtr++;
+                    if (spaceCount >= spaceBuf.length) {
+                        spaceBuf = java.util.Arrays.copyOf(spaceBuf, spaceBuf.length * 2);
+                    }
+                    spaceBuf[spaceCount++] = ch;
+                }
+
+                if (!foundQuote && spaceCount > 0) {
+                    // Not a quoted value: restore consumed whitespace into unquoted output
+                    _tokenInputTotal = _currInputProcessed + _inputPtr - 1;
+                    _tokenInputRow = _currInputRow;
+                    _tokenInputCol = _inputPtr - _currInputRowStart - 1;
+                    char[] outBuf = _textBuffer.emptyAndGetCurrentSegment();
+                    System.arraycopy(spaceBuf, 0, outBuf, 0, spaceCount);
+                    return _nextUnquotedString(outBuf, spaceCount);
+                }
+            }
         }
         // First, need to ensure we know the starting location of token
         _tokenInputTotal = _currInputProcessed + _inputPtr - 1;

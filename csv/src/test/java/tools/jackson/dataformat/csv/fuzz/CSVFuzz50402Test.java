@@ -18,7 +18,7 @@ public class CSVFuzz50402Test extends ModuleTestBase
             mapper.readTree(input);
             // Ok; don't care about content, just buffer reads
         } catch (JacksonException e) {
-            verifyException(e, "foo");
+            verifyException(e, "Unexpected character");
         }
     }
 }
