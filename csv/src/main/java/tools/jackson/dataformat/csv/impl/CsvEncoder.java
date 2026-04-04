@@ -1112,12 +1112,12 @@ public class CsvEncoder
 
     public void close(boolean autoClose, boolean flushStream) throws IOException
     {
+        // May need to remove the linefeed appended after the last row written
+        // (if not yet done)
+        if (!CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW.enabledIn(_csvFeatures)) {
+            _removeTrailingLF();
+        }
         try {
-            // May need to remove the linefeed appended after the last row written
-            // (if not yet done)
-            if (!CsvWriteFeature.WRITE_LINEFEED_AFTER_LAST_ROW.enabledIn(_csvFeatures)) {
-                _removeTrailingLF();
-            }
             _flushBuffer();
         } finally {
             if (autoClose) {
