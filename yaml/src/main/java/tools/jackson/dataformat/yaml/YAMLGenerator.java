@@ -324,9 +324,12 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
-            _emitEndDocument();
-            _emit(new StreamEndEvent());
-            super.close();
+            try {
+                _emitEndDocument();
+                _emit(new StreamEndEvent());
+            } finally {
+                super.close();
+            }
         }
     }
 

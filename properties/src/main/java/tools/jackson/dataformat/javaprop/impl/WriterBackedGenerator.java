@@ -87,9 +87,12 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     public void close()
     {
         if (!isClosed()) {
-            _flushBuffer();
-            _outputTail = 0; // just to ensure we don't think there's anything buffered
-            super.close();
+            try {
+                _flushBuffer();
+            } finally {
+                _outputTail = 0; // just to ensure we don't think there's anything buffered
+                super.close();
+            }
         }
     }
 

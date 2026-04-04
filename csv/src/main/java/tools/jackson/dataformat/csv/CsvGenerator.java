@@ -335,16 +335,19 @@ public class CsvGenerator extends GeneratorBase
     @Override
     public void close()
     {
-        if (!isClosed()) {
-            // Let's mark row as closed, if we had any...
-            finishRow();
+        try {
+            if (!isClosed()) {
+                // Let's mark row as closed, if we had any...
+                finishRow();
 
-            // Write the header if necessary, occurs when no rows written
-            if (_handleFirstLine) {
-                _handleFirstLine();
+                // Write the header if necessary, occurs when no rows written
+                if (_handleFirstLine) {
+                    _handleFirstLine();
+                }
             }
+        } finally {
+            super.close();
         }
-        super.close();
     }
 
     @Override
