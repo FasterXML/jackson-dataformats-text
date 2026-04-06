@@ -282,6 +282,7 @@ public class YAMLGenerator extends GeneratorBase
      *
      * @since 3.2
      */
+    @Override
     public YAMLGenerator writeComment(String text) throws JacksonException
     {
         if (text == null) {
@@ -758,6 +759,12 @@ public class YAMLGenerator extends GeneratorBase
     /* Public API, write methods, Native Ids
     /**********************************************************************
      */
+
+    @Override // @since 3.2
+    public boolean canWriteComments() {
+        // 06-Apr-2026, tatu: as per [dataformats-text#36]:
+        return true;
+    }
 
     @Override
     public boolean canWriteObjectId() {
