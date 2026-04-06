@@ -19,6 +19,7 @@ import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
 
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.DumpSettingsBuilder;
+import org.snakeyaml.engine.v2.comments.CommentType;
 import org.snakeyaml.engine.v2.common.Anchor;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
@@ -38,7 +39,12 @@ public class YAMLGenerator extends GeneratorBase
 
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = (long) Integer.MAX_VALUE;
+
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[+-]?[0-9]*(\\.[0-9]*)?");
+
+    // @since 3.2
+    protected final static Pattern NEWLINE_SPLITTER_P = Pattern.compile("\r\n|\r|\n");
+
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     // for property names, leave out quotes
@@ -172,6 +178,8 @@ public class YAMLGenerator extends GeneratorBase
         // 03-Oct-2020, tatu: Specify spec version; however, does not seem to make
         //   any difference?
         opt.setYamlDirective(Optional.ofNullable(version));
+        // Enable comment output support (needed for writeComment())
+        opt.setDumpComments(true);
         return opt.build();
     }
 
@@ -249,6 +257,51 @@ public class YAMLGenerator extends GeneratorBase
 
     public final boolean isEnabled(YAMLWriteFeature f) {
         return (_formatWriteFeatures & f.getMask()) != 0;
+    }
+
+    /**
+     * Method for writing a YAML comment.
+     * If called right after {@link #writeName}, the comment is emitted as an
+     * end-of-line (inline) comment on the property name line; otherwise it is
+     * emitted as a block comment (full line starting with {@code #}).
+     *<p>
+     * If {@code text} is {@code null}, an empty (blank) line is emitted instead.
+     *<p>
+     * Multi-line comments are supported: if the text contains newlines,
+     * each line will be emitted as a separate comment line.
+     *<p>
+     * Note: YAML comments are presentation detail and are not part of the
+     * serialization model per the YAML specification.
+     *
+     * @param text Comment text to write (without the leading {@code #});
+     *    if {@code null}, writes an empty line
+     *
+     * @return This generator, to allow call chaining
+     *
+     * @throws JacksonException if there is a problem emitting the comment
+     *
+     * @since 3.2
+     */
+    public YAMLGenerator writeComment(String text) throws JacksonException
+    {
+        if (text == null) {
+            _emit(new CommentEvent(CommentType.BLANK_LINE, "",
+                    Optional.empty(), Optional.empty()));
+            return this;
+        }
+        // If we just wrote a property name (expecting value next),
+        // emit as an inline (end-of-line) comment; otherwise as a block comment
+        final CommentType type = (_streamWriteContext.inObject()
+                && _streamWriteContext.hasCurrentName())
+                ? CommentType.IN_LINE : CommentType.BLOCK;
+        // Split multi-line comments into separate CommentEvents;
+        // handle all standard linefeeds: "\r\n", "\r", "\n"
+        String[] lines = NEWLINE_SPLITTER_P.split(text, -1);
+        for (String line : lines) {
+            _emit(new CommentEvent(type, line,
+                    Optional.empty(), Optional.empty()));
+        }
+        return this;
     }
 
     /*
