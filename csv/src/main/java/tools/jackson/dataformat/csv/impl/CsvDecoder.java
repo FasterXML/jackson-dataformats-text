@@ -780,7 +780,7 @@ public class CsvDecoder
                     _tokenInputCol = _inputPtr - _currInputRowStart - 1;
                     _textBuffer.resetWithCopy(spaceBuf, 0, spaceCount);
                     return _nextUnquotedString(_textBuffer.getBufferWithoutReset(),
-                            spaceCount);
+                            _textBuffer.getCurrentSegmentSize());
                 }
             }
         }
