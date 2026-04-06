@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class SchemaConstructionTest extends ModuleTestBase
 {
@@ -39,5 +41,27 @@ public class SchemaConstructionTest extends ModuleTestBase
         assertEquals("\r", schema2.withLineEnding("\r").lineEnding());
 
         assertEquals("JavaProps", schema2.getSchemaType());
+    }
+
+    // [dataformats-text#xxx]: withPathSeparatorEscapeChar() was comparing
+    // against wrong field (_pathSeparator instead of _pathSeparatorEscapeChar)
+    @Test
+    public void testWithPathSeparatorEscapeChar()
+    {
+        JavaPropsSchema empty = JavaPropsSchema.emptySchema();
+        assertEquals('\0', empty.pathSeparatorEscapeChar());
+
+        // Setting a new escape char should produce a new schema
+        JavaPropsSchema schema2 = empty.withPathSeparatorEscapeChar('\\');
+        assertNotSame(empty, schema2);
+        assertEquals('\\', schema2.pathSeparatorEscapeChar());
+
+        // Setting the same escape char should return the same instance
+        assertSame(schema2, schema2.withPathSeparatorEscapeChar('\\'));
+
+        // Setting a different escape char should produce a new schema
+        JavaPropsSchema schema3 = schema2.withPathSeparatorEscapeChar('/');
+        assertNotSame(schema2, schema3);
+        assertEquals('/', schema3.pathSeparatorEscapeChar());
     }
 }

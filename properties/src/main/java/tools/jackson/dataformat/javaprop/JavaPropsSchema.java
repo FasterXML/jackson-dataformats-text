@@ -262,7 +262,7 @@ public class JavaPropsSchema
      * @since 2.14
      */
     public JavaPropsSchema withPathSeparatorEscapeChar(char v) {
-        if (_equals(v, _pathSeparator)) {
+        if (v == _pathSeparatorEscapeChar) {
             return this;
         }
         JavaPropsSchema s = new JavaPropsSchema(this);

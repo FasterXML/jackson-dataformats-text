@@ -69,6 +69,7 @@ public class JPropWriteContext
         _currentValue = null;
         _index = -1;
         _currentValue = currValue;
+        _gotName = false;
     }
     
     // // // Factory methods
