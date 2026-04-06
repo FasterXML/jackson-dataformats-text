@@ -24,6 +24,9 @@ implementations)
 #25: (yaml) Yaml anchor error when `@JsonSubTypes` used
  (reported by @mopsop)
  (fix by @cowtowncoder, w/ Claude code)
+#36 (yaml) Allow emitting YAML comments
+ (requested by Daniel L)
+ (fix by @cowtowncoder, w/ Claude code)
 #109: (yaml) `YAMLMapper` doesn't close output file if an error occurs
  (reported by Martin W)
  (fix by @cowtowncoder, w/ Claude code)
