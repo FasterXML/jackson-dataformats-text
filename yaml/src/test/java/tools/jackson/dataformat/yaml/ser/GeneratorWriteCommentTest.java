@@ -118,21 +118,30 @@ public class GeneratorWriteCommentTest extends ModuleTestBase
     }
 
     @Test
-    public void testNullCommentIsNoOp() throws Exception
+    public void testNullCommentEmitsBlankLine() throws Exception
     {
         StringWriter w = new StringWriter();
         YAMLGenerator gen = (YAMLGenerator) MAPPER.createGenerator(w);
         gen.writeStartObject();
+        gen.writeComment(" group one");
+        gen.writeName("a");
+        gen.writeNumber(1);
         gen.writeComment(null);
-        gen.writeName("key");
-        gen.writeString("value");
+        gen.writeComment(" group two");
+        gen.writeName("b");
+        gen.writeNumber(2);
         gen.writeEndObject();
         gen.close();
 
         String yaml = w.toString();
-        // Should not contain any comment markers beyond what's normal
-        assertFalse(yaml.contains("#"),
-                "Expected no comment in output, got: " + yaml);
+        // Null comment should produce a blank line separating the two groups
+        assertTrue(yaml.contains("# group one"),
+                "Expected first group comment, got: " + yaml);
+        assertTrue(yaml.contains("# group two"),
+                "Expected second group comment, got: " + yaml);
+        // Verify blank line exists between the two groups
+        assertTrue(yaml.contains("\n\n"),
+                "Expected blank line from null comment, got: " + yaml);
     }
 
     @Test

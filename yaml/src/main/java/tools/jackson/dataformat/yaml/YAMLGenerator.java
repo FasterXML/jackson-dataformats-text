@@ -265,13 +265,16 @@ public class YAMLGenerator extends GeneratorBase
      * end-of-line (inline) comment on the property name line; otherwise it is
      * emitted as a block comment (full line starting with {@code #}).
      *<p>
+     * If {@code text} is {@code null}, an empty (blank) line is emitted instead.
+     *<p>
      * Multi-line comments are supported: if the text contains newlines,
      * each line will be emitted as a separate comment line.
      *<p>
      * Note: YAML comments are presentation detail and are not part of the
      * serialization model per the YAML specification.
      *
-     * @param text Comment text to write (without the leading {@code #})
+     * @param text Comment text to write (without the leading {@code #});
+     *    if {@code null}, writes an empty line
      *
      * @return This generator, to allow call chaining
      *
@@ -282,6 +285,8 @@ public class YAMLGenerator extends GeneratorBase
     public YAMLGenerator writeComment(String text) throws JacksonException
     {
         if (text == null) {
+            _emit(new CommentEvent(CommentType.BLANK_LINE, "",
+                    Optional.empty(), Optional.empty()));
             return this;
         }
         // If we just wrote a property name (expecting value next),
