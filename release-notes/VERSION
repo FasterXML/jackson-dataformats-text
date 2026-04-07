@@ -30,6 +30,9 @@ implementations)
 #109: (yaml) `YAMLMapper` doesn't close output file if an error occurs
  (reported by Martin W)
  (fix by @cowtowncoder, w/ Claude code)
+#214: (yaml) Expose custom tags via `YAMLParser.getRawTag()`
+ (requested by Alexander T)
+ (fix by @cowtowncoder, w/ Claude code)
 #264: (csv) `CsvMapper` applies alphabetic Property Order  for Java Records
  (reported by @alexpartsch)
  (fix by @cowtowncoder)

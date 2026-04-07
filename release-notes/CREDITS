@@ -54,6 +54,10 @@ Martin Winandy (@pmwmedia)
  * Reported #109: (yaml) `YAMLMapper` doesn't close output file if an error occurs
   (3.2.0)
 
+Alexander Tsvetkov (@nictas)
+ * Requested #214: (yaml) Expose custom tags via `YAMLParser.getRawTag()`
+  (3.2.0)
+
 David Xia (@davidxia)
  * Requested #276: (yaml) Support opting out of octal number interpretation (like "0444");
    add `YAMLReadFeature.PARSE_OCTAL_NUMBERS`

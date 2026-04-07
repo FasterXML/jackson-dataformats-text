@@ -1122,7 +1122,33 @@ public class YAMLParser extends ParserBase
         }
         return null;
     }
-    
+
+    /**
+     * Method that can be used to access the YAML tag of the current token,
+     * in its raw form: that is, without stripping leading "!" prefix(es)
+     * (unlike {@link #getTypeId()} which does strip them).
+     *<p>
+     * NOTE: method name is somewhat of a misnomer since YAML actually allows
+     * at most one tag per node; but since this is a raw accessor for the
+     * underlying SnakeYAML event tag, we keep the name as-is.
+     *
+     * @return Raw YAML tag of the current token, if any; {@code null} if none
+     *
+     * @since 3.2
+     */
+    public String getRawTag()
+    {
+        Optional<String> tagOpt;
+        if (_lastTagEvent instanceof CollectionStartEvent) {
+            tagOpt = ((CollectionStartEvent) _lastTagEvent).getTag();
+        } else if (_lastTagEvent instanceof ScalarEvent) {
+            tagOpt = ((ScalarEvent) _lastTagEvent).getTag();
+        } else {
+            return null;
+        }
+        return tagOpt.orElse(null);
+    }
+
     /*
     /**********************************************************************
     /* Internal methods
