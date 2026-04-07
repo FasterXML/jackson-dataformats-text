@@ -91,36 +91,36 @@ public class CsvEncoder
      */
     protected final int _cfgMinSafeChar;
 
-    protected int _csvFeatures;
+    protected final int _csvFeatures;
 
     /**
      * Marker flag used to determine if to do optimal (aka "strict") quoting
      * checks or not (looser conservative check)
      */
-    protected boolean _cfgOptimalQuoting;
+    protected final boolean _cfgOptimalQuoting;
 
     protected final boolean _cfgAllowsComments;
 
-    protected boolean _cfgIncludeMissingTail;
+    protected final boolean _cfgIncludeMissingTail;
 
-    protected boolean _cfgAlwaysQuoteStrings;
+    protected final boolean _cfgAlwaysQuoteStrings;
 
-    protected boolean _cfgAlwaysQuoteEmptyStrings;
+    protected final boolean _cfgAlwaysQuoteEmptyStrings;
 
     // @since 2.16
-    protected boolean _cfgAlwaysQuoteNumbers;
+    protected final boolean _cfgAlwaysQuoteNumbers;
 
     // @since 3.2
-    protected boolean _cfgQuoteLeadingTrailingWhitespace;
+    protected final boolean _cfgQuoteLeadingTrailingWhitespace;
 
-    protected boolean _cfgEscapeQuoteCharWithEscapeChar;
+    protected final boolean _cfgEscapeQuoteCharWithEscapeChar;
 
-    protected boolean _cfgEscapeControlCharWithEscapeChar;
+    protected final boolean _cfgEscapeControlCharWithEscapeChar;
 
     /**
      * @since 2.14
      */
-    protected boolean _cfgUseFastDoubleWriter;
+    protected final boolean _cfgUseFastDoubleWriter;
 
     protected final char _cfgQuoteCharEscapeChar;
 
@@ -307,8 +307,7 @@ public class CsvEncoder
             }
         }
     }
-    
-    
+
     private final char _getQuoteCharEscapeChar(
             final boolean escapeQuoteCharWithEscapeChar,
             final int quoteCharacter,
