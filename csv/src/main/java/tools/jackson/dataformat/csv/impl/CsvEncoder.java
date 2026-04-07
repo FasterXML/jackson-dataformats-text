@@ -110,6 +110,9 @@ public class CsvEncoder
     // @since 2.16
     protected boolean _cfgAlwaysQuoteNumbers;
 
+    // @since 3.2
+    protected boolean _cfgQuoteLeadingTrailingWhitespace;
+
     protected boolean _cfgEscapeQuoteCharWithEscapeChar;
 
     protected boolean _cfgEscapeControlCharWithEscapeChar;
@@ -207,6 +210,7 @@ public class CsvEncoder
         _cfgAlwaysQuoteStrings = CsvWriteFeature.ALWAYS_QUOTE_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteEmptyStrings = CsvWriteFeature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(csvFeatures);
         _cfgAlwaysQuoteNumbers = CsvWriteFeature.ALWAYS_QUOTE_NUMBERS.enabledIn(csvFeatures);
+        _cfgQuoteLeadingTrailingWhitespace = CsvWriteFeature.QUOTE_STRINGS_WITH_LEADING_TRAILING_WHITESPACE.enabledIn(csvFeatures);
         _cfgEscapeQuoteCharWithEscapeChar = CsvWriteFeature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
         _cfgEscapeControlCharWithEscapeChar = CsvWriteFeature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(csvFeatures);
 
@@ -259,6 +263,7 @@ public class CsvEncoder
         _cfgAlwaysQuoteStrings = base._cfgAlwaysQuoteStrings;
         _cfgAlwaysQuoteEmptyStrings = base._cfgAlwaysQuoteEmptyStrings;
         _cfgAlwaysQuoteNumbers = base._cfgAlwaysQuoteNumbers;
+        _cfgQuoteLeadingTrailingWhitespace = base._cfgQuoteLeadingTrailingWhitespace;
 
         _cfgEscapeQuoteCharWithEscapeChar = base._cfgEscapeQuoteCharWithEscapeChar;
         _cfgEscapeControlCharWithEscapeChar = base._cfgEscapeControlCharWithEscapeChar;
@@ -1155,6 +1160,14 @@ public class CsvEncoder
         // 21-Mar-2014, tatu: If quoting disabled, don't quote
         if (_cfgQuoteCharacter < 0) {
             return false;
+        }
+        // [dataformats-text#210]: check for leading/trailing whitespace
+        if (_cfgQuoteLeadingTrailingWhitespace && length > 0) {
+            char first = value.charAt(0);
+            char last = value.charAt(length - 1);
+            if (first <= ' ' || last <= ' ') {
+                return true;
+            }
         }
         // may skip checks unless we want exact checking
         if (_cfgOptimalQuoting) {
