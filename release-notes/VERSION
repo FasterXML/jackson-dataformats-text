@@ -30,6 +30,10 @@ implementations)
 #109: (yaml) `YAMLMapper` doesn't close output file if an error occurs
  (reported by Martin W)
  (fix by @cowtowncoder, w/ Claude code)
+#210: (csv) Quote strings with leading/trailing spaces in csv
+  (`CsvWriteFeature.QUOTE_STRINGS_WITH_LEADING_TRAILING_WHITESPACE`)
+ (requested by @sfzhi)
+ (implemented by @cowtowncoder, w/ Claude code)
 #214: (yaml) Expose custom tags via `YAMLParser.getRawTag()`
  (requested by Alexander T)
  (fix by @cowtowncoder, w/ Claude code)
