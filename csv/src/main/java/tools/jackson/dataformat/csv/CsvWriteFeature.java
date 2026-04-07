@@ -58,7 +58,8 @@ public enum CsvWriteFeature
 
     /**
      * Feature that determines whether String values with leading or trailing
-     * whitespace (space or tab) should be forced to be quoted.
+     * whitespace (any character {@code <= 0x0020}, including space and tab)
+     * should be forced to be quoted.
      * This is useful for interoperability with CSV parsers that trim unquoted
      * whitespace.
      *<p>

@@ -347,22 +347,6 @@ public class CsvEncoder
         return new CsvEncoder(this, schema);
     }
 
-    /*
-    public CsvEncoder overrideFormatFeatures(int feat) {
-        if (feat != _csvFeatures) {
-            _csvFeatures = feat;
-            _cfgOptimalQuoting = CsvGenerator.Feature.STRICT_CHECK_FOR_QUOTING.enabledIn(feat);
-            _cfgIncludeMissingTail = !CsvGenerator.Feature.OMIT_MISSING_TAIL_COLUMNS.enabledIn(feat);
-            _cfgAlwaysQuoteStrings = CsvGenerator.Feature.ALWAYS_QUOTE_STRINGS.enabledIn(feat);
-            _cfgAlwaysQuoteEmptyStrings = CsvGenerator.Feature.ALWAYS_QUOTE_EMPTY_STRINGS.enabledIn(feat);
-            _cfgAlwaysQuoteNumbers = CsvGenerator.Feature.ALWAYS_QUOTE_NUMBERS.enabledIn(feat);
-            _cfgEscapeQuoteCharWithEscapeChar = CsvGenerator.Feature.ESCAPE_QUOTE_CHAR_WITH_ESCAPE_CHAR.enabledIn(feat);
-            _cfgEscapeControlCharWithEscapeChar = Feature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR.enabledIn(feat);
-        }
-        return this;
-    }
-    */
-
     public CsvEncoder setOutputEscapes(int[] esc) {
         _outputEscapes = (esc != null) ? esc : sOutputEscapes;
         return this;
