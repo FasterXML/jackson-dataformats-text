@@ -71,3 +71,10 @@ Michael Carman (@mjcarman)
  * Contributed #623: Add support for YAML 1.2 non-finite (Infinite, -Infinite, NaN)
    numbers, Octal notation
   (3.2.0)
+
+Tomas Hugec (@polyoxidonium)
+ * Reported #657: (csv) CSV header validation ignores `ACCEPT_CASE_INSENSITIVE_PROPERTIES`:
+   add `CsvReadFeature.CASE_INSENSITIVE_HEADERS`
+  (3.2.0)
+ 
+ 

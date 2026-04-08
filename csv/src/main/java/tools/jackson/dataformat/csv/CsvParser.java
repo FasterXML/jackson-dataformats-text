@@ -645,6 +645,9 @@ public class CsvParser
         final boolean failOnDupHeaders = CsvReadFeature.FAIL_ON_DUPLICATE_HEADER_COLUMNS.enabledIn(_formatFeatures);
         final Set<String> seenNames = failOnDupHeaders ? new HashSet<>() : null;
 
+        // [dataformats-text#657]: Optionally match header names case-insensitively
+        final boolean caseInsensitive = CsvReadFeature.CASE_INSENSITIVE_HEADERS.enabledIn(_formatFeatures);
+
         final boolean trimHeaderNames = CsvReadFeature.TRIM_HEADER_SPACES.enabledIn(_formatFeatures);
         while ((name = _reader.nextString()) != null) {
             // one more thing: always trim names, regardless of config settings
@@ -660,9 +663,12 @@ public class CsvParser
                         "Duplicate header column \"%s\"", name));
             }
             // See if "old" schema defined type; if so, use that type...
-            CsvSchema.Column prev = _schema.column(name);
+            // [dataformats-text#657]: optionally use case-insensitive lookup
+            CsvSchema.Column prev = caseInsensitive
+                    ? _schema.columnIgnoreCase(name)
+                    : _schema.column(name);
             if (prev != null) {
-                builder.addColumn(name, prev.getType());
+                builder.addColumn(prev.getName(), prev.getType());
             } else {
                 builder.addColumn(name);
             }

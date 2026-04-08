@@ -212,6 +212,23 @@ public enum CsvReadFeature
      * @since 3.2
      */
     FAIL_ON_DUPLICATE_HEADER_COLUMNS(true),
+
+    /**
+     * Feature that enables case-insensitive matching of header column names
+     * against schema column names. When enabled, a CSV header column named
+     * "TEMP_MAX" will match a schema column named "temp_max" (and vice versa).
+     *<p>
+     * This is useful when used together with
+     * {@code MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES} to allow
+     * case-insensitive header matching at the parser level, preventing
+     * {@link #FAIL_ON_MISSING_HEADER_COLUMNS} from incorrectly reporting
+     * columns as missing when they differ only by case.
+     *<p>
+     * Feature is disabled by default.
+     *
+     * @since 3.2
+     */
+    CASE_INSENSITIVE_HEADERS(false),
     ;
 
     private final boolean _defaultState;

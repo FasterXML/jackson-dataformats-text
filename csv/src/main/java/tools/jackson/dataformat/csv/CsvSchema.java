@@ -1529,6 +1529,29 @@ public class CsvSchema
     }
 
     /**
+     * Case-insensitive variant of {@link #column(String)}: looks up a column
+     * by name, ignoring case differences.
+     *
+     * @param name Column name to look up (case-insensitive)
+     * @return Column with matching name, or {@code null} if not found
+     *
+     * @since 3.2
+     */
+    public Column columnIgnoreCase(String name) {
+        // Try exact match first for efficiency
+        Column col = _columnsByName.get(name);
+        if (col != null) {
+            return col;
+        }
+        for (Column c : _columns) {
+            if (c.getName().equalsIgnoreCase(name)) {
+                return c;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Optimized variant where a hint is given as to likely index of the column
      * name.
      *

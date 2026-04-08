@@ -71,8 +71,12 @@ implementations)
 #638: (properties) Support for `StreamReadConstraints.maxNameLength` and
   `maxStringLength` for Properties parsing
  (fix by @cowtowncoder, w/ Claude code)
-#643: `CsvParser` doesn't handle whitespace outside of quoted values correctly
+#643: (csv) `CsvParser` doesn't handle whitespace outside of quoted values correctly
  (reported by @tomdz)
+ (fix by @cowtowncoder, w/ Claude code)
+#657: (csv) CSV header validation ignores `ACCEPT_CASE_INSENSITIVE_PROPERTIES`:
+  add `CsvReadFeature.CASE_INSENSITIVE_HEADERS`
+ (reported by Tomas H)
  (fix by @cowtowncoder, w/ Claude code)
 
 3.1.1 (27-Mar-2026)
