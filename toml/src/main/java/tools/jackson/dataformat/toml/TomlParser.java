@@ -16,7 +16,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.*;
 
 class TomlParser {
-    private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
+    private static final JsonNodeFactory factory = TomlNodeFactory.INSTANCE;
     static final int MAX_CHARS_TO_REPORT = 1000;
 
     private final TomlFactory tomlFactory;
@@ -111,6 +111,7 @@ class TomlParser {
                 }
                 currentTable.defined = true;
                 currentTable.explicitlyDefined = true;
+                currentTable.fromTableHeader = true;
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
                 pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
@@ -119,6 +120,7 @@ class TomlParser {
                 if (array.closed) {
                     throw errorContext.atPosition(lexer).generic("Array already finished");
                 }
+                array.fromArrayOfTables = true;
                 currentTable = (TomlObjectNode) array.addObject();
                 currentTable.explicitlyDefined = true;
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
@@ -537,56 +539,6 @@ class TomlParser {
         FieldRef(TomlObjectNode object, String key) {
             this.object = object;
             this.key = key;
-        }
-    }
-
-    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
-    private static class TomlObjectNode extends ObjectNode {
-        boolean closed = false;
-        // True for both explicit headers and dotted-key super-tables; gates "Table redefined".
-        boolean defined = false;
-        // Subset of `defined`: set only by [table] or [[array-of-tables]] headers,
-        // not by dotted-key super-tables.
-        // Gates rejection of dotted-key extensions of an already-explicit table.
-        boolean explicitlyDefined = false;
-
-        TomlObjectNode(JsonNodeFactory nc) {
-            super(nc);
-        }
-    }
-
-    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
-    private static class TomlArrayNode extends ArrayNode {
-        boolean closed = false;
-
-        TomlArrayNode(JsonNodeFactory nf) {
-            super(nf);
-        }
-
-        TomlArrayNode(JsonNodeFactory nf, int capacity) {
-            super(nf, capacity);
-        }
-    }
-
-    @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
-    private static class JsonNodeFactoryImpl extends JsonNodeFactory {
-        public JsonNodeFactoryImpl() {
-            super();
-        }
-
-        @Override
-        public ArrayNode arrayNode() {
-            return new TomlArrayNode(this);
-        }
-
-        @Override
-        public ArrayNode arrayNode(int capacity) {
-            return new TomlArrayNode(this, capacity);
-        }
-
-        @Override
-        public ObjectNode objectNode() {
-            return new TomlObjectNode(this);
         }
     }
 }
