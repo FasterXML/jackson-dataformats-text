@@ -755,6 +755,26 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void dottedKeyCannotExtendExplicitTable() throws Exception {
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("[fruit.apple]\n" +
+                        "[fruit]\n" +
+                        "apple.color = \"red\"")
+        );
+        assertTrue(thrown.getMessage().contains("Dotted key cannot extend explicitly defined table"));
+    }
+
+    @Test
+    public void dottedKeyCannotExtendArrayTable() throws Exception {
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("[[fruit.apple]]\n" +
+                        "[fruit]\n" +
+                        "apple.color = \"red\"")
+        );
+        assertTrue(thrown.getMessage().contains("Dotted key cannot extend array of tables"));
+    }
+
+    @Test
     public void inlineTable() throws Exception {
         assertEquals(
                 json("{\"name\": {\"first\": \"Tom\", \"last\": \"Preston-Werner\"}, \"point\": {\"x\": 1, \"y\": 2}, \"animal\": {\"type\": {\"name\": \"pug\"}}}"),

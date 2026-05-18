@@ -109,6 +109,7 @@ class TomlParser {
                     throw errorContext.atPosition(lexer).generic("Table redefined");
                 }
                 currentTable.defined = true;
+                currentTable.explicitlyDefined = true;
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
                 pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
@@ -118,6 +119,7 @@ class TomlParser {
                     throw errorContext.atPosition(lexer).generic("Array already finished");
                 }
                 currentTable = (TomlObjectNode) array.addObject();
+                currentTable.explicitlyDefined = true;
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else {
                 throw errorContext.atPosition(lexer).unexpectedToken(token, "key or table");
@@ -140,12 +142,6 @@ class TomlParser {
             if (node.closed) {
                 throw errorContext.atPosition(lexer).generic("Object already closed");
             }
-            if (!forTable) {
-                /* "Dotted keys create and define a table for each key part before the last one, provided that such
-                 * tables were not previously created." */
-                node.defined = true;
-            }
-
             TomlToken partToken = peek();
             String part;
             if (partToken == TomlToken.STRING) {
@@ -164,8 +160,14 @@ class TomlParser {
             JsonNode existing = node.get(part);
             if (existing == null) {
                 node = (TomlObjectNode) node.putObject(part);
+                if (!forTable) {
+                    node.defined = true;
+                }
             } else if (existing.isObject()) {
                 node = (TomlObjectNode) existing;
+                if (!forTable && node.explicitlyDefined) {
+                    throw errorContext.atPosition(lexer).generic("Dotted key cannot extend explicitly defined table");
+                }
             } else if (existing.isArray()) {
                 /* "Any reference to an array of tables points to the most recently defined table element of the array.
                  * This allows you to define sub-tables, and even sub-arrays of tables, inside the most recent table."
@@ -177,6 +179,9 @@ class TomlParser {
                 TomlArrayNode array = (TomlArrayNode) existing;
                 if (array.closed) {
                     throw errorContext.atPosition(lexer).generic("Array already closed");
+                }
+                if (!forTable) {
+                    throw errorContext.atPosition(lexer).generic("Dotted key cannot extend array of tables");
                 }
                 // Only arrays declared by array tables are not closed, and those are always arrays of objects.
                 node = (TomlObjectNode) array.get(array.size() - 1);
@@ -511,6 +516,7 @@ class TomlParser {
     private static class TomlObjectNode extends ObjectNode {
         boolean closed = false;
         boolean defined = false;
+        boolean explicitlyDefined = false;
 
         TomlObjectNode(JsonNodeFactory nc) {
             super(nc);
