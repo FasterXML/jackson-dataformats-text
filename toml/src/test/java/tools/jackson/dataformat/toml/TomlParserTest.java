@@ -388,6 +388,17 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void integerLongBoundaries() throws Exception {
+        assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("max", Long.MAX_VALUE)
+                        .put("min", Long.MIN_VALUE),
+                toml("max = 9223372036854775807\n" +
+                        "min = -9223372036854775808")
+        );
+    }
+
+    @Test
     public void floats() throws Exception {
         ObjectNode json = json("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}");
         ObjectNode toml = toml("# fractional\n" +
