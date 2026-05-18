@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UTF8ReaderTest
 {
@@ -38,5 +38,42 @@ public class UTF8ReaderTest
         assertEquals(emojiStr, result);
 
         reader.close();
+    }
+    @Test
+    public void invalidUtf8Scalars() throws IOException {
+        assertInvalid(new byte[] { (byte) 0xC0, (byte) 0x80 });
+        assertInvalid(new byte[] { (byte) 0xE0, (byte) 0x80, (byte) 0x80 });
+        assertInvalid(new byte[] { (byte) 0xED, (byte) 0xA0, (byte) 0x80 });
+        assertInvalid(new byte[] { (byte) 0xED, (byte) 0xBF, (byte) 0xBF });
+        assertInvalid(new byte[] { (byte) 0xF4, (byte) 0x90, (byte) 0x80, (byte) 0x80 });
+    }
+
+    @Test
+    public void validUtf8ScalarBoundaries() throws IOException {
+        assertValid("\uD7FF");
+        assertValid("\uE000");
+        assertValid(new String(Character.toChars(Character.MAX_CODE_POINT)));
+    }
+
+    @Test
+    public void validFourByteScalar() throws IOException {
+        assertValid("\uD83D\uDE00");
+    }
+
+    private void assertInvalid(byte[] utf8Bytes) throws IOException {
+        try (UTF8Reader reader = UTF8Reader.construct(utf8Bytes, 0, utf8Bytes.length)) {
+            assertThrows(CharConversionException.class, () -> reader.read(new char[4], 0, 4));
+        }
+    }
+
+    private void assertValid(String value) throws IOException {
+        byte[] utf8Bytes = value.getBytes(StandardCharsets.UTF_8);
+        try (UTF8Reader reader = UTF8Reader.construct(utf8Bytes, 0, utf8Bytes.length)) {
+            char[] buf = new char[value.length()];
+
+            assertEquals(value.length(), reader.read(buf, 0, buf.length));
+            assertEquals(value, new String(buf));
+            assertEquals(-1, reader.read(buf, 0, buf.length));
+        }
     }
 }

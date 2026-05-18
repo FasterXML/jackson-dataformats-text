@@ -988,6 +988,25 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void unicodeEscapeSurrogateInvalid() throws Exception {
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("short = \"\\uD800\"")
+        );
+        assertTrue(thrown.getMessage().contains("Invalid code point d800"));
+
+        thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("long = \"\\U0000DFFF\"")
+        );
+        assertTrue(thrown.getMessage().contains("Invalid code point dfff"));
+    }
+
+    @Test
+    public void unicodeEscapeValidSupplementaryScalar() throws Exception {
+        ObjectNode node = toml("value = \"\\U0001D800\"");
+        assertEquals(new String(Character.toChars(0x1D800)), node.get("value").asString());
+    }
+
+    @Test
     public void intTypes() throws Exception {
         assertEquals(
                 JsonNodeFactory.instance.objectNode()

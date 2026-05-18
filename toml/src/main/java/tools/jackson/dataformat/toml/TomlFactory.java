@@ -3,6 +3,7 @@ package tools.jackson.dataformat.toml;
 import java.io.*;
 
 import tools.jackson.core.*;
+import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.UTF8Writer;
@@ -242,6 +243,9 @@ public final class TomlFactory extends TextualTSFactory
             } else {
                 return TomlParser.parse(this, ctxt, readFeatures, r0);
             }
+        } catch (CharConversionException e) {
+            TokenStreamLocation location = new TokenStreamLocation(ctxt.contentReference(), -1, -1, -1, -1);
+            throw new TomlStreamReadException(null, e.getMessage(), location, e);
         } catch (IOException e) {
             throw _wrapIOFailure(e);
         }

@@ -249,7 +249,7 @@ public final class UTF8Reader
                 needed = 2;
             } else if ((c & 0xF8) == 0xF0) {
                 // 4 bytes; double-char BS, with surrogates and all...
-                c = (c & 0x0F);
+                c = (c & 0x07);
                 needed = 3;
             } else {
                 reportInvalidInitial(c & 0xFF, outPtr-start);
@@ -283,6 +283,12 @@ public final class UTF8Reader
                         reportInvalidOther(d & 0xFF, outPtr-start);
                     }
                     c = (c << 6) | (d & 0x3F);
+                    if (c < 0x10000) {
+                        reportInvalid(c, outPtr-start, "overlong encoding");
+                    }
+                    if (c > Character.MAX_CODE_POINT) {
+                        reportInvalid(c, outPtr-start, "not a valid Unicode scalar value");
+                    }
                     /* Ugh. Need to mess with surrogates. Ok; let's inline them
                      * there, then, if there's room: if only room for one,
                      * need to save the surrogate for the rainy day...
@@ -299,16 +305,17 @@ public final class UTF8Reader
                     }
                     // sure, let's fall back to normal processing:
                 }
-                // Otherwise, should we check that 3-byte chars are
-                // legal ones (should not expand to surrogates?
-                // For now, let's not...
-                /*
                 else {
-                    if (c >= 0xD800 && c < 0xE000) {
-                        reportInvalid(c, outPtr-start, "(a surrogate character) ");
+                    if (c < 0x800) {
+                        reportInvalid(c, outPtr-start, "overlong encoding");
+                    }
+                    // Like jackson-core#363: surrogates are not legal UTF-8 scalar values.
+                    if (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE) {
+                        reportInvalid(c, outPtr-start, "not a valid Unicode scalar value");
                     }
                 }
-                */
+            } else if (c < 0x80) {
+                reportInvalid(c, outPtr-start, "overlong encoding");
             }
             cbuf[outPtr++] = (char) c;
             if (inPtr >= inBufLen) {
@@ -444,6 +451,15 @@ public final class UTF8Reader
 
         throw new CharConversionException("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask)
                 +" (at char #"+charPos+", byte #"+bytePos+")");
+    }
+
+    private void reportInvalid(int value, int offset, String msg) throws IOException
+    {
+        int bytePos = _byteCount + _inputPtr - 1;
+        int charPos = _charCount + offset;
+
+        throw new CharConversionException("Invalid UTF-8 character 0x"+Integer.toHexString(value)
+                +" ("+msg+") (at char #"+charPos+", byte #"+bytePos+")");
     }
 
     private void reportInvalidOther(int mask, int offset)

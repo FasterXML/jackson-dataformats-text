@@ -29,7 +29,7 @@ public class FuzzTomlRead57237Test extends TomlMapperTestBase
                 fail("Should not pass");
             } catch (StreamReadException e) {
                 // Possibly not what we should get; tweak once working
-                verifyException(e, "Premature end of file");
+                verifyException(e, "Invalid UTF-8 character");
             }
         }
     }
