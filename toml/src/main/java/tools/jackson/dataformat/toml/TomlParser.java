@@ -220,9 +220,22 @@ class TomlParser {
     private JsonNode parseDateTime(int nextState) throws IOException {
         String text = lexer.yytext();
         TomlToken token = poll(nextState);
-        // the time-delim index can be [Tt ]. java.time supports only [Tt]
-        if ((token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) && text.charAt(10) == ' ') {
-            text = text.substring(0, 10) + 'T' + text.substring(11);
+        // The time delimiter can be [Tt ]. java.time supports [Tt], and TOML accepts lowercase z.
+        if (token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) {
+            StringBuilder normalized = null;
+            if (text.charAt(10) == ' ') {
+                normalized = new StringBuilder(text);
+                normalized.setCharAt(10, 'T');
+            }
+            if (token == TomlToken.OFFSET_DATE_TIME && text.charAt(text.length() - 1) == 'z') {
+                if (normalized == null) {
+                    normalized = new StringBuilder(text);
+                }
+                normalized.setCharAt(text.length() - 1, 'Z');
+            }
+            if (normalized != null) {
+                text = normalized.toString();
+            }
         }
 
         if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)) {

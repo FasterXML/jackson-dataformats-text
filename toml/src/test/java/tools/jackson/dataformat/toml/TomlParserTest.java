@@ -489,6 +489,15 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void dateTimeLowercaseZAndSpaceDelimiter() throws Exception {
+        assertEquals(
+                json("{\"odt1\": \"1979-05-27T07:32:00Z\", \"odt2\": \"1979-05-27T07:32:00Z\"}"),
+                toml("odt1 = 1979-05-27T07:32:00z\n" +
+                        "odt2 = 1979-05-27 07:32:00z")
+        );
+    }
+
+    @Test
     public void ldt() throws Exception {
         assertEquals(
                 json("{\"ldt1\": \"1979-05-27T07:32:00\", \"ldt2\": \"1979-05-27T00:32:00.999999\"}"),
