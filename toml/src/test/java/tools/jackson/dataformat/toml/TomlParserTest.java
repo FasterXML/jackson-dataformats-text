@@ -953,6 +953,21 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void byteOrderMarkOnlyAtDocumentStart() throws Exception {
+        assertEquals(json("{\"key\": \"value\"}"), toml("\uFEFFkey = \"value\""));
+
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("key = \"value\"\n\uFEFFother = true")
+        );
+        assertTrue(thrown.getMessage().contains("Byte order mark is only permitted at the start"));
+
+        thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("key = \"\uFEFF\"")
+        );
+        assertTrue(thrown.getMessage().contains("Byte order mark is only permitted at the start"));
+    }
+
+    @Test
     public void intTypes() throws Exception {
         assertEquals(
                 JsonNodeFactory.instance.objectNode()

@@ -124,7 +124,7 @@ Ws = [ \t]*
 WsNonEmpty = [ \t]+
 NewLine = \n|\r\n
 CommentStartSymbol = "#"
-NonEol = [^\u0000-\u0008\u000a-\u001f\u007f]
+NonEol = [^\u0000-\u0008\u000a-\u001f\u007f\uFEFF]
 
 //Expression = {Ws} (({KeyVal}|{Table}) {Ws}) {Comment}?
 Comment = {CommentStartSymbol} {NonEol}*
@@ -240,6 +240,12 @@ HexDig = [0-9A-Fa-f]
 
 <EXPECT_EXPRESSION> {
     // this state matches until the *first* simple-key of a key, or until the -open token of a table.
+
+    \uFEFF {
+          if (yychar != 0) {
+              throw errorContext.atPosition(this).generic("Byte order mark is only permitted at the start of a document");
+          }
+      }
 
     // toml = expression *( newline expression )
     // expression =  ws [ comment ]
@@ -433,7 +439,7 @@ HexDig = [0-9A-Fa-f]
 }
 
 <BASIC_STRING, ML_BASIC_STRING> {
-    [^\u0000-\u0008\u000a-\u001f\u007f\\\"]+ { appendNormalTextToken(); }
+    [^\u0000-\u0008\u000a-\u001f\u007f\uFEFF\\\"]+ { appendNormalTextToken(); }
     \\\" { textBuffer.append('"'); }
     \\\\ { textBuffer.append('\\'); }
     \\b { textBuffer.append('\b'); }
@@ -449,7 +455,7 @@ HexDig = [0-9A-Fa-f]
 <LITERAL_STRING> {
     // literal-string = apostrophe *literal-char apostrophe
     {Apostrophe} {return TomlToken.STRING;}
-    [^\u0000-\u0008\u000a-\u001f\u007f']+ { appendNormalTextToken(); }
+    [^\u0000-\u0008\u000a-\u001f\u007f\uFEFF']+ { appendNormalTextToken(); }
 }
 
 <ML_LITERAL_STRING> {
@@ -457,7 +463,7 @@ HexDig = [0-9A-Fa-f]
     // ml-literal-body = *mll-content *( mll-quotes 1*mll-content ) [ mll-quotes ]
     // mll-quotes = 1*2apostrophe
     {MlLiteralStringDelim} {return TomlToken.STRING;}
-    [^\u0000-\u0008\u000a-\u001f\u007f']+ { appendNormalTextToken(); }
+    [^\u0000-\u0008\u000a-\u001f\u007f\uFEFF']+ { appendNormalTextToken(); }
     {NewLine} { appendNewlineWithPossibleTrim(); }
     // mll-quotes: inline
     {Apostrophe} { textBuffer.append('\''); }
@@ -479,6 +485,9 @@ HexDig = [0-9A-Fa-f]
 }
 [\u0000-\u001f\u007f] {
   throw errorContext.atPosition(this).generic("Illegal control character");
+}
+\uFEFF {
+  throw errorContext.atPosition(this).generic("Byte order mark is only permitted at the start of a document");
 }
 \# {
   throw errorContext.atPosition(this).generic("Comment not permitted here");

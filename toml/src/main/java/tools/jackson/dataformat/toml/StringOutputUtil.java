@@ -62,6 +62,12 @@ class StringOutputUtil {
             return 0;
         }
 
+        // BOM is only permitted at the start of input. When writing it as content,
+        // force a basic string so it can be escaped instead of emitted literally.
+        if (c == 0xFEFF) {
+            return BASIC_STRING;
+        }
+
         // first, get the very restrictive unquoted keys out of the way.
         // unquoted-key = 1*( ALPHA / DIGIT / %x2D / %x5F ) ; A-Z / a-z / 0-9 / - / _
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_') {
@@ -118,6 +124,9 @@ class StringOutputUtil {
                 return("\\\"");
             case '\\':
                 return("\\\\");
+            // Keep BOM escaped inside strings; a literal BOM is only valid at document start.
+            case '\uFEFF':
+                return("\\uFEFF");
             default:
                 if (c < 0x10) {
                     return "\\u000" + Integer.toHexString(c);
