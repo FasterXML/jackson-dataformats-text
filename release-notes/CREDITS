@@ -4,7 +4,15 @@ text dataformats project, version 3.x
 
 (note: for older credits, check out `CREDITS-2.x`)
 
-Tatu Saloranta, tatu.saloranta@iki.fi: author
+Authors/maintainers (for whom full change entries not recorded)
+
+* Jonas Konrad (@yawkat): author of TOML module
+* PJ Fanning (@pjfanning): active contributor to most modules
+* Tatu Saloranta (@cowtowncoder): author of CSV, Properties and YAML modules
+
+--------------------------------------------------------------------------------
+Credits for specific contributions (by non-maintainers)
+--------------------------------------------------------------------------------
 
 Andrey Somov (asomov@github)
  * Contributed #106: (yaml) Upgrade to `snakeyaml-engine` (from classic `snakeyaml`)

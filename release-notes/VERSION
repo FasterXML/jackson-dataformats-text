@@ -78,6 +78,8 @@ implementations)
   add `CsvReadFeature.CASE_INSENSITIVE_HEADERS`
  (reported by Tomas H)
  (fix by @cowtowncoder, w/ Claude code)
+#672: (toml) Fix TOML int64 boundary parsing
+  (fix by @yawkat)
 
 3.1.3 (01-May-2026)
 3.1.2 (11-Apr-2026)

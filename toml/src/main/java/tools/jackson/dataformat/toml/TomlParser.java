@@ -336,8 +336,15 @@ class TomlParser {
             return factory.numberNode(v);
         }
         if (length <= 18 || NumberInput.inLongRange(buffer, start, length, negative)) {
-            long v = NumberInput.parseLong(buffer, start, length);
-            if (negative) v = -v;
+            long v;
+            if (length <= 18) {
+                v = NumberInput.parseLong(buffer, start, length);
+                if (negative) {
+                    v = -v;
+                }
+            } else {
+                v = NumberInput.parseLong19(buffer, start, negative);
+            }
             // Might still fit in int, need to check
             if ((int) v == v) {
                 return factory.numberNode((int) v);
