@@ -509,6 +509,27 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void dateTimeValidationFeature() throws Exception {
+        // default string mode preserves historical behavior and does not validate date/time ranges
+        assertEquals(json("{\"date\": \"2024-02-30\"}"), toml("date = 2024-02-30"));
+
+        TomlFactory tomlFactory = TomlFactory.builder()
+                .enable(TomlReadFeature.VALIDATE_DATE_TIME)
+                .build();
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml(tomlFactory, "date = 2024-02-30")
+        );
+        assertTrue(thrown.getMessage().contains("Invalid date/time value ('2024-02-30')"));
+        assertInstanceOf(java.time.format.DateTimeParseException.class, thrown.getCause());
+
+        thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml(tomlFactory, "time = 24:00:00")
+        );
+        assertTrue(thrown.getMessage().contains("Invalid date/time value ('24:00:00')"));
+        assertInstanceOf(java.time.format.DateTimeParseException.class, thrown.getCause());
+    }
+
+    @Test
     public void ldt() throws Exception {
         assertEquals(
                 json("{\"ldt1\": \"1979-05-27T07:32:00\", \"ldt2\": \"1979-05-27T00:32:00.999999\"}"),

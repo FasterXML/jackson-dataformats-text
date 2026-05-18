@@ -18,7 +18,17 @@ public enum TomlReadFeature
      *<p>
      * Feature is disabled by default.
      */
-    PARSE_JAVA_TIME(false);
+    PARSE_JAVA_TIME(false),
+
+    /**
+     * Whether TOML date/time values should be validated when they are returned as strings.
+     * <p>
+     * {@link #PARSE_JAVA_TIME} always validates date/time values while constructing {@code java.time}
+     * values. This feature only affects the default string representation mode.
+     * <p>
+     * Feature is disabled by default.
+     */
+    VALIDATE_DATE_TIME(false);
 
     private final boolean _defaultState;
     private final int _mask;

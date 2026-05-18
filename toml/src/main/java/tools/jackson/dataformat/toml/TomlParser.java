@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.time.*;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 
 import tools.jackson.core.io.IOContext;
@@ -218,8 +219,9 @@ class TomlParser {
     }
 
     private JsonNode parseDateTime(int nextState) throws IOException {
-        String text = lexer.yytext();
-        TomlToken token = poll(nextState);
+        String originalText = lexer.yytext();
+        String text = originalText;
+        TomlToken token = peek();
         // The time delimiter can be [Tt ]. java.time supports [Tt], and TOML accepts lowercase z.
         if (token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) {
             StringBuilder normalized = null;
@@ -238,14 +240,15 @@ class TomlParser {
             }
         }
 
-        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)) {
-            Temporal value;
-            if (token == TomlToken.LOCAL_DATE) {
-                value = LocalDate.parse(text);
-            } else if (token == TomlToken.LOCAL_TIME) {
-                value = LocalTime.parse(text);
-            } else {
-                if (token == TomlToken.LOCAL_DATE_TIME) {
+        Temporal value = null;
+        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)
+                || TomlReadFeature.VALIDATE_DATE_TIME.enabledIn(options)) {
+            try {
+                if (token == TomlToken.LOCAL_DATE) {
+                    value = LocalDate.parse(text);
+                } else if (token == TomlToken.LOCAL_TIME) {
+                    value = LocalTime.parse(text);
+                } else if (token == TomlToken.LOCAL_DATE_TIME) {
                     value = LocalDateTime.parse(text);
                 } else if (token == TomlToken.OFFSET_DATE_TIME) {
                     value = OffsetDateTime.parse(text);
@@ -253,11 +256,15 @@ class TomlParser {
                     VersionUtil.throwInternal();
                     throw new AssertionError();
                 }
+            } catch (DateTimeParseException e) {
+                throw errorContext.atPosition(lexer).invalidDateTime(e, originalText);
             }
-            return factory.pojoNode(value);
-        } else {
-            return factory.stringNode(text);
         }
+        pollExpected(token, nextState);
+        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)) {
+            return factory.pojoNode(value);
+        }
+        return factory.stringNode(text);
     }
 
     private JsonNode parseInt(int nextState) throws IOException {

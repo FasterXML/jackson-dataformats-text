@@ -14,7 +14,9 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class ComplianceInvalidTest extends TomlMapperTestBase
 {
-    private static final ObjectMapper MAPPER = newTomlMapper();
+    private static final ObjectMapper MAPPER = TomlMapper.builder()
+            .enable(TomlReadFeature.VALIDATE_DATE_TIME)
+            .build();
 
     @ParameterizedTest
     @MethodSource("data")

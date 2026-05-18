@@ -71,6 +71,11 @@ public class TomlStreamReadException
                 return new TomlStreamReadException(parser,
                         "Invalid number representation ('"+value+"'), problem: "+cause.getMessage(), location, cause);
             }
+
+            TomlStreamReadException invalidDateTime(Exception cause, String value) {
+                return new TomlStreamReadException(parser,
+                        "Invalid date/time value ('"+value+"'), problem: "+cause.getMessage(), location, cause);
+            }
         }
     }
 }
