@@ -12,7 +12,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -78,7 +77,7 @@ public class ComplianceValidTest extends TomlMapperTestBase
         return toml.resolveSibling(fileName.substring(0, fileName.length() - 5) + ".json");
     }
 
-    private static JsonNode mapFromComplianceNode(JsonNode expected) throws JacksonException {
+    private static JsonNode mapFromComplianceNode(JsonNode expected) {
         final JsonNodeCreator nodeF = JsonMapper.shared().createObjectNode();
         if (expected.isObject()) {
             ObjectNode expectedObject = (ObjectNode) expected;
@@ -141,13 +140,20 @@ public class ComplianceValidTest extends TomlMapperTestBase
 
     private static boolean semanticallyEquals(JsonNode expected, JsonNode actual) {
         if (expected.isNumber() && actual.isNumber()) {
-            double expectedDouble = expected.doubleValue();
-            double actualDouble = actual.doubleValue();
-            if (!Double.isFinite(expectedDouble) || !Double.isFinite(actualDouble)) {
-                return Double.compare(expectedDouble, actualDouble) == 0;
-            }
+            // Compare integrals via BigInteger first: doubleValue() on a large
+            // BigInteger/BigDecimal overflows to Infinity, which would otherwise
+            // make two distinct large values compare equal via the non-finite path.
             if (expected.isIntegralNumber() && actual.isIntegralNumber()) {
                 return toBigInteger(expected).equals(toBigInteger(actual));
+            }
+            // Only Float/Double nodes can hold NaN/±Infinity.
+            if (expected.isFloat() || expected.isDouble()
+                    || actual.isFloat() || actual.isDouble()) {
+                double e = expected.doubleValue();
+                double a = actual.doubleValue();
+                if (!Double.isFinite(e) || !Double.isFinite(a)) {
+                    return Double.compare(e, a) == 0;
+                }
             }
             return toBigDecimal(expected).compareTo(toBigDecimal(actual)) == 0;
         }

@@ -7,7 +7,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -21,7 +20,7 @@ public class ComplianceInvalidTest extends TomlMapperTestBase
     @MethodSource("data")
     public void tomlTestInvalidCorpus(Path path) {
         assumeTrue(path != null, "Set -Dtoml.corpus.dir=/path/to/toml-test to run TOML corpus tests");
-        assertThrows(StreamReadException.class, () -> MAPPER.readTree(path.toFile()));
+        assertThrows(TomlStreamReadException.class, () -> MAPPER.readTree(path.toFile()));
     }
 
     public static Stream<Arguments> data() throws Exception {
