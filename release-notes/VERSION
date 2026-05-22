@@ -87,7 +87,14 @@ implementations)
 #665: (toml) TOML parser: leading UTF-8 BOM rejected as 'Unknown token'
  (reported by @rajulbhatnagar)
  (fix by @yawkat)
+#666: (toml) TOML parser: invalid UTF-8 byte sequences not rejected
+ (reported by @rajulbhatnagar)
+ (fix by @yawkat)
+#668: (toml) TOML parser: surrogate-half unicode escapes accepted in strings
+ (reported by @rajulbhatnagar)
+ (fix by @yawkat)
 
+3.1.4 (not yet released)
 3.1.3 (01-May-2026)
 3.1.2 (11-Apr-2026)
 
