@@ -81,15 +81,15 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       }
   }
 
-  private void appendUnicodeEscapeShort() {
+  private void appendUnicodeEscapeShort() throws TomlStreamReadException {
       int value = (Character.digit(yycharat(2), 16) << 12) |
                    (Character.digit(yycharat(3), 16) << 8) |
                    (Character.digit(yycharat(4), 16) << 4) |
                    Character.digit(yycharat(5), 16);
-      textBuffer.append((char) value);
+      appendUnicodeScalar(value);
   }
 
-  private void appendUnicodeEscapeLong() {
+  private void appendUnicodeEscapeLong() throws TomlStreamReadException {
      int value = (Character.digit(yycharat(2), 16) << 28) |
                  (Character.digit(yycharat(3), 16) << 24) |
                  (Character.digit(yycharat(4), 16) << 20) |
@@ -98,17 +98,20 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
                  (Character.digit(yycharat(7), 16) << 8) |
                  (Character.digit(yycharat(8), 16) << 4) |
                  Character.digit(yycharat(9), 16);
-     if (Character.isValidCodePoint(value)) {
-         // "Such code points can be represented using a single char."
-         if (value <= Character.MAX_VALUE) {
-             textBuffer.append((char) value);
-         } else {
-             textBuffer.append(Character.highSurrogate(value));
-             textBuffer.append(Character.lowSurrogate(value));
-         }
-     } else {
-         throw errorContext.atPosition(this).generic("Invalid code point " + Integer.toHexString(value));
-     }
+     appendUnicodeScalar(value);
+  }
+
+  private void appendUnicodeScalar(int value) throws TomlStreamReadException {
+      if (!Character.isValidCodePoint(value)
+              || (value >= Character.MIN_SURROGATE && value <= Character.MAX_SURROGATE)) {
+          throw errorContext.atPosition(this).generic("Invalid code point " + Integer.toHexString(value));
+      }
+      if (value <= Character.MAX_VALUE) {
+          textBuffer.append((char) value);
+      } else {
+          textBuffer.append(Character.highSurrogate(value));
+          textBuffer.append(Character.lowSurrogate(value));
+      }
   }
 
   int getLine() { return yyline; }

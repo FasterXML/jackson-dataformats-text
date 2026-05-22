@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import tools.jackson.core.JacksonException;
 import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamWriteConstraints;
-import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.databind.JsonNode;
@@ -48,7 +47,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
         try {
             TOML_MAPPER.readTree(INPUT);
             fail("Should not pass");
-        } catch (JacksonIOException e) {
+        } catch (StreamReadException e) {
             verifyException(e, "Unexpected EOF in the middle of a multi-byte");
             verifyException(e, "got 1, needed 2");
         }
@@ -81,7 +80,7 @@ public class FuzzTomlReadTest extends TomlMapperTestBase
                 TOML_MAPPER.readTree(is);
                 fail("Should not pass");
             } catch (StreamReadException e) {
-                verifyException(e, "EOF in wrong state");
+                verifyException(e, "Invalid UTF-8 character");
             }
         }
     }
