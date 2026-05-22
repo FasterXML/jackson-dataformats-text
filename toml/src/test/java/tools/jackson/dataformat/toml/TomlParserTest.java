@@ -527,6 +527,15 @@ public class TomlParserTest extends TomlMapperTestBase {
         );
         assertTrue(thrown.getMessage().contains("Invalid date/time value ('24:00:00')"));
         assertInstanceOf(java.time.format.DateTimeParseException.class, thrown.getCause());
+
+        StringBuilder longTime = new StringBuilder("time = 12:00:00.");
+        for (int i = 0; i < 2000; i++) {
+            longTime.append('1');
+        }
+        thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml(tomlFactory, longTime.toString())
+        );
+        assertTrue(thrown.getMessage().contains("[truncated]"));
     }
 
     @Test

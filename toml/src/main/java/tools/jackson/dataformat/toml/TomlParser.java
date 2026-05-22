@@ -218,6 +218,13 @@ class TomlParser {
         }
     }
 
+    private String reportText(String text) {
+        if (text.length() <= MAX_CHARS_TO_REPORT) {
+            return text;
+        }
+        return text.substring(0, MAX_CHARS_TO_REPORT) + " [truncated]";
+    }
+
     private JsonNode parseDateTime(int nextState) throws IOException {
         String originalText = lexer.yytext();
         String text = originalText;
@@ -257,7 +264,7 @@ class TomlParser {
                     throw new AssertionError();
                 }
             } catch (DateTimeParseException e) {
-                throw errorContext.atPosition(lexer).invalidDateTime(e, originalText);
+                throw errorContext.atPosition(lexer).invalidDateTime(e, reportText(originalText));
             }
         }
         pollExpected(token, nextState);
