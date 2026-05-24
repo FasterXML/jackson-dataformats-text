@@ -17,7 +17,7 @@ import tools.jackson.databind.node.*;
 
 class TomlParser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
-    private static final int MAX_CHARS_TO_REPORT = 1000;
+    public static final int MAX_CHARS_TO_REPORT = 1000;
 
     private final TomlFactory tomlFactory;
 
@@ -226,6 +226,10 @@ class TomlParser {
         }
     }
 
+    // Helper method for ensuring text content included in exception is
+    // of bound length, to avoid excessive messages.
+    //
+    // @since 3.2
     private String reportText(String text) {
         if (text.length() <= MAX_CHARS_TO_REPORT) {
             return text;
