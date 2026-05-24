@@ -10,6 +10,13 @@ public class TomlStreamReadException
 {
     private static final long serialVersionUID = 1L;
 
+    private static String _truncateDetail(String detail) {
+        if (detail != null && detail.length() > TomlParser.MAX_CHARS_TO_REPORT) {
+            return detail.substring(0, TomlParser.MAX_CHARS_TO_REPORT) + " [truncated]";
+        }
+        return detail;
+    }
+
     TomlStreamReadException(JsonParser p, String msg, TokenStreamLocation loc) {
         super(p, msg, loc);
     }
@@ -69,16 +76,14 @@ public class TomlStreamReadException
 
             TomlStreamReadException invalidNumber(Exception cause, String value) {
                 return new TomlStreamReadException(parser,
-                        "Invalid number representation ('"+value+"'), problem: "+cause.getMessage(), location, cause);
+                        "Invalid number representation ('"+value+"'), problem: "+_truncateDetail(cause.getMessage()),
+                        location, cause);
             }
 
             TomlStreamReadException invalidDateTime(Exception cause, String value) {
-                String detail = cause.getMessage();
-                if (detail != null && detail.length() > TomlParser.MAX_CHARS_TO_REPORT) {
-                    detail = detail.substring(0, TomlParser.MAX_CHARS_TO_REPORT) + " [truncated]";
-                }
                 return new TomlStreamReadException(parser,
-                        "Invalid date/time value ('"+value+"'), problem: "+detail, location, cause);
+                        "Invalid date/time value ('"+value+"'), problem: "+_truncateDetail(cause.getMessage()),
+                        location, cause);
             }
         }
     }

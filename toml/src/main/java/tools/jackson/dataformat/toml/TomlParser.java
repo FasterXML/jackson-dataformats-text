@@ -17,7 +17,7 @@ import tools.jackson.databind.node.*;
 
 class TomlParser {
     private static final JsonNodeFactory factory = new JsonNodeFactoryImpl();
-    public static final int MAX_CHARS_TO_REPORT = 1000;
+    static final int MAX_CHARS_TO_REPORT = 1000;
 
     private final TomlFactory tomlFactory;
 
