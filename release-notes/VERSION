@@ -90,6 +90,9 @@ implementations)
 #666: (toml) TOML parser: invalid UTF-8 byte sequences not rejected
  (reported by @rajulbhatnagar)
  (fix by @yawkat)
+#667: (toml) TOML parser: out-of-range datetime/date/time field values not rejected
+ (reported by @rajulbhatnagar)
+ (fix by @yawkat)
 #668: (toml) TOML parser: surrogate-half unicode escapes accepted in strings
  (reported by @rajulbhatnagar)
  (fix by @yawkat)
