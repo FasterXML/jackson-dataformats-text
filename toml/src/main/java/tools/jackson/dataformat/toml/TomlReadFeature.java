@@ -27,6 +27,8 @@ public enum TomlReadFeature
      * values. This feature only affects the default string representation mode.
      * <p>
      * Feature is disabled by default.
+     *
+     * @since 3.2
      */
     VALIDATE_DATE_TIME(false);
 

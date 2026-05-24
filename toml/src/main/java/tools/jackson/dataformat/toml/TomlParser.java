@@ -255,9 +255,9 @@ class TomlParser {
             }
         }
 
-        Temporal value = null;
-        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)
-                || TomlReadFeature.VALIDATE_DATE_TIME.enabledIn(options)) {
+        boolean parseJavaTime = TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options);
+        if (parseJavaTime || TomlReadFeature.VALIDATE_DATE_TIME.enabledIn(options)) {
+            Temporal value;
             try {
                 if (token == TomlToken.LOCAL_DATE) {
                     value = LocalDate.parse(text);
@@ -274,11 +274,13 @@ class TomlParser {
             } catch (DateTimeParseException e) {
                 throw errorContext.atPosition(lexer).invalidDateTime(e, reportText(originalText));
             }
+            pollExpected(token, nextState);
+            if (parseJavaTime) {
+                return factory.pojoNode(value);
+            }
+            return factory.stringNode(text);
         }
         pollExpected(token, nextState);
-        if (TomlReadFeature.PARSE_JAVA_TIME.enabledIn(options)) {
-            return factory.pojoNode(value);
-        }
         return factory.stringNode(text);
     }
 

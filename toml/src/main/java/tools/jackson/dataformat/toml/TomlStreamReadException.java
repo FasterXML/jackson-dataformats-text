@@ -10,6 +10,10 @@ public class TomlStreamReadException
 {
     private static final long serialVersionUID = 1L;
 
+    // Cap on cause detail length included in wrapper messages; the cause itself
+    // (with its full message) remains accessible via getCause().
+    private static final int MAX_CAUSE_DETAIL_CHARS = 1000;
+
     TomlStreamReadException(JsonParser p, String msg, TokenStreamLocation loc) {
         super(p, msg, loc);
     }
@@ -73,8 +77,12 @@ public class TomlStreamReadException
             }
 
             TomlStreamReadException invalidDateTime(Exception cause, String value) {
+                String detail = cause.getMessage();
+                if (detail != null && detail.length() > MAX_CAUSE_DETAIL_CHARS) {
+                    detail = detail.substring(0, MAX_CAUSE_DETAIL_CHARS) + " [truncated]";
+                }
                 return new TomlStreamReadException(parser,
-                        "Invalid date/time value ('"+value+"'), problem: "+cause.getMessage(), location, cause);
+                        "Invalid date/time value ('"+value+"'), problem: "+detail, location, cause);
             }
         }
     }
