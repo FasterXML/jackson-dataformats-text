@@ -45,12 +45,10 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     static ObjectNode toml(TomlFactory factory, String toml) throws Exception {
-        // 07-Mar-2023, tatu: Due to refactoring, ended up here...
-        int options = TomlReadFeature.PARSE_JAVA_TIME.getMask();
         return TomlParser.parse(
                 factory,
                 testIOContext(),
-                options,
+                factory.getFormatReadFeatures(),
                 new StringReader(toml)
                 );
     }
@@ -516,6 +514,11 @@ public class TomlParserTest extends TomlMapperTestBase {
         TomlFactory tomlFactory = TomlFactory.builder()
                 .enable(TomlReadFeature.VALIDATE_DATE_TIME)
                 .build();
+        // Valid literal under VALIDATE_DATE_TIME alone still surfaces as a string node
+        // (not a pojoNode) — guards against the flag silently aliasing PARSE_JAVA_TIME.
+        assertEquals(json("{\"date\": \"1979-05-27\"}"),
+                toml(tomlFactory, "date = 1979-05-27"));
+
         TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
                 toml(tomlFactory, "date = 2024-02-30")
         );
