@@ -161,6 +161,9 @@ class TomlParser {
             if (existing == null) {
                 node = (TomlObjectNode) node.putObject(part);
                 if (!forTable) {
+                    /* "Dotted keys create and define a table for each key part before
+                     * the last one, provided that such tables were not previously created."
+                     */
                     node.defined = true;
                 }
             } else if (existing.isObject()) {
@@ -515,7 +518,11 @@ class TomlParser {
     @SuppressWarnings("serial") // only used internally, no need to be JDK serializable
     private static class TomlObjectNode extends ObjectNode {
         boolean closed = false;
+        // True for both explicit headers and dotted-key super-tables; gates "Table redefined".
         boolean defined = false;
+        // Subset of `defined`: set only by [table] or [[array-of-tables]] headers,
+        // not by dotted-key super-tables.
+        // Gates rejection of dotted-key extensions of an already-explicit table.
         boolean explicitlyDefined = false;
 
         TomlObjectNode(JsonNodeFactory nc) {

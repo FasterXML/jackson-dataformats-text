@@ -774,6 +774,17 @@ public class TomlParserTest extends TomlMapperTestBase {
         assertTrue(thrown.getMessage().contains("Dotted key cannot extend array of tables"));
     }
 
+    // Value arrays are closed once parsed, so dotted-key extension of one must be rejected
+    // via the "Array already closed" path (not via the AOT path tested above).
+    @Test
+    public void dottedKeyCannotExtendClosedValueArray() throws Exception {
+        TomlStreamReadException thrown = assertThrows(TomlStreamReadException.class, () ->
+                toml("apple = []\n" +
+                        "apple.color = \"red\"")
+        );
+        assertTrue(thrown.getMessage().contains("Array already closed"));
+    }
+
     @Test
     public void inlineTable() throws Exception {
         assertEquals(
