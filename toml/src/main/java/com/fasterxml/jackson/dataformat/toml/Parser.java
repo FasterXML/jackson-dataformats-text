@@ -295,6 +295,14 @@ class Parser {
             char baseChar = buffer[start + 1];
 
             if (baseChar == 'x' || baseChar == 'o' || baseChar == 'b') {
+                try {
+                    tomlFactory.streamReadConstraints().validateIntegerLength(length);
+                } catch (StreamConstraintsException e) {
+                    final String reportNum = length <= MAX_CHARS_TO_REPORT
+                            ? new String(buffer, start, length)
+                            : new String(buffer, start, MAX_CHARS_TO_REPORT) + " [truncated]";
+                    throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
+                }
                 start += 2;
                 length -= 2;
                 String text = new String(buffer, start, length);

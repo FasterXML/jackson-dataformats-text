@@ -67,6 +67,37 @@ public class LongTokenTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void integerTooLongBinary() throws IOException {
+        // default TomlFactory has max num length of 1000
+        assertRadixIntegerRejected("0b1");
+    }
+
+    @Test
+    public void integerTooLongOctal() throws IOException {
+        assertRadixIntegerRejected("0o1");
+    }
+
+    @Test
+    public void integerTooLongHex() throws IOException {
+        assertRadixIntegerRejected("0xa");
+    }
+
+    private void assertRadixIntegerRejected(String prefixAndFirstDigit) throws IOException {
+        final ObjectMapper mapper = newTomlMapper();
+        StringBuilder toml = new StringBuilder("foo = ").append(prefixAndFirstDigit);
+        for (int i = 0; i < SCALE; i++) {
+            toml.append('0');
+        }
+        try {
+            mapper.readTree(toml.toString());
+            Assert.fail("expected TomlStreamReadException for radix integer of length " + (prefixAndFirstDigit.length() + SCALE));
+        } catch (TomlStreamReadException e) {
+            Assert.assertTrue("exception message contains truncated number: " + e.getMessage(),
+                    e.getMessage().contains("[truncated]"));
+        }
+    }
+
+    @Test
     public void comment() throws IOException {
         StringBuilder toml = new StringBuilder("# ");
         for (int i = 0; i < SCALE; i++) {
