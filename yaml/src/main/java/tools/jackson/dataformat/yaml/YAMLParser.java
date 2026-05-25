@@ -810,6 +810,7 @@ public class YAMLParser extends ParserBase
     }
 
     private BigInteger _decodeBigInt(String numStr, int base) throws JacksonException {
+        streamReadConstraints().validateIntegerLength(numStr.length());
         try {
             return base == 10 ?
                     NumberInput.parseBigInteger(numStr, isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)) :
