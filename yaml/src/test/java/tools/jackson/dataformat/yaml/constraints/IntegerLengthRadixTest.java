@@ -38,7 +38,8 @@ public class IntegerLengthRadixTest extends ModuleTestBase
             MAPPER.readTree(doc);
             fail("expected StreamConstraintsException for decimal literal");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Number");
+            verifyException(e, "Number value length");
+            verifyException(e, "exceeds the maximum allowed");
         }
     }
 
@@ -51,7 +52,8 @@ public class IntegerLengthRadixTest extends ModuleTestBase
             MAPPER.readTree(doc);
             fail("expected StreamConstraintsException for hex literal");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Number");
+            verifyException(e, "Number value length");
+            verifyException(e, "exceeds the maximum allowed");
         }
     }
 
@@ -64,7 +66,8 @@ public class IntegerLengthRadixTest extends ModuleTestBase
             MAPPER.readTree(doc);
             fail("expected StreamConstraintsException for octal literal");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Number");
+            verifyException(e, "Number value length");
+            verifyException(e, "exceeds the maximum allowed");
         }
     }
 
@@ -77,7 +80,8 @@ public class IntegerLengthRadixTest extends ModuleTestBase
             MAPPER.readTree(doc);
             fail("expected StreamConstraintsException for binary literal");
         } catch (StreamConstraintsException e) {
-            verifyException(e, "Number");
+            verifyException(e, "Number value length");
+            verifyException(e, "exceeds the maximum allowed");
         }
     }
 }
