@@ -376,19 +376,17 @@ class Parser {
                 return factory.numberNode(v);
             }
         }
-        String text = null;
         try {
             tomlFactory.streamReadConstraints().validateIntegerLength(length);
-        } catch (NumberFormatException | StreamConstraintsException e) {
-            final String reportNum = length <= MAX_CHARS_TO_REPORT ?
-                    text == null ? new String(buffer, start, length) : text :
-                    (text == null ? new String(buffer, start, MAX_CHARS_TO_REPORT) : text.substring(0, MAX_CHARS_TO_REPORT))
-                            + " [truncated]";
+        } catch (StreamConstraintsException e) {
+            final String reportNum = length <= MAX_CHARS_TO_REPORT
+                    ? new String(buffer, start, length)
+                    : new String(buffer, start, MAX_CHARS_TO_REPORT) + " [truncated]";
             throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
-        text = new String(buffer, start, length);
         return factory.numberNode(NumberInput.parseBigInteger(
-                text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
+                new String(buffer, start, length),
+                tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
