@@ -287,3 +287,8 @@ Henning Langhorst (@HenningLanghorst)
 * Reported #615 (csv): Feature `CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL` ignored
   when preceding column is quoted
  (2.18.7)
+
+Shanchao Li (@tonguaroot)
+
+* Fixed #679: (toml) Validate integer length for hex/octal/binary radix literals
+ (2.18.8)
