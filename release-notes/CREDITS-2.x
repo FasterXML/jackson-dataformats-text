@@ -291,7 +291,7 @@ Henning Langhorst (@HenningLanghorst)
   when preceding column is quoted
  (2.18.7)
 
-Shanchao Li (@tonguaroot)
+Shanchao Li (@tonghuaroot)
 
 * Fixed #679: (toml) Validate integer length for hex/octal/binary radix literals
  (2.18.8)
