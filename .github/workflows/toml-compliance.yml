@@ -20,7 +20,6 @@ jobs:
   toml-compliance:
     runs-on: 'ubuntu-24.04'
     env:
-      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       TOML_TEST_DIR: ${{ github.workspace }}/toml-test
     steps:
     - name: Check out jackson-dataformats-text
@@ -36,7 +35,7 @@ jobs:
       uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
       with:
         distribution: 'temurin'
-        java-version: '17'
+        java-version: '21'
         cache: 'maven'
     - name: Run TOML compliance tests
       working-directory: jackson-dataformats-text
