@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.18.8 (not yet released)
+2.18.8 (28-May-2026)
 
 #679: (toml) Validate integer length for hex/octal/binary radix literals
  (fix by @tonghuaroot)
