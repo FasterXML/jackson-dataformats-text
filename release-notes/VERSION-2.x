@@ -14,7 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.22.0 (not yet released)
+2.23.0 (not yet released)
+
+No changes since 2.22
+
+2.22.0 (31-May-2026)
 
 #601: (csv) Reader should allow separating plain `nullValue` and quoted
   value `"nullValue"`
