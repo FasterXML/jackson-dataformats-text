@@ -1,16 +1,14 @@
 package tools.jackson.dataformat.toml;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.file.*;
 import java.time.*;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.Map;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import at.yawk.toml.test.TomlTestCase;
 
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.databind.JsonNode;
@@ -21,7 +19,6 @@ import tools.jackson.databind.node.JsonNodeCreator;
 import tools.jackson.databind.node.ObjectNode;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class ComplianceValidTest extends TomlMapperTestBase
 {
@@ -31,50 +28,15 @@ public class ComplianceValidTest extends TomlMapperTestBase
     private static final ObjectMapper JSON_MAPPER = JsonMapper.shared();
 
     @ParameterizedTest
-    @MethodSource("data")
-    public void tomlTestValidCorpus(Path toml, Path json) throws Exception {
-        assumeTrue(toml != null, "Set -Dtoml.corpus.dir=/path/to/toml-test to run TOML corpus tests");
+    @MethodSource("at.yawk.toml.test.TomlTestSuite#validToml100")
+    public void tomlTestValidCorpus(TomlTestCase test) throws Exception {
+        String expectedJson = test.expectedJson();
+        assertNotNull(expectedJson, "valid TOML test must have expected JSON");
 
-        JsonNode expected = mapFromComplianceNode(JSON_MAPPER.readTree(json.toFile()));
-        JsonNode actual = TOML_MAPPER.readTree(toml.toFile());
+        JsonNode expected = mapFromComplianceNode(JSON_MAPPER.readTree(expectedJson));
+        JsonNode actual = TOML_MAPPER.readTree(test.tomlBytes());
         assertTrue(semanticallyEquals(expected, actual),
                 "expected=" + expected + " actual=" + actual);
-    }
-
-    public static Stream<Arguments> data() throws Exception {
-        Path corpusRoot = corpusRoot();
-        if (corpusRoot == null) {
-            return Stream.of(Arguments.of(null, null));
-        }
-        return corpusFiles(corpusRoot, "valid/").stream()
-                .map(toml -> Arguments.of(toml, expectedJson(toml)))
-                .filter(args -> Files.isRegularFile((Path) args.get()[1]));
-    }
-
-    static Path corpusRoot() {
-        String root = System.getProperty("toml.corpus.dir");
-        if (root == null || root.isBlank()) {
-            return null;
-        }
-        return Paths.get(root);
-    }
-
-    static List<Path> corpusFiles(Path corpusRoot, String prefix) throws IOException {
-        Path testsRoot = corpusRoot.resolve("tests");
-        Path fileList = testsRoot.resolve(System.getProperty("toml.corpus.fileList", "files-toml-1.0.0"));
-        List<Path> files = new ArrayList<>();
-        for (String line : Files.readAllLines(fileList)) {
-            if (line.isBlank() || line.startsWith("#") || !line.endsWith(".toml") || !line.startsWith(prefix)) {
-                continue;
-            }
-            files.add(testsRoot.resolve(line));
-        }
-        return files;
-    }
-
-    private static Path expectedJson(Path toml) {
-        String fileName = toml.getFileName().toString();
-        return toml.resolveSibling(fileName.substring(0, fileName.length() - 5) + ".json");
     }
 
     private static JsonNode mapFromComplianceNode(JsonNode expected) {
