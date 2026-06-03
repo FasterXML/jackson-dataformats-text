@@ -241,17 +241,38 @@ class TomlParser {
         String text = originalText;
         TomlToken token = peek();
         // The time delimiter can be [Tt ]. java.time supports [Tt], and TOML accepts lowercase z.
-        if (token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) {
+        if (token == TomlToken.LOCAL_TIME || token == TomlToken.LOCAL_DATE_TIME || token == TomlToken.OFFSET_DATE_TIME) {
             StringBuilder normalized = null;
-            if (text.charAt(10) == ' ') {
+            int timeStart = token == TomlToken.LOCAL_TIME ? 0 : 11;
+            int timeEnd = text.length();
+            if (token == TomlToken.OFFSET_DATE_TIME) {
+                char last = text.charAt(text.length() - 1);
+                if (last == 'z' || last == 'Z') {
+                    timeEnd--;
+                } else {
+                    int plus = text.indexOf('+', timeStart);
+                    int minus = text.indexOf('-', timeStart);
+                    int offsetStart = plus < 0 ? minus : (minus < 0 ? plus : Math.min(plus, minus));
+                    if (offsetStart >= 0) {
+                        timeEnd = offsetStart;
+                    }
+                }
+            }
+            if (text.indexOf(':', timeStart + 3) < 0 || text.indexOf(':', timeStart + 3) >= timeEnd) {
                 normalized = new StringBuilder(text);
+                normalized.insert(timeEnd, ":00");
+            }
+            if (token != TomlToken.LOCAL_TIME && text.charAt(10) == ' ') {
+                if (normalized == null) {
+                    normalized = new StringBuilder(text);
+                }
                 normalized.setCharAt(10, 'T');
             }
             if (token == TomlToken.OFFSET_DATE_TIME && text.charAt(text.length() - 1) == 'z') {
                 if (normalized == null) {
                     normalized = new StringBuilder(text);
                 }
-                normalized.setCharAt(text.length() - 1, 'Z');
+                normalized.setCharAt(normalized.length() - 1, 'Z');
             }
             if (normalized != null) {
                 text = normalized.toString();
@@ -447,13 +468,7 @@ class TomlParser {
         while (true) {
             TomlToken token = peek();
             if (token == TomlToken.INLINE_TABLE_CLOSE) {
-                if (node.isEmpty()) {
-                    break;
-                } else {
-                    // "A terminating comma (also called trailing comma) is not permitted after the last key/value pair
-                    // in an inline table."
-                    throw errorContext.atPosition(lexer).generic("Trailing comma not permitted for inline tables");
-                }
+                break;
             }
             parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
             TomlToken sepToken = peek();

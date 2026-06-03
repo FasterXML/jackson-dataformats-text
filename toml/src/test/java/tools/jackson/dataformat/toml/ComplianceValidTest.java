@@ -28,7 +28,7 @@ public class ComplianceValidTest extends TomlMapperTestBase
     private static final ObjectMapper JSON_MAPPER = JsonMapper.shared();
 
     @ParameterizedTest
-    @MethodSource("at.yawk.toml.test.TomlTestSuite#validToml100")
+    @MethodSource("at.yawk.toml.test.TomlTestSuite#validToml110")
     public void tomlTestValidCorpus(TomlTestCase test) throws Exception {
         String expectedJson = test.expectedJson();
         assertNotNull(expectedJson, "valid TOML test must have expected JSON");

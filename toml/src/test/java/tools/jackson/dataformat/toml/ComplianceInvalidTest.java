@@ -16,7 +16,7 @@ public class ComplianceInvalidTest extends TomlMapperTestBase
             .build();
 
     @ParameterizedTest
-    @MethodSource("at.yawk.toml.test.TomlTestSuite#invalidToml100")
+    @MethodSource("at.yawk.toml.test.TomlTestSuite#invalidToml110")
     public void tomlTestInvalidCorpus(TomlTestCase test) {
         assertThrows(TomlStreamReadException.class, () -> MAPPER.readTree(test.tomlBytes()));
     }
