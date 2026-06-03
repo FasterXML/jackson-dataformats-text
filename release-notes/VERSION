@@ -101,7 +101,7 @@ implementations)
  (reported by @rajulbhatnagar)
  (fix by @yawkat)
 #685: (toml) Support TOML 1.1.0-compatible parsing
- (fix by @yawkat, w/ multicode)
+ (fix by @yawkat)
 
 3.1.4 (29-May-2026)
 

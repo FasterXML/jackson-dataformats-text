@@ -127,10 +127,15 @@ public class TomlParserTest extends TomlMapperTestBase {
     @Test
     public void toml11OptionalSeconds() throws Exception {
         assertEquals(
-                json("{\"localTime\": \"14:15:00\", \"localDateTime\": \"2010-02-03T14:15:00\", \"offsetDateTime\": \"2010-02-03T14:15:00Z\"}"),
+                json("{\"localTime\": \"14:15:00\", \"localDateTime\": \"2010-02-03T14:15:00\", " +
+                        "\"offsetDateTimeZ\": \"2010-02-03T14:15:00Z\", " +
+                        "\"offsetDateTimePlus\": \"2010-02-03T14:15:00+02:30\", " +
+                        "\"offsetDateTimeMinus\": \"2010-02-03T14:15:00-02:30\"}"),
                 toml("localTime = 14:15\n" +
                         "localDateTime = 2010-02-03 14:15\n" +
-                        "offsetDateTime = 2010-02-03 14:15Z"));
+                        "offsetDateTimeZ = 2010-02-03 14:15Z\n" +
+                        "offsetDateTimePlus = 2010-02-03 14:15+02:30\n" +
+                        "offsetDateTimeMinus = 2010-02-03 14:15-02:30"));
     }
 
     @Test
