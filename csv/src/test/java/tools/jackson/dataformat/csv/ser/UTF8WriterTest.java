@@ -21,9 +21,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for {@code impl.UTF8Writer}, exercising the various code paths
  * (single-byte ASCII, 2/3/4-byte encodings, surrogate-pair handling and the
  * error cases) directly rather than only incidentally via the generator.
+ *<p>
+ * Non-ASCII characters are written using {@code \\uXXXX} escapes so the source
+ * stays pure ASCII.
  */
 public class UTF8WriterTest extends ModuleTestBase
 {
+    // U+1F600 GRINNING FACE, as a UTF-16 surrogate pair
+    private final static String EMOJI_GRIN = "\uD83D\uDE00";
+
     private IOContext ioContext() {
         return new IOContext(
                 StreamReadConstraints.defaults(),
@@ -36,10 +42,10 @@ public class UTF8WriterTest extends ModuleTestBase
 
     // Sample text mixing 1-, 2-, 3- and 4-byte UTF-8 code points
     private final static String MIXED =
-            "abcABC123 " +          // ASCII (1 byte)
-            " éÿ " +  // Latin-1 supplement (2 bytes)
-            "€中Ａ " +  // Euro, CJK, fullwidth (3 bytes)
-            "😀🎉"; // emoji (4 bytes, surrogate pairs)
+            "abcABC123 "                       // ASCII (1 byte)
+            + " \u00E9\u00FF "                  // e-acute, y-diaeresis (2 bytes)
+            + "\u20AC\u4E2D\uFF21 "             // Euro, CJK '\u4E2D', fullwidth 'A' (3 bytes)
+            + EMOJI_GRIN + "\uD83C\uDF89"; // emoji U+1F600, U+1F389 (4 bytes)
 
     @Test
     public void testWriteSingleCharsViaInt() throws Exception
@@ -111,7 +117,7 @@ public class UTF8WriterTest extends ModuleTestBase
             w.write(0xD83D); // high surrogate, held
             w.write(0xDE00); // low surrogate, completes U+1F600
         }
-        assertArrayEquals(utf8("😀"), out.toByteArray());
+        assertArrayEquals(utf8(EMOJI_GRIN), out.toByteArray());
     }
 
     // Leftover (held) surrogate consumed by the start of a following char[] write
@@ -125,7 +131,7 @@ public class UTF8WriterTest extends ModuleTestBase
             // Next array starts with the matching low surrogate
             w.write(new char[] { '\uDE00', 'b' }, 0, 2);
         }
-        assertArrayEquals(utf8("a😀b"), out.toByteArray());
+        assertArrayEquals(utf8("a" + EMOJI_GRIN + "b"), out.toByteArray());
     }
 
     // Same, but for the String-based write path
@@ -137,7 +143,7 @@ public class UTF8WriterTest extends ModuleTestBase
             w.write("a\uD83D", 0, 2);  // ends with held high surrogate
             w.write("\uDE00b", 0, 2);  // starts with low surrogate
         }
-        assertArrayEquals(utf8("a😀b"), out.toByteArray());
+        assertArrayEquals(utf8("a" + EMOJI_GRIN + "b"), out.toByteArray());
     }
 
     // Second half of a surrogate pair without a preceding first half
