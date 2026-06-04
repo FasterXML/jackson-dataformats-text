@@ -1,0 +1,189 @@
+package tools.jackson.dataformat.csv.ser;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import org.junit.jupiter.api.Test;
+
+import tools.jackson.core.ErrorReportConfiguration;
+import tools.jackson.core.JsonEncoding;
+import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamWriteConstraints;
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.dataformat.csv.impl.UTF8Writer;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Unit tests for {@code impl.UTF8Writer}, exercising the various code paths
+ * (single-byte ASCII, 2/3/4-byte encodings, surrogate-pair handling and the
+ * error cases) directly rather than only incidentally via the generator.
+ */
+public class UTF8WriterTest extends ModuleTestBase
+{
+    private IOContext ioContext() {
+        return new IOContext(
+                StreamReadConstraints.defaults(),
+                StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
+                new BufferRecycler(),
+                ContentReference.unknown(), false,
+                JsonEncoding.UTF8);
+    }
+
+    // Sample text mixing 1-, 2-, 3- and 4-byte UTF-8 code points
+    private final static String MIXED =
+            "abcABC123 " +          // ASCII (1 byte)
+            " éÿ " +  // Latin-1 supplement (2 bytes)
+            "€中Ａ " +  // Euro, CJK, fullwidth (3 bytes)
+            "😀🎉"; // emoji (4 bytes, surrogate pairs)
+
+    private byte[] utf8(String str) {
+        return str.getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Test
+    public void testWriteSingleCharsViaInt() throws Exception
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            for (int i = 0; i < MIXED.length(); ++i) {
+                w.write(MIXED.charAt(i));
+            }
+        }
+        assertArrayEquals(utf8(MIXED), out.toByteArray());
+    }
+
+    @Test
+    public void testWriteCharArray() throws Exception
+    {
+        // Make it long enough to force at least one internal buffer flush
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 200; ++i) {
+            sb.append(MIXED);
+        }
+        String input = sb.toString();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            char[] ch = input.toCharArray();
+            w.write(ch); // exercises write(char[]) -> write(char[],0,len)
+        }
+        assertArrayEquals(utf8(input), out.toByteArray());
+    }
+
+    @Test
+    public void testWriteStringAndAppend() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 200; ++i) {
+            sb.append(MIXED);
+        }
+        String input = sb.toString();
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            w.write(input);          // write(String) -> write(String,0,len)
+            w.append('!');           // append(char) -> write(int)
+            w.flush();               // exercise explicit flush
+        }
+        assertArrayEquals(utf8(input + "!"), out.toByteArray());
+    }
+
+    @Test
+    public void testSingleAndEmptyChunks() throws Exception
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            w.write(new char[0]);            // len == 0, no-op
+            w.write(new char[] { 'x' });     // len == 1 special-cased
+            w.write("y", 0, 1);              // String len == 1 special-cased
+            w.write("", 0, 0);              // String len == 0, no-op
+        }
+        assertArrayEquals(utf8("xy"), out.toByteArray());
+    }
+
+    // Surrogate pair split across two separate write(int) calls
+    @Test
+    public void testSurrogatePairSplitViaInt() throws Exception
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            w.write(0xD83D); // high surrogate, held
+            w.write(0xDE00); // low surrogate, completes U+1F600
+        }
+        assertArrayEquals(utf8("😀"), out.toByteArray());
+    }
+
+    // Leftover (held) surrogate consumed by the start of a following char[] write
+    @Test
+    public void testSurrogatePairSplitAcrossArrayWrites() throws Exception
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            // First array ends with a lone high surrogate (held over)
+            w.write(new char[] { 'a', '\uD83D' }, 0, 2);
+            // Next array starts with the matching low surrogate
+            w.write(new char[] { '\uDE00', 'b' }, 0, 2);
+        }
+        assertArrayEquals(utf8("a😀b"), out.toByteArray());
+    }
+
+    // Same, but for the String-based write path
+    @Test
+    public void testSurrogatePairSplitAcrossStringWrites() throws Exception
+    {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+            w.write("a\uD83D", 0, 2);  // ends with held high surrogate
+            w.write("\uDE00b", 0, 2);  // starts with low surrogate
+        }
+        assertArrayEquals(utf8("a😀b"), out.toByteArray());
+    }
+
+    // Second half of a surrogate pair without a preceding first half
+    @Test
+    public void testUnmatchedSecondSurrogate() throws Exception
+    {
+        try (UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream())) {
+            try {
+                w.write(0xDE00); // low surrogate alone
+                fail("Should not pass");
+            } catch (IOException e) {
+                verifyException(e, "Unmatched second part of surrogate pair");
+            }
+        }
+    }
+
+    // First half of a surrogate pair, never completed, flushed on close()
+    @Test
+    public void testUnmatchedFirstSurrogateOnClose() throws Exception
+    {
+        UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream());
+        w.write(0xD83D); // high surrogate, held
+        try {
+            w.close();
+            fail("Should not pass");
+        } catch (IOException e) {
+            verifyException(e, "Unmatched first part of surrogate pair");
+        }
+    }
+
+    // High surrogate followed by a non-low-surrogate char: broken pair
+    @Test
+    public void testBrokenSurrogatePair() throws Exception
+    {
+        try (UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream())) {
+            w.write(0xD83D); // high surrogate, held
+            try {
+                w.write('a'); // not a low surrogate
+                fail("Should not pass");
+            } catch (IOException e) {
+                verifyException(e, "Broken surrogate pair");
+            }
+        }
+    }
+}
