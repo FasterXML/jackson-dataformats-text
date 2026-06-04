@@ -258,7 +258,8 @@ class TomlParser {
                     }
                 }
             }
-            if (text.indexOf(':', timeStart + 3) < 0 || text.indexOf(':', timeStart + 3) >= timeEnd) {
+            int secondsColon = text.indexOf(':', timeStart + 3);
+            if (secondsColon < 0 || secondsColon >= timeEnd) {
                 normalized = new StringBuilder(text);
                 normalized.insert(timeEnd, ":00");
             }
