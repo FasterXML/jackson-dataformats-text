@@ -1,24 +1,21 @@
 package tools.jackson.dataformat.toml;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.util.Map;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import at.yawk.toml.test.TomlExpectedDocumentValidator;
 import at.yawk.toml.test.TomlTestCase;
 
-import tools.jackson.core.io.NumberInput;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.JsonNodeCreator;
-import tools.jackson.databind.node.ObjectNode;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class ComplianceValidTest extends TomlMapperTestBase
 {
@@ -26,139 +23,71 @@ public class ComplianceValidTest extends TomlMapperTestBase
             .enable(TomlReadFeature.PARSE_JAVA_TIME)
             .build();
     private static final ObjectMapper JSON_MAPPER = JsonMapper.shared();
+    private static final TomlExpectedDocumentValidator VALIDATOR = new JacksonTomlExpectedDocumentValidator();
 
     @ParameterizedTest
     @MethodSource("at.yawk.toml.test.TomlTestSuite#validToml110")
     public void tomlTestValidCorpus(TomlTestCase test) throws Exception {
-        String expectedJson = test.expectedJson();
-        assertNotNull(expectedJson, "valid TOML test must have expected JSON");
-
-        JsonNode expected = mapFromComplianceNode(JSON_MAPPER.readTree(expectedJson));
         JsonNode actual = TOML_MAPPER.readTree(test.tomlBytes());
-        assertTrue(semanticallyEquals(expected, actual),
-                "expected=" + expected + " actual=" + actual);
+        VALIDATOR.validate(test, JSON_MAPPER.convertValue(actual, new TypeReference<Map<String, ?>>() { }));
     }
 
-    private static JsonNode mapFromComplianceNode(JsonNode expected) {
-        final JsonNodeCreator nodeF = JsonMapper.shared().createObjectNode();
-        if (expected.isObject()) {
-            ObjectNode expectedObject = (ObjectNode) expected;
-            if (expectedObject.has("type") && expectedObject.has("value")) {
-                JsonNode value = expectedObject.get("value");
-                switch (expectedObject.get("type").stringValue()) {
-                    case "string":
-                        return nodeF.stringNode(value.stringValue());
-                    case "integer":
-                        return nodeF.numberNode(NumberInput.parseBigInteger(value.stringValue(), false));
-                    case "float":
-                        switch (value.stringValue()) {
-                            case "inf":
-                                return nodeF.numberNode(Double.POSITIVE_INFINITY);
-                            case "-inf":
-                                return nodeF.numberNode(Double.NEGATIVE_INFINITY);
-                            case "nan":
-                                return nodeF.numberNode(Double.NaN);
-                            default:
-                                return nodeF.numberNode(NumberInput.parseBigDecimal(value.stringValue(), false));
-                        }
-                    case "bool":
-                    case "boolean":
-                        return nodeF.booleanNode(Boolean.parseBoolean(value.stringValue()));
-                    case "datetime":
-                    case "offset datetime":
-                        return nodeF.pojoNode(OffsetDateTime.parse(value.stringValue()));
-                    case "datetime-local":
-                    case "local datetime":
-                        return nodeF.pojoNode(LocalDateTime.parse(value.stringValue()));
-                    case "date":
-                    case "date-local":
-                    case "local date":
-                        return nodeF.pojoNode(LocalDate.parse(value.stringValue()));
-                    case "time":
-                    case "time-local":
-                    case "local time":
-                        return nodeF.pojoNode(LocalTime.parse(value.stringValue()));
-                    case "array":
-                        return mapFromComplianceNode(value);
-                    default:
-                        throw new AssertionError(expectedObject);
-                }
+    private static final class JacksonTomlExpectedDocumentValidator extends TomlExpectedDocumentValidator {
+        @Override
+        protected Map<String, ?> parseExpectedJson(String expectedJson) {
+            try {
+                return JSON_MAPPER.readValue(expectedJson, new TypeReference<Map<String, ?>>() { });
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Failed to parse expected JSON", e);
             }
-            ObjectNode object = expectedObject.objectNode();
-            for (Map.Entry<String, JsonNode> field : expectedObject.properties()) {
-                object.set(field.getKey(), mapFromComplianceNode(field.getValue()));
-            }
-            return object;
         }
-        if (expected.isArray()) {
-            ArrayNode array = JsonMapper.shared().createArrayNode();
-            for (JsonNode member : expected) {
-                array.add(mapFromComplianceNode(member));
-            }
-            return array;
-        }
-        throw new AssertionError(expected);
-    }
 
-    private static boolean semanticallyEquals(JsonNode expected, JsonNode actual) {
-        if (expected.isNumber() && actual.isNumber()) {
-            // Compare integrals via BigInteger first: doubleValue() on a large
-            // BigInteger/BigDecimal overflows to Infinity, which would otherwise
-            // make two distinct large values compare equal via the non-finite path.
-            if (expected.isIntegralNumber() && actual.isIntegralNumber()) {
-                return toBigInteger(expected).equals(toBigInteger(actual));
+        @Override
+        protected void validateOffsetDateTime(String path, String expected, Object actual) {
+            OffsetDateTime expectedValue = OffsetDateTime.parse(expected);
+            if (actual instanceof OffsetDateTime actualOffsetDateTime && expectedValue.equals(actualOffsetDateTime)) {
+                return;
             }
-            // Only Float/Double nodes can hold NaN/±Infinity.
-            if (expected.isFloat() || expected.isDouble()
-                    || actual.isFloat() || actual.isDouble()) {
-                double e = expected.doubleValue();
-                double a = actual.doubleValue();
-                if (!Double.isFinite(e) || !Double.isFinite(a)) {
-                    return Double.compare(e, a) == 0;
-                }
+            if (actual instanceof String actualString && expectedValue.equals(OffsetDateTime.parse(actualString))) {
+                return;
             }
-            return toBigDecimal(expected).compareTo(toBigDecimal(actual)) == 0;
+            throw new AssertionError(path + ": expected offset date-time " + expected + " but was " + actual);
         }
-        if (expected.isObject() && actual.isObject()) {
-            if (expected.size() != actual.size()) {
-                return false;
-            }
-            for (String name : expected.propertyNames()) {
-                JsonNode actualValue = actual.get(name);
-                if (actualValue == null || !semanticallyEquals(expected.get(name), actualValue)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        if (expected.isArray() && actual.isArray()) {
-            if (expected.size() != actual.size()) {
-                return false;
-            }
-            for (int i = 0; i < expected.size(); i++) {
-                if (!semanticallyEquals(expected.get(i), actual.get(i))) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return expected.equals(actual);
-    }
 
-    private static BigInteger toBigInteger(JsonNode node) {
-        if (node.isBigInteger()) {
-            return node.bigIntegerValue();
+        @Override
+        protected void validateLocalDateTime(String path, String expected, Object actual) {
+            LocalDateTime expectedValue = LocalDateTime.parse(expected);
+            if (actual instanceof LocalDateTime actualLocalDateTime && expectedValue.equals(actualLocalDateTime)) {
+                return;
+            }
+            if (actual instanceof String actualString && expectedValue.equals(LocalDateTime.parse(actualString))) {
+                return;
+            }
+            throw new AssertionError(path + ": expected local date-time " + expected + " but was " + actual);
         }
-        return BigInteger.valueOf(node.longValue());
-    }
 
-    private static BigDecimal toBigDecimal(JsonNode node) {
-        if (node.isBigDecimal()) {
-            return node.decimalValue();
+        @Override
+        protected void validateLocalDate(String path, String expected, Object actual) {
+            LocalDate expectedValue = LocalDate.parse(expected);
+            if (actual instanceof LocalDate actualLocalDate && expectedValue.equals(actualLocalDate)) {
+                return;
+            }
+            if (actual instanceof String actualString && expectedValue.equals(LocalDate.parse(actualString))) {
+                return;
+            }
+            throw new AssertionError(path + ": expected local date " + expected + " but was " + actual);
         }
-        if (node.isIntegralNumber()) {
-            return new BigDecimal(toBigInteger(node));
+
+        @Override
+        protected void validateLocalTime(String path, String expected, Object actual) {
+            LocalTime expectedValue = LocalTime.parse(expected);
+            if (actual instanceof LocalTime actualLocalTime && expectedValue.equals(actualLocalTime)) {
+                return;
+            }
+            if (actual instanceof String actualString && expectedValue.equals(LocalTime.parse(actualString))) {
+                return;
+            }
+            throw new AssertionError(path + ": expected local time " + expected + " but was " + actual);
         }
-        return BigDecimal.valueOf(node.doubleValue());
     }
 }
