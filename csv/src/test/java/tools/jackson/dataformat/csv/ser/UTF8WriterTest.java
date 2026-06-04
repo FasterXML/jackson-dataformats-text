@@ -2,7 +2,6 @@ package tools.jackson.dataformat.csv.ser;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +12,7 @@ import tools.jackson.core.StreamWriteConstraints;
 import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.impl.UTF8Writer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,10 +40,6 @@ public class UTF8WriterTest extends ModuleTestBase
             " éÿ " +  // Latin-1 supplement (2 bytes)
             "€中Ａ " +  // Euro, CJK, fullwidth (3 bytes)
             "😀🎉"; // emoji (4 bytes, surrogate pairs)
-
-    private byte[] utf8(String str) {
-        return str.getBytes(StandardCharsets.UTF_8);
-    }
 
     @Test
     public void testWriteSingleCharsViaInt() throws Exception
