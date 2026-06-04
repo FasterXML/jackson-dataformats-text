@@ -89,6 +89,12 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
       appendUnicodeScalar(value);
   }
 
+  private void appendUnicodeEscapeByte() throws TomlStreamReadException {
+      int value = (Character.digit(yycharat(2), 16) << 4) |
+                   Character.digit(yycharat(3), 16);
+      appendUnicodeScalar(value);
+  }
+
   private void appendUnicodeEscapeLong() throws TomlStreamReadException {
      int value = (Character.digit(yycharat(2), 16) << 28) |
                  (Character.digit(yycharat(3), 16) << 24) |
@@ -153,6 +159,7 @@ QuotationMark = "\""
 // exclude control chars (tab is allowed, " and \)
 //BasicUnescaped = [^\u0000-\u0008\u0009-\u001f\u007f\\\"]
 //Escaped = "\\" ([\"\\bfnrt]|"u" {HexDig} {HexDig} {HexDig} {HexDig} ({HexDig} {HexDig} {HexDig} {HexDig})?)
+UnicodeEscapeByte = "\\x" {HexDig} {HexDig}
 UnicodeEscapeShort = "\\u" {HexDig} {HexDig} {HexDig} {HexDig}
 UnicodeEscapeLong = "\\U" {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig} {HexDig}
 
@@ -194,7 +201,7 @@ TimeSecond = [0-9][0-9]
 TimeSecfrac = "." [0-9]+
 TimeNumoffset = [+-] {TimeHour} ":" {TimeMinute}
 TimeOffset = [Zz] | {TimeNumoffset}
-PartialTime = {TimeHour} ":" {TimeMinute} ":" {TimeSecond} {TimeSecfrac}?
+PartialTime = {TimeHour} ":" {TimeMinute} (":" {TimeSecond} {TimeSecfrac}?)?
 FullDate = {DateFullyear} "-" {DateMonth} "-" {DateMday}
 FullTime = {PartialTime} {TimeOffset}
 
@@ -306,7 +313,7 @@ HexDig = [0-9A-Fa-f]
           startString();
       }
     {KeyValSep} {return TomlToken.KEY_VAL_SEP;}
-    {InlineTableClose} {
+    {WsCommentNewlineNonEmpty}* {InlineTableClose} {
           nestingDepth--;
           return TomlToken.INLINE_TABLE_CLOSE;
       }
@@ -375,7 +382,7 @@ HexDig = [0-9A-Fa-f]
           streamReadConstraints.validateNestingDepth(++nestingDepth);
           return TomlToken.ARRAY_OPEN;
       }
-    {InlineTableOpen} {
+    {InlineTableOpen} {WsCommentNewlineNonEmpty}* {
           streamReadConstraints.validateNestingDepth(++nestingDepth);
           return TomlToken.INLINE_TABLE_OPEN;
       }
@@ -402,8 +409,8 @@ HexDig = [0-9A-Fa-f]
     // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
     // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
 
-    {Ws} {Comma} {Ws} {return TomlToken.COMMA;}
-    {InlineTableClose} {
+    {WsCommentNewlineNonEmpty}* {Comma} {WsCommentNewlineNonEmpty}* {return TomlToken.COMMA;}
+    {WsCommentNewlineNonEmpty}* {InlineTableClose} {
           nestingDepth--;
           return TomlToken.INLINE_TABLE_CLOSE;
       }
@@ -450,6 +457,8 @@ HexDig = [0-9A-Fa-f]
     \\n { textBuffer.append('\n'); }
     \\r { textBuffer.append('\r'); }
     \\t { textBuffer.append('\t'); }
+    \\e { textBuffer.append('\u001B'); }
+    {UnicodeEscapeByte} { appendUnicodeEscapeByte(); }
     {UnicodeEscapeShort} { appendUnicodeEscapeShort(); }
     {UnicodeEscapeLong} { appendUnicodeEscapeLong(); }
     \\ { throw errorContext.atPosition(this).generic("Unknown escape sequence"); }

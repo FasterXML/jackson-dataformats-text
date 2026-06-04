@@ -8,6 +8,7 @@ module tools.jackson.dataformat.toml
     requires tools.jackson.databind;
 
     // Additional test lib/framework dependencies
+    requires at.yawk.toml.test;
     requires org.assertj.core;
     requires org.junit.jupiter.api;
     requires org.junit.jupiter.params;

@@ -100,6 +100,8 @@ implementations)
   tables / AOT not rejected
  (reported by @rajulbhatnagar)
  (fix by @yawkat)
+#685: (toml) Improve TOML 1.1.0 compatibility (parsing)
+ (fix by @yawkat)
 
 3.1.4 (29-May-2026)
 

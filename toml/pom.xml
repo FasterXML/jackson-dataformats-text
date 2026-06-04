@@ -43,6 +43,12 @@
             <version>20.1.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>at.yawk.toml.test</groupId>
+            <artifactId>toml-test-for-java</artifactId>
+            <version>0.1.0-2.2.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
