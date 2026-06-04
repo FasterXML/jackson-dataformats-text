@@ -7,6 +7,9 @@ import java.util.*;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import tools.jackson.core.*;
+import tools.jackson.core.io.ContentReference;
+import tools.jackson.core.io.IOContext;
+import tools.jackson.core.util.BufferRecycler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -215,6 +218,21 @@ public abstract class ModuleTestBase
     
     protected CsvMapper.Builder mapperBuilder(CsvFactory f) {
         return CsvMapper.builder(f);
+    }
+
+    /**
+     * Shared factory for a generic {@link IOContext} suitable for directly
+     * constructing low-level readers/writers (e.g. {@code UTF8Writer},
+     * {@code CsvParserBootstrapper}) in unit tests.
+     */
+    protected IOContext testIOContext() {
+        return new IOContext(
+                StreamReadConstraints.defaults(),
+                StreamWriteConstraints.defaults(),
+                ErrorReportConfiguration.defaults(),
+                new BufferRecycler(),
+                ContentReference.unknown(), false,
+                JsonEncoding.UTF8);
     }
 
     /*

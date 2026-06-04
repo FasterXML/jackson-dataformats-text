@@ -144,12 +144,15 @@ public class CsvDecoderNumberTest extends ModuleTestBase
                 .addColumn("bd")
                 .addColumn("bi")
                 .build();
+        // Use values that are NOT exactly representable in binary floating point,
+        // so a coercion/rounding regression in the float/double path would show up.
+        // Compare with a delta accordingly.
         FloatingPoint result = MAPPER.readerFor(FloatingPoint.class)
                 .with(schema)
-                .readValue("1.5,2.5,3.14159,42\n");
-        assertEquals(1.5f, result.f);
-        assertEquals(2.5, result.d);
-        assertEquals(new BigDecimal("3.14159"), result.bd);
+                .readValue("3.14159,2.718281828459045,2.5,42\n");
+        assertEquals(3.14159f, result.f, 1e-6f);
+        assertEquals(2.718281828459045, result.d, 1e-15);
+        assertEquals(new BigDecimal("2.5"), result.bd);
         assertEquals(BigInteger.valueOf(42), result.bi);
     }
 

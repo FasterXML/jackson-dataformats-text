@@ -7,9 +7,6 @@ import java.nio.charset.Charset;
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.*;
-import tools.jackson.core.io.ContentReference;
-import tools.jackson.core.io.IOContext;
-import tools.jackson.core.util.BufferRecycler;
 import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.impl.CsvParserBootstrapper;
 
@@ -118,25 +115,25 @@ public class CsvEncodingDetectionTest extends ModuleTestBase
     @Test
     public void testWeirdUCS4_2143_viaBOM() throws Exception {
         // 0x0000FFFE
-        _verifyWeirdUCS4(new byte[] { 0, 0, (byte) 0xFF, (byte) 0xFE });
+        _verifyWeirdUCS4(new byte[] { 0, 0, (byte) 0xFF, (byte) 0xFE }, "2143");
     }
 
     @Test
     public void testWeirdUCS4_3412_viaBOM() throws Exception {
         // 0xFEFF0000
-        _verifyWeirdUCS4(new byte[] { (byte) 0xFE, (byte) 0xFF, 0, 0 });
+        _verifyWeirdUCS4(new byte[] { (byte) 0xFE, (byte) 0xFF, 0, 0 }, "3412");
     }
 
     @Test
     public void testWeirdUCS4_3412_viaContent() throws Exception {
         // 0x00??0000 -> "3412" in-order UTF-32
-        _verifyWeirdUCS4(new byte[] { 0, 0x41, 0, 0 });
+        _verifyWeirdUCS4(new byte[] { 0, 0x41, 0, 0 }, "3412");
     }
 
     @Test
     public void testWeirdUCS4_2143_viaContent() throws Exception {
         // 0x0000??00 -> "2143" in-order UTF-32
-        _verifyWeirdUCS4(new byte[] { 0, 0, 0x41, 0 });
+        _verifyWeirdUCS4(new byte[] { 0, 0, 0x41, 0 }, "2143");
     }
 
     /*
@@ -165,27 +162,20 @@ public class CsvEncodingDetectionTest extends ModuleTestBase
         }
     }
 
-    private void _verifyWeirdUCS4(byte[] bytes) throws Exception
+    private void _verifyWeirdUCS4(byte[] bytes, String expectedType) throws Exception
     {
-        CsvParserBootstrapper bs = new CsvParserBootstrapper(_ioContext(),
+        CsvParserBootstrapper bs = new CsvParserBootstrapper(testIOContext(),
                 bytes, 0, bytes.length);
         try {
             // readCtxt is only used after successful detection, so null is fine here
             bs.constructParser(null, 0, 0, CsvSchema.emptySchema());
             fail("Should not pass with unsupported UCS-4 byte order");
         } catch (JacksonException e) {
+            // Verify both the generic message and the specific byte-order label,
+            // so the "2143" vs "3412" cases are actually distinguished
             verifyException(e, "Unsupported UCS-4 endianness");
+            verifyException(e, expectedType);
         }
-    }
-
-    private IOContext _ioContext() {
-        return new IOContext(
-                StreamReadConstraints.defaults(),
-                StreamWriteConstraints.defaults(),
-                ErrorReportConfiguration.defaults(),
-                new BufferRecycler(),
-                ContentReference.unknown(), false,
-                JsonEncoding.UTF8);
     }
 
     private static byte[] encode(String str, String charset) {

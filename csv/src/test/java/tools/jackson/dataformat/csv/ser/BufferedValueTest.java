@@ -69,6 +69,38 @@ public class BufferedValueTest extends ModuleTestBase
                 sw.toString());
     }
 
+    // Same typed values, but written in column order: this exercises the symmetric
+    // "in order" direct-write branch of CsvEncoder (columnIndex == _nextColumnToWrite),
+    // which the buffered test above does NOT cover. Output must be identical.
+    @Test
+    public void testInOrderTypedValues() throws Exception
+    {
+        StringWriter sw = new StringWriter();
+        try (JsonGenerator gen = MAPPER.writer(SCHEMA).createGenerator(sw)) {
+            gen.writeStartObject();
+            gen.writeName("str");
+            gen.writeString("A");
+            gen.writeName("lng");
+            gen.writeNumber(9999999999L); // > Integer.MAX_VALUE so stays a long
+            gen.writeName("flt");
+            gen.writeNumber(1.5f);
+            gen.writeName("dbl");
+            gen.writeNumber(2.5d);
+            gen.writeName("bigInt");
+            gen.writeNumber(new BigInteger("123456789012345678901234567890"));
+            gen.writeName("bigDec");
+            gen.writeNumber(new BigDecimal("3.14"));
+            gen.writeName("raw");
+            gen.writeRawValue("RAW");
+            gen.writeName("nul");
+            gen.writeNull();
+            gen.writeEndObject();
+        }
+
+        assertEquals("A,9999999999,1.5,2.5,123456789012345678901234567890,3.14,RAW,\n",
+                sw.toString());
+    }
+
     // Covers IntValue, BooleanValue and TextValue (String) buffering paths
     @Test
     public void testBufferedSimpleValues() throws Exception

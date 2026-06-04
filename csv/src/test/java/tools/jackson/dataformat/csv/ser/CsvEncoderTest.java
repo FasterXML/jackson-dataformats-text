@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests targeting less-exercised code paths of {@code impl.CsvEncoder}: the
  * "long" (buffer-spanning) quoting and escaping routines, the raw-write
  * methods, and a few quoting-related write features. The internal output
- * buffer is ~2000 chars, so values well above that exercise the long paths.
+ * buffer is 4000 chars, so values well above that exercise the long paths.
  */
 public class CsvEncoderTest extends ModuleTestBase
 {
@@ -24,7 +24,7 @@ public class CsvEncoderTest extends ModuleTestBase
     private final CsvSchema SCHEMA = MAPPER.schemaFor(IdDesc.class)
             .withLineSeparator("\n");
 
-    // Build a String longer than the encoder's internal output buffer (~2000 chars)
+    // Build a String longer than the encoder's internal output buffer (4000 chars)
     private static String longString(String unit, int targetLen) {
         StringBuilder sb = new StringBuilder(targetLen + unit.length());
         while (sb.length() < targetLen) {
@@ -44,6 +44,18 @@ public class CsvEncoderTest extends ModuleTestBase
     public void testLongQuotedValueRoundTrip() throws Exception
     {
         String id = longString("ab,\"cd ", 5000);
+
+        // Assert the exact generated CSV, not just round-trip self-consistency:
+        // the whole value must be wrapped in quotes with each embedded quote doubled.
+        // Column order is id,desc (see @JsonPropertyOrder on IdDesc); "Foo" needs no quoting.
+        String expected = '"' + id.replace("\"", "\"\"") + "\",Foo\n";
+        assertEquals(expected, MAPPER.writer(SCHEMA)
+                .without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc(id, "Foo")));
+        assertEquals(expected, MAPPER.writer(SCHEMA)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(new IdDesc(id, "Foo")));
+
         _roundTrip(MAPPER.writer(SCHEMA).without(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING),
                 new IdDesc(id, "Foo"));
         _roundTrip(MAPPER.writer(SCHEMA).with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING),
@@ -83,7 +95,7 @@ public class CsvEncoderTest extends ModuleTestBase
     @Test
     public void testWriteRawVariants() throws Exception
     {
-        String big = longString("X", 2500);           // > output buffer -> writeRawLong
+        String big = longString("X", 6000);           // > output buffer (4000) -> writeRawLong
         char[] shortArr = "0123456789".toCharArray();   // < SHORT_WRITE (32)
         char[] bigArr = longString("Y", 5000).toCharArray(); // >= SHORT_WRITE -> pass-through
 

@@ -5,13 +5,6 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-import tools.jackson.core.ErrorReportConfiguration;
-import tools.jackson.core.JsonEncoding;
-import tools.jackson.core.StreamReadConstraints;
-import tools.jackson.core.StreamWriteConstraints;
-import tools.jackson.core.io.ContentReference;
-import tools.jackson.core.io.IOContext;
-import tools.jackson.core.util.BufferRecycler;
 import tools.jackson.dataformat.csv.*;
 import tools.jackson.dataformat.csv.impl.UTF8Writer;
 
@@ -30,16 +23,6 @@ public class UTF8WriterTest extends ModuleTestBase
     // U+1F600 GRINNING FACE, as a UTF-16 surrogate pair
     private final static String EMOJI_GRIN = "\uD83D\uDE00";
 
-    private IOContext ioContext() {
-        return new IOContext(
-                StreamReadConstraints.defaults(),
-                StreamWriteConstraints.defaults(),
-                ErrorReportConfiguration.defaults(),
-                new BufferRecycler(),
-                ContentReference.unknown(), false,
-                JsonEncoding.UTF8);
-    }
-
     // Sample text mixing 1-, 2-, 3- and 4-byte UTF-8 code points
     private final static String MIXED =
             "abcABC123 "                       // ASCII (1 byte)
@@ -51,7 +34,7 @@ public class UTF8WriterTest extends ModuleTestBase
     public void testWriteSingleCharsViaInt() throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             for (int i = 0; i < MIXED.length(); ++i) {
                 w.write(MIXED.charAt(i));
             }
@@ -70,7 +53,7 @@ public class UTF8WriterTest extends ModuleTestBase
         String input = sb.toString();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             char[] ch = input.toCharArray();
             w.write(ch); // exercises write(char[]) -> write(char[],0,len)
         }
@@ -87,7 +70,7 @@ public class UTF8WriterTest extends ModuleTestBase
         String input = sb.toString();
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             w.write(input);          // write(String) -> write(String,0,len)
             w.append('!');           // append(char) -> write(int)
             w.flush();               // exercise explicit flush
@@ -99,7 +82,7 @@ public class UTF8WriterTest extends ModuleTestBase
     public void testSingleAndEmptyChunks() throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             w.write(new char[0]);            // len == 0, no-op
             w.write(new char[] { 'x' });     // len == 1 special-cased
             w.write("y", 0, 1);              // String len == 1 special-cased
@@ -113,7 +96,7 @@ public class UTF8WriterTest extends ModuleTestBase
     public void testSurrogatePairSplitViaInt() throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             w.write(0xD83D); // high surrogate, held
             w.write(0xDE00); // low surrogate, completes U+1F600
         }
@@ -125,7 +108,7 @@ public class UTF8WriterTest extends ModuleTestBase
     public void testSurrogatePairSplitAcrossArrayWrites() throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             // First array ends with a lone high surrogate (held over)
             w.write(new char[] { 'a', '\uD83D' }, 0, 2);
             // Next array starts with the matching low surrogate
@@ -139,7 +122,7 @@ public class UTF8WriterTest extends ModuleTestBase
     public void testSurrogatePairSplitAcrossStringWrites() throws Exception
     {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (UTF8Writer w = new UTF8Writer(ioContext(), out)) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), out)) {
             w.write("a\uD83D", 0, 2);  // ends with held high surrogate
             w.write("\uDE00b", 0, 2);  // starts with low surrogate
         }
@@ -150,7 +133,7 @@ public class UTF8WriterTest extends ModuleTestBase
     @Test
     public void testUnmatchedSecondSurrogate() throws Exception
     {
-        try (UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream())) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), new ByteArrayOutputStream())) {
             try {
                 w.write(0xDE00); // low surrogate alone
                 fail("Should not pass");
@@ -164,21 +147,19 @@ public class UTF8WriterTest extends ModuleTestBase
     @Test
     public void testUnmatchedFirstSurrogateOnClose() throws Exception
     {
-        UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream());
+        UTF8Writer w = new UTF8Writer(testIOContext(), new ByteArrayOutputStream());
         w.write(0xD83D); // high surrogate, held
-        try {
-            w.close();
-            fail("Should not pass");
-        } catch (IOException e) {
-            verifyException(e, "Unmatched first part of surrogate pair");
-        }
+        // close() itself is expected to throw; assertThrows keeps the failure
+        // path structured (no leaked reference) and still lets us inspect the message
+        IOException e = assertThrows(IOException.class, w::close);
+        verifyException(e, "Unmatched first part of surrogate pair");
     }
 
     // High surrogate followed by a non-low-surrogate char: broken pair
     @Test
     public void testBrokenSurrogatePair() throws Exception
     {
-        try (UTF8Writer w = new UTF8Writer(ioContext(), new ByteArrayOutputStream())) {
+        try (UTF8Writer w = new UTF8Writer(testIOContext(), new ByteArrayOutputStream())) {
             w.write(0xD83D); // high surrogate, held
             try {
                 w.write('a'); // not a low surrogate
