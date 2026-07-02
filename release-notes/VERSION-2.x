@@ -16,7 +16,10 @@ Active Maintainers:
 
 2.23.0 (not yet released)
 
-No changes since 2.22
+#696: (toml) Write non-finite floating-point values as TOML tokens
+  (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
+ (reported by @EverNife)
+ (fix by @seonwooj0810)
 
 2.22.0 (31-May-2026)
 
