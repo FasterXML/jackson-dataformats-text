@@ -313,3 +313,15 @@ Dmitry Bufistov (@dmitry-workato)
 * Requested #601: (csv) Reader should allow separating plain `nullValue`
   and quoted value `"nullValue"`
  (2.22.0)
+
+EverNife (@EverNife)
+
+* Reported #696: (toml) Write non-finite floating-point values as TOML tokens
+  (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
+ (2.23.0)
+
+seonwoojung (@seonwooj0810)
+
+* Fixed #696: (toml) Write non-finite floating-point values as TOML tokens
+  (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
+ (2.23.0)
