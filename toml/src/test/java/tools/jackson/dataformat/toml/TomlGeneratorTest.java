@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 public class TomlGeneratorTest extends TomlMapperTestBase {
@@ -46,6 +48,61 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndObject();
         }
         assertEquals("abc = 1.23\n", w.toString());
+    }
+
+    // [dataformats-text#696]: non-finite floats must be written as the TOML
+    // tokens `nan` / `inf` / `-inf` (not Java's `NaN` / `Infinity`) so the
+    // writer's own output can be parsed back.
+    @Test
+    public void nonFiniteDoubles() throws IOException {
+        assertEquals("abc = nan\n", _writeDouble(Double.NaN));
+        assertEquals("abc = inf\n", _writeDouble(Double.POSITIVE_INFINITY));
+        assertEquals("abc = -inf\n", _writeDouble(Double.NEGATIVE_INFINITY));
+    }
+
+    @Test
+    public void nonFiniteFloats() throws IOException {
+        assertEquals("abc = nan\n", _writeFloat(Float.NaN));
+        assertEquals("abc = inf\n", _writeFloat(Float.POSITIVE_INFINITY));
+        assertEquals("abc = -inf\n", _writeFloat(Float.NEGATIVE_INFINITY));
+    }
+
+    // Written non-finite values must round-trip through the same mapper.
+    @Test
+    public void nonFiniteRoundTrip() throws IOException {
+        TomlMapper mapper = newTomlMapper();
+        for (double d : new double[] {
+                Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY }) {
+            String toml = mapper.writeValueAsString(java.util.Collections.singletonMap("x", d));
+            JsonNode node = mapper.readTree(toml).get("x");
+            if (Double.isNaN(d)) {
+                assertTrue(Double.isNaN(node.doubleValue()), "expected NaN from: " + toml);
+            } else {
+                assertEquals(d, node.doubleValue(), 0.0, "round-trip failed for: " + toml);
+            }
+        }
+    }
+
+    private String _writeDouble(double d) throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeNumber(d);
+            generator.writeEndObject();
+        }
+        return w.toString();
+    }
+
+    private String _writeFloat(float f) throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeNumber(f);
+            generator.writeEndObject();
+        }
+        return w.toString();
     }
 
     @Test
