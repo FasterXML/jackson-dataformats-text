@@ -44,6 +44,10 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
+2.18.9 (07-Jul-2026)
+
+No changes since 2.18.8
+
 2.18.8 (28-May-2026)
 
 #679: (toml) Validate integer length for hex/octal/binary radix literals
