@@ -18,6 +18,10 @@ implementations)
 
 No changes since 3.2
 
+3.2.1 (10-Jul-2026)
+
+No changes since 3.2.1
+
 3.2.0 (08-Jun-2026)
 
 #9: (csv) Incorrect detection of `hasNextValue()` for simple iteration with `String[]`
