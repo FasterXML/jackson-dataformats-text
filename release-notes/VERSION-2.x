@@ -14,13 +14,20 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.22.0 (not yet released)
+2.23.0 (not yet released)
+
+#696: (toml) Write non-finite floating-point values as TOML tokens
+  (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
+ (reported by @EverNife)
+ (fix by @seonwooj0810)
+
+2.22.0 (31-May-2026)
 
 #601: (csv) Reader should allow separating plain `nullValue` and quoted
   value `"nullValue"`
  (requested by Dmitry B)
 
-2.21.4 (not yet released)
+2.21.4 (28-May-2026)
 
 #679: (toml) Validate integer length for hex/octal/binary radix literals
  (fix by @tonghuaroot)
@@ -93,7 +100,7 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
-2.18.8 (not yet released)
+2.18.8 (28-May-2026)
 
 #679: (toml) Validate integer length for hex/octal/binary radix literals
  (fix by @tonghuaroot)

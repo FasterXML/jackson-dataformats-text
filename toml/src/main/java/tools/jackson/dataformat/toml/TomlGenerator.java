@@ -606,15 +606,35 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public JsonGenerator writeNumber(double d) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(d));
+        _writeRaw(_nonFiniteTomlToken(d, String.valueOf(d)));
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(float f) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(f));
+        _writeRaw(_nonFiniteTomlToken(f, String.valueOf(f)));
         return writeValueEnd();
+    }
+
+    /**
+     * Maps a non-finite floating-point value to the TOML float token
+     * ({@code nan}, {@code inf} or {@code -inf}); finite values are written
+     * using the supplied Java text form. {@code String.valueOf(...)} would
+     * otherwise emit {@code NaN} / {@code Infinity} / {@code -Infinity}, which
+     * are not valid TOML and cannot be read back by the parser.
+     */
+    private static String _nonFiniteTomlToken(double d, String finiteForm) {
+        if (Double.isNaN(d)) {
+            return "nan";
+        }
+        if (d == Double.POSITIVE_INFINITY) {
+            return "inf";
+        }
+        if (d == Double.NEGATIVE_INFINITY) {
+            return "-inf";
+        }
+        return finiteForm;
     }
 
     @Override
