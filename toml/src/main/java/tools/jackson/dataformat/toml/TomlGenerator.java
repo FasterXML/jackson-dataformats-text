@@ -13,6 +13,7 @@ import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.VersionUtil;
+import tools.jackson.databind.JsonNode;
 
 final class TomlGenerator extends GeneratorBase
 {
@@ -369,7 +370,7 @@ final class TomlGenerator extends GeneratorBase
             _reportError("Cannot write a property name, expecting a value");
         }
 
-        if (_streamWriteContext._inline) {
+        if (_streamWriteContext.isInline()) {
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
@@ -405,16 +406,46 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
+        // Section/AOT syntax is only valid in non-inline scopes. Inside an
+        // inline array or inline table the only valid form is a regular
+        // inline array, so a flagged TomlArrayNode reused there must fall
+        // through to plain serialization.
+        if (TomlNodes.isArrayOfTables(currValue)
+                && !_streamWriteContext.isInline()
+                && _hasSectionAnchor()) {
+            TomlArrayNode arr = (TomlArrayNode) currValue;
+            // TOML has no empty array-of-tables form ([[path]] requires at least
+            // one element). If a parsed [[items]] has been emptied (or a caller
+            // started one without elements), drop AOT mode and emit an inline
+            // empty array so the field still survives in the output.
+            if (arr.size() > 0) {
+                _verifyArrayOfTablesElements(arr);
+                return writeStartArrayOfTables(currValue);
+            }
+        }
         // arrays are always inline, force writing the current key
         // NOTE: if this ever changes, we need to add empty array handling in writeEndArray
         _verifyValueWrite("start an array", true);
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
-                _basePath.length());
+                _basePath.length(), TomlWriteContext.Kind.INLINE_ARRAY);
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
-        if (_streamWriteContext._inline) {
+        if (_streamWriteContext.isInline()) {
             _writeRaw('[');
         }
         return this;
+    }
+
+    private void _verifyArrayOfTablesElements(TomlArrayNode array) throws JacksonException {
+        for (int i = 0, n = array.size(); i < n; ++i) {
+            JsonNode el = array.get(i);
+            if (!el.isObject()) {
+                throw new TomlStreamWriteException(this,
+                        "Array marked as TOML array-of-tables (parsed `[[path]]`) cannot contain "
+                        + "non-object element at index " + i + " (was " + el.getNodeType()
+                        + "); replace the elements with objects, or remove the array and add a "
+                        + "fresh inline array, before serialization");
+            }
+        }
     }
 
     @Override
@@ -422,10 +453,24 @@ final class TomlGenerator extends GeneratorBase
         if (!_streamWriteContext.inArray()) {
             _reportError("Current context not an Array but " + _streamWriteContext.typeDesc());
         }
-        if (_streamWriteContext._inline) {
+        TomlWriteContext.Kind kind = _streamWriteContext._kind;
+        if (kind == TomlWriteContext.Kind.INLINE_ARRAY) {
             _writeRaw(']');
-        } else if (!_streamWriteContext.hasCurrentIndex()) {
-            // empty array
+            _streamWriteContext = _streamWriteContext.getParent();
+            return writeValueEnd();
+        }
+        if (kind == TomlWriteContext.Kind.ARRAY_OF_TABLES) {
+            if (!_streamWriteContext.hasCurrentIndex()) {
+                throw new TomlStreamWriteException(this,
+                        "Cannot end an empty TOML array-of-tables: TOML has no "
+                        + "empty [[path]] form, write at least one element or "
+                        + "use writeStartArray for an inline empty array");
+            }
+            _restoreOuterBasePath(_streamWriteContext);
+            _streamWriteContext = _streamWriteContext.getParent();
+            return this;
+        }
+        if (!_streamWriteContext.hasCurrentIndex()) {
             VersionUtil.throwInternal();
         }
         _streamWriteContext = _streamWriteContext.getParent();
@@ -439,11 +484,22 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeStartObject(Object forValue) throws JacksonException {
+        if (_streamWriteContext._kind == TomlWriteContext.Kind.ARRAY_OF_TABLES) {
+            return _startArrayOfTablesElement(forValue);
+        }
+        // See writeStartArray: section headers are illegal inside inline
+        // scopes, so a flagged TomlObjectNode reused there falls through to
+        // plain inline-object serialization.
+        if (TomlNodes.isTableHeader(forValue)
+                && !_streamWriteContext.isInline()
+                && _hasSectionAnchor()) {
+            return writeStartTable(forValue);
+        }
         // objects aren't always materialized right now
         _verifyValueWrite("start an object", false);
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
-        if (_streamWriteContext._inline) {
+        if (_streamWriteContext.isInline()) {
             writeRaw('{');
         }
         return this;
@@ -454,19 +510,195 @@ final class TomlGenerator extends GeneratorBase
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
-        if (_streamWriteContext._inline) {
+        TomlWriteContext.Kind kind = _streamWriteContext._kind;
+        if (kind == TomlWriteContext.Kind.INLINE_OBJECT) {
             writeRaw('}');
             _streamWriteContext = _streamWriteContext.getParent();
-            writeValueEnd();
-        } else {
-            if (!_streamWriteContext.hasCurrentIndex()) {
-                // empty object
-                writeCurrentPath();
-                _writeRaw("{}");
-                writeValueEnd();
-            }
-            _streamWriteContext = _streamWriteContext.getParent();
+            return writeValueEnd();
         }
+        if (kind == TomlWriteContext.Kind.TABLE) {
+            _restoreOuterBasePath(_streamWriteContext);
+            _streamWriteContext = _streamWriteContext.getParent();
+            return this;
+        }
+        if (!_streamWriteContext.hasCurrentIndex()) {
+            writeCurrentPath();
+            _writeRaw("{}");
+            writeValueEnd();
+        }
+        _streamWriteContext = _streamWriteContext.getParent();
+        return this;
+    }
+
+    /*
+    /**********************************************************************
+    /* TOML-specific structural output: tables and array of tables
+    /**********************************************************************
+     */
+
+    /**
+     * Begin a TOML standard table (e.g. {@code [foo.bar]}). Must be called
+     * after a {@link #writeName(String)} that supplies the table's key.
+     * Locks the parent context against further scalar writes: TOML requires
+     * scalars to precede sub-tables.
+     */
+    public TomlGenerator writeStartTable() throws JacksonException {
+        return writeStartTable(null);
+    }
+
+    public TomlGenerator writeStartTable(Object forValue) throws JacksonException {
+        String fullPath = _openSection("table", false);
+        _writeRaw('[');
+        _writeRaw(fullPath);
+        _writeRaw(']');
+        _writeRaw('\n');
+
+        String outerBasePath = _basePath.length() == 0 ? null : _basePath.toString();
+        _basePath.setLength(0);
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(
+                forValue, _basePath.length(), TomlWriteContext.Kind.TABLE);
+        _streamWriteContext._savedPath = fullPath;
+        _streamWriteContext._savedOuterBasePath = outerBasePath;
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
+        return this;
+    }
+
+    /**
+     * Begin a TOML array of tables (e.g. {@code [[foo.bar]]}). Each subsequent
+     * {@link #writeStartObject()} inside the array emits another {@code [[path]]}
+     * header.
+     */
+    public TomlGenerator writeStartArrayOfTables() throws JacksonException {
+        return writeStartArrayOfTables(null);
+    }
+
+    public TomlGenerator writeStartArrayOfTables(Object currValue) throws JacksonException {
+        String fullPath = _openSection("array of tables", true);
+        // Per-element [[path]] headers are emitted lazily in _startArrayOfTablesElement.
+        // Snapshot _basePath now: per-element TABLE setup will zero it, so the
+        // sibling-write path after this AOT closes needs the outer prefix back.
+        String outerBasePath = _basePath.length() == 0 ? null : _basePath.toString();
+        _streamWriteContext = _streamWriteContext.createChildArrayContext(
+                currValue, _basePath.length(), TomlWriteContext.Kind.ARRAY_OF_TABLES);
+        _streamWriteContext._savedPath = fullPath;
+        _streamWriteContext._savedOuterBasePath = outerBasePath;
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
+        return this;
+    }
+
+    /**
+     * Shared prologue for {@link #writeStartTable} and
+     * {@link #writeStartArrayOfTables}: validates context, consumes the
+     * pending name, builds the absolute header path, locks the parent
+     * against further scalars, and (for tables) emits a leading blank-line
+     * separator. Returns the absolute path for the new section.
+     *
+     * @param what            human-readable kind for error messages
+     * @param suppressLeadGap when true, the caller is responsible for the
+     *                        per-element separator (array-of-tables case)
+     */
+    private String _openSection(String what, boolean suppressLeadGap) throws JacksonException {
+        if (_streamWriteContext.isInline()) {
+            throw new TomlStreamWriteException(this,
+                    "Cannot start a TOML " + what + " inside an inline context");
+        }
+        if (!_streamWriteContext.writeValue()) {
+            _reportError("Cannot start a " + what + ", expecting a property name");
+        }
+        String fullPath = _buildSectionPath(_currentEnclosingPath(), _basePath);
+        if (fullPath.isEmpty()) {
+            throw new TomlStreamWriteException(this,
+                    "Cannot start a TOML " + what + " without a name");
+        }
+        // Lock every scope from here up to (but not including) the nearest
+        // enclosing TABLE/AOT against further scalars: once a `[header]` has
+        // been emitted, any later scalar at any of those levels would land
+        // inside the new section in TOML's grammar.
+        for (TomlWriteContext c = _streamWriteContext; c != null; c = c.getParent()) {
+            c._scalarsClosed = true;
+            if (c._kind == TomlWriteContext.Kind.TABLE
+                    || c._kind == TomlWriteContext.Kind.ARRAY_OF_TABLES) {
+                break;
+            }
+        }
+        if (!suppressLeadGap && _needsLeadingBlankLine()) {
+            _writeRaw('\n');
+        }
+        return fullPath;
+    }
+
+    private boolean _needsLeadingBlankLine() {
+        return _streamWriteContext.getCurrentIndex() > 0
+                || _streamWriteContext._kind != TomlWriteContext.Kind.ROOT;
+    }
+
+    // True when the current position has a name to anchor a `[section]` header:
+    // either an enclosing TABLE/AOT path, or a buffered relative key from a
+    // pending writeName(). When false (e.g. parsed subtree written as the root
+    // value with no field name), table-flagged metadata cannot trigger
+    // table-syntax output, so we fall through to plain serialization.
+    private boolean _hasSectionAnchor() {
+        return !_currentEnclosingPath().isEmpty() || _basePath.length() > 0;
+    }
+
+    private static String _buildSectionPath(String parent, StringBuilder relative) {
+        if (parent.isEmpty()) {
+            return relative.toString();
+        }
+        if (relative.length() == 0) {
+            return parent;
+        }
+        StringBuilder sb = new StringBuilder(parent.length() + 1 + relative.length());
+        sb.append(parent).append('.').append(relative);
+        return sb.toString();
+    }
+
+    // Restores _basePath to the prefix that existed before the section opened,
+    // so the parent's in-progress dotted-key sequence survives across the section.
+    private void _restoreOuterBasePath(TomlWriteContext closing) {
+        _basePath.setLength(0);
+        if (closing._savedOuterBasePath != null) {
+            _basePath.append(closing._savedOuterBasePath);
+        }
+    }
+
+    /**
+     * Section path that scopes content written into the current context, or
+     * {@code ""} for the document root. For TABLE/ARRAY_OF_TABLES this is
+     * the context's own {@code _savedPath}; otherwise it is the cached
+     * enclosing path (inherited at construction). O(1).
+     */
+    private String _currentEnclosingPath() {
+        TomlWriteContext ctxt = _streamWriteContext;
+        if (ctxt._kind == TomlWriteContext.Kind.TABLE
+                || ctxt._kind == TomlWriteContext.Kind.ARRAY_OF_TABLES) {
+            return ctxt._savedPath == null ? "" : ctxt._savedPath;
+        }
+        return ctxt._enclosingSectionPath;
+    }
+
+    private JsonGenerator _startArrayOfTablesElement(Object forValue) throws JacksonException {
+        if (!_streamWriteContext.writeValue()) {
+            _reportError("Cannot start an array-of-tables element, expecting array context");
+        }
+        String fullPath = _streamWriteContext._savedPath;
+
+        TomlWriteContext parent = _streamWriteContext.getParent();
+        boolean atDocStart = _streamWriteContext.getCurrentIndex() == 0
+                && (parent == null || parent._kind == TomlWriteContext.Kind.ROOT);
+        if (!atDocStart) {
+            _writeRaw('\n');
+        }
+        _writeRaw("[[");
+        _writeRaw(fullPath);
+        _writeRaw("]]");
+        _writeRaw('\n');
+
+        _basePath.setLength(0);
+        _streamWriteContext = _streamWriteContext.createChildObjectContext(
+                forValue, _basePath.length(), TomlWriteContext.Kind.TABLE);
+        _streamWriteContext._savedPath = fullPath;
+        streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         return this;
     }
 
@@ -680,11 +912,22 @@ final class TomlGenerator extends GeneratorBase
     }
 
     protected void _verifyValueWrite(String typeMsg, boolean forceMaterializeKey) throws JacksonException {
+        if (_streamWriteContext._kind == TomlWriteContext.Kind.ARRAY_OF_TABLES) {
+            throw new TomlStreamWriteException(this,
+                    "Cannot " + typeMsg + " inside a TOML array-of-tables: each "
+                    + "element must be an object (writeStartObject)");
+        }
+        // Strict ordering: scalars (and inline values) cannot follow a sub-table at the same level.
+        if (_streamWriteContext._scalarsClosed) {
+            throw new TomlStreamWriteException(this,
+                    "Cannot " + typeMsg + " after a sub-table has been opened at this level "
+                    + "(TOML requires scalars to precede sub-tables / arrays of tables)");
+        }
         // check that name/value cadence works
         if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot " + typeMsg + ", expecting a property name");
         }
-        if (_streamWriteContext._inline) {
+        if (_streamWriteContext.isInline()) {
             // write separators, if we're inline the key is already there
             if (_streamWriteContext.inArray()) {
                 if (_streamWriteContext.getCurrentIndex() != 0) {
@@ -707,7 +950,7 @@ final class TomlGenerator extends GeneratorBase
     }
 
     private JsonGenerator writeValueEnd() {
-        if (!_streamWriteContext._inline) {
+        if (!_streamWriteContext.isInline()) {
             writeRaw('\n');
         }
         return this;
