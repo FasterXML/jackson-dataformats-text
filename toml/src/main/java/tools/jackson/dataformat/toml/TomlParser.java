@@ -59,16 +59,10 @@ class TomlParser {
         TomlParser parser = new TomlParser(factory, ioContext, errorCtxt,
                 formatReadFeatures, reader);
         try {
-            final ObjectNode node = parser.parse();
-            assert parser.getNestingDepth() == 0;
-            return node;
+            return parser.parse();
         } finally {
             parser.lexer.releaseBuffers();
         }
-    }
-
-    int getNestingDepth() {
-        return lexer.getNestingDepth();
     }
 
     private TomlToken peek() throws TomlStreamReadException {
@@ -97,14 +91,16 @@ class TomlParser {
     public ObjectNode parse() throws IOException {
         TomlObjectNode root = (TomlObjectNode) factory.objectNode();
         TomlObjectNode currentTable = root;
+        int currentTableDepth = 1;
         while (next != null) {
             TomlToken token = peek();
             if (token == TomlToken.UNQUOTED_KEY || token == TomlToken.STRING) {
-                parseKeyVal(currentTable, Lexer.EXPECT_EOL);
+                parseKeyVal(currentTable, Lexer.EXPECT_EOL, currentTableDepth);
             } else if (token == TomlToken.STD_TABLE_OPEN) {
                 pollExpected(TomlToken.STD_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
-                FieldRef fieldRef = parseAndEnterKey(root, true);
-                currentTable = getOrCreateObject(fieldRef.object, fieldRef.key);
+                FieldRef fieldRef = parseAndEnterKey(root, true, 1);
+                currentTableDepth = fieldRef.objectDepth + 1;
+                currentTable = getOrCreateObject(fieldRef.object, fieldRef.key, currentTableDepth);
                 if (currentTable.defined) {
                     throw errorContext.atPosition(lexer).generic("Table redefined");
                 }
@@ -112,11 +108,14 @@ class TomlParser {
                 pollExpected(TomlToken.STD_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else if (token == TomlToken.ARRAY_TABLE_OPEN) {
                 pollExpected(TomlToken.ARRAY_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
-                FieldRef fieldRef = parseAndEnterKey(root, true);
-                TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key);
+                FieldRef fieldRef = parseAndEnterKey(root, true, 1);
+                int arrayDepth = fieldRef.objectDepth + 1;
+                TomlArrayNode array = getOrCreateArray(fieldRef.object, fieldRef.key, arrayDepth);
                 if (array.closed) {
                     throw errorContext.atPosition(lexer).generic("Array already finished");
                 }
+                currentTableDepth = arrayDepth + 1;
+                tomlFactory.streamReadConstraints().validateNestingDepth(currentTableDepth);
                 currentTable = (TomlObjectNode) array.addObject();
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
             } else {
@@ -133,9 +132,11 @@ class TomlParser {
 
     private FieldRef parseAndEnterKey(
             TomlObjectNode outer,
-            boolean forTable
+            boolean forTable,
+            int outerDepth
     ) throws IOException {
         TomlObjectNode node = outer;
+        int nodeDepth = outerDepth;
         while (true) {
             if (node.closed) {
                 throw errorContext.atPosition(lexer).generic("Object already closed");
@@ -157,15 +158,20 @@ class TomlParser {
             }
             pollExpected(partToken, Lexer.EXPECT_INLINE_KEY);
             if (peek() != TomlToken.DOT_SEP) {
-                return new FieldRef(node, part);
+                return new FieldRef(node, part, nodeDepth);
             }
             pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_INLINE_KEY);
+
+            int childDepth = nodeDepth + 1;
+            tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
 
             JsonNode existing = node.get(part);
             if (existing == null) {
                 node = (TomlObjectNode) node.putObject(part);
+                nodeDepth = childDepth;
             } else if (existing.isObject()) {
                 node = (TomlObjectNode) existing;
+                nodeDepth = childDepth;
             } else if (existing.isArray()) {
                 /* "Any reference to an array of tables points to the most recently defined table element of the array.
                  * This allows you to define sub-tables, and even sub-arrays of tables, inside the most recent table."
@@ -179,14 +185,17 @@ class TomlParser {
                     throw errorContext.atPosition(lexer).generic("Array already closed");
                 }
                 // Only arrays declared by array tables are not closed, and those are always arrays of objects.
+                int tableDepth = childDepth + 1;
+                tomlFactory.streamReadConstraints().validateNestingDepth(tableDepth);
                 node = (TomlObjectNode) array.get(array.size() - 1);
+                nodeDepth = tableDepth;
             } else {
                 throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + existing.getNodeType());
             }
         }
     }
 
-    private JsonNode parseValue(int nextState) throws IOException {
+    private JsonNode parseValue(int nextState, int valueDepth) throws IOException {
         TomlToken firstToken = peek();
         switch (firstToken) {
             case STRING:
@@ -209,9 +218,11 @@ class TomlParser {
             case INTEGER:
                 return parseInt(nextState);
             case ARRAY_OPEN:
-                return parseArray(nextState);
+                tomlFactory.streamReadConstraints().validateNestingDepth(valueDepth);
+                return parseArray(nextState, valueDepth);
             case INLINE_TABLE_OPEN:
-                return parseInlineTable(nextState);
+                tomlFactory.streamReadConstraints().validateNestingDepth(valueDepth);
+                return parseInlineTable(nextState, valueDepth);
             default:
                 throw errorContext.atPosition(lexer).unexpectedToken(firstToken, "value");
         }
@@ -392,7 +403,7 @@ class TomlParser {
         }
     }
 
-    private ObjectNode parseInlineTable(int nextState) throws IOException {
+    private ObjectNode parseInlineTable(int nextState, int tableDepth) throws IOException {
         // inline-table = inline-table-open [ inline-table-keyvals ] inline-table-close
         // inline-table-keyvals = keyval [ inline-table-sep inline-table-keyvals ]
         pollExpected(TomlToken.INLINE_TABLE_OPEN, Lexer.EXPECT_INLINE_KEY);
@@ -408,7 +419,7 @@ class TomlParser {
                     throw errorContext.atPosition(lexer).generic("Trailing comma not permitted for inline tables");
                 }
             }
-            parseKeyVal(node, Lexer.EXPECT_TABLE_SEP);
+            parseKeyVal(node, Lexer.EXPECT_TABLE_SEP, tableDepth);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.INLINE_TABLE_CLOSE) {
                 break;
@@ -424,7 +435,7 @@ class TomlParser {
         return node;
     }
 
-    private ArrayNode parseArray(int nextState) throws IOException {
+    private ArrayNode parseArray(int nextState, int arrayDepth) throws IOException {
         // array = array-open [ array-values ] ws-comment-newline array-close
         // array-values =  ws-comment-newline val ws-comment-newline array-sep array-values
         // array-values =/ ws-comment-newline val ws-comment-newline [ array-sep ]
@@ -435,7 +446,7 @@ class TomlParser {
             if (token == TomlToken.ARRAY_CLOSE) {
                 break;
             }
-            JsonNode value = parseValue(Lexer.EXPECT_ARRAY_SEP);
+            JsonNode value = parseValue(Lexer.EXPECT_ARRAY_SEP, arrayDepth + 1);
             node.add(value);
             TomlToken sepToken = peek();
             if (sepToken == TomlToken.ARRAY_CLOSE) {
@@ -451,18 +462,19 @@ class TomlParser {
         return node;
     }
 
-    private void parseKeyVal(TomlObjectNode target, int nextState) throws IOException {
+    private void parseKeyVal(TomlObjectNode target, int nextState, int targetDepth) throws IOException {
         // keyval = key keyval-sep val
-        FieldRef fieldRef = parseAndEnterKey(target, false);
+        FieldRef fieldRef = parseAndEnterKey(target, false, targetDepth);
         pollExpected(TomlToken.KEY_VAL_SEP, Lexer.EXPECT_VALUE);
-        JsonNode value = parseValue(nextState);
+        JsonNode value = parseValue(nextState, fieldRef.objectDepth + 1);
         if (fieldRef.object.has(fieldRef.key)) {
             throw errorContext.atPosition(lexer).generic("Duplicate key");
         }
         fieldRef.object.set(fieldRef.key, value);
     }
 
-    private TomlObjectNode getOrCreateObject(ObjectNode node, String field) throws TomlStreamReadException {
+    private TomlObjectNode getOrCreateObject(ObjectNode node, String field, int childDepth) throws IOException {
+        tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlObjectNode) node.putObject(field);
@@ -472,24 +484,28 @@ class TomlParser {
             throw errorContext.atPosition(lexer).generic("Path into existing non-object value of type " + existing.getNodeType());
         }
     }
-    private TomlArrayNode getOrCreateArray(ObjectNode node, String field) throws TomlStreamReadException {
+
+    private TomlArrayNode getOrCreateArray(ObjectNode node, String field, int childDepth) throws IOException {
+        tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlArrayNode) node.putArray(field);
         } else if (existing.isArray()) {
             return (TomlArrayNode) existing;
         } else {
-            throw errorContext.atPosition(lexer).generic("Path into existing non-array value of type " + node.getNodeType());
+            throw errorContext.atPosition(lexer).generic("Path into existing non-array value of type " + existing.getNodeType());
         }
     }
 
     private static class FieldRef {
         final TomlObjectNode object;
         final String key;
+        final int objectDepth;
 
-        FieldRef(TomlObjectNode object, String key) {
+        FieldRef(TomlObjectNode object, String key, int objectDepth) {
             this.object = object;
             this.key = key;
+            this.objectDepth = objectDepth;
         }
     }
 
