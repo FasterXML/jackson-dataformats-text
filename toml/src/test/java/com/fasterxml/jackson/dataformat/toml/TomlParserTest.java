@@ -219,6 +219,23 @@ public class TomlParserTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void dottedKeysIntoArrayTableRespectMaxNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        // Navigating a table path through an existing array table points at its most
+        // recently defined element; the created sub-table must still be depth-counted.
+        Assert.assertEquals(json("{\"a\":[{\"b\":{\"c\":1}}]}"),
+                toml("[[a]]\n[a.b]\nc = 1"));
+
+        assertNestingDepthExceeded(factory, "[[a]]\n[a.b]\nc = 1");
+        assertNestingDepthExceeded(factory, "[[a]]\n[[a.b]]\nc = 1");
+    }
+
+    @Test
     public void dottedKeysWhitespace() throws Exception {
         Assert.assertEquals(
                 json("{\"fruit\": {\"name\": \"banana\", \"color\": \"yellow\", \"flavor\": \"banana\"}}"),
