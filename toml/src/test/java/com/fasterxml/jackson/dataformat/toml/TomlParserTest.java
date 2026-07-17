@@ -10,6 +10,8 @@ import java.util.Arrays;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Test;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +54,17 @@ public class TomlParserTest extends TomlMapperTestBase {
                 factory, testIOContext(),
                 new StringReader(toml)
         );
+    }
+
+    private static void assertNestingDepthExceeded(TomlFactory factory,
+            @Language("toml") String toml) throws Exception {
+        try {
+            toml(factory, toml);
+            fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            assertTrue(e.getMessage().contains("Document nesting depth (4) exceeds the maximum allowed (3"),
+                    "unexpected exception message: " + e.getMessage());
+        }
     }
 
     @Test
@@ -145,6 +158,96 @@ public class TomlParserTest extends TomlMapperTestBase {
                         "physical.color = \"orange\"\n" +
                         "physical.shape = \"round\"\n" +
                         "site.\"google.com\" = true"));
+    }
+
+    @Test
+    public void dottedKeysRespectMaxNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        assertEquals(json("{\"a\":{\"b\":{\"c\":1}}}"),
+                toml(factory, "a.b.c = 1"));
+
+        assertNestingDepthExceeded(factory, "a.b.c.d = 1");
+    }
+
+    @Test
+    public void dottedKeysRespectCurrentTableNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        assertEquals(json("{\"a\":{\"b\":{\"c\":1}}}"),
+                toml(factory, "[a.b]\nc = 1"));
+
+        assertNestingDepthExceeded(factory, "[a.b]\nc.d = 1");
+        assertNestingDepthExceeded(factory, "[a.b.c]\nd = 1");
+    }
+
+    @Test
+    public void dottedKeysRespectExistingObjectNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        assertEquals(json("{\"a\":{\"b\":{\"c\":1,\"d\":2}}}"),
+                toml(factory, "a.b.c = 1\na.b.d = 2"));
+
+        assertNestingDepthExceeded(factory, "a.b.c = 1\na.b.d.e = 2");
+    }
+
+    @Test
+    public void inlineContainersRespectDottedKeyNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        assertEquals(json("{\"a\":{\"b\":{\"c\":1}}}"),
+                toml(factory, "a.b = { c = 1 }"));
+
+        assertNestingDepthExceeded(factory, "a.b.c = {}");
+        assertNestingDepthExceeded(factory, "a.b = { c = {} }");
+        assertNestingDepthExceeded(factory, "a.b = [[1]]");
+    }
+
+    @Test
+    public void arrayTablesRespectMaxNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        assertEquals(json("{\"a\":[{\"b\":1}]}"),
+                toml(factory, "[[a]]\nb = 1"));
+
+        assertNestingDepthExceeded(factory, "[[a.b]]\nc = 1");
+    }
+
+    @Test
+    public void dottedKeysIntoArrayTableRespectMaxNestingDepth() throws Exception {
+        TomlFactory factory = TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(3)
+                        .build())
+                .build();
+
+        // Navigating a table path through an existing array table points at its most
+        // recently defined element; the created sub-table must still be depth-counted.
+        assertEquals(json("{\"a\":[{\"b\":{\"c\":1}}]}"),
+                toml("[[a]]\n[a.b]\nc = 1"));
+
+        assertNestingDepthExceeded(factory, "[[a]]\n[a.b]\nc = 1");
+        assertNestingDepthExceeded(factory, "[[a]]\n[[a.b]]\nc = 1");
     }
 
     @Test
