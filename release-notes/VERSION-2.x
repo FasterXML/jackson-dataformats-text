@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.21.6 (not yet released)
+
+#702: (toml) Expand nesting depth checks for dotted keys
+ (contributed by @yawkat)
+
 2.21.5 (06-Jul-2026)
 
 No changes since 2.21.4
