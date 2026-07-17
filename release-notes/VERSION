@@ -18,6 +18,11 @@ implementations)
 
 No changes since 3.2
 
+3.2.2 (not yet released)
+
+#702: (toml) Expand nesting depth checks for dotted keys
+ (contributed by @yawkat)
+
 3.2.1 (10-Jul-2026)
 
 No changes since 3.2.1
