@@ -253,4 +253,46 @@ public class CsvSchemaTest extends ModuleTestBase
 
         _verifyLinks(pointSchema);
     }
+
+    // For [dataformats-text#699]: modify columns in Builder by name
+    @Test
+    public void testModifyColumnsByName()
+    {
+        CsvSchema.Builder b = CsvSchema.builder()
+                .addColumn("a", CsvSchema.ColumnType.STRING)
+                .addColumn("b", CsvSchema.ColumnType.NUMBER)
+                .addColumn("c", CsvSchema.ColumnType.BOOLEAN);
+
+        // rename by name maps to same slot as rename by index
+        b.renameColumn("b", "b2");
+        // replace by name preserves position, changes type
+        b.replaceColumn("c", new Column(2, "c2", CsvSchema.ColumnType.STRING));
+
+        CsvSchema schema = b.build();
+        assertEquals(3, schema.size());
+        assertEquals("a", schema.column(0).getName());
+        assertEquals("b2", schema.column(1).getName());
+        assertEquals(CsvSchema.ColumnType.NUMBER, schema.column(1).getType());
+        assertEquals("c2", schema.column(2).getName());
+        assertEquals(CsvSchema.ColumnType.STRING, schema.column(2).getType());
+
+        // remove by name drops just that column
+        CsvSchema shrunk = schema.rebuild().removeColumn("a").build();
+        assertEquals(2, shrunk.size());
+        assertEquals("b2", shrunk.column(0).getName());
+        assertEquals("c2", shrunk.column(1).getName());
+    }
+
+    // For [dataformats-text#699]: unknown name should fail fast
+    @Test
+    public void testModifyUnknownColumnByName()
+    {
+        CsvSchema.Builder b = CsvSchema.builder().addColumn("a");
+        try {
+            b.removeColumn("missing");
+            fail("Should not pass");
+        } catch (IllegalArgumentException e) {
+            verifyException(e, "No column with name 'missing'");
+        }
+    }
 }

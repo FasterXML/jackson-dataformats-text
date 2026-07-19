@@ -630,6 +630,39 @@ public class CsvSchema
         }
 
         /**
+         * Method for renaming an existing column, located by its current name
+         * instead of by index. If no column with given {@code oldName} exists,
+         * an {@link IllegalArgumentException} is thrown.
+         *
+         * @since 2.23
+         */
+        public Builder renameColumn(String oldName, String newName) {
+            return renameColumn(_columnIndex(oldName), newName);
+        }
+
+        /**
+         * Method for replacing an existing column, located by its current name
+         * instead of by index. If no column with given {@code name} exists,
+         * an {@link IllegalArgumentException} is thrown.
+         *
+         * @since 2.23
+         */
+        public Builder replaceColumn(String name, Column c) {
+            return replaceColumn(_columnIndex(name), c);
+        }
+
+        /**
+         * Method for removing an existing column, located by its name instead
+         * of by index. If no column with given {@code name} exists, an
+         * {@link IllegalArgumentException} is thrown.
+         *
+         * @since 2.23
+         */
+        public Builder removeColumn(String name) {
+            return removeColumn(_columnIndex(name));
+        }
+
+        /**
          * Helper method called to drop the last collected column name if
          * it is empty: called if {link CsvParser.Feature#ALLOW_TRAILING_COMMA}
          * enabled to remove the last entry after being added initially.
@@ -868,6 +901,21 @@ public class CsvSchema
             if (index < 0 || index >= _columns.size()) {
                 throw new IllegalArgumentException("Illegal index "+index+"; only got "+_columns.size()+" columns");
             }
+        }
+
+        /**
+         * Helper method for finding index of the column with given name; throws
+         * {@link IllegalArgumentException} if no column with the name exists.
+         *
+         * @since 2.23
+         */
+        protected int _columnIndex(String name) {
+            for (int i = 0, end = _columns.size(); i < end; ++i) {
+                if (_columns.get(i).getName().equals(name)) {
+                    return i;
+                }
+            }
+            throw new IllegalArgumentException("No column with name '"+name+"' (have "+_columns.size()+" columns)");
         }
     }
 
