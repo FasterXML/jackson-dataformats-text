@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -218,6 +219,16 @@ public class YAMLGenerator extends GeneratorBase
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = (long) Integer.MAX_VALUE;
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[+-]?[0-9]*(\\.[0-9]*)?");
+
+    /**
+     * SnakeYAML's own implicit resolver patterns for {@code int} and {@code float}: used
+     * (in addition to {@link #PLAIN_NUMBER_P}) by {@link Feature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}
+     * to detect number-like Strings that {@link #PLAIN_NUMBER_P} misses -- notably YAML 1.1
+     * exponent ({@code 1e5}), hex ({@code 0x1F}) and underscore ({@code 12_34}) forms. Since these
+     * are the exact patterns the parser uses to resolve plain scalars back to numbers, quoting
+     * everything they match guarantees such Strings round-trip. See [dataformats-text#701].
+     */
+    protected final static Pattern[] NUMBER_RESOLVER_PS = { Resolver.INT, Resolver.FLOAT };
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /*
@@ -673,7 +684,7 @@ public class YAMLGenerator extends GeneratorBase
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
             } else if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
-                        && PLAIN_NUMBER_P.matcher(text).matches())
+                        && _looksLikeYAMLNumber(text))
                 ) {
                 style = STYLE_QUOTED;
             } else {
@@ -694,6 +705,28 @@ public class YAMLGenerator extends GeneratorBase
     public void writeString(char[] text, int offset, int len) throws IOException
     {
         writeString(new String(text, offset, len));
+    }
+
+    /**
+     * Checks whether given String value would be re-read as a YAML number if emitted
+     * unquoted; used by {@link Feature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}. Combines the
+     * historical {@link #PLAIN_NUMBER_P} check (retained for backwards compatibility)
+     * with SnakeYAML's own {@code int}/{@code float} resolver patterns, so that YAML 1.1
+     * exponent, hex and underscore number forms -- which {@link #PLAIN_NUMBER_P} does not
+     * match -- are quoted too and thus round-trip. See [dataformats-text#701].
+     *
+     * @since 2.23
+     */
+    protected boolean _looksLikeYAMLNumber(String text) {
+        if (PLAIN_NUMBER_P.matcher(text).matches()) {
+            return true;
+        }
+        for (Pattern p : NUMBER_RESOLVER_PS) {
+            if (p.matcher(text).matches()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
