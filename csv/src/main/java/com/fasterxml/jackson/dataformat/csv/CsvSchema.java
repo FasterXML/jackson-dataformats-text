@@ -915,8 +915,11 @@ public class CsvSchema
         }
 
         /**
-         * Helper method for finding index of the column with given name; throws
-         * {@link IllegalArgumentException} if no column with the name exists.
+         * Helper method for finding index of the column with given name.
+         *
+         * @param name Name of the column to find
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
          *
          * @since 2.23
          */
