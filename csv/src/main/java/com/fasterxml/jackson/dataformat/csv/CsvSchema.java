@@ -631,8 +631,12 @@ public class CsvSchema
 
         /**
          * Method for renaming an existing column, located by its current name
-         * instead of by index. If no column with given {@code oldName} exists,
-         * an {@link IllegalArgumentException} is thrown.
+         * instead of by index.
+         *
+         * @param oldName Current name of the column to rename
+         * @param newName New name to assign to the column
+         *
+         * @throws IllegalArgumentException if no column with given {@code oldName} exists
          *
          * @since 2.23
          */
@@ -642,8 +646,12 @@ public class CsvSchema
 
         /**
          * Method for replacing an existing column, located by its current name
-         * instead of by index. If no column with given {@code name} exists,
-         * an {@link IllegalArgumentException} is thrown.
+         * instead of by index.
+         *
+         * @param name Name of the column to replace
+         * @param c Column definition to use as replacement
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
          *
          * @since 2.23
          */
@@ -653,8 +661,11 @@ public class CsvSchema
 
         /**
          * Method for removing an existing column, located by its name instead
-         * of by index. If no column with given {@code name} exists, an
-         * {@link IllegalArgumentException} is thrown.
+         * of by index.
+         *
+         * @param name Name of the column to remove
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
          *
          * @since 2.23
          */
