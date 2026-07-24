@@ -35,6 +35,10 @@ No changes since 2.22.0
 
 2.21.6 (not yet released)
 
+#701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote YAML 1.1 exponent
+  (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
+ (reported by @EverNife)
+ (fix contributed by @seonwooj0810)
 #702: (toml) Expand nesting depth checks for dotted keys
  (contributed by @yawkat)
 

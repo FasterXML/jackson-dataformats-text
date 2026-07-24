@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.DumperOptions.FlowStyle;
 import org.yaml.snakeyaml.emitter.Emitter;
 import org.yaml.snakeyaml.events.*;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.GeneratorBase;
@@ -673,7 +674,7 @@ public class YAMLGenerator extends GeneratorBase
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
             } else if (_quotingChecker.needToQuoteValue(text)
                 || (Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatFeatures)
-                        && PLAIN_NUMBER_P.matcher(text).matches())
+                        && _looksLikeYAMLNumber(text))
                 ) {
                 style = STYLE_QUOTED;
             } else {
@@ -694,6 +695,52 @@ public class YAMLGenerator extends GeneratorBase
     public void writeString(char[] text, int offset, int len) throws IOException
     {
         writeString(new String(text, offset, len));
+    }
+
+    /**
+     * Checks whether given String value would be re-read as a YAML number if emitted
+     * unquoted; used by {@link Feature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}. Combines the
+     * historical {@link #PLAIN_NUMBER_P} check (retained for backwards compatibility)
+     * with SnakeYAML's own implicit resolver patterns for {@code int} and {@code float}
+     * ({@link Resolver#INT}, {@link Resolver#FLOAT}) -- the very patterns the parser uses
+     * to resolve plain scalars back to numbers -- so that YAML 1.1 exponent
+     * ({@code 1e5}), hex ({@code 0x1F}) and underscore ({@code 12_34}) forms, which
+     * {@link #PLAIN_NUMBER_P} does not match, are quoted too and thus round-trip.
+     * See [dataformats-text#701].
+     *<p>
+     * 60-base ("sexagesimal") forms like {@code 1:30} are excluded, to match
+     * {@link com.fasterxml.jackson.dataformat.yaml.YAMLParser}, which does not decode
+     * them either.
+     *
+     * @since 2.21.6
+     */
+    protected boolean _looksLikeYAMLNumber(String text) {
+        // 23-Jul-2026, tatu: Regexps are relatively costly so avoid them for the
+        //    common case of "regular" text: all forms matched below have to start
+        //    with one of following characters
+        if (text.isEmpty()) {
+            return false;
+        }
+        switch (text.charAt(0)) {
+        case '+': case '-': case '.':
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            break;
+        default:
+            return false;
+        }
+        // 23-Jul-2026, tatu: `Resolver.INT`/`Resolver.FLOAT` also match 60-base
+        //    ("sexagesimal") forms like "1:30" or "12:00:01". But `YAMLParser` on
+        //    purpose does NOT decode those (see `_decodeNumberScalar()`), since they
+        //    are much more likely to be Times or IP numbers -- so quoting them here
+        //    would only add noise. Colon cannot occur in any other alternative of
+        //    either pattern, so this excludes exactly the 60-base ones.
+        if (text.indexOf(':') >= 0) {
+            return false;
+        }
+        return PLAIN_NUMBER_P.matcher(text).matches()
+                || Resolver.INT.matcher(text).matches()
+                || Resolver.FLOAT.matcher(text).matches();
     }
 
     @Override
