@@ -337,3 +337,13 @@ seonwoojung (@seonwooj0810)
 * Fixed #696: (toml) Write non-finite floating-point values as TOML tokens
   (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
  (2.23.0)
+
+James Howe (@OrangeDog)
+
+* Requested #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
+ (2.23.0)
+
+seonwoojung (@seonwooj0810)
+
+* Fixed #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
+ (2.23.0)
