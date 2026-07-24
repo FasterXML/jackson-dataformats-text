@@ -219,16 +219,6 @@ public class YAMLGenerator extends GeneratorBase
     protected final static long MIN_INT_AS_LONG = (long) Integer.MIN_VALUE;
     protected final static long MAX_INT_AS_LONG = (long) Integer.MAX_VALUE;
     protected final static Pattern PLAIN_NUMBER_P = Pattern.compile("[+-]?[0-9]*(\\.[0-9]*)?");
-
-    /**
-     * SnakeYAML's own implicit resolver patterns for {@code int} and {@code float}: used
-     * (in addition to {@link #PLAIN_NUMBER_P}) by {@link Feature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}
-     * to detect number-like Strings that {@link #PLAIN_NUMBER_P} misses -- notably YAML 1.1
-     * exponent ({@code 1e5}), hex ({@code 0x1F}) and underscore ({@code 12_34}) forms. Since these
-     * are the exact patterns the parser uses to resolve plain scalars back to numbers, quoting
-     * everything they match guarantees such Strings round-trip. See [dataformats-text#701].
-     */
-    protected final static Pattern[] NUMBER_RESOLVER_PS = { Resolver.INT, Resolver.FLOAT };
     protected final static String TAG_BINARY = Tag.BINARY.toString();
 
     /*
@@ -711,22 +701,33 @@ public class YAMLGenerator extends GeneratorBase
      * Checks whether given String value would be re-read as a YAML number if emitted
      * unquoted; used by {@link Feature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}. Combines the
      * historical {@link #PLAIN_NUMBER_P} check (retained for backwards compatibility)
-     * with SnakeYAML's own {@code int}/{@code float} resolver patterns, so that YAML 1.1
-     * exponent, hex and underscore number forms -- which {@link #PLAIN_NUMBER_P} does not
-     * match -- are quoted too and thus round-trip. See [dataformats-text#701].
+     * with SnakeYAML's own implicit resolver patterns for {@code int} and {@code float}
+     * ({@link Resolver#INT}, {@link Resolver#FLOAT}) -- the very patterns the parser uses
+     * to resolve plain scalars back to numbers -- so that YAML 1.1 exponent
+     * ({@code 1e5}), hex ({@code 0x1F}) and underscore ({@code 12_34}) forms, which
+     * {@link #PLAIN_NUMBER_P} does not match, are quoted too and thus round-trip.
+     * See [dataformats-text#701].
      *
-     * @since 2.23
+     * @since 2.21.6
      */
     protected boolean _looksLikeYAMLNumber(String text) {
-        if (PLAIN_NUMBER_P.matcher(text).matches()) {
-            return true;
+        // 23-Jul-2026, tatu: Regexps are relatively costly so avoid them for the
+        //    common case of "regular" text: all forms matched below have to start
+        //    with one of following characters
+        if (text.isEmpty()) {
+            return false;
         }
-        for (Pattern p : NUMBER_RESOLVER_PS) {
-            if (p.matcher(text).matches()) {
-                return true;
-            }
+        switch (text.charAt(0)) {
+        case '+': case '-': case '.':
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            break;
+        default:
+            return false;
         }
-        return false;
+        return PLAIN_NUMBER_P.matcher(text).matches()
+                || Resolver.INT.matcher(text).matches()
+                || Resolver.FLOAT.matcher(text).matches();
     }
 
     @Override
