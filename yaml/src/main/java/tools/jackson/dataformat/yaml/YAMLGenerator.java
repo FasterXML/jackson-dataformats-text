@@ -27,6 +27,7 @@ import org.snakeyaml.engine.v2.emitter.Emitter;
 import org.snakeyaml.engine.v2.events.*;
 import org.snakeyaml.engine.v2.exceptions.YamlEngineException;
 import org.snakeyaml.engine.v2.nodes.Tag;
+import org.snakeyaml.engine.v2.resolver.JsonScalarResolver;
 
 public class YAMLGenerator extends GeneratorBase
 {
@@ -457,7 +458,7 @@ public class YAMLGenerator extends GeneratorBase
             // If one of reserved values ("true", "null"), or, number, preserve quoting:
             } else if (_quotingChecker.needToQuoteValue(text)
                 || (YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS.enabledIn(_formatWriteFeatures)
-                        && PLAIN_NUMBER_P.matcher(text).matches())
+                        && _looksLikeYAMLNumber(text))
                 ) {
                 style = STYLE_QUOTED;
             } else {
@@ -479,6 +480,42 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException
     {
         return writeString(new String(text, offset, len));
+    }
+
+    /**
+     * Checks whether given String value would be re-read as a YAML number if emitted
+     * unquoted; used by {@link YAMLWriteFeature#ALWAYS_QUOTE_NUMBERS_AS_STRINGS}.
+     * Combines the historical {@link #PLAIN_NUMBER_P} check (retained for backwards
+     * compatibility) with the implicit resolver patterns
+     * ({@link JsonScalarResolver#INT}, {@link JsonScalarResolver#FLOAT}) that
+     * {@link YAMLParser} uses to resolve plain scalars back to numbers, so that
+     * exponent ({@code 1e5}) and non-finite ({@code .inf}, {@code .nan}) forms, which
+     * {@link #PLAIN_NUMBER_P} does not match, are quoted too and thus round-trip.
+     * See [dataformats-text#701].
+     *
+     * @since 3.1.6
+     */
+    protected boolean _looksLikeYAMLNumber(String text) {
+        // 23-Jul-2026, tatu: Regexps are relatively costly so avoid them for the
+        //    common case of "regular" text: all forms matched below have to start
+        //    with one of following characters
+        if (text.isEmpty()) {
+            return false;
+        }
+        switch (text.charAt(0)) {
+        case '+': case '-': case '.':
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            break;
+        default:
+            return false;
+        }
+        // NOTE: unlike YAML 1.1 (used by 2.x), the YAML 1.2 JSON schema resolves
+        //   hex ("0x1F"), binary ("0b101"), underscore ("12_34") and 60-base ("1:30")
+        //   forms as Strings already -- so, unlike 2.x, no exclusions needed here
+        return PLAIN_NUMBER_P.matcher(text).matches()
+                || JsonScalarResolver.INT.matcher(text).matches()
+                || JsonScalarResolver.FLOAT.matcher(text).matches();
     }
 
     @Override
