@@ -231,6 +231,44 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: \"+125\"", yaml);
     }
 
+    // [dataformats-text#701]: PLAIN_NUMBER_P missed exponent (and non-finite) number
+    // forms, so ALWAYS_QUOTE_NUMBERS_AS_STRINGS left them unquoted and they were
+    // re-read as numbers (silent corruption). Verify they are now quoted and round-trip.
+    @Test
+    public void testQuoteExtraNumberFormsStoredAsString() throws Exception
+    {
+        YAMLFactory f = YAMLFactory.builder()
+                .enable(YAMLWriteFeature.MINIMIZE_QUOTES,
+                        YAMLWriteFeature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS)
+                .build();
+        YAMLMapper mapper = new YAMLMapper(f);
+
+        // forms NOT matched by the old PLAIN_NUMBER_P regex:
+        for (String value : new String[] { "1e5", "1E5", "1.5e-3", ".inf", "-.inf", ".nan" }) {
+            String yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
+            assertEquals("---\nkey: \"" + value + "\"", yaml,
+                    "String '" + value + "' should be quoted");
+            // ... and survive a read+write cycle through the untyped tree
+            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+                    "String '" + value + "' should round-trip");
+        }
+
+        // genuine multi-dot version String stays unquoted (not a YAML number)
+        String yaml = mapper.writeValueAsString(Collections.singletonMap("key", "2.0.1.2.3")).trim();
+        assertEquals("---\nkey: 2.0.1.2.3", yaml);
+
+        // ... and so do YAML 1.1-only number forms: unlike 2.x (which uses YAML 1.1),
+        // the YAML 1.2 JSON schema resolves these as Strings already, so quoting
+        // them would only add noise
+        for (String value : new String[] { "0x1F", "0b101", "12_34", "1:30", "12:00:01" }) {
+            yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
+            assertEquals("---\nkey: " + value, yaml,
+                    "String '" + value + "' should NOT be quoted");
+            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+                    "String '" + value + "' should round-trip");
+        }
+    }
+
     @Test
     public void testNonQuoteNumberStoredAsString() throws Exception
     {
