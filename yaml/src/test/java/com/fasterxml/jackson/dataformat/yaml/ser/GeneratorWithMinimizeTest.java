@@ -245,6 +245,17 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
         // genuine multi-dot version String stays unquoted (not a YAML number)
         String yaml = mapper.writeValueAsString(Collections.singletonMap("key", "2.0.1.2.3")).trim();
         assertEquals("---\nkey: 2.0.1.2.3", yaml);
+
+        // ... and so do 60-base ("sexagesimal") forms: SnakeYAML's resolver patterns
+        // match these, but `YAMLParser` does not decode them (Times, IP numbers), so
+        // quoting them would only add noise
+        for (String value : new String[] { "1:30", "12:00:01", "3:1" }) {
+            yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
+            assertEquals("---\nkey: " + value, yaml,
+                    "String '" + value + "' should NOT be quoted");
+            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+                    "String '" + value + "' should round-trip");
+        }
     }
 
     @Test

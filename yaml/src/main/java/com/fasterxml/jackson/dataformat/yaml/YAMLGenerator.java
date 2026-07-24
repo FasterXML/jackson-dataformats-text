@@ -707,6 +707,10 @@ public class YAMLGenerator extends GeneratorBase
      * ({@code 1e5}), hex ({@code 0x1F}) and underscore ({@code 12_34}) forms, which
      * {@link #PLAIN_NUMBER_P} does not match, are quoted too and thus round-trip.
      * See [dataformats-text#701].
+     *<p>
+     * 60-base ("sexagesimal") forms like {@code 1:30} are excluded, to match
+     * {@link com.fasterxml.jackson.dataformat.yaml.YAMLParser}, which does not decode
+     * them either.
      *
      * @since 2.21.6
      */
@@ -723,6 +727,15 @@ public class YAMLGenerator extends GeneratorBase
         case '5': case '6': case '7': case '8': case '9':
             break;
         default:
+            return false;
+        }
+        // 23-Jul-2026, tatu: `Resolver.INT`/`Resolver.FLOAT` also match 60-base
+        //    ("sexagesimal") forms like "1:30" or "12:00:01". But `YAMLParser` on
+        //    purpose does NOT decode those (see `_decodeNumberScalar()`), since they
+        //    are much more likely to be Times or IP numbers -- so quoting them here
+        //    would only add noise. Colon cannot occur in any other alternative of
+        //    either pattern, so this excludes exactly the 60-base ones.
+        if (text.indexOf(':') >= 0) {
             return false;
         }
         return PLAIN_NUMBER_P.matcher(text).matches()
