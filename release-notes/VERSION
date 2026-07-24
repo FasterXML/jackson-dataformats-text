@@ -16,7 +16,9 @@ implementations)
 
 3.3.0 (not yet released)
 
-No changes since 3.2
+#699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
+ (requested by @OrangeDog)
+ (fix by @seonwooj0810)
 
 3.2.2 (not yet released)
 
