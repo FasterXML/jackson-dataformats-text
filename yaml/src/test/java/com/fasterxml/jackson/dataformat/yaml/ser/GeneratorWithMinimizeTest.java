@@ -221,6 +221,43 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
                 "key: \"+125\"", yaml);
     }
 
+    // [dataformats-text#701]: PLAIN_NUMBER_P missed YAML 1.1 exponent/hex/underscore
+    // number forms, so ALWAYS_QUOTE_NUMBERS_AS_STRINGS left them unquoted and they were
+    // re-read as numbers (silent corruption). Verify they are now quoted and round-trip.
+    @Test
+    public void testQuoteYAML11NumberFormsStoredAsString701() throws Exception
+    {
+        YAMLFactory f = new YAMLFactory();
+        f.configure(YAMLGenerator.Feature.MINIMIZE_QUOTES, true);
+        f.configure(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS, true);
+        YAMLMapper mapper = new YAMLMapper(f);
+
+        // forms NOT matched by the old PLAIN_NUMBER_P regex:
+        for (String value : new String[] { "1e5", "0x1F", "12_34", "1.5e-3", "0b101" }) {
+            String yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
+            assertEquals("---\nkey: \"" + value + "\"", yaml,
+                    "String '" + value + "' should be quoted");
+            // ... and survive a read+write cycle through the untyped tree
+            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+                    "String '" + value + "' should round-trip");
+        }
+
+        // genuine multi-dot version String stays unquoted (not a YAML number)
+        String yaml = mapper.writeValueAsString(Collections.singletonMap("key", "2.0.1.2.3")).trim();
+        assertEquals("---\nkey: 2.0.1.2.3", yaml);
+
+        // ... and so do 60-base ("sexagesimal") forms: SnakeYAML's resolver patterns
+        // match these, but `YAMLParser` does not decode them (Times, IP numbers), so
+        // quoting them would only add noise
+        for (String value : new String[] { "1:30", "12:00:01", "3:1" }) {
+            yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
+            assertEquals("---\nkey: " + value, yaml,
+                    "String '" + value + "' should NOT be quoted");
+            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+                    "String '" + value + "' should round-trip");
+        }
+    }
+
     @Test
     public void testNonQuoteNumberStoredAsString() throws Exception
     {
