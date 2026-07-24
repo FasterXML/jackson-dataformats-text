@@ -20,6 +20,9 @@ Active Maintainers:
   (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
  (reported by @EverNife)
  (fix by @seonwooj0810)
+#699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
+ (requested by @OrangeDog)
+ (fix by @seonwooj0810)
 
 2.22.2 (not yet released)
 

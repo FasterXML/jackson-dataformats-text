@@ -630,6 +630,55 @@ public class CsvSchema
         }
 
         /**
+         * Method for renaming an existing column, located by its current name
+         * instead of by index.
+         *
+         * @param oldName Current name of the column to rename
+         * @param newName New name to assign to the column
+         *
+         * @throws IllegalArgumentException if no column with given {@code oldName} exists
+         *
+         * @since 2.23
+         */
+        public Builder renameColumn(String oldName, String newName) {
+            return renameColumn(_columnIndex(oldName), newName);
+        }
+
+        /**
+         * Method for replacing an existing column, located by its current name
+         * instead of by index.
+         *<p>
+         * NOTE: index of the replacement column {@code c} is ignored (as with
+         * {@link #replaceColumn(int, Column)}): columns are renumbered to match
+         * their actual position when {@link #build()} is called. Caller hence does
+         * not need to know index of the column being replaced.
+         *
+         * @param name Name of the column to replace
+         * @param c Column definition to use as replacement
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        public Builder replaceColumn(String name, Column c) {
+            return replaceColumn(_columnIndex(name), c);
+        }
+
+        /**
+         * Method for removing an existing column, located by its name instead
+         * of by index.
+         *
+         * @param name Name of the column to remove
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        public Builder removeColumn(String name) {
+            return removeColumn(_columnIndex(name));
+        }
+
+        /**
          * Helper method called to drop the last collected column name if
          * it is empty: called if {link CsvParser.Feature#ALLOW_TRAILING_COMMA}
          * enabled to remove the last entry after being added initially.
@@ -651,10 +700,39 @@ public class CsvSchema
             return this;
         }
 
+        /**
+         * Method for changing type of an existing column, located by its name
+         * instead of by index.
+         *
+         * @param name Name of the column to change type of
+         * @param type Type to assign to the column
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        public Builder setColumnType(String name, ColumnType type) {
+            return setColumnType(_columnIndex(name), type);
+        }
+
         public Builder removeArrayElementSeparator(int index) {
             _checkIndex(index);
             _columns.set(index, _columns.get(index).withArrayElementSeparator(""));
             return this;
+        }
+
+        /**
+         * Method for removing array element separator of an existing column,
+         * located by its name instead of by index.
+         *
+         * @param name Name of the column to remove array element separator of
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        public Builder removeArrayElementSeparator(String name) {
+            return removeArrayElementSeparator(_columnIndex(name));
         }
 
         /**
@@ -664,6 +742,25 @@ public class CsvSchema
             _checkIndex(index);
             _columns.set(index, _columns.get(index).withArrayElementSeparator(sep));
             return this;
+        }
+
+        /**
+         * Method for setting array element separator of an existing column,
+         * located by its name instead of by index.
+         *<p>
+         * NOTE: not to be confused with single-argument
+         * {@link #setArrayElementSeparator(String)}, which sets the schema-wide
+         * default separator instead of that of a single column.
+         *
+         * @param name Name of the column to set array element separator of
+         * @param sep Array element separator to assign to the column
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        public Builder setArrayElementSeparator(String name, String sep) {
+            return setArrayElementSeparator(_columnIndex(name), sep);
         }
 
         public Builder setAnyPropertyName(String name) {
@@ -694,12 +791,31 @@ public class CsvSchema
          * @since 2.9
          */
         public boolean hasColumn(String name) {
+            return columnIndex(name) >= 0;
+        }
+
+        /**
+         * Method for finding index of the column with given name, if any.
+         *<p>
+         * NOTE: this method requires linear scan over existing columns
+         * so it may be more efficient to use other types of lookups if
+         * available (for example, {@link CsvSchema#columnIndex(String)} has a
+         * hash lookup to use).
+         *
+         * @param name Name of column to find
+         *
+         * @return Index of the first column with given name, if one exists;
+         *    {@code -1} if not
+         *
+         * @since 2.23
+         */
+        public int columnIndex(String name) {
             for (int i = 0, end = _columns.size(); i < end; ++i) {
                 if (_columns.get(i).getName().equals(name)) {
-                    return true;
+                    return i;
                 }
             }
-            return false;
+            return -1;
         }
 
         /**
@@ -868,6 +984,42 @@ public class CsvSchema
             if (index < 0 || index >= _columns.size()) {
                 throw new IllegalArgumentException("Illegal index "+index+"; only got "+_columns.size()+" columns");
             }
+        }
+
+        /**
+         * Helper method for finding index of the column with given name, for
+         * use by name-based mutators; same as {@link #columnIndex(String)} except
+         * that a missing column is reported as an exception instead of {@code -1}.
+         *
+         * @param name Name of the column to find
+         *
+         * @return Index of the first column with given name
+         *
+         * @throws IllegalArgumentException if no column with given {@code name} exists
+         *
+         * @since 2.23
+         */
+        protected int _columnIndex(String name) {
+            int ix = columnIndex(name);
+            if (ix < 0) {
+                throw new IllegalArgumentException("No column '"+name+"' in CsvSchema.Builder (known columns: "
+                        +_columnNames()+")");
+            }
+            return ix;
+        }
+
+        /**
+         * Helper method for constructing List of names of currently included
+         * columns, for use in exception messages.
+         *
+         * @since 2.23
+         */
+        private List<String> _columnNames() {
+            List<String> names = new ArrayList<>(_columns.size());
+            for (int i = 0, end = _columns.size(); i < end; ++i) {
+                names.add(_columns.get(i).getName());
+            }
+            return names;
         }
     }
 
