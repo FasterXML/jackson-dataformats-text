@@ -265,8 +265,10 @@ public class CsvSchemaTest extends ModuleTestBase
 
         // rename by name maps to same slot as rename by index
         b.renameColumn("b", "b2");
-        // replace by name preserves position, changes type
-        b.replaceColumn("c", new Column(2, "c2", CsvSchema.ColumnType.STRING));
+        // replace by name preserves position, changes type; note that index of
+        // the replacement Column is deliberately "wrong" (0, not 2) to verify it
+        // is ignored -- the whole point being caller need not know the index
+        b.replaceColumn("c", new Column(0, "c2", CsvSchema.ColumnType.STRING));
 
         CsvSchema schema = b.build();
         assertEquals(3, schema.size());
@@ -275,6 +277,9 @@ public class CsvSchemaTest extends ModuleTestBase
         assertEquals(CsvSchema.ColumnType.NUMBER, schema.column(1).getType());
         assertEquals("c2", schema.column(2).getName());
         assertEquals(CsvSchema.ColumnType.STRING, schema.column(2).getType());
+        // ... and index gets renumbered to match actual position
+        assertEquals(2, schema.column(2).getIndex());
+        assertEquals(2, schema.columnIndex("c2"));
 
         // remove by name drops just that column
         CsvSchema shrunk = schema.rebuild().removeColumn("a").build();
@@ -283,7 +288,41 @@ public class CsvSchemaTest extends ModuleTestBase
         assertEquals("c2", shrunk.column(1).getName());
     }
 
-    // For [dataformats-text#699]: unknown name should fail fast
+    // For [dataformats-text#699]: type and array-element-separator by name too
+    @Test
+    public void testModifyColumnSettingsByName()
+    {
+        CsvSchema.Builder b = CsvSchema.builder()
+                .addColumn("a", CsvSchema.ColumnType.STRING)
+                .addColumn("tags", CsvSchema.ColumnType.ARRAY);
+
+        b.setColumnType("a", CsvSchema.ColumnType.NUMBER);
+        b.setArrayElementSeparator("tags", ";");
+
+        CsvSchema schema = b.build();
+        assertEquals(CsvSchema.ColumnType.NUMBER, schema.column(0).getType());
+        assertEquals(";", schema.column(1).getArrayElementSeparator());
+
+        // and removal of separator, likewise by name
+        assertEquals("", schema.rebuild().removeArrayElementSeparator("tags")
+                .build().column(1).getArrayElementSeparator());
+    }
+
+    // For [dataformats-text#699]: non-throwing index lookup from Builder
+    @Test
+    public void testColumnIndexLookupFromBuilder()
+    {
+        CsvSchema.Builder b = CsvSchema.builder().addColumn("a").addColumn("b");
+        assertEquals(0, b.columnIndex("a"));
+        assertEquals(1, b.columnIndex("b"));
+        assertEquals(-1, b.columnIndex("missing"));
+        // and `hasColumn()` remains consistent with it
+        assertTrue(b.hasColumn("a"));
+        assertFalse(b.hasColumn("missing"));
+    }
+
+    // For [dataformats-text#699]: unknown name should fail fast, and the failure
+    // should name the columns that DO exist (as `CsvSchema.withColumn(String,...)` does)
     @Test
     public void testModifyUnknownColumnByName()
     {
@@ -292,7 +331,8 @@ public class CsvSchemaTest extends ModuleTestBase
             b.removeColumn("missing");
             fail("Should not pass");
         } catch (IllegalArgumentException e) {
-            verifyException(e, "No column with name 'missing'");
+            verifyException(e, "No column 'missing' in CsvSchema.Builder");
+            verifyException(e, "known columns: [a]");
         }
     }
 }
