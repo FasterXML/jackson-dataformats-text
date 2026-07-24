@@ -307,3 +307,15 @@ Sergio Delgado (@serandel)
 * Reported #154: (yaml) YAML file with no content throws `MismatchedInputException`
   when binding to Object type (POJO etc)
  (2.21.0)
+
+Pétrus Pradella (@EverNife)
+
+* Reported #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote YAML 1.1
+  exponent (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
+ (2.21.6)
+
+seonwoojung (@seonwooj0810)
+
+* Contributed fix for #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote
+  YAML 1.1 exponent (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
+ (2.21.6)
