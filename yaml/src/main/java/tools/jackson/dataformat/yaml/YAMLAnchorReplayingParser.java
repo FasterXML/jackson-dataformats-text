@@ -41,12 +41,24 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     /**
      * the maximum limit of anchors to remember
+     *
+     * @deprecated Since 2.21.6 / 3.1.6 not used for anything: this counted anchors nested inside
+     *   each other, and since every such anchor is an open collection, the (configurable)
+     *   {@link tools.jackson.core.StreamReadConstraints#getMaxNestingDepth()} is
+     *   always reached first.
      */
+    @Deprecated
     public static final int MAX_ANCHORS = 9999;
 
     /**
      * the maximum limit of merges to follow
+     *
+     * @deprecated Since 2.21.6 / 3.1.6 not used for anything: nesting of merge keys is limited by
+     *   {@link tools.jackson.core.StreamReadConstraints#getMaxNestingDepth()},
+     *   which is both configurable and reached first (merge nesting can never exceed
+     *   the nesting depth of the document it occurs in).
      */
+    @Deprecated
     public static final int MAX_MERGES = 9999;
 
     /**
@@ -87,13 +99,17 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     }
 
     private void finishContext(AnchorContext context) throws StreamConstraintsException {
-        if (referencedObjects.size() + 1 > MAX_REFS)
-			throw new StreamConstraintsException("too many references in the document");
+        if (referencedObjects.size() >= MAX_REFS) {
+            throw constraintsException("too many references in the document",
+                    referencedObjects.size() + 1, MAX_REFS, "MAX_REFS");
+        }
         referencedObjects.put(context.anchor, context.events);
         if (!tokenStack.isEmpty()) {
             List<Event> events = tokenStack.peek().events;
-            if (events.size() + context.events.size() > MAX_EVENTS)
-				throw new StreamConstraintsException("too many events to replay");
+            if (events.size() + context.events.size() > MAX_EVENTS) {
+                throw constraintsException("too many events to replay",
+                        events.size() + context.events.size(), MAX_EVENTS, "MAX_EVENTS");
+            }
             events.addAll(context.events);
         }
     }
@@ -122,8 +138,10 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     protected void recordEvent(Event event) {
 	    if (tokenStack.isEmpty()) return;
 	    AnchorContext context = tokenStack.peek();
-	    if (context.events.size() + 1 > MAX_EVENTS)
-	        throw new StreamConstraintsException("too many events to replay");
+	    if (context.events.size() >= MAX_EVENTS) {
+	        throw constraintsException("too many events to replay",
+	                context.events.size() + 1, MAX_EVENTS, "MAX_EVENTS");
+	    }
 	    context.events.add(event);
 	    if (event instanceof CollectionStartEvent) {
 	        ++context.depth;
@@ -143,70 +161,98 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     // @since 3.1.1
     protected Event nextEvent(boolean recordEvents) {
-        while (!refEvents.isEmpty()) {
-            Event event = filterEvent(trackDepth(refEvents.removeFirst()));
-            if (event != null) {
-                if (recordEvents) {
-                    recordEvent(event);
+        // 2.21.6 / 3.1.6: merge keys used to be followed by recursing into this method,
+        //   which let a document with deeply nested `<<` keys exhaust the stack (with
+        //   `StackOverflowError`) before any of the limits here was reached. Both the
+        //   merge and the alias continuation are tail calls, so loop instead.
+        while (true) {
+            while (!refEvents.isEmpty()) {
+                Event event = filterEvent(trackDepth(refEvents.removeFirst()));
+                if (event != null) {
+                    if (recordEvents) {
+                        recordEvent(event);
+                    }
+                    return event;
                 }
-                return event;
             }
-        }
 
-        Event event = null;
-        while (event == null) {
-            event = trackDepth(super.nextEvent());
-            if (event == null) return null;
-            event = filterEvent(event);
-        }
-
-        if (event instanceof AliasEvent alias) {
-            List<Event> events = referencedObjects.get(alias.getAlias().getValue());
-            if (events != null) {
-                if (refEvents.size() + events.size() > MAX_EVENTS)
-					throw new StreamConstraintsException("too many events to replay");
-                refEvents.addAll(events);
-                return nextEvent(recordEvents);
-            }
-            _reportError("invalid alias: " + alias.getAlias());
-        }
-
-        if (event instanceof NodeEvent nodeEvent) {
-            String anchor = nodeEvent.getAnchor().map(Anchor::getValue).orElse(null);
-            if (anchor != null) {
-                AnchorContext context = new AnchorContext(anchor);
-                context.events.add(event);
-                if (event instanceof CollectionStartEvent) {
-                    if (tokenStack.size() + 1 > MAX_ANCHORS)
-						throw new StreamConstraintsException("too many anchors in the document");
-                    tokenStack.push(context);
-                } else {
-                    // directly store it
-                    finishContext(context);
+            Event event = null;
+            while (event == null) {
+                event = trackDepth(super.nextEvent());
+                if (event == null) {
+                    return null;
                 }
-                // no need to record this event as it was handled above
-                return event;
+                event = filterEvent(event);
             }
-        }
 
-        if (event instanceof ScalarEvent scalarEvent) {
-            if (scalarEvent.getValue().equals("<<")) {
-                // expect next node to be a map
-                // this mapping start event must not be registered by anchors; it is dropped so the contents are merged
-                Event next = nextEvent(false);
-                if (next instanceof MappingStartEvent) {
-                    if (mergeStack.size() + 1 > MAX_MERGES)
-						throw new StreamConstraintsException("too many merges in the document");
-                    mergeStack.push(globalDepth);
-                    return nextEvent(recordEvents);
+            if (event instanceof AliasEvent alias) {
+                List<Event> events = referencedObjects.get(alias.getAlias().getValue());
+                if (events != null) {
+                    if (refEvents.size() + events.size() > MAX_EVENTS) {
+                        throw constraintsException("too many events to replay",
+                                refEvents.size() + events.size(), MAX_EVENTS, "MAX_EVENTS");
+                    }
+                    refEvents.addAll(events);
+                    continue;
                 }
-                _reportError("found field '<<' but value isn't a map");
+                _reportError("invalid alias: " + alias.getAlias());
             }
-        }
 
-        if (recordEvents) {
-            recordEvent(event);
+            if (event instanceof NodeEvent nodeEvent) {
+                String anchor = nodeEvent.getAnchor().map(Anchor::getValue).orElse(null);
+                if (anchor != null) {
+                    AnchorContext context = new AnchorContext(anchor);
+                    context.events.add(event);
+                    if (event instanceof CollectionStartEvent) {
+                        tokenStack.push(context);
+                    } else {
+                        // directly store it
+                        finishContext(context);
+                    }
+                    // no need to record this event as it was handled above
+                    return event;
+                }
+            }
+
+            if (event instanceof ScalarEvent scalarEvent) {
+                if (scalarEvent.getValue().equals("<<")) {
+                    // expect next node to be a map
+                    // this mapping start event must not be registered by anchors; it is dropped so the contents are merged
+                    Event next = nextEvent(false);
+                    if (next instanceof MappingStartEvent) {
+                        // 2.21.6 / 3.1.6: [dataformats-text#707] the `MappingStartEvent` of a
+                        //   merged map is consumed here and its `MappingEndEvent` filtered out,
+                        //   so merge nesting never reaches the usual nesting depth accounting
+                        //   and has to be validated explicitly. Use `globalDepth`, which counts
+                        //   all collection starts of the underlying event stream: structural
+                        //   and merge nesting then share one limit.
+                        streamReadConstraints().validateNestingDepth(globalDepth);
+                        mergeStack.push(globalDepth);
+                        // and then continue with the first event of the merged map
+                        continue;
+                    }
+                    _reportError("found field '<<' but value isn't a map");
+                }
+            }
+
+            if (recordEvents) {
+                recordEvent(event);
+            }
+            return event;
         }
-        return event;
+    }
+
+    /**
+     * Builds exception for one of the {@code MAX_xxx} limits of this class, including both
+     * the count that tripped it and the limit itself (limits are constants, not settings,
+     * so the constant is named to make it discoverable).
+     */
+    private StreamConstraintsException constraintsException(String problem,
+            int count, int maxAllowed, String constantName)
+    {
+        return new StreamConstraintsException(String.format(
+                "%s: %d exceeds the maximum allowed (%d, from `%s.%s`)",
+                problem, count, maxAllowed,
+                YAMLAnchorReplayingParser.class.getSimpleName(), constantName));
     }
 }

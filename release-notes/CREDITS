@@ -62,3 +62,9 @@ Shanchao Li (@tonguaroot)
  (3.1.4)
 * Fixed #680: (yaml) Restore `validateIntegerLength()` check in `_decodeBigInt`
  (3.1.4)
+
+Michał Majchrowicz (@sectroyer)
+
+* Reported #707: (yaml) `StackOverflowError` when reading deeply nested merge keys
+  (`<<`) with `YAMLAnchorReplayingFactory` (GHSA-255r-36wv-4qpr)
+ (3.1.6)
