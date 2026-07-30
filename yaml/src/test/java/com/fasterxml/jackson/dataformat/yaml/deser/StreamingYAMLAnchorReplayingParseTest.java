@@ -287,6 +287,53 @@ public class StreamingYAMLAnchorReplayingParseTest extends ModuleTestBase
         p.close();
     }
 
+    // [dataformats-text#624]: a merge key *inside* an anchor used to leave the anchor's
+    // recorded events unbalanced (the dropped `MappingStartEvent` of the merged map was
+    // recorded), so the anchor was never completed and any alias to it failed
+    @Test
+    public void testMergeInsideAnchor() throws Exception
+    {
+        final String YAML =
+"tpl: &tpl\n"
++"  <<: {x: 1}\n"
++"  y: 2\n"
++"use: *tpl\n"
+;
+        try (JsonParser p = YAML_F.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("tpl", p.getText());
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("x", p.getText());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(1, p.getIntValue());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("y", p.getText());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(2, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+            // and the alias must replay that same, merged content
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("use", p.getText());
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("x", p.getText());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(1, p.getIntValue());
+            assertToken(JsonToken.FIELD_NAME, p.nextToken());
+            assertEquals("y", p.getText());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(2, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
     @Test
     public void testMergeAnchor() throws Exception
     {

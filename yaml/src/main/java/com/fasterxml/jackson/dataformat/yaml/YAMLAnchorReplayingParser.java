@@ -92,16 +92,30 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      */
     private int mergeValueNesting = 0;
 
+    /**
+     * Set while fetching the value node of a merge key: that {@link MappingStartEvent}
+     * is dropped from the event stream, so it must not be recorded as part of an
+     * enclosing anchor either -- otherwise the recorded events are unbalanced and
+     * the anchor is never completed
+     */
+    private boolean recordingSuspended = false;
+
     public YAMLAnchorReplayingParser(IOContext ctxt, int parserFeatures, int formatFeatures, LoaderOptions loaderOptions, ObjectCodec codec, Reader reader) {
         super(ctxt, parserFeatures, formatFeatures, loaderOptions, codec, reader);
     }
 
     private void finishContext(AnchorContext context) throws StreamConstraintsException {
-        if (referencedObjects.size() + 1 > MAX_REFS) throw new StreamConstraintsException("too many references in the document");
+        if (referencedObjects.size() >= MAX_REFS) {
+            throw _constraintsException("too many references in the document",
+                    referencedObjects.size() + 1, MAX_REFS, "MAX_REFS");
+        }
         referencedObjects.put(context.anchor, context.events);
         if (!tokenStack.isEmpty()) {
             List<Event> events = tokenStack.peek().events;
-            if (events.size() + context.events.size() > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
+            if (events.size() + context.events.size() > MAX_EVENTS) {
+                throw _constraintsException("too many events to replay",
+                        events.size() + context.events.size(), MAX_EVENTS, "MAX_EVENTS");
+            }
             events.addAll(context.events);
         }
     }
@@ -155,7 +169,8 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                 List<Event> events = referencedObjects.get(alias.getAnchor());
                 if (events != null) {
                     if (refEvents.size() + events.size() > MAX_EVENTS) {
-                        throw new StreamConstraintsException("too many events to replay");
+                        throw _constraintsException("too many events to replay",
+                                refEvents.size() + events.size(), MAX_EVENTS, "MAX_EVENTS");
                     }
                     refEvents.addAll(events);
                     // 2.21.6: [dataformats-text#707] must NOT return the first replayed
@@ -174,7 +189,8 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                     context.events.add(event);
                     if (event instanceof CollectionStartEvent) {
                         if (tokenStack.size() + 1 > MAX_ANCHORS) {
-                            throw new StreamConstraintsException("too many anchors in the document");
+                            throw _constraintsException("too many anchors in the document",
+                                    tokenStack.size() + 1, MAX_ANCHORS, "MAX_ANCHORS");
                         }
                         tokenStack.push(context);
                     } else {
@@ -206,10 +222,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                 }
             }
 
-            if (!tokenStack.isEmpty()) {
+            if (!recordingSuspended && !tokenStack.isEmpty()) {
                 AnchorContext context = tokenStack.peek();
-                if (context.events.size() + 1 > MAX_EVENTS) {
-                    throw new StreamConstraintsException("too many events to replay");
+                if (context.events.size() >= MAX_EVENTS) {
+                    throw _constraintsException("too many events to replay",
+                            context.events.size() + 1, MAX_EVENTS, "MAX_EVENTS");
                 }
                 context.events.add(event);
                 if (event instanceof CollectionStartEvent) {
@@ -229,14 +246,32 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     /**
      * Fetches the value node of a merge key: the one remaining path on which
      * {@link #getEvent()} still calls itself, so bounded by configured maximum
-     * nesting depth to prevent stack exhaustion.
+     * nesting depth to prevent stack exhaustion. The event fetched here is dropped
+     * from the stream, so anchor recording is suspended for the duration.
      */
+    /**
+     * Builds exception for one of the {@code MAX_xxx} limits of this class, including both
+     * the count that tripped it and the limit itself (limits are constants, not settings,
+     * so the constant is named to make it discoverable).
+     */
+    private StreamConstraintsException _constraintsException(String problem,
+            int count, int maxAllowed, String constantName)
+    {
+        return new StreamConstraintsException(String.format(
+                "%s: %d exceeds the maximum allowed (%d, from `%s.%s`)",
+                problem, count, maxAllowed,
+                YAMLAnchorReplayingParser.class.getSimpleName(), constantName));
+    }
+
     private Event nextMergeValue() throws IOException {
         ++mergeValueNesting;
+        final boolean prevSuspended = recordingSuspended;
+        recordingSuspended = true;
         try {
             streamReadConstraints().validateNestingDepth(mergeValueNesting);
             return getEvent();
         } finally {
+            recordingSuspended = prevSuspended;
             --mergeValueNesting;
         }
     }
