@@ -7,10 +7,10 @@ import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -29,7 +29,7 @@ public class DeeplyNestedMergeKeysTest
 {
     private final YAMLAnchorReplayingFactory F = new YAMLAnchorReplayingFactory();
 
-    private final ObjectMapper MAPPER = new ObjectMapper(F);
+    private final YAMLMapper MAPPER = new YAMLMapper(F);
 
     // Small enough stack that the recursive implementation is guaranteed to fail, big
     // enough that the non-recursive one has plenty of room
@@ -58,12 +58,9 @@ public class DeeplyNestedMergeKeysTest
     public void testDeeplyNestedMergeKeysStreaming() throws Exception
     {
         final String doc = nestedMergeKeys(REPORTED_DEPTH);
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                try (JsonParser p = F.createParser(doc)) {
-                    while (p.nextToken() != null) { }
-                }
+        Throwable failure = failureOnSmallStack(() -> {
+            try (JsonParser p = F.createParser(doc)) {
+                while (p.nextToken() != null) { }
             }
         });
         _assertNestingDepthFailure(failure, 1001, 1000);
@@ -73,12 +70,7 @@ public class DeeplyNestedMergeKeysTest
     public void testDeeplyNestedMergeKeysDatabind() throws Exception
     {
         final String doc = nestedMergeKeys(REPORTED_DEPTH);
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                MAPPER.readTree(doc);
-            }
-        });
+        Throwable failure = failureOnSmallStack(() -> MAPPER.readTree(doc));
         _assertNestingDepthFailure(failure, 1001, 1000);
     }
 
@@ -94,7 +86,7 @@ public class DeeplyNestedMergeKeysTest
                             .maxNestingDepth(10).build())
                     .build(),
                 (ObjectCodec) null);
-        final ObjectMapper mapper = new ObjectMapper(f);
+        final YAMLMapper mapper = new YAMLMapper(f);
 
         // NOTE: `nestedMergeKeys(n)` reaches a combined depth of n+3: two structural
         // levels (root mapping, value of `result`), plus n+1 nested merges
@@ -103,12 +95,7 @@ public class DeeplyNestedMergeKeysTest
         assertNotNull(mapper.readTree(nestedMergeKeys(7)));
 
         // ... 11 is not
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                mapper.readTree(nestedMergeKeys(8));
-            }
-        });
+        Throwable failure = failureOnSmallStack(() -> mapper.readTree(nestedMergeKeys(8)));
         _assertNestingDepthFailure(failure, 11, 10);
     }
 
@@ -120,12 +107,7 @@ public class DeeplyNestedMergeKeysTest
     public void testMergeKeyNestingWithinLimit() throws Exception
     {
         final String doc = nestedMergeKeys(900);
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                assertNotNull(MAPPER.readTree(doc));
-            }
-        });
+        Throwable failure = failureOnSmallStack(() -> assertNotNull(MAPPER.readTree(doc)));
         if (failure != null) {
             throw new AssertionError("Failed to read document with 900 nested merge keys: "
                     +failure, failure);
@@ -152,12 +134,7 @@ public class DeeplyNestedMergeKeysTest
         }
         final String doc = "result: "+sb+"\n";
 
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                MAPPER.readTree(doc);
-            }
-        });
+        Throwable failure = failureOnSmallStack(() -> MAPPER.readTree(doc));
         _assertNestingDepthFailure(failure, 1001, 1000);
     }
 
@@ -184,18 +161,13 @@ public class DeeplyNestedMergeKeysTest
         }
         final String doc = sb.append('\n').toString();
 
-        final ObjectMapper mapper = new ObjectMapper(new YAMLAnchorReplayingFactory(
+        final YAMLMapper mapper = new YAMLMapper(new YAMLAnchorReplayingFactory(
                 YAMLFactory.builder()
                     .streamReadConstraints(StreamReadConstraints.builder()
                             .maxNestingDepth(10).build())
                     .build(),
                 (ObjectCodec) null));
-        Throwable failure = failureOnSmallStack(new Body() {
-            @Override
-            public void call() throws Exception {
-                mapper.readTree(doc);
-            }
-        });
+        Throwable failure = failureOnSmallStack(() -> mapper.readTree(doc));
         _assertNestingDepthFailure(failure, 11, 10);
     }
 
@@ -251,25 +223,28 @@ public class DeeplyNestedMergeKeysTest
     }
 
     /**
-     * Runs given body on a thread with an explicitly small stack.
+     * Runs given body on a thread with an explicitly small stack, so that recursive
+     * handling of merge keys fails deterministically.
      *
-     * @return Throwable body failed with, if any; {@code null} if it succeeded
+     * @return Throwable body failed with, if any; {@code null} if it succeeded.
+     *   Assertion failures from within the body are rethrown as-is instead, since those
+     *   are test failures and not parser outcomes.
      */
-    private Throwable failureOnSmallStack(final Body body) throws Exception
+    private Throwable failureOnSmallStack(Body body) throws Exception
     {
         final Throwable[] failure = new Throwable[1];
-        Thread t = new Thread(null, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    body.call();
-                } catch (Throwable e) {
-                    failure[0] = e;
-                }
+        Thread t = new Thread(null, () -> {
+            try {
+                body.call();
+            } catch (Throwable e) {
+                failure[0] = e;
             }
         }, "nested-merge-keys", SMALL_STACK);
         t.start();
         t.join();
+        if (failure[0] instanceof AssertionError) {
+            throw (AssertionError) failure[0];
+        }
         return failure[0];
     }
 }

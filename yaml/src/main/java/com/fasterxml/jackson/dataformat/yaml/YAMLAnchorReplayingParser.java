@@ -106,14 +106,14 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     private void finishContext(AnchorContext context) throws StreamConstraintsException {
         if (referencedObjects.size() >= MAX_REFS) {
-            throw _constraintsException("too many references in the document",
+            throw constraintsException("too many references in the document",
                     referencedObjects.size() + 1, MAX_REFS, "MAX_REFS");
         }
         referencedObjects.put(context.anchor, context.events);
         if (!tokenStack.isEmpty()) {
             List<Event> events = tokenStack.peek().events;
             if (events.size() + context.events.size() > MAX_EVENTS) {
-                throw _constraintsException("too many events to replay",
+                throw constraintsException("too many events to replay",
                         events.size() + context.events.size(), MAX_EVENTS, "MAX_EVENTS");
             }
             events.addAll(context.events);
@@ -169,7 +169,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                 List<Event> events = referencedObjects.get(alias.getAnchor());
                 if (events != null) {
                     if (refEvents.size() + events.size() > MAX_EVENTS) {
-                        throw _constraintsException("too many events to replay",
+                        throw constraintsException("too many events to replay",
                                 refEvents.size() + events.size(), MAX_EVENTS, "MAX_EVENTS");
                     }
                     refEvents.addAll(events);
@@ -189,7 +189,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                     context.events.add(event);
                     if (event instanceof CollectionStartEvent) {
                         if (tokenStack.size() + 1 > MAX_ANCHORS) {
-                            throw _constraintsException("too many anchors in the document",
+                            throw constraintsException("too many anchors in the document",
                                     tokenStack.size() + 1, MAX_ANCHORS, "MAX_ANCHORS");
                         }
                         tokenStack.push(context);
@@ -225,7 +225,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
             if (!recordingSuspended && !tokenStack.isEmpty()) {
                 AnchorContext context = tokenStack.peek();
                 if (context.events.size() >= MAX_EVENTS) {
-                    throw _constraintsException("too many events to replay",
+                    throw constraintsException("too many events to replay",
                             context.events.size() + 1, MAX_EVENTS, "MAX_EVENTS");
                 }
                 context.events.add(event);
@@ -254,7 +254,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      * the count that tripped it and the limit itself (limits are constants, not settings,
      * so the constant is named to make it discoverable).
      */
-    private StreamConstraintsException _constraintsException(String problem,
+    private StreamConstraintsException constraintsException(String problem,
             int count, int maxAllowed, String constantName)
     {
         return new StreamConstraintsException(String.format(
