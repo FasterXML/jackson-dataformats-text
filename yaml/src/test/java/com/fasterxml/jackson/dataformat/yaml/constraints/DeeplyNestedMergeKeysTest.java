@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.yaml.constraints;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for [dataformats-text#707]: nesting of YAML merge keys ({@code <<}) read via
@@ -188,6 +190,31 @@ public class DeeplyNestedMergeKeysTest
         assertEquals(COUNT, root.get("items").size());
         assertEquals(1, root.get("items").get("k0").get("x").intValue());
         assertEquals(1, root.get("items").get("k"+(COUNT-1)).get("x").intValue());
+    }
+
+    /**
+     * Fetching the value of a merge key is the one remaining recursive call, and it can only
+     * recurse if that value is the scalar {@code <<} itself -- which always fails on the
+     * next event. Pinned here because it is what makes the recursion non-chaining, and so
+     * bounded without a counter.
+     */
+    @Test
+    public void testMergeKeyAsMergeValue() throws Exception
+    {
+        for (String doc : new String[] {
+                "a: {<<: <<}\n",
+                "a:\n  <<: <<\n",
+                "a: {<<: {<<: <<}}\n"
+        }) {
+            Throwable failure = failureOnSmallStack(() -> MAPPER.readTree(doc));
+            assertNotNull(failure, "Should have failed: "+doc);
+            if (!(failure instanceof JsonProcessingException)) {
+                throw new AssertionError("Expected JsonProcessingException for "+doc
+                        +", got: "+failure, failure);
+            }
+            assertTrue(failure.getMessage().startsWith("found field '<<' but value isn't a map"),
+                    "Unexpected message: "+failure.getMessage());
+        }
     }
 
     /**

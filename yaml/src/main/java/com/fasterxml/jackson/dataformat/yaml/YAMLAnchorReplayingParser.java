@@ -41,7 +41,13 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     /**
      * the maximum limit of anchors to remember
+     *
+     * @deprecated Since 2.21.6 not used for anything: this counted anchors nested inside
+     *   each other, and since every such anchor is an open collection, the (configurable)
+     *   {@link com.fasterxml.jackson.core.StreamReadConstraints#getMaxNestingDepth()} is
+     *   always reached first.
      */
+    @Deprecated
     public static final int MAX_ANCHORS = 9999;
 
     /**
@@ -85,12 +91,6 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      * keeps track of the global depth of nested collections
      */
     private int globalDepth = 0;
-
-    /**
-     * Nesting level of {@link #nextMergeValue()} calls, to bound the only
-     * remaining recursive path of {@link #getEvent()}
-     */
-    private int mergeValueNesting = 0;
 
     /**
      * Set while fetching the value node of a merge key: that {@link MappingStartEvent}
@@ -188,10 +188,6 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                     AnchorContext context = new AnchorContext(anchor);
                     context.events.add(event);
                     if (event instanceof CollectionStartEvent) {
-                        if (tokenStack.size() + 1 > MAX_ANCHORS) {
-                            throw constraintsException("too many anchors in the document",
-                                    tokenStack.size() + 1, MAX_ANCHORS, "MAX_ANCHORS");
-                        }
                         tokenStack.push(context);
                     } else {
                         // directly store it
@@ -245,12 +241,6 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     }
 
     /**
-     * Fetches the value node of a merge key: the one remaining path on which
-     * {@link #getEvent()} still calls itself, so bounded by configured maximum
-     * nesting depth to prevent stack exhaustion. The event fetched here is dropped
-     * from the stream, so anchor recording is suspended for the duration.
-     */
-    /**
      * Builds exception for one of the {@code MAX_xxx} limits of this class, including both
      * the count that tripped it and the limit itself (limits are constants, not settings,
      * so the constant is named to make it discoverable).
@@ -264,16 +254,20 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                 YAMLAnchorReplayingParser.class.getSimpleName(), constantName));
     }
 
+    /**
+     * Fetches the value node of a merge key. This is the one path on which
+     * {@link #getEvent()} still calls itself, but it cannot chain: recursing again
+     * requires the merge value to be the scalar {@code <<} itself, and that always
+     * fails on the following event. The event fetched here is dropped from the
+     * stream, so anchor recording is suspended for the duration.
+     */
     private Event nextMergeValue() throws IOException {
-        ++mergeValueNesting;
         final boolean prevSuspended = recordingSuspended;
         recordingSuspended = true;
         try {
-            streamReadConstraints().validateNestingDepth(mergeValueNesting);
             return getEvent();
         } finally {
             recordingSuspended = prevSuspended;
-            --mergeValueNesting;
         }
     }
 }
