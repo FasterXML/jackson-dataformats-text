@@ -9,7 +9,7 @@ import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLAnchorReplayingFactory;
-import tools.jackson.dataformat.yaml.YAMLAnchorReplayingFactoryBuilder;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -227,13 +227,13 @@ public class DeeplyNestedMergeKeysTest
         assertEquals(EXP, root.toString());
     }
 
-    private YAMLAnchorReplayingFactory _factoryWithMaxDepth(int maxDepth) {
-        // NOTE: cannot chain, since `streamReadConstraints()` returns the base builder
-        // type -- and `YAMLFactoryBuilder.build()` would give a plain `YAMLFactory`
-        YAMLAnchorReplayingFactoryBuilder b = YAMLAnchorReplayingFactory.builder();
-        b.streamReadConstraints(StreamReadConstraints.builder()
-                .maxNestingDepth(maxDepth).build());
-        return b.build();
+    // NOTE: static type is `YAMLFactory` since `streamReadConstraints()` returns the base
+    // builder type; the instance built is still a `YAMLAnchorReplayingFactory`
+    private YAMLFactory _factoryWithMaxDepth(int maxDepth) {
+        return YAMLAnchorReplayingFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxNestingDepth(maxDepth).build())
+                .build();
     }
 
     private void _assertNestingDepthFailure(Throwable failure, int depth, int max)
