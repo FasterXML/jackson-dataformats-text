@@ -80,6 +80,12 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      */
     private int globalDepth = 0;
 
+    /**
+     * Nesting level of {@link #nextMergeValue()} calls, to bound the only
+     * remaining recursive path of {@link #getEvent()}
+     */
+    private int mergeValueNesting = 0;
+
     public YAMLAnchorReplayingParser(IOContext ctxt, int parserFeatures, int formatFeatures, LoaderOptions loaderOptions, ObjectCodec codec, Reader reader) {
         super(ctxt, parserFeatures, formatFeatures, loaderOptions, codec, reader);
     }
@@ -117,73 +123,112 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     @Override
     protected Event getEvent() throws IOException {
-        while(!refEvents.isEmpty()) {
-            Event event = filterEvent(trackDepth(refEvents.removeFirst()));
-            if (event != null) return event;
-        }
-
-        Event event = null;
-        while (event == null) {
-            event = trackDepth(super.getEvent());
-            if (event == null) return null;
-            event = filterEvent(event);
-        }
-
-        if (event instanceof AliasEvent) {
-            AliasEvent alias = (AliasEvent) event;
-            List<Event> events = referencedObjects.get(alias.getAnchor());
-            if (events != null) {
-                if (refEvents.size() + events.size() > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
-                refEvents.addAll(events);
-                return refEvents.removeFirst();
+        // 2.21.6: merge keys used to be followed by recursing into this method, which
+        //   let a document with deeply nested `<<` keys exhaust the stack (with
+        //   `StackOverflowError`) long before `MAX_MERGES` was reached. The merge
+        //   continuation is a tail call, so loop instead of recursing.
+        while (true) {
+            while(!refEvents.isEmpty()) {
+                Event event = filterEvent(trackDepth(refEvents.removeFirst()));
+                if (event != null) {
+                    return event;
+                }
             }
-            throw new JsonParseException("invalid alias " + alias.getAnchor());
-        }
 
-        if (event instanceof NodeEvent) {
-            String anchor = ((NodeEvent) event).getAnchor();
-            if (anchor != null) {
-                AnchorContext context = new AnchorContext(anchor);
+            Event event = null;
+            while (event == null) {
+                event = trackDepth(super.getEvent());
+                if (event == null) {
+                    return null;
+                }
+                event = filterEvent(event);
+            }
+
+            if (event instanceof AliasEvent) {
+                AliasEvent alias = (AliasEvent) event;
+                List<Event> events = referencedObjects.get(alias.getAnchor());
+                if (events != null) {
+                    if (refEvents.size() + events.size() > MAX_EVENTS) {
+                        throw new StreamConstraintsException("too many events to replay");
+                    }
+                    refEvents.addAll(events);
+                    return refEvents.removeFirst();
+                }
+                throw new JsonParseException("invalid alias " + alias.getAnchor());
+            }
+
+            if (event instanceof NodeEvent) {
+                String anchor = ((NodeEvent) event).getAnchor();
+                if (anchor != null) {
+                    AnchorContext context = new AnchorContext(anchor);
+                    context.events.add(event);
+                    if (event instanceof CollectionStartEvent) {
+                        if (tokenStack.size() + 1 > MAX_ANCHORS) {
+                            throw new StreamConstraintsException("too many anchors in the document");
+                        }
+                        tokenStack.push(context);
+                    } else {
+                        // directly store it
+                        finishContext(context);
+                    }
+                    return event;
+                }
+            }
+
+            if (event instanceof ScalarEvent) {
+                ScalarEvent scalarEvent = (ScalarEvent) event;
+                if (scalarEvent.getValue().equals( "<<")) {
+                    // expect next node to be a map
+                    Event next = nextMergeValue();
+                    if (next instanceof MappingStartEvent) {
+                        if (mergeStack.size() + 1 > MAX_MERGES) {
+                            throw new StreamConstraintsException("too many merges in the document");
+                        }
+                        // 2.21.6: [dataformats-text#707] the `MappingStartEvent` of a merged
+                        //   map is consumed here and its `MappingEndEvent` filtered out, so
+                        //   merge nesting never reaches the usual nesting depth accounting:
+                        //   needs to be validated explicitly
+                        streamReadConstraints().validateNestingDepth(mergeStack.size() + 1);
+                        mergeStack.push(globalDepth);
+                        // and then continue with the first event of the merged map
+                        continue;
+                    }
+                    throw new JsonParseException("found field '<<' but value isn't a map");
+                }
+            }
+
+            if (!tokenStack.isEmpty()) {
+                AnchorContext context = tokenStack.peek();
+                if (context.events.size() + 1 > MAX_EVENTS) {
+                    throw new StreamConstraintsException("too many events to replay");
+                }
                 context.events.add(event);
                 if (event instanceof CollectionStartEvent) {
-                    if (tokenStack.size() + 1 > MAX_ANCHORS) throw new StreamConstraintsException("too many anchors in the document");
-                    tokenStack.push(context);
-                } else {
-                    // directly store it
-                    finishContext(context);
+                    ++context.depth;
+                } else if (event instanceof CollectionEndEvent) {
+                    --context.depth;
+                    if (context.depth == 0) {
+                        tokenStack.pop();
+                        finishContext(context);
+                    }
                 }
-                return event;
             }
+            return event;
         }
+    }
 
-        if (event instanceof ScalarEvent) {
-            ScalarEvent scalarEvent = (ScalarEvent) event;
-            if (scalarEvent.getValue().equals( "<<")) {
-                // expect next node to be a map
-                Event next = getEvent();
-                if (next instanceof MappingStartEvent) {
-                    if (mergeStack.size() + 1 > MAX_MERGES) throw new StreamConstraintsException("too many merges in the document");
-                    mergeStack.push(globalDepth);
-                    return getEvent();
-                }
-                throw new JsonParseException("found field '<<' but value isn't a map");
-            }
+    /**
+     * Fetches the value node of a merge key: the one remaining path on which
+     * {@link #getEvent()} still calls itself, so bounded by configured maximum
+     * nesting depth to prevent stack exhaustion.
+     */
+    private Event nextMergeValue() throws IOException {
+        ++mergeValueNesting;
+        try {
+            streamReadConstraints().validateNestingDepth(mergeValueNesting);
+            return getEvent();
+        } finally {
+            --mergeValueNesting;
         }
-
-        if (!tokenStack.isEmpty()) {
-            AnchorContext context = tokenStack.peek();
-            if (context.events.size() + 1 > MAX_EVENTS) throw new StreamConstraintsException("too many events to replay");
-            context.events.add(event);
-            if (event instanceof CollectionStartEvent) {
-                ++context.depth;
-            } else if (event instanceof CollectionEndEvent) {
-                --context.depth;
-                if (context.depth == 0) {
-                    tokenStack.pop();
-                    finishContext(context);
-                }
-            }
-        }
-        return event;
     }
 }
