@@ -179,7 +179,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                     //   expansion (and with it, nesting depth validation)
                     continue;
                 }
-                throw new JsonParseException("invalid alias " + alias.getAnchor());
+                throw new JsonParseException(this, "invalid alias " + alias.getAnchor());
             }
 
             if (event instanceof NodeEvent) {
@@ -218,7 +218,8 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                         // and then continue with the first event of the merged map
                         continue;
                     }
-                    throw new JsonParseException("found field '<<' but value isn't a map");
+                    throw new JsonParseException(this,
+                            "found field '<<' but value isn't a map");
                 }
             }
 
