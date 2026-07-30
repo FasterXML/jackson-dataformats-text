@@ -46,7 +46,13 @@ public class YAMLAnchorReplayingParser extends YAMLParser
 
     /**
      * the maximum limit of merges to follow
+     *
+     * @deprecated Since 2.21.6 not used for anything: nesting of merge keys is limited by
+     *   {@link com.fasterxml.jackson.core.StreamReadConstraints#getMaxNestingDepth()},
+     *   which is both configurable and reached first (merge nesting can never exceed
+     *   the nesting depth of the document it occurs in).
      */
+    @Deprecated
     public static final int MAX_MERGES = 9999;
 
     /**
@@ -125,7 +131,7 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     protected Event getEvent() throws IOException {
         // 2.21.6: merge keys used to be followed by recursing into this method, which
         //   let a document with deeply nested `<<` keys exhaust the stack (with
-        //   `StackOverflowError`) long before `MAX_MERGES` was reached. The merge
+        //   `StackOverflowError`) before any of the limits here was reached. The merge
         //   continuation is a tail call, so loop instead of recursing.
         while (true) {
             while(!refEvents.isEmpty()) {
@@ -185,9 +191,6 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                     // expect next node to be a map
                     Event next = nextMergeValue();
                     if (next instanceof MappingStartEvent) {
-                        if (mergeStack.size() + 1 > MAX_MERGES) {
-                            throw new StreamConstraintsException("too many merges in the document");
-                        }
                         // 2.21.6: [dataformats-text#707] the `MappingStartEvent` of a merged
                         //   map is consumed here and its `MappingEndEvent` filtered out, so
                         //   merge nesting never reaches the usual nesting depth accounting
