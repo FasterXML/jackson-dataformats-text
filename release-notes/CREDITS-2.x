@@ -319,3 +319,15 @@ seonwoojung (@seonwooj0810)
 * Contributed fix for #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote
   YAML 1.1 exponent (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (2.21.6)
+
+Théo SZANTO (@indyteo)
+
+* Contributed fix for #624: (yaml) `YAMLAnchorReplayingParser` produces invalid
+  sequence of events when using the merge operator inside an anchor
+ (2.21.6)
+
+Michał Majchrowicz (@sectroyer)
+
+* Reported #707: (yaml) `StackOverflowError` when reading deeply nested merge keys
+  (`<<`) with `YAMLAnchorReplayingFactory` (GHSA-255r-36wv-4qpr)
+ (2.21.6)

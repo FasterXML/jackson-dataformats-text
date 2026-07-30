@@ -20,8 +20,14 @@ Active Maintainers:
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
  (fix contributed by @seonwooj0810)
+#624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
+  using the merge operator inside an anchor
+ (fix by @indyteo, backported from 3.1)
 #702: (toml) Expand nesting depth checks for dotted keys
  (contributed by @yawkat)
+#707: (yaml) Should constraint deeply nested YAML merge keys in
+  `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
+ (reported by Michał M)
 
 2.21.5 (06-Jul-2026)
 
