@@ -152,7 +152,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                         throw new StreamConstraintsException("too many events to replay");
                     }
                     refEvents.addAll(events);
-                    return refEvents.removeFirst();
+                    // 2.21.6: [dataformats-text#707] must NOT return the first replayed
+                    //   event directly: it has to go through `trackDepth()` like every
+                    //   other event, or `globalDepth` drifts down by one per alias
+                    //   expansion (and with it, nesting depth validation)
+                    continue;
                 }
                 throw new JsonParseException("invalid alias " + alias.getAnchor());
             }

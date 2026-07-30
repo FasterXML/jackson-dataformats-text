@@ -162,6 +162,44 @@ public class DeeplyNestedMergeKeysTest
     }
 
     /**
+     * Alias expansion must not corrupt depth accounting: the first replayed event used to
+     * be returned without depth tracking, so every alias of a collection lowered the
+     * tracked depth by one -- enough aliases up front and deep merge nesting slipped past
+     * the limit entirely.
+     */
+    @Test
+    public void testMergeNestingLimitNotBypassableViaAliases() throws Exception
+    {
+        StringBuilder sb = new StringBuilder("base: &b {x: 1}\n");
+        for (int i = 0; i < 30; ++i) {
+            sb.append("r").append(i).append(": *b\n");
+        }
+        sb.append("deep:\n  <<: ");
+        for (int i = 0; i < 20; ++i) {
+            sb.append("{<<: ");
+        }
+        sb.append("{x: 1}");
+        for (int i = 0; i < 20; ++i) {
+            sb.append('}');
+        }
+        final String doc = sb.append('\n').toString();
+
+        final ObjectMapper mapper = new ObjectMapper(new YAMLAnchorReplayingFactory(
+                YAMLFactory.builder()
+                    .streamReadConstraints(StreamReadConstraints.builder()
+                            .maxNestingDepth(10).build())
+                    .build(),
+                (ObjectCodec) null));
+        Throwable failure = failureOnSmallStack(new Body() {
+            @Override
+            public void call() throws Exception {
+                mapper.readTree(doc);
+            }
+        });
+        _assertNestingDepthFailure(failure, 11, 10);
+    }
+
+    /**
      * Merge keys that are siblings rather than nested must NOT count towards maximum
      * nesting depth: each one is popped again when its mapping ends, so a shallow
      * document may contain any number of them.
