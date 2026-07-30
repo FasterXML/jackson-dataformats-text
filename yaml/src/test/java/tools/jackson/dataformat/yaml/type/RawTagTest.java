@@ -30,7 +30,7 @@ public class RawTagTest extends ModuleTestBase
             assertEquals("password", p.currentName());
 
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("Abcd1234", p.getText());
+            assertEquals("Abcd1234", p.getString());
             assertEquals("!sensitive", p.getRawTag());
             // getTypeId() should strip the "!" prefix
             assertEquals("sensitive", p.getTypeId());
@@ -86,7 +86,7 @@ public class RawTagTest extends ModuleTestBase
 
             assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("value", p.getText());
+            assertEquals("value", p.getString());
             assertNull(p.getRawTag());
 
             assertToken(JsonToken.END_OBJECT, p.nextToken());
@@ -102,11 +102,11 @@ public class RawTagTest extends ModuleTestBase
             assertEquals("!mylist", p.getRawTag());
 
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("a", p.getText());
+            assertEquals("a", p.getString());
             assertNull(p.getRawTag());
 
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("b", p.getText());
+            assertEquals("b", p.getString());
             assertNull(p.getRawTag());
 
             assertToken(JsonToken.END_ARRAY, p.nextToken());
@@ -124,7 +124,7 @@ public class RawTagTest extends ModuleTestBase
 
             assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("123", p.getText());
+            assertEquals("123", p.getString());
             // Raw tag includes the resolved "tag:yaml.org,2002:" prefix
             assertEquals("tag:yaml.org,2002:str", p.getRawTag());
             // getTypeId() strips "!" but this tag has none, so same value
@@ -144,13 +144,13 @@ public class RawTagTest extends ModuleTestBase
             assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
             assertEquals("user", p.currentName());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("someone", p.getText());
+            assertEquals("someone", p.getString());
             assertEquals("!public", p.getRawTag());
 
             assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
             assertEquals("pass", p.currentName());
             assertToken(JsonToken.VALUE_STRING, p.nextToken());
-            assertEquals("Abcd1234", p.getText());
+            assertEquals("Abcd1234", p.getString());
             assertEquals("!sensitive", p.getRawTag());
 
             assertToken(JsonToken.END_OBJECT, p.nextToken());
