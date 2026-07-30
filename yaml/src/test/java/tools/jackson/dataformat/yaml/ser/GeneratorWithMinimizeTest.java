@@ -249,7 +249,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
             assertEquals("---\nkey: \"" + value + "\"", yaml,
                     "String '" + value + "' should be quoted");
             // ... and survive a read+write cycle through the untyped tree
-            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+            assertEquals(value, mapper.readTree(yaml).get("key").asString(),
                     "String '" + value + "' should round-trip");
         }
 
@@ -264,7 +264,7 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
             yaml = mapper.writeValueAsString(Collections.singletonMap("key", value)).trim();
             assertEquals("---\nkey: " + value, yaml,
                     "String '" + value + "' should NOT be quoted");
-            assertEquals(value, mapper.readTree(yaml).get("key").asText(),
+            assertEquals(value, mapper.readTree(yaml).get("key").asString(),
                     "String '" + value + "' should round-trip");
         }
     }

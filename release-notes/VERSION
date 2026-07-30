@@ -28,6 +28,9 @@ implementations)
  (fix contributed by @seonwooj0810)
 #702: (toml) Expand nesting depth checks for dotted keys
  (contributed by @yawkat)
+#707: (yaml) Should constraint deeply nested YAML merge keys in
+  `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
+ (reported by Michał M)
 
 3.2.1 (10-Jul-2026)
 
@@ -130,6 +133,9 @@ No changes since 3.2.1
  (fix contributed by @seonwooj0810)
 #702: (toml) Expand nesting depth checks for dotted keys
  (contributed by @yawkat)
+#707: (yaml) Should constraint deeply nested YAML merge keys in
+  `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
+ (reported by Michał M)
 
 3.1.5 (07-Jul-2026)
 
