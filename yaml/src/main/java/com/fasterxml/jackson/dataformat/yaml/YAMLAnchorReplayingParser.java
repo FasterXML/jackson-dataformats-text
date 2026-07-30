@@ -186,9 +186,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser
                         }
                         // 2.21.6: [dataformats-text#707] the `MappingStartEvent` of a merged
                         //   map is consumed here and its `MappingEndEvent` filtered out, so
-                        //   merge nesting never reaches the usual nesting depth accounting:
-                        //   needs to be validated explicitly
-                        streamReadConstraints().validateNestingDepth(mergeStack.size() + 1);
+                        //   merge nesting never reaches the usual nesting depth accounting
+                        //   and has to be validated explicitly. Use `globalDepth`, which
+                        //   counts all collection starts of the underlying event stream:
+                        //   structural and merge nesting then share one limit.
+                        streamReadConstraints().validateNestingDepth(globalDepth);
                         mergeStack.push(globalDepth);
                         // and then continue with the first event of the merged map
                         continue;

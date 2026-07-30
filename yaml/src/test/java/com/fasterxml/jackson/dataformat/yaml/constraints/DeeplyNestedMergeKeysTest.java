@@ -96,16 +96,17 @@ public class DeeplyNestedMergeKeysTest
                 (ObjectCodec) null);
         final ObjectMapper mapper = new ObjectMapper(f);
 
-        // NOTE: `nestedMergeKeys(n)` has n+1 merge keys (outer one, plus n nested)
+        // NOTE: `nestedMergeKeys(n)` reaches a combined depth of n+3: two structural
+        // levels (root mapping, value of `result`), plus n+1 nested merges
 
-        // 10 levels of merge nesting still fine...
-        assertNotNull(mapper.readTree(nestedMergeKeys(9)));
+        // Combined depth of 10 still fine...
+        assertNotNull(mapper.readTree(nestedMergeKeys(7)));
 
         // ... 11 is not
         Throwable failure = failureOnSmallStack(new Body() {
             @Override
             public void call() throws Exception {
-                mapper.readTree(nestedMergeKeys(10));
+                mapper.readTree(nestedMergeKeys(8));
             }
         });
         _assertNestingDepthFailure(failure, 11, 10);
@@ -129,6 +130,35 @@ public class DeeplyNestedMergeKeysTest
             throw new AssertionError("Failed to read document with 900 nested merge keys: "
                     +failure, failure);
         }
+    }
+
+    /**
+     * Structural nesting and merge nesting share one limit: neither half of this document
+     * exceeds the default 1000 on its own, but together they do.
+     */
+    @Test
+    public void testCombinedStructuralAndMergeNesting() throws Exception
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 600; ++i) {
+            sb.append("{a: ");
+        }
+        for (int i = 0; i < 600; ++i) {
+            sb.append("{<<: ");
+        }
+        sb.append("{x: 1}");
+        for (int i = 0; i < 1200; ++i) {
+            sb.append('}');
+        }
+        final String doc = "result: "+sb+"\n";
+
+        Throwable failure = failureOnSmallStack(new Body() {
+            @Override
+            public void call() throws Exception {
+                MAPPER.readTree(doc);
+            }
+        });
+        _assertNestingDepthFailure(failure, 1001, 1000);
     }
 
     /**
