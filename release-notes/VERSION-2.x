@@ -16,6 +16,9 @@ Active Maintainers:
 
 2.21.6 (not yet released)
 
+#710: (csv) `CsvSchema.withArrayElementSeparator(null)` stores `null`, causing
+  `NullPointerException` from `hasArrayElementSeparator()`
+ (fix by @uttam12331)
 #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote YAML 1.1 exponent
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
