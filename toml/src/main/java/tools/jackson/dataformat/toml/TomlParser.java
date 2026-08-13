@@ -327,10 +327,18 @@ class TomlParser {
 
         for (int i = 0; i < length; i++) {
             if (buffer[start + i] == '_') {
-                // slow path to remove underscores
-                buffer = new String(buffer, start, length).replace("_", "").toCharArray();
+                // slow path to remove underscores: copy in-place, skipping '_'
+                char[] cleaned = new char[length];
+                int pos = 0;
+                for (int j = 0; j < length; j++) {
+                    char c = buffer[start + j];
+                    if (c != '_') {
+                        cleaned[pos++] = c;
+                    }
+                }
+                buffer = cleaned;
                 start = 0;
-                length = buffer.length;
+                length = pos;
                 break;
             }
         }
@@ -447,7 +455,8 @@ class TomlParser {
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
-        final String text = lexer.yytext().replace("_", "");
+        String rawText = lexer.yytext();
+        final String text = rawText.indexOf('_') >= 0 ? rawText.replace("_", "") : rawText;
         pollExpected(TomlToken.FLOAT, nextState);
         if (text.endsWith("nan")) {
             return factory.numberNode(Double.NaN);
