@@ -837,7 +837,7 @@ public class CsvDecoder
         char[] inputBuffer = _inputBuffer;
 
         while (ptr < end) {
-            char c = inputBuffer[ptr++];
+            char c = BufferAccess.getChar(inputBuffer, ptr++);
             if (c <= _maxSpecialChar) {
                 if (c == _separatorChar) { // end of value, yay!
                     _inputPtr = ptr;
@@ -853,7 +853,7 @@ public class CsvDecoder
                     break;
                 }
             }
-            outBuf[outPtr++] = c;
+            BufferAccess.setChar(outBuf, outPtr++, c);
         }
         // ok, either input or output across buffer boundary, offline
         _inputPtr = ptr;
@@ -916,7 +916,7 @@ public class CsvDecoder
             }
             final int max = Math.min(_inputEnd, (ptr + (outBuf.length - outPtr)));
             while (ptr < max) {
-                c = inputBuffer[ptr++];
+                c = BufferAccess.getChar(inputBuffer, ptr++);
                 if (c <= _maxSpecialChar) {
                     if (c == _separatorChar) { // end of value, yay!
                         _inputPtr = ptr;
@@ -934,7 +934,7 @@ public class CsvDecoder
                         continue main_loop;
                     }
                 }
-                outBuf[outPtr++] = (char) c;
+                BufferAccess.setChar(outBuf, outPtr++, (char) c);
             }
             _inputPtr = ptr;
         }
@@ -978,7 +978,7 @@ public class CsvDecoder
 
             inner_loop:
             while (true) {
-                char c = inputBuffer[ptr++];
+                char c = BufferAccess.getChar(inputBuffer, ptr++);
                 if (c <= _maxSpecialChar) {
                     if (c == _quoteChar) {
                         _inputPtr = ptr;
@@ -1001,12 +1001,12 @@ public class CsvDecoder
                     } else if (c == _escapeChar) {
                         _inputPtr = ptr;
                         c = _unescape();
-                        outBuf[outPtr++] = c;
+                        BufferAccess.setChar(outBuf, outPtr++, c);
                         // May have passed input boundary, need to re-set
                         continue main_loop;
                     }
                 }
-                outBuf[outPtr++] = c;
+                BufferAccess.setChar(outBuf, outPtr++, c);
                 if (ptr >= max) {
                     _inputPtr = ptr;
                     continue main_loop;

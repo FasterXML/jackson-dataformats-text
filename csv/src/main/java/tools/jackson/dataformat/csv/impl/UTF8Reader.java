@@ -218,11 +218,11 @@ public final class UTF8Reader
         main_loop:
         while (outPtr < len) {
             // At this point we have at least one byte available
-            int c = buf[inPtr++];
+            int c = BufferAccess.getByte(buf, inPtr++);
 
             // Let's first do the quickie loop for common case; 7-bit ASCII
             if (c >= 0) { // ASCII? can probably loop, then
-                cbuf[outPtr++] = (char) c; // ok since MSB is never on
+                BufferAccess.setChar(cbuf, outPtr++, (char) c); // ok since MSB is never on
 
                 // Ok, how many such chars could we safely process without overruns?
                 // (will combine 2 in-loop comparisons into just one)
@@ -235,11 +235,11 @@ public final class UTF8Reader
                     if (inPtr >= inEnd) {
                         break main_loop;
                     }
-                    c = buf[inPtr++];
+                    c = BufferAccess.getByte(buf, inPtr++);
                     if (c < 0) { // or multi-byte
                         break ascii_loop;
                     }
-                    cbuf[outPtr++] = (char) c;
+                    BufferAccess.setChar(cbuf, outPtr++, (char) c);
                 }
             }
 

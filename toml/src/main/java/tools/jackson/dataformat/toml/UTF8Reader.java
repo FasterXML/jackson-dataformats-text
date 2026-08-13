@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.Objects;
 
 import tools.jackson.core.io.IOContext;
+import tools.jackson.dataformat.toml.impl.BufferAccess;
 
 /**
  * Optimized Reader that reads UTF-8 encoded content from an input stream.
@@ -213,7 +214,7 @@ public final class UTF8Reader
         main_loop:
         while (outPtr < len) {
             // At this point we have at least one byte available
-            int c = (int) buf[inPtr++];
+            int c = BufferAccess.getByte(buf, inPtr++);
 
             // Let's first do the quickie loop for common case; 7-bit ASCII
             if (c >= 0) { // ASCII? can probably loop, then
