@@ -283,15 +283,12 @@ public class YAMLParser extends ParserBase
 
     protected TokenStreamLocation _locationFor(Optional<Mark> option)
     {
-        if (!option.isPresent()) {
-            return new TokenStreamLocation(_ioContext.contentReference(),
-                    -1, -1, -1);
-        }
-        Mark m = option.get();
-        return new TokenStreamLocation(_ioContext.contentReference(),
+        return option.map(m -> new TokenStreamLocation(_ioContext.contentReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
-                m.getColumn() + 1); // ditto
+                m.getColumn() + 1)) // ditto
+            .orElseGet(() -> new TokenStreamLocation(_ioContext.contentReference(),
+                -1, -1, -1));
     }
 
     // Note: SHOULD override 'getTokenLineNr', 'getTokenColumnNr', but those are final in 2.0
@@ -502,7 +499,7 @@ public class YAMLParser extends ParserBase
         // we may get an explicit tag, if so, use for corroborating...
         Optional<String> typeTagOptional = scalar.getTag();
         final int len = value.length();
-        if (!typeTagOptional.isPresent() || typeTagOptional.get().equals("!")) { // no, implicit
+        if (typeTagOptional.filter(t -> !t.equals("!")).isEmpty()) { // no, implicit
             Tag nodeTag = _yamlResolver.resolve(value, scalar.getImplicit().canOmitTagInPlainScalar());
             if (nodeTag == Tag.STR) {
                 return JsonToken.VALUE_STRING;
@@ -579,16 +576,11 @@ public class YAMLParser extends ParserBase
 
     protected Boolean _matchYAMLBoolean(String value, int len)
     {
-        switch (len) {
-        case 4:
-            //TODO it should be only lower case
-            if ("true".equalsIgnoreCase(value)) return Boolean.TRUE;
-            break;
-        case 5:
-            if ("false".equalsIgnoreCase(value)) return Boolean.FALSE;
-            break;
-        }
-        return null;
+        return switch (len) {
+            case 4 -> "true".equalsIgnoreCase(value) ? Boolean.TRUE : null;
+            case 5 -> "false".equalsIgnoreCase(value) ? Boolean.FALSE : null;
+            default -> null;
+        };
     }
 
     protected JsonToken _decodeNumberScalar(String value, final int len)

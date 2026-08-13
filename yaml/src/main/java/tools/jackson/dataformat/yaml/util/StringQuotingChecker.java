@@ -1,7 +1,5 @@
 package tools.jackson.dataformat.yaml.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -23,7 +21,7 @@ public abstract class StringQuotingChecker
      * and <a href="https://yaml.org/type/bool.html">boolean</a> type specs,
      * better retain quoting for some keys (property names) and values.
      */
-    private final static Set<String> RESERVED_KEYWORDS = new HashSet<>(Arrays.asList(
+    private final static Set<String> RESERVED_KEYWORDS = Set.of(
             // 02-Apr-2019, tatu: Some names will look funny if escaped: let's leave out
             //    single letter case (esp so 'y' won't get escaped)
             // 17-Sep-2020, tatu: [dataformats-text#226] No, let's be consistent w/ values
@@ -36,7 +34,7 @@ public abstract class StringQuotingChecker
             "true", "True", "TRUE",
             "y", "Y",
             "yes", "Yes", "YES"
-    ));
+    );
 
     /**
      * Method called by

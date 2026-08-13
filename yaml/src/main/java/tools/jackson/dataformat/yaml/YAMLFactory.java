@@ -9,6 +9,7 @@ import org.snakeyaml.engine.v2.common.SpecVersion;
 import org.snakeyaml.engine.v2.schema.CoreSchema;
 import org.snakeyaml.engine.v2.schema.FailsafeSchema;
 import org.snakeyaml.engine.v2.schema.JsonSchema;
+import org.snakeyaml.engine.v2.schema.Schema;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
@@ -139,18 +140,14 @@ public class YAMLFactory
         if (b.loadSettings() == null) {
             LoadSettingsBuilder builder = LoadSettings.builder();
             if (_schema != null) {
-                switch (_schema) {
-                    case FAILSAFE:
-                        builder.setSchema(new FailsafeSchema());
-                        break;
-                    case JSON:
-                        builder.setSchema(new JsonSchema());
-                        break;
-                    case CORE:
-                        builder.setSchema(new CoreSchema());
-                        break;
-                    default:
-                        break;
+                Schema s = switch (_schema) {
+                    case FAILSAFE -> new FailsafeSchema();
+                    case JSON -> new JsonSchema();
+                    case CORE -> new CoreSchema();
+                    default -> null;
+                };
+                if (s != null) {
+                    builder.setSchema(s);
                 }
             }
             _loadSettings = builder.build();
