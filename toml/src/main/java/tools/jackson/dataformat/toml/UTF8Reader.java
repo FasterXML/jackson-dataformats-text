@@ -350,9 +350,7 @@ public final class UTF8Reader
             if (_inputPtr > 0) {
                 // Can only do so if buffer mutable
                 if (!_inputBufferReadOnly) {
-                    for (int i = 0; i < available; ++i) {
-                        _inputBuffer[i] = _inputBuffer[_inputPtr+i];
-                    }
+                    System.arraycopy(_inputBuffer, _inputPtr, _inputBuffer, 0, available);
                     _inputPtr = 0;
                     _inputEnd = available;
                 }
