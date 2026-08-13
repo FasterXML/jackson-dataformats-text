@@ -1057,7 +1057,7 @@ public class CsvSchema
 
         // and then we may need to create a mapping
         if (_columns.length == 0) {
-            _columnsByName = Collections.emptyMap();
+            _columnsByName = Map.of();
         } else {
             _columnsByName = new LinkedHashMap<>(4 + _columns.length);
             for (Column c : _columns) {
@@ -1106,7 +1106,7 @@ public class CsvSchema
 
         // and then we may need to create a mapping
         if (_columns.length == 0) {
-            _columnsByName = Collections.emptyMap();
+            _columnsByName = Map.of();
         } else {
             _columnsByName = new LinkedHashMap<>(4 + _columns.length);
             for (Column c : _columns) {
@@ -1636,7 +1636,7 @@ public class CsvSchema
 
     @Override
     public Iterator<Column> iterator() {
-        return Arrays.asList(_columns).iterator();
+        return List.of(_columns).iterator();
     }
 
     /**

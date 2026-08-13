@@ -1070,18 +1070,13 @@ public class CsvDecoder
         }
         // Some characters are more special than others, so:
         char c = _inputBuffer[_inputPtr++];
-        switch (c) {
-            case '0':
-                return '\0';
-            case 'n':
-                return '\n';
-            case 'r':
-                return '\r';
-            case 't':
-                return '\t';
-        }
-        // others, return as is...
-        return c;
+        return switch (c) {
+            case '0' -> '\0';
+            case 'n' -> '\n';
+            case 'r' -> '\r';
+            case 't' -> '\t';
+            default -> c;
+        };
     }
 
     protected final int _nextChar() throws JacksonException {

@@ -407,10 +407,8 @@ public class YAMLGenerator extends GeneratorBase
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
-        if (anchor.isPresent()) {
-            _objectId = null;
-        }
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(Anchor::new);
+        _objectId = null;
         _emit(new SequenceStartEvent(anchor, Optional.ofNullable(yamlTag),
                 implicit,  style));
         return this;
@@ -445,10 +443,8 @@ public class YAMLGenerator extends GeneratorBase
         FlowStyle style = _outputOptions.getDefaultFlowStyle();
         String yamlTag = _typeId;
         boolean implicit = (yamlTag == null);
-        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
-        if (anchor.isPresent()) {
-            _objectId = null;
-        }
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(Anchor::new);
+        _objectId = null;
         _emit(new MappingStartEvent(anchor, Optional.ofNullable(yamlTag), implicit,  style));
         return this;
     }
@@ -926,10 +922,8 @@ public class YAMLGenerator extends GeneratorBase
         if (yamlTag != null) {
             _typeId = null;
         }
-        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(s -> new Anchor(s));
-        if (anchor.isPresent()) {
-            _objectId = null;
-        }
+        Optional<Anchor> anchor = Optional.ofNullable(_objectId).map(Anchor::new);
+        _objectId = null;
         // 29-Nov-2017, tatu: Not 100% sure why we don't force explicit tags for
         //    type id, but trying to do so seems to double up tag output...
         return new ScalarEvent(anchor, Optional.ofNullable(yamlTag), NO_TAGS, value, style);
@@ -941,7 +935,7 @@ public class YAMLGenerator extends GeneratorBase
 
     protected void _emitStartDocument() throws JacksonException
     {
-        Map<String,String> noTags = Collections.emptyMap();
+        Map<String,String> noTags = Map.of();
         boolean startMarker = YAMLWriteFeature.WRITE_DOC_START_MARKER.enabledIn(_formatWriteFeatures);
         _emit(new DocumentStartEvent(startMarker, _outputOptions.getYamlDirective(),
                  // for 1.10 was: ((version == null) ? null : version.getArray()),
