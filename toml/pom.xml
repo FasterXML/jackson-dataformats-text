@@ -9,7 +9,7 @@
     <parent>
         <groupId>tools.jackson.dataformat</groupId>
         <artifactId>jackson-dataformats-text</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.3-SNAPSHOT</version>
     </parent>
     <artifactId>jackson-dataformat-toml</artifactId>
     <packaging>jar</packaging>
