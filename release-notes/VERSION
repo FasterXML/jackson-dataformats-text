@@ -18,7 +18,7 @@ implementations)
 
 No changes since 3.2
 
-3.2.2 (not yet released)
+3.2.2 (14-Aug-2026)
 
 #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote exponent (`1e5`)
   and non-finite (`.inf`, `.nan`) number forms
