@@ -49,7 +49,7 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
-2.21.6 (not yet released)
+2.21.6 (14-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
