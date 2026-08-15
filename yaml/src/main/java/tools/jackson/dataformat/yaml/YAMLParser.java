@@ -356,6 +356,15 @@ public class YAMLParser extends ParserBase
                             _streamReadContext = _streamReadContext.getParent();
                             return _updateToken(JsonToken.END_OBJECT);
                         }
+                        // [dataformats-text#589]: complex (non-scalar) mapping keys
+                        if (evt.getEventId() == Event.ID.SequenceStart
+                                || evt.getEventId() == Event.ID.MappingStart) {
+                            final String name = _decodeComplexPropertyName(evt);
+                            _streamReadConstraints.validateNameLength(name.length());
+                            _currentName = name;
+                            _streamReadContext.setCurrentName(name);
+                            return _updateToken(JsonToken.PROPERTY_NAME);
+                        }
                         _reportError("Expected a property name (Scalar value in YAML), got this instead: "+evt);
                     }
 
@@ -479,6 +488,119 @@ public class YAMLParser extends ParserBase
 
     protected Event nextEvent() {
         return _yamlParser.next();
+    }
+
+    /**
+     * Helper method called when a non-scalar event (Sequence or Mapping start) is encountered
+     * where a property name is expected -- indicates a "complex key" in YAML terms.
+     * Consumes the full key structure and converts to a canonical String representation
+     * (flow-style) so that Jackson's scalar-only property name model can represent it.
+     *
+     * @since 3.2
+     */
+    protected String _decodeComplexPropertyName(Event evt) throws JacksonException
+    {
+        StringBuilder sb = new StringBuilder(32);
+        _appendComplexKey(evt, sb, 0);
+        return sb.toString();
+    }
+
+    private void _appendComplexKey(Event evt, StringBuilder sb, int depth) throws JacksonException
+    {
+        _streamReadConstraints.validateNestingDepth(depth);
+        switch (evt.getEventId()) {
+        case Scalar:
+            _appendComplexKeyScalar(((ScalarEvent) evt).getValue(), sb);
+            return;
+        case SequenceStart:
+            sb.append('[');
+            _appendComplexKeySequenceContent(sb, depth + 1);
+            sb.append(']');
+            return;
+        case MappingStart:
+            sb.append('{');
+            _appendComplexKeyMappingContent(sb, depth + 1);
+            sb.append('}');
+            return;
+        default:
+            _reportError("Unexpected YAML event for complex property name, expected Scalar, Sequence or Mapping start, got: "+evt);
+        }
+    }
+
+    private void _appendComplexKeySequenceContent(StringBuilder sb, int depth) throws JacksonException
+    {
+        boolean first = true;
+        while (true) {
+            Event evt = nextEvent();
+            if (evt == null) {
+                _reportError("Unexpected end-of-input in complex property name (sequence)");
+            }
+            if (evt.getEventId() == Event.ID.SequenceEnd) {
+                return;
+            }
+            if (!first) {
+                sb.append(", ");
+            }
+            first = false;
+            _appendComplexKey(evt, sb, depth);
+        }
+    }
+
+    private void _appendComplexKeyMappingContent(StringBuilder sb, int depth) throws JacksonException
+    {
+        boolean first = true;
+        while (true) {
+            Event keyEvt = nextEvent();
+            if (keyEvt == null) {
+                _reportError("Unexpected end-of-input in complex property name (mapping)");
+            }
+            if (keyEvt.getEventId() == Event.ID.MappingEnd) {
+                return;
+            }
+            if (!first) {
+                sb.append(", ");
+            }
+            first = false;
+            _appendComplexKey(keyEvt, sb, depth);
+            sb.append(": ");
+            Event valEvt = nextEvent();
+            if (valEvt == null) {
+                _reportError("Unexpected end-of-input in complex property name (mapping value)");
+            }
+            _appendComplexKey(valEvt, sb, depth);
+        }
+    }
+
+    private void _appendComplexKeyScalar(String value, StringBuilder sb)
+    {
+        if (_needsQuotesForComplexKey(value)) {
+            sb.append('"');
+            for (int i = 0, len = value.length(); i < len; ++i) {
+                char c = value.charAt(i);
+                if (c == '"' || c == '\\') {
+                    sb.append('\\');
+                }
+                sb.append(c);
+            }
+            sb.append('"');
+        } else {
+            sb.append(value);
+        }
+    }
+
+    private boolean _needsQuotesForComplexKey(String value)
+    {
+        if (value.isEmpty()) {
+            return true;
+        }
+        for (int i = 0, len = value.length(); i < len; ++i) {
+            char c = value.charAt(i);
+            if (c == ':' || c == ',' || c == '[' || c == ']' || c == '{' || c == '}'
+                    || c == ' ' || c == '\t' || c == '\n' || c == '\r') {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws JacksonException

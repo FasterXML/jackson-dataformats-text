@@ -10,6 +10,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.dataformat.yaml.JacksonYAMLParseException;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
@@ -660,6 +661,51 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             fail("expected to fail by now");
         } catch (JacksonYAMLParseException e) {
             assertTrue(e.getMessage().startsWith("The incoming YAML document exceeds the limit: 5 code points."));
+        }
+    }
+
+    // [dataformats-text#589]: sequence (and mapping) as mapping key
+    @Test
+    public void testComplexMappingKeySequence() throws Exception
+    {
+        final String YAML = "? [user, 123]\n: name: Ivan\n  age: 30\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("[user, 123]", p.currentName());
+            assertEquals("[user, 123]", p.getString());
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("name", p.currentName());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("Ivan", p.getString());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("age", p.currentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(30, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+
+        JsonNode node = MAPPER.readTree(YAML);
+        assertTrue(node.has("[user, 123]"));
+        assertEquals("Ivan", node.get("[user, 123]").get("name").asString());
+        assertEquals(30, node.get("[user, 123]").get("age").asInt());
+    }
+
+    @Test
+    public void testComplexMappingKeyMapping() throws Exception
+    {
+        final String YAML = "? {foo: bar}\n: 42\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("{foo: bar}", p.currentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(42, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
         }
     }
 
