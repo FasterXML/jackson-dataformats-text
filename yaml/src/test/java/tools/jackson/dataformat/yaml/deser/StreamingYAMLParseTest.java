@@ -707,6 +707,117 @@ public class StreamingYAMLParseTest extends ModuleTestBase
             assertToken(JsonToken.END_OBJECT, p.nextToken());
             assertNull(p.nextToken());
         }
+
+        JsonNode node = MAPPER.readTree(YAML);
+        assertTrue(node.has("{foo: bar}"));
+        assertEquals(42, node.get("{foo: bar}").asInt());
+    }
+
+    @Test
+    public void testComplexMappingKeyImplicitFlow() throws Exception
+    {
+        final String YAML = "[user, 123]: 42\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("[user, 123]", p.currentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(42, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
+    @Test
+    public void testComplexMappingKeyNested() throws Exception
+    {
+        final String YAML = "? {outer: {inner: x}}\n: 42\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("{outer: {inner: x}}", p.currentName());
+            assertToken(JsonToken.VALUE_NUMBER_INT, p.nextToken());
+            assertEquals(42, p.getIntValue());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
+    @Test
+    public void testComplexMappingKeyEmptyCollections() throws Exception
+    {
+        final String YAML = "? []\n: empty-seq\n? {}\n: empty-map\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("[]", p.currentName());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("empty-seq", p.getString());
+
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("{}", p.currentName());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("empty-map", p.getString());
+
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
+    @Test
+    public void testComplexMappingKeyQuotedSpecials() throws Exception
+    {
+        final String YAML = "? [\"a:b\", \"c,d\", has space]\n: ok\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("[\"a:b\", \"c,d\", \"has space\"]", p.currentName());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("ok", p.getString());
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
+    @Test
+    public void testComplexMappingKeyAliasInKey() throws Exception
+    {
+        final String YAML = "? &key1 [user, 123]\n: first\n? *key1\n: second\n";
+        try (JsonParser p = MAPPER.createParser(YAML)) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("[user, 123]", p.currentName());
+
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("first", p.getString());
+
+            assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+            assertEquals("*key1", p.currentName());
+
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("second", p.getString());
+
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertNull(p.nextToken());
+        }
+    }
+
+    @Test
+    public void testComplexMappingKeyObjectAnchorDeferredOnFirstEntry() throws Exception
+    {
+        final String YAML = "&obj1\n? [user, 123]\n: 42\n";
+        YAMLParser yp = (YAMLParser) MAPPER.createParser(YAML);
+        assertToken(JsonToken.START_OBJECT, yp.nextToken());
+        assertEquals("obj1", yp.getObjectId());
+        assertToken(JsonToken.PROPERTY_NAME, yp.nextToken());
+        assertEquals("[user, 123]", yp.currentName());
+        assertToken(JsonToken.VALUE_NUMBER_INT, yp.nextToken());
+        assertEquals(42, yp.getIntValue());
+        assertToken(JsonToken.END_OBJECT, yp.nextToken());
+        assertNull(yp.nextToken());
+        yp.close();
     }
 
     // In Jackson 3.x, non-Number token should NOT throw exception for parser.getNumberType()
