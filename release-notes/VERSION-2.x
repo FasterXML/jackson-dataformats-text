@@ -21,7 +21,7 @@ Active Maintainers:
  (reported by @EverNife)
  (fix by @seonwooj0810)
 
-2.22.2 (not yet released)
+2.22.2 (16-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
@@ -46,7 +46,7 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
-2.21.6 (not yet released)
+2.21.6 (14-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
@@ -140,7 +140,7 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
-2.18.10 (not yet released)
+2.18.10 (15-Aug-2026)
 
 #702: (toml) Expand nesting depth checks for dotted keys
  (contributed by @yawkat)
