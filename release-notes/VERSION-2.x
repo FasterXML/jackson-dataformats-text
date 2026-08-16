@@ -16,7 +16,7 @@ Active Maintainers:
 
 2.23.0 (not yet released)
 
-2.22.2 (not yet released)
+2.22.2 (16-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
