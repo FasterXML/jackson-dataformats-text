@@ -84,6 +84,27 @@ public class LongTokenTest extends TomlMapperTestBase {
         assertRadixIntegerRejected("0xa");
     }
 
+    @Test
+    public void integerUnderscoreBufferGrowth() throws IOException {
+        // Digits interleaved with underscores, long enough to force the lexer's
+        // token buffer (initial size 4000) to grow while removing the underscores,
+        // followed by another key/value pair to prove later tokens are unaffected.
+        StringBuilder digits = new StringBuilder();
+        for (int i = 0; i < SCALE; i++) {
+            digits.append((char) ('0' + (i % 10)));
+            if (i % 3 == 2 && i != SCALE - 1) {
+                digits.append('_');
+            }
+        }
+        String toml = "foo = 1" + digits + "\nbar = 42";
+
+        ObjectNode node = (ObjectNode) NO_LIMITS_MAPPER.readTree(toml);
+
+        BigInteger expected = new BigInteger("1" + digits.toString().replace("_", ""));
+        assertEquals(expected, node.get("foo").bigIntegerValue());
+        assertEquals(42, node.get("bar").intValue());
+    }
+
     private void assertRadixIntegerRejected(String prefixAndFirstDigit) throws IOException {
         final ObjectMapper mapper = newTomlMapper();
         StringBuilder toml = new StringBuilder("foo = ").append(prefixAndFirstDigit);

@@ -327,18 +327,17 @@ class TomlParser {
 
         for (int i = 0; i < length; i++) {
             if (buffer[start + i] == '_') {
-                // slow path to remove underscores: copy in-place, skipping '_'
-                char[] cleaned = new char[length];
-                int pos = 0;
-                for (int j = 0; j < length; j++) {
-                    char c = buffer[start + j];
+                // slow path to remove underscores: compact into the already-owned
+                // buffer itself (chars before the first '_' are already in place),
+                // avoiding a second array allocation
+                int pos = start + i;
+                for (int j = pos + 1; j < start + length; j++) {
+                    char c = buffer[j];
                     if (c != '_') {
-                        cleaned[pos++] = c;
+                        buffer[pos++] = c;
                     }
                 }
-                buffer = cleaned;
-                start = 0;
-                length = pos;
+                length = pos - start;
                 break;
             }
         }
