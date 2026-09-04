@@ -22,7 +22,7 @@ Active Maintainers:
 
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
   for CSV module
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.19.4 (29-Oct-2025)
