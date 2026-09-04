@@ -23,7 +23,7 @@ Active Maintainers:
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
  (fix by @indyteo, backported from 3.1)
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 #707: (yaml) Should constraint deeply nested YAML merge keys in
   `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
