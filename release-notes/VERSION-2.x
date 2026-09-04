@@ -16,7 +16,7 @@ Active Maintainers:
 
 2.18.10 (15-Aug-2026)
 
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.18.9 (07-Jul-2026)
