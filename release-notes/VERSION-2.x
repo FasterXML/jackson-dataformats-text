@@ -21,7 +21,7 @@ Active Maintainers:
  (reported by @EverNife)
  (fix by @seonwooj0810)
 
-2.22.2 (not yet released)
+2.22.2 (16-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
@@ -30,7 +30,7 @@ Active Maintainers:
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
  (fix contributed by @seonwooj0810)
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 #707: (yaml) Should constraint deeply nested YAML merge keys in
   `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
@@ -46,7 +46,7 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
-2.21.6 (not yet released)
+2.21.6 (14-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
   using the merge operator inside an anchor
@@ -55,7 +55,7 @@ No changes since 2.22.0
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
  (fix contributed by @seonwooj0810)
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 #707: (yaml) Should constraint deeply nested YAML merge keys in
   `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
@@ -116,7 +116,7 @@ No changes since 2.20.0
 
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
   for CSV module
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.19.4 (29-Oct-2025)
@@ -140,9 +140,9 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
-2.18.10 (not yet released)
+2.18.10 (15-Aug-2026)
 
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.18.9 (07-Jul-2026)
