@@ -33,7 +33,7 @@ Active Maintainers:
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
  (fix contributed by @seonwooj0810)
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 #707: (yaml) Should constraint deeply nested YAML merge keys in
   `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
@@ -58,7 +58,7 @@ No changes since 2.22.0
   (`1e5`), hex (`0x1F`) and underscore (`12_34`) number forms
  (reported by @EverNife)
  (fix contributed by @seonwooj0810)
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 #707: (yaml) Should constraint deeply nested YAML merge keys in
   `YAMLAnchorReplayingParser` (GHSA-255r-36wv-4qpr)
@@ -119,7 +119,7 @@ No changes since 2.20.0
 
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
   for CSV module
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.19.4 (29-Oct-2025)
@@ -145,7 +145,7 @@ No changes since 2.19.0
 
 2.18.10 (15-Aug-2026)
 
-#702: (toml) Expand nesting depth checks for dotted keys
+#702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
  (contributed by @yawkat)
 
 2.18.9 (07-Jul-2026)
