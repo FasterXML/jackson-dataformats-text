@@ -324,7 +324,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
-        String idStr = Long.valueOf(id).toString(); // since instances for small values cached
+        String idStr = Long.toString(id);
         if (!_streamWriteContext.writeName(idStr)) {
             _reportError("Cannot write a property id, expecting a value");
         }
@@ -684,7 +684,7 @@ public class YAMLGenerator extends GeneratorBase
             return writeNull();
         }
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(v.toString()), "java.math.BigInteger", STYLE_SCALAR);
+        _writeScalar(v.toString(), "java.math.BigInteger", STYLE_SCALAR);
         return this;
     }
 
@@ -792,7 +792,7 @@ public class YAMLGenerator extends GeneratorBase
         throws JacksonException
     {
         _verifyValueWrite("write Object reference");
-        AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
+        AliasEvent evt = new AliasEvent(id == null ? Optional.empty() : Optional.of(new Anchor(id.toString())));
         _emit(evt);
         return this;
     }
