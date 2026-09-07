@@ -331,3 +331,9 @@ Michał Majchrowicz (@sectroyer)
 * Reported #707: (yaml) `StackOverflowError` when reading deeply nested merge keys
   (`<<`) with `YAMLAnchorReplayingFactory` (GHSA-255r-36wv-4qpr)
  (2.21.6)
+
+Uttam Limbani (@uttam12331)
+
+* Fixed #710: (csv) `CsvSchema.withArrayElementSeparator(null)` stores `null`,
+  causing `NullPointerException` from `hasArrayElementSeparator()`
+ (2.21.6)

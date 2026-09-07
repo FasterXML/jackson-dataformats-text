@@ -1206,7 +1206,7 @@ public class CsvSchema
     public CsvSchema withArrayElementSeparator(String separator) {
         String sep = separator == null ? "" : separator;
         return (_arrayElementSeparator.equals(sep)) ? this : new CsvSchema(_columns, _features,
-            _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, separator,
+            _columnSeparator, _quoteChar, _escapeChar, _lineSeparator, sep,
             _nullValue, _columnsByName, _anyPropertyName);
     }
 
