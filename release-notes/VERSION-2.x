@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.21.7 (not yet released)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+
 2.21.6 (14-Aug-2026)
 
 #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote YAML 1.1 exponent
