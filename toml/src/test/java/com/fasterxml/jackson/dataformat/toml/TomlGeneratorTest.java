@@ -24,6 +24,34 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         assertEquals("abc = 123\n", w.toString());
     }
 
+    // `writeString(char[],int,int)` used to read `text[offset + len]` instead
+    // of `text[offset + i]` when escaping was needed (wrong chars written, or
+    // ArrayIndexOutOfBoundsException)
+    @Test
+    public void stringFromCharArrayNeedingEscapes() throws IOException {
+        // value has a quote and a newline: needs "basic string" with escapes
+        String value = "say \"hi\"\nbye";
+        char[] padded = ("<<" + value).toCharArray(); // no trailing padding: index bug would overflow
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            generator.writeString(padded, 2, value.length());
+            generator.writeEndObject();
+        }
+        assertEquals("abc = \"say \\\"hi\\\"\\nbye\"\n", w.toString());
+        // and must match String variant, and read back
+        StringWriter w2 = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w2)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            generator.writeString(value);
+            generator.writeEndObject();
+        }
+        assertEquals(w2.toString(), w.toString());
+        assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").textValue());
+    }
+
     @Test
     public void bool() throws IOException {
         StringWriter w = new StringWriter();

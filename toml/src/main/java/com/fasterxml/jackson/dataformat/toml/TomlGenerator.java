@@ -709,7 +709,7 @@ final class TomlGenerator extends GeneratorBase
         } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
             _writeRaw('"');
             for (int i = 0; i < len; i++) {
-                char c = text[offset + len];
+                char c = text[offset + i];
                 String escape = StringOutputUtil.getBasicStringEscape(c);
                 if (escape == null) {
                     _writeRaw(c);
