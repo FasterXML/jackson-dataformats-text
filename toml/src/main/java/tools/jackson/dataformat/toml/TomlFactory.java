@@ -181,7 +181,11 @@ public final class TomlFactory extends TextualTSFactory
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) throws JacksonException {
         try {
             ObjectNode node = parse(readCtxt, ctxt, r);
-            return new TreeTraversingParser(node, readCtxt);
+            // [dataformats-text#430]: apply this factory's `StreamReadConstraints`
+            // (from `IOContext`) same as streaming parsers do -- and not those of
+            // `ObjectReadContext` -- so that constraints like `maxTokenCount` are
+            // enforced regardless of how parser is created
+            return new TreeTraversingParser(node, readCtxt, ctxt.streamReadConstraints());
         } finally {
             ctxt.close();
         }
