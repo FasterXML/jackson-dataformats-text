@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.21.7 (not yet released)
+
+#726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
+  or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+
 2.21.6 (14-Aug-2026)
 
 #701: (yaml) `ALWAYS_QUOTE_NUMBERS_AS_STRINGS` does not quote YAML 1.1 exponent
