@@ -320,6 +320,12 @@ public class CsvDecoder
     /**********************************************************************
      */
 
+    /**
+     * @deprecated Since 3.3 use
+     *   {@link #CsvDecoder(IOContext, CsvParser, Reader, CsvSchema, TextBuffer, int, int, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
                       CsvSchema schema, TextBuffer textBuffer,
                       int stdFeatures, int csvFeatures)

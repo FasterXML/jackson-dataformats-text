@@ -76,6 +76,11 @@ public final class Latin1Reader extends Reader
         _inputEnd = ptr+len;
     }
 
+    /**
+     * @deprecated Since 3.3 use {@link #Latin1Reader(IOContext, InputStream, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public Latin1Reader(IOContext ctxt, InputStream in) {
         this(ctxt, in, true);
     }
