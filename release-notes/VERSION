@@ -16,6 +16,8 @@ implementations)
 
 3.3.0 (not yet released)
 
+#430: (toml) Apply `TomlFactory`'s `StreamReadConstraints` (incl. `maxTokenCount`)
+  to parsers regardless of `ObjectReadContext` used to create them
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
