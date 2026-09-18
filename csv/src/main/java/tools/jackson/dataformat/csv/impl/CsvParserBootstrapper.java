@@ -186,7 +186,9 @@ public final class CsvParserBootstrapper
                 InputStream in = _in;
                 
                 if (in == null) {
-                    in = new ByteArrayInputStream(_inputBuffer, _inputPtr, _inputEnd);
+                    // 18-Sep-2026, tatu: third argument is a LENGTH, not end offset --
+                    //   passing `_inputEnd` made us decode past the given `byte[]` range
+                    in = new ByteArrayInputStream(_inputBuffer, _inputPtr, _inputEnd - _inputPtr);
                 } else {
                     // Also, if we have any read but unused input (usually true),
                     // need to merge that input in:
