@@ -24,6 +24,11 @@ Active Maintainers:
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
 
+2.22.3 (not yet released)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+
 2.22.2 (16-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
