@@ -16,6 +16,10 @@ Active Maintainers:
 
 2.21.7 (not yet released)
 
+#430: (toml) Support `StreamReadConstraints.maxNameLength()` and
+  `StreamReadConstraints.maxDocumentLength()` for TOML parser
+ (requested by @pjfanning)
+ (fix by @pjfanning)
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
 
