@@ -158,9 +158,15 @@ public final class CsvParserBootstrapper
         _context.setEncoding(enc);
         final boolean autoClose = _context.isResourceManaged()
             || StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(parserFeatures);
+        // Readers we construct here are ours to close -- that is what returns their read
+        // buffer to the recycler -- and `UTF8Reader` / `UTF32Reader` honour `autoClose`
+        // themselves, so the caller's `InputStream` is left alone unless it should not be.
+        // The UTF-16 path however uses a plain `InputStreamReader`, which has no such
+        // notion and would close the caller's stream regardless; leave that one as-is.
+        final boolean ownsReader = (enc != JsonEncoding.UTF16_BE) && (enc != JsonEncoding.UTF16_LE);
         return new CsvParser(readCtxt, _context,
                 parserFeatures, csvFeatures, schema,
-                _createReader(enc, autoClose));
+                _createReader(enc, autoClose), ownsReader);
     }
 
     @SuppressWarnings("resource")
@@ -180,7 +186,9 @@ public final class CsvParserBootstrapper
                 InputStream in = _in;
                 
                 if (in == null) {
-                    in = new ByteArrayInputStream(_inputBuffer, _inputPtr, _inputEnd);
+                    // 18-Sep-2026, tatu: third argument is a LENGTH, not end offset --
+                    //   passing `_inputEnd` made us decode past the given `byte[]` range
+                    in = new ByteArrayInputStream(_inputBuffer, _inputPtr, _inputEnd - _inputPtr);
                 } else {
                     // Also, if we have any read but unused input (usually true),
                     // need to merge that input in:

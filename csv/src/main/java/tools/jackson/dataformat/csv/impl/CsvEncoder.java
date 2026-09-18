@@ -661,7 +661,27 @@ public class CsvEncoder
 
     protected void appendValue(float value) throws JacksonException
     {
-        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
+        if (_cfgUseFastDoubleWriter) {
+            // Fast path: Schubfach writes straight into the output buffer,
+            // no intermediate String. Quoting (if enabled) is applied inline,
+            // same as for int/long values.
+            // up to MAX_FLOAT_BYTES chars, leading comma, possible quotes
+            if ((_outputTail + NumberOutput.MAX_FLOAT_BYTES + 3) > _outputEnd) {
+                _flushBuffer();
+            }
+            if (_nextColumnToWrite > 0) {
+                _outputBuffer[_outputTail++] = _cfgColumnSeparator;
+            }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            _outputTail = NumberOutput.outputFloat(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            return;
+        }
+        String str = NumberOutput.toString(value, false);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -674,7 +694,27 @@ public class CsvEncoder
 
     protected void appendValue(double value) throws JacksonException
     {
-        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
+        if (_cfgUseFastDoubleWriter) {
+            // Fast path: Schubfach writes straight into the output buffer,
+            // no intermediate String. Quoting (if enabled) is applied inline,
+            // same as for int/long values.
+            // up to MAX_DOUBLE_BYTES chars, leading comma, possible quotes
+            if ((_outputTail + NumberOutput.MAX_DOUBLE_BYTES + 3) > _outputEnd) {
+                _flushBuffer();
+            }
+            if (_nextColumnToWrite > 0) {
+                _outputBuffer[_outputTail++] = _cfgColumnSeparator;
+            }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            _outputTail = NumberOutput.outputDouble(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            return;
+        }
+        String str = NumberOutput.toString(value, false);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
