@@ -32,16 +32,6 @@ final class TomlGenerator extends GeneratorBase
      */
     protected final Writer _out;
 
-    /**
-     * Whether {@link #_out} was constructed by us (wrapping a caller-provided
-     * {@link java.io.OutputStream}) rather than handed to us by the caller. A
-     * {@link Writer} we construct must always be closed: that is what flushes its
-     * pending content into the stream and returns its buffers to the recycler.
-     *
-     * @since 3.3
-     */
-    protected final boolean _ownsWriter;
-
     private final int _tomlFeatures;
 
     /*
@@ -89,13 +79,7 @@ final class TomlGenerator extends GeneratorBase
 
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, int tomlFeatures, Writer out) {
-        this(writeCtxt, ioCtxt, stdFeatures, tomlFeatures, out, false);
-    }
-
-    public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, int tomlFeatures, Writer out, boolean ownsWriter) {
         super(writeCtxt, ioCtxt, stdFeatures);
-        _ownsWriter = ownsWriter;
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
@@ -154,18 +138,9 @@ final class TomlGenerator extends GeneratorBase
         if (_out != null) {
             if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
                 _out.close();
-            } else {
-                if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    // If we can't close it, we should at least flush
-                    _out.flush();
-                }
-                // 08-Sep-2026, pjfanning: [dataformats-text#719] a Writer we constructed
-                //   ourselves must be closed regardless: without that its buffered
-                //   content never reaches the caller's OutputStream, and the buffer it
-                //   took from the recycler is lost. The stream it wraps is shielded.
-                if (_ownsWriter) {
-                    _out.close();
-                }
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                // If we can't close it, we should at least flush
+                _out.flush();
             }
         }
     }

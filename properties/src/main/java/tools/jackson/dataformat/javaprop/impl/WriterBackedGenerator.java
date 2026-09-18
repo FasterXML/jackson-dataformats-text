@@ -23,16 +23,6 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      */
     protected final Writer _out;
 
-    /**
-     * Whether {@link #_out} was constructed by Jackson (wrapping a caller-provided
-     * {@link java.io.OutputStream}) rather than handed to us by the caller. A
-     * {@link Writer} we construct must always be closed: that is what flushes its
-     * pending content into the stream and returns its buffers.
-     *
-     * @since 3.3
-     */
-    protected final boolean _ownsWriter;
-
     /*
     /**********************************************************************
     /* Output buffering
@@ -66,22 +56,8 @@ public class WriterBackedGenerator extends JavaPropsGenerator
             int stdFeatures, JavaPropsSchema schema,
             Writer out)
     {
-        this(writeCtxt, ioCtxt, stdFeatures, schema, out, false);
-    }
-
-    /**
-     * @param ownsWriter Whether {@code out} was constructed by Jackson (and hence must
-     *    always be closed), or provided by the caller
-     *
-     * @since 3.3
-     */
-    public WriterBackedGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, JavaPropsSchema schema,
-            Writer out, boolean ownsWriter)
-    {
         super(writeCtxt, ioCtxt, stdFeatures, schema);
         _out = out;
-        _ownsWriter = ownsWriter;
         _outputBuffer = ioCtxt.allocConcatBuffer();
         _outputEnd = _outputBuffer.length;
     }
@@ -127,18 +103,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         if (_out != null) {
             if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
                 _out.close();
-            } else {
-                if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    // If we can't close it, we should at least flush
-                    _out.flush();
-                }
-                // 08-Sep-2026, pjfanning: [dataformats-text#719] a Writer we constructed
-                //   ourselves must be closed regardless: without that its buffered
-                //   content never reaches the caller's OutputStream. The stream it wraps
-                //   is shielded.
-                if (_ownsWriter) {
-                    _out.close();
-                }
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                // If we can't close it, we should at least flush
+                _out.flush();
             }
         }
     }
