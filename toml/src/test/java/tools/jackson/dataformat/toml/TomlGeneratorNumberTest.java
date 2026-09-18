@@ -27,6 +27,10 @@ public class TomlGeneratorNumberTest extends TomlMapperTestBase
             .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
             .build();
 
+    private final static short[] SHORTS = new short[] {
+        0, 1, -1, 7, 42, -99, 1000, Short.MAX_VALUE, Short.MIN_VALUE,
+    };
+
     private final static int[] INTS = new int[] {
         0, 1, -1, 7, 42, -99, 1000, 123456789, Integer.MAX_VALUE, Integer.MIN_VALUE,
     };
@@ -52,6 +56,13 @@ public class TomlGeneratorNumberTest extends TomlMapperTestBase
      */
 
     @Test
+    public void testShorts() {
+        for (short v : SHORTS) {
+            assertEquals("abc = " + v + "\n", _write(DEFAULT_MAPPER, g -> g.writeNumber(v)));
+        }
+    }
+
+    @Test
     public void testInts() {
         for (int v : INTS) {
             assertEquals("abc = " + v + "\n", _write(DEFAULT_MAPPER, g -> g.writeNumber(v)));
@@ -63,6 +74,31 @@ public class TomlGeneratorNumberTest extends TomlMapperTestBase
         for (long v : LONGS) {
             assertEquals("abc = " + v + "\n", _write(DEFAULT_MAPPER, g -> g.writeNumber(v)));
         }
+    }
+
+    // Also verify `short` in inline (array) context, where no linefeed is written
+    @Test
+    public void testShortsInArray() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = DEFAULT_MAPPER.createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("abc");
+            g.writeStartArray();
+            for (short v : SHORTS) {
+                g.writeNumber(v);
+            }
+            g.writeEndArray();
+            g.writeEndObject();
+        }
+        StringBuilder exp = new StringBuilder("abc = [");
+        for (int i = 0; i < SHORTS.length; ++i) {
+            if (i > 0) {
+                exp.append(", ");
+            }
+            exp.append(SHORTS[i]);
+        }
+        exp.append("]\n");
+        assertEquals(exp.toString(), w.toString());
     }
 
     /*
