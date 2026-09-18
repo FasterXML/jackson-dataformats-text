@@ -125,6 +125,24 @@ public class CsvGenerator extends GeneratorBase
             Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes,
             int maxQuoteCheckChars)
     {
+        this(writeCtxt, ioCtxt, streamWriteFeatures, csvFeatures, out, schema,
+                characterEscapes, maxQuoteCheckChars, false);
+    }
+
+    /**
+     * @param ownsWriter Whether {@code out} was constructed by Jackson (typically
+     *    wrapping a caller-provided {@link java.io.OutputStream}), in which case it must
+     *    always be closed so its content is flushed and its buffers recycled; or provided
+     *    by the caller, in which case
+     *    {@link tools.jackson.core.StreamWriteFeature#AUTO_CLOSE_TARGET} decides.
+     *
+     * @since 3.3
+     */
+    public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int streamWriteFeatures, int csvFeatures,
+            Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes,
+            int maxQuoteCheckChars, boolean ownsWriter)
+    {
         super(writeCtxt, ioCtxt, streamWriteFeatures);
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
@@ -136,7 +154,7 @@ public class CsvGenerator extends GeneratorBase
         }
         boolean useFastDoubleWriter = isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER);
         _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes,
-                useFastDoubleWriter, maxQuoteCheckChars);
+                useFastDoubleWriter, maxQuoteCheckChars, ownsWriter);
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
