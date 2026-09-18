@@ -31,6 +31,18 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
   private boolean trimmedNewline;
   final com.fasterxml.jackson.core.util.TextBuffer textBuffer;
 
+  // [dataformats-text#430]: total number of chars read from input so far,
+  // for enforcing `StreamReadConstraints.maxDocumentLength()`
+  private long totalCharsRead;
+
+  // Called from `zzRefill()` (see `skeleton-toml`) after reading more input
+  private void countCharsRead(int numRead)
+      throws com.fasterxml.jackson.core.exc.StreamConstraintsException
+  {
+      totalCharsRead += numRead;
+      ioContext.streamReadConstraints().validateDocumentLength(totalCharsRead);
+  }
+
   private void requestLargerBuffer() throws TomlStreamReadException {
       if (prohibitInternalBufferAllocate) {
           throw errorContext.atPosition(this).generic("Token too long, but buffer resizing prohibited");
