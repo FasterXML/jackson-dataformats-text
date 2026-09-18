@@ -26,6 +26,10 @@ implementations)
   `NumberOutput.outputDouble()/outputFloat()`) when `USE_FAST_DOUBLE_WRITER`
   enabled, avoiding intermediate `String`
  (fix by @pjfanning)
+#722: (properties, toml, yaml) Use `NumberOutput` for writing numbers; respect
+  `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
+  ignored by these modules), writing directly into output buffer where possible
+ (fix by @pjfanning)
 
 3.2.2 (14-Aug-2026)
 
