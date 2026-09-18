@@ -17,13 +17,13 @@ public class LexerBufferRecyclingTest extends TomlMapperTestBase
     // constructor, i.e. outside the try/finally that releases the buffers
     @Test
     public void testTokenBufferRecycledOnFirstTokenFailure() throws Exception {
-        _assertTokenBufferRecycled("");
+        _assertTokenBufferRecycled("\007");
     }
 
     // ... failures past the first token always released correctly, but pin them too
     @Test
     public void testTokenBufferRecycledOnLaterFailure() throws Exception {
-        _assertTokenBufferRecycled("a = 1\nb = ");
+        _assertTokenBufferRecycled("a = 1\nb = \007");
         _assertTokenBufferRecycled("a = ");
         _assertTokenBufferRecycled("[");
     }

@@ -270,12 +270,17 @@ public class YAMLFactory
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             InputStream in) {
         final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        final Reader r = _createReader(in, null, ioCtxt, stdFeatures);
+        // 18-Sep-2026: [dataformats-text#718] `UTF8Reader` holds a recycled buffer and
+        //   knows whether it may close the caller's `InputStream`, so it must always be
+        //   closed. Other `Reader`s (incl. ones a subclass may return) get the legacy
+        //   treatment: closed only if auto-closing is enabled.
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
                 stdFeatures,
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(in, null, ioCtxt, stdFeatures));
+                r, (r instanceof UTF8Reader));
     }
 
     @Override
@@ -286,7 +291,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                r);
+                r, false);
     }
 
     @Override
@@ -297,7 +302,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                new CharArrayReader(data, offset, len));
+                new CharArrayReader(data, offset, len), true);
     }
 
     @Override
@@ -307,7 +312,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(data, offset, len, null, ioCtxt));
+                _createReader(data, offset, len, null, ioCtxt), true);
     }
 
     @Override
