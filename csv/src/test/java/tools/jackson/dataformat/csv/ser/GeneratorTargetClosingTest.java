@@ -6,8 +6,11 @@ import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.util.BufferRecycler;
+import tools.jackson.core.util.RecyclerPool;
 
 import tools.jackson.dataformat.csv.CsvFactory;
 import tools.jackson.dataformat.csv.CsvMapper;
@@ -177,6 +180,66 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         writerMapper(true, false).writer(SCHEMA).writeValue(w2, row());
         assertEquals("1,2\n", w2.toString());
         assertEquals(1, w2.closeCount);
+    }
+
+    // A failing flush() of the caller's stream must not leave the Writer we own
+    // unclosed: that would strand its encoding buffer instead of recycling it
+    @Test
+    public void testEncodingBufferReleasedWhenTargetFlushFails() throws Exception {
+        SingleRecyclerPool pool = new SingleRecyclerPool();
+        CsvMapper mapper = CsvMapper.builder(CsvFactory.builder()
+                .recyclerPool(pool)
+                .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+                .enable(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)
+                .build())
+                .build();
+        TrackingStream out = new TrackingStream() {
+            @Override
+            public void flush() throws IOException {
+                throw new IOException("Fail on flush");
+            }
+        };
+        try {
+            mapper.writer(SCHEMA).writeValue(out, row());
+            fail("Should not pass");
+        } catch (JacksonException e) {
+            verifyException(e, "Fail on flush");
+        }
+        assertEquals(1, pool.recycler.allocCount);
+        assertEquals(1, pool.recycler.releaseCount);
+    }
+
+    static class CountingRecycler extends BufferRecycler {
+        public int allocCount;
+        public int releaseCount;
+
+        @Override
+        public byte[] allocByteBuffer(int ix, int minSize) {
+            if (ix == BufferRecycler.BYTE_WRITE_ENCODING_BUFFER) {
+                ++allocCount;
+            }
+            return super.allocByteBuffer(ix, minSize);
+        }
+
+        @Override
+        public void releaseByteBuffer(int ix, byte[] buffer) {
+            if (ix == BufferRecycler.BYTE_WRITE_ENCODING_BUFFER) {
+                ++releaseCount;
+            }
+            super.releaseByteBuffer(ix, buffer);
+        }
+    }
+
+    static class SingleRecyclerPool implements RecyclerPool<BufferRecycler> {
+        private static final long serialVersionUID = 1L;
+
+        public final CountingRecycler recycler = new CountingRecycler();
+
+        @Override
+        public BufferRecycler acquirePooled() { return recycler; }
+
+        @Override
+        public void releasePooled(BufferRecycler pooled) { }
     }
 
     static class TrackingWriter extends StringWriter {

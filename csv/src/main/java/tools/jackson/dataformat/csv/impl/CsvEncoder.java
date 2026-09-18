@@ -1190,14 +1190,19 @@ public class CsvEncoder
             //   here and not when the Writer was constructed, since stream-write
             //   features may be changed on the generator after that point.
             if (_ownsWriter) {
-                if (!autoClose && flushStream) {
-                    // If we can't close the target, we should at least flush it
-                    _out.flush();
-                }
-                if (_out instanceof UTF8Writer) {
-                    ((UTF8Writer) _out).close(autoClose);
-                } else { // should not happen, but let's not lose content if it does
-                    _out.close();
+                // NOTE: `finally` so that a failing flush() does not leave our Writer
+                //   unclosed -- that would lose its encoding buffer from the recycler
+                try {
+                    if (!autoClose && flushStream) {
+                        // If we can't close the target, we should at least flush it
+                        _out.flush();
+                    }
+                } finally {
+                    if (_out instanceof UTF8Writer) {
+                        ((UTF8Writer) _out).close(autoClose);
+                    } else { // should not happen, but let's not lose content if it does
+                        _out.close();
+                    }
                 }
             } else if (autoClose) {
                 _out.close();
