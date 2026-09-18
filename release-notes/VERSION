@@ -33,6 +33,9 @@ implementations)
   `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
   ignored by these modules), writing directly into output buffer where possible
  (fix by @pjfanning)
+#735: (toml) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
 
 3.2.3 (not yet released)
 
