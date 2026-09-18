@@ -14,9 +14,10 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
-3.3.0 (not yet released)
+3.2.3 (not yet released)
 
-No changes since 3.2
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
 
 3.2.2 (14-Aug-2026)
 

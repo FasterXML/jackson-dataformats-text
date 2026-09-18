@@ -575,8 +575,9 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
-        return writeValueEnd();
+        // NOTE: writeNumber(int) already calls writeValueEnd(); calling it
+        // again here would output an extra empty line
+        return writeNumber((int) v);
     }
 
     @Override
