@@ -11,6 +11,7 @@ import java.util.Arrays;
 import tools.jackson.core.*;
 import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.VersionUtil;
 
@@ -575,21 +576,29 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
-        return writeValueEnd();
+        // NOTE: `writeNumber(int)` already calls `writeValueEnd()`
+        return writeNumber((int) v);
     }
 
     @Override
     public JsonGenerator writeNumber(int i) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(i));
+        // up to 10 digits and possible minus sign
+        if ((_outputTail + 11) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputInt(i, _outputBuffer, _outputTail);
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(long l) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(l));
+        // up to 19 digits and possible minus sign
+        if ((_outputTail + 20) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputLong(l, _outputBuffer, _outputTail);
         return writeValueEnd();
     }
 
@@ -599,42 +608,53 @@ final class TomlGenerator extends GeneratorBase
             return writeNull();
         }
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(v));
+        _writeRaw(v.toString());
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(double d) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(_nonFiniteTomlToken(d, String.valueOf(d)));
+        // Non-finite values need TOML tokens (`nan`/`inf`/`-inf`): Java text
+        // forms (`NaN`/`Infinity`) are not valid TOML and cannot be read back
+        if (NumberOutput.notFinite(d)) {
+            _writeRaw(_nonFiniteTomlToken(d));
+        } else if (isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            if ((_outputTail + NumberOutput.MAX_DOUBLE_BYTES) > _outputEnd) {
+                _flushBuffer();
+            }
+            _outputTail = NumberOutput.outputDouble(d, _outputBuffer, _outputTail);
+        } else {
+            _writeRaw(NumberOutput.toString(d, false));
+        }
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(float f) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(_nonFiniteTomlToken(f, String.valueOf(f)));
+        if (NumberOutput.notFinite(f)) {
+            _writeRaw(_nonFiniteTomlToken(f));
+        } else if (isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            if ((_outputTail + NumberOutput.MAX_FLOAT_BYTES) > _outputEnd) {
+                _flushBuffer();
+            }
+            _outputTail = NumberOutput.outputFloat(f, _outputBuffer, _outputTail);
+        } else {
+            _writeRaw(NumberOutput.toString(f, false));
+        }
         return writeValueEnd();
     }
 
     /**
      * Maps a non-finite floating-point value to the TOML float token
-     * ({@code nan}, {@code inf} or {@code -inf}); finite values are written
-     * using the supplied Java text form. {@code String.valueOf(...)} would
-     * otherwise emit {@code NaN} / {@code Infinity} / {@code -Infinity}, which
-     * are not valid TOML and cannot be read back by the parser.
+     * ({@code nan}, {@code inf} or {@code -inf}).
      */
-    private static String _nonFiniteTomlToken(double d, String finiteForm) {
+    private static String _nonFiniteTomlToken(double d) {
         if (Double.isNaN(d)) {
             return "nan";
         }
-        if (d == Double.POSITIVE_INFINITY) {
-            return "inf";
-        }
-        if (d == Double.NEGATIVE_INFINITY) {
-            return "-inf";
-        }
-        return finiteForm;
+        return (d > 0) ? "inf" : "-inf";
     }
 
     @Override

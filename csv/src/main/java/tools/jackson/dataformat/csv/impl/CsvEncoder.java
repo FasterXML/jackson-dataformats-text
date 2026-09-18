@@ -70,6 +70,18 @@ public class CsvEncoder
      * Underlying {@link Writer} used for output.
      */
     protected final Writer _out;
+
+    /**
+     * Flag that indicates whether {@link #_out} was constructed by Jackson (wrapping a
+     * caller-provided {@link java.io.OutputStream}) rather than handed to us by the
+     * caller. A {@link Writer} we construct must always be closed: that is what flushes
+     * its pending content into the stream and returns its buffers to the recycler --
+     * whether the stream underneath goes with it is a separate decision, made in
+     * {@link #close}.
+     *
+     * @since 3.3
+     */
+    protected final boolean _ownsWriter;
     
     protected final char _cfgColumnSeparator;
 
@@ -202,7 +214,22 @@ public class CsvEncoder
             CharacterEscapes esc, boolean useFastDoubleWriter,
             int maxQuoteCheckChars)
     {
+        this(ctxt, csvFeatures, out, schema, esc, useFastDoubleWriter,
+                maxQuoteCheckChars, false);
+    }
+
+    /**
+     * @param ownsWriter Whether {@code out} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
+    public CsvEncoder(IOContext ctxt, int csvFeatures, Writer out, CsvSchema schema,
+            CharacterEscapes esc, boolean useFastDoubleWriter,
+            int maxQuoteCheckChars, boolean ownsWriter)
+    {
         _ioContext = ctxt;
+        _ownsWriter = ownsWriter;
         _csvFeatures = csvFeatures;
         _cfgUseFastDoubleWriter = useFastDoubleWriter;
         _cfgOptimalQuoting = CsvWriteFeature.STRICT_CHECK_FOR_QUOTING.enabledIn(csvFeatures);
@@ -256,6 +283,7 @@ public class CsvEncoder
     public CsvEncoder(CsvEncoder base, CsvSchema newSchema)
     {
         _ioContext = base._ioContext;
+        _ownsWriter = base._ownsWriter;
         _csvFeatures = base._csvFeatures;
         _cfgUseFastDoubleWriter = base._cfgUseFastDoubleWriter;
         _cfgOptimalQuoting = base._cfgOptimalQuoting;
@@ -728,7 +756,27 @@ public class CsvEncoder
 
     protected void appendValue(float value) throws JacksonException
     {
-        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
+        if (_cfgUseFastDoubleWriter) {
+            // Fast path: Schubfach writes straight into the output buffer,
+            // no intermediate String. Quoting (if enabled) is applied inline,
+            // same as for int/long values.
+            // up to MAX_FLOAT_BYTES chars, leading comma, possible quotes
+            if ((_outputTail + NumberOutput.MAX_FLOAT_BYTES + 3) > _outputEnd) {
+                _flushBuffer();
+            }
+            if (_nextColumnToWrite > 0) {
+                _outputBuffer[_outputTail++] = _cfgColumnSeparator;
+            }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            _outputTail = NumberOutput.outputFloat(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            return;
+        }
+        String str = NumberOutput.toString(value, false);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -741,7 +789,27 @@ public class CsvEncoder
 
     protected void appendValue(double value) throws JacksonException
     {
-        String str = NumberOutput.toString(value, _cfgUseFastDoubleWriter);
+        if (_cfgUseFastDoubleWriter) {
+            // Fast path: Schubfach writes straight into the output buffer,
+            // no intermediate String. Quoting (if enabled) is applied inline,
+            // same as for int/long values.
+            // up to MAX_DOUBLE_BYTES chars, leading comma, possible quotes
+            if ((_outputTail + NumberOutput.MAX_DOUBLE_BYTES + 3) > _outputEnd) {
+                _flushBuffer();
+            }
+            if (_nextColumnToWrite > 0) {
+                _outputBuffer[_outputTail++] = _cfgColumnSeparator;
+            }
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            _outputTail = NumberOutput.outputDouble(value, _outputBuffer, _outputTail);
+            if (_cfgAlwaysQuoteNumbers) {
+                _outputBuffer[_outputTail++] = (char) _cfgQuoteCharacter;
+            }
+            return;
+        }
+        String str = NumberOutput.toString(value, false);
         final int len = str.length();
         if ((_outputTail + len) >= _outputEnd) { // >= to include possible comma too
             _flushBuffer();
@@ -1160,7 +1228,13 @@ public class CsvEncoder
     public void flush(boolean flushStream) throws IOException
     {
         _flushBuffer();
-        if (flushStream) {
+        // 18-Sep-2026, tatu: [dataformats-text#719] content buffered in a Writer of ours
+        //   has to be handed over to the caller's OutputStream here too, and not just on
+        //   `close()`: `FLUSH_PASSED_TO_STREAM` only decides whether the stream itself is
+        //   flushed, not whether our own buffers reach it
+        if (_ownsWriter && (_out instanceof UTF8Writer utf8w)) {
+            utf8w.flush(flushStream);
+        } else if (flushStream) {
             _out.flush();
         }
     }
@@ -1175,7 +1249,29 @@ public class CsvEncoder
         try {
             _flushBuffer();
         } finally {
-            if (autoClose) {
+            // 08-Sep-2026, pjfanning: [dataformats-text#719] a Writer we constructed
+            //   ourselves must be closed regardless of `autoClose`: without that its
+            //   buffered content never reaches the caller's OutputStream, and the buffer
+            //   it took from the recycler is lost. `autoClose` only decides whether the
+            //   caller's target is closed along with it -- and that has to be decided
+            //   here and not when the Writer was constructed, since stream-write
+            //   features may be changed on the generator after that point.
+            if (_ownsWriter) {
+                // NOTE: `finally` so that a failing flush() does not leave our Writer
+                //   unclosed -- that would lose its encoding buffer from the recycler
+                try {
+                    if (!autoClose && flushStream) {
+                        // If we can't close the target, we should at least flush it
+                        _out.flush();
+                    }
+                } finally {
+                    if (_out instanceof UTF8Writer utf8w) {
+                        utf8w.close(autoClose);
+                    } else { // should not happen, but let's not lose content if it does
+                        _out.close();
+                    }
+                }
+            } else if (autoClose) {
                 _out.close();
             } else if (flushStream) {
                 // If we can't close it, we should at least flush
