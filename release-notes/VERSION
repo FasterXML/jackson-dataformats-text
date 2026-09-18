@@ -30,6 +30,9 @@ implementations)
   `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
   ignored by these modules), writing directly into output buffer where possible
  (fix by @pjfanning)
+#727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
+  in `CsvDecoder` (parse directly from already-materialized `String`)
+ (fix by @pjfanning)
 
 3.2.2 (14-Aug-2026)
 
