@@ -1,5 +1,6 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.IOContext;
@@ -26,6 +27,15 @@ class Parser {
 
     private final TomlFactory tomlFactory;
 
+    /**
+     * Constraints to enforce: read from {@link IOContext} (and not from
+     * {@link #tomlFactory}) so that the same settings apply as for the
+     * document-length check the lexer does.
+     *
+     * @since 2.18.11
+     */
+    private final StreamReadConstraints streamReadConstraints;
+
     private final TomlStreamReadException.ErrorContext errorContext;
     private final int options;
     private final Lexer lexer;
@@ -40,6 +50,7 @@ class Parser {
             Reader reader
     ) throws IOException {
         this.tomlFactory = tomlFactory;
+        this.streamReadConstraints = ioContext.streamReadConstraints();
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, ioContext, errorContext);
@@ -178,7 +189,7 @@ class Parser {
                 throw errorContext.atPosition(lexer).unexpectedToken(partToken, "quoted or unquoted key");
             }
             // [dataformats-text#430]: each key part becomes a property name
-            tomlFactory.streamReadConstraints().validateNameLength(part.length());
+            streamReadConstraints.validateNameLength(part.length());
             pollExpected(partToken, Lexer.EXPECT_INLINE_KEY);
             if (peek() != TomlToken.DOT_SEP) {
                 return new FieldRef(node, part, nodeDepth);
