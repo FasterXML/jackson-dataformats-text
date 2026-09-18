@@ -1165,8 +1165,8 @@ public class CsvEncoder
         //   has to be handed over to the caller's OutputStream here too, and not just on
         //   `close()`: `FLUSH_PASSED_TO_STREAM` only decides whether the stream itself is
         //   flushed, not whether our own buffers reach it
-        if (_ownsWriter && (_out instanceof UTF8Writer)) {
-            ((UTF8Writer) _out).flush(flushStream);
+        if (_ownsWriter && (_out instanceof UTF8Writer utf8w)) {
+            utf8w.flush(flushStream);
         } else if (flushStream) {
             _out.flush();
         }
@@ -1198,8 +1198,8 @@ public class CsvEncoder
                         _out.flush();
                     }
                 } finally {
-                    if (_out instanceof UTF8Writer) {
-                        ((UTF8Writer) _out).close(autoClose);
+                    if (_out instanceof UTF8Writer utf8w) {
+                        utf8w.close(autoClose);
                     } else { // should not happen, but let's not lose content if it does
                         _out.close();
                     }
