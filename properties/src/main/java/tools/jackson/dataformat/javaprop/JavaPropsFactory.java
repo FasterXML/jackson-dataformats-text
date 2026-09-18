@@ -193,9 +193,9 @@ public class JavaPropsFactory
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             InputStream in)
     {
-        Properties props = _loadProperties(in, ioCtxt);
-        return new JavaPropsParser(readCtxt, ioCtxt,
-                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+        final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        Properties props = _loadProperties(in, ioCtxt, stdFeatures);
+        return new JavaPropsParser(readCtxt, ioCtxt, stdFeatures,
                 _getSchema(readCtxt),
                 in, props);
     }
@@ -203,9 +203,9 @@ public class JavaPropsFactory
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             Reader r) {
-        Properties props = _loadProperties(r, ioCtxt);
-        return new JavaPropsParser(readCtxt, ioCtxt,
-                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+        final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        Properties props = _loadProperties(r, ioCtxt, stdFeatures);
+        return new JavaPropsParser(readCtxt, ioCtxt, stdFeatures,
                 _getSchema(readCtxt),
                 r, props);
     }
@@ -292,19 +292,31 @@ public class JavaPropsFactory
     /**********************************************************************
      */
 
-    protected Properties _loadProperties(InputStream in, IOContext ctxt)
+    protected Properties _loadProperties(InputStream in, IOContext ctxt,
+            int streamReadFeatures)
     {
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
-        return _loadProperties(new Latin1Reader(ctxt, in), ctxt);
+        final boolean autoClose = _autoCloseSource(ctxt, streamReadFeatures);
+        // Reader is constructed (and hence owned) by us, so it must always be closed to
+        // have its read buffer recycled; `autoClose` only decides whether the caller's
+        // `InputStream` is closed along with it
+        return _readProperties(new Latin1Reader(ctxt, in, autoClose), true);
     }
 
-    protected Properties _loadProperties(Reader r0, IOContext ctxt)
+    protected Properties _loadProperties(Reader r0, IOContext ctxt,
+            int streamReadFeatures)
+    {
+        // Reader is the caller's, so only close it if auto-closing is enabled
+        return _readProperties(r0, _autoCloseSource(ctxt, streamReadFeatures));
+    }
+
+    private Properties _readProperties(Reader r0, boolean closeReader)
     {
         Properties props = new Properties();
         // May or may not want to close the reader, so...
         try {
-            if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            if (closeReader) {
                 try (Reader r = r0) {
                     props.load(r);
                 }
@@ -317,6 +329,11 @@ public class JavaPropsFactory
             throw _wrapIOFailure(e);
         }
         return props;
+    }
+
+    private boolean _autoCloseSource(IOContext ctxt, int streamReadFeatures) {
+        return ctxt.isResourceManaged()
+                || StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(streamReadFeatures);
     }
 
     protected <T> T _reportReadException(String msg, Exception rootCause)

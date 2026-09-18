@@ -59,6 +59,17 @@ public class YAMLParser extends ParserBase
      */
     protected final Reader _reader;
 
+    /**
+     * Flag that indicates whether {@link #_reader} was constructed by Jackson
+     * (wrapping a caller-provided {@link java.io.InputStream}) rather than handed to
+     * us by the caller. Readers we construct must always be closed -- that is what
+     * returns their buffers to the recycler -- whereas the {@link java.io.InputStream}
+     * underneath is only closed if auto-closing is enabled.
+     *
+     * @since 3.3
+     */
+    protected final boolean _ownsReader;
+
     protected final ParserImpl _yamlParser;
     protected final ScalarResolver _yamlResolver;
 
@@ -139,9 +150,29 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
+    /**
+     * @deprecated Since 3.3 use
+     *   {@link #YAMLParser(ObjectReadContext, IOContext, BufferRecycler, int, int, LoadSettings, Reader, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
             int streamReadFeatures, int formatFeatures,
             LoadSettings loadSettings, Reader reader)
+    {
+        this(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures, loadSettings,
+                reader, false);
+    }
+
+    /**
+     * @param ownsReader Whether {@code reader} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
+    public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
+            int streamReadFeatures, int formatFeatures,
+            LoadSettings loadSettings, Reader reader, boolean ownsReader)
     {
         super(readCtxt, ioCtxt, streamReadFeatures);
         if (loadSettings == null) {
@@ -149,6 +180,7 @@ public class YAMLParser extends ParserBase
         }
         _formatFeatures = formatFeatures;
         _reader = reader;
+        _ownsReader = ownsReader;
         _yamlParser = new ParserImpl(loadSettings, new StreamReader(loadSettings, reader));
         _yamlResolver = loadSettings.getSchema().getScalarResolver();
 
@@ -226,12 +258,14 @@ public class YAMLParser extends ParserBase
         /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
          *   on the underlying Reader, unless we "own" it, or auto-closing
          *   feature is enabled.
-         *   One downside is that when using our optimized
-         *   Reader (granted, we only do that for UTF-32...) this
-         *   means that buffer recycling won't work correctly.
          */
+        // 18-Sep-2026: [dataformats-text#718] but a Reader we constructed ourselves must
+        //   always be closed, else the buffer it took from the recycler is lost; such a
+        //   Reader knows not to close the caller's `InputStream` unless auto-closing
+        //   is enabled
         if (_reader != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            if (_ownsReader || _ioContext.isResourceManaged()
+                    || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 _reader.close();
             }
         }

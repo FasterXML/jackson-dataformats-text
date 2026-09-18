@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.dataformat.yaml.ModuleTestBase;
 import tools.jackson.dataformat.yaml.YAMLFactory;
 import tools.jackson.dataformat.yaml.YAMLMapper;
@@ -29,8 +30,12 @@ public class YAMLGeneratorNumberTest extends ModuleTestBase
     private interface GenBody { void write(JsonGenerator g) throws Exception; }
 
     private String _doc(GenBody body) throws Exception {
+        return _doc(MAPPER, body);
+    }
+
+    private String _doc(YAMLMapper mapper, GenBody body) throws Exception {
         StringWriter w = new StringWriter();
-        try (JsonGenerator g = MAPPER.createGenerator(w)) {
+        try (JsonGenerator g = mapper.createGenerator(w)) {
             body.write(g);
         }
         return w.toString();
@@ -100,6 +105,46 @@ public class YAMLGeneratorNumberTest extends ModuleTestBase
     public void testWriteNumberAsString() throws Exception {
         String yaml = _doc(g -> g.writeNumber("4321"));
         assertEquals(4321, (int) MAPPER.readValue(yaml, Integer.class));
+    }
+
+    private final static double[] DOUBLES = new double[] {
+        0.0, -0.0, 1.0, -1.0, 1.25, -2.5, 0.1, 0.3, 1e-7, 1.0e20, 1.0e21,
+        123456789.125, Double.MIN_VALUE, Double.MAX_VALUE, Math.PI, -Math.E,
+    };
+
+    private final static float[] FLOATS = new float[] {
+        0.0f, -0.0f, 1.0f, -1.0f, 1.25f, -2.5f, 0.1f, 1.89f, 1e-7f, 1.0e20f,
+        Float.MIN_VALUE, Float.MAX_VALUE, (float) Math.PI,
+    };
+
+    // Default writer: text must match `Double.toString()`/`Float.toString()`
+    @Test
+    public void testDoublesAndFloatsDefaultWriter() throws Exception {
+        for (double d : DOUBLES) {
+            assertEquals("--- " + Double.toString(d) + "\n", _doc(g -> g.writeNumber(d)));
+        }
+        for (float f : FLOATS) {
+            assertEquals("--- " + Float.toString(f) + "\n", _doc(g -> g.writeNumber(f)));
+        }
+    }
+
+    // Fast writer (Schubfach): text must match `NumberOutput.toString(v, true)`
+    @Test
+    public void testDoublesAndFloatsFastWriter() throws Exception {
+        YAMLMapper fast = YAMLMapper.builder()
+                .enable(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)
+                .build();
+        for (double d : DOUBLES) {
+            assertEquals("--- " + NumberOutput.toString(d, true) + "\n",
+                    _doc(fast, g -> g.writeNumber(d)));
+        }
+        for (float f : FLOATS) {
+            assertEquals("--- " + NumberOutput.toString(f, true) + "\n",
+                    _doc(fast, g -> g.writeNumber(f)));
+        }
+        // and non-finite notation must be unaffected
+        assertTrue(_doc(fast, g -> g.writeNumber(Double.NaN)).contains(".nan"));
+        assertTrue(_doc(fast, g -> g.writeNumber(Float.NEGATIVE_INFINITY)).contains("-.inf"));
     }
 
     /*

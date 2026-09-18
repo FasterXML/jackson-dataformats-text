@@ -33,12 +33,23 @@ class TomlParser {
             TomlStreamReadException.ErrorContext errorContext,
             int options,
             Reader reader
-    ) throws IOException {
+    ) {
         this.tomlFactory = tomlFactory;
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, ioContext, errorContext);
         lexer.prohibitInternalBufferAllocate = (options & TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE) != 0;
+        // NOTE: lexing of the first token is deliberately NOT done here but in
+        // `readFirstToken()`, so that it happens inside the caller's try/finally
+        // and cannot leak the buffers `Lexer` just took from the recycler
+    }
+
+    /**
+     * Reads the first token; separate from constructor since the `Lexer` has already
+     * allocated recycled buffers by then, and failure here must not bypass
+     * {@link Lexer#releaseBuffers()}.
+     */
+    private void readFirstToken() throws IOException {
         this.next = lexer.yylex();
     }
 
@@ -60,6 +71,7 @@ class TomlParser {
         TomlParser parser = new TomlParser(factory, ioContext, errorCtxt,
                 formatReadFeatures, reader);
         try {
+            parser.readFirstToken();
             return parser.parse();
         } finally {
             parser.lexer.releaseBuffers();
