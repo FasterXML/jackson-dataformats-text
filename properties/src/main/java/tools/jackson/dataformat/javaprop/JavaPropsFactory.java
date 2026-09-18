@@ -10,6 +10,7 @@ import tools.jackson.core.io.IOContext;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import tools.jackson.dataformat.javaprop.io.Latin1Reader;
+import tools.jackson.dataformat.javaprop.io.NonClosingOutputStream;
 
 @SuppressWarnings("resource")
 public class JavaPropsFactory
@@ -259,10 +260,20 @@ public class JavaPropsFactory
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
+        final int stdFeatures = writeCtxt.getStreamWriteFeatures(_streamWriteFeatures);
+        // Writer is constructed (and hence owned) by us, so the generator must always
+        // close it -- that flushes its pending content into the stream. Since
+        // `OutputStreamWriter` always closes the stream it wraps, shield the caller's
+        // stream when it is not ours to close.
+        if (!ioCtxt.isResourceManaged()
+                && !StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures)) {
+            out = new NonClosingOutputStream(out,
+                    StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures));
+        }
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                stdFeatures,
                 _getSchema(writeCtxt),
-                _createWriter(ioCtxt, out, null));
+                _createWriter(ioCtxt, out, null), true);
     }
 
     @Override
