@@ -250,6 +250,28 @@ public class TomlParserTest extends TomlMapperTestBase {
         assertNestingDepthExceeded(factory, "[[a]]\n[[a.b]]\nc = 1");
     }
 
+    // [dataformats-text#430]: name-length constraint is read from `IOContext`
+    // (same source as the lexer's document-length check), not from `TomlFactory`
+    @Test
+    public void nameLengthConstraintComesFromIOContext() throws Exception {
+        final StreamReadConstraints constraints = StreamReadConstraints.builder()
+                .maxNameLength(5)
+                .build();
+        try {
+            Parser.parse(new TomlFactory(), testIOContext(constraints),
+                    new StringReader("abcdefghij = 1"));
+            fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            assertTrue(e.getMessage().contains("Name length"),
+                    "unexpected exception message: " + e.getMessage());
+            assertTrue(e.getMessage().contains("exceeds the maximum allowed"),
+                    "unexpected exception message: " + e.getMessage());
+        }
+        // and with default constraints on the `IOContext`, same content is fine
+        assertEquals(json("{\"abcdefghij\":1}"),
+                toml(new TomlFactory(), "abcdefghij = 1"));
+    }
+
     @Test
     public void dottedKeysWhitespace() throws Exception {
         assertEquals(
