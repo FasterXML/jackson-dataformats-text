@@ -19,7 +19,7 @@ implementations)
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
-#718: (csv, properties,toml,yaml) `Fix AUTO_CLOSE_SOURCE` overrides and recycled-buffer
+#718: (csv, properties,toml,yaml) Fix `AUTO_CLOSE_SOURCE` overrides and recycled-buffer
   leaks on read paths
  (fix by @pjfanning)
 
