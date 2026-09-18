@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.18.11 (not yet released)
+
+#638: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+
 2.18.10 (15-Aug-2026)
 
 #702: (toml) Expand nesting depth checks for dotted keys [CVE-2026-85278]
