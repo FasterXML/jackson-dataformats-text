@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.toml;
 
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
+
 %%
 
 %class Lexer
@@ -37,7 +39,7 @@ this.textBuffer = ioContext.constructReadConstrainedTextBuffer();
 
   // Called from `zzRefill()` (see `skeleton-toml`) after reading more input
   private void countCharsRead(int numRead)
-      throws com.fasterxml.jackson.core.exc.StreamConstraintsException
+      throws StreamConstraintsException
   {
       totalCharsRead += numRead;
       ioContext.streamReadConstraints().validateDocumentLength(totalCharsRead);
