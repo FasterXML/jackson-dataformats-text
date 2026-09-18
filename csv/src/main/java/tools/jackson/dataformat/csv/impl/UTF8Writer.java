@@ -100,14 +100,29 @@ public final class UTF8Writer
     }
 
     @Override
-    public void flush() throws IOException
+    public void flush() throws IOException {
+        flush(true);
+    }
+
+    /**
+     * Variant of {@link #flush()} that can leave the underlying {@link OutputStream}
+     * alone: pending content is written out to it either way, only flushing of the
+     * stream itself is optional.
+     *
+     * @param flushTarget Whether to also flush the underlying {@link OutputStream}
+     *
+     * @since 3.3
+     */
+    public void flush(boolean flushTarget) throws IOException
     {
         if (_out != null) {
             if (_outPtr > 0) {
                 _out.write(_outBuffer, 0, _outPtr);
                 _outPtr = 0;
             }
-            _out.flush();
+            if (flushTarget) {
+                _out.flush();
+            }
         }
     }
 

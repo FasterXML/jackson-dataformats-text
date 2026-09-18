@@ -134,6 +134,35 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         return out;
     }
 
+    // Content buffered in a `Writer` of ours must reach the caller's stream on
+    // `flush()` as well: `FLUSH_PASSED_TO_STREAM` decides whether the stream itself is
+    // flushed, not whether our own buffers are handed over to it (matching what
+    // jackson-core's JSON generator does, which writes straight to the stream)
+    @Test
+    public void testContentHandedOverOnFlush() throws Exception {
+        for (boolean flushStream : new boolean[] { true, false }) {
+            String desc = "flushStream="+flushStream;
+            TrackingStream out = new TrackingStream();
+            CsvMapper mapper = CsvMapper.builder(CsvFactory.builder()
+                    .configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream)
+                    .build())
+                    .build();
+            try (JsonGenerator g = mapper.writer(SCHEMA).createGenerator(out)) {
+                g.writeStartObject();
+                g.writeName("a");
+                g.writeString("1");
+                g.writeName("b");
+                g.writeString("2");
+                g.writeEndObject();
+                g.flush();
+
+                assertEquals("1,2\n", out.toString(StandardCharsets.UTF_8), desc);
+                // ... but the stream itself is only flushed when asked to be
+                assertEquals(flushStream ? 1 : 0, out.flushCount, desc);
+            }
+        }
+    }
+
     // Conversely, a `Writer` handed to us by the caller is not ours to close: only
     // `AUTO_CLOSE_TARGET` decides, as before
     @Test

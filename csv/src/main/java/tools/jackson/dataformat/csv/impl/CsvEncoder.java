@@ -1161,7 +1161,13 @@ public class CsvEncoder
     public void flush(boolean flushStream) throws IOException
     {
         _flushBuffer();
-        if (flushStream) {
+        // 18-Sep-2026, tatu: [dataformats-text#719] content buffered in a Writer of ours
+        //   has to be handed over to the caller's OutputStream here too, and not just on
+        //   `close()`: `FLUSH_PASSED_TO_STREAM` only decides whether the stream itself is
+        //   flushed, not whether our own buffers reach it
+        if (_ownsWriter && (_out instanceof UTF8Writer)) {
+            ((UTF8Writer) _out).flush(flushStream);
+        } else if (flushStream) {
             _out.flush();
         }
     }
