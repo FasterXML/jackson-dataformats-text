@@ -15,9 +15,12 @@ import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
+
+import com.fasterxml.jackson.dataformat.yaml.util.ReadConstrainedReader;
 
 /**
  * {@link JsonParser} implementation used to expose YAML documents
@@ -194,8 +197,24 @@ public class YAMLParser extends ParserBase
             LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
     {
         this(ctxt, parserFeatures, formatFeatures, codec, reader,
-             new ParserImpl(new StreamReader(reader),
+             new ParserImpl(new StreamReader(_constrainedReader(ctxt, reader)),
                      (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
+    }
+
+    /**
+     * Helper method for [dataformats-text#636]: SnakeYAML reads input directly
+     * from the {@link Reader} given, so to enforce maximum document length we
+     * need to count what it reads. No wrapping (and no overhead) if no
+     * maximum document length configured.
+     *
+     * @since 2.18.11
+     */
+    private static Reader _constrainedReader(IOContext ctxt, Reader reader) {
+        StreamReadConstraints constraints = ctxt.streamReadConstraints();
+        if (constraints.hasMaxDocumentLength()) {
+            return new ReadConstrainedReader(reader, constraints);
+        }
+        return reader;
     }
 
     /**
@@ -449,6 +468,13 @@ public class YAMLParser extends ParserBase
             try {
                 evt = getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
+                // [dataformats-text#636]: SnakeYAML wraps the `IOException` that
+                // `ReadConstrainedReader` throws, so unwrap to expose the
+                // constraints violation as-is
+                StreamConstraintsException sce = _findConstraintsException(e);
+                if (sce != null) {
+                    throw sce;
+                }
                 if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
                         (this, (org.yaml.snakeyaml.error.MarkedYAMLException) e);
@@ -588,6 +614,21 @@ public class YAMLParser extends ParserBase
      */
     protected Event getEvent() {
         return _yamlParser.getEvent();
+    }
+
+    /**
+     * Helper method for finding a {@link StreamConstraintsException} that SnakeYAML
+     * has wrapped in a {@link org.yaml.snakeyaml.error.YAMLException}, if any.
+     *
+     * @since 2.18.11
+     */
+    private StreamConstraintsException _findConstraintsException(Throwable t) {
+        for (Throwable cause = t.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof StreamConstraintsException) {
+                return (StreamConstraintsException) cause;
+            }
+        }
+        return null;
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
