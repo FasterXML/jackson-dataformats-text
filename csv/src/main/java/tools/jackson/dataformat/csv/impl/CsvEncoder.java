@@ -75,8 +75,9 @@ public class CsvEncoder
      * Flag that indicates whether {@link #_out} was constructed by Jackson (wrapping a
      * caller-provided {@link java.io.OutputStream}) rather than handed to us by the
      * caller. A {@link Writer} we construct must always be closed: that is what flushes
-     * its pending content into the stream and returns its buffers to the recycler. Such
-     * a {@link Writer} knows not to close the stream underneath unless it should.
+     * its pending content into the stream and returns its buffers to the recycler --
+     * whether the stream underneath goes with it is a separate decision, made in
+     * {@link #close}.
      *
      * @since 3.3
      */
@@ -1175,20 +1176,28 @@ public class CsvEncoder
         try {
             _flushBuffer();
         } finally {
-            if (autoClose) {
-                _out.close();
-            } else {
-                if (flushStream) {
-                    // If we can't close it, we should at least flush
+            // 08-Sep-2026, pjfanning: [dataformats-text#719] a Writer we constructed
+            //   ourselves must be closed regardless of `autoClose`: without that its
+            //   buffered content never reaches the caller's OutputStream, and the buffer
+            //   it took from the recycler is lost. `autoClose` only decides whether the
+            //   caller's target is closed along with it -- and that has to be decided
+            //   here and not when the Writer was constructed, since stream-write
+            //   features may be changed on the generator after that point.
+            if (_ownsWriter) {
+                if (!autoClose && flushStream) {
+                    // If we can't close the target, we should at least flush it
                     _out.flush();
                 }
-                // 08-Sep-2026, pjfanning: [dataformats-text#719] a Writer we constructed
-                //   ourselves must be closed regardless: without that its buffered
-                //   content never reaches the caller's OutputStream, and the buffer it
-                //   took from the recycler is lost. It knows not to close the stream.
-                if (_ownsWriter) {
+                if (_out instanceof UTF8Writer) {
+                    ((UTF8Writer) _out).close(autoClose);
+                } else { // should not happen, but let's not lose content if it does
                     _out.close();
                 }
+            } else if (autoClose) {
+                _out.close();
+            } else if (flushStream) {
+                // If we can't close it, we should at least flush
+                _out.flush();
             }
             // Internal buffer(s) generator has can now be released as well
             _releaseBuffers();

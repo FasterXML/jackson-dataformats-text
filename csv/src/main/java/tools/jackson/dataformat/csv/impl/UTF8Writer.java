@@ -22,14 +22,6 @@ public final class UTF8Writer
 
     private OutputStream _out;
 
-    /**
-     * Whether {@link #close()} should also close {@link #_out}, or only flush pending
-     * content into it and release buffers this writer holds.
-     *
-     * @since 3.3
-     */
-    final private boolean _autoClose;
-
     private byte[] _outBuffer;
 
     final private int _outBufferEnd;
@@ -43,22 +35,10 @@ public final class UTF8Writer
      */
     private int _surrogate = 0;
 
-    public UTF8Writer(IOContext ctxt, OutputStream out) {
-        this(ctxt, out, true);
-    }
-
-    /**
-     * @param autoClose Whether {@link #close()} should also close the underlying
-     *    {@link OutputStream}: if not, closing still writes out pending content and
-     *    releases buffers, but leaves the stream itself open.
-     *
-     * @since 3.3
-     */
-    public UTF8Writer(IOContext ctxt, OutputStream out, boolean autoClose)
+    public UTF8Writer(IOContext ctxt, OutputStream out)
     {
         _context = ctxt;
         _out = out;
-        _autoClose = autoClose;
 
         _outBuffer = ctxt.allocWriteEncodingBuffer();
         // Max. expansion for a single char (in unmodified UTF-8) is 4 bytes (or 3 depending
@@ -75,7 +55,20 @@ public final class UTF8Writer
     }
 
     @Override
-    public void close() throws IOException
+    public void close() throws IOException {
+        close(true);
+    }
+
+    /**
+     * Variant of {@link #close()} that can leave the underlying {@link OutputStream}
+     * open: pending content is written out and buffers are released either way, only
+     * closing of the stream itself is optional.
+     *
+     * @param closeTarget Whether to also close the underlying {@link OutputStream}
+     *
+     * @since 3.3
+     */
+    public void close(boolean closeTarget) throws IOException
     {
         if (_out != null) {
             if (_outPtr > 0) {
@@ -91,7 +84,7 @@ public final class UTF8Writer
                 _context.releaseWriteEncodingBuffer(buf);
             }
 
-            if (_autoClose) {
+            if (closeTarget) {
                 out.close();
             }
 

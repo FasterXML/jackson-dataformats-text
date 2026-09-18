@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
 
 import tools.jackson.dataformat.csv.CsvFactory;
@@ -93,5 +94,78 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
     @Test
     public void testTargetFlushedWhenRequested() throws Exception {
         assertTrue(write(false, true).flushCount > 0);
+    }
+
+    // Whether the target gets closed must follow the generator's settings as they are
+    // when it is closed: `AUTO_CLOSE_TARGET` may be changed on the generator itself,
+    // after the writer wrapping the target has already been constructed
+    @Test
+    public void testAutoCloseDisabledAfterGeneratorCreated() throws Exception {
+        TrackingStream out = writeViaGenerator(true, false);
+        assertEquals("1,2\n", out.toString(StandardCharsets.UTF_8));
+        assertEquals(0, out.closeCount);
+    }
+
+    @Test
+    public void testAutoCloseEnabledAfterGeneratorCreated() throws Exception {
+        TrackingStream out = writeViaGenerator(false, true);
+        assertEquals("1,2\n", out.toString(StandardCharsets.UTF_8));
+        assertEquals(1, out.closeCount);
+    }
+
+    private static TrackingStream writeViaGenerator(boolean autoCloseAtCreation,
+            boolean autoCloseAtClose)
+        throws Exception
+    {
+        CsvMapper mapper = CsvMapper.builder(CsvFactory.builder()
+                .configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoCloseAtCreation)
+                .build())
+                .build();
+        TrackingStream out = new TrackingStream();
+        JsonGenerator g = mapper.writer(SCHEMA).createGenerator(out);
+        g.configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoCloseAtClose);
+        g.writeStartObject();
+        g.writeName("a");
+        g.writeString("1");
+        g.writeName("b");
+        g.writeString("2");
+        g.writeEndObject();
+        g.close();
+        return out;
+    }
+
+    // Conversely, a `Writer` handed to us by the caller is not ours to close: only
+    // `AUTO_CLOSE_TARGET` decides, as before
+    @Test
+    public void testCallerSuppliedWriterNotClosedUnlessAutoClose() throws Exception {
+        TrackingWriter w = new TrackingWriter();
+        writerMapper(false, false).writer(SCHEMA).writeValue(w, row());
+        assertEquals("1,2\n", w.toString());
+        assertEquals(0, w.closeCount);
+        assertEquals(0, w.flushCount);
+
+        TrackingWriter w2 = new TrackingWriter();
+        writerMapper(true, false).writer(SCHEMA).writeValue(w2, row());
+        assertEquals("1,2\n", w2.toString());
+        assertEquals(1, w2.closeCount);
+    }
+
+    static class TrackingWriter extends StringWriter {
+        public int closeCount;
+        public int flushCount;
+
+        @Override
+        public void close() { ++closeCount; }
+
+        @Override
+        public void flush() { ++flushCount; }
+    }
+
+    private static CsvMapper writerMapper(boolean autoClose, boolean flushStream) {
+        return CsvMapper.builder(CsvFactory.builder()
+                .configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoClose)
+                .configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream)
+                .build())
+                .build();
     }
 }
