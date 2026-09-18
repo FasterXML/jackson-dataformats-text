@@ -18,6 +18,7 @@ module tools.jackson.dataformat.properties
     opens tools.jackson.dataformat.javaprop.deser;
     opens tools.jackson.dataformat.javaprop.deser.convert;
     opens tools.jackson.dataformat.javaprop.filter;
+    opens tools.jackson.dataformat.javaprop.ser;
     opens tools.jackson.dataformat.javaprop.ser.dos;
     opens tools.jackson.dataformat.javaprop.testutil;
     opens tools.jackson.dataformat.javaprop.testutil.failure;

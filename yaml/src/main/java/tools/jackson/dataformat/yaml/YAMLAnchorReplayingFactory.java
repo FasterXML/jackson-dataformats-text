@@ -51,12 +51,13 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
 
     @Override
     protected YAMLAnchorReplayingParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt, InputStream in) {
+        final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
         return new YAMLAnchorReplayingParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
-                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                stdFeatures,
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(in, null, ioCtxt));
+                _createReader(in, null, ioCtxt, stdFeatures));
     }
 
     @Override

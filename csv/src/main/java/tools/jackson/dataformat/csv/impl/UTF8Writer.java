@@ -55,7 +55,20 @@ public final class UTF8Writer
     }
 
     @Override
-    public void close() throws IOException
+    public void close() throws IOException {
+        close(true);
+    }
+
+    /**
+     * Variant of {@link #close()} that can leave the underlying {@link OutputStream}
+     * open: pending content is written out and buffers are released either way, only
+     * closing of the stream itself is optional.
+     *
+     * @param closeTarget Whether to also close the underlying {@link OutputStream}
+     *
+     * @since 3.3
+     */
+    public void close(boolean closeTarget) throws IOException
     {
         if (_out != null) {
             if (_outPtr > 0) {
@@ -71,7 +84,9 @@ public final class UTF8Writer
                 _context.releaseWriteEncodingBuffer(buf);
             }
 
-            out.close();
+            if (closeTarget) {
+                out.close();
+            }
 
             /* Let's 'flush' orphan surrogate, no matter what; but only
              * after cleanly closing everything else.
@@ -85,14 +100,29 @@ public final class UTF8Writer
     }
 
     @Override
-    public void flush() throws IOException
+    public void flush() throws IOException {
+        flush(true);
+    }
+
+    /**
+     * Variant of {@link #flush()} that can leave the underlying {@link OutputStream}
+     * alone: pending content is written out to it either way, only flushing of the
+     * stream itself is optional.
+     *
+     * @param flushTarget Whether to also flush the underlying {@link OutputStream}
+     *
+     * @since 3.3
+     */
+    public void flush(boolean flushTarget) throws IOException
     {
         if (_out != null) {
             if (_outPtr > 0) {
                 _out.write(_outBuffer, 0, _outPtr);
                 _outPtr = 0;
             }
-            _out.flush();
+            if (flushTarget) {
+                _out.flush();
+            }
         }
     }
 
