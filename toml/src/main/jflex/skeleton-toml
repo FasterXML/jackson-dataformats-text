@@ -121,6 +121,8 @@
       }
       if (numRead > 0) {
         zzEndRead += numRead;
+        // JACKSON: enforce max document length (jackson-dataformats-text#430)
+        countCharsRead(numRead);
         if (Character.isHighSurrogate(zzBuffer[zzEndRead - 1])) {
           if (numRead == requested) { // We requested too few chars to encode a full Unicode character
             --zzEndRead;
@@ -137,6 +139,7 @@
               return true;
             } else {
               zzBuffer[zzEndRead++] = (char)c;
+              countCharsRead(1);
             }
           }
         }
