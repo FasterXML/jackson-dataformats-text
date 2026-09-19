@@ -23,6 +23,9 @@ Active Maintainers:
  (fix by @pjfanning)
 #737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
  (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 2.21.6 (14-Aug-2026)
 
