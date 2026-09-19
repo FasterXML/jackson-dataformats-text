@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
@@ -13,6 +15,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.yaml.ModuleTestBase;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link StreamReadConstraints#getMaxDocumentLength()} enforcement
@@ -34,12 +42,14 @@ public class YAMLDocumentLengthTest extends ModuleTestBase
 
     private final YAMLMapper LIMITED_MAPPER = new YAMLMapper(factoryWithDocLimit(MAX_DOC_LEN));
 
+    @Test
     public void testDocumentWithinLimit() throws Exception
     {
         final String doc = _generateYaml(MAX_DOC_LEN - 100);
         _verifyReadable(LIMITED_MAPPER, doc);
     }
 
+    @Test
     public void testDocumentExceedingLimit() throws Exception
     {
         final String doc = _generateYaml(MAX_DOC_LEN + 500);
@@ -81,6 +91,7 @@ public class YAMLDocumentLengthTest extends ModuleTestBase
     }
 
     // Limit smaller than SnakeYAML's read buffer: must still be enforced
+    @Test
     public void testSmallLimit() throws Exception
     {
         final YAMLMapper mapper = new YAMLMapper(factoryWithDocLimit(100));
@@ -94,6 +105,7 @@ public class YAMLDocumentLengthTest extends ModuleTestBase
     }
 
     // Single scalar value longer than limit
+    @Test
     public void testLongScalar() throws Exception
     {
         final String doc = "key: " + _repeat('x', MAX_DOC_LEN + 500) + "\n";
@@ -108,6 +120,7 @@ public class YAMLDocumentLengthTest extends ModuleTestBase
     }
 
     // Multiple documents in one stream: limit applies to whole stream
+    @Test
     public void testMultipleDocuments() throws Exception
     {
         final String one = _generateYaml(MAX_DOC_LEN / 2);
@@ -124,6 +137,7 @@ public class YAMLDocumentLengthTest extends ModuleTestBase
     }
 
     // No limit configured: nothing is counted or enforced
+    @Test
     public void testNoLimit() throws Exception
     {
         YAMLFactory f = YAMLFactory.builder()
