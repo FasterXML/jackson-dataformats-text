@@ -1,6 +1,9 @@
 package com.fasterxml.jackson.dataformat.javaprop.constraints;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
@@ -24,6 +27,14 @@ import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
 public class PropsDocumentLengthTest extends ModuleTestBase
 {
     private final static int MAX_DOC_LEN = 10_000;
+
+    // Big enough to dwarf both read buffers involved: `Properties.load()` reads
+    // through an 8k-char `LineReader`, `Latin1Reader` through an 8k-byte buffer
+    private final static int HUGE_DOC_LEN = 500_000;
+
+    // Actual consumption before abort is a single buffer-load (8192 chars /
+    // 8000 bytes); allow headroom for JDK buffering differences
+    private final static int MAX_CONSUMED_BEFORE_ABORT = 64_000;
 
     private static JavaPropsFactory factoryWithDocLimit(long limit) {
         return JavaPropsFactory.builder()
@@ -92,6 +103,34 @@ public class PropsDocumentLengthTest extends ModuleTestBase
         });
     }
 
+    // Reading must be ABANDONED once the limit is passed, rather than the whole
+    // document being consumed and only then rejected: that early abort is the
+    // entire point of the constraint as DoS protection
+    public void testAbortsReadingEarly() throws Exception
+    {
+        final String doc = _generateProps(HUGE_DOC_LEN);
+        final JavaPropsMapper mapper = new JavaPropsMapper(factoryWithDocLimit(1_000));
+
+        final CountingReader chars = new CountingReader(doc);
+        _verifyDocTooLong(new ThrowingRunnable() {
+            @Override
+            public void run() throws Exception {
+                mapper.readTree(chars);
+            }
+        });
+        _verifyStoppedEarly("Reader", chars.count(), doc.length());
+
+        final CountingInputStream bytes = new CountingInputStream(
+                doc.getBytes(StandardCharsets.ISO_8859_1));
+        _verifyDocTooLong(new ThrowingRunnable() {
+            @Override
+            public void run() throws Exception {
+                mapper.readTree(bytes);
+            }
+        });
+        _verifyStoppedEarly("InputStream", bytes.count(), doc.length());
+    }
+
     // Single value longer than limit
     public void testLongValue() throws Exception
     {
@@ -142,6 +181,85 @@ public class PropsDocumentLengthTest extends ModuleTestBase
         assertEquals(n, mapper.readTree(new StringReader(doc)));
         assertEquals(n, mapper.readTree(new ByteArrayInputStream(doc.getBytes(StandardCharsets.ISO_8859_1))));
         assertEquals(n, mapper.readTree(doc.getBytes(StandardCharsets.ISO_8859_1)));
+    }
+
+    private void _verifyStoppedEarly(String desc, long consumed, int docLen)
+    {
+        assertTrue("Should not have consumed whole document via "+desc
+                +": read "+consumed+" of "+docLen+" units",
+                consumed < docLen);
+        assertTrue("Should have stopped within "+MAX_CONSUMED_BEFORE_ABORT
+                +" units via "+desc+", but read "+consumed,
+                consumed <= MAX_CONSUMED_BEFORE_ABORT);
+    }
+
+    /**
+     * {@link Reader} that records how much of the input was actually pulled.
+     */
+    private static class CountingReader extends Reader
+    {
+        private final Reader _delegate;
+
+        private long _count;
+
+        public CountingReader(String doc) {
+            _delegate = new StringReader(doc);
+        }
+
+        public long count() { return _count; }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int n = _delegate.read(cbuf, off, len);
+            if (n > 0) {
+                _count += n;
+            }
+            return n;
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
+    }
+
+    /**
+     * {@link InputStream} that records how much of the input was actually pulled.
+     */
+    private static class CountingInputStream extends InputStream
+    {
+        private final InputStream _delegate;
+
+        private long _count;
+
+        public CountingInputStream(byte[] doc) {
+            _delegate = new ByteArrayInputStream(doc);
+        }
+
+        public long count() { return _count; }
+
+        @Override
+        public int read() throws IOException {
+            int b = _delegate.read();
+            if (b >= 0) {
+                ++_count;
+            }
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int n = _delegate.read(b, off, len);
+            if (n > 0) {
+                _count += n;
+            }
+            return n;
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
     }
 
     private static String _generateProps(int targetLen) {
