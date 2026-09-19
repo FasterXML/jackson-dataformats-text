@@ -5,6 +5,7 @@ import java.util.*;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
@@ -313,6 +314,9 @@ public class JavaPropsFactory
 
     private Properties _readProperties(Reader r0, boolean closeReader)
     {
+        // [dataformats-text#738]: `Properties.load()` reads input directly, so
+        // to enforce max document length we need to count what it reads
+        r0 = _constrainedReader(ctxt, r0);
         Properties props = new Properties();
         // May or may not want to close the reader, so...
         try {
@@ -339,5 +343,100 @@ public class JavaPropsFactory
     protected <T> T _reportReadException(String msg, Exception rootCause)
     {
         throw new StreamReadException((JsonParser) null, msg, rootCause);
+    }
+
+    /**
+     * Helper method for [dataformats-text#738]: {@link java.util.Properties#load(Reader)}
+     * reads input directly from the {@link Reader} given, so to enforce maximum
+     * document length we need to count what it reads. No wrapping (and no
+     * overhead) if no maximum document length configured.
+     *
+     * @since 3.1.7
+     */
+    protected static Reader _constrainedReader(IOContext ioCtxt, Reader reader) {
+        StreamReadConstraints constraints = ioCtxt.streamReadConstraints();
+        if (constraints.hasMaxDocumentLength()) {
+            return new ReadConstrainedReader(reader, constraints);
+        }
+        return reader;
+    }
+
+    /*
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
+     */
+
+    /**
+     * {@link Reader} decorator that enforces
+     * {@link StreamReadConstraints#getMaxDocumentLength()} by counting characters
+     * read through it. Needed since actual decoding is done by
+     * {@link java.util.Properties#load(Reader)}, reading content directly from
+     * a {@link Reader}, so the parser itself does not see input as it is consumed.
+     *<p>
+     * Only installed when constraints define a maximum document length
+     * (see {@link StreamReadConstraints#hasMaxDocumentLength()}).
+     *<p>
+     * NOTE: unlike in 2.x, {@link StreamConstraintsException} is unchecked in 3.x,
+     * so it propagates out of {@link java.util.Properties#load(Reader)} as-is
+     * (which only catches {@link IOException}) and needs no unwrapping by the caller.
+     *
+     * @since 3.1.7
+     */
+    private static class ReadConstrainedReader extends Reader
+    {
+        private final Reader _delegate;
+
+        private final StreamReadConstraints _constraints;
+
+        /**
+         * Total number of characters read (or skipped) so far.
+         */
+        private long _charsRead;
+
+        public ReadConstrainedReader(Reader delegate, StreamReadConstraints constraints) {
+            _delegate = delegate;
+            _constraints = constraints;
+        }
+
+        private void _count(long n) throws StreamConstraintsException {
+            if (n > 0) {
+                _charsRead += n;
+                _constraints.validateDocumentLength(_charsRead);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int c = _delegate.read();
+            if (c >= 0) {
+                _count(1);
+            }
+            return c;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int n = _delegate.read(cbuf, off, len);
+            _count(n);
+            return n;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipped = _delegate.skip(n);
+            _count(skipped);
+            return skipped;
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+            return _delegate.ready();
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
     }
 }
