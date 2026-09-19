@@ -200,7 +200,7 @@ public class YAMLParser extends ParserBase
     }
 
     /**
-     * Helper method for [dataformats-text#636]: SnakeYAML reads input directly
+     * Helper method for [dataformats-text#737]: SnakeYAML reads input directly
      * from the {@link Reader} given, so to enforce maximum document length we
      * need to count what it reads. No wrapping (and no overhead) if no
      * maximum document length configured.
@@ -477,7 +477,7 @@ public class YAMLParser extends ParserBase
             try {
                 evt = getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
-                // [dataformats-text#636]: SnakeYAML wraps the `IOException` that
+                // [dataformats-text#737]: SnakeYAML wraps the `IOException` that
                 // `ReadConstrainedReader` throws, so unwrap to expose the
                 // constraints violation as-is
                 StreamConstraintsException sce = _findConstraintsException(e);

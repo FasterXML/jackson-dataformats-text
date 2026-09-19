@@ -19,7 +19,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
  * in YAML parsing: since SnakeYAML reads input directly, this is done
  * by counting characters it reads.
  *
- * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/636">[dataformats-text#636]</a>
+ * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/pull/737">[dataformats-text#737]</a>
  */
 public class YAMLDocumentLengthTest extends ModuleTestBase
 {
