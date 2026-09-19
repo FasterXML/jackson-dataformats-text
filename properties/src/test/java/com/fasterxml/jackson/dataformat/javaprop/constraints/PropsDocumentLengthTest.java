@@ -19,7 +19,7 @@ import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
  * in Properties parsing: since {@code java.util.Properties.load()} reads input
  * directly, this is done by counting characters it reads.
  *
- * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/638">[dataformats-text#638]</a>
+ * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/pull/738">[dataformats-text#738]</a>
  */
 public class PropsDocumentLengthTest extends ModuleTestBase
 {
