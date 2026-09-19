@@ -302,21 +302,24 @@ public class JavaPropsFactory
         // Reader is constructed (and hence owned) by us, so it must always be closed to
         // have its read buffer recycled; `autoClose` only decides whether the caller's
         // `InputStream` is closed along with it
-        return _readProperties(new Latin1Reader(ctxt, in, autoClose), true);
+        // [dataformats-text#738]: `Properties.load()` reads input directly, so
+        // to enforce max document length we need to count what it reads
+        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, autoClose)),
+                true);
     }
 
     protected Properties _loadProperties(Reader r0, IOContext ctxt,
             int streamReadFeatures)
     {
         // Reader is the caller's, so only close it if auto-closing is enabled
-        return _readProperties(r0, _autoCloseSource(ctxt, streamReadFeatures));
+        // [dataformats-text#738]: count what `Properties.load()` reads, to
+        // enforce max document length
+        return _readProperties(_constrainedReader(ctxt, r0),
+                _autoCloseSource(ctxt, streamReadFeatures));
     }
 
     private Properties _readProperties(Reader r0, boolean closeReader)
     {
-        // [dataformats-text#738]: `Properties.load()` reads input directly, so
-        // to enforce max document length we need to count what it reads
-        r0 = _constrainedReader(ctxt, r0);
         Properties props = new Properties();
         // May or may not want to close the reader, so...
         try {
