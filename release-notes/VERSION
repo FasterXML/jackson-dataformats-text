@@ -33,6 +33,11 @@ implementations)
   `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
   ignored by these modules), writing directly into output buffer where possible
  (fix by @pjfanning)
+#724: (csv) Single-pass String value writing in `CsvEncoder` (copy into output
+  buffer, then scan for quoting need); `char[]` values no longer converted to
+  `String` unless quoting needed; numeric array elements appended without
+  intermediate `String`
+ (fix by @pjfanning)
 #734: (properties) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
@@ -41,6 +46,14 @@ implementations)
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 3.2.2 (14-Aug-2026)
 

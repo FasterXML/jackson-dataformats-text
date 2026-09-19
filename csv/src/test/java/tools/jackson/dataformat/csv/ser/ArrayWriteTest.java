@@ -1,8 +1,12 @@
 package tools.jackson.dataformat.csv.ser;
 
+import java.io.StringWriter;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import tools.jackson.core.JsonGenerator;
 
 import tools.jackson.dataformat.csv.*;
 
@@ -50,6 +54,54 @@ public class ArrayWriteTest extends ModuleTestBase
                 .writeValueAsString(input)
                 .trim();
         assertEquals("foo,1;2;3,stuff", csv);
+    }
+
+    @JsonPropertyOrder({"id", "longs", "doubles", "floats", "shorts"})
+    static class NumberArrays {
+        public String id = "n";
+        public long[] longs = new long[] { 0L, -1L, 1L << 40 };
+        public double[] doubles = new double[] { -0.0, 1.25, 1e-7, Double.NaN };
+        public float[] floats = new float[] { 1.89f, 1.4e-45f, Float.POSITIVE_INFINITY };
+        public short[] shorts = new short[] { -1, 300 };
+    }
+
+    // Numeric array elements are appended directly (no intermediate String),
+    // output must match `String.valueOf()`. NOTE: kept short enough not to
+    // trigger quoting of long values
+    @Test
+    public void testNumberArrays() throws Exception
+    {
+        NumberArrays input = new NumberArrays();
+        String csv = MAPPER.writerWithSchemaFor(NumberArrays.class)
+                .writeValueAsString(input)
+                .trim();
+        assertEquals("n,0;-1;1099511627776"
+                + ",-0.0;1.25;1.0E-7;NaN"
+                + ",1.89;1.4E-45;Infinity"
+                + ",-1;300", csv);
+    }
+
+    @Test
+    public void testCharArrayElements() throws Exception
+    {
+        CsvSchema schema = CsvSchema.builder()
+                .addColumn("id")
+                .addArrayColumn("values", ";")
+                .build();
+        StringWriter sw = new StringWriter();
+        try (JsonGenerator g = MAPPER.writer(schema).createGenerator(sw)) {
+            g.writeStartObject();
+            g.writeName("id");
+            g.writeString("foo");
+            g.writeName("values");
+            g.writeStartArray();
+            g.writeString("xxabcyy".toCharArray(), 2, 3);
+            g.writeString("def");
+            g.writeString("ghi".toCharArray(), 0, 3);
+            g.writeEndArray();
+            g.writeEndObject();
+        }
+        assertEquals("foo,abc;def;ghi\n", sw.toString());
     }
 
     @Test
