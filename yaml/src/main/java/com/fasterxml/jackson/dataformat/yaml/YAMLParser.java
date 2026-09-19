@@ -206,10 +206,15 @@ public class YAMLParser extends ParserBase
      * from the {@link Reader} given, so to enforce maximum document length we
      * need to count what it reads. No wrapping (and no overhead) if no
      * maximum document length configured.
+     *<p>
+     * Exposed for sub-classes that construct their own {@link ParserImpl}
+     * (see {@link #YAMLParser(IOContext, int, int, ObjectCodec, Reader, ParserImpl)}):
+     * such sub-classes need to wrap the {@link Reader} they pass to
+     * {@link StreamReader} using this method, for the limit to be enforced.
      *
      * @since 2.18.11
      */
-    private static Reader _constrainedReader(IOContext ctxt, Reader reader) {
+    protected static Reader _constrainedReader(IOContext ctxt, Reader reader) {
         StreamReadConstraints constraints = ctxt.streamReadConstraints();
         if (constraints.hasMaxDocumentLength()) {
             return new ReadConstrainedReader(reader, constraints);
@@ -220,6 +225,12 @@ public class YAMLParser extends ParserBase
     /**
      * Constructor to overload by custom parser sub-classes that want to replace
      * {@link ParserImpl} passed.
+     *<p>
+     * NOTE: {@link StreamReadConstraints#getMaxDocumentLength()} is enforced by
+     * wrapping the {@link Reader} SnakeYAML reads from; sub-classes that
+     * construct their own {@link ParserImpl} need to pass
+     * {@code _constrainedReader(ctxt, reader)} to {@link StreamReader} to have
+     * the limit enforced.
      *
      * @since 2.18
      */
