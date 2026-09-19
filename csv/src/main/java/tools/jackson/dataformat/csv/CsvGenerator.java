@@ -125,6 +125,24 @@ public class CsvGenerator extends GeneratorBase
             Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes,
             int maxQuoteCheckChars)
     {
+        this(writeCtxt, ioCtxt, streamWriteFeatures, csvFeatures, out, schema,
+                characterEscapes, maxQuoteCheckChars, false);
+    }
+
+    /**
+     * @param ownsWriter Whether {@code out} was constructed by Jackson (typically
+     *    wrapping a caller-provided {@link java.io.OutputStream}), in which case it must
+     *    always be closed so its content is flushed and its buffers recycled; or provided
+     *    by the caller, in which case
+     *    {@link tools.jackson.core.StreamWriteFeature#AUTO_CLOSE_TARGET} decides.
+     *
+     * @since 3.3
+     */
+    public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int streamWriteFeatures, int csvFeatures,
+            Writer out, CsvSchema schema, CsvCharacterEscapes characterEscapes,
+            int maxQuoteCheckChars, boolean ownsWriter)
+    {
         super(writeCtxt, ioCtxt, streamWriteFeatures);
         _formatFeatures = csvFeatures;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
@@ -136,7 +154,7 @@ public class CsvGenerator extends GeneratorBase
         }
         boolean useFastDoubleWriter = isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER);
         _writer = new CsvEncoder(ioCtxt, csvFeatures, out, schema, characterEscapes,
-                useFastDoubleWriter, maxQuoteCheckChars);
+                useFastDoubleWriter, maxQuoteCheckChars, ownsWriter);
     }
 
     public CsvGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
@@ -535,7 +553,7 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("write String value");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(new String(text, offset, len));
+                _addToArray(text, offset, len);
             // 26-Aug-2024, tatu: [dataformats-text#495] Decorations!
             } else if (_nextColumnDecorator != null) {
                 String str = new String(text, offset, len);
@@ -762,7 +780,7 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(v);
             // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
             } else if (_nextColumnDecorator != null) {
                 _writer.write(_columnIndex(),
@@ -784,7 +802,7 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(v);
             // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
             } else if (_nextColumnDecorator != null) {
                 _writer.write(_columnIndex(),
@@ -824,7 +842,7 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(v);
             // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
             } else if (_nextColumnDecorator != null) {
                 _writer.write(_columnIndex(),
@@ -842,7 +860,7 @@ public class CsvGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         if (!_skipValue) {
             if (!_arraySeparator.isEmpty()) {
-                _addToArray(String.valueOf(v));
+                _addToArray(v);
             // 26-Aug-2024, tatu: [dataformats-text#495] Decorations?
             } else if (_nextColumnDecorator != null) {
                 _writer.write(_columnIndex(),
@@ -1014,6 +1032,64 @@ public class CsvGenerator extends GeneratorBase
     }
     
     protected void _addToArray(char[] value) {
+        if (_arrayElements > 0) {
+            _arrayContents.append(_arraySeparator);
+        }
+        ++_arrayElements;
+        _arrayContents.append(value);
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _addToArray(char[] value, int offset, int len) {
+        if (_arrayElements > 0) {
+            _arrayContents.append(_arraySeparator);
+        }
+        ++_arrayElements;
+        _arrayContents.append(value, offset, len);
+    }
+
+    /**
+     * Primitive number variants append directly, avoiding intermediate
+     * {@code String}; output text is the same as with {@code String.valueOf()}.
+     *
+     * @since 3.3
+     */
+    protected void _addToArray(int value) {
+        if (_arrayElements > 0) {
+            _arrayContents.append(_arraySeparator);
+        }
+        ++_arrayElements;
+        _arrayContents.append(value);
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _addToArray(long value) {
+        if (_arrayElements > 0) {
+            _arrayContents.append(_arraySeparator);
+        }
+        ++_arrayElements;
+        _arrayContents.append(value);
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _addToArray(double value) {
+        if (_arrayElements > 0) {
+            _arrayContents.append(_arraySeparator);
+        }
+        ++_arrayElements;
+        _arrayContents.append(value);
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _addToArray(float value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
         }
