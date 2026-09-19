@@ -14,6 +14,7 @@ module tools.jackson.dataformat.toml
 
     // Further, need to open up some packages for JUnit et al
     opens tools.jackson.dataformat.toml;
+    opens tools.jackson.dataformat.toml.constraints;
     opens tools.jackson.dataformat.toml.dos;
     opens tools.jackson.dataformat.toml.testutil.failure;
 }
