@@ -6,10 +6,12 @@ import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.util.BufferRecycler;
 
 import tools.jackson.dataformat.csv.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Guard against drift between the {@code String} and {@code char[]} quoting-need
@@ -50,6 +52,26 @@ public class QuotingScanParityTest extends ModuleTestBase
     private final static char[] EXTRA_CHARS = new char[] {
         0x100, 0x2028, 0x2029, 0xFEFF, 0xFFFF
     };
+
+    /*
+    /**********************************************************************
+    /* Test methods: premise of the long-value tests
+    /**********************************************************************
+     */
+
+    /**
+     * The long-value tests only reach the {@code String} scans because the value
+     * does not fit in the output buffer. Were that buffer ever to grow past
+     * {@link #LONG_LEN} they would keep passing while quietly comparing the
+     * {@code char[]} scan against itself, so verify the premise explicitly.
+     */
+    @Test
+    public void testLongValuesDoNotFitOutputBuffer() {
+        int bufferSize = new BufferRecycler()
+                .allocCharBuffer(BufferRecycler.CHAR_CONCAT_BUFFER).length;
+        assertTrue(LONG_LEN > bufferSize,
+                "LONG_LEN ("+LONG_LEN+") must exceed output buffer size ("+bufferSize+")");
+    }
 
     /*
     /**********************************************************************
