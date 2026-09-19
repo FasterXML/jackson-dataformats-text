@@ -518,6 +518,17 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
+        int room = _outputEnd - _outputTail;
+        if (room < len) {
+            _flushBuffer();
+            room = _outputEnd - _outputTail;
+        }
+        if (room >= len) {
+            text.getChars(offset, offset + len, _outputBuffer, _outputTail);
+            _outputTail += len;
+            return this;
+        }
+        // Rare: longer than the output buffer
         return _writeRaw(text.substring(offset, offset + len));
     }
 
@@ -533,7 +544,8 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
-        return writeRaw(text.toString());
+        // NOTE: `asQuotedChars()` would be JSON-escaped; need unquoted value
+        return _writeRaw(text.getValue());
     }
 
     /*

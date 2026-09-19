@@ -12,6 +12,17 @@ class StringOutputUtil {
     public static final int MASK_SIMPLE_KEY = -1; // Should exclude multi-line keys when/if we support them.
     public static final int MASK_STRING = ~UNQUOTED_KEY;
 
+    /**
+     * Pre-computed categories for ASCII range, to avoid evaluating the
+     * full set of checks for every character of every String and key.
+     */
+    private static final int[] ASCII_CATEGORIES = new int[0x80];
+    static {
+        for (int c = 0; c < 0x80; c++) {
+            ASCII_CATEGORIES[c] = _categorize(c);
+        }
+    }
+
     static int categorize(String s) {
         if (s.isEmpty()) {
             return EMPTY_STRING_CATS;
@@ -19,7 +30,9 @@ class StringOutputUtil {
         int flags = -1;
         for (int i = 0; i < s.length();) {
             char hi = s.charAt(i++);
-            if (Character.isHighSurrogate(hi) && i < s.length()) {
+            if (hi < 0x80) { // common case, ASCII
+                flags &= ASCII_CATEGORIES[hi];
+            } else if (Character.isHighSurrogate(hi) && i < s.length()) {
                 char lo = s.charAt(i);
                 if (Character.isLowSurrogate(lo)) {
                     i++;
@@ -41,7 +54,9 @@ class StringOutputUtil {
         int flags = -1;
         for (int i = 0; i < len;) {
             char hi = text[offset + i++];
-            if (Character.isHighSurrogate(hi) && i < len) {
+            if (hi < 0x80) { // common case, ASCII
+                flags &= ASCII_CATEGORIES[hi];
+            } else if (Character.isHighSurrogate(hi) && i < len) {
                 char lo = text[offset + i];
                 if (Character.isLowSurrogate(lo)) {
                     i++;
@@ -57,6 +72,15 @@ class StringOutputUtil {
     }
 
     static int categorize(int c) {
+        if ((c & ~0x7F) == 0) { // ASCII (and not negative)
+            return ASCII_CATEGORIES[c];
+        }
+        return _categorize(c);
+    }
+
+    // Full categorization; used to populate lookup table for ASCII, and
+    // directly for everything else
+    private static int _categorize(int c) {
         if (c > Character.MAX_CODE_POINT || (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE)) {
             // cannot write surrogates
             return 0;

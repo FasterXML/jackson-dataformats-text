@@ -43,6 +43,32 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void rawWrites() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeRaw("xxabc = 1yy", 2, 7);
+            generator.writeRaw('\n');
+            generator.writeRaw(new tools.jackson.core.io.SerializedString("def = \"quoted\""));
+            generator.writeRaw("\n".toCharArray(), 0, 1);
+            // longer than output buffer (2000 chars), via offset/length variant
+            StringBuilder sb = new StringBuilder("<<ghi = '");
+            for (int i = 0; i < 2500; i++) {
+                sb.append('x');
+            }
+            sb.append("'>>");
+            generator.writeRaw(sb.toString(), 2, sb.length() - 4);
+            generator.writeRaw("\n");
+        }
+        String exp = "abc = 1\ndef = \"quoted\"\nghi = '" + "x".repeat(2500) + "'\n";
+        assertEquals(exp, w.toString());
+        // and must be valid TOML
+        JsonNode n = newTomlMapper().readTree(w.toString());
+        assertEquals(1, n.get("abc").intValue());
+        assertEquals("quoted", n.get("def").stringValue());
+        assertEquals(2500, n.get("ghi").stringValue().length());
+    }
+
+    @Test
     public void bool() {
         StringWriter w = new StringWriter();
         try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
