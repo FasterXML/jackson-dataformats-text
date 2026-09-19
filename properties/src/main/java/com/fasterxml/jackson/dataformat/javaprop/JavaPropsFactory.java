@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.format.InputAccessor;
 import com.fasterxml.jackson.core.format.MatchStrength;
 import com.fasterxml.jackson.core.io.IOContext;
@@ -349,6 +350,12 @@ public class JavaPropsFactory extends JsonFactory
     protected Properties _loadProperties(Reader r0, IOContext ctxt)
         throws IOException
     {
+        // [dataformats-text#738]: `Properties.load()` reads input directly, so
+        // to enforce max document length we need to count what it reads
+        final StreamReadConstraints src = ctxt.streamReadConstraints();
+        if (src.hasMaxDocumentLength()) {
+            r0 = new ReadConstrainedReader(r0, src);
+        }
         Properties props = new Properties();
         // May or may not want to close the reader, so...
         if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
@@ -389,5 +396,80 @@ public class JavaPropsFactory extends JsonFactory
         throws IOException
     {
         throw new JsonParseException((JsonParser) null, msg, rootCause);
+    }
+
+    /*
+    /******************************************************
+    /* Helper classes
+    /******************************************************
+     */
+
+    /**
+     * {@link Reader} decorator that enforces
+     * {@link StreamReadConstraints#getMaxDocumentLength()} by counting characters
+     * read through it. Needed since actual decoding is done by
+     * {@link java.util.Properties#load(Reader)}, reading content directly from
+     * a {@link Reader}, so the parser itself does not see input as it is consumed.
+     *<p>
+     * Only installed when constraints define a maximum document length
+     * (see {@link StreamReadConstraints#hasMaxDocumentLength()}).
+     *
+     * @since 2.18.11
+     */
+    private static class ReadConstrainedReader extends Reader
+    {
+        private final Reader _delegate;
+
+        private final StreamReadConstraints _constraints;
+
+        /**
+         * Total number of characters read (or skipped) so far.
+         */
+        private long _charsRead;
+
+        public ReadConstrainedReader(Reader delegate, StreamReadConstraints constraints) {
+            _delegate = delegate;
+            _constraints = constraints;
+        }
+
+        private void _count(long n) throws StreamConstraintsException {
+            if (n > 0) {
+                _charsRead += n;
+                _constraints.validateDocumentLength(_charsRead);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int c = _delegate.read();
+            if (c >= 0) {
+                _count(1);
+            }
+            return c;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int n = _delegate.read(cbuf, off, len);
+            _count(n);
+            return n;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipped = _delegate.skip(n);
+            _count(skipped);
+            return skipped;
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+            return _delegate.ready();
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
     }
 }
