@@ -33,6 +33,11 @@ implementations)
   `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
   ignored by these modules), writing directly into output buffer where possible
  (fix by @pjfanning)
+#724: (csv) Single-pass String value writing in `CsvEncoder` (copy into output
+  buffer, then scan for quoting need); `char[]` values no longer converted to
+  `String` unless quoting needed; numeric array elements appended without
+  intermediate `String`
+ (fix by @pjfanning)
 
 3.2.3 (not yet released)
 
