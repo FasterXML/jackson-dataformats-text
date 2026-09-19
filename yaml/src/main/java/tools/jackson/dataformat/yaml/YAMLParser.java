@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.ParserBase;
+import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.json.DupDetector;
@@ -58,6 +59,17 @@ public class YAMLParser extends ParserBase
      * auto-close it (if required to)
      */
     protected final Reader _reader;
+
+    /**
+     * Flag that indicates whether {@link #_reader} was constructed by Jackson
+     * (wrapping a caller-provided {@link java.io.InputStream}) rather than handed to
+     * us by the caller. Readers we construct must always be closed -- that is what
+     * returns their buffers to the recycler -- whereas the {@link java.io.InputStream}
+     * underneath is only closed if auto-closing is enabled.
+     *
+     * @since 3.3
+     */
+    protected final boolean _ownsReader;
 
     protected final ParserImpl _yamlParser;
     protected final ScalarResolver _yamlResolver;
@@ -139,9 +151,29 @@ public class YAMLParser extends ParserBase
     /**********************************************************************
      */
 
+    /**
+     * @deprecated Since 3.3 use
+     *   {@link #YAMLParser(ObjectReadContext, IOContext, BufferRecycler, int, int, LoadSettings, Reader, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
             int streamReadFeatures, int formatFeatures,
             LoadSettings loadSettings, Reader reader)
+    {
+        this(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures, loadSettings,
+                reader, false);
+    }
+
+    /**
+     * @param ownsReader Whether {@code reader} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
+    public YAMLParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
+            int streamReadFeatures, int formatFeatures,
+            LoadSettings loadSettings, Reader reader, boolean ownsReader)
     {
         super(readCtxt, ioCtxt, streamReadFeatures);
         if (loadSettings == null) {
@@ -149,13 +181,31 @@ public class YAMLParser extends ParserBase
         }
         _formatFeatures = formatFeatures;
         _reader = reader;
-        _yamlParser = new ParserImpl(loadSettings, new StreamReader(loadSettings, reader));
+        _ownsReader = ownsReader;
+        _yamlParser = new ParserImpl(loadSettings,
+                new StreamReader(loadSettings, _constrainedReader(ioCtxt, reader)));
         _yamlResolver = loadSettings.getSchema().getScalarResolver();
 
         _cfgEmptyStringsToNull = YAMLReadFeature.EMPTY_STRING_AS_NULL.enabledIn(formatFeatures);
         DupDetector dups = StreamReadFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamReadFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
+    }
+
+    /**
+     * Helper method for [dataformats-text#737]: SnakeYAML Engine reads input directly
+     * from the {@link Reader} given, so to enforce maximum document length we
+     * need to count what it reads. No wrapping (and no overhead) if no
+     * maximum document length configured.
+     *
+     * @since 3.1.7
+     */
+    private static Reader _constrainedReader(IOContext ioCtxt, Reader reader) {
+        StreamReadConstraints constraints = ioCtxt.streamReadConstraints();
+        if (constraints.hasMaxDocumentLength()) {
+            return new ReadConstrainedReader(reader, constraints);
+        }
+        return reader;
     }
 
     /*
@@ -226,12 +276,14 @@ public class YAMLParser extends ParserBase
         /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
          *   on the underlying Reader, unless we "own" it, or auto-closing
          *   feature is enabled.
-         *   One downside is that when using our optimized
-         *   Reader (granted, we only do that for UTF-32...) this
-         *   means that buffer recycling won't work correctly.
          */
+        // 18-Sep-2026: [dataformats-text#718] but a Reader we constructed ourselves must
+        //   always be closed, else the buffer it took from the recycler is lost; such a
+        //   Reader knows not to close the caller's `InputStream` unless auto-closing
+        //   is enabled
         if (_reader != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            if (_ownsReader || _ioContext.isResourceManaged()
+                    || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
                 _reader.close();
             }
         }
@@ -1222,5 +1274,84 @@ public class YAMLParser extends ParserBase
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
                 (char) actCh, expCh, ctxt.typeDesc(), ctxt.startLocation(_contentReference())));
+    }
+
+    /*
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
+     */
+
+    /**
+     * {@link Reader} decorator that enforces
+     * {@link StreamReadConstraints#getMaxDocumentLength()} by counting characters
+     * read through it. Needed since actual YAML decoding is done by SnakeYAML Engine,
+     * reading content directly from a {@link Reader}, so the parser
+     * itself does not see input as it is consumed.
+     *<p>
+     * Only installed when constraints define a maximum document length
+     * (see {@link StreamReadConstraints#hasMaxDocumentLength()}).
+     *<p>
+     * NOTE: unlike in 2.x, {@link StreamConstraintsException} is unchecked in 3.x,
+     * so it propagates out of SnakeYAML Engine as-is (Engine only catches
+     * {@link IOException}) and needs no unwrapping by the caller.
+     *
+     * @since 3.1.7
+     */
+    private static class ReadConstrainedReader extends Reader
+    {
+        private final Reader _delegate;
+
+        private final StreamReadConstraints _constraints;
+
+        /**
+         * Total number of characters read (or skipped) so far.
+         */
+        private long _charsRead;
+
+        public ReadConstrainedReader(Reader delegate, StreamReadConstraints constraints) {
+            _delegate = delegate;
+            _constraints = constraints;
+        }
+
+        private void _count(long n) throws StreamConstraintsException {
+            if (n > 0) {
+                _charsRead += n;
+                _constraints.validateDocumentLength(_charsRead);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int c = _delegate.read();
+            if (c >= 0) {
+                _count(1);
+            }
+            return c;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int n = _delegate.read(cbuf, off, len);
+            _count(n);
+            return n;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipped = _delegate.skip(n);
+            _count(skipped);
+            return skipped;
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+            return _delegate.ready();
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
     }
 }

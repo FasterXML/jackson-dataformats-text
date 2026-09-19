@@ -26,6 +26,22 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         assertEquals("abc = 123\n", w.toString());
     }
 
+    // `writeNumber(short)` used to call `writeValueEnd()` twice, producing
+    // an extra empty line after every short value
+    @Test
+    public void shortNumber() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeNumber((short) 7);
+            generator.writeName("def");
+            generator.writeNumber((short) -8);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 7\ndef = -8\n", w.toString());
+    }
+
     @Test
     public void rawWrites() {
         StringWriter w = new StringWriter();

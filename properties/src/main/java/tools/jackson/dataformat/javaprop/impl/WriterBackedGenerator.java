@@ -5,6 +5,7 @@ import java.io.Writer;
 
 import tools.jackson.core.*;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.dataformat.javaprop.JavaPropsGenerator;
 import tools.jackson.dataformat.javaprop.JavaPropsSchema;
 import tools.jackson.dataformat.javaprop.io.JPropEscapes;
@@ -195,6 +196,64 @@ public class WriterBackedGenerator extends JavaPropsGenerator
         _writeRaw(_schema.keyValueSeparator());
 
         _writeRaw(value);
+        _writeLinefeed();
+    }
+
+    @Override
+    protected void _writeUnescapedEntry(int value) throws JacksonException
+    {
+        _writeRaw(_basePath);
+        _writeRaw(_schema.keyValueSeparator());
+        // up to 10 digits and possible minus sign
+        if ((_outputTail + 11) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputInt(value, _outputBuffer, _outputTail);
+        _writeLinefeed();
+    }
+
+    @Override
+    protected void _writeUnescapedEntry(long value) throws JacksonException
+    {
+        _writeRaw(_basePath);
+        _writeRaw(_schema.keyValueSeparator());
+        // up to 19 digits and possible minus sign
+        if ((_outputTail + 20) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputLong(value, _outputBuffer, _outputTail);
+        _writeLinefeed();
+    }
+
+    @Override
+    protected void _writeUnescapedEntry(double value) throws JacksonException
+    {
+        if (!isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            _writeUnescapedEntry(NumberOutput.toString(value, false));
+            return;
+        }
+        _writeRaw(_basePath);
+        _writeRaw(_schema.keyValueSeparator());
+        if ((_outputTail + NumberOutput.MAX_DOUBLE_BYTES) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputDouble(value, _outputBuffer, _outputTail);
+        _writeLinefeed();
+    }
+
+    @Override
+    protected void _writeUnescapedEntry(float value) throws JacksonException
+    {
+        if (!isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            _writeUnescapedEntry(NumberOutput.toString(value, false));
+            return;
+        }
+        _writeRaw(_basePath);
+        _writeRaw(_schema.keyValueSeparator());
+        if ((_outputTail + NumberOutput.MAX_FLOAT_BYTES) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputFloat(value, _outputBuffer, _outputTail);
         _writeLinefeed();
     }
 

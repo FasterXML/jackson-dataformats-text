@@ -19,8 +19,41 @@ implementations)
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
+#718: (csv, properties,toml,yaml) Fix `AUTO_CLOSE_SOURCE` overrides and recycled-buffer
+  leaks on read paths
+ (fix by @pjfanning)
+#719: (csv) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
+#721: (csv) Write `double`/`float` values directly into output buffer (via
+  `NumberOutput.outputDouble()/outputFloat()`) when `USE_FAST_DOUBLE_WRITER`
+  enabled, avoiding intermediate `String`
+ (fix by @pjfanning)
+#722: (properties, toml, yaml) Use `NumberOutput` for writing numbers; respect
+  `StreamWriteFeature.USE_FAST_DOUBLE_WRITER` for `double`/`float` (previously
+  ignored by these modules), writing directly into output buffer where possible
+ (fix by @pjfanning)
+#724: (csv) Single-pass String value writing in `CsvEncoder` (copy into output
+  buffer, then scan for quoting need); `char[]` values no longer converted to
+  `String` unless quoting needed; numeric array elements appended without
+  intermediate `String`
+ (fix by @pjfanning)
 #725: (toml) Use lookup table for ASCII character categorization when writing
   Strings/keys; avoid `substring()`/`toString()` in `writeRaw()` variants
+ (fix by @pjfanning)
+
+3.2.3 (not yet released)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 3.2.2 (14-Aug-2026)
 
@@ -184,9 +217,9 @@ No changes since 3.1.1
  (requested by Dmitry B)
 #604: (csv) Remove `CsvParser.enable()`/`.disable()`/`.configure()` (reduce mutability)
 #608: (csv, toml, yaml) Fix issue with UTF-8 surrogate pair decoding
- (fixed by @pjfanning)
+ (fix by @pjfanning)
 #609: (yaml) Catch and rethrow yaml engine internal exception on generation
- (fixed by @pjfanning)
+ (fix by @pjfanning)
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
   for CSV module
 

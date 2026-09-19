@@ -68,6 +68,17 @@ public class CsvDecoder
     protected boolean _autoCloseInput;
 
     /**
+     * Flag that indicates whether {@link #_inputReader} was constructed by Jackson
+     * (wrapping a caller-provided {@link java.io.InputStream}) rather than handed to
+     * us by the caller. Readers we construct must always be closed -- that is what
+     * returns their buffers to the recycler -- whereas the {@link java.io.InputStream}
+     * underneath is only closed if {@link #_autoCloseInput} is set.
+     *
+     * @since 3.3
+     */
+    protected final boolean _ownsInputReader;
+
+    /**
      * Configuration flag that determines whether spaces surrounding
      * separator characters are to be automatically trimmed or not.
      */
@@ -309,13 +320,33 @@ public class CsvDecoder
     /**********************************************************************
      */
 
+    /**
+     * @deprecated Since 3.3 use
+     *   {@link #CsvDecoder(IOContext, CsvParser, Reader, CsvSchema, TextBuffer, int, int, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
                       CsvSchema schema, TextBuffer textBuffer,
                       int stdFeatures, int csvFeatures)
     {
+        this(ctxt, owner, r, schema, textBuffer, stdFeatures, csvFeatures, false);
+    }
+
+    /**
+     * @param ownsReader Whether {@code r} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
+    public CsvDecoder(IOContext ctxt, CsvParser owner, Reader r,
+                      CsvSchema schema, TextBuffer textBuffer,
+                      int stdFeatures, int csvFeatures, boolean ownsReader)
+    {
         _owner = owner;
         _ioContext = ctxt;
         _inputReader = r;
+        _ownsInputReader = ownsReader;
         _textBuffer = textBuffer;
         _autoCloseInput = StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(stdFeatures);
         _allowComments = CsvReadFeature.ALLOW_COMMENTS.enabledIn(csvFeatures);
@@ -465,12 +496,13 @@ public class CsvDecoder
         /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
          *   on the underlying Reader, unless we "own" it, or auto-closing
          *   feature is enabled.
-         *   One downside is that when using our optimized
-         *   Reader (granted, we only do that for UTF-32...) this
-         *   means that buffer recycling won't work correctly.
          */
+        // 08-Sep-2026, pjfanning: [dataformats-text#718] but a Reader we constructed
+        //   ourselves must always be closed, else the buffer it took from the recycler
+        //   is lost; such a Reader knows not to close the caller's `InputStream` unless
+        //   auto-closing is enabled
         if (_inputReader != null) {
-            if (_autoCloseInput || _ioContext.isResourceManaged()) {
+            if (_ownsInputReader || _autoCloseInput || _ioContext.isResourceManaged()) {
                 _inputReader.close();
             }
             _inputReader = null;

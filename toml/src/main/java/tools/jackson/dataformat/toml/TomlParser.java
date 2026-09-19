@@ -9,6 +9,7 @@ import java.time.temporal.Temporal;
 
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberInput;
+import tools.jackson.core.StreamReadConstraints;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.util.VersionUtil;
@@ -20,6 +21,15 @@ class TomlParser {
     static final int MAX_CHARS_TO_REPORT = 1000;
 
     private final TomlFactory tomlFactory;
+
+    /**
+     * Constraints to enforce: read from {@link IOContext} (and not from
+     * {@link #tomlFactory}) so that the same settings apply as for the
+     * document-length check the lexer does.
+     *
+     * @since 3.1.7
+     */
+    private final StreamReadConstraints streamReadConstraints;
 
     private final TomlStreamReadException.ErrorContext errorContext;
     private final int options;
@@ -33,12 +43,24 @@ class TomlParser {
             TomlStreamReadException.ErrorContext errorContext,
             int options,
             Reader reader
-    ) throws IOException {
+    ) {
         this.tomlFactory = tomlFactory;
+        this.streamReadConstraints = ioContext.streamReadConstraints();
         this.errorContext = errorContext;
         this.options = options;
         this.lexer = new Lexer(reader, ioContext, errorContext);
         lexer.prohibitInternalBufferAllocate = (options & TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE) != 0;
+        // NOTE: lexing of the first token is deliberately NOT done here but in
+        // `readFirstToken()`, so that it happens inside the caller's try/finally
+        // and cannot leak the buffers `Lexer` just took from the recycler
+    }
+
+    /**
+     * Reads the first token; separate from constructor since the `Lexer` has already
+     * allocated recycled buffers by then, and failure here must not bypass
+     * {@link Lexer#releaseBuffers()}.
+     */
+    private void readFirstToken() throws IOException {
         this.next = lexer.yylex();
     }
 
@@ -60,6 +82,7 @@ class TomlParser {
         TomlParser parser = new TomlParser(factory, ioContext, errorCtxt,
                 formatReadFeatures, reader);
         try {
+            parser.readFirstToken();
             return parser.parse();
         } finally {
             parser.lexer.releaseBuffers();
@@ -153,6 +176,8 @@ class TomlParser {
             } else {
                 throw errorContext.atPosition(lexer).unexpectedToken(partToken, "quoted or unquoted key");
             }
+            // [dataformats-text#430]: each key part becomes a property name
+            streamReadConstraints.validateNameLength(part.length());
             pollExpected(partToken, Lexer.EXPECT_INLINE_KEY);
             if (peek() != TomlToken.DOT_SEP) {
                 return new FieldRef(node, part, nodeDepth);
