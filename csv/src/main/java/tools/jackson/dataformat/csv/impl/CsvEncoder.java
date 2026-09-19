@@ -625,7 +625,7 @@ public class CsvEncoder
             writeRaw(value);
             return;
         }
-        if (_needsQuotesWithoutScan(value, len, _nextColumnToWrite)) {
+        if (_needsQuotesWithoutContentScan(value, len, _nextColumnToWrite)) {
             _writeQuotedValue(value);
             return;
         }
@@ -675,7 +675,7 @@ public class CsvEncoder
             writeRaw(ch, offset, len);
             return;
         }
-        if (_needsQuotesWithoutScan(ch, offset, len, _nextColumnToWrite)) {
+        if (_needsQuotesWithoutContentScan(ch, offset, len, _nextColumnToWrite)) {
             _writeQuotedValue(new String(ch, offset, len));
             return;
         }
@@ -1298,22 +1298,6 @@ public class CsvEncoder
      */
 
     /**
-     * Helper method that determines whether given String is likely
-     * to require quoting; check tries to optimize for speed.
-     */
-    protected boolean _mayNeedQuotes(String value, int length, int columnIndex)
-    {
-        // 21-Mar-2014, tatu: If quoting disabled, don't quote
-        if (_cfgQuoteCharacter < 0) {
-            return false;
-        }
-        if (_needsQuotesWithoutScan(value, length, columnIndex)) {
-            return true;
-        }
-        return _needsQuoting(value);
-    }
-
-    /**
      * Checks that can determine need for quoting without scanning content
      * (leading/trailing whitespace, comment marker, length, empty String).
      * Returns {@code false} if content scan ({@link #_needsQuoting}) is
@@ -1321,29 +1305,32 @@ public class CsvEncoder
      *
      * @since 3.3
      */
-    protected boolean _needsQuotesWithoutScan(String value, int length, int columnIndex)
+    protected boolean _needsQuotesWithoutContentScan(String value, int length, int columnIndex)
     {
         if (length == 0) {
-            return _needsQuotesWithoutScan((char) 0, (char) 0, length, columnIndex);
+            return _needsQuotesWithoutContentScan((char) 0, (char) 0, length, columnIndex);
         }
-        return _needsQuotesWithoutScan(value.charAt(0), value.charAt(length - 1),
+        return _needsQuotesWithoutContentScan(value.charAt(0), value.charAt(length - 1),
                 length, columnIndex);
     }
 
     /**
+     * Variant of {@link #_needsQuotesWithoutContentScan(String,int,int)} for
+     * {@code char[]} input.
+     *
      * @since 3.3
      */
-    protected boolean _needsQuotesWithoutScan(char[] ch, int offset, int length, int columnIndex)
+    protected boolean _needsQuotesWithoutContentScan(char[] ch, int offset, int length, int columnIndex)
     {
         if (length == 0) {
-            return _needsQuotesWithoutScan((char) 0, (char) 0, length, columnIndex);
+            return _needsQuotesWithoutContentScan((char) 0, (char) 0, length, columnIndex);
         }
-        return _needsQuotesWithoutScan(ch[offset], ch[offset + length - 1],
+        return _needsQuotesWithoutContentScan(ch[offset], ch[offset + length - 1],
                 length, columnIndex);
     }
 
     // NOTE: `first` and `last` only meaningful if `length > 0`
-    private boolean _needsQuotesWithoutScan(char first, char last, int length, int columnIndex)
+    private boolean _needsQuotesWithoutContentScan(char first, char last, int length, int columnIndex)
     {
         // [dataformats-text#210]: check for leading/trailing whitespace
         if (_cfgQuoteLeadingTrailingWhitespace && length > 0) {

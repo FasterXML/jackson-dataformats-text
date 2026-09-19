@@ -37,6 +37,7 @@ implementations)
   buffer, then scan for quoting need); `char[]` values no longer converted to
   `String` unless quoting needed; numeric array elements appended without
   intermediate `String`
+ (fix by @pjfanning)
 
 3.2.3 (not yet released)
 

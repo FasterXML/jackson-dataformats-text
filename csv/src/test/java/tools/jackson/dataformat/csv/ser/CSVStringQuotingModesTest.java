@@ -158,6 +158,7 @@ public class CSVStringQuotingModesTest extends ModuleTestBase
         schemaVariants.add(CsvSchema::withoutQuoteChar);
 
         int count = 0;
+        int skipped = 0;
         for (int m = 0; m < mappers.size(); ++m) {
             CsvMapper mapper = mappers.get(m);
             for (int v = 0; v < schemaVariants.size(); ++v) {
@@ -165,7 +166,8 @@ public class CSVStringQuotingModesTest extends ModuleTestBase
                 CsvSchema reordered = schemaVariants.get(v).apply(REORDERED);
                 if (mapper.isEnabled(CsvWriteFeature.ESCAPE_CONTROL_CHARS_WITH_ESCAPE_CHAR)
                         && schema.getEscapeChar() < 0) {
-                    continue; // not a valid combination
+                    ++skipped; // not a valid combination
+                    continue;
                 }
                 for (String value : VALUES) {
                     String desc = "mode=" + m + " schema=" + v + " value=" + _abbrev(value);
@@ -193,7 +195,8 @@ public class CSVStringQuotingModesTest extends ModuleTestBase
                 }
             }
         }
-        assertEquals((mappers.size() * schemaVariants.size() - 3) * VALUES.length, count);
+        assertEquals((mappers.size() * schemaVariants.size() - skipped) * VALUES.length,
+                count);
     }
 
     // Reads single row back, verifying "id" column and returning "value" column

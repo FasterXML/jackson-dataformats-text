@@ -1,8 +1,12 @@
 package tools.jackson.dataformat.csv.ser;
 
+import java.io.StringWriter;
+
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import tools.jackson.core.JsonGenerator;
 
 import tools.jackson.dataformat.csv.*;
 
@@ -84,8 +88,8 @@ public class ArrayWriteTest extends ModuleTestBase
                 .addColumn("id")
                 .addArrayColumn("values", ";")
                 .build();
-        java.io.StringWriter sw = new java.io.StringWriter();
-        try (tools.jackson.core.JsonGenerator g = MAPPER.writer(schema).createGenerator(sw)) {
+        StringWriter sw = new StringWriter();
+        try (JsonGenerator g = MAPPER.writer(schema).createGenerator(sw)) {
             g.writeStartObject();
             g.writeName("id");
             g.writeString("foo");

@@ -1039,7 +1039,9 @@ public class CsvGenerator extends GeneratorBase
         _arrayContents.append(value);
     }
 
-    // @since 3.3
+    /**
+     * @since 3.3
+     */
     protected void _addToArray(char[] value, int offset, int len) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
@@ -1048,10 +1050,12 @@ public class CsvGenerator extends GeneratorBase
         _arrayContents.append(value, offset, len);
     }
 
-    // Primitive number variants append directly, avoiding intermediate `String`;
-    // output text is the same as with `String.valueOf()`.
-
-    // @since 3.3
+    /**
+     * Primitive number variants append directly, avoiding intermediate
+     * {@code String}; output text is the same as with {@code String.valueOf()}.
+     *
+     * @since 3.3
+     */
     protected void _addToArray(int value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
@@ -1060,7 +1064,9 @@ public class CsvGenerator extends GeneratorBase
         _arrayContents.append(value);
     }
 
-    // @since 3.3
+    /**
+     * @since 3.3
+     */
     protected void _addToArray(long value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
@@ -1069,7 +1075,9 @@ public class CsvGenerator extends GeneratorBase
         _arrayContents.append(value);
     }
 
-    // @since 3.3
+    /**
+     * @since 3.3
+     */
     protected void _addToArray(double value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
@@ -1078,7 +1086,9 @@ public class CsvGenerator extends GeneratorBase
         _arrayContents.append(value);
     }
 
-    // @since 3.3
+    /**
+     * @since 3.3
+     */
     protected void _addToArray(float value) {
         if (_arrayElements > 0) {
             _arrayContents.append(_arraySeparator);
