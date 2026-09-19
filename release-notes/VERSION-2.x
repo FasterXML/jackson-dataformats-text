@@ -156,9 +156,8 @@ No changes since 2.19.0
 
 2.18.11 (not yet released)
 
-#430: (toml) Support `StreamReadConstraints.maxNameLength()` and
-  `StreamReadConstraints.maxDocumentLength()` for TOML parser
- (requested by @pjfanning)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
  (fix by @pjfanning)
 #737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
  (fix by @pjfanning)
