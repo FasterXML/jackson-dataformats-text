@@ -7,6 +7,8 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.core.exc.StreamConstraintsException;
@@ -16,6 +18,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsFactory;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.javaprop.ModuleTestBase;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Tests for {@link StreamReadConstraints#getMaxDocumentLength()} enforcement
@@ -45,11 +52,13 @@ public class PropsDocumentLengthTest extends ModuleTestBase
 
     private final JavaPropsMapper LIMITED_MAPPER = new JavaPropsMapper(factoryWithDocLimit(MAX_DOC_LEN));
 
+    @Test
     public void testDocumentWithinLimit() throws Exception
     {
         _verifyReadable(LIMITED_MAPPER, _generateProps(MAX_DOC_LEN - 100));
     }
 
+    @Test
     public void testDocumentExceedingLimit() throws Exception
     {
         final String doc = _generateProps(MAX_DOC_LEN + 500);
@@ -91,6 +100,7 @@ public class PropsDocumentLengthTest extends ModuleTestBase
     }
 
     // Limit smaller than `Properties.load()` read buffer (8k): must still be enforced
+    @Test
     public void testSmallLimit() throws Exception
     {
         final JavaPropsMapper mapper = new JavaPropsMapper(factoryWithDocLimit(100));
@@ -106,6 +116,7 @@ public class PropsDocumentLengthTest extends ModuleTestBase
     // Reading must be ABANDONED once the limit is passed, rather than the whole
     // document being consumed and only then rejected: that early abort is the
     // entire point of the constraint as DoS protection
+    @Test
     public void testAbortsReadingEarly() throws Exception
     {
         final String doc = _generateProps(HUGE_DOC_LEN);
@@ -132,6 +143,7 @@ public class PropsDocumentLengthTest extends ModuleTestBase
     }
 
     // Single value longer than limit
+    @Test
     public void testLongValue() throws Exception
     {
         final String doc = "key=" + _repeat('x', MAX_DOC_LEN + 500) + "\n";
@@ -146,6 +158,7 @@ public class PropsDocumentLengthTest extends ModuleTestBase
     }
 
     // No limit configured: nothing is counted or enforced
+    @Test
     public void testNoLimit() throws Exception
     {
         JavaPropsFactory f = JavaPropsFactory.builder()
@@ -185,12 +198,12 @@ public class PropsDocumentLengthTest extends ModuleTestBase
 
     private void _verifyStoppedEarly(String desc, long consumed, int docLen)
     {
-        assertTrue("Should not have consumed whole document via "+desc
-                +": read "+consumed+" of "+docLen+" units",
-                consumed < docLen);
-        assertTrue("Should have stopped within "+MAX_CONSUMED_BEFORE_ABORT
-                +" units via "+desc+", but read "+consumed,
-                consumed <= MAX_CONSUMED_BEFORE_ABORT);
+        assertTrue(consumed < docLen,
+                "Should not have consumed whole document via "+desc
+                +": read "+consumed+" of "+docLen+" units");
+        assertTrue(consumed <= MAX_CONSUMED_BEFORE_ABORT,
+                "Should have stopped within "+MAX_CONSUMED_BEFORE_ABORT
+                +" units via "+desc+", but read "+consumed);
     }
 
     /**
