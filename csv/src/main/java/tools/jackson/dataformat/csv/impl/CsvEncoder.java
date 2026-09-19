@@ -1302,10 +1302,8 @@ public class CsvEncoder
      * (leading/trailing whitespace, comment marker, length, empty String).
      * Returns {@code false} if content scan ({@link #_needsQuoting}) is
      * still needed to decide.
-     *
-     * @since 3.3
      */
-    protected boolean _needsQuotesWithoutContentScan(String value, int length, int columnIndex)
+    private boolean _needsQuotesWithoutContentScan(String value, int length, int columnIndex)
     {
         if (length == 0) {
             return _needsQuotesWithoutContentScan((char) 0, (char) 0, length, columnIndex);
@@ -1317,10 +1315,8 @@ public class CsvEncoder
     /**
      * Variant of {@link #_needsQuotesWithoutContentScan(String,int,int)} for
      * {@code char[]} input.
-     *
-     * @since 3.3
      */
-    protected boolean _needsQuotesWithoutContentScan(char[] ch, int offset, int length, int columnIndex)
+    private boolean _needsQuotesWithoutContentScan(char[] ch, int offset, int length, int columnIndex)
     {
         if (length == 0) {
             return _needsQuotesWithoutContentScan((char) 0, (char) 0, length, columnIndex);
@@ -1357,10 +1353,11 @@ public class CsvEncoder
     /**
      * Content scan to determine whether quoting is needed; strict or loose
      * depending on configuration.
-     *
-     * @since 3.3
+     *<p>
+     * NOTE: only reached for values too long to be copied into the output
+     * buffer; shorter ones are scanned via {@link #_needsQuoting(char[],int,int)}.
      */
-    protected boolean _needsQuoting(String value)
+    private boolean _needsQuoting(String value)
     {
         if (_cfgOptimalQuoting) {
             if (_cfgEscapeCharacter > 0) {
@@ -1377,10 +1374,8 @@ public class CsvEncoder
     /**
      * Content scan over a {@code char[]} region; same logic as
      * {@link #_needsQuoting(String)}.
-     *
-     * @since 3.3
      */
-    protected boolean _needsQuoting(char[] ch, int offset, int len)
+    private boolean _needsQuoting(char[] ch, int offset, int len)
     {
         final int end = offset + len;
         if (_cfgOptimalQuoting) {
