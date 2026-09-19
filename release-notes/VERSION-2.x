@@ -25,6 +25,14 @@ Active Maintainers:
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 2.22.2 (16-Aug-2026)
 
@@ -144,6 +152,17 @@ No changes since 2.19.0
  (contributed by @pjfanning)
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
+
+2.18.11 (not yet released)
+
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 2.18.10 (15-Aug-2026)
 
