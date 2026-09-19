@@ -15,6 +15,7 @@ import org.yaml.snakeyaml.resolver.Resolver;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.base.ParserBase;
+import com.fasterxml.jackson.core.exc.StreamConstraintsException;
 import com.fasterxml.jackson.core.io.IOContext;
 import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.core.util.JacksonFeatureSet;
@@ -194,13 +195,40 @@ public class YAMLParser extends ParserBase
             LoaderOptions loaderOptions, ObjectCodec codec, Reader reader)
     {
         this(ctxt, parserFeatures, formatFeatures, codec, reader,
-             new ParserImpl(new StreamReader(reader),
+             new ParserImpl(new StreamReader(_constrainedReader(ctxt, reader)),
                      (loaderOptions == null) ? new LoaderOptions() : loaderOptions));
+    }
+
+    /**
+     * Helper method for [dataformats-text#737]: SnakeYAML reads input directly
+     * from the {@link Reader} given, so to enforce maximum document length we
+     * need to count what it reads. No wrapping (and no overhead) if no
+     * maximum document length configured.
+     *<p>
+     * Exposed for sub-classes that construct their own {@link ParserImpl}
+     * (see {@link #YAMLParser(IOContext, int, int, ObjectCodec, Reader, ParserImpl)}):
+     * such sub-classes need to wrap the {@link Reader} they pass to
+     * {@link StreamReader} using this method, for the limit to be enforced.
+     *
+     * @since 2.18.11
+     */
+    protected static Reader _constrainedReader(IOContext ctxt, Reader reader) {
+        StreamReadConstraints constraints = ctxt.streamReadConstraints();
+        if (constraints.hasMaxDocumentLength()) {
+            return new ReadConstrainedReader(reader, constraints);
+        }
+        return reader;
     }
 
     /**
      * Constructor to overload by custom parser sub-classes that want to replace
      * {@link ParserImpl} passed.
+     *<p>
+     * NOTE: {@link StreamReadConstraints#getMaxDocumentLength()} is enforced by
+     * wrapping the {@link Reader} SnakeYAML reads from; sub-classes that
+     * construct their own {@link ParserImpl} need to pass
+     * {@code _constrainedReader(ctxt, reader)} to {@link StreamReader} to have
+     * the limit enforced.
      *
      * @since 2.18
      */
@@ -449,6 +477,13 @@ public class YAMLParser extends ParserBase
             try {
                 evt = getEvent();
             } catch (org.yaml.snakeyaml.error.YAMLException e) {
+                // [dataformats-text#737]: SnakeYAML wraps the `IOException` that
+                // `ReadConstrainedReader` throws, so unwrap to expose the
+                // constraints violation as-is
+                StreamConstraintsException sce = _findConstraintsException(e);
+                if (sce != null) {
+                    throw sce;
+                }
                 if (e instanceof org.yaml.snakeyaml.error.MarkedYAMLException) {
                     throw com.fasterxml.jackson.dataformat.yaml.snakeyaml.error.MarkedYAMLException.from
                         (this, (org.yaml.snakeyaml.error.MarkedYAMLException) e);
@@ -591,6 +626,21 @@ public class YAMLParser extends ParserBase
      */
     protected Event getEvent() throws IOException {
         return _yamlParser.getEvent();
+    }
+
+    /**
+     * Helper method for finding a {@link StreamConstraintsException} that SnakeYAML
+     * has wrapped in a {@link org.yaml.snakeyaml.error.YAMLException}, if any.
+     *
+     * @since 2.18.11
+     */
+    private StreamConstraintsException _findConstraintsException(Throwable t) {
+        for (Throwable cause = t.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof StreamConstraintsException) {
+                return (StreamConstraintsException) cause;
+            }
+        }
+        return null;
     }
 
     protected JsonToken _decodeScalar(ScalarEvent scalar) throws IOException
@@ -1314,5 +1364,80 @@ public class YAMLParser extends ParserBase
         }
         _cleanedTextValue = sb.toString();
         return JsonToken.VALUE_NUMBER_FLOAT;
+    }
+
+    /*
+    /**********************************************************************
+    /* Helper classes
+    /**********************************************************************
+     */
+
+    /**
+     * {@link Reader} decorator that enforces
+     * {@link StreamReadConstraints#getMaxDocumentLength()} by counting characters
+     * read through it. Needed since actual YAML decoding is done by SnakeYAML,
+     * reading content directly from a {@link Reader}, so the parser
+     * itself does not see input as it is consumed.
+     *<p>
+     * Only installed when constraints define a maximum document length
+     * (see {@link StreamReadConstraints#hasMaxDocumentLength()}).
+     *
+     * @since 2.18.11
+     */
+    private static class ReadConstrainedReader extends Reader
+    {
+        private final Reader _delegate;
+
+        private final StreamReadConstraints _constraints;
+
+        /**
+         * Total number of characters read (or skipped) so far.
+         */
+        private long _charsRead;
+
+        public ReadConstrainedReader(Reader delegate, StreamReadConstraints constraints) {
+            _delegate = delegate;
+            _constraints = constraints;
+        }
+
+        private void _count(long n) throws StreamConstraintsException {
+            if (n > 0) {
+                _charsRead += n;
+                _constraints.validateDocumentLength(_charsRead);
+            }
+        }
+
+        @Override
+        public int read() throws IOException {
+            int c = _delegate.read();
+            if (c >= 0) {
+                _count(1);
+            }
+            return c;
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            int n = _delegate.read(cbuf, off, len);
+            _count(n);
+            return n;
+        }
+
+        @Override
+        public long skip(long n) throws IOException {
+            long skipped = _delegate.skip(n);
+            _count(skipped);
+            return skipped;
+        }
+
+        @Override
+        public boolean ready() throws IOException {
+            return _delegate.ready();
+        }
+
+        @Override
+        public void close() throws IOException {
+            _delegate.close();
+        }
     }
 }
