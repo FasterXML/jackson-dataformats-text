@@ -20,6 +20,8 @@ Active Maintainers:
   `StreamReadConstraints.maxDocumentLength()` for TOML parser
  (requested by @pjfanning)
  (fix by @pjfanning)
+#636: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
 
 2.18.10 (15-Aug-2026)
 
