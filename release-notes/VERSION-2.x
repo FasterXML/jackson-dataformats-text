@@ -22,6 +22,8 @@ Active Maintainers:
  (fix by @pjfanning)
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
 
 2.22.2 (16-Aug-2026)
 
@@ -147,6 +149,8 @@ No changes since 2.19.0
 #430: (toml) Support `StreamReadConstraints.maxNameLength()` and
   `StreamReadConstraints.maxDocumentLength()` for TOML parser
  (requested by @pjfanning)
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
  (fix by @pjfanning)
 
 2.18.10 (15-Aug-2026)
