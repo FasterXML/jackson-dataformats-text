@@ -1396,6 +1396,9 @@ public class CsvEncoder
     }
 
     /**
+     * NOTE: keep in sync with {@link #_needsQuotingLoose(char[],int,int)};
+     * verified by {@code QuotingScanParityTest}.
+     *
      * @since 2.4
      */
     protected final boolean _needsQuotingLoose(String value)
@@ -1414,6 +1417,8 @@ public class CsvEncoder
         return false;
     }
 
+    // NOTE: keep in sync with `_needsQuotingLoose(char[],int,int,int)`;
+    // verified by `QuotingScanParityTest`
     protected final boolean _needsQuotingLoose(String value, int esc)
     {
         for (int i = 0, len = value.length(); i < len; ++i) {
@@ -1425,28 +1430,40 @@ public class CsvEncoder
         return false;
     }
 
+    /**
+     * Single source of truth for the "does this character force quoting" decision
+     * under strict ({@code STRICT_CHECK_FOR_QUOTING}) checking; shared by all
+     * {@code _needsQuotingStrict()} variants so that the rules only ever need to
+     * be changed in one place.
+     *<p>
+     * NOTE: only to be called for characters below {@code _cfgMinSafeChar}.
+     */
+    // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
+    //   leads to quoting
+    // 17-Dec-2025, tatu: [dataformats-text#479] Must check for ALL line separators
+    //   (LF, CR) per RFC 4180, not just the configured schema line separator.
+    //   NOTE: escCodes is empty by default (unless custom CharacterEscapes provided),
+    //   so we cannot rely on `escCodes[c] != 0` check to catch newlines - we must
+    //   check for them explicitly.
+    private boolean _quotingTriggerStrict(int c, int[] escCodes, int lfFirst)
+    {
+        return (c == _cfgColumnSeparator) || (c == _cfgQuoteCharacter)
+                || (c < escCodes.length && escCodes[c] != 0)
+                || (c == lfFirst)
+                // Per RFC 4180: must quote if contains LF or CR
+                || (c == '\n') || (c == '\r');
+    }
+
     protected boolean _needsQuotingStrict(String value)
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
-        final int escLen = escCodes.length;
-        // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
-        //   leads to quoting
-        // 17-Dec-2025, tatu: [dataformats-text#479] Must check for ALL line separators
-        //   (LF, CR) per RFC 4180, not just the configured schema line separator.
-        //   NOTE: escCodes is empty by default (unless custom CharacterEscapes provided),
-        //   so we cannot rely on `escCodes[c] != 0` check to catch newlines - we must
-        //   check for them explicitly.
         final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
-                if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        // Per RFC 4180: must quote if contains LF or CR
-                        || (c == '\n') || (c == '\r')) {
+                if (_quotingTriggerStrict(c, escCodes, lfFirst)) {
                     return true;
                 }
             }
@@ -1458,24 +1475,12 @@ public class CsvEncoder
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
-        final int escLen = escCodes.length;
-        // 23-Sep-2020, tatu: [dataformats-text#217] Must also ensure line separator
-        //   leads to quoting
-        // 17-Dec-2025, tatu: [dataformats-text#479] Must check for ALL line separators
-        //   (LF, CR) per RFC 4180, not just the configured schema line separator.
-        //   NOTE: escCodes is empty by default (unless custom CharacterEscapes provided),
-        //   so we cannot rely on `escCodes[c] != 0` check to catch newlines - we must
-        //   check for them explicitly.
         final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (int i = 0, len = value.length(); i < len; ++i) {
             int c = value.charAt(i);
             if (c < minSafe) {
-                if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        // Per RFC 4180: must quote if contains LF or CR
-                        || (c == '\n') || (c == '\r')) {
+                if (_quotingTriggerStrict(c, escCodes, lfFirst)) {
                     return true;
                 }
             } else if (c == esc) {
@@ -1485,6 +1490,7 @@ public class CsvEncoder
         return false;
     }
 
+    // NOTE: keep in sync with `_needsQuotingLoose(String)`
     private boolean _needsQuotingLoose(char[] ch, int i, int end)
     {
         final char esc1 = _cfgQuoteCharEscapeChar;
@@ -1500,6 +1506,7 @@ public class CsvEncoder
         return false;
     }
 
+    // NOTE: keep in sync with `_needsQuotingLoose(String,int)`
     private boolean _needsQuotingLoose(char[] ch, int i, int end, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
@@ -1512,20 +1519,18 @@ public class CsvEncoder
         return false;
     }
 
+    // NOTE: keep in sync with `_needsQuotingStrict(String)` (per-character
+    // rules themselves shared via `_quotingTriggerStrict()`)
     private boolean _needsQuotingStrict(char[] ch, int i, int end)
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
-        final int escLen = escCodes.length;
         final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (; i < end; ++i) {
             int c = ch[i];
             if (c < minSafe) {
-                if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        || (c == '\n') || (c == '\r')) {
+                if (_quotingTriggerStrict(c, escCodes, lfFirst)) {
                     return true;
                 }
             }
@@ -1533,20 +1538,17 @@ public class CsvEncoder
         return false;
     }
 
+    // NOTE: keep in sync with `_needsQuotingStrict(String,int)`
     private boolean _needsQuotingStrict(char[] ch, int i, int end, int esc)
     {
         final int minSafe = _cfgMinSafeChar;
         final int[] escCodes = _outputEscapes;
-        final int escLen = escCodes.length;
         final int lfFirst = (_cfgLineSeparatorLength == 0) ? 0 : _cfgLineSeparator[0];
 
         for (; i < end; ++i) {
             int c = ch[i];
             if (c < minSafe) {
-                if (c == _cfgColumnSeparator || c == _cfgQuoteCharacter
-                        || (c < escLen && escCodes[c] != 0)
-                        || (c == lfFirst)
-                        || (c == '\n') || (c == '\r')) {
+                if (_quotingTriggerStrict(c, escCodes, lfFirst)) {
                     return true;
                 }
             } else if (c == esc) {
