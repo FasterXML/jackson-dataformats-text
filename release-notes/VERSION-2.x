@@ -21,7 +21,7 @@ Active Maintainers:
  (reported by @EverNife)
  (fix by @seonwooj0810)
 
-2.22.3 (not yet released)
+2.22.3 (21-Sep-2026)
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
