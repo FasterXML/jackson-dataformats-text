@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.18.11 (not yet released)
+2.18.11 (20-Sep-2026)
 
 #736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
   in TOML parser
