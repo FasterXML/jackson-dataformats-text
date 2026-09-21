@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.21.7 (not yet released)
+2.21.7 (21-Sep-2026)
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
