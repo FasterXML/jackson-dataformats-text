@@ -59,6 +59,19 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
+2.21.7 (21-Sep-2026)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
+
 2.21.6 (14-Aug-2026)
 
 #624: (yaml) `YAMLAnchorReplayingParser` produces invalid sequence of events when
@@ -153,7 +166,7 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
-2.18.11 (not yet released)
+2.18.11 (20-Sep-2026)
 
 #736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
   in TOML parser
