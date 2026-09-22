@@ -38,6 +38,9 @@ implementations)
   `String` unless quoting needed; numeric array elements appended without
   intermediate `String`
  (fix by @pjfanning)
+#735: (toml) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
 
 3.2.3 (not yet released)
 
