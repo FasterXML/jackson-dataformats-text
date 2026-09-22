@@ -90,6 +90,79 @@ public class CsvDecoderNumberTest extends ModuleTestBase
         }
     }
 
+    // Boundaries between int / long / BigInteger parsing paths (by digit
+    // count and by value), with and without signs, leading zeroes
+    @Test
+    public void testIntegerBoundaries() throws Exception
+    {
+        _assertInt("0", 0);
+        _assertInt("-0", 0);
+        _assertInt("+7", 7);
+        _assertInt("000000001", 1);
+        _assertInt("999999999", 999999999); // 9 digits
+        _assertInt("1000000000", 1000000000); // 10 digits, fits int
+        _assertInt("2147483647", Integer.MAX_VALUE);
+        _assertInt("+2147483647", Integer.MAX_VALUE);
+        _assertInt("-2147483648", Integer.MIN_VALUE);
+        // NOTE: type chosen by digit count; leading zeroes push into long path
+        _assertLong("-000002147483648", Integer.MIN_VALUE);
+
+        _assertLong("2147483648", 2147483648L); // 10 digits, does not fit int
+        _assertLong("-2147483649", -2147483649L);
+        _assertLong("999999999999999999", 999999999999999999L); // 18 digits
+        _assertLong("-999999999999999999", -999999999999999999L);
+        _assertLong("1000000000000000000", 1000000000000000000L); // 19 digits
+        _assertLong("9223372036854775807", Long.MAX_VALUE);
+        _assertLong("+9223372036854775807", Long.MAX_VALUE);
+        _assertLong("-9223372036854775808", Long.MIN_VALUE);
+        _assertBigInteger("0009223372036854775807"); // in long range, but >19 digits
+
+        _assertBigInteger("9223372036854775808"); // Long.MAX_VALUE + 1
+        _assertBigInteger("-9223372036854775809"); // Long.MIN_VALUE - 1
+        _assertBigInteger("+9223372036854775808");
+        _assertBigInteger("12345678901234567890");
+        _assertBigInteger("-123456789012345678901234567890");
+    }
+
+    @Test
+    public void testNotInts() throws Exception
+    {
+        for (String value : new String[] { "", " ", "-", "+", "1.0", "1e5", "0x10", "12a", "1 2", "--1", "+-1" }) {
+            try (JsonParser p = MAPPER.reader(SCHEMA).createParser("\"" + value + "\"\n")) {
+                assertToken(JsonToken.START_OBJECT, p.nextToken());
+                assertToken(JsonToken.PROPERTY_NAME, p.nextToken());
+                assertToken(JsonToken.VALUE_STRING, p.nextToken());
+                assertFalse(p.isExpectedNumberIntToken(), "Should not be number-int: '" + value + "'");
+                assertToken(JsonToken.VALUE_STRING, p.currentToken());
+                assertEquals(value, p.getString());
+            }
+        }
+    }
+
+    private void _assertInt(String text, int exp) throws Exception {
+        try (JsonParser p = _intValueParser(text)) {
+            assertEquals(NumberType.INT, p.getNumberType(), text);
+            assertEquals(exp, p.getIntValue(), text);
+            assertEquals(Integer.valueOf(exp), p.getNumberValue(), text);
+            assertEquals(text, p.getString());
+        }
+    }
+
+    private void _assertLong(String text, long exp) throws Exception {
+        try (JsonParser p = _intValueParser(text)) {
+            assertEquals(NumberType.LONG, p.getNumberType(), text);
+            assertEquals(exp, p.getLongValue(), text);
+            assertEquals(Long.valueOf(exp), p.getNumberValue(), text);
+        }
+    }
+
+    private void _assertBigInteger(String text) throws Exception {
+        try (JsonParser p = _intValueParser(text)) {
+            assertEquals(NumberType.BIG_INTEGER, p.getNumberType(), text);
+            assertEquals(new BigInteger(text), p.getBigIntegerValue(), text);
+        }
+    }
+
     /*
     /**********************************************************************
     /* Overflow handling

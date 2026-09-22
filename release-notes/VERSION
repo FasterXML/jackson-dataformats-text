@@ -38,6 +38,9 @@ implementations)
   `String` unless quoting needed; numeric array elements appended without
   intermediate `String`
  (fix by @pjfanning)
+#727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
+  in `CsvDecoder` (parse directly from already-materialized `String`)
+ (fix by @pjfanning)
 
 3.2.3 (not yet released)
 

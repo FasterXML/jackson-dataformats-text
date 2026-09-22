@@ -1347,15 +1347,17 @@ public class CsvDecoder
     }
 
     private boolean looksLikeInt() throws JacksonException {
-        final char[] ch = _textBuffer.contentsAsArray();
-        final int len = ch.length;
+        // NOTE: tokenizer has already materialized value as String (see
+        // `_nextUnquotedString()` etc), so access that: no copying needed
+        final String text = _textBuffer.contentsAsString();
+        final int len = text.length();
 
         if (len == 0) {
             return false;
         }
 
         int i = 0;
-        char c = ch[0];
+        char c = text.charAt(0);
         if (c == '-' || c == '+') {
             if (len == 1) {
                 return false;
@@ -1363,7 +1365,7 @@ public class CsvDecoder
             ++i;
         }
         for (; i < len; ++i) {
-            c = ch[i];
+            c = text.charAt(i);
             if (c > '9' || c < '0') {
                 return false;
             }
@@ -1374,32 +1376,23 @@ public class CsvDecoder
     // @since 2.12
     protected void _parseIntValue() throws JacksonException
     {
-        char[] buf = _textBuffer.getTextBuffer();
-        int offset = _textBuffer.getTextOffset();
-        char c = buf[offset];
-        boolean neg;
+        // NOTE: parse directly from String tokenizer has already created,
+        // instead of making a `char[]` copy of it (see `looksLikeInt()`)
+        final String text = _textBuffer.contentsAsString();
+        final char c = text.charAt(0);
+        final boolean neg = (c == '-');
+        final int offset = (neg || (c == '+')) ? 1 : 0;
+        final int len = text.length() - offset;
 
-        if (c == '-') {
-            neg = true;
-            ++offset;
-        } else {
-            neg = false;
-            if (c == '+') {
-                ++offset;
-            }
-        }
-        int len = buf.length - offset;
         if (len <= 9) { // definitely fits in int
-            int i = NumberInput.parseInt(buf, offset, len);
-            _numberInt = neg ? -i : i;
+            // `NumberInput.parseInt(String)` handles leading minus sign but not
+            // plus sign; that is rare enough to just use JDK parsing
+            _numberInt = (c == '+') ? Integer.parseInt(text) : NumberInput.parseInt(text);
             _numTypesValid = NR_INT;
             return;
         }
-        if (len <= 18) { // definitely fits AND is easy to parse using 2 int parse calls
-            long l = NumberInput.parseLong(buf, offset, len);
-            if (neg) {
-                l = -l;
-            }
+        if (len <= 18) { // definitely fits in long
+            long l = Long.parseLong(text);
             // [JACKSON-230] Could still fit in int, need to check
             if (len == 10) {
                 if (neg) {
@@ -1420,7 +1413,7 @@ public class CsvDecoder
             _numTypesValid = NR_LONG;
             return;
         }
-        _parseSlowIntValue(buf, offset, len, neg);
+        _parseSlowIntValue(text, offset, neg);
     }
 
     private final void _parseSlowFloatValue(boolean exactNumber)
@@ -1449,14 +1442,14 @@ public class CsvDecoder
         }
     }
 
-    private final void _parseSlowIntValue(char[] buf, int offset, int len,
-            boolean neg)
+    // Called for 19 or more digits: may still fit in `long`
+    private final void _parseSlowIntValue(String numStr, int offset, boolean neg)
         throws JacksonException
     {
-        String numStr = _textBuffer.contentsAsString();
         try {
-            if (NumberInput.inLongRange(buf, offset, len, neg)) {
-                // Probably faster to construct a String, call parse, than to use BigInteger
+            // `inLongRange()` needs digits without sign
+            final String digits = (offset == 0) ? numStr : numStr.substring(offset);
+            if (NumberInput.inLongRange(digits, neg)) {
                 _numberLong = Long.parseLong(numStr);
                 _numTypesValid = NR_LONG;
             } else {
