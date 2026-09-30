@@ -195,7 +195,19 @@ public class JavaPropsFactory
             InputStream in)
     {
         final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        // A source Jackson opened (File/Path) is closed by the base factory when
+        // construction fails [dataformats-text#720], so do not close it while loading.
+        // Close it only after a successful load. Caller-owned streams are closed by
+        // the reader when auto-close is enabled.
+        final boolean managed = ioCtxt.isResourceManaged();
         Properties props = _loadProperties(in, ioCtxt, stdFeatures);
+        if (managed) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+        }
         return new JavaPropsParser(readCtxt, ioCtxt, stdFeatures,
                 _getSchema(readCtxt),
                 in, props);
@@ -298,13 +310,15 @@ public class JavaPropsFactory
     {
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
-        final boolean autoClose = _autoCloseSource(ctxt, streamReadFeatures);
         // Reader is constructed (and hence owned) by us, so it must always be closed to
-        // have its read buffer recycled; `autoClose` only decides whether the caller's
-        // `InputStream` is closed along with it
+        // have its read buffer recycled. It closes the caller's stream only when that
+        // stream is not one the base factory will close on construction failure
+        // [dataformats-text#720].
         // [dataformats-text#738]: `Properties.load()` reads input directly, so
         // to enforce max document length we need to count what it reads
-        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, autoClose)),
+        final boolean closeStreamWithReader = !ctxt.isResourceManaged()
+                && _autoCloseSource(ctxt, streamReadFeatures);
+        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, closeStreamWithReader)),
                 true);
     }
 
