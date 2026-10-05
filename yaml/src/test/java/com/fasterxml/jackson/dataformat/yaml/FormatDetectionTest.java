@@ -1,5 +1,7 @@
 package com.fasterxml.jackson.dataformat.yaml;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.format.*;
 
@@ -12,6 +14,7 @@ public class FormatDetectionTest extends ModuleTestBase
     * One nifty thing YAML has is the "---" start-doc indicator, which
     * makes it possible to auto-detect format...
     */
+   @Test
    public void testFormatDetection() throws Exception
    {
        YAMLFactory yamlF = new YAMLFactory();
