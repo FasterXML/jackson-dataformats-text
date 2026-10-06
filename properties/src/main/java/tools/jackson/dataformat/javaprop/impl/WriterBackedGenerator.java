@@ -31,7 +31,7 @@ public class WriterBackedGenerator extends JavaPropsGenerator
      *<p>
      * A {@link Writer} we construct is an internal buffer, so it must always be flushed
      * on {@link #flush()} and closed on {@link #close()}. It is shielded from this
-     * stream (see {@link GuardedOutputStream}), which is instead flushed and closed
+     * stream (see {@link tools.jackson.core.io.GuardedOutputStream}), which is instead flushed and closed
      * directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM} and
      * {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
      *
