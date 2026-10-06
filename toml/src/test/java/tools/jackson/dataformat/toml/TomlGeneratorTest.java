@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.StreamWriteException;
 import tools.jackson.core.io.SerializedString;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -133,6 +134,28 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         }
         assertEquals("a = \"a\\nb\"\n", w.toString());
         assertEquals("a\nb", newTomlMapper().readTree(w.toString()).get("a").stringValue());
+    }
+
+    // Invalid offset/len must be rejected before anything is written
+    @Test
+    public void invalidRangeArguments() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            char[] buf = "abc".toCharArray();
+            assertThrows(StreamWriteException.class, () -> generator.writeString(buf, 0, -1));
+            assertThrows(StreamWriteException.class, () -> generator.writeString(buf, 2, 2));
+            assertThrows(StreamWriteException.class, () -> generator.writeRaw("abc", 0, 5000));
+            assertThrows(StreamWriteException.class, () -> generator.writeRaw(buf, -1, 1));
+            assertThrows(StreamWriteException.class, () -> generator.writeRawValue("abc", 1, 3));
+            assertThrows(StreamWriteException.class, () -> generator.writeRawValue(buf, 0, 4));
+            generator.flush();
+            assertEquals("", w.toString());
+            generator.writeString(buf, 0, 3);
+            generator.writeEndObject();
+        }
+        assertEquals("a = 'abc'\n", w.toString());
     }
 
     @Test

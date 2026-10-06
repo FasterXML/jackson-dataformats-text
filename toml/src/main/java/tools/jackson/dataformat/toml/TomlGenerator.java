@@ -492,6 +492,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
         return writeValueEnd();
@@ -521,11 +522,13 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForString(text, offset, len);
         return _writeRaw(text, offset, len);
     }
 
     @Override
     public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         return _writeRaw(text, offset, len);
     }
 
@@ -536,8 +539,18 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
-        // NOTE: `asQuotedChars()` would be JSON-escaped; need unquoted value
-        return _writeRaw(text.getValue());
+        return _writeRaw(text);
+    }
+
+    private JsonGenerator _writeRaw(SerializableString text) throws JacksonException {
+        // Copy unquoted chars directly into buffer if they fit; otherwise
+        // fall back to (unquoted) String value
+        int len = text.appendUnquoted(_outputBuffer, _outputTail);
+        if (len < 0) {
+            return _writeRaw(text.getValue());
+        }
+        _outputTail += len;
+        return this;
     }
 
     // Raw values need value-end handling (newline in table context) just
@@ -551,6 +564,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForString(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
         return writeValueEnd();
@@ -558,6 +572,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
         return writeValueEnd();
@@ -566,7 +581,7 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
         _verifyValueWrite("write raw value");
-        _writeRaw(text.getValue());
+        _writeRaw(text);
         return writeValueEnd();
     }
 
