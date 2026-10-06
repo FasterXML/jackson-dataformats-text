@@ -1,4 +1,4 @@
-package tools.jackson.dataformat.javaprop.ser;
+package tools.jackson.dataformat.toml;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -8,22 +8,16 @@ import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
-import tools.jackson.databind.SequenceWriter;
-
-import tools.jackson.dataformat.javaprop.JavaPropsFactory;
-import tools.jackson.dataformat.javaprop.JavaPropsMapper;
-import tools.jackson.dataformat.javaprop.ModuleTestBase;
-import tools.jackson.dataformat.javaprop.impl.GuardedOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for [dataformats-text#734]: writing to an {@link OutputStream} wraps it in an
- * {@code OutputStreamWriter}, which buffers content. That writer has to be flushed and
- * closed even when {@code FLUSH_PASSED_TO_STREAM} and {@code AUTO_CLOSE_TARGET} say to
- * leave the caller's stream alone, else its buffered content does not reach the stream.
+ * Tests for [dataformats-text#735]: writing to an {@link OutputStream} wraps it in a
+ * {@code UTF8Writer}, which buffers content. That writer has to be closed even when
+ * {@code AUTO_CLOSE_TARGET} says to leave the caller's stream alone, else its buffered
+ * content never reaches the stream at all.
  */
-public class GeneratorTargetClosingTest extends ModuleTestBase
+public class GeneratorTargetClosingTest extends TomlMapperTestBase
 {
     static class TrackingStream extends ByteArrayOutputStream {
         public int closeCount;
@@ -49,12 +43,11 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         return map;
     }
 
-    private static JavaPropsMapper mapper(boolean autoClose, boolean flushStream) {
-        return JavaPropsMapper.builder(JavaPropsFactory.builder()
+    private static TomlMapper mapper(boolean autoClose, boolean flushStream) {
+        return newTomlMapper(TomlFactory.builder()
                 .configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoClose)
                 .configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream)
-                .build())
-                .build();
+                .build());
     }
 
     private static TrackingStream write(boolean autoClose, boolean flushStream)
@@ -66,13 +59,13 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
     }
 
     // Content must come out whatever the two features say: this is the case that used
-    // to produce nothing at all, the whole document stranded in the OutputStreamWriter
+    // to produce nothing at all, the whole document stranded in the UTF8Writer
     @Test
     public void testContentWrittenForAllFeatureCombinations() throws Exception {
         for (boolean autoClose : new boolean[] { true, false }) {
             for (boolean flushStream : new boolean[] { true, false }) {
                 TrackingStream out = write(autoClose, flushStream);
-                assertEquals("a=1\nb=2\n", out.toString(StandardCharsets.ISO_8859_1),
+                assertEquals("a = '1'\nb = '2'\n", out.toString(StandardCharsets.UTF_8),
                         "autoClose="+autoClose+", flushStream="+flushStream);
             }
         }
@@ -97,25 +90,6 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         assertTrue(write(false, true).flushCount > 0);
     }
 
-    // Flush-on-close must come from the wrapper itself, not depend on the
-    // `Writer` it is wrapped in happening to flush the stream when closed
-    @Test
-    public void testGuardedStreamCloseFlushesWhenNotClosing() throws Exception {
-        TrackingStream out = new TrackingStream();
-        new GuardedOutputStream(out, true, false).close();
-        assertEquals(1, out.flushCount);
-        assertEquals(0, out.closeCount);
-
-        out = new TrackingStream();
-        new GuardedOutputStream(out, false, false).close();
-        assertEquals(0, out.flushCount);
-        assertEquals(0, out.closeCount);
-
-        out = new TrackingStream();
-        new GuardedOutputStream(out, false, true).close();
-        assertEquals(1, out.closeCount);
-    }
-
     // Same for `JsonGenerator.flush()` mid-document: our own writer must be drained
     // into the stream, whether or not the stream itself is to be flushed
     @Test
@@ -123,37 +97,17 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         for (boolean autoClose : new boolean[] { true, false }) {
             for (boolean flushStream : new boolean[] { true, false }) {
                 final String desc = "autoClose="+autoClose+", flushStream="+flushStream;
-                JavaPropsMapper mapper = mapper(autoClose, flushStream);
                 TrackingStream out = new TrackingStream();
-                try (JsonGenerator g = mapper.createGenerator(out)) {
+                try (JsonGenerator g = mapper(autoClose, flushStream).createGenerator(out)) {
                     g.writeStartObject();
                     g.writeStringProperty("a", "1");
                     g.flush();
-                    assertEquals("a=1\n", out.toString(StandardCharsets.ISO_8859_1), desc);
+                    assertEquals("a = '1'\n", out.toString(StandardCharsets.UTF_8), desc);
                     assertEquals(flushStream ? 1 : 0, out.flushCount, desc);
                     assertEquals(0, out.closeCount, desc);
                     g.writeEndObject();
                 }
                 assertEquals(autoClose ? 1 : 0, out.closeCount, desc);
-            }
-        }
-    }
-
-    // And via databind: `SequenceWriter.flush()` between values
-    @Test
-    public void testSequenceWriterFlushWritesContent() throws Exception {
-        for (boolean autoClose : new boolean[] { true, false }) {
-            for (boolean flushStream : new boolean[] { true, false }) {
-                final String desc = "autoClose="+autoClose+", flushStream="+flushStream;
-                TrackingStream out = new TrackingStream();
-                try (SequenceWriter w = mapper(autoClose, flushStream).writer().writeValues(out)) {
-                    w.write(Collections.singletonMap("x", "1"));
-                    w.flush();
-                    assertEquals("x=1\n", out.toString(StandardCharsets.ISO_8859_1), desc);
-                    if (!flushStream) {
-                        assertEquals(0, out.flushCount, desc);
-                    }
-                }
             }
         }
     }
