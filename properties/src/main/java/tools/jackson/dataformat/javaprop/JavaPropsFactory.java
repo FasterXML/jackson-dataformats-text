@@ -308,14 +308,28 @@ public class JavaPropsFactory
     {
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
-        final boolean autoClose = _autoCloseSource(ctxt, streamReadFeatures);
         // Reader is constructed (and hence owned) by us, so it must always be closed to
-        // have its read buffer recycled; `autoClose` only decides whether the caller's
-        // `InputStream` is closed along with it
+        // have its read buffer recycled.
+        // [dataformats-text#720]: a source Jackson opened (File/Path) is closed by the
+        // base factory if construction fails, so the reader must not close it too; we
+        // close it only after a successful load. Caller's stream is closed along with
+        // the reader only if auto-closing is enabled.
         // [dataformats-text#738]: `Properties.load()` reads input directly, so
         // to enforce max document length we need to count what it reads
-        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, autoClose)),
+        final boolean managed = ctxt.isResourceManaged();
+        final boolean closeStreamWithReader = !managed
+                && StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(streamReadFeatures);
+        Properties props = _readProperties(_constrainedReader(ctxt,
+                new Latin1Reader(ctxt, in, closeStreamWithReader)),
                 true);
+        if (managed) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+        }
+        return props;
     }
 
     protected Properties _loadProperties(Reader r0, IOContext ctxt,
