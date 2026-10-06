@@ -56,6 +56,16 @@ implementations)
 #735: (toml) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
+#749: (yaml) Fix `YAMLGenerator` flushing/closing of output target:
+  - (UTF-8) `OutputStream`: `flush()` did not write buffered content with
+    `FLUSH_PASSED_TO_STREAM` disabled, and internal `UTF8Writer` was not closed
+    (nor its buffer recycled) with `AUTO_CLOSE_TARGET` disabled
+  - SnakeYAML flushed target (`OutputStream` or `Writer`) at end of every document
+    regardless of `FLUSH_PASSED_TO_STREAM`
+  - `flush()` after `close()` flushed (already closed) target
+  - `streamWriteOutputTarget()` returned internal `UTF8Writer`, not caller's stream
+  - failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 
