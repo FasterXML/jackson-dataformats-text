@@ -14,6 +14,12 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.2.4 (not yet released)
+
+#726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
+  or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+ (fix by @pjfanning)
+
 3.2.3 (21-Sep-2026)
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
@@ -131,6 +137,12 @@ No changes since 3.2.1
  (fix by @yawkat)
 #685: (toml) Improve TOML 1.1.0 compatibility (parsing)
  (fix by @yawkat)
+
+3.1.8 (not yet released)
+
+#726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
+  or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+ (fix by @pjfanning)
 
 3.1.7 (21-Sep-2026)
 
