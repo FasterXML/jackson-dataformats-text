@@ -373,7 +373,7 @@ final class TomlGenerator extends GeneratorBase
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
-            _writeStringImpl(StringOutputUtil.MASK_SIMPLE_KEY, name);
+            _writeStringImpl(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY, name);
         } else {
             // Ok; append to base path at this point.
             // First: ensure possibly preceding property name is removed:
@@ -481,15 +481,21 @@ final class TomlGenerator extends GeneratorBase
         if (text == null) {
             return writeNull();
         }
+        // validate before writing anything (key, separator)
+        final int cat = _stringValueCategories(StringOutputUtil.categorize(text));
         _verifyValueWrite("write String value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, text);
+        _writeStringImpl(cat, text);
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
+        // NOTE: also reports `null` array as error
+        _checkRangeBoundsForCharArray(text, offset, len);
+        // validate before writing anything (key, separator)
+        final int cat = _stringValueCategories(StringOutputUtil.categorize(text, offset, len));
         _verifyValueWrite("write String value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
+        _writeStringImpl(cat, text, offset, len);
         return writeValueEnd();
     }
 
@@ -500,8 +506,10 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
-        return writeValueEnd();
+        // NOTE: also reports `null` array as error
+        _checkRangeBoundsForByteArray(text, offset, len);
+        // NOTE: writeString() already calls writeValueEnd()
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -517,11 +525,13 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForString(text, offset, len);
         return _writeRaw(text.substring(offset, offset + len));
     }
 
     @Override
     public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         return _writeRaw(text, offset, len);
     }
 
@@ -533,6 +543,36 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
         return writeRaw(text.toString());
+    }
+
+    // Overridden since `GeneratorBase` implementations do not call `writeValueEnd()`
+
+    @Override
+    public JsonGenerator writeRawValue(String text) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForString(text, offset, len);
+        _verifyValueWrite("write raw value");
+        _writeRaw(text.substring(offset, offset + len));
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
+        _verifyValueWrite("write raw value");
+        _writeRaw(text, offset, len);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
+        return writeRawValue(text.getValue());
     }
 
     /*
@@ -547,6 +587,7 @@ final class TomlGenerator extends GeneratorBase
         if (data == null) {
             return writeNull();
         }
+        _checkRangeBoundsForByteArray(data, offset, len);
         _verifyValueWrite("write Binary value");
         // ok, better just Base64 encode as a String...
         if (offset > 0 || (offset + len) != data.length) {
@@ -665,7 +706,7 @@ final class TomlGenerator extends GeneratorBase
             throw new TomlStreamWriteException(this, "TOML null writing disabled (TomlWriteFeature.FAIL_ON_NULL_WRITE)");
         }
         _verifyValueWrite("write null value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, "");
+        _writeStringImpl(_stringValueCategories(StringOutputUtil.categorize("")), "");
         return writeValueEnd();
     }
 
@@ -741,13 +782,16 @@ final class TomlGenerator extends GeneratorBase
             }
             path.append('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            throw _reportUnsupportedKeyCharacters();
         }
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
     }
 
-    private void _writeStringImpl(int categoryMask, String name) {
-        int cat = StringOutputUtil.categorize(name) & categoryMask;
+    /**
+     * @param cat Categories of {@code name} (see {@link StringOutputUtil}), already masked
+     *    for the context (key or value)
+     */
+    private void _writeStringImpl(int cat, String name) {
         if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
             _writeRaw(name);
         } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
@@ -771,12 +815,13 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            // String values are validated before writing (see _stringValueCategories()),
+            // so only keys can get here
+            throw _reportUnsupportedKeyCharacters();
         }
     }
 
-    private void _writeStringImpl(int categoryMask, char[] text, int offset, int len) {
-        int cat = StringOutputUtil.categorize(text, offset, len) & categoryMask;
+    private void _writeStringImpl(int cat, char[] text, int offset, int len) {
         if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
             _writeRaw(text, offset, len);
         } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
@@ -800,8 +845,27 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            // String values are validated before writing (see _stringValueCategories()),
+            // so only keys can get here
+            throw _reportUnsupportedKeyCharacters();
         }
+    }
+
+    private JacksonException _reportUnsupportedKeyCharacters() {
+        return new TomlStreamWriteException(this, "Key contains unsupported characters");
+    }
+
+    /**
+     * Masks categories of a String value and verifies it can be written; to be called
+     * before {@link #_verifyValueWrite} so that nothing is written for invalid values.
+     */
+    private int _stringValueCategories(int cat) throws JacksonException {
+        cat &= StringOutputUtil.MASK_STRING;
+        if ((cat & (StringOutputUtil.LITERAL_STRING | StringOutputUtil.BASIC_STRING
+                | StringOutputUtil.BASIC_STRING_NO_ESCAPE)) == 0) {
+            throw new TomlStreamWriteException(this, "String value contains unsupported characters");
+        }
+        return cat;
     }
 
     /*
