@@ -39,7 +39,7 @@ final class TomlGenerator extends GeneratorBase
      *<p>
      * A {@link Writer} we construct must always be flushed and closed: that is what
      * hands its pending content over and returns its buffers to the recycler. It is
-     * shielded from this stream (see {@link GuardedOutputStream}), which is instead
+     * shielded from this stream (see {@link tools.jackson.core.io.GuardedOutputStream}), which is instead
      * flushed and closed directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
      * and {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
      *
