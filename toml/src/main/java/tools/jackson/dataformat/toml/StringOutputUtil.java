@@ -12,6 +12,17 @@ class StringOutputUtil {
     public static final int MASK_SIMPLE_KEY = -1; // Should exclude multi-line keys when/if we support them.
     public static final int MASK_STRING = ~UNQUOTED_KEY;
 
+    /**
+     * Pre-computed categories for ASCII range, to avoid evaluating the
+     * full set of checks for every character of every String and key.
+     */
+    private static final int[] ASCII_CATEGORIES = new int[0x80];
+    static {
+        for (int c = 0; c < 0x80; c++) {
+            ASCII_CATEGORIES[c] = _categorize(c);
+        }
+    }
+
     static int categorize(String s) {
         if (s.isEmpty()) {
             return EMPTY_STRING_CATS;
@@ -19,16 +30,18 @@ class StringOutputUtil {
         int flags = -1;
         for (int i = 0; i < s.length();) {
             char hi = s.charAt(i++);
-            if (Character.isHighSurrogate(hi) && i < s.length()) {
+            if (hi < 0x80) { // common case, ASCII
+                flags &= ASCII_CATEGORIES[hi];
+            } else if (Character.isHighSurrogate(hi) && i < s.length()) {
                 char lo = s.charAt(i);
                 if (Character.isLowSurrogate(lo)) {
                     i++;
-                    flags &= categorize(Character.toCodePoint(hi, lo));
+                    flags &= _categorize(Character.toCodePoint(hi, lo));
                 } else {
                     return 0; // surrogates not allowed
                 }
             } else {
-                flags &= categorize(hi);
+                flags &= _categorize(hi);
             }
         }
         return flags;
@@ -41,22 +54,33 @@ class StringOutputUtil {
         int flags = -1;
         for (int i = 0; i < len;) {
             char hi = text[offset + i++];
-            if (Character.isHighSurrogate(hi) && i < len) {
+            if (hi < 0x80) { // common case, ASCII
+                flags &= ASCII_CATEGORIES[hi];
+            } else if (Character.isHighSurrogate(hi) && i < len) {
                 char lo = text[offset + i];
                 if (Character.isLowSurrogate(lo)) {
                     i++;
-                    flags &= categorize(Character.toCodePoint(hi, lo));
+                    flags &= _categorize(Character.toCodePoint(hi, lo));
                 } else {
                     return 0; // surrogates not allowed
                 }
             } else {
-                flags &= categorize(hi);
+                flags &= _categorize(hi);
             }
         }
         return flags;
     }
 
     static int categorize(int c) {
+        if ((c & ~0x7F) == 0) { // ASCII (and not negative)
+            return ASCII_CATEGORIES[c];
+        }
+        return _categorize(c);
+    }
+
+    // Full categorization; used to populate lookup table for ASCII, and
+    // directly for everything else
+    static int _categorize(int c) { // package-private for tests
         if (c > Character.MAX_CODE_POINT || (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE)) {
             // cannot write surrogates
             return 0;
@@ -68,15 +92,16 @@ class StringOutputUtil {
             return BASIC_STRING;
         }
 
-        // first, get the very restrictive unquoted keys out of the way.
+        // non-ascii is allowed everywhere. (checked first since ASCII is
+        // normally served from the lookup table)
+        if (c >= 0x80) {
+            return LITERAL_STRING | BASIC_STRING | BASIC_STRING_NO_ESCAPE;
+        }
+
+        // then, get the very restrictive unquoted keys out of the way.
         // unquoted-key = 1*( ALPHA / DIGIT / %x2D / %x5F ) ; A-Z / a-z / 0-9 / - / _
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_') {
             return LITERAL_STRING | BASIC_STRING | UNQUOTED_KEY | BASIC_STRING_NO_ESCAPE | ASCII_ONLY;
-        }
-
-        // non-ascii is allowed everywhere.
-        if (c >= 0x80) {
-            return LITERAL_STRING | BASIC_STRING | BASIC_STRING_NO_ESCAPE;
         }
 
         // quotes need escaping.
