@@ -13,6 +13,7 @@ import tools.jackson.databind.SequenceWriter;
 import tools.jackson.dataformat.javaprop.JavaPropsFactory;
 import tools.jackson.dataformat.javaprop.JavaPropsMapper;
 import tools.jackson.dataformat.javaprop.ModuleTestBase;
+import tools.jackson.dataformat.javaprop.impl.GuardedOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,6 +95,25 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
     @Test
     public void testTargetFlushedWhenRequested() throws Exception {
         assertTrue(write(false, true).flushCount > 0);
+    }
+
+    // Flush-on-close must come from the wrapper itself, not depend on the
+    // `Writer` it is wrapped in happening to flush the stream when closed
+    @Test
+    public void testGuardedStreamCloseFlushesWhenNotClosing() throws Exception {
+        TrackingStream out = new TrackingStream();
+        new GuardedOutputStream(out, true, false).close();
+        assertEquals(1, out.flushCount);
+        assertEquals(0, out.closeCount);
+
+        out = new TrackingStream();
+        new GuardedOutputStream(out, false, false).close();
+        assertEquals(0, out.flushCount);
+        assertEquals(0, out.closeCount);
+
+        out = new TrackingStream();
+        new GuardedOutputStream(out, false, true).close();
+        assertEquals(1, out.closeCount);
     }
 
     // Same for `JsonGenerator.flush()` mid-document: our own writer must be drained

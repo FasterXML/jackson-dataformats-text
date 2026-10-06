@@ -94,6 +94,12 @@ final class TomlGenerator extends GeneratorBase
         this(writeCtxt, ioCtxt, stdFeatures, tomlFeatures, out, false);
     }
 
+    /**
+     * @param ownsWriter Whether {@code out} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, int tomlFeatures, Writer out, boolean ownsWriter) {
         super(writeCtxt, ioCtxt, stdFeatures);
