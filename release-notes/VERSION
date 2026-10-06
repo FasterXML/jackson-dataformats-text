@@ -46,6 +46,9 @@ implementations)
 #727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
   in `CsvDecoder` (parse directly from already-materialized `String`)
  (fix by @pjfanning)
+#734: (properties) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
 
 3.2.4 (not yet released)
 
