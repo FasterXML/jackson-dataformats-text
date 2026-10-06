@@ -228,15 +228,14 @@ public final class TomlFactory extends TextualTSFactory
     @Override
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt, IOContext ioCtxt, OutputStream out) throws JacksonException {
         final int stdFeatures = writeCtxt.getStreamWriteFeatures(_streamWriteFeatures);
-        // Writer is constructed (and hence owned) by us, so the generator must always
-        // close it -- that flushes its pending content and recycles its buffer. Since
-        // `UTF8Writer` always closes the stream it wraps, shield the caller's stream
-        // when it is not ours to close.
-        if (!ioCtxt.isResourceManaged()
-                && !StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures)) {
-            out = new NonClosingOutputStream(out,
-                    StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures));
-        }
+        // [dataformats-text#735]: Writer is constructed (and hence owned) by us, so the
+        // generator must always close it -- that flushes its pending content and
+        // recycles its buffer. Whether that also flushes or closes the caller's stream
+        // is decided by the wrapper, as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`.
+        out = new GuardedOutputStream(out,
+                StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures),
+                ioCtxt.isResourceManaged()
+                    || StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures));
         return new TomlGenerator(writeCtxt, ioCtxt,
                 stdFeatures,
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),

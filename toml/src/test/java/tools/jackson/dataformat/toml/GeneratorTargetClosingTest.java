@@ -6,12 +6,13 @@ import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for [dataformats-text#719]: writing to an {@link OutputStream} wraps it in a
+ * Tests for [dataformats-text#735]: writing to an {@link OutputStream} wraps it in a
  * {@code UTF8Writer}, which buffers content. That writer has to be closed even when
  * {@code AUTO_CLOSE_TARGET} says to leave the caller's stream alone, else its buffered
  * content never reaches the stream at all.
@@ -42,15 +43,18 @@ public class GeneratorTargetClosingTest extends TomlMapperTestBase
         return map;
     }
 
-    private static TrackingStream write(boolean autoClose, boolean flushStream)
-        throws Exception
-    {
-        TomlMapper mapper = newTomlMapper(TomlFactory.builder()
+    private static TomlMapper mapper(boolean autoClose, boolean flushStream) {
+        return newTomlMapper(TomlFactory.builder()
                 .configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoClose)
                 .configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream)
                 .build());
+    }
+
+    private static TrackingStream write(boolean autoClose, boolean flushStream)
+        throws Exception
+    {
         TrackingStream out = new TrackingStream();
-        mapper.writeValue(out, row());
+        mapper(autoClose, flushStream).writeValue(out, row());
         return out;
     }
 
@@ -84,5 +88,27 @@ public class GeneratorTargetClosingTest extends TomlMapperTestBase
     @Test
     public void testTargetFlushedWhenRequested() throws Exception {
         assertTrue(write(false, true).flushCount > 0);
+    }
+
+    // Same for `JsonGenerator.flush()` mid-document: our own writer must be drained
+    // into the stream, whether or not the stream itself is to be flushed
+    @Test
+    public void testGeneratorFlushWritesContent() throws Exception {
+        for (boolean autoClose : new boolean[] { true, false }) {
+            for (boolean flushStream : new boolean[] { true, false }) {
+                final String desc = "autoClose="+autoClose+", flushStream="+flushStream;
+                TrackingStream out = new TrackingStream();
+                try (JsonGenerator g = mapper(autoClose, flushStream).createGenerator(out)) {
+                    g.writeStartObject();
+                    g.writeStringProperty("a", "1");
+                    g.flush();
+                    assertEquals("a = '1'\n", out.toString(StandardCharsets.UTF_8), desc);
+                    assertEquals(flushStream ? 1 : 0, out.flushCount, desc);
+                    assertEquals(0, out.closeCount, desc);
+                    g.writeEndObject();
+                }
+                assertEquals(autoClose ? 1 : 0, out.closeCount, desc);
+            }
+        }
     }
 }
