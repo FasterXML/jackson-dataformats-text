@@ -66,6 +66,10 @@ implementations)
   - `streamWriteOutputTarget()` returned internal `UTF8Writer`, not caller's stream
   - failure on `close()` could mask an earlier failure
  (fix by @cowtowncoder)
+#751: (properties) `WriterBackedGenerator`: `flush()` after `close()` failed with
+  "Stream closed", `streamWriteOutputTarget()` returned internal `OutputStreamWriter`
+  instead of caller's stream, and failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 
