@@ -111,4 +111,31 @@ public class GeneratorTargetClosingTest extends TomlMapperTestBase
             }
         }
     }
+
+    // Features changed on the generator after construction must be honored, both on
+    // `flush()` and `close()`: so start with the opposite of what is then configured
+    @Test
+    public void testFeaturesChangedOnGenerator() throws Exception {
+        for (boolean autoClose : new boolean[] { true, false }) {
+            for (boolean flushStream : new boolean[] { true, false }) {
+                final String desc = "autoClose="+autoClose+", flushStream="+flushStream;
+                TrackingStream out = new TrackingStream();
+                try (JsonGenerator g = mapper(!autoClose, !flushStream).createGenerator(out)) {
+                    g.configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoClose);
+                    g.configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream);
+                    g.writeStartObject();
+                    g.writeStringProperty("a", "1");
+                    g.flush();
+                    assertEquals(flushStream ? 1 : 0, out.flushCount, desc);
+                    assertEquals(0, out.closeCount, desc);
+                    g.writeEndObject();
+                }
+                assertEquals("a = '1'\n", out.toString(StandardCharsets.UTF_8), desc);
+                assertEquals(autoClose ? 1 : 0, out.closeCount, desc);
+                if (!flushStream) {
+                    assertEquals(0, out.flushCount, desc);
+                }
+            }
+        }
+    }
 }

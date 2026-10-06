@@ -5,9 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * {@link OutputStream} wrapper that forwards written content, but only forwards
- * {@link #flush()} and {@link #close()} to the underlying stream if configured to
- * (a {@link #close()} that may not close it flushes it instead, if allowed).
+ * {@link OutputStream} wrapper that forwards written content, but never flushes or
+ * closes the underlying stream.
  *<p>
  * Needed because we wrap the caller's {@link OutputStream} in a {@code Writer} of our
  * own, which buffers content and only hands it over when flushed or closed. That
@@ -15,20 +14,16 @@ import java.io.OutputStream;
  * closed by {@code JsonGenerator.close()} regardless of
  * {@link tools.jackson.core.StreamWriteFeature#FLUSH_PASSED_TO_STREAM} and
  * {@link tools.jackson.core.StreamWriteFeature#AUTO_CLOSE_TARGET} -- but doing so must
- * only flush or close the caller's stream if those features say so.
+ * not flush or close the caller's stream. Whether that is to be done is decided by
+ * the generator, when flushed or closed, since those features may be changed on the
+ * generator after construction.
  *
  * @since 3.3
  */
 public final class GuardedOutputStream extends FilterOutputStream
 {
-    private final boolean _flushTarget;
-
-    private final boolean _closeTarget;
-
-    public GuardedOutputStream(OutputStream out, boolean flushTarget, boolean closeTarget) {
+    public GuardedOutputStream(OutputStream out) {
         super(out);
-        _flushTarget = flushTarget;
-        _closeTarget = closeTarget;
     }
 
     // NOTE: must override; `FilterOutputStream` otherwise writes one byte at a time
@@ -38,21 +33,12 @@ public final class GuardedOutputStream extends FilterOutputStream
     }
 
     @Override
-    public void flush() throws IOException {
-        if (_flushTarget) {
-            out.flush();
-        }
+    public void flush() {
+        // Deliberately does NOT flush the stream we wrap
     }
 
     @Override
-    public void close() throws IOException {
-        // Our `Writer` being closed means end of output: close the stream we wrap if
-        // allowed, else at least flush it if allowed. NOTE: done explicitly rather than
-        // relying on `OutputStreamWriter.close()` flushing the stream it wraps
-        if (_closeTarget) {
-            out.close();
-        } else {
-            flush();
-        }
+    public void close() {
+        // Deliberately does NOT close (nor flush) the stream we wrap
     }
 }

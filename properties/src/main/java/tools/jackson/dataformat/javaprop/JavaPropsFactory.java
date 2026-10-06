@@ -261,19 +261,15 @@ public class JavaPropsFactory
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
-        final int stdFeatures = writeCtxt.getStreamWriteFeatures(_streamWriteFeatures);
         // [dataformats-text#734]: Writer is constructed (and hence owned) by us, so the
         // generator must always flush and close it to get its buffered content into the
-        // stream. Whether that also flushes or closes the caller's stream is decided by
-        // the wrapper, as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`.
-        out = new GuardedOutputStream(out,
-                StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures),
-                ioCtxt.isResourceManaged()
-                    || StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures));
+        // stream. It is shielded from the caller's stream, which the generator itself
+        // flushes or closes as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`
+        // (as enabled at that point).
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                stdFeatures,
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 _getSchema(writeCtxt),
-                _createWriter(ioCtxt, out, null), true);
+                _createWriter(ioCtxt, new GuardedOutputStream(out), null), out);
     }
 
     @Override
