@@ -416,23 +416,27 @@ public class YAMLGenerator extends GeneratorBase
             //   but need END_DOCUMENT regardless
             // [dataformats-text#749]: closing may fail too (on writing out buffered
             //   content): must not mask earlier failure
-            RuntimeException fail = null;
+            Throwable fail = null;
             try {
                 _emitEndDocument();
                 _emit(new StreamEndEvent());
-            } catch (RuntimeException e) {
-                fail = e;
+            } catch (Throwable t) {
+                fail = t;
             }
             try {
                 super.close();
-            } catch (RuntimeException e) {
+            } catch (Throwable t) {
                 if (fail == null) {
-                    throw e;
+                    fail = t;
+                } else {
+                    fail.addSuppressed(t);
                 }
-                fail.addSuppressed(e);
             }
             if (fail != null) {
-                throw fail;
+                if (fail instanceof RuntimeException re) {
+                    throw re;
+                }
+                throw (Error) fail; // nothing else can be thrown from above
             }
         }
     }
@@ -455,11 +459,11 @@ public class YAMLGenerator extends GeneratorBase
                 //   features enabled now.
                 //   [dataformats-text#749]: first failure is the one to report, any
                 //   later ones are added as suppressed
-                IOException fail = null;
+                Throwable fail = null;
                 try {
                     _writer.close();
-                } catch (IOException e) {
-                    fail = e;
+                } catch (Throwable t) {
+                    fail = t;
                 }
                 try {
                     if (closeTarget) {
@@ -467,15 +471,21 @@ public class YAMLGenerator extends GeneratorBase
                     } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                         _target.flush();
                     }
-                } catch (IOException e) {
+                } catch (Throwable t) {
                     if (fail == null) {
-                        fail = e;
+                        fail = t;
                     } else {
-                        fail.addSuppressed(e);
+                        fail.addSuppressed(t);
                     }
                 }
                 if (fail != null) {
-                    throw fail;
+                    if (fail instanceof IOException ioe) {
+                        throw ioe;
+                    }
+                    if (fail instanceof RuntimeException re) {
+                        throw re;
+                    }
+                    throw (Error) fail;
                 }
             } else if (closeTarget) {
                 _writer.close();
