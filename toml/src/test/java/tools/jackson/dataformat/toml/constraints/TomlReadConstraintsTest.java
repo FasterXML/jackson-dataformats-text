@@ -6,7 +6,10 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.ObjectReadContext;
 import tools.jackson.core.StreamReadConstraints;
+import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.exc.StreamConstraintsException;
 
 import tools.jackson.databind.JsonNode;
@@ -174,6 +177,58 @@ public class TomlReadConstraintsTest extends TomlMapperTestBase
         final String doc = "a = \"" + _repeat('x', MAX_DOC_LEN + 500) + "\"\n";
         final TomlMapper mapper = mapperWithDocLimit(MAX_DOC_LEN);
         _verifyDocTooLong(() -> mapper.readTree(doc));
+    }
+
+    private final static String DOC_8_TOKENS = "a = 1\nb = 2\nc = 3\n";
+
+    private static TomlFactory factoryWithTokenLimit(long limit) {
+        return TomlFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder()
+                        .maxTokenCount(limit).build())
+                .build();
+    }
+
+    @Test
+    public void testTokenCountWithinLimit() throws Exception
+    {
+        TomlFactory f = factoryWithTokenLimit(8);
+        try (JsonParser p = f.createParser(ObjectReadContext.empty(), DOC_8_TOKENS)) {
+            int count = 0;
+            while (p.nextToken() != null) {
+                ++count;
+            }
+            assertEquals(8, count);
+        }
+    }
+
+    @Test
+    public void testTokenCountExceeded() throws Exception
+    {
+        TomlFactory f = factoryWithTokenLimit(7);
+        _verifyTokenCountExceeded(() -> {
+            try (JsonParser p = f.createParser(ObjectReadContext.empty(), DOC_8_TOKENS)) {
+                while (p.nextToken() != null) { }
+            }
+        });
+        TomlFactory nonClosing = f.rebuild().disable(StreamReadFeature.AUTO_CLOSE_SOURCE).build();
+        _verifyTokenCountExceeded(() -> {
+            try (JsonParser p = nonClosing.createParser(ObjectReadContext.empty(),
+                    new StringReader(DOC_8_TOKENS))) {
+                while (p.nextToken() != null) { }
+            }
+        });
+        _verifyTokenCountExceeded(() -> newTomlMapper(f).readTree(DOC_8_TOKENS));
+    }
+
+    private void _verifyTokenCountExceeded(ThrowingRunnable r) throws Exception
+    {
+        try {
+            r.run();
+            fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            _verifyException(e, "Token count");
+            _verifyException(e, "exceeds the maximum allowed");
+        }
     }
 
     @FunctionalInterface

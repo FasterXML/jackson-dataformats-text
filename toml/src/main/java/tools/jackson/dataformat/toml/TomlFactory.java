@@ -206,7 +206,7 @@ public final class TomlFactory extends TextualTSFactory
             boolean closeReader) throws JacksonException {
         try {
             ObjectNode node = parse(readCtxt, ctxt, r, closeReader);
-            return new TreeTraversingParser(node, readCtxt);
+            return new TreeTraversingParser(node, readCtxt, ctxt.streamReadConstraints());
         } finally {
             ctxt.close();
         }
