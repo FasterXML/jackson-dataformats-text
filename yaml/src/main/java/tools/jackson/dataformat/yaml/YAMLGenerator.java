@@ -393,15 +393,13 @@ public class YAMLGenerator extends GeneratorBase
         }
         try {
             if (_target != null) {
-                // [dataformats-text#735] (as with toml): a Writer we constructed ourselves is just
-                //   a buffer, so must be flushed regardless; caller's stream is
-                //   shielded from that, and flushed here only if it should be
+                // [dataformats-text#749]: a Writer we constructed ourselves is just a
+                //   buffer, so must be flushed regardless (caller's stream is shielded)
                 _writer.flush();
-                if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _target.flush();
-                }
-            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                _writer.flush();
+            }
+            if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                final Flushable target = (_target != null) ? _target : _writer;
+                target.flush();
             }
         } catch (IOException e) {
             throw _wrapIOFailure(e);
@@ -414,85 +412,54 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
-            // [dataformats-text#749]: closing may fail too (on writing out buffered
-            //   content): must not mask earlier failure
-            Throwable fail = null;
             try {
                 _emitEndDocument();
                 _emit(new StreamEndEvent());
             } catch (Throwable t) {
-                fail = t;
-            }
-            try {
-                super.close();
-            } catch (Throwable t) {
-                if (fail == null) {
-                    fail = t;
-                } else {
-                    fail.addSuppressed(t);
+                // [dataformats-text#752]: must close regardless, but without masking
+                //   the original failure
+                try {
+                    super.close();
+                } catch (Throwable t2) {
+                    t.addSuppressed(t2);
                 }
+                throw t;
             }
-            if (fail != null) {
-                if (fail instanceof RuntimeException re) {
-                    throw re;
-                }
-                throw (Error) fail; // nothing else can be thrown from above
-            }
+            super.close();
         }
     }
 
     @Override
     protected void _closeInput() throws IOException
     {
-        /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
-         *   on the underlying Reader, unless we "own" it, or auto-closing
-         *   feature is enabled.
-         */
-        if (_writer != null) {
-            final boolean closeTarget = _ioContext.isResourceManaged()
-                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
-            if (_target != null) {
-                // [dataformats-text#735] (as with toml): a Writer we constructed ourselves must be closed
-                //   regardless: that hands its buffered content over to the caller's
-                //   OutputStream and recycles its buffer. Caller's stream is shielded
-                //   from that, and closed (or flushed) here only if it should be, as per
-                //   features enabled now.
-                //   [dataformats-text#749]: first failure is the one to report, any
-                //   later ones are added as suppressed
-                Throwable fail = null;
-                try {
-                    _writer.close();
-                } catch (Throwable t) {
-                    fail = t;
-                }
-                try {
-                    if (closeTarget) {
-                        _target.close();
-                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                        _target.flush();
-                    }
-                } catch (Throwable t) {
-                    if (fail == null) {
-                        fail = t;
-                    } else {
-                        fail.addSuppressed(t);
-                    }
-                }
-                if (fail != null) {
-                    if (fail instanceof IOException ioe) {
-                        throw ioe;
-                    }
-                    if (fail instanceof RuntimeException re) {
-                        throw re;
-                    }
-                    throw (Error) fail;
-                }
-            } else if (closeTarget) {
+        if (_writer == null) {
+            return;
+        }
+        final boolean closeTarget = _ioContext.isResourceManaged()
+                || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
+        if (_target == null) {
+            // 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
+            //   on the underlying Writer, unless we "own" it, or auto-closing
+            //   feature is enabled.
+            if (closeTarget) {
                 _writer.close();
             } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
                 _writer.flush();
             }
+            return;
+        }
+        // [dataformats-text#749]: a Writer we constructed ourselves must be closed
+        //   regardless: that hands its buffered content over to the caller's
+        //   OutputStream and recycles its buffer. Caller's stream is shielded from
+        //   that, and closed (or flushed) as per features enabled now --
+        //   [dataformats-text#752] even if closing our Writer fails: try-with-resources
+        //   ensures that, and reports the first failure (with any later one added
+        //   as suppressed)
+        final Closeable target = closeTarget ? _target
+                : (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM) ? _target::flush : null);
+        try (target) {
+            _writer.close();
         }
     }
 
