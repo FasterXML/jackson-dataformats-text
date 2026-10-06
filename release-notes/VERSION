@@ -56,10 +56,11 @@ implementations)
 #735: (toml) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
-- (yaml) `YAMLGenerator` writing to `OutputStream`: `flush()` did not write buffered
+#749: (yaml) `YAMLGenerator` writing to `OutputStream`: `flush()` did not write buffered
   content with `FLUSH_PASSED_TO_STREAM` disabled, caller's stream was flushed despite it,
   and internal `UTF8Writer` was not closed (or its buffer recycled) with
   `AUTO_CLOSE_TARGET` disabled
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 
