@@ -8,6 +8,7 @@ import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.dataformat.javaprop.impl.GuardedOutputStream;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import tools.jackson.dataformat.javaprop.io.Latin1Reader;
@@ -260,10 +261,19 @@ public class JavaPropsFactory
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
+        final int stdFeatures = writeCtxt.getStreamWriteFeatures(_streamWriteFeatures);
+        // [dataformats-text#734]: Writer is constructed (and hence owned) by us, so the
+        // generator must always flush and close it to get its buffered content into the
+        // stream. Whether that also flushes or closes the caller's stream is decided by
+        // the wrapper, as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`.
+        out = new GuardedOutputStream(out,
+                StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures),
+                ioCtxt.isResourceManaged()
+                    || StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures));
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
-                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                stdFeatures,
                 _getSchema(writeCtxt),
-                _createWriter(ioCtxt, out, null));
+                _createWriter(ioCtxt, out, null), true);
     }
 
     @Override
