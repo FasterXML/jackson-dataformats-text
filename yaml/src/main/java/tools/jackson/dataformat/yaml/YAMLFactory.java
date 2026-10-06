@@ -269,12 +269,18 @@ public class YAMLFactory
     @Override
     protected YAMLParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt,
             InputStream in) {
+        final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        final Reader r = _createReader(in, null, ioCtxt, stdFeatures);
+        // 18-Sep-2026: [dataformats-text#718] `UTF8Reader` holds a recycled buffer and
+        //   knows whether it may close the caller's `InputStream`, so it must always be
+        //   closed. Other `Reader`s (incl. ones a subclass may return) get the legacy
+        //   treatment: closed only if auto-closing is enabled.
         return new YAMLParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
-                readCtxt.getStreamReadFeatures(_streamReadFeatures),
+                stdFeatures,
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(in, null, ioCtxt));
+                r, (r instanceof UTF8Reader));
     }
 
     @Override
@@ -285,7 +291,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                r);
+                r, false);
     }
 
     @Override
@@ -296,7 +302,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                new CharArrayReader(data, offset, len));
+                new CharArrayReader(data, offset, len), true);
     }
 
     @Override
@@ -306,7 +312,7 @@ public class YAMLFactory
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(data, offset, len, null, ioCtxt));
+                _createReader(data, offset, len, null, ioCtxt), true);
     }
 
     @Override
@@ -358,14 +364,27 @@ public class YAMLFactory
     /**********************************************************************
      */
 
-    protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt)
+    /**
+     * @param streamReadFeatures Effective {@link StreamReadFeature}s of the parser being
+     *    constructed: note that these may differ from this factory's defaults, since
+     *    {@code ObjectReader} may override them on a per-call basis.
+     *
+     * @since 3.3
+     */
+    protected Reader _createReader(InputStream in, JsonEncoding enc, IOContext ctxt,
+            int streamReadFeatures)
     {
         if (enc == null) {
             enc = JsonEncoding.UTF8;
         }
         // default to UTF-8 if encoding missing
         if (enc == JsonEncoding.UTF8) {
-            boolean autoClose = ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE);
+            // 08-Sep-2026, pjfanning: [dataformats-text#718] must use the parser's
+            //   effective features here; `YAMLParser._closeInput()` decides whether to
+            //   close this Reader based on those, and if the two disagree the caller's
+            //   `InputStream` is silently left open
+            boolean autoClose = ctxt.isResourceManaged()
+                    || StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(streamReadFeatures);
             return new UTF8Reader(in, autoClose);
 //          return new InputStreamReader(in, UTF8);
         }

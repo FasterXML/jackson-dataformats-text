@@ -303,11 +303,15 @@ public class CsvFactory
     protected CsvGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
+        // Writer is constructed (and hence owned) by us, so the generator must always
+        // close it -- that is what flushes its pending content into `out` and recycles
+        // its encoding buffer. Whether `out` itself is closed along with it is decided
+        // at close time, by `CsvEncoder`.
         return new CsvGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
                 new UTF8Writer(ioCtxt, out), _getSchema(writeCtxt),
-                _characterEscapes, _maxQuoteCheckChars);
+                _characterEscapes, _maxQuoteCheckChars, true);
     }
 
     private final CsvSchema _getSchema(ObjectWriteContext writeCtxt) {

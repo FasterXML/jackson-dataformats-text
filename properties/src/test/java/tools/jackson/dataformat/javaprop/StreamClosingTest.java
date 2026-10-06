@@ -32,13 +32,16 @@ public class StreamClosingTest extends ModuleTestBase
         assertTrue(in.closed);
 
         // but not if reconfigured
+        // 08-Sep-2026, pjfanning: [dataformats-text#718] used to (wrongly) assert `true`
+        //   here: `AUTO_CLOSE_SOURCE` was only ever read off the factory, so disabling
+        //   it on the `ObjectReader` had no effect
         in = CloseStateInputStream.forString("value = 42");
         assertFalse(in.closed);
         result = PROPS_MAPPER.readerFor(Bean179.class)
                 .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .readValue(in);
         assertNotNull(result);
-        assertTrue(in.closed);
+        assertFalse(in.closed);
     }
 
     @Test
@@ -52,12 +55,13 @@ public class StreamClosingTest extends ModuleTestBase
         assertTrue(r.closed);
 
         // but not if reconfigured
+        // 08-Sep-2026, pjfanning: [dataformats-text#718] see above
         r = CloseStateReader.forString("value = 42");
         assertFalse(r.closed);
         result = PROPS_MAPPER.readerFor(Bean179.class)
                 .without(StreamReadFeature.AUTO_CLOSE_SOURCE)
                 .readValue(r);
         assertNotNull(result);
-        assertTrue(r.closed);
+        assertFalse(r.closed);
     }
 }

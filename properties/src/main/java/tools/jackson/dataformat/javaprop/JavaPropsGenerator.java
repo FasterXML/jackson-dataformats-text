@@ -8,6 +8,7 @@ import java.util.Arrays;
 import tools.jackson.core.*;
 import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.core.util.JacksonFeatureSet;
 
 import tools.jackson.dataformat.javaprop.io.JPropWriteContext;
@@ -388,7 +389,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeNumber(int i) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeUnescapedEntry(String.valueOf(i));
+        _writeUnescapedEntry(i);
         return this;
     }
 
@@ -396,7 +397,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeNumber(long l) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeUnescapedEntry(String.valueOf(l));
+        _writeUnescapedEntry(l);
         return this;
     }
 
@@ -407,7 +408,7 @@ public abstract class JavaPropsGenerator
             return writeNull();
         }
         _verifyValueWrite("write number");
-        _writeUnescapedEntry(String.valueOf(v));
+        _writeUnescapedEntry(v.toString());
         return this;
     }
     
@@ -415,7 +416,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeUnescapedEntry(String.valueOf(d));
+        _writeUnescapedEntry(d);
         return this;
     }    
 
@@ -423,7 +424,7 @@ public abstract class JavaPropsGenerator
     public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeUnescapedEntry(String.valueOf(f));
+        _writeUnescapedEntry(f);
         return this;
     }
 
@@ -510,6 +511,40 @@ public abstract class JavaPropsGenerator
     protected abstract void _writeEscapedEntry(char[] text, int offset, int len) throws JacksonException;
 
     protected abstract void _writeUnescapedEntry(String value) throws JacksonException;
+
+    /**
+     * Default implementations for numeric entries go through {@code String}
+     * representation; sub-classes with direct access to an output buffer
+     * may override to write digits without intermediate {@code String}.
+     *
+     * @since 3.3
+     */
+    protected void _writeUnescapedEntry(int value) throws JacksonException {
+        _writeUnescapedEntry(Integer.toString(value));
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _writeUnescapedEntry(long value) throws JacksonException {
+        _writeUnescapedEntry(Long.toString(value));
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _writeUnescapedEntry(double value) throws JacksonException {
+        _writeUnescapedEntry(NumberOutput.toString(value,
+                isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)));
+    }
+
+    /**
+     * @since 3.3
+     */
+    protected void _writeUnescapedEntry(float value) throws JacksonException {
+        _writeUnescapedEntry(NumberOutput.toString(value,
+                isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)));
+    }
 
     protected abstract void _writeRaw(char c) throws JacksonException;
     protected abstract void _writeRaw(String text) throws JacksonException;

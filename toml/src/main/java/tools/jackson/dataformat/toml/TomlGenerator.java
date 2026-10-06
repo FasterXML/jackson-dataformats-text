@@ -11,6 +11,7 @@ import java.util.Arrays;
 import tools.jackson.core.*;
 import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.VersionUtil;
 
@@ -199,8 +200,11 @@ final class TomlGenerator extends GeneratorBase
     }
 
     protected JsonGenerator _writeRaw(String text) throws JacksonException {
+        return _writeRaw(text, 0, text.length());
+    }
+
+    protected JsonGenerator _writeRaw(String text, int offset, int len) throws JacksonException {
         // Nothing to check, can just output as is
-        int len = text.length();
         int room = _outputEnd - _outputTail;
 
         if (room == 0) {
@@ -209,10 +213,10 @@ final class TomlGenerator extends GeneratorBase
         }
         // But would it nicely fit in? If yes, it's easy
         if (room >= len) {
-            text.getChars(0, len, _outputBuffer, _outputTail);
+            text.getChars(offset, offset + len, _outputBuffer, _outputTail);
             _outputTail += len;
         } else {
-            _writeRawLong(text);
+            _writeRawLong(text, offset, len);
         }
         return this;
     }
@@ -257,13 +261,13 @@ final class TomlGenerator extends GeneratorBase
         return this;
     }
 
-    protected void _writeRawLong(String text) throws JacksonException {
+    protected void _writeRawLong(String text, int offset, int len) throws JacksonException {
         int room = _outputEnd - _outputTail;
-        text.getChars(0, room, _outputBuffer, _outputTail);
+        text.getChars(offset, offset + room, _outputBuffer, _outputTail);
         _outputTail += room;
         _flushBuffer();
-        int offset = room;
-        int len = text.length() - room;
+        offset += room;
+        len -= room;
 
         while (len > _outputEnd) {
             int amount = _outputEnd;
@@ -488,6 +492,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
         return writeValueEnd();
@@ -500,8 +505,8 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
-        return writeValueEnd();
+        // NOTE: `writeString(String)` already calls `writeValueEnd()`
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -517,11 +522,13 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
-        return _writeRaw(text.substring(offset, offset + len));
+        _checkRangeBoundsForString(text, offset, len);
+        return _writeRaw(text, offset, len);
     }
 
     @Override
     public JsonGenerator writeRaw(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
         return _writeRaw(text, offset, len);
     }
 
@@ -532,7 +539,50 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
-        return writeRaw(text.toString());
+        return _writeRaw(text);
+    }
+
+    private JsonGenerator _writeRaw(SerializableString text) throws JacksonException {
+        // Copy unquoted chars directly into buffer if they fit; otherwise
+        // fall back to (unquoted) String value
+        int len = text.appendUnquoted(_outputBuffer, _outputTail);
+        if (len < 0) {
+            return _writeRaw(text.getValue());
+        }
+        _outputTail += len;
+        return this;
+    }
+
+    // Raw values need value-end handling (newline in table context) just
+    // like regular values; `GeneratorBase` implementations do not do that
+    @Override
+    public JsonGenerator writeRawValue(String text) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForString(text, offset, len);
+        _verifyValueWrite("write raw value");
+        _writeRaw(text, offset, len);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
+        _checkRangeBoundsForCharArray(text, offset, len);
+        _verifyValueWrite("write raw value");
+        _writeRaw(text, offset, len);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text);
+        return writeValueEnd();
     }
 
     /*
@@ -575,21 +625,29 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeNumber(short v) throws JacksonException {
-        writeNumber((int) v);
-        return writeValueEnd();
+        // NOTE: `writeNumber(int)` already calls `writeValueEnd()`
+        return writeNumber((int) v);
     }
 
     @Override
     public JsonGenerator writeNumber(int i) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(i));
+        // up to 10 digits and possible minus sign
+        if ((_outputTail + 11) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputInt(i, _outputBuffer, _outputTail);
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(long l) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(l));
+        // up to 19 digits and possible minus sign
+        if ((_outputTail + 20) > _outputEnd) {
+            _flushBuffer();
+        }
+        _outputTail = NumberOutput.outputLong(l, _outputBuffer, _outputTail);
         return writeValueEnd();
     }
 
@@ -599,42 +657,53 @@ final class TomlGenerator extends GeneratorBase
             return writeNull();
         }
         _verifyValueWrite("write number");
-        _writeRaw(String.valueOf(v));
+        _writeRaw(v.toString());
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(double d) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(_nonFiniteTomlToken(d, String.valueOf(d)));
+        // Non-finite values need TOML tokens (`nan`/`inf`/`-inf`): Java text
+        // forms (`NaN`/`Infinity`) are not valid TOML and cannot be read back
+        if (NumberOutput.notFinite(d)) {
+            _writeRaw(_nonFiniteTomlToken(d));
+        } else if (isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            if ((_outputTail + NumberOutput.MAX_DOUBLE_BYTES) > _outputEnd) {
+                _flushBuffer();
+            }
+            _outputTail = NumberOutput.outputDouble(d, _outputBuffer, _outputTail);
+        } else {
+            _writeRaw(NumberOutput.toString(d, false));
+        }
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(float f) throws JacksonException {
         _verifyValueWrite("write number");
-        _writeRaw(_nonFiniteTomlToken(f, String.valueOf(f)));
+        if (NumberOutput.notFinite(f)) {
+            _writeRaw(_nonFiniteTomlToken(f));
+        } else if (isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)) {
+            if ((_outputTail + NumberOutput.MAX_FLOAT_BYTES) > _outputEnd) {
+                _flushBuffer();
+            }
+            _outputTail = NumberOutput.outputFloat(f, _outputBuffer, _outputTail);
+        } else {
+            _writeRaw(NumberOutput.toString(f, false));
+        }
         return writeValueEnd();
     }
 
     /**
      * Maps a non-finite floating-point value to the TOML float token
-     * ({@code nan}, {@code inf} or {@code -inf}); finite values are written
-     * using the supplied Java text form. {@code String.valueOf(...)} would
-     * otherwise emit {@code NaN} / {@code Infinity} / {@code -Infinity}, which
-     * are not valid TOML and cannot be read back by the parser.
+     * ({@code nan}, {@code inf} or {@code -inf}).
      */
-    private static String _nonFiniteTomlToken(double d, String finiteForm) {
+    private static String _nonFiniteTomlToken(double d) {
         if (Double.isNaN(d)) {
             return "nan";
         }
-        if (d == Double.POSITIVE_INFINITY) {
-            return "inf";
-        }
-        if (d == Double.NEGATIVE_INFINITY) {
-            return "-inf";
-        }
-        return finiteForm;
+        return (d > 0) ? "inf" : "-inf";
     }
 
     @Override
@@ -789,7 +858,7 @@ final class TomlGenerator extends GeneratorBase
         } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
             _writeRaw('"');
             for (int i = 0; i < len; i++) {
-                char c = text[offset + len];
+                char c = text[offset + i];
                 String escape = StringOutputUtil.getBasicStringEscape(c);
                 if (escape == null) {
                     _writeRaw(c);

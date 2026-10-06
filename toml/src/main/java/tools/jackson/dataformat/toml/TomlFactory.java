@@ -173,14 +173,23 @@ public final class TomlFactory extends TextualTSFactory
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, InputStream in) throws JacksonException {
         // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        boolean autoClose = ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE);
-        return _createParser(readCtxt, ctxt, UTF8Reader.construct(ctxt, in, autoClose));
+        final boolean autoClose = _autoCloseSource(readCtxt, ctxt);
+        // Reader is constructed (and hence owned) by us, so it must always be closed to
+        // have its read buffer recycled; `autoClose` only decides whether the caller's
+        // `InputStream` is closed along with it
+        return _createParser(readCtxt, ctxt, UTF8Reader.construct(ctxt, in, autoClose), true);
     }
 
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r) throws JacksonException {
+        // Reader is the caller's, so only close it if auto-closing is enabled
+        return _createParser(readCtxt, ctxt, r, _autoCloseSource(readCtxt, ctxt));
+    }
+
+    private JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, Reader r,
+            boolean closeReader) throws JacksonException {
         try {
-            ObjectNode node = parse(readCtxt, ctxt, r);
+            ObjectNode node = parse(readCtxt, ctxt, r, closeReader);
             return new TreeTraversingParser(node, readCtxt);
         } finally {
             ctxt.close();
@@ -233,10 +242,17 @@ public final class TomlFactory extends TextualTSFactory
     /**********************************************************************
      */
 
-    private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0) {
+    private boolean _autoCloseSource(ObjectReadContext readCtxt, IOContext ctxt) {
+        return ctxt.isResourceManaged()
+                || StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(
+                        readCtxt.getStreamReadFeatures(_streamReadFeatures));
+    }
+
+    private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0,
+            boolean closeReader) {
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
         try {
-            if (ctxt.isResourceManaged() || isEnabled(StreamReadFeature.AUTO_CLOSE_SOURCE)) {
+            if (closeReader) {
                 try (Reader r = r0) {
                     return TomlParser.parse(this, ctxt, readFeatures, r);
                 }

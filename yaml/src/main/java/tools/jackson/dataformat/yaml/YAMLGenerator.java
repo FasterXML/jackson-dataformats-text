@@ -11,6 +11,7 @@ import tools.jackson.core.*;
 
 import tools.jackson.core.base.GeneratorBase;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberOutput;
 import tools.jackson.core.json.DupDetector;
 import tools.jackson.core.util.JacksonFeatureSet;
 import tools.jackson.core.util.SimpleStreamWriteContext;
@@ -324,7 +325,7 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public JsonGenerator writePropertyId(long id) throws JacksonException {
         // 24-Jul-2019, tatu: Should not force construction of a String here...
-        String idStr = Long.valueOf(id).toString(); // since instances for small values cached
+        String idStr = Long.toString(id);
         if (!_streamWriteContext.writeName(idStr)) {
             _reportError("Cannot write a property id, expecting a value");
         }
@@ -661,7 +662,7 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(int v) throws JacksonException
     {
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(v), "int", STYLE_SCALAR);
+        _writeScalar(Integer.toString(v), "int", STYLE_SCALAR);
         return this;
     }
 
@@ -673,7 +674,7 @@ public class YAMLGenerator extends GeneratorBase
             return writeNumber((int) l);
         }
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(l), "long", STYLE_SCALAR);
+        _writeScalar(Long.toString(l), "long", STYLE_SCALAR);
         return this;
     }
 
@@ -684,7 +685,7 @@ public class YAMLGenerator extends GeneratorBase
             return writeNull();
         }
         _verifyValueWrite("write number");
-        _writeScalar(String.valueOf(v.toString()), "java.math.BigInteger", STYLE_SCALAR);
+        _writeScalar(v.toString(), "java.math.BigInteger", STYLE_SCALAR);
         return this;
     }
 
@@ -692,25 +693,18 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(double d) throws JacksonException
     {
         _verifyValueWrite("write number");
-        if (isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
+        if (NumberOutput.notFinite(d) && isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
             if (Double.isNaN(d)) {
                 _writeScalar(".nan", "double", STYLE_PLAIN);
+            } else if (d > 0.0) {
+                _writeScalar(".inf", "double", STYLE_PLAIN);
+            } else {
+                _writeScalar("-.inf", "double", STYLE_PLAIN);
             }
-            else if (Double.isInfinite(d)) {
-                if (d > 0.0) {
-                    _writeScalar(".inf", "double", STYLE_PLAIN);
-                }
-                else {
-                    _writeScalar("-.inf", "double", STYLE_PLAIN);
-                }
-            }
-            else {
-                _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
-            }
+            return this;
         }
-        else {
-            _writeScalar(String.valueOf(d), "double", STYLE_SCALAR);
-        }
+        _writeScalar(NumberOutput.toString(d, isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)),
+                "double", STYLE_SCALAR);
         return this;
     }
 
@@ -718,25 +712,18 @@ public class YAMLGenerator extends GeneratorBase
     public JsonGenerator writeNumber(float f) throws JacksonException
     {
         _verifyValueWrite("write number");
-        if (isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
+        if (NumberOutput.notFinite(f) && isEnabled(YAMLWriteFeature.USE_YAML_NONFINITE_NOTATION)) {
             if (Float.isNaN(f)) {
                 _writeScalar(".nan", "float", STYLE_PLAIN);
+            } else if (f > 0.0f) {
+                _writeScalar(".inf", "float", STYLE_PLAIN);
+            } else {
+                _writeScalar("-.inf", "float", STYLE_PLAIN);
             }
-            else if (Float.isInfinite(f)) {
-                if (f > 0.0f) {
-                    _writeScalar(".inf", "float", STYLE_PLAIN);
-                }
-                else {
-                    _writeScalar("-.inf", "float", STYLE_PLAIN);
-                }
-            }
-            else {
-                _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
-            }
+            return this;
         }
-        else {  
-            _writeScalar(String.valueOf(f), "float", STYLE_SCALAR);
-        }
+        _writeScalar(NumberOutput.toString(f, isEnabled(StreamWriteFeature.USE_FAST_DOUBLE_WRITER)),
+                "float", STYLE_SCALAR);
         return this;
     }
 
@@ -792,7 +779,9 @@ public class YAMLGenerator extends GeneratorBase
         throws JacksonException
     {
         _verifyValueWrite("write Object reference");
-        AliasEvent evt = new AliasEvent(Optional.of(String.valueOf(id)).map(s -> new Anchor(s)));
+        // NOTE: `String.valueOf()` to retain legacy handling of `null` id as "null"
+        // (`AliasEvent` itself does not allow missing Anchor)
+        AliasEvent evt = new AliasEvent(Optional.of(new Anchor(String.valueOf(id))));
         _emit(evt);
         return this;
     }

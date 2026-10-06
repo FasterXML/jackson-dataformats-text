@@ -19,6 +19,14 @@ public final class Latin1Reader extends Reader
 
     private InputStream _inputSource;
 
+    /**
+     * Whether {@link #close()} should also close {@link #_inputSource}, or only
+     * release buffers held by this reader.
+     *
+     * @since 3.3
+     */
+    private final boolean _autoClose;
+
     private byte[] _inputBuffer;
 
     /**
@@ -62,16 +70,33 @@ public final class Latin1Reader extends Reader
         super(new Object());
         _ioContext = null;
         _inputSource = null;
+        _autoClose = true;
         _inputBuffer = buf;
         _inputPtr = ptr;
         _inputEnd = ptr+len;
     }
 
-    public Latin1Reader(IOContext ctxt, InputStream in)
+    /**
+     * @deprecated Since 3.3 use {@link #Latin1Reader(IOContext, InputStream, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
+    public Latin1Reader(IOContext ctxt, InputStream in) {
+        this(ctxt, in, true);
+    }
+
+    /**
+     * @param autoClose Whether {@link #close()} should also close the underlying
+     *    {@link InputStream}: if not, closing only releases buffers this reader holds.
+     *
+     * @since 3.3
+     */
+    public Latin1Reader(IOContext ctxt, InputStream in, boolean autoClose)
     {
         super(in);
         _ioContext = ctxt;
         _inputSource = in;
+        _autoClose = autoClose;
         _inputBuffer = ctxt.allocReadIOBuffer();
         _inputPtr = 0;
         _inputEnd = 0;
@@ -100,7 +125,9 @@ public final class Latin1Reader extends Reader
         if (in != null) {
             _inputSource = null;
             freeBuffers();
-            in.close();
+            if (_autoClose) {
+                in.close();
+            }
         }
     }
 

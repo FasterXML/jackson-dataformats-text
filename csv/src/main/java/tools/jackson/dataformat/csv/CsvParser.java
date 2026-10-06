@@ -249,6 +249,22 @@ public class CsvParser
             int stdFeatures, int csvFeatures, CsvSchema schema,
             Reader reader)
     {
+        this(readCtxt, ioCtxt, stdFeatures, csvFeatures, schema, reader, false);
+    }
+
+    /**
+     * @param ownsReader Whether {@code reader} was constructed by Jackson (typically
+     *    wrapping a caller-provided {@link java.io.InputStream}), in which case it must
+     *    always be closed so its buffers are recycled; or provided by the caller, in
+     *    which case {@link tools.jackson.core.StreamReadFeature#AUTO_CLOSE_SOURCE}
+     *    decides.
+     *
+     * @since 3.3
+     */
+    public CsvParser(ObjectReadContext readCtxt, IOContext ioCtxt,
+            int stdFeatures, int csvFeatures, CsvSchema schema,
+            Reader reader, boolean ownsReader)
+    {
         super(readCtxt, ioCtxt, stdFeatures);
         if (reader == null) {
             throw new IllegalArgumentException("Can not pass `null` as `java.io.Reader` to read from");
@@ -259,7 +275,7 @@ public class CsvParser
         _streamReadContext = SimpleStreamReadContext.createRootContext(dups);
         _textBuffer = ioCtxt.constructReadConstrainedTextBuffer();
         _reader = new CsvDecoder(ioCtxt, this, reader, schema, _textBuffer,
-                stdFeatures, csvFeatures);
+                stdFeatures, csvFeatures, ownsReader);
         _setSchema(schema);
         _cfgEmptyStringAsNull = CsvReadFeature.EMPTY_STRING_AS_NULL.enabledIn(csvFeatures);
         _cfgEmptyUnquotedStringAsNull = CsvReadFeature.EMPTY_UNQUOTED_STRING_AS_NULL.enabledIn(csvFeatures);
