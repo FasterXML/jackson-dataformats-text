@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.StreamWriteFeature;
 import tools.jackson.databind.SequenceWriter;
@@ -178,5 +179,68 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
                 }
             }
         }
+    }
+
+    // Stream that fails on both write and close
+    static class FailingStream extends OutputStream {
+        @Override
+        public void write(int b) throws IOException {
+            throw new IOException("write failed");
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            throw new IOException("write failed");
+        }
+
+        @Override
+        public void close() throws IOException {
+            throw new IOException("close failed");
+        }
+    }
+
+    // Once closed (and target auto-closed), flush must not reach the target any more
+    @Test
+    public void testFlushAfterCloseIsNoOp() throws Exception {
+        TrackingStream out = new TrackingStream();
+        JsonGenerator g = mapper(true, true).createGenerator(out);
+        g.writeStartObject();
+        g.writeStringProperty("a", "1");
+        g.writeEndObject();
+        g.close();
+        assertEquals(1, out.closeCount);
+        final int flushes = out.flushCount;
+        g.flush();
+        assertEquals(flushes, out.flushCount);
+    }
+
+    // Output target accessor should expose caller's stream, not the Writer we
+    // wrapped it in
+    @Test
+    public void testOutputTargetIsCallersStream() throws Exception {
+        TrackingStream out = new TrackingStream();
+        try (JsonGenerator g = mapper(true, true).createGenerator(out)) {
+            assertSame(out, g.streamWriteOutputTarget());
+        }
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = mapper(true, true).createGenerator(w)) {
+            assertSame(w, g.streamWriteOutputTarget());
+        }
+    }
+
+    // Failure to close target must not mask earlier failure to write out buffered
+    // content
+    @Test
+    public void testCloseFailureDoesNotMaskWriteFailure() throws Exception {
+        JsonGenerator g = mapper(true, true).createGenerator(new FailingStream());
+        g.writeStartObject();
+        g.writeStringProperty("a", "1");
+        g.writeEndObject();
+        JacksonException e = assertThrows(JacksonException.class, g::close);
+        Throwable cause = e.getCause();
+        assertNotNull(cause);
+        assertEquals("write failed", cause.getMessage());
+        assertEquals(1, cause.getSuppressed().length);
+        assertEquals("close failed", cause.getSuppressed()[0].getMessage());
     }
 }

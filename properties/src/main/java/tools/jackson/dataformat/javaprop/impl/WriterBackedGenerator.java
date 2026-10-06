@@ -103,7 +103,9 @@ public class WriterBackedGenerator extends JavaPropsGenerator
 
     @Override
     public Object streamWriteOutputTarget() {
-        return _out;
+        // (follow-up to [dataformats-text#734]): Writer we constructed ourselves is an implementation
+        //   detail, shielded from caller's stream: so expose the stream instead
+        return (_target != null) ? _target : _out;
     }
 
     @Override
@@ -121,11 +123,25 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     public void close()
     {
         if (!isClosed()) {
+            // (follow-up to [dataformats-text#734]): closing may fail too (on writing out buffered
+            //   content): must not mask earlier failure
+            RuntimeException fail = null;
             try {
                 _flushBuffer();
-            } finally {
-                _outputTail = 0; // just to ensure we don't think there's anything buffered
+            } catch (RuntimeException e) {
+                fail = e;
+            }
+            _outputTail = 0; // just to ensure we don't think there's anything buffered
+            try {
                 super.close();
+            } catch (RuntimeException e) {
+                if (fail == null) {
+                    throw e;
+                }
+                fail.addSuppressed(e);
+            }
+            if (fail != null) {
+                throw fail;
             }
         }
     }
@@ -142,15 +158,29 @@ public class WriterBackedGenerator extends JavaPropsGenerator
                 //   caller's OutputStream. Caller's stream is shielded from that, and
                 //   closed (or flushed) here only if it should be, as per features
                 //   enabled now.
+                //   (follow-up to [dataformats-text#734]): first failure is the one to report, any
+                //   later ones are added as suppressed
+                IOException fail = null;
                 try {
                     _out.close();
-                } finally {
+                } catch (IOException e) {
+                    fail = e;
+                }
+                try {
                     if (closeTarget) {
                         _target.close();
+                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } catch (IOException e) {
+                    if (fail == null) {
+                        fail = e;
+                    } else {
+                        fail.addSuppressed(e);
                     }
                 }
-                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _target.flush();
+                if (fail != null) {
+                    throw fail;
                 }
             } else if (closeTarget) {
                 _out.close();
@@ -164,6 +194,11 @@ public class WriterBackedGenerator extends JavaPropsGenerator
     @Override
     public void flush()
     {
+        // (follow-up to [dataformats-text#734]): nothing to flush once closed -- and target may
+        //   have been closed along with us
+        if (isClosed()) {
+            return;
+        }
         _flushBuffer();
         if (_out != null) {
             try {
