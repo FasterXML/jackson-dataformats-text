@@ -200,8 +200,11 @@ final class TomlGenerator extends GeneratorBase
     }
 
     protected JsonGenerator _writeRaw(String text) throws JacksonException {
+        return _writeRaw(text, 0, text.length());
+    }
+
+    protected JsonGenerator _writeRaw(String text, int offset, int len) throws JacksonException {
         // Nothing to check, can just output as is
-        int len = text.length();
         int room = _outputEnd - _outputTail;
 
         if (room == 0) {
@@ -210,10 +213,10 @@ final class TomlGenerator extends GeneratorBase
         }
         // But would it nicely fit in? If yes, it's easy
         if (room >= len) {
-            text.getChars(0, len, _outputBuffer, _outputTail);
+            text.getChars(offset, offset + len, _outputBuffer, _outputTail);
             _outputTail += len;
         } else {
-            _writeRawLong(text);
+            _writeRawLong(text, offset, len);
         }
         return this;
     }
@@ -258,13 +261,13 @@ final class TomlGenerator extends GeneratorBase
         return this;
     }
 
-    protected void _writeRawLong(String text) throws JacksonException {
+    protected void _writeRawLong(String text, int offset, int len) throws JacksonException {
         int room = _outputEnd - _outputTail;
-        text.getChars(0, room, _outputBuffer, _outputTail);
+        text.getChars(offset, offset + room, _outputBuffer, _outputTail);
         _outputTail += room;
         _flushBuffer();
-        int offset = room;
-        int len = text.length() - room;
+        offset += room;
+        len -= room;
 
         while (len > _outputEnd) {
             int amount = _outputEnd;
@@ -501,8 +504,8 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        writeString(new String(text, offset, len, StandardCharsets.UTF_8));
-        return writeValueEnd();
+        // NOTE: `writeString(String)` already calls `writeValueEnd()`
+        return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
     /*
@@ -518,18 +521,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeRaw(String text, int offset, int len) throws JacksonException {
-        int room = _outputEnd - _outputTail;
-        if (room < len) {
-            _flushBuffer();
-            room = _outputEnd - _outputTail;
-        }
-        if (room >= len) {
-            text.getChars(offset, offset + len, _outputBuffer, _outputTail);
-            _outputTail += len;
-            return this;
-        }
-        // Rare: longer than the output buffer
-        return _writeRaw(text.substring(offset, offset + len));
+        return _writeRaw(text, offset, len);
     }
 
     @Override
@@ -546,6 +538,36 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeRaw(SerializableString text) throws JacksonException {
         // NOTE: `asQuotedChars()` would be JSON-escaped; need unquoted value
         return _writeRaw(text.getValue());
+    }
+
+    // Raw values need value-end handling (newline in table context) just
+    // like regular values; `GeneratorBase` implementations do not do that
+    @Override
+    public JsonGenerator writeRawValue(String text) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(String text, int offset, int len) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text, offset, len);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(char[] text, int offset, int len) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text, offset, len);
+        return writeValueEnd();
+    }
+
+    @Override
+    public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
+        _verifyValueWrite("write raw value");
+        _writeRaw(text.getValue());
+        return writeValueEnd();
     }
 
     /*
@@ -821,7 +843,7 @@ final class TomlGenerator extends GeneratorBase
         } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
             _writeRaw('"');
             for (int i = 0; i < len; i++) {
-                char c = text[offset + len];
+                char c = text[offset + i];
                 String escape = StringOutputUtil.getBasicStringEscape(c);
                 if (escape == null) {
                     _writeRaw(c);

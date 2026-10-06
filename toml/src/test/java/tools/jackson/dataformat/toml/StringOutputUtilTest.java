@@ -10,6 +10,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StringOutputUtilTest extends TomlMapperTestBase {
+    // ASCII lookup table must match the full categorization logic
+    @Test
+    public void asciiTableMatchesFullLogic() {
+        for (int c = 0; c < 0x80; c++) {
+            assertEquals(StringOutputUtil._categorize(c), StringOutputUtil.categorize(c),
+                    "c=0x" + Integer.toHexString(c));
+        }
+        // and spot-check a few hard-coded expectations, independent of `_categorize`
+        assertEquals(StringOutputUtil.UNQUOTED_KEY, StringOutputUtil.categorize('a') & StringOutputUtil.UNQUOTED_KEY);
+        assertEquals(StringOutputUtil.UNQUOTED_KEY, StringOutputUtil.categorize('-') & StringOutputUtil.UNQUOTED_KEY);
+        assertEquals(0, StringOutputUtil.categorize(' ') & StringOutputUtil.UNQUOTED_KEY);
+        assertEquals(0, StringOutputUtil.categorize('\'') & StringOutputUtil.LITERAL_STRING);
+        assertEquals(StringOutputUtil.ASCII_ONLY, StringOutputUtil.categorize('z') & StringOutputUtil.ASCII_ONLY);
+    }
+
     // Categorization of a single char via `int`, `String` and `char[]` must agree
     // (ASCII goes through a lookup table; rest through full logic)
     @Test

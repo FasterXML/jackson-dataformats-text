@@ -80,7 +80,7 @@ class StringOutputUtil {
 
     // Full categorization; used to populate lookup table for ASCII, and
     // directly for everything else
-    private static int _categorize(int c) {
+    static int _categorize(int c) { // package-private for tests
         if (c > Character.MAX_CODE_POINT || (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE)) {
             // cannot write surrogates
             return 0;
