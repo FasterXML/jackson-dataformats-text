@@ -1,5 +1,7 @@
 package tools.jackson.dataformat.toml;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
@@ -39,7 +41,7 @@ final class TomlGenerator extends GeneratorBase
      *<p>
      * A {@link Writer} we construct must always be flushed and closed: that is what
      * hands its pending content over and returns its buffers to the recycler. It is
-     * shielded from this stream (see {@link GuardedOutputStream}), which is instead
+     * shielded from this stream (see {@link tools.jackson.core.io.GuardedOutputStream}), which is instead
      * flushed and closed directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
      * and {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
      *
@@ -136,7 +138,9 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public Object streamWriteOutputTarget() {
-        return _out;
+        // [dataformats-text#750]: Writer we constructed ourselves is an implementation
+        //   detail, shielded from caller's stream: so expose the stream instead
+        return (_target != null) ? _target : _out;
     }
 
     @Override
@@ -155,63 +159,72 @@ final class TomlGenerator extends GeneratorBase
         if (!isClosed()) {
             try {
                 _flushBuffer();
-            } finally {
-                super.close();
+            } catch (Throwable t) {
+                // [dataformats-text#750]: must close regardless, but without masking
+                //   the original failure
                 _outputTail = 0; // just to ensure we don't think there's anything buffered
+                try {
+                    super.close();
+                } catch (Throwable t2) {
+                    t.addSuppressed(t2);
+                }
+                throw t;
             }
+            super.close();
         }
     }
 
     @Override
     protected void _closeInput() throws IOException
     {
-        if (_out != null) {
-            final boolean closeTarget = _ioContext.isResourceManaged()
-                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
-            if (_target != null) {
-                // [dataformats-text#735]: a Writer we constructed ourselves must be closed
-                //   regardless: without that its buffered content never reaches the
-                //   caller's OutputStream, and the buffer it took from the recycler is
-                //   lost. Caller's stream is shielded from that, and closed (or flushed)
-                //   here only if it should be, as per features enabled now.
-                try {
-                    _out.close();
-                } finally {
-                    if (closeTarget) {
-                        _target.close();
-                    }
-                }
-                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _target.flush();
-                }
-            } else if (closeTarget) {
+        if (_out == null) {
+            return;
+        }
+        final boolean closeTarget = _ioContext.isResourceManaged()
+                || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
+        if (_target == null) { // Writer is caller's: close or flush as per features
+            if (closeTarget) {
                 _out.close();
             } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
                 _out.flush();
             }
+            return;
+        }
+        // [dataformats-text#735]: a Writer we constructed ourselves must be closed
+        //   regardless: without that its buffered content never reaches the caller's
+        //   OutputStream, and the buffer it took from the recycler is lost. Caller's
+        //   stream is shielded from that, and closed (or flushed) as per features
+        //   enabled now -- [dataformats-text#750] even if closing our Writer fails:
+        //   try-with-resources ensures that, and reports the first failure (with
+        //   any later one added as suppressed)
+        final Closeable target = closeTarget ? _target
+                : (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM) ? _target::flush : null);
+        try (target) {
+            _out.close();
         }
     }
 
     @Override
     public void flush() {
+        // [dataformats-text#750]: nothing to flush once closed -- and target may
+        //   have been closed along with us
+        if (isClosed() || (_out == null)) {
+            return;
+        }
         _flushBuffer();
-        if (_out != null) {
-            try {
-                if (_target != null) {
-                    // [dataformats-text#735]: a Writer we constructed ourselves is just
-                    //   a buffer, so must be flushed regardless; caller's stream is
-                    //   shielded from that, and flushed here only if it should be
-                    _out.flush();
-                    if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                        _target.flush();
-                    }
-                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _out.flush();
-                }
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
+        try {
+            if (_target != null) {
+                // [dataformats-text#735]: a Writer we constructed ourselves is just a
+                //   buffer, so must be flushed regardless (caller's stream is shielded)
+                _out.flush();
             }
+            if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                final Flushable target = (_target != null) ? _target : _out;
+                target.flush();
+            }
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
     }
 
