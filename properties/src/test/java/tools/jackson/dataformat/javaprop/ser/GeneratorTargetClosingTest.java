@@ -243,4 +243,39 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         assertEquals(1, cause.getSuppressed().length);
         assertEquals("close failed", cause.getSuppressed()[0].getMessage());
     }
+
+    // Stream that fails on write with an unchecked exception
+    static class UncheckedFailingStream extends OutputStream {
+        public int closeCount;
+
+        @Override
+        public void write(int b) {
+            throw new UncheckedIOException(new IOException("write failed"));
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) {
+            throw new UncheckedIOException(new IOException("write failed"));
+        }
+
+        @Override
+        public void close() {
+            ++closeCount;
+        }
+    }
+
+    // Target must be closed (if auto-closing) even if writing out buffered content
+    // fails with an unchecked exception
+    @Test
+    public void testTargetClosedOnUncheckedWriteFailure() throws Exception {
+        UncheckedFailingStream out = new UncheckedFailingStream();
+        JsonGenerator g = mapper(true, true).createGenerator(out);
+        g.writeStartObject();
+        g.writeStringProperty("a", "1");
+        g.writeEndObject();
+        UncheckedIOException e = assertThrows(UncheckedIOException.class, g::close);
+        assertEquals("write failed", e.getCause().getMessage());
+        assertEquals(1, out.closeCount);
+        assertTrue(g.isClosed());
+    }
 }
