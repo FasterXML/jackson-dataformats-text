@@ -173,11 +173,26 @@ public final class TomlFactory extends TextualTSFactory
     @Override
     protected JsonParser _createParser(ObjectReadContext readCtxt, IOContext ctxt, InputStream in) throws JacksonException {
         // "A TOML file must be a valid UTF-8 encoded Unicode document."
-        final boolean autoClose = _autoCloseSource(readCtxt, ctxt);
         // Reader is constructed (and hence owned) by us, so it must always be closed to
-        // have its read buffer recycled; `autoClose` only decides whether the caller's
-        // `InputStream` is closed along with it
-        return _createParser(readCtxt, ctxt, UTF8Reader.construct(ctxt, in, autoClose), true);
+        // have its read buffer recycled. A source Jackson opened (File/Path) is closed by
+        // the base factory when construction fails [dataformats-text#720], so the reader
+        // must not close it too; we close that source only after a successful parse.
+        // A caller-owned stream is closed with the reader when auto-close is enabled,
+        // because the base factory does not close caller sources.
+        final boolean managed = ctxt.isResourceManaged();
+        final boolean closeStreamWithReader = !managed
+                && StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(
+                        readCtxt.getStreamReadFeatures(_streamReadFeatures));
+        JsonParser parser = _createParser(readCtxt, ctxt,
+                UTF8Reader.construct(ctxt, in, closeStreamWithReader), true);
+        if (managed) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+        }
+        return parser;
     }
 
     @Override
@@ -227,7 +242,15 @@ public final class TomlFactory extends TextualTSFactory
 
     @Override
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt, IOContext ioCtxt, OutputStream out) throws JacksonException {
-        return _createGenerator(writeCtxt, ioCtxt, new UTF8Writer(ioCtxt, out));
+        // [dataformats-text#735]: Writer is constructed (and hence owned) by us, so the
+        // generator must always flush and close it -- that hands its pending content over
+        // and recycles its buffer. It is shielded from the caller's stream, which the
+        // generator itself flushes or closes as per `FLUSH_PASSED_TO_STREAM` and
+        // `AUTO_CLOSE_TARGET` (as enabled at that point).
+        return new TomlGenerator(writeCtxt, ioCtxt,
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
+                new UTF8Writer(ioCtxt, new GuardedOutputStream(out)), out);
     }
 
     @Override

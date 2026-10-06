@@ -25,6 +25,10 @@ implementations)
 #719: (csv) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
+#720: (properties, toml) Do not close a Jackson-opened File/Path source twice
+  when parsing fails
+ (reported by @cowtowncoder)
+ (fix by @kalayciburak)
 #721: (csv) Write `double`/`float` values directly into output buffer (via
   `NumberOutput.outputDouble()/outputFloat()`) when `USE_FAST_DOUBLE_WRITER`
   enabled, avoiding intermediate `String`
@@ -46,12 +50,23 @@ implementations)
 #727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
   in `CsvDecoder` (parse directly from already-materialized `String`)
  (fix by @pjfanning)
+#734: (properties) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
+#735: (toml) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
 
 3.2.4 (not yet released)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
  (fix by @pjfanning)
+#746: (toml) Fix multiple `TomlGenerator` value-writing issues: `writeUTF8String()`
+  writes an extra empty line; `writeRawValue()` writes no line feed after value;
+  `writeBinary()` silently pads invalid ranges with zero bytes; `writeString()`,
+  `writeRaw()` do not validate offset/length; String value with unsupported
+  characters fails after key is written, with misleading "Key contains ..." message
 
 3.2.3 (21-Sep-2026)
 
@@ -176,6 +191,11 @@ No changes since 3.2.1
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
  (fix by @pjfanning)
+#746: (toml) Fix multiple `TomlGenerator` value-writing issues: `writeUTF8String()`
+  writes an extra empty line; `writeRawValue()` writes no line feed after value;
+  `writeBinary()` silently pads invalid ranges with zero bytes; `writeString()`,
+  `writeRaw()` do not validate offset/length; String value with unsupported
+  characters fails after key is written, with misleading "Key contains ..." message
 
 3.1.7 (21-Sep-2026)
 

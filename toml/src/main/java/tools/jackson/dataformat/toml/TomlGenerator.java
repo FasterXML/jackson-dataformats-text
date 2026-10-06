@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.toml;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -31,6 +32,20 @@ final class TomlGenerator extends GeneratorBase
      * Underlying {@link Writer} used for output.
      */
     protected final Writer _out;
+
+    /**
+     * Caller-provided {@link OutputStream} that {@link #_out} was constructed (by us)
+     * to wrap, if any; {@code null} if {@link #_out} was handed to us by the caller.
+     *<p>
+     * A {@link Writer} we construct must always be flushed and closed: that is what
+     * hands its pending content over and returns its buffers to the recycler. It is
+     * shielded from this stream (see {@link GuardedOutputStream}), which is instead
+     * flushed and closed directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
+     * and {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
+     *
+     * @since 3.3
+     */
+    protected final OutputStream _target;
 
     private final int _tomlFeatures;
 
@@ -79,7 +94,22 @@ final class TomlGenerator extends GeneratorBase
 
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, int tomlFeatures, Writer out) {
+        this(writeCtxt, ioCtxt, stdFeatures, tomlFeatures, out, null);
+    }
+
+    /**
+     * @param out Writer to write to: either provided by the caller, or constructed
+     *    by Jackson to wrap {@code target}
+     * @param target Caller-provided stream that {@code out} wraps, if {@code out} was
+     *    constructed by Jackson (and hence must always be flushed and closed);
+     *    {@code null} if {@code out} was provided by the caller
+     *
+     * @since 3.3
+     */
+    public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
+            int stdFeatures, int tomlFeatures, Writer out, OutputStream target) {
         super(writeCtxt, ioCtxt, stdFeatures);
+        _target = target;
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
@@ -136,7 +166,25 @@ final class TomlGenerator extends GeneratorBase
     protected void _closeInput() throws IOException
     {
         if (_out != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+            final boolean closeTarget = _ioContext.isResourceManaged()
+                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
+            if (_target != null) {
+                // [dataformats-text#735]: a Writer we constructed ourselves must be closed
+                //   regardless: without that its buffered content never reaches the
+                //   caller's OutputStream, and the buffer it took from the recycler is
+                //   lost. Caller's stream is shielded from that, and closed (or flushed)
+                //   here only if it should be, as per features enabled now.
+                try {
+                    _out.close();
+                } finally {
+                    if (closeTarget) {
+                        _target.close();
+                    }
+                }
+                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    _target.flush();
+                }
+            } else if (closeTarget) {
                 _out.close();
             } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
@@ -149,12 +197,20 @@ final class TomlGenerator extends GeneratorBase
     public void flush() {
         _flushBuffer();
         if (_out != null) {
-            if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                try {
+            try {
+                if (_target != null) {
+                    // [dataformats-text#735]: a Writer we constructed ourselves is just
+                    //   a buffer, so must be flushed regardless; caller's stream is
+                    //   shielded from that, and flushed here only if it should be
                     _out.flush();
-                } catch (IOException e) {
-                    throw _wrapIOFailure(e);
+                    if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    _out.flush();
                 }
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
             }
         }
     }
@@ -377,7 +433,7 @@ final class TomlGenerator extends GeneratorBase
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
-            _writeStringImpl(StringOutputUtil.MASK_SIMPLE_KEY, name);
+            _writeStringImpl(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY, name);
         } else {
             // Ok; append to base path at this point.
             // First: ensure possibly preceding property name is removed:
@@ -485,16 +541,21 @@ final class TomlGenerator extends GeneratorBase
         if (text == null) {
             return writeNull();
         }
+        // validate before writing anything (key, separator)
+        final int cat = _stringValueCategories(StringOutputUtil.categorize(text));
         _verifyValueWrite("write String value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, text);
+        _writeStringImpl(cat, text);
         return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
+        // NOTE: also reports `null` array as error
         _checkRangeBoundsForCharArray(text, offset, len);
+        // validate before writing anything (key, separator)
+        final int cat = _stringValueCategories(StringOutputUtil.categorize(text, offset, len));
         _verifyValueWrite("write String value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
+        _writeStringImpl(cat, text, offset, len);
         return writeValueEnd();
     }
 
@@ -505,7 +566,9 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
-        // NOTE: `writeString(String)` already calls `writeValueEnd()`
+        // NOTE: also reports `null` array as error
+        _checkRangeBoundsForByteArray(text, offset, len);
+        // NOTE: writeString() already calls writeValueEnd()
         return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
@@ -597,6 +660,7 @@ final class TomlGenerator extends GeneratorBase
         if (data == null) {
             return writeNull();
         }
+        _checkRangeBoundsForByteArray(data, offset, len);
         _verifyValueWrite("write Binary value");
         // ok, better just Base64 encode as a String...
         if (offset > 0 || (offset + len) != data.length) {
@@ -733,7 +797,7 @@ final class TomlGenerator extends GeneratorBase
             throw new TomlStreamWriteException(this, "TOML null writing disabled (TomlWriteFeature.FAIL_ON_NULL_WRITE)");
         }
         _verifyValueWrite("write null value");
-        _writeStringImpl(StringOutputUtil.MASK_STRING, "");
+        _writeStringImpl(_stringValueCategories(StringOutputUtil.categorize("")), "");
         return writeValueEnd();
     }
 
@@ -809,13 +873,16 @@ final class TomlGenerator extends GeneratorBase
             }
             path.append('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            throw _reportUnsupportedKeyCharacters();
         }
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
     }
 
-    private void _writeStringImpl(int categoryMask, String name) {
-        int cat = StringOutputUtil.categorize(name) & categoryMask;
+    /**
+     * @param cat Categories of {@code name} (see {@link StringOutputUtil}), already masked
+     *    for the context (key or value)
+     */
+    private void _writeStringImpl(int cat, String name) {
         if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
             _writeRaw(name);
         } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
@@ -839,12 +906,13 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            // String values are validated before writing (see _stringValueCategories()),
+            // so only keys can get here
+            throw _reportUnsupportedKeyCharacters();
         }
     }
 
-    private void _writeStringImpl(int categoryMask, char[] text, int offset, int len) {
-        int cat = StringOutputUtil.categorize(text, offset, len) & categoryMask;
+    private void _writeStringImpl(int cat, char[] text, int offset, int len) {
         if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
             _writeRaw(text, offset, len);
         } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
@@ -868,8 +936,27 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw _constructWriteException("Key contains unsupported characters");
+            // String values are validated before writing (see _stringValueCategories()),
+            // so only keys can get here
+            throw _reportUnsupportedKeyCharacters();
         }
+    }
+
+    private JacksonException _reportUnsupportedKeyCharacters() {
+        return new TomlStreamWriteException(this, "Key contains unsupported characters");
+    }
+
+    /**
+     * Masks categories of a String value and verifies it can be written; to be called
+     * before {@link #_verifyValueWrite} so that nothing is written for invalid values.
+     */
+    private int _stringValueCategories(int cat) throws JacksonException {
+        cat &= StringOutputUtil.MASK_STRING;
+        if ((cat & (StringOutputUtil.LITERAL_STRING | StringOutputUtil.BASIC_STRING
+                | StringOutputUtil.BASIC_STRING_NO_ESCAPE)) == 0) {
+            throw new TomlStreamWriteException(this, "String value contains unsupported characters");
+        }
+        return cat;
     }
 
     /*

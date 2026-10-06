@@ -8,6 +8,7 @@ import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.dataformat.javaprop.impl.GuardedOutputStream;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import tools.jackson.dataformat.javaprop.io.Latin1Reader;
@@ -260,10 +261,15 @@ public class JavaPropsFactory
     protected JsonGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
+        // [dataformats-text#734]: Writer is constructed (and hence owned) by us, so the
+        // generator must always flush and close it to get its buffered content into the
+        // stream. It is shielded from the caller's stream, which the generator itself
+        // flushes or closes as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`
+        // (as enabled at that point).
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
                 _getSchema(writeCtxt),
-                _createWriter(ioCtxt, out, null));
+                _createWriter(ioCtxt, new GuardedOutputStream(out), null), out);
     }
 
     @Override
@@ -298,14 +304,28 @@ public class JavaPropsFactory
     {
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
-        final boolean autoClose = _autoCloseSource(ctxt, streamReadFeatures);
         // Reader is constructed (and hence owned) by us, so it must always be closed to
-        // have its read buffer recycled; `autoClose` only decides whether the caller's
-        // `InputStream` is closed along with it
+        // have its read buffer recycled.
+        // [dataformats-text#720]: a source Jackson opened (File/Path) is closed by the
+        // base factory if construction fails, so the reader must not close it too; we
+        // close it only after a successful load. Caller's stream is closed along with
+        // the reader only if auto-closing is enabled.
         // [dataformats-text#738]: `Properties.load()` reads input directly, so
         // to enforce max document length we need to count what it reads
-        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, autoClose)),
+        final boolean managed = ctxt.isResourceManaged();
+        final boolean closeStreamWithReader = !managed
+                && StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(streamReadFeatures);
+        Properties props = _readProperties(_constrainedReader(ctxt,
+                new Latin1Reader(ctxt, in, closeStreamWithReader)),
                 true);
+        if (managed) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+        }
+        return props;
     }
 
     protected Properties _loadProperties(Reader r0, IOContext ctxt,

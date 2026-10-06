@@ -95,3 +95,8 @@ Tomas Hugec (@polyoxidonium)
  * Reported #657: (csv) CSV header validation ignores `ACCEPT_CASE_INSENSITIVE_PROPERTIES`:
    add `CsvReadFeature.CASE_INSENSITIVE_HEADERS`
   (3.2.0)
+
+Burak Kalayci (@kalayciburak)
+ * Fixed #720: (properties, toml) Do not close a Jackson-opened File/Path source twice
+   when parsing fails
+  (3.3.0)
