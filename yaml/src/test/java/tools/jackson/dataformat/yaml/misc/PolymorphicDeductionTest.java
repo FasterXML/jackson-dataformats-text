@@ -1,5 +1,7 @@
 package tools.jackson.dataformat.yaml.misc;
 
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -57,6 +59,7 @@ public class PolymorphicDeductionTest extends ModuleTestBase
 
   private final ObjectMapper MAPPER = newObjectMapper();
 
+  @Test
   public void testSimpleInference() throws Exception
   {
     Cat cat = MAPPER.readValue(LIVE_CAT_DOC, Cat.class);
@@ -72,11 +75,13 @@ public class PolymorphicDeductionTest extends ModuleTestBase
     assertEquals("entropy", ((DeadCat)cat).causeOfDeath);
   }
 
+  @Test
   public void testSimpleInferenceOfEmptySubtypeDoesntMatchNull() throws Exception {
     Feline feline = MAPPER.readValue("null", Feline.class);
     assertNull(feline);
   }
 
+  @Test
   public void testCaseInsensitiveInference() throws Exception
   {
     Cat cat = mapperBuilder()
@@ -90,6 +95,7 @@ public class PolymorphicDeductionTest extends ModuleTestBase
   }
 
   // [dataformats-text#404]:
+  @Test
   public void testSerializationOfInferred() throws Exception
   {
       assertEquals("name: \"Grizabella\"",
