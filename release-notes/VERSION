@@ -43,6 +43,9 @@ implementations)
   also fix escaping of `char[]` String values, missing newline after raw values
   and extra blank line after `writeUTF8String()`
  (fix by @pjfanning)
+#727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
+  in `CsvDecoder` (parse directly from already-materialized `String`)
+ (fix by @pjfanning)
 
 3.2.4 (not yet released)
 
