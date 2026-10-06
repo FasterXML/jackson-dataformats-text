@@ -13,13 +13,16 @@ public class WriterWrapper implements StreamDataWriter {
         this._writer = _writer;
     }
 
+    /**
+     * Deliberately does NOT flush the underlying {@link Writer}: SnakeYAML flushes
+     * its output at the end of each document (and of the stream), but whether
+     * the target gets flushed is for {@link YAMLGenerator} to decide, as per
+     * {@link tools.jackson.core.StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
+     * [dataformats-text#749].
+     */
     @Override
     public void flush() {
-        try {
-            _writer.flush();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        // nothing to do
     }
 
     @Override

@@ -293,7 +293,9 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public Object streamWriteOutputTarget() {
-        return _writer;
+        // [dataformats-text#749]: Writer we constructed ourselves is an implementation
+        //   detail, shielded from caller's stream: so expose the stream instead
+        return (_target != null) ? _target : _writer;
     }
 
     /**
@@ -384,6 +386,11 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void flush()
     {
+        // [dataformats-text#749]: nothing to flush once closed -- and target may
+        //   have been closed along with us
+        if (isClosed()) {
+            return;
+        }
         try {
             if (_target != null) {
                 // [dataformats-text#735] (as with toml): a Writer we constructed ourselves is just
@@ -407,11 +414,25 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
+            // [dataformats-text#749]: closing may fail too (on writing out buffered
+            //   content): must not mask earlier failure
+            RuntimeException fail = null;
             try {
                 _emitEndDocument();
                 _emit(new StreamEndEvent());
-            } finally {
+            } catch (RuntimeException e) {
+                fail = e;
+            }
+            try {
                 super.close();
+            } catch (RuntimeException e) {
+                if (fail == null) {
+                    throw e;
+                }
+                fail.addSuppressed(e);
+            }
+            if (fail != null) {
+                throw fail;
             }
         }
     }
@@ -432,15 +453,29 @@ public class YAMLGenerator extends GeneratorBase
                 //   OutputStream and recycles its buffer. Caller's stream is shielded
                 //   from that, and closed (or flushed) here only if it should be, as per
                 //   features enabled now.
+                //   [dataformats-text#749]: first failure is the one to report, any
+                //   later ones are added as suppressed
+                IOException fail = null;
                 try {
                     _writer.close();
-                } finally {
+                } catch (IOException e) {
+                    fail = e;
+                }
+                try {
                     if (closeTarget) {
                         _target.close();
+                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } catch (IOException e) {
+                    if (fail == null) {
+                        fail = e;
+                    } else {
+                        fail.addSuppressed(e);
                     }
                 }
-                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _target.flush();
+                if (fail != null) {
+                    throw fail;
                 }
             } else if (closeTarget) {
                 _writer.close();
