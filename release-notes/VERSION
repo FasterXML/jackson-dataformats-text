@@ -49,6 +49,9 @@ implementations)
 #734: (properties) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
+#735: (toml) Output written to `OutputStream` lost entirely when
+  both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
+ (fix by @pjfanning)
 
 3.2.4 (not yet released)
 
