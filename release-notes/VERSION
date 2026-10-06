@@ -38,6 +38,11 @@ implementations)
   `String` unless quoting needed; numeric array elements appended without
   intermediate `String`
  (fix by @pjfanning)
+#725: (toml) Use lookup table for ASCII character categorization when writing
+  Strings/keys; avoid `substring()`/`toString()` in `writeRaw()` variants;
+  also fix escaping of `char[]` String values, missing newline after raw values
+  and extra blank line after `writeUTF8String()`
+ (fix by @pjfanning)
 
 3.2.3 (21-Sep-2026)
 
