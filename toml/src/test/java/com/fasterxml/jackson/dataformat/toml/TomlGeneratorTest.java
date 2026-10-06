@@ -85,18 +85,44 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").textValue());
     }
 
+    // `null` arrays are caller errors (as with JSON generators), not TOML nulls
     @Test
-    public void nullStringFromCharArray() throws IOException {
+    public void nullArraysAsStrings() throws IOException {
         StringWriter w = new StringWriter();
         try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
             generator.writeStartObject();
             generator.writeFieldName("abc");
-            generator.writeString((char[]) null, 0, 0);
-            generator.writeFieldName("def");
+            StreamWriteException e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeString((char[]) null, 0, 0));
+            assertTrue(e.getMessage().contains("null"), e.getMessage());
+            e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(null, 0, 0));
+            assertTrue(e.getMessage().contains("null"), e.getMessage());
+            // nothing written, generator still usable
             generator.writeNull();
             generator.writeEndObject();
         }
-        assertEquals("abc = \'\'\ndef = \'\'\n", w.toString());
+        assertEquals("abc = \'\'\n", w.toString());
+    }
+
+    @Test
+    public void invalidUTF8StringRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            final byte[] utf8 = "abc".getBytes(StandardCharsets.UTF_8);
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, 2, 5));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, -1, 1));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, 0, -1));
+            // nothing written, generator still usable
+            generator.writeUTF8String(utf8, 1, 2);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'bc'\n", w.toString());
     }
 
     // Invalid String values must fail before anything (key, separator) is written,

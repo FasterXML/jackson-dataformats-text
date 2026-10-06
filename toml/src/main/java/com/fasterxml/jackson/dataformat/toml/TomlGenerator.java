@@ -427,10 +427,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeString(char[] text, int offset, int len) throws IOException {
-        if (text == null) {
-            writeNull();
-            return;
-        }
+        // NOTE: also reports `null` array as error
         _checkRangeBoundsForCharArray(text, offset, len);
         // validate before writing anything (key, separator)
         final int cat = _stringValueCategories(StringOutputUtil.categorize(text, offset, len));
@@ -446,10 +443,7 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeUTF8String(byte[] text, int offset, int len) throws IOException {
-        if (text == null) {
-            writeNull();
-            return;
-        }
+        // NOTE: also reports `null` array as error
         _checkRangeBoundsForByteArray(text, offset, len);
         // NOTE: writeString() already calls writeValueEnd()
         writeString(new String(text, offset, len, StandardCharsets.UTF_8));
@@ -728,7 +722,7 @@ final class TomlGenerator extends GeneratorBase
             }
             path.append('"');
         } else {
-            throw new TomlStreamWriteException("Key contains unsupported characters", this);
+            _reportUnsupportedKeyCharacters();
         }
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
     }
@@ -763,7 +757,7 @@ final class TomlGenerator extends GeneratorBase
         } else {
             // String values are validated before writing (see _stringValueCategories()),
             // so only keys can get here
-            throw new TomlStreamWriteException("Key contains unsupported characters", this);
+            _reportUnsupportedKeyCharacters();
         }
     }
 
@@ -793,8 +787,12 @@ final class TomlGenerator extends GeneratorBase
         } else {
             // String values are validated before writing (see _stringValueCategories()),
             // so only keys can get here
-            throw new TomlStreamWriteException("Key contains unsupported characters", this);
+            _reportUnsupportedKeyCharacters();
         }
+    }
+
+    private void _reportUnsupportedKeyCharacters() throws IOException {
+        throw new TomlStreamWriteException("Key contains unsupported characters", this);
     }
 
     /**
