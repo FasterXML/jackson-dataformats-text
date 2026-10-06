@@ -196,19 +196,7 @@ public class JavaPropsFactory
             InputStream in)
     {
         final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
-        // A source Jackson opened (File/Path) is closed by the base factory when
-        // construction fails [dataformats-text#720], so do not close it while loading.
-        // Close it only after a successful load. Caller-owned streams are closed by
-        // the reader when auto-close is enabled.
-        final boolean managed = ioCtxt.isResourceManaged();
         Properties props = _loadProperties(in, ioCtxt, stdFeatures);
-        if (managed) {
-            try {
-                in.close();
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
-            }
-        }
         return new JavaPropsParser(readCtxt, ioCtxt, stdFeatures,
                 _getSchema(readCtxt),
                 in, props);
@@ -321,15 +309,27 @@ public class JavaPropsFactory
         // NOTE: Properties default to ISO-8859-1 (aka Latin-1), NOT UTF-8; this
         // as per JDK documentation
         // Reader is constructed (and hence owned) by us, so it must always be closed to
-        // have its read buffer recycled. It closes the caller's stream only when that
-        // stream is not one the base factory will close on construction failure
-        // [dataformats-text#720].
+        // have its read buffer recycled.
+        // [dataformats-text#720]: a source Jackson opened (File/Path) is closed by the
+        // base factory if construction fails, so the reader must not close it too; we
+        // close it only after a successful load. Caller's stream is closed along with
+        // the reader only if auto-closing is enabled.
         // [dataformats-text#738]: `Properties.load()` reads input directly, so
         // to enforce max document length we need to count what it reads
-        final boolean closeStreamWithReader = !ctxt.isResourceManaged()
-                && _autoCloseSource(ctxt, streamReadFeatures);
-        return _readProperties(_constrainedReader(ctxt, new Latin1Reader(ctxt, in, closeStreamWithReader)),
+        final boolean managed = ctxt.isResourceManaged();
+        final boolean closeStreamWithReader = !managed
+                && StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(streamReadFeatures);
+        Properties props = _readProperties(_constrainedReader(ctxt,
+                new Latin1Reader(ctxt, in, closeStreamWithReader)),
                 true);
+        if (managed) {
+            try {
+                in.close();
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
+            }
+        }
+        return props;
     }
 
     protected Properties _loadProperties(Reader r0, IOContext ctxt,

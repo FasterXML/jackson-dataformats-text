@@ -1,8 +1,10 @@
 package tools.jackson.dataformat.toml;
 
+import java.io.ByteArrayInputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -63,6 +65,19 @@ public class ParserSourceCloseOnFailureTest extends TomlMapperTestBase
         assertThat(decorator.closes).isEqualTo(1);
     }
 
+    // Decorated byte[] input is also a source Jackson opened (and the base factory closes)
+    @Test
+    public void failedDecoratedBytesParseClosesSourceOnce() throws Exception {
+        byte[] doc = "key = [\n".getBytes(StandardCharsets.UTF_8);
+        CountingDecorator decorator = new CountingDecorator();
+        TomlFactory factory = TomlFactory.builder().inputDecorator(decorator).build();
+
+        assertThatThrownBy(() -> factory.createParser(ObjectReadContext.empty(), doc))
+            .isInstanceOf(JacksonException.class)
+            .satisfies(ex -> assertThat(ex.getSuppressed()).isEmpty());
+        assertThat(decorator.closes).isEqualTo(1);
+    }
+
     static final class CountingDecorator extends InputDecorator {
         int closes;
 
@@ -73,7 +88,7 @@ public class ParserSourceCloseOnFailureTest extends TomlMapperTestBase
 
         @Override
         public InputStream decorate(IOContext ctxt, byte[] src, int offset, int length) {
-            throw new UnsupportedOperationException();
+            return new OnceInputStream(new ByteArrayInputStream(src, offset, length), this);
         }
 
         @Override

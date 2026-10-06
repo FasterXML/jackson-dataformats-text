@@ -180,7 +180,9 @@ public final class TomlFactory extends TextualTSFactory
         // A caller-owned stream is closed with the reader when auto-close is enabled,
         // because the base factory does not close caller sources.
         final boolean managed = ctxt.isResourceManaged();
-        final boolean closeStreamWithReader = !managed && _autoCloseSource(readCtxt, ctxt);
+        final boolean closeStreamWithReader = !managed
+                && StreamReadFeature.AUTO_CLOSE_SOURCE.enabledIn(
+                        readCtxt.getStreamReadFeatures(_streamReadFeatures));
         JsonParser parser = _createParser(readCtxt, ctxt,
                 UTF8Reader.construct(ctxt, in, closeStreamWithReader), true);
         if (managed) {
