@@ -36,12 +36,12 @@ class StringOutputUtil {
                 char lo = s.charAt(i);
                 if (Character.isLowSurrogate(lo)) {
                     i++;
-                    flags &= categorize(Character.toCodePoint(hi, lo));
+                    flags &= _categorize(Character.toCodePoint(hi, lo));
                 } else {
                     return 0; // surrogates not allowed
                 }
             } else {
-                flags &= categorize(hi);
+                flags &= _categorize(hi);
             }
         }
         return flags;
@@ -60,12 +60,12 @@ class StringOutputUtil {
                 char lo = text[offset + i];
                 if (Character.isLowSurrogate(lo)) {
                     i++;
-                    flags &= categorize(Character.toCodePoint(hi, lo));
+                    flags &= _categorize(Character.toCodePoint(hi, lo));
                 } else {
                     return 0; // surrogates not allowed
                 }
             } else {
-                flags &= categorize(hi);
+                flags &= _categorize(hi);
             }
         }
         return flags;
@@ -92,15 +92,16 @@ class StringOutputUtil {
             return BASIC_STRING;
         }
 
-        // first, get the very restrictive unquoted keys out of the way.
+        // non-ascii is allowed everywhere. (checked first since ASCII is
+        // normally served from the lookup table)
+        if (c >= 0x80) {
+            return LITERAL_STRING | BASIC_STRING | BASIC_STRING_NO_ESCAPE;
+        }
+
+        // then, get the very restrictive unquoted keys out of the way.
         // unquoted-key = 1*( ALPHA / DIGIT / %x2D / %x5F ) ; A-Z / a-z / 0-9 / - / _
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_') {
             return LITERAL_STRING | BASIC_STRING | UNQUOTED_KEY | BASIC_STRING_NO_ESCAPE | ASCII_ONLY;
-        }
-
-        // non-ascii is allowed everywhere.
-        if (c >= 0x80) {
-            return LITERAL_STRING | BASIC_STRING | BASIC_STRING_NO_ESCAPE;
         }
 
         // quotes need escaping.
