@@ -14,10 +14,24 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.21.7 (not yet released)
+2.21.8 (not yet released)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+ (fix by @pjfanning)
+
+2.21.7 (21-Sep-2026)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 2.21.6 (14-Aug-2026)
 
@@ -112,6 +126,17 @@ No changes since 2.19.0
  (contributed by @pjfanning)
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
+
+2.18.11 (20-Sep-2026)
+
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 2.18.10 (15-Aug-2026)
 
