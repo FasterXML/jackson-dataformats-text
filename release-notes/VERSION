@@ -70,6 +70,10 @@ implementations)
   "Stream closed", `streamWriteOutputTarget()` returned internal `OutputStreamWriter`
   instead of caller's stream, and failure on `close()` could mask an earlier failure
  (fix by @cowtowncoder)
+#750: (toml) `TomlGenerator`: `flush()` after `close()` flushed (already closed) target,
+  `streamWriteOutputTarget()` returned internal `UTF8Writer` instead of caller's stream,
+  and failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 

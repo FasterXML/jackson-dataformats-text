@@ -5,6 +5,7 @@ import java.io.*;
 import tools.jackson.core.*;
 import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.GuardedOutputStream;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.UTF8Writer;
 
