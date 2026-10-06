@@ -23,6 +23,11 @@ Active Maintainers:
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
+#746: (toml) Fix multiple `TomlGenerator` value-writing issues: `writeUTF8String()`
+  writes an extra empty line; `writeRawValue()` writes no line feed after value;
+  `writeBinary()` silently pads invalid ranges with zero bytes; `writeString()`,
+  `writeRaw()` do not validate offset/length; String value with unsupported
+  characters fails after key is written, with misleading "Key contains ..." message
 
 2.22.4 (not yet released)
 
