@@ -513,8 +513,9 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeNumber(short v) throws IOException {
+        // NOTE: writeNumber(int) already calls writeValueEnd(); calling it
+        // again here would output an extra empty line
         writeNumber((int) v);
-        writeValueEnd();
     }
 
     @Override
