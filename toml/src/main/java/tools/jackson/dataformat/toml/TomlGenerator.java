@@ -136,7 +136,9 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public Object streamWriteOutputTarget() {
-        return _out;
+        // (follow-up to [dataformats-text#735]): Writer we constructed ourselves is an implementation
+        //   detail, shielded from caller's stream: so expose the stream instead
+        return (_target != null) ? _target : _out;
     }
 
     @Override
@@ -153,11 +155,25 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public void close() {
         if (!isClosed()) {
+            // (follow-up to [dataformats-text#735]): closing may fail too (on writing out buffered
+            //   content): must not mask earlier failure
+            RuntimeException fail = null;
             try {
                 _flushBuffer();
-            } finally {
+            } catch (RuntimeException e) {
+                fail = e;
+            }
+            _outputTail = 0; // just to ensure we don't think there's anything buffered
+            try {
                 super.close();
-                _outputTail = 0; // just to ensure we don't think there's anything buffered
+            } catch (RuntimeException e) {
+                if (fail == null) {
+                    throw e;
+                }
+                fail.addSuppressed(e);
+            }
+            if (fail != null) {
+                throw fail;
             }
         }
     }
@@ -174,15 +190,29 @@ final class TomlGenerator extends GeneratorBase
                 //   caller's OutputStream, and the buffer it took from the recycler is
                 //   lost. Caller's stream is shielded from that, and closed (or flushed)
                 //   here only if it should be, as per features enabled now.
+                //   (follow-up to [dataformats-text#735]): first failure is the one to report, any
+                //   later ones are added as suppressed
+                IOException fail = null;
                 try {
                     _out.close();
-                } finally {
+                } catch (IOException e) {
+                    fail = e;
+                }
+                try {
                     if (closeTarget) {
                         _target.close();
+                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } catch (IOException e) {
+                    if (fail == null) {
+                        fail = e;
+                    } else {
+                        fail.addSuppressed(e);
                     }
                 }
-                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                    _target.flush();
+                if (fail != null) {
+                    throw fail;
                 }
             } else if (closeTarget) {
                 _out.close();
@@ -195,6 +225,11 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void flush() {
+        // (follow-up to [dataformats-text#735]): nothing to flush once closed -- and target may
+        //   have been closed along with us
+        if (isClosed()) {
+            return;
+        }
         _flushBuffer();
         if (_out != null) {
             try {
