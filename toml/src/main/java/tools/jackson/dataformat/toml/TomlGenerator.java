@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.toml;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -33,16 +34,18 @@ final class TomlGenerator extends GeneratorBase
     protected final Writer _out;
 
     /**
-     * Whether {@link #_out} was constructed by us (wrapping a caller-provided
-     * {@link java.io.OutputStream}) rather than handed to us by the caller. A
-     * {@link Writer} we construct must always be closed: that is what flushes its
-     * pending content into the stream and returns its buffers to the recycler.
-     * Whether that also closes the caller's stream is up to the stream wrapper it
-     * was constructed with (see {@link GuardedOutputStream}).
+     * Caller-provided {@link OutputStream} that {@link #_out} was constructed (by us)
+     * to wrap, if any; {@code null} if {@link #_out} was handed to us by the caller.
+     *<p>
+     * A {@link Writer} we construct must always be flushed and closed: that is what
+     * hands its pending content over and returns its buffers to the recycler. It is
+     * shielded from this stream (see {@link GuardedOutputStream}), which is instead
+     * flushed and closed directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
+     * and {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
      *
      * @since 3.3
      */
-    protected final boolean _ownsWriter;
+    protected final OutputStream _target;
 
     private final int _tomlFeatures;
 
@@ -91,19 +94,22 @@ final class TomlGenerator extends GeneratorBase
 
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
             int stdFeatures, int tomlFeatures, Writer out) {
-        this(writeCtxt, ioCtxt, stdFeatures, tomlFeatures, out, false);
+        this(writeCtxt, ioCtxt, stdFeatures, tomlFeatures, out, null);
     }
 
     /**
-     * @param ownsWriter Whether {@code out} was constructed by Jackson (and hence must
-     *    always be closed), or provided by the caller
+     * @param out Writer to write to: either provided by the caller, or constructed
+     *    by Jackson to wrap {@code target}
+     * @param target Caller-provided stream that {@code out} wraps, if {@code out} was
+     *    constructed by Jackson (and hence must always be flushed and closed);
+     *    {@code null} if {@code out} was provided by the caller
      *
      * @since 3.3
      */
     public TomlGenerator(ObjectWriteContext writeCtxt, IOContext ioCtxt,
-            int stdFeatures, int tomlFeatures, Writer out, boolean ownsWriter) {
+            int stdFeatures, int tomlFeatures, Writer out, OutputStream target) {
         super(writeCtxt, ioCtxt, stdFeatures);
-        _ownsWriter = ownsWriter;
+        _target = target;
         _tomlFeatures = tomlFeatures;
         _streamWriteContext = TomlWriteContext.createRootContext();
         _out = out;
@@ -160,13 +166,25 @@ final class TomlGenerator extends GeneratorBase
     protected void _closeInput() throws IOException
     {
         if (_out != null) {
-            // [dataformats-text#735]: a Writer we constructed ourselves must be closed
-            //   regardless: without that its buffered content never reaches the
-            //   caller's OutputStream (which is only closed if it should be), and the
-            //   buffer it took from the recycler is lost
-            if (_ownsWriter
-                    || _ioContext.isResourceManaged()
-                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+            final boolean closeTarget = _ioContext.isResourceManaged()
+                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
+            if (_target != null) {
+                // [dataformats-text#735]: a Writer we constructed ourselves must be closed
+                //   regardless: without that its buffered content never reaches the
+                //   caller's OutputStream, and the buffer it took from the recycler is
+                //   lost. Caller's stream is shielded from that, and closed (or flushed)
+                //   here only if it should be, as per features enabled now.
+                try {
+                    _out.close();
+                } finally {
+                    if (closeTarget) {
+                        _target.close();
+                    }
+                }
+                if (!closeTarget && isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    _target.flush();
+                }
+            } else if (closeTarget) {
                 _out.close();
             } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
@@ -179,15 +197,20 @@ final class TomlGenerator extends GeneratorBase
     public void flush() {
         _flushBuffer();
         if (_out != null) {
-            // [dataformats-text#735]: a Writer we constructed ourselves is just a
-            //   buffer, so must be flushed regardless (caller's OutputStream is only
-            //   flushed if it should be)
-            if (_ownsWriter || isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-                try {
+            try {
+                if (_target != null) {
+                    // [dataformats-text#735]: a Writer we constructed ourselves is just
+                    //   a buffer, so must be flushed regardless; caller's stream is
+                    //   shielded from that, and flushed here only if it should be
                     _out.flush();
-                } catch (IOException e) {
-                    throw _wrapIOFailure(e);
+                    if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    _out.flush();
                 }
+            } catch (IOException e) {
+                throw _wrapIOFailure(e);
             }
         }
     }

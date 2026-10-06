@@ -97,23 +97,18 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
         assertTrue(write(false, true).flushCount > 0);
     }
 
-    // Flush-on-close must come from the wrapper itself, not depend on the
-    // `Writer` it is wrapped in happening to flush the stream when closed
+    // Wrapper must never flush or close the caller's stream: that is for the
+    // generator to decide (as per features enabled at that point)
     @Test
-    public void testGuardedStreamCloseFlushesWhenNotClosing() throws Exception {
+    public void testGuardedStreamShieldsTarget() throws Exception {
         TrackingStream out = new TrackingStream();
-        new GuardedOutputStream(out, true, false).close();
-        assertEquals(1, out.flushCount);
-        assertEquals(0, out.closeCount);
-
-        out = new TrackingStream();
-        new GuardedOutputStream(out, false, false).close();
+        GuardedOutputStream guarded = new GuardedOutputStream(out);
+        guarded.write(new byte[] { 'x' }, 0, 1);
+        guarded.flush();
+        guarded.close();
+        assertEquals("x", out.toString(StandardCharsets.ISO_8859_1));
         assertEquals(0, out.flushCount);
         assertEquals(0, out.closeCount);
-
-        out = new TrackingStream();
-        new GuardedOutputStream(out, false, true).close();
-        assertEquals(1, out.closeCount);
     }
 
     // Same for `JsonGenerator.flush()` mid-document: our own writer must be drained
@@ -153,6 +148,33 @@ public class GeneratorTargetClosingTest extends ModuleTestBase
                     if (!flushStream) {
                         assertEquals(0, out.flushCount, desc);
                     }
+                }
+            }
+        }
+    }
+
+    // Features changed on the generator after construction must be honored, both on
+    // `flush()` and `close()`: so start with the opposite of what is then configured
+    @Test
+    public void testFeaturesChangedOnGenerator() throws Exception {
+        for (boolean autoClose : new boolean[] { true, false }) {
+            for (boolean flushStream : new boolean[] { true, false }) {
+                final String desc = "autoClose="+autoClose+", flushStream="+flushStream;
+                TrackingStream out = new TrackingStream();
+                try (JsonGenerator g = mapper(!autoClose, !flushStream).createGenerator(out)) {
+                    g.configure(StreamWriteFeature.AUTO_CLOSE_TARGET, autoClose);
+                    g.configure(StreamWriteFeature.FLUSH_PASSED_TO_STREAM, flushStream);
+                    g.writeStartObject();
+                    g.writeStringProperty("a", "1");
+                    g.flush();
+                    assertEquals(flushStream ? 1 : 0, out.flushCount, desc);
+                    assertEquals(0, out.closeCount, desc);
+                    g.writeEndObject();
+                }
+                assertEquals("a=1\n", out.toString(StandardCharsets.ISO_8859_1), desc);
+                assertEquals(autoClose ? 1 : 0, out.closeCount, desc);
+                if (!flushStream) {
+                    assertEquals(0, out.flushCount, desc);
                 }
             }
         }
