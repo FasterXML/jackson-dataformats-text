@@ -79,6 +79,20 @@ public class YAMLGenerator extends GeneratorBase
 
     protected Writer _writer;
 
+    /**
+     * Caller-provided {@link OutputStream} that {@link #_writer} was constructed (by us)
+     * to wrap, if any; {@code null} if {@link #_writer} was handed to us by the caller.
+     *<p>
+     * A {@link Writer} we construct must always be flushed and closed: that is what
+     * hands its pending content over and returns its buffers to the recycler. It is
+     * shielded from this stream (see {@link GuardedOutputStream}), which is instead
+     * flushed and closed directly, as per {@link StreamWriteFeature#FLUSH_PASSED_TO_STREAM}
+     * and {@link StreamWriteFeature#AUTO_CLOSE_TARGET}.
+     *
+     * @since 3.3
+     */
+    protected final OutputStream _target;
+
     protected DumpSettings _outputOptions;
 
     protected final boolean _cfgMinimizeQuotes;
@@ -123,7 +137,27 @@ public class YAMLGenerator extends GeneratorBase
             Writer out, SpecVersion version,
             DumpSettings dumpOptions)
     {
+        this(writeContext, ioCtxt, streamWriteFeatures, yamlFeatures, quotingChecker,
+                out, null, version, dumpOptions);
+    }
+
+    /**
+     * @param out Writer to write to: either provided by the caller, or constructed
+     *    by Jackson to wrap {@code target}
+     * @param target Caller-provided stream that {@code out} wraps, if {@code out} was
+     *    constructed by Jackson (and hence must always be flushed and closed);
+     *    {@code null} if {@code out} was provided by the caller
+     *
+     * @since 3.3
+     */
+    public YAMLGenerator(ObjectWriteContext writeContext, IOContext ioCtxt,
+            int streamWriteFeatures, int yamlFeatures,
+            StringQuotingChecker quotingChecker,
+            Writer out, OutputStream target, SpecVersion version,
+            DumpSettings dumpOptions)
+    {
         super(writeContext, ioCtxt, streamWriteFeatures);
+        _target = target;
         final DupDetector dups = StreamWriteFeature.STRICT_DUPLICATE_DETECTION.enabledIn(streamWriteFeatures)
                 ? DupDetector.rootDetector(this) : null;
         _streamWriteContext = SimpleStreamWriteContext.createRootContext(dups);
@@ -259,7 +293,9 @@ public class YAMLGenerator extends GeneratorBase
 
     @Override
     public Object streamWriteOutputTarget() {
-        return _writer;
+        // [dataformats-text#749]: Writer we constructed ourselves is an implementation
+        //   detail, shielded from caller's stream: so expose the stream instead
+        return (_target != null) ? _target : _writer;
     }
 
     /**
@@ -350,12 +386,25 @@ public class YAMLGenerator extends GeneratorBase
     @Override
     public final void flush()
     {
-        if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
-            try {
+        // [dataformats-text#749]: nothing to flush once closed -- and target may
+        //   have been closed along with us
+        if (isClosed()) {
+            return;
+        }
+        try {
+            if (_target != null) {
+                // [dataformats-text#735] (as with toml): a Writer we constructed ourselves is just
+                //   a buffer, so must be flushed regardless; caller's stream is
+                //   shielded from that, and flushed here only if it should be
                 _writer.flush();
-            } catch (IOException e) {
-                throw _wrapIOFailure(e);
+                if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                    _target.flush();
+                }
+            } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                _writer.flush();
             }
+        } catch (IOException e) {
+            throw _wrapIOFailure(e);
         }
     }
 
@@ -365,11 +414,25 @@ public class YAMLGenerator extends GeneratorBase
         if (!isClosed()) {
             // 11-Dec-2019, tatu: Should perhaps check if content is to be auto-closed...
             //   but need END_DOCUMENT regardless
+            // [dataformats-text#749]: closing may fail too (on writing out buffered
+            //   content): must not mask earlier failure
+            RuntimeException fail = null;
             try {
                 _emitEndDocument();
                 _emit(new StreamEndEvent());
-            } finally {
+            } catch (RuntimeException e) {
+                fail = e;
+            }
+            try {
                 super.close();
+            } catch (RuntimeException e) {
+                if (fail == null) {
+                    throw e;
+                }
+                fail.addSuppressed(e);
+            }
+            if (fail != null) {
+                throw fail;
             }
         }
     }
@@ -380,11 +443,41 @@ public class YAMLGenerator extends GeneratorBase
         /* 25-Nov-2008, tatus: As per [JACKSON-16] we are not to call close()
          *   on the underlying Reader, unless we "own" it, or auto-closing
          *   feature is enabled.
-         *   One downside: when using UTF8Writer, underlying buffer(s)
-         *   may not be properly recycled if we don't close the writer.
          */
         if (_writer != null) {
-            if (_ioContext.isResourceManaged() || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET)) {
+            final boolean closeTarget = _ioContext.isResourceManaged()
+                    || isEnabled(StreamWriteFeature.AUTO_CLOSE_TARGET);
+            if (_target != null) {
+                // [dataformats-text#735] (as with toml): a Writer we constructed ourselves must be closed
+                //   regardless: that hands its buffered content over to the caller's
+                //   OutputStream and recycles its buffer. Caller's stream is shielded
+                //   from that, and closed (or flushed) here only if it should be, as per
+                //   features enabled now.
+                //   [dataformats-text#749]: first failure is the one to report, any
+                //   later ones are added as suppressed
+                IOException fail = null;
+                try {
+                    _writer.close();
+                } catch (IOException e) {
+                    fail = e;
+                }
+                try {
+                    if (closeTarget) {
+                        _target.close();
+                    } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
+                        _target.flush();
+                    }
+                } catch (IOException e) {
+                    if (fail == null) {
+                        fail = e;
+                    } else {
+                        fail.addSuppressed(e);
+                    }
+                }
+                if (fail != null) {
+                    throw fail;
+                }
+            } else if (closeTarget) {
                 _writer.close();
             } else if (isEnabled(StreamWriteFeature.FLUSH_PASSED_TO_STREAM)) {
                 // If we can't close it, we should at least flush
