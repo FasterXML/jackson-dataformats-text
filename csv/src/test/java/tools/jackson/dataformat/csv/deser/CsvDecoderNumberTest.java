@@ -153,6 +153,7 @@ public class CsvDecoderNumberTest extends ModuleTestBase
             assertEquals(NumberType.LONG, p.getNumberType(), text);
             assertEquals(exp, p.getLongValue(), text);
             assertEquals(Long.valueOf(exp), p.getNumberValue(), text);
+            assertEquals(text, p.getString());
         }
     }
 
@@ -160,6 +161,7 @@ public class CsvDecoderNumberTest extends ModuleTestBase
         try (JsonParser p = _intValueParser(text)) {
             assertEquals(NumberType.BIG_INTEGER, p.getNumberType(), text);
             assertEquals(new BigInteger(text), p.getBigIntegerValue(), text);
+            assertEquals(text, p.getString());
         }
     }
 
