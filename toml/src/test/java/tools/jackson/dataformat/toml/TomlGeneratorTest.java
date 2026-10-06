@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.toml;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+
 import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.StreamWriteException;
+import tools.jackson.core.io.SerializedString;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -26,6 +32,235 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         assertEquals("abc = 123\n", w.toString());
     }
 
+    // `writeString(char[],int,int)` used to read `text[offset + len]` instead
+    // of `text[offset + i]` when escaping was needed (wrong chars written, or
+    // ArrayIndexOutOfBoundsException)
+    @Test
+    public void stringFromCharArrayNeedingEscapes() {
+        // value has a quote and a newline: needs "basic string" with escapes
+        String value = "say \"hi\"\nbye";
+        char[] padded = ("<<" + value).toCharArray(); // no trailing padding: index bug would overflow
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeString(padded, 2, value.length());
+            generator.writeEndObject();
+        }
+        assertEquals("abc = \"say \\\"hi\\\"\\nbye\"\n", w.toString());
+        // and must match String variant, and read back
+        StringWriter w2 = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w2)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeString(value);
+            generator.writeEndObject();
+        }
+        assertEquals(w2.toString(), w.toString());
+        assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").asString());
+    }
+
+    // [#726]: long value (exceeds output buffer) with escapes, sliced from the middle
+    // of a larger array, so both index-bound directions are exercised
+    @Test
+    public void longStringFromCharArrayNeedingEscapes() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 2000; ++i) {
+            sb.append("line \"").append(i).append("\"\n");
+        }
+        final String value = sb.toString();
+        char[] padded = ("<<<" + value + ">>>").toCharArray();
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeString(padded, 3, value.length());
+            generator.writeEndObject();
+        }
+        StringWriter w2 = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w2)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeString(value);
+            generator.writeEndObject();
+        }
+        assertEquals(w2.toString(), w.toString());
+        assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").asString());
+    }
+
+    // `null` arrays are caller errors (as with JSON generators), not TOML nulls
+    @Test
+    public void nullArraysAsStrings() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            StreamWriteException e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeString((char[]) null, 0, 0));
+            assertTrue(e.getMessage().contains("null"), e.getMessage());
+            e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(null, 0, 0));
+            assertTrue(e.getMessage().contains("null"), e.getMessage());
+            // nothing written, generator still usable
+            generator.writeNull();
+            generator.writeEndObject();
+        }
+        assertEquals("abc = \'\'\n", w.toString());
+    }
+
+    @Test
+    public void invalidUTF8StringRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            final byte[] utf8 = "abc".getBytes(StandardCharsets.UTF_8);
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, 2, 5));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, -1, 1));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeUTF8String(utf8, 0, -1));
+            // nothing written, generator still usable
+            generator.writeUTF8String(utf8, 1, 2);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'bc'\n", w.toString());
+    }
+
+    // Invalid String values must fail before anything (key, separator) is written,
+    // leaving generator usable
+    @Test
+    public void unsupportedCharsInStringValue() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> generator.writeString(new char[] { '\uD800', 'x' }, 0, 2));
+            assertTrue(e.getMessage().startsWith("String value contains unsupported characters"),
+                    e.getMessage());
+            e = assertThrows(TomlStreamWriteException.class,
+                    () -> generator.writeString("\uD800x"));
+            assertTrue(e.getMessage().startsWith("String value contains unsupported characters"),
+                    e.getMessage());
+            generator.writeString("ok");
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'ok'\n", w.toString());
+    }
+
+    @Test
+    public void unsupportedCharsInInlineKey() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            generator.writeStartArray();
+            generator.writeStartObject();
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> generator.writeName("\uD800x"));
+            assertTrue(e.getMessage().startsWith("Key contains unsupported characters"),
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void invalidCharArrayRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            final char[] chars = "ab\"c".toCharArray();
+            StreamWriteException e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeString(chars, 2, 10));
+            assertTrue(e.getMessage().contains("Invalid 'offset'"), e.getMessage());
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeString(chars, 0, -1));
+            // nothing written, generator still usable
+            generator.writeString(chars, 2, 2);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = '\"c'\n", w.toString());
+    }
+
+    @Test
+    public void invalidBinaryRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            final byte[] data = new byte[] { 1, 2 };
+            // used to silently pad with zero bytes
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeBinary(data, 1, 5));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeBinary(data, -1, 1));
+            generator.writeBinary(data, 1, 1);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'Ag=='\n", w.toString());
+    }
+
+    // `writeRawValue()` variants did not call `writeValueEnd()`: no line feed after value
+    @Test
+    public void rawValue() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            generator.writeRawValue("1");
+            generator.writeName("b");
+            generator.writeRawValue("<<2>>", 2, 1);
+            generator.writeName("c");
+            generator.writeRawValue("<<3>>".toCharArray(), 2, 1);
+            generator.writeName("d");
+            generator.writeRawValue(new SerializedString("4"));
+            generator.writeName("e");
+            generator.writeStartArray();
+            generator.writeRawValue("5");
+            generator.writeRawValue("6");
+            generator.writeEndArray();
+            generator.writeEndObject();
+        }
+        assertEquals("a = 1\nb = 2\nc = 3\nd = 4\ne = [5, 6]\n", w.toString());
+        assertThrows(StreamWriteException.class,
+                () -> newTomlMapper().createGenerator(new StringWriter()).writeRawValue("abc", 2, 5));
+    }
+
+    @Test
+    public void invalidRawRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeRaw("abc", 2, 5));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeRaw("abc".toCharArray(), 2, 5));
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeRaw("abc".toCharArray(), -1, 1));
+            generator.writeRaw("abc", 1, 2);
+            generator.writeRaw("xyz".toCharArray(), 0, 1);
+        }
+        assertEquals("bcx", w.toString());
+    }
+
+    // `writeUTF8String()` used to call `writeValueEnd()` twice, producing
+    // an extra empty line after the value
+    @Test
+    public void utf8StringNeedingQuotes() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("abc");
+            final byte[] utf8 = "<<x\"y>>".getBytes(StandardCharsets.UTF_8);
+            generator.writeUTF8String(utf8, 2, 3);
+            generator.writeName("def");
+            generator.writeNumber(1);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'x\"y'\ndef = 1\n", w.toString());
+    }
+
     // `writeNumber(short)` used to call `writeValueEnd()` twice, producing
     // an extra empty line after every short value
     @Test
@@ -40,6 +275,116 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             generator.writeEndObject();
         }
         assertEquals("abc = 7\ndef = -8\n", w.toString());
+    }
+
+    @Test
+    public void rawWrites() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeRaw("xxabc = 1yy", 2, 7);
+            generator.writeRaw('\n');
+            generator.writeRaw(new SerializedString("def = \"quoted\""));
+            generator.writeRaw("\n".toCharArray(), 0, 1);
+            // longer than output buffer (4000 chars), via offset/length variant
+            StringBuilder sb = new StringBuilder("<<ghi = '");
+            for (int i = 0; i < 9000; i++) {
+                sb.append('x');
+            }
+            sb.append("'>>");
+            generator.writeRaw(sb.toString(), 2, sb.length() - 4);
+            generator.writeRaw("\n");
+        }
+        String exp = "abc = 1\ndef = \"quoted\"\nghi = '" + "x".repeat(9000) + "'\n";
+        assertEquals(exp, w.toString());
+        // and must be valid TOML
+        JsonNode n = newTomlMapper().readTree(w.toString());
+        assertEquals(1, n.get("abc").intValue());
+        assertEquals("quoted", n.get("def").stringValue());
+        assertEquals(9000, n.get("ghi").stringValue().length());
+    }
+
+    @Test
+    public void rawValues() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            generator.writeRawValue("1");
+            generator.writeName("b");
+            generator.writeRawValue("x2x", 1, 1);
+            generator.writeName("c");
+            generator.writeRawValue("x3x".toCharArray(), 1, 1);
+            generator.writeName("d");
+            generator.writeRawValue(new SerializedString("'four'"));
+            generator.writeName("e");
+            generator.writeNumber(5);
+            generator.writeEndObject();
+        }
+        assertEquals("a = 1\nb = 2\nc = 3\nd = 'four'\ne = 5\n", w.toString());
+    }
+
+    @Test
+    public void rawValueAnnotated() throws Exception {
+        assertEquals("raw = 42\nafter = 1\n",
+                newTomlMapper().writeValueAsString(new RawValueBean()));
+    }
+
+    @JsonPropertyOrder({ "raw", "after" })
+    static class RawValueBean {
+        @JsonRawValue
+        public String raw = "42";
+        public int after = 1;
+    }
+
+    @Test
+    public void utf8String() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            byte[] utf8 = "<xy>".getBytes(StandardCharsets.UTF_8);
+            generator.writeUTF8String(utf8, 1, 2);
+            generator.writeName("b");
+            generator.writeNumber(2);
+            generator.writeEndObject();
+        }
+        assertEquals("a = 'xy'\nb = 2\n", w.toString());
+    }
+
+    @Test
+    public void escapedCharArrayString() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            char[] buf = "<a\nb>".toCharArray();
+            generator.writeString(buf, 1, 3);
+            generator.writeEndObject();
+        }
+        assertEquals("a = \"a\\nb\"\n", w.toString());
+        assertEquals("a\nb", newTomlMapper().readTree(w.toString()).get("a").stringValue());
+    }
+
+    // Invalid offset/len must be rejected before anything is written
+    @Test
+    public void invalidRangeArguments() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("a");
+            char[] buf = "abc".toCharArray();
+            assertThrows(StreamWriteException.class, () -> generator.writeString(buf, 0, -1));
+            assertThrows(StreamWriteException.class, () -> generator.writeString(buf, 2, 2));
+            assertThrows(StreamWriteException.class, () -> generator.writeRaw("abc", 0, 5000));
+            assertThrows(StreamWriteException.class, () -> generator.writeRaw(buf, -1, 1));
+            assertThrows(StreamWriteException.class, () -> generator.writeRawValue("abc", 1, 3));
+            assertThrows(StreamWriteException.class, () -> generator.writeRawValue(buf, 0, 4));
+            generator.flush();
+            assertEquals("", w.toString());
+            generator.writeString(buf, 0, 3);
+            generator.writeEndObject();
+        }
+        assertEquals("a = 'abc'\n", w.toString());
     }
 
     @Test
