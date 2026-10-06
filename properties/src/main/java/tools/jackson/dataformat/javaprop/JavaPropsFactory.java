@@ -8,10 +8,10 @@ import tools.jackson.core.base.TextualTSFactory;
 import tools.jackson.core.exc.StreamConstraintsException;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.dataformat.javaprop.impl.GuardedOutputStream;
 import tools.jackson.dataformat.javaprop.impl.PropertiesBackedGenerator;
 import tools.jackson.dataformat.javaprop.impl.WriterBackedGenerator;
 import tools.jackson.dataformat.javaprop.io.Latin1Reader;
-import tools.jackson.dataformat.javaprop.io.NonClosingOutputStream;
 
 @SuppressWarnings("resource")
 public class JavaPropsFactory
@@ -262,15 +262,14 @@ public class JavaPropsFactory
             IOContext ioCtxt, OutputStream out)
     {
         final int stdFeatures = writeCtxt.getStreamWriteFeatures(_streamWriteFeatures);
-        // Writer is constructed (and hence owned) by us, so the generator must always
-        // close it -- that flushes its pending content into the stream. Since
-        // `OutputStreamWriter` always closes the stream it wraps, shield the caller's
-        // stream when it is not ours to close.
-        if (!ioCtxt.isResourceManaged()
-                && !StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures)) {
-            out = new NonClosingOutputStream(out,
-                    StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures));
-        }
+        // [dataformats-text#734]: Writer is constructed (and hence owned) by us, so the
+        // generator must always flush and close it to get its buffered content into the
+        // stream. Whether that also flushes or closes the caller's stream is decided by
+        // the wrapper, as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`.
+        out = new GuardedOutputStream(out,
+                StreamWriteFeature.FLUSH_PASSED_TO_STREAM.enabledIn(stdFeatures),
+                ioCtxt.isResourceManaged()
+                    || StreamWriteFeature.AUTO_CLOSE_TARGET.enabledIn(stdFeatures));
         return new WriterBackedGenerator(writeCtxt, ioCtxt,
                 stdFeatures,
                 _getSchema(writeCtxt),
