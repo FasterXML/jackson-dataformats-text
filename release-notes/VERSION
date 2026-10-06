@@ -38,11 +38,25 @@ implementations)
   `String` unless quoting needed; numeric array elements appended without
   intermediate `String`
  (fix by @pjfanning)
+#725: (toml) Use lookup table for ASCII character categorization when writing
+  Strings/keys; avoid `substring()`/`toString()` in `writeRaw()` variants;
+  also fix escaping of `char[]` String values, missing newline after raw values
+  and extra blank line after `writeUTF8String()`
+ (fix by @pjfanning)
+#727: (csv) Avoid `char[]` copy of value text when parsing integer numbers
+  in `CsvDecoder` (parse directly from already-materialized `String`)
+ (fix by @pjfanning)
 #734: (properties) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
 
-3.2.3 (not yet released)
+3.2.4 (not yet released)
+
+#726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
+  or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+ (fix by @pjfanning)
+
+3.2.3 (21-Sep-2026)
 
 #723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
   after the value (calls `writeValueEnd()` twice)
@@ -159,6 +173,25 @@ No changes since 3.2.1
  (fix by @yawkat)
 #685: (toml) Improve TOML 1.1.0 compatibility (parsing)
  (fix by @yawkat)
+
+3.1.8 (not yet released)
+
+#726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
+  or throws `ArrayIndexOutOfBoundsException` when value needs escaping
+ (fix by @pjfanning)
+
+3.1.7 (21-Sep-2026)
+
+#723: (toml) `TomlGenerator.writeNumber(short)` writes an extra empty line
+  after the value (calls `writeValueEnd()` twice)
+#736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
+  in TOML parser
+ (fix by @pjfanning)
+#737: (yaml) Support `StreamReadConstraints.maxDocumentLength()` for YAML parser
+ (fix by @pjfanning)
+#738: (properties) Support `StreamReadConstraints.maxDocumentLength()` for
+  Properties parser
+ (fix by @pjfanning)
 
 3.1.6 (14-Aug-2026)
 
