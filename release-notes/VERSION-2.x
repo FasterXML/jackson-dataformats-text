@@ -23,6 +23,9 @@ Active Maintainers:
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
+#746: (toml) `TomlGenerator`: `writeUTF8String()` writes an extra empty line;
+  `writeString(char[], int, int)` does not handle `null` or validate offset/length;
+  misleading "Key contains unsupported characters" error for String values
 
 2.22.4 (not yet released)
 
