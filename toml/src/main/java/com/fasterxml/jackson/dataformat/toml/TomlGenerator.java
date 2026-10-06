@@ -425,6 +425,11 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeString(char[] text, int offset, int len) throws IOException {
+        if (text == null) {
+            writeNull();
+            return;
+        }
+        _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write String value");
         _writeStringImpl(StringOutputUtil.MASK_STRING, text, offset, len);
         writeValueEnd();
@@ -437,8 +442,13 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public void writeUTF8String(byte[] text, int offset, int len) throws IOException {
+        if (text == null) {
+            writeNull();
+            return;
+        }
+        _checkRangeBoundsForByteArray(text, offset, len);
+        // NOTE: writeString() already calls writeValueEnd()
         writeString(new String(text, offset, len, StandardCharsets.UTF_8));
-        writeValueEnd();
     }
 
     /*
@@ -711,7 +721,7 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw new TomlStreamWriteException("Key contains unsupported characters", this);
+            _reportUnsupportedCharacters(categoryMask);
         }
     }
 
@@ -740,8 +750,13 @@ final class TomlGenerator extends GeneratorBase
             }
             _writeRaw('"');
         } else {
-            throw new TomlStreamWriteException("Key contains unsupported characters", this);
+            _reportUnsupportedCharacters(categoryMask);
         }
+    }
+
+    private void _reportUnsupportedCharacters(int categoryMask) throws IOException {
+        String what = (categoryMask == StringOutputUtil.MASK_SIMPLE_KEY) ? "Key" : "String value";
+        throw new TomlStreamWriteException(what + " contains unsupported characters", this);
     }
 
     /*

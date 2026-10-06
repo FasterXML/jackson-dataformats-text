@@ -1,11 +1,13 @@
 package com.fasterxml.jackson.dataformat.toml;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,6 +54,93 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         }
         assertEquals(w2.toString(), w.toString());
         assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").textValue());
+    }
+
+    // [#726]: long value (exceeds output buffer) with escapes, sliced from the middle
+    // of a larger array, so both index-bound directions are exercised
+    @Test
+    public void longStringFromCharArrayNeedingEscapes() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 2000; ++i) {
+            sb.append("line \"").append(i).append("\"\n");
+        }
+        final String value = sb.toString();
+        char[] padded = ("<<<" + value + ">>>").toCharArray();
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            generator.writeString(padded, 3, value.length());
+            generator.writeEndObject();
+        }
+        StringWriter w2 = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w2)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            generator.writeString(value);
+            generator.writeEndObject();
+        }
+        assertEquals(w2.toString(), w.toString());
+        assertEquals(value, newTomlMapper().readTree(w.toString()).get("abc").textValue());
+    }
+
+    @Test
+    public void nullStringFromCharArray() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            generator.writeString((char[]) null, 0, 0);
+            generator.writeFieldName("def");
+            generator.writeNull();
+            generator.writeEndObject();
+        }
+        assertEquals("abc = \'\'\ndef = \'\'\n", w.toString());
+    }
+
+    @Test
+    public void unsupportedCharsInStringValue() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> generator.writeString(new char[] { '\uD800', 'x' }, 0, 2));
+            assertTrue(e.getMessage().startsWith("String value contains unsupported characters"),
+                    e.getMessage());
+        }
+    }
+
+    @Test
+    public void invalidCharArrayRange() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            final char[] chars = "ab\"c".toCharArray();
+            StreamWriteException e = assertThrows(StreamWriteException.class,
+                    () -> generator.writeString(chars, 2, 10));
+            assertTrue(e.getMessage().contains("Invalid 'offset'"), e.getMessage());
+            assertThrows(StreamWriteException.class,
+                    () -> generator.writeString(chars, 0, -1));
+        }
+    }
+
+    // `writeUTF8String()` used to call `writeValueEnd()` twice, producing
+    // an extra empty line after the value
+    @Test
+    public void utf8String() throws IOException {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeFieldName("abc");
+            final byte[] utf8 = "<<x\"y>>".getBytes(StandardCharsets.UTF_8);
+            generator.writeUTF8String(utf8, 2, 3);
+            generator.writeFieldName("def");
+            generator.writeNumber(1);
+            generator.writeEndObject();
+        }
+        assertEquals("abc = 'x\"y'\ndef = 1\n", w.toString());
     }
 
     // `writeNumber(short)` used to call `writeValueEnd()` twice, producing
