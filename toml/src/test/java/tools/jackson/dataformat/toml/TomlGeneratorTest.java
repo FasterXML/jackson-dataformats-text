@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.Test;
@@ -725,7 +726,8 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
 
     // [dataformats-text#747]: every value write method -- whether overridden or
     // inherited from `GeneratorBase`/`JsonGenerator`, delegating to another public
-    // method or not -- must terminate its line with exactly one line feed
+    // method or not -- must terminate its line with exactly one line feed; and
+    // write none within inline arrays and tables
     @Test
     public void valueLinesTerminatedOnce() throws Exception {
         final byte[] bytes = new byte[] { 1, 2, 3 };
@@ -733,9 +735,12 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         writers.put("writeString(String)", g -> g.writeString("x"));
         writers.put("writeString(String) escaped", g -> g.writeString("'x\"\n"));
         writers.put("writeString(char[])", g -> g.writeString("<x>".toCharArray(), 1, 1));
+        writers.put("writeString(char[]) escaped", g -> g.writeString("<'x\">".toCharArray(), 1, 3));
         writers.put("writeString(SerializableString)", g -> g.writeString(new SerializedString("x")));
         writers.put("writeUTF8String()", g -> g.writeUTF8String(bytes, 0, 1));
         writers.put("writeRawValue(String)", g -> g.writeRawValue("1"));
+        writers.put("writeRawValue(String,int,int)", g -> g.writeRawValue("<1>", 1, 1));
+        writers.put("writeRawValue(char[],int,int)", g -> g.writeRawValue("<1>".toCharArray(), 1, 1));
         writers.put("writeRawValue(SerializableString)", g -> g.writeRawValue(new SerializedString("1")));
         writers.put("writeBinary(byte[])", g -> g.writeBinary(bytes));
         writers.put("writeBoolean()", g -> g.writeBoolean(true));
@@ -757,24 +762,64 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         writers.put("writeArray(String[])", g -> g.writeArray(new String[] { "x" }, 0, 1));
         writers.put("empty Object", g -> { g.writeStartObject(); g.writeEndObject(); });
 
+        // Value as: key/value line; inline array elements; inline table entries
+        final Map<String, BiConsumer<JsonGenerator, Consumer<JsonGenerator>>> shapes = new LinkedHashMap<>();
+        shapes.put("value", (g, writer) -> writer.accept(g));
+        shapes.put("array", (g, writer) -> {
+            g.writeStartArray();
+            writer.accept(g);
+            writer.accept(g);
+            g.writeEndArray();
+        });
+        shapes.put("inline table", (g, writer) -> {
+            g.writeStartArray();
+            g.writeStartObject();
+            g.writeName("x");
+            writer.accept(g);
+            g.writeName("y");
+            writer.accept(g);
+            g.writeEndObject();
+            g.writeEndArray();
+        });
+
         final ObjectMapper mapper = newTomlMapper();
-        for (Map.Entry<String, Consumer<JsonGenerator>> entry : writers.entrySet()) {
-            StringWriter w = new StringWriter();
-            try (JsonGenerator g = mapper.createGenerator(w)) {
-                g.writeStartObject();
-                g.writeName("a");
-                entry.getValue().accept(g);
-                g.writeName("b");
-                g.writeNumber(2);
-                g.writeEndObject();
+        for (Map.Entry<String, BiConsumer<JsonGenerator, Consumer<JsonGenerator>>> shape : shapes.entrySet()) {
+            for (Map.Entry<String, Consumer<JsonGenerator>> entry : writers.entrySet()) {
+                StringWriter w = new StringWriter();
+                try (JsonGenerator g = mapper.createGenerator(w)) {
+                    g.writeStartObject();
+                    g.writeName("a");
+                    shape.getValue().accept(g, entry.getValue());
+                    g.writeName("b");
+                    g.writeNumber(2);
+                    g.writeEndObject();
+                }
+                final String toml = w.toString();
+                final String desc = shape.getKey() + ", " + entry.getKey() + ", output: " + toml;
+                assertTrue(toml.startsWith("a = "), desc);
+                assertTrue(toml.endsWith("\nb = 2\n"), desc);
+                assertEquals(2, toml.split("\n", -1).length - 1, desc);
+                // and must be valid TOML
+                assertEquals(2, mapper.readTree(toml).get("b").intValue(), desc);
             }
-            final String toml = w.toString();
-            final String desc = entry.getKey() + ", output: " + toml;
-            assertTrue(toml.startsWith("a = "), desc);
-            assertTrue(toml.endsWith("\nb = 2\n"), desc);
-            assertEquals(2, toml.split("\n", -1).length - 1, desc);
-            // and must be valid TOML
-            assertEquals(2, mapper.readTree(toml).get("b").intValue(), desc);
+        }
+    }
+
+    // Invalid key of an inline table must be reported before anything
+    // (like the separator) is written
+    @Test
+    public void invalidInlineTableKey() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartArray();
+            g.writeStartObject();
+            g.writeName("x");
+            g.writeNumber(1);
+            assertThrows(StreamWriteException.class, () -> g.writeName("\ud800"));
+            g.flush();
+            assertEquals("a = [{x = 1", w.toString());
         }
     }
 }

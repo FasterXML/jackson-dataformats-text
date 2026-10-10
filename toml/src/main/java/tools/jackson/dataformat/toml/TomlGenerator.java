@@ -456,10 +456,12 @@ final class TomlGenerator extends GeneratorBase
         }
 
         if (_streamWriteContext._inline) {
+            // validate before writing anything (separator)
+            final char quote = _quoting(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY);
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
-            _writeStringImpl(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY, name);
+            _writeQuoted(quote, name);
         } else {
             // Ok; append to base path at this point.
             // First: ensure possibly preceding property name is removed:
@@ -563,9 +565,9 @@ final class TomlGenerator extends GeneratorBase
             return writeNull();
         }
         // validate before writing anything (key, separator)
-        final int cat = _stringValueCategories(StringOutputUtil.categorize(text));
+        final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize(text)));
         _verifyValueWrite("write String value");
-        _writeStringImpl(cat, text);
+        _writeQuoted(quote, text);
         return _writeValueEnd();
     }
 
@@ -573,7 +575,17 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
         // NOTE: also reports `null` array as error
         _checkRangeBoundsForCharArray(text, offset, len);
-        return writeString(new String(text, offset, len));
+        // validate before writing anything (key, separator)
+        final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize(text, offset, len)));
+        _verifyValueWrite("write String value");
+        if (quote == QUOTE_ESCAPED) {
+            _writeQuoted(quote, new String(text, offset, len));
+        } else { // common case: no escaping needed, so no need to construct String
+            _writeRaw(quote);
+            _writeRaw(text, offset, len);
+            _writeRaw(quote);
+        }
+        return _writeValueEnd();
     }
 
     @Override
@@ -813,7 +825,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write null value");
         // as empty String
-        _writeRaw("''");
+        _writeQuoted(_quoting(_stringValueCategories(StringOutputUtil.categorize(""))), "");
         return _writeValueEnd();
     }
 
@@ -926,11 +938,9 @@ final class TomlGenerator extends GeneratorBase
     }
 
     /**
-     * @param cat Categories of {@code text} (see {@link StringOutputUtil}), already masked
-     *    for the context (key or value)
+     * @param quote Quoting to use, as returned by {@link #_quoting}
      */
-    private void _writeStringImpl(int cat, String text) {
-        final char quote = _quoting(cat);
+    private void _writeQuoted(char quote, String text) {
         if (quote == QUOTE_ESCAPED) {
             // rare enough to not bother escaping directly into output buffer
             _writeRaw(_appendEscaped(new StringBuilder(text.length() + 16), text));
