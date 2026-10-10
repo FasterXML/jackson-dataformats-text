@@ -13,6 +13,7 @@ import org.snakeyaml.engine.v2.schema.Schema;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.GuardedOutputStream;
 import tools.jackson.core.io.IOContext;
 
 import tools.jackson.dataformat.yaml.util.StringQuotingChecker;
@@ -342,8 +343,17 @@ public class YAMLFactory
     protected YAMLGenerator _createUTF8Generator(ObjectWriteContext writeCtxt,
             IOContext ioCtxt, OutputStream out)
     {
-        return _createGenerator(writeCtxt, ioCtxt,
-                _createWriter(ioCtxt, out, JsonEncoding.UTF8));
+        // [dataformats-text#735] (as with toml): Writer is constructed (and hence owned) by us, so the
+        // generator must always flush and close it to get its buffered content into the
+        // stream. It is shielded from the caller's stream, which the generator itself
+        // flushes or closes as per `FLUSH_PASSED_TO_STREAM` and `AUTO_CLOSE_TARGET`
+        // (as enabled at that point).
+        return new YAMLGenerator(writeCtxt, ioCtxt,
+                writeCtxt.getStreamWriteFeatures(_streamWriteFeatures),
+                writeCtxt.getFormatWriteFeatures(_formatWriteFeatures),
+                _quotingChecker,
+                _createWriter(ioCtxt, new GuardedOutputStream(out), JsonEncoding.UTF8), out,
+                _version, _dumpSettings);
     }
 
     @Override

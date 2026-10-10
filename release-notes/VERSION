@@ -56,6 +56,37 @@ implementations)
 #735: (toml) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
+#739: (toml) `TreeTraversingParser` created by `TomlFactory` does not use
+  factory's `StreamReadConstraints`
+ (reported by @cowtowncoder)
+ (fix by @kas5852)
+#747: (toml) `TomlGenerator`: centralize value termination to avoid
+  missing/duplicate line feeds; share String quoting/escaping implementation
+ (fix by @cowtowncoder)
+#749: (yaml) Fix `YAMLGenerator` flushing/closing of output target:
+  - (UTF-8) `OutputStream`: `flush()` did not write buffered content with
+    `FLUSH_PASSED_TO_STREAM` disabled, and internal `UTF8Writer` was not closed
+    (nor its buffer recycled) with `AUTO_CLOSE_TARGET` disabled
+  - SnakeYAML flushed target (`OutputStream` or `Writer`) at end of every document
+    regardless of `FLUSH_PASSED_TO_STREAM`
+  - `flush()` after `close()` flushed (already closed) target
+  - `streamWriteOutputTarget()` returned internal `UTF8Writer`, not caller's stream
+  - failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
+#751: (properties) `WriterBackedGenerator`: `flush()` after `close()` failed with
+  "Stream closed", `streamWriteOutputTarget()` returned internal `OutputStreamWriter`
+  instead of caller's stream, and failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
+#750: (toml) `TomlGenerator`: `flush()` after `close()` flushed (already closed) target,
+  `streamWriteOutputTarget()` returned internal `UTF8Writer` instead of caller's stream,
+  and failure on `close()` could mask an earlier failure
+ (fix by @cowtowncoder)
+#752: (yaml) `YAMLGenerator`: caller's `OutputStream` not closed (with `AUTO_CLOSE_TARGET`
+  enabled) if writing out buffered content failed with an unchecked exception
+  (follow-up to #749)
+ (fix by @cowtowncoder)
+#755: (toml) `TomlParser`: use a single `StreamReadConstraints` source
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 

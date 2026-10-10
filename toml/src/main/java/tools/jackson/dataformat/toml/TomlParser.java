@@ -140,7 +140,7 @@ class TomlParser {
                     throw errorContext.atPosition(lexer).generic("Array already finished");
                 }
                 currentTableDepth = arrayDepth + 1;
-                tomlFactory.streamReadConstraints().validateNestingDepth(currentTableDepth);
+                streamReadConstraints.validateNestingDepth(currentTableDepth);
                 currentTable = (TomlObjectNode) array.addObject();
                 currentTable.explicitlyDefined = true;
                 pollExpected(TomlToken.ARRAY_TABLE_CLOSE, Lexer.EXPECT_EOL);
@@ -185,7 +185,7 @@ class TomlParser {
             pollExpected(TomlToken.DOT_SEP, Lexer.EXPECT_INLINE_KEY);
 
             int childDepth = nodeDepth + 1;
-            tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
+            streamReadConstraints.validateNestingDepth(childDepth);
 
             JsonNode existing = node.get(part);
             if (existing == null) {
@@ -219,7 +219,7 @@ class TomlParser {
                 }
                 // Only arrays declared by array tables are not closed, and those are always arrays of objects.
                 int tableDepth = childDepth + 1;
-                tomlFactory.streamReadConstraints().validateNestingDepth(tableDepth);
+                streamReadConstraints.validateNestingDepth(tableDepth);
                 node = (TomlObjectNode) array.get(array.size() - 1);
                 nodeDepth = tableDepth;
             } else {
@@ -251,10 +251,10 @@ class TomlParser {
             case INTEGER:
                 return parseInt(nextState);
             case ARRAY_OPEN:
-                tomlFactory.streamReadConstraints().validateNestingDepth(valueDepth);
+                streamReadConstraints.validateNestingDepth(valueDepth);
                 return parseArray(nextState, valueDepth);
             case INLINE_TABLE_OPEN:
-                tomlFactory.streamReadConstraints().validateNestingDepth(valueDepth);
+                streamReadConstraints.validateNestingDepth(valueDepth);
                 return parseInlineTable(nextState, valueDepth);
             default:
                 throw errorContext.atPosition(lexer).unexpectedToken(firstToken, "value");
@@ -380,7 +380,7 @@ class TomlParser {
 
             if (baseChar == 'x' || baseChar == 'o' || baseChar == 'b') {
                 try {
-                    tomlFactory.streamReadConstraints().validateIntegerLength(length);
+                    streamReadConstraints.validateIntegerLength(length);
                 } catch (StreamConstraintsException e) {
                     final String reportNum = length <= MAX_CHARS_TO_REPORT
                             ? new String(buffer, start, length)
@@ -468,7 +468,7 @@ class TomlParser {
             }
         }
         try {
-            tomlFactory.streamReadConstraints().validateIntegerLength(length);
+            streamReadConstraints.validateIntegerLength(length);
         } catch (StreamConstraintsException e) {
             final String reportNum = length <= MAX_CHARS_TO_REPORT
                     ? new String(buffer, start, length)
@@ -494,7 +494,7 @@ class TomlParser {
                 if (!NumberInput.looksLikeValidNumber(text)) {
                     throw new NumberFormatException("Not a valid Number representation");
                 }
-                tomlFactory.streamReadConstraints().validateFPLength(text.length());
+                streamReadConstraints.validateFPLength(text.length());
                 BigDecimal dec = NumberInput.parseBigDecimal(
                         text, tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
                 return factory.numberNode(dec);
@@ -572,7 +572,7 @@ class TomlParser {
     }
 
     private TomlObjectNode getOrCreateObject(ObjectNode node, String field, int childDepth) throws IOException {
-        tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
+        streamReadConstraints.validateNestingDepth(childDepth);
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlObjectNode) node.putObject(field);
@@ -584,7 +584,7 @@ class TomlParser {
     }
 
     private TomlArrayNode getOrCreateArray(ObjectNode node, String field, int childDepth) throws IOException {
-        tomlFactory.streamReadConstraints().validateNestingDepth(childDepth);
+        streamReadConstraints.validateNestingDepth(childDepth);
         JsonNode existing = node.get(field);
         if (existing == null) {
             return (TomlArrayNode) node.putArray(field);
