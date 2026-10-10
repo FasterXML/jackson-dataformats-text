@@ -530,7 +530,7 @@ final class TomlGenerator extends GeneratorBase
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
-            writeRaw('{');
+            _writeRaw('{');
         }
         return this;
     }
