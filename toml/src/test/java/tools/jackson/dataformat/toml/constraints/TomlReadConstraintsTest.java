@@ -21,10 +21,12 @@ import tools.jackson.dataformat.toml.TomlMapperTestBase;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Tests for enforcement of {@link StreamReadConstraints#getMaxNameLength()}
- * and {@link StreamReadConstraints#getMaxDocumentLength()} by TOML parser.
+ * Tests for enforcement of {@link StreamReadConstraints#getMaxNameLength()},
+ * {@link StreamReadConstraints#getMaxDocumentLength()} and
+ * {@link StreamReadConstraints#getMaxTokenCount()} by TOML parser.
  *
  * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/430">[dataformats-text#430]</a>
+ * @see <a href="https://github.com/FasterXML/jackson-dataformats-text/issues/739">[dataformats-text#739]</a>
  */
 public class TomlReadConstraintsTest extends TomlMapperTestBase
 {
@@ -210,14 +212,34 @@ public class TomlReadConstraintsTest extends TomlMapperTestBase
                 while (p.nextToken() != null) { }
             }
         });
-        TomlFactory nonClosing = f.rebuild().disable(StreamReadFeature.AUTO_CLOSE_SOURCE).build();
+    }
+
+    // Constraints must also apply when the caller's Reader is left open
+    @Test
+    public void testTokenCountExceededNonClosingReader() throws Exception
+    {
+        TomlFactory f = factoryWithTokenLimit(7).rebuild()
+                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+                .build();
+        CloseTrackingReader r = new CloseTrackingReader(DOC_8_TOKENS);
         _verifyTokenCountExceeded(() -> {
-            try (JsonParser p = nonClosing.createParser(ObjectReadContext.empty(),
-                    new StringReader(DOC_8_TOKENS))) {
+            try (JsonParser p = f.createParser(ObjectReadContext.empty(), r)) {
                 while (p.nextToken() != null) { }
             }
         });
-        _verifyTokenCountExceeded(() -> newTomlMapper(f).readTree(DOC_8_TOKENS));
+        assertFalse(r.closed, "Reader should not be closed with AUTO_CLOSE_SOURCE disabled");
+    }
+
+    private static class CloseTrackingReader extends StringReader {
+        boolean closed;
+
+        CloseTrackingReader(String s) { super(s); }
+
+        @Override
+        public void close() {
+            closed = true;
+            super.close();
+        }
     }
 
     private void _verifyTokenCountExceeded(ThrowingRunnable r) throws Exception
