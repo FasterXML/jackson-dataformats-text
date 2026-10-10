@@ -88,6 +88,23 @@ final class TomlGenerator extends GeneratorBase
 
     protected final StringBuilder _basePath = new StringBuilder(50);
 
+    /**
+     * Scratch buffer for quoting/escaping keys of inline tables and String
+     * values that need escaping.
+     */
+    private final StringBuilder _quoteBuffer = new StringBuilder(50);
+
+    /**
+     * Whether a key/value line (outside inline arrays and tables) has been started
+     * but not yet terminated with a line feed. Lets {@link #_writeValueEnd()} be the
+     * single place that terminates value lines: calling it more than once is harmless,
+     * and a line not terminated by a value write method gets terminated before the
+     * next key/value line is started, as well as on {@link #flush()} and {@link #close()}.
+     *
+     * @since 3.3
+     */
+    private boolean _valueLineOpen;
+
     /*
     /**********************************************************************
     /* Life-cycle
@@ -158,6 +175,7 @@ final class TomlGenerator extends GeneratorBase
     public void close() {
         if (!isClosed()) {
             try {
+                _writeValueEnd();
                 _flushBuffer();
             } catch (Throwable t) {
                 // [dataformats-text#750]: must close regardless, but without masking
@@ -212,6 +230,7 @@ final class TomlGenerator extends GeneratorBase
         if (isClosed() || (_out == null)) {
             return;
         }
+        _writeValueEnd();
         _flushBuffer();
         try {
             if (_target != null) {
@@ -446,7 +465,9 @@ final class TomlGenerator extends GeneratorBase
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
-            _writeStringImpl(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY, name);
+            _quoteBuffer.setLength(0);
+            _appendPropertyName(_quoteBuffer, name);
+            _writeRaw(_quoteBuffer);
         } else {
             // Ok; append to base path at this point.
             // First: ensure possibly preceding property name is removed:
@@ -502,7 +523,7 @@ final class TomlGenerator extends GeneratorBase
             VersionUtil.throwInternal();
         }
         _streamWriteContext = _streamWriteContext.getParent();
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -530,13 +551,13 @@ final class TomlGenerator extends GeneratorBase
         if (_streamWriteContext._inline) {
             writeRaw('}');
             _streamWriteContext = _streamWriteContext.getParent();
-            writeValueEnd();
+            _writeValueEnd();
         } else {
             if (!_streamWriteContext.hasCurrentIndex()) {
                 // empty object
                 writeCurrentPath();
                 _writeRaw("{}");
-                writeValueEnd();
+                _writeValueEnd();
             }
             _streamWriteContext = _streamWriteContext.getParent();
         }
@@ -558,7 +579,7 @@ final class TomlGenerator extends GeneratorBase
         final int cat = _stringValueCategories(StringOutputUtil.categorize(text));
         _verifyValueWrite("write String value");
         _writeStringImpl(cat, text);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -568,8 +589,8 @@ final class TomlGenerator extends GeneratorBase
         // validate before writing anything (key, separator)
         final int cat = _stringValueCategories(StringOutputUtil.categorize(text, offset, len));
         _verifyValueWrite("write String value");
-        _writeStringImpl(cat, text, offset, len);
-        return writeValueEnd();
+        _writeStringImpl(cat, new String(text, offset, len));
+        return _writeValueEnd();
     }
 
     @Override
@@ -581,7 +602,6 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeUTF8String(byte[] text, int offset, int len) throws JacksonException {
         // NOTE: also reports `null` array as error
         _checkRangeBoundsForByteArray(text, offset, len);
-        // NOTE: writeString() already calls writeValueEnd()
         return writeString(new String(text, offset, len, StandardCharsets.UTF_8));
     }
 
@@ -635,7 +655,7 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeRawValue(String text) throws JacksonException {
         _verifyValueWrite("write raw value");
         _writeRaw(text);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -643,7 +663,7 @@ final class TomlGenerator extends GeneratorBase
         _checkRangeBoundsForString(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -651,14 +671,14 @@ final class TomlGenerator extends GeneratorBase
         _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
         _verifyValueWrite("write raw value");
         _writeRaw(text);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     /*
@@ -684,7 +704,7 @@ final class TomlGenerator extends GeneratorBase
         _writeRaw('\'');
         _writeRaw(encoded);
         _writeRaw('\'');
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     /*
@@ -697,12 +717,11 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeBoolean(boolean state) throws JacksonException {
         _verifyValueWrite("write boolean value");
         _writeRaw(state ? "true" : "false");
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeNumber(short v) throws JacksonException {
-        // NOTE: `writeNumber(int)` already calls `writeValueEnd()`
         return writeNumber((int) v);
     }
 
@@ -714,7 +733,7 @@ final class TomlGenerator extends GeneratorBase
             _flushBuffer();
         }
         _outputTail = NumberOutput.outputInt(i, _outputBuffer, _outputTail);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -725,7 +744,7 @@ final class TomlGenerator extends GeneratorBase
             _flushBuffer();
         }
         _outputTail = NumberOutput.outputLong(l, _outputBuffer, _outputTail);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -735,7 +754,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         _writeRaw(v.toString());
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -753,7 +772,7 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRaw(NumberOutput.toString(d, false));
         }
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -769,7 +788,7 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRaw(NumberOutput.toString(f, false));
         }
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     /**
@@ -791,7 +810,7 @@ final class TomlGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeRaw(str);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -801,7 +820,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         _writeRaw(encodedValue);
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     @Override
@@ -811,7 +830,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write null value");
         _writeStringImpl(_stringValueCategories(StringOutputUtil.categorize("")), "");
-        return writeValueEnd();
+        return _writeValueEnd();
     }
 
     /*
@@ -847,14 +866,27 @@ final class TomlGenerator extends GeneratorBase
         }
     }
 
+    /**
+     * Starts a new key/value line: all of them are started here, so preceding
+     * line gets terminated, in case it was not yet.
+     */
     private void writeCurrentPath() {
+        _writeValueEnd();
         _writeRaw(_basePath);
         _writeRaw(" = ");
+        _valueLineOpen = true;
     }
 
-    private JsonGenerator writeValueEnd() {
-        if (!_streamWriteContext._inline) {
-            writeRaw('\n');
+    /**
+     * Terminates the current key/value line with a line feed, if one is open and we
+     * are not within an inline array or table (where values are separated by
+     * {@link #_verifyValueWrite} instead). The only method that writes value-terminating
+     * line feeds; safe to call more than once (see {@link #_valueLineOpen}).
+     */
+    private JsonGenerator _writeValueEnd() {
+        if (_valueLineOpen && !_streamWriteContext._inline) {
+            _valueLineOpen = false;
+            _writeRaw('\n');
         }
         return this;
     }
@@ -866,58 +898,36 @@ final class TomlGenerator extends GeneratorBase
      */
 
     private void _appendPropertyName(StringBuilder path, String name) {
-        int cat = StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY;
-        if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
-            path.append(name);
-        } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
-            path.append('\'').append(name).append('\'');
-        } else if ((cat & StringOutputUtil.BASIC_STRING_NO_ESCAPE) != 0) {
-            path.append('"').append(name).append('"');
-        } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
-            path.append('"');
-            for (int i = 0; i < name.length(); i++) {
-                char c = name.charAt(i);
-                String escape = StringOutputUtil.getBasicStringEscape(c);
-                if (escape == null) {
-                    path.append(c);
-                } else {
-                    path.append(escape);
-                }
-            }
-            path.append('"');
-        } else {
-            throw _reportUnsupportedKeyCharacters();
-        }
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
+        _appendQuoted(path, StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY, name);
     }
 
     /**
-     * @param cat Categories of {@code name} (see {@link StringOutputUtil}), already masked
+     * Appends given key or String value, quoted and escaped as necessary: the only
+     * implementation of TOML String quoting and escaping rules.
+     *
+     * @param cat Categories of {@code text} (see {@link StringOutputUtil}), already masked
      *    for the context (key or value)
      */
-    private void _writeStringImpl(int cat, String name) {
+    private void _appendQuoted(StringBuilder sb, int cat, String text) {
         if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
-            _writeRaw(name);
+            sb.append(text);
         } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
-            _writeRaw('\'');
-            _writeRaw(name);
-            _writeRaw('\'');
+            sb.append('\'').append(text).append('\'');
         } else if ((cat & StringOutputUtil.BASIC_STRING_NO_ESCAPE) != 0) {
-            _writeRaw('"');
-            _writeRaw(name);
-            _writeRaw('"');
+            sb.append('"').append(text).append('"');
         } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
-            _writeRaw('"');
-            for (int i = 0; i < name.length(); i++) {
-                char c = name.charAt(i);
+            sb.append('"');
+            for (int i = 0, len = text.length(); i < len; i++) {
+                char c = text.charAt(i);
                 String escape = StringOutputUtil.getBasicStringEscape(c);
                 if (escape == null) {
-                    _writeRaw(c);
+                    sb.append(c);
                 } else {
-                    _writeRaw(escape);
+                    sb.append(escape);
                 }
             }
-            _writeRaw('"');
+            sb.append('"');
         } else {
             // String values are validated before writing (see _stringValueCategories()),
             // so only keys can get here
@@ -925,33 +935,22 @@ final class TomlGenerator extends GeneratorBase
         }
     }
 
-    private void _writeStringImpl(int cat, char[] text, int offset, int len) {
-        if ((cat & StringOutputUtil.UNQUOTED_KEY) != 0) {
-            _writeRaw(text, offset, len);
-        } else if ((cat & StringOutputUtil.LITERAL_STRING) != 0) {
-            _writeRaw('\'');
-            _writeRaw(text, offset, len);
-            _writeRaw('\'');
-        } else if ((cat & StringOutputUtil.BASIC_STRING_NO_ESCAPE) != 0) {
-            _writeRaw('"');
-            _writeRaw(text, offset, len);
-            _writeRaw('"');
-        } else if ((cat & StringOutputUtil.BASIC_STRING) != 0) {
-            _writeRaw('"');
-            for (int i = 0; i < len; i++) {
-                char c = text[offset + i];
-                String escape = StringOutputUtil.getBasicStringEscape(c);
-                if (escape == null) {
-                    _writeRaw(c);
-                } else {
-                    _writeRaw(escape);
-                }
-            }
-            _writeRaw('"');
+    /**
+     * @param cat Categories of {@code text} (see {@link StringOutputUtil}), already masked
+     *    for String values (see {@link #_stringValueCategories})
+     */
+    private void _writeStringImpl(int cat, String text) {
+        // Common case of no escaping needed: write directly (without copying into
+        // `_quoteBuffer`), using same quoting as `_appendQuoted()` would
+        if ((cat & (StringOutputUtil.LITERAL_STRING | StringOutputUtil.BASIC_STRING_NO_ESCAPE)) != 0) {
+            final char quote = ((cat & StringOutputUtil.LITERAL_STRING) != 0) ? '\'' : '"';
+            _writeRaw(quote);
+            _writeRaw(text);
+            _writeRaw(quote);
         } else {
-            // String values are validated before writing (see _stringValueCategories()),
-            // so only keys can get here
-            throw _reportUnsupportedKeyCharacters();
+            _quoteBuffer.setLength(0);
+            _appendQuoted(_quoteBuffer, cat, text);
+            _writeRaw(_quoteBuffer);
         }
     }
 
@@ -990,7 +989,7 @@ final class TomlGenerator extends GeneratorBase
                 value instanceof OffsetDateTime) {
             _verifyValueWrite("write local date");
             _writeRaw(value.toString());
-            writeValueEnd();
+            _writeValueEnd();
         } else {
             _objectWriteContext.writeValue(this, value);
         }

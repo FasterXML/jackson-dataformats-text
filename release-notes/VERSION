@@ -60,6 +60,9 @@ implementations)
   factory's `StreamReadConstraints`
  (reported by @cowtowncoder)
  (fix by @kas5852)
+#747: (toml) `TomlGenerator`: centralize value termination to avoid
+  missing/duplicate line feeds; share String quoting/escaping implementation
+ (fix by @cowtowncoder)
 #749: (yaml) Fix `YAMLGenerator` flushing/closing of output target:
   - (UTF-8) `OutputStream`: `flush()` did not write buffered content with
     `FLUSH_PASSED_TO_STREAM` disabled, and internal `UTF8Writer` was not closed
