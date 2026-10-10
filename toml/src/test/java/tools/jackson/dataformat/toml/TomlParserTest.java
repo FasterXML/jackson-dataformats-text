@@ -48,7 +48,7 @@ public class TomlParserTest extends TomlMapperTestBase {
     static ObjectNode toml(TomlFactory factory, String toml) throws Exception {
         return TomlParser.parse(
                 factory,
-                testIOContext(),
+                testIOContext(factory.streamReadConstraints()),
                 factory.getFormatReadFeatures(),
                 new StringReader(toml)
                 );

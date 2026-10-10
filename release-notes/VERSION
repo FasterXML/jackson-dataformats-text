@@ -82,6 +82,8 @@ implementations)
   enabled) if writing out buffered content failed with an unchecked exception
   (follow-up to #749)
  (fix by @cowtowncoder)
+#755: (toml) `TomlParser`: use a single `StreamReadConstraints` source
+ (fix by @cowtowncoder)
 
 3.2.4 (not yet released)
 
