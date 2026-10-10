@@ -56,6 +56,10 @@ implementations)
 #735: (toml) Output written to `OutputStream` lost entirely when
   both `AUTO_CLOSE_TARGET` and `FLUSH_PASSED_TO_STREAM` are disabled
  (fix by @pjfanning)
+#739: (toml) `TreeTraversingParser` created by `TomlFactory` does not use
+  factory's `StreamReadConstraints`
+ (reported by @cowtowncoder)
+ (fix by @kas5852)
 #749: (yaml) Fix `YAMLGenerator` flushing/closing of output target:
   - (UTF-8) `OutputStream`: `flush()` did not write buffered content with
     `FLUSH_PASSED_TO_STREAM` disabled, and internal `UTF8Writer` was not closed
