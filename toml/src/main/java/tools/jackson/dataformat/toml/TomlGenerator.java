@@ -90,12 +90,10 @@ final class TomlGenerator extends GeneratorBase
 
     /**
      * Whether a key/value line (outside inline arrays and tables) has been started
-     * but not yet terminated with a line feed. Lets {@link #_writeValueEnd()} be the
-     * single place that terminates value lines, and makes calling it more than once
-     * harmless. Value write methods terminate their line right away (so that output
-     * is complete after each value); as a safety net, a line a method failed to
-     * terminate gets terminated before the next key/value line is started, as well
-     * as on {@link #flush()} and {@link #close()}.
+     * but not yet terminated: lets {@link #writeValueEnd()} write the line feed
+     * just once, regardless of how many times it is called. Lines are terminated
+     * right after the value; as a safety net, also before the next key/value line,
+     * and on {@link #flush()} and {@link #close()}.
      */
     private boolean _valueLineOpen;
 
@@ -169,7 +167,7 @@ final class TomlGenerator extends GeneratorBase
     public void close() {
         if (!isClosed()) {
             try {
-                _writeValueEnd();
+                writeValueEnd();
                 _flushBuffer();
             } catch (Throwable t) {
                 // [dataformats-text#750]: must close regardless, but without masking
@@ -224,7 +222,7 @@ final class TomlGenerator extends GeneratorBase
         if (isClosed() || (_out == null)) {
             return;
         }
-        _writeValueEnd();
+        writeValueEnd();
         _flushBuffer();
         try {
             if (_target != null) {
@@ -517,7 +515,7 @@ final class TomlGenerator extends GeneratorBase
             VersionUtil.throwInternal();
         }
         _streamWriteContext = _streamWriteContext.getParent();
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -532,7 +530,7 @@ final class TomlGenerator extends GeneratorBase
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
-            _writeRaw('{');
+            writeRaw('{');
         }
         return this;
     }
@@ -550,7 +548,7 @@ final class TomlGenerator extends GeneratorBase
             _writeRaw("{}");
         }
         _streamWriteContext = _streamWriteContext.getParent();
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -568,7 +566,7 @@ final class TomlGenerator extends GeneratorBase
         final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize(text)));
         _verifyValueWrite("write String value");
         _writeQuoted(quote, text);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -585,7 +583,7 @@ final class TomlGenerator extends GeneratorBase
             _writeRaw(text, offset, len);
             _writeRaw(quote);
         }
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -650,7 +648,7 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeRawValue(String text) throws JacksonException {
         _verifyValueWrite("write raw value");
         _writeRaw(text);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -658,7 +656,7 @@ final class TomlGenerator extends GeneratorBase
         _checkRangeBoundsForString(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -666,14 +664,14 @@ final class TomlGenerator extends GeneratorBase
         _checkRangeBoundsForCharArray(text, offset, len);
         _verifyValueWrite("write raw value");
         _writeRaw(text, offset, len);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
     public JsonGenerator writeRawValue(SerializableString text) throws JacksonException {
         _verifyValueWrite("write raw value");
         _writeRaw(text);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -699,7 +697,7 @@ final class TomlGenerator extends GeneratorBase
         _writeRaw('\'');
         _writeRaw(encoded);
         _writeRaw('\'');
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -712,7 +710,7 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeBoolean(boolean state) throws JacksonException {
         _verifyValueWrite("write boolean value");
         _writeRaw(state ? "true" : "false");
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -728,7 +726,7 @@ final class TomlGenerator extends GeneratorBase
             _flushBuffer();
         }
         _outputTail = NumberOutput.outputInt(i, _outputBuffer, _outputTail);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -739,7 +737,7 @@ final class TomlGenerator extends GeneratorBase
             _flushBuffer();
         }
         _outputTail = NumberOutput.outputLong(l, _outputBuffer, _outputTail);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -749,7 +747,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         _writeRaw(v.toString());
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -767,7 +765,7 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRaw(NumberOutput.toString(d, false));
         }
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -783,7 +781,7 @@ final class TomlGenerator extends GeneratorBase
         } else {
             _writeRaw(NumberOutput.toString(f, false));
         }
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     /**
@@ -805,7 +803,7 @@ final class TomlGenerator extends GeneratorBase
         _verifyValueWrite("write number");
         String str = isEnabled(StreamWriteFeature.WRITE_BIGDECIMAL_AS_PLAIN) ? dec.toPlainString() : dec.toString();
         _writeRaw(str);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -815,7 +813,7 @@ final class TomlGenerator extends GeneratorBase
         }
         _verifyValueWrite("write number");
         _writeRaw(encodedValue);
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     @Override
@@ -826,7 +824,7 @@ final class TomlGenerator extends GeneratorBase
         _verifyValueWrite("write null value");
         // as empty String
         _writeQuoted(_quoting(_stringValueCategories(StringOutputUtil.categorize(""))), "");
-        return _writeValueEnd();
+        return writeValueEnd();
     }
 
     /*
@@ -862,24 +860,19 @@ final class TomlGenerator extends GeneratorBase
         }
     }
 
-    /**
-     * Starts a new key/value line: all of them are started here, so preceding
-     * line gets terminated, in case it was not yet.
-     */
+    // Starts every key/value line: terminate preceding one, in case it was not yet
     private void writeCurrentPath() {
-        _writeValueEnd();
+        writeValueEnd();
         _writeRaw(_basePath);
         _writeRaw(" = ");
         _valueLineOpen = true;
     }
 
     /**
-     * Terminates the current key/value line with a line feed, if one is open and we
-     * are not within an inline array or table (where values are separated by
-     * {@link #_verifyValueWrite} instead). The only method that writes value-terminating
-     * line feeds; safe to call more than once (see {@link #_valueLineOpen}).
+     * Terminates the current key/value line, if one is open (and we are not within
+     * an inline array or table): the only place that writes value-terminating line feeds.
      */
-    private JsonGenerator _writeValueEnd() {
+    private JsonGenerator writeValueEnd() {
         if (_valueLineOpen && !_streamWriteContext._inline) {
             _valueLineOpen = false;
             _writeRaw('\n');
@@ -1005,7 +998,7 @@ final class TomlGenerator extends GeneratorBase
                 value instanceof OffsetDateTime) {
             _verifyValueWrite("write local date");
             _writeRaw(value.toString());
-            _writeValueEnd();
+            writeValueEnd();
         } else {
             _objectWriteContext.writeValue(this, value);
         }
