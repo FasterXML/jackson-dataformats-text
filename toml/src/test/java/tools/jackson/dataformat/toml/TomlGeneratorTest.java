@@ -571,6 +571,43 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
     }
 
     @Test
+    public void objectCannotEndWithDanglingName() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("outer");
+            generator.writeStartObject();
+            generator.writeName("dangling");
+            StreamWriteException e = assertThrows(StreamWriteException.class, generator::writeEndObject);
+            assertTrue(e.getMessage().contains("dangling"));
+
+            generator.writeNumber(1);
+            generator.writeEndObject();
+            generator.writeEndObject();
+        }
+        assertEquals("outer.dangling = 1\n", w.toString());
+    }
+
+    @Test
+    public void inlineObjectCannotEndWithDanglingName() {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("array");
+            generator.writeStartArray();
+            generator.writeStartObject();
+            generator.writeName("dangling");
+            assertThrows(StreamWriteException.class, generator::writeEndObject);
+
+            generator.writeNumber(1);
+            generator.writeEndObject();
+            generator.writeEndArray();
+            generator.writeEndObject();
+        }
+        assertEquals("array = [{dangling = 1}]\n", w.toString());
+    }
+
+    @Test
     public void objectWithValues() {
         StringWriter w = new StringWriter();
         try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {

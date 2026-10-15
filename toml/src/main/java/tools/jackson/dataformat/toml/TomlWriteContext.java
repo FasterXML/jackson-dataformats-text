@@ -66,9 +66,10 @@ final class TomlWriteContext extends TokenStreamContext {
     private void reset(int type, Object currValue, int basePathLength) {
         _type = type;
         _basePathLength = basePathLength;
-        _currentValue = null;
         _index = -1;
         _currentValue = currValue;
+        _gotName = false;
+        _currentName = null;
         // 09-Apr-2021, tatu: [dataformats-text#260]: must reset this flag as well
         _inline = (type == TYPE_ARRAY) || (_parent != null && _parent._inline);
     }
