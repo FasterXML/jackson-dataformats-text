@@ -186,6 +186,10 @@ No changes since 2.19.0
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
 
+2.18.12 (17-Oct-2026)
+
+No changes since 2.18.11
+
 2.18.11 (20-Sep-2026)
 
 #736: (toml) Support `StreamReadConstraints` maxNameLength/maxDocumentLength
