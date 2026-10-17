@@ -73,7 +73,7 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
-2.21.8 (not yet released)
+2.21.8 (17-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
@@ -185,6 +185,10 @@ No changes since 2.19.0
  (contributed by @pjfanning)
 #554: (csv) Enforce, document thread-safety of `CsvSchema`
  (requested by Gili T)
+
+2.18.12 (17-Oct-2026)
+
+No changes since 2.18.11
 
 2.18.11 (20-Sep-2026)
 
