@@ -14,10 +14,6 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.20.0 (not yet released)
-
--
-
 2.19.5 (not yet released)
 
 #613: (csv) Support `StreamReadConstraints.maxDocumentLength()` validation
