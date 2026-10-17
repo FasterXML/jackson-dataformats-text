@@ -29,7 +29,7 @@ Active Maintainers:
   `writeRaw()` do not validate offset/length; String value with unsupported
   characters fails after key is written, with misleading "Key contains ..." message
 
-2.22.4 (not yet released)
+2.22.4 (17-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
