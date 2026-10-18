@@ -28,6 +28,9 @@ Active Maintainers:
   `writeBinary()` silently pads invalid ranges with zero bytes; `writeString()`,
   `writeRaw()` do not validate offset/length; String value with unsupported
   characters fails after key is written, with misleading "Key contains ..." message
+#763: (csv) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
+  not rejected; wrong char/byte positions in invalid UTF-8 error messages
+ (fix by @pjfanning)
 
 2.22.4 (17-Oct-2026)
 
