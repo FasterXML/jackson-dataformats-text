@@ -1,11 +1,11 @@
 package com.fasterxml.jackson.dataformat.csv.fuzz;
 
 import java.io.ByteArrayInputStream;
+import java.io.CharConversionException;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
@@ -53,11 +53,13 @@ public class FuzzCSVReadTest extends ModuleTestBase
     public void testReadBoundary50402() throws Exception
     {
         byte[] input = readResource("/data/fuzz-50402.csv");
+        // Was about buffer reads, but input also has overlong UTF-8 sequences
+        // (like `C0 AD` at byte #2975), rejected since [dataformats-text#763]
         try {
             CSV_MAPPER.readTree(input);
-            // Ok; don't care about content, just buffer reads
-        } catch (JacksonException e) {
-            verifyException(e, "foo");
+            fail("Should not pass");
+        } catch (CharConversionException e) {
+            verifyException(e, "Invalid UTF-8 character 0x2d (overlong encoding) (at char #2975, byte #2975)");
         }
     }
 }

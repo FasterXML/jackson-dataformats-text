@@ -58,15 +58,10 @@ public final class UTF8Reader
     private int _charCount = 0;
 
     /**
-     * Total read byte count; used for error reporting purposes
+     * Number of input bytes that precede {@code _inputBuffer[0]};
+     * used for error reporting purposes
      */
-    private int _byteCount = 0;
-
-    /**
-     * Flag that is set when a pending decode error has been detected; needed
-     * to properly handle deferred reporting.
-     */
-    private int _decodeErrorOffset;
+    private int _byteCount;
 
     /*
     /**********************************************************************
@@ -87,6 +82,8 @@ public final class UTF8Reader
         // Unmodifiable if there is no stream to actually read from
         // (ideally caller should pass explicitly)
         _inputBufferReadOnly = (in == null);
+        // so that byte positions are relative to start of content, not of buffer
+        _byteCount = -ptr;
     }
 
     public UTF8Reader(IOContext ctxt, byte[] buf, int ptr, int len)
@@ -100,6 +97,7 @@ public final class UTF8Reader
         _autoClose = true;
         // This is the case when we have a buffer of contents already read
         _inputBufferReadOnly = true;
+        _byteCount = -ptr;
     }
 
     public UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose)
@@ -181,10 +179,6 @@ public final class UTF8Reader
             }
             // otherwise let things work the way they should
         } else {
-            if (_decodeErrorOffset != 0) {
-                reportDeferredInvalid();
-            }
-
             // To prevent unnecessary blocking (esp. with network streams),
             // we'll only require decoding of a single char
             int left = (_inputEnd - _inputPtr);
@@ -207,6 +201,12 @@ public final class UTF8Reader
         final byte[] buf = _inputBuffer;
         int inPtr = _inputPtr;
         final int inBufLen = _inputEnd;
+        // for invalid content: start of offending byte sequence, message, index of offending
+        // byte, and whether input looks like it is not UTF-8 at all
+        int seqStart = 0;
+        String error = null;
+        int errorByte = 0;
+        boolean notUtf8 = false;
 
         main_loop:
         while (outPtr < len) {
@@ -237,6 +237,7 @@ public final class UTF8Reader
             }
 
             int needed;
+            seqStart = inPtr - 1;
 
             // Ok; if we end here, we got multi-byte combination
             if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF), from 110xxxxx
@@ -246,13 +247,12 @@ public final class UTF8Reader
                 c = (c & 0x0F);
                 needed = 2;
             } else if ((c & 0xF8) == 0xF0) { // 4 bytes from 11110xxx (double-char w/ surrogates and all)
-                c = (c & 0x0F);
+                c = (c & 0x07);
                 needed = 3;
             } else {
-                reportInvalidInitial(c & 0xFF, outPtr-start);
-                // 25-Aug-2016, tatu: As per [dataformat-csv#132], only returns
-                // if we are ok to return already decoded content and defer error reporting
-                --inPtr;
+                error = "Invalid UTF-8 start byte 0x"+Integer.toHexString(c & 0xFF);
+                errorByte = seqStart;
+                notUtf8 = true;
                 break main_loop;
             }
             /* Do we have enough bytes? If not, let's just push back the
@@ -265,37 +265,49 @@ public final class UTF8Reader
                 break main_loop;
             }
 
-            int d = buf[inPtr];
+            int d = buf[inPtr++];
             if ((d & 0xC0) != 0x080) {
-                reportInvalidOther(d & 0xFF, outPtr-start, 2);
+                error = invalidMiddleByte(d);
+                errorByte = inPtr - 1;
+                notUtf8 = true;
                 break main_loop;
             }
-            ++inPtr;
             c = (c << 6) | (d & 0x3F);
 
             if (needed > 1) { // needed == 1 means 2 bytes total
-                d = buf[inPtr]; // 3rd byte
+                d = buf[inPtr++]; // 3rd byte
                 if ((d & 0xC0) != 0x080) {
-                    reportInvalidOther(d & 0xFF, outPtr-start, 3);
+                    error = invalidMiddleByte(d);
+                    errorByte = inPtr - 1;
+                    notUtf8 = true;
                     break main_loop;
                 }
-                ++inPtr;
                 c = (c << 6) | (d & 0x3F);
                 if (needed > 2) { // 4 bytes? (need surrogates)
-                    d = buf[inPtr];
+                    d = buf[inPtr++];
                     if ((d & 0xC0) != 0x080) {
-                        reportInvalidOther(d & 0xFF, outPtr-start, 4);
+                        error = invalidMiddleByte(d);
+                        errorByte = inPtr - 1;
+                        notUtf8 = true;
                         break main_loop;
                     }
-                    ++inPtr;
                     c = (c << 6) | (d & 0x3F);
+                    if (c < 0x10000) {
+                        error = invalidChar(c, "overlong encoding");
+                        errorByte = seqStart;
+                        break main_loop;
+                    }
+                    if (c > Character.MAX_CODE_POINT) {
+                        error = invalidChar(c, "not a valid Unicode scalar value");
+                        errorByte = seqStart;
+                        break main_loop;
+                    }
                     /* Ugh. Need to mess with surrogates. Ok; let's inline them
                      * there, then, if there's room: if only room for one,
                      * need to save the surrogate for the rainy day...
                      */
                     c -= 0x10000; // to normalize it starting with 0x0
                     cbuf[outPtr++] = (char) (0xD800 + (c >> 10));
-                    // hmmh. can this ever be 0? (not legal, at least?)
                     c = (0xDC00 | (c & 0x03FF));
 
                     // Room for second part?
@@ -304,22 +316,36 @@ public final class UTF8Reader
                         break main_loop;
                     }
                     // sure, let's fall back to normal processing:
+                } else if (c < 0x800) {
+                    error = invalidChar(c, "overlong encoding");
+                    errorByte = seqStart;
+                    break main_loop;
+                } else if (c >= 0xD800 && c <= 0xDFFF) {
+                    // as per [jackson-core#363], surrogates are illegal in UTF-8
+                    error = invalidChar(c, "not a valid Unicode scalar value");
+                    errorByte = seqStart;
+                    break main_loop;
                 }
-                // Otherwise, should we check that 3-byte chars are
-                // legal ones (should not expand to surrogates?
-                // For now, let's not...
-                /*
-                else {
-                    if (c >= 0xD800 && c < 0xE000) {
-                        reportInvalid(c, outPtr-start, "(a surrogate character) ");
-                    }
-                }
-                */
+            } else if (c < 0x80) {
+                error = invalidChar(c, "overlong encoding");
+                errorByte = seqStart;
+                break main_loop;
             }
             cbuf[outPtr++] = (char) c;
             if (inPtr >= inBufLen) {
                 break main_loop;
             }
+        }
+
+        if (error != null) {
+            // 25-Aug-2016, tatu: As per [dataformat-csv#132] defer error reporting if
+            //   (but only if) some content has been decoded successfully: we then
+            //   return that content, and next call starts from the invalid sequence
+            //   and reports it.
+            if (outPtr == start) {
+                reportInvalid(error, errorByte, notUtf8);
+            }
+            inPtr = seqStart;
         }
 
         _inputPtr = inPtr;
@@ -406,13 +432,12 @@ public final class UTF8Reader
      */
     private boolean loadMore(int available) throws IOException
     {
-        _byteCount += (_inputEnd - available);
-
         if (available > 0) {
             // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
                 // Can only do so if buffer mutable
                 if (!_inputBufferReadOnly) {
+                    _byteCount += _inputPtr;
                     for (int i = 0; i < available; ++i) {
                         _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
@@ -421,6 +446,7 @@ public final class UTF8Reader
                 }
             }
         } else {
+            _byteCount += _inputEnd;
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
             int count = readBytes();
             if (count < 1) {
@@ -481,62 +507,37 @@ public final class UTF8Reader
         throw new IOException("Strange I/O stream, returned 0 bytes on read");
     }
 
-    protected void reportInvalidInitial(int mask, int outputDecoded) throws IOException
-    {
-        // 25-Aug-2016, tatu: As per [dataformat-csv#132] defer error reporting if
-        //   (but only if) some content has been decoded successfully
-        if (_decodeErrorOffset == 0) {
-            if (outputDecoded > 0) {
-                _decodeErrorOffset = 1;
-                return;
-            }
-        }
-        
-        // input (byte) ptr has been advanced by one, by now:
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + outputDecoded + 1;
+    private final static String NOT_UTF8 = ": check content encoding, does not look like UTF-8";
 
-        throw new CharConversionException(String.format(
-                "Invalid UTF-8 start byte 0x%s (at char #%d, byte #%d): check content encoding, does not look like UTF-8",
-                Integer.toHexString(mask), charPos, bytePos));
+    private static String invalidMiddleByte(int b) {
+        return "Invalid UTF-8 middle byte 0x"+Integer.toHexString(b & 0xFF);
     }
 
-    protected void reportInvalidOther(int mask, int outputDecoded, int errorPosition) throws IOException
-    {
-        // 25-Aug-2016, tatu: As per [dataformat-csv#132] defer error reporting if
-        //   (but only if) some content has been decoded successfully
-        if (_decodeErrorOffset == 0) {
-            if (outputDecoded > 0) {
-                _decodeErrorOffset = errorPosition;
-                return;
-            }
-        }
-
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + outputDecoded + 1;
-
-        throw new CharConversionException(String.format(
-                "Invalid UTF-8 middle byte 0x%s (at char #%d, byte #%d): check content encoding, does not look like UTF-8",
-                Integer.toHexString(mask), charPos, bytePos));
+    private static String invalidChar(int value, String reason) {
+        return "Invalid UTF-8 character 0x"+Integer.toHexString(value)+" ("+reason+")";
     }
 
-    protected void reportDeferredInvalid() throws IOException
+    // Errors are only reported before anything is decoded by the current read() call
+    // (see [dataformat-csv#132] above), so the offending char is the one after
+    // `_charCount`. `byteIndex` is the index in `_inputBuffer` of the offending byte:
+    // `_inputPtr` is not updated until read() returns, so the decode loop passes it in.
+    private void reportInvalid(String msg, int byteIndex, boolean notUtf8)
+        throws IOException
     {
-        int ch = _inputBuffer[_inputPtr] & 0xFF;
-        if (_decodeErrorOffset == 1) {
-            reportInvalidInitial(ch, 0);
-        } else {
-            reportInvalidOther(ch, 0, _decodeErrorOffset);
-        }
+        throw new CharConversionException(msg+_position(byteIndex)
+                +(notUtf8 ? NOT_UTF8 : ""));
     }
 
     protected void reportUnexpectedEOF(int gotBytes, int needed) throws IOException
     {
-        int bytePos = _byteCount + gotBytes;
-        int charPos = _charCount;
-
+        // only called from loadMore(), before anything is decoded by the current read()
         throw new CharConversionException(String.format(
-                "Unexpected EOF in the middle of a multi-byte UTF-8 character: got %d, needed %d, at char #%d, byte #%d)",
-                gotBytes, needed, charPos, bytePos));
+                "Unexpected EOF in the middle of a multi-byte UTF-8 character: got %d, needed %d%s",
+                gotBytes, needed, _position(_inputPtr)));
+    }
+
+    // 1-based positions, relative to start of content (after BOM, if any)
+    private String _position(int byteIndex) {
+        return " (at char #"+(_charCount + 1)+", byte #"+(_byteCount + byteIndex + 1)+")";
     }
 }
