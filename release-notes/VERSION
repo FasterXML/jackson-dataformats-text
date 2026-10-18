@@ -87,6 +87,8 @@ implementations)
  (fix by @cowtowncoder)
 #755: (toml) `TomlParser`: use a single `StreamReadConstraints` source
  (fix by @cowtowncoder)
+#765: (toml) Wrong byte position (`byte #-1`) in invalid UTF-8 error messages
+ (fix by @pjfanning)
 
 3.2.4 (not yet released)
 
