@@ -62,9 +62,10 @@ public final class UTF8Reader
     int _charCount = 0;
 
     /**
-     * Total read byte count; used for error reporting purposes
+     * Number of input bytes that precede {@code _inputBuffer[0]};
+     * used for error reporting purposes
      */
-    int _byteCount = 0;
+    int _byteCount;
 
     /*
     /**********************************************************************
@@ -102,6 +103,8 @@ public final class UTF8Reader
         _inputEnd = ptr+len;
         _autoClose = autoClose; 
         _bufferHolder = null;
+        // so that byte positions are relative to start of content, not of buffer
+        _byteCount = -ptr;
     }
 
     private static byte[][] _findBufferHolder()
@@ -240,6 +243,8 @@ public final class UTF8Reader
             }
 
             int needed;
+            // index of the first byte of this multi-byte sequence, for error reporting
+            final int seqStart = inPtr - 1;
 
             // Ok; if we end here, we got multi-byte combination
             if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF)
@@ -250,10 +255,10 @@ public final class UTF8Reader
                 needed = 2;
             } else if ((c & 0xF8) == 0xF0) {
                 // 4 bytes; double-char BS, with surrogates and all...
-                c = (c & 0x0F);
+                c = (c & 0x07);
                 needed = 3;
             } else {
-                reportInvalidInitial(c & 0xFF, outPtr-start);
+                reportInvalidInitial(c & 0xFF, outPtr-start, seqStart);
                 // never gets here...
                 needed = 1;
             }
@@ -269,29 +274,34 @@ public final class UTF8Reader
 
             int d = (int) buf[inPtr++];
             if ((d & 0xC0) != 0x080) {
-                reportInvalidOther(d & 0xFF, outPtr-start);
+                reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
             }
             c = (c << 6) | (d & 0x3F);
 
             if (needed > 1) { // needed == 1 means 2 bytes total
                 d = buf[inPtr++]; // 3rd byte
                 if ((d & 0xC0) != 0x080) {
-                    reportInvalidOther(d & 0xFF, outPtr-start);
+                    reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
                 }
                 c = (c << 6) | (d & 0x3F);
                 if (needed > 2) { // 4 bytes? (need surrogates)
                     d = buf[inPtr++];
                     if ((d & 0xC0) != 0x080) {
-                        reportInvalidOther(d & 0xFF, outPtr-start);
+                        reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
                     }
                     c = (c << 6) | (d & 0x3F);
+                    if (c < 0x10000) {
+                        reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
+                    }
+                    if (c > Character.MAX_CODE_POINT) {
+                        reportInvalid(c, outPtr-start, seqStart, "not a valid Unicode scalar value");
+                    }
                     /* Ugh. Need to mess with surrogates. Ok; let's inline them
                      * there, then, if there's room: if only room for one,
                      * need to save the surrogate for the rainy day...
                      */
                     c -= 0x10000; // to normalize it starting with 0x0
                     cbuf[outPtr++] = (char) (0xD800 + (c >> 10));
-                    // hmmh. can this ever be 0? (not legal, at least?)
                     c = (0xDC00 | (c & 0x03FF));
 
                     // Room for second part?
@@ -300,17 +310,14 @@ public final class UTF8Reader
                         break main_loop;
                     }
                     // sure, let's fall back to normal processing:
+                } else if (c < 0x800) {
+                    reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
+                } else if (c >= 0xD800 && c <= 0xDFFF) {
+                    // as per [jackson-core#363], surrogates are illegal in UTF-8
+                    reportInvalid(c, outPtr-start, seqStart, "not a valid Unicode scalar value");
                 }
-                // Otherwise, should we check that 3-byte chars are
-                // legal ones (should not expand to surrogates?
-                // For now, let's not...
-                /*
-                else {
-                    if (c >= 0xD800 && c < 0xE000) {
-                        reportInvalid(c, outPtr-start, "(a surrogate character) ");
-                    }
-                }
-                */
+            } else if (c < 0x80) {
+                reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
             }
             cbuf[outPtr++] = (char) c;
             if (inPtr >= inBufLen) {
@@ -394,46 +401,41 @@ public final class UTF8Reader
     /**********************************************************************
      */
 
-    private void reportInvalidInitial(int mask, int offset) throws IOException
-    {
-        // input (byte) ptr has been advanced by one, by now:
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset + 1;
+    // Positions in messages are 1-based: `offset` is the 0-based index of the char
+    // within the current read() call, `byteIndex` the index in `_inputBuffer` of the
+    // offending byte. Neither `_charCount` nor `_inputPtr` are updated until read()
+    // returns, so the decode loop has to pass its local state in.
 
+    private void reportInvalidInitial(int mask, int offset, int byteIndex) throws IOException
+    {
         throw new CharConversionException("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask)
-                +" (at char #"+charPos+", byte #"+bytePos+")");
+                +_position(offset, byteIndex));
     }
 
-    private void reportInvalidOther(int mask, int offset)
+    private void reportInvalidOther(int mask, int offset, int byteIndex)
         throws IOException
     {
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset;
-
         throw new CharConversionException("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask)
-                +" (at char #"+charPos+", byte #"+bytePos+")");
+                +_position(offset, byteIndex));
+    }
+
+    private void reportInvalid(int value, int offset, int byteIndex, String msg) throws IOException
+    {
+        throw new CharConversionException("Invalid UTF-8 character 0x"+Integer.toHexString(value)
+                +" ("+msg+")"+_position(offset, byteIndex));
     }
 
     private void reportUnexpectedEOF(int gotBytes, int needed)
         throws IOException
     {
-        int bytePos = _byteCount + gotBytes;
-        int charPos = _charCount;
-
+        // only called from loadMore(), before anything is decoded by the current read()
         throw new CharConversionException("Unexpected EOF in the middle of a multi-byte char: got "
-                +gotBytes+", needed "+needed +", at char #"+charPos+", byte #"+bytePos+")");
+                +gotBytes+", needed "+needed+_position(0, _inputPtr));
     }
 
-    /*
-    private void reportInvalid(int value, int offset, String msg) throws IOException
-    { 
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset;
-
-        throw new CharConversionException("Invalid UTF-8 character 0x"+Integer.toHexString(value)+msg
-                +" at char #"+charPos+", byte #"+bytePos+")");
+    private String _position(int offset, int byteIndex) {
+        return " (at char #"+(_charCount + offset + 1)+", byte #"+(_byteCount + byteIndex + 1)+")";
     }
-    */
 
     /**
      * @param available Number of "unused" bytes in the input buffer
@@ -443,13 +445,12 @@ public final class UTF8Reader
      */
     private boolean loadMore(int available) throws IOException
     {
-        _byteCount += (_inputEnd - available);
-
         if (available > 0) {
             // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
                 // Can only do so if buffer mutable
                 if (!_inputBufferReadOnly) {
+                    _byteCount += _inputPtr;
                     for (int i = 0; i < available; ++i) {
                         _inputBuffer[i] = _inputBuffer[_inputPtr+i];
                     }
@@ -458,6 +459,7 @@ public final class UTF8Reader
                 }
             }
         } else {
+            _byteCount += _inputEnd;
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
             int count = readBytes();
             if (count < 1) {
