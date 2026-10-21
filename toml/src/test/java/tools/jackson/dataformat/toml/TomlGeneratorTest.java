@@ -653,6 +653,44 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         assertEquals("abc = [2021-03-27, 18:40:15.123456789, 2021-03-27T18:40:15.123456789, 2021-03-27T18:40:15.123456789+01:23]\n", w.toString());
     }
 
+    // [dataformats-text#758]: TOML 1.0 requires seconds even when they are zero
+    @Test
+    public void localTimeWithZeroSeconds() {
+        _verifyTemporalWithZeroSeconds(LocalTime.of(10, 0), "10:00:00");
+    }
+
+    @Test
+    public void localDateTimeWithZeroSeconds() {
+        _verifyTemporalWithZeroSeconds(LocalDateTime.of(2026, 10, 10, 10, 0),
+                "2026-10-10T10:00:00");
+    }
+
+    @Test
+    public void offsetDateTimeWithZeroSeconds() {
+        _verifyTemporalWithZeroSeconds(OffsetDateTime.of(2026, 10, 10, 10, 0, 0, 0,
+                ZoneOffset.ofHoursMinutes(5, 30)), "2026-10-10T10:00:00+05:30");
+        _verifyTemporalWithZeroSeconds(OffsetDateTime.of(2026, 10, 10, 10, 0, 0, 0,
+                ZoneOffset.UTC), "2026-10-10T10:00:00Z");
+    }
+
+    private void _verifyTemporalWithZeroSeconds(Object value, String expected) {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator generator = newTomlMapper().createGenerator(w)) {
+            generator.writeStartObject();
+            generator.writeName("value");
+            generator.writePOJO(value);
+            generator.writeName("array");
+            generator.writeStartArray();
+            generator.writePOJO(value);
+            generator.writeEndArray();
+            generator.writeEndObject();
+        }
+        assertEquals("value = " + expected + "\narray = [" + expected + "]\n", w.toString());
+        JsonNode node = newTomlMapper().readTree(w.toString());
+        assertEquals(expected, node.get("value").asString());
+        assertEquals(expected, node.get("array").get(0).asString());
+    }
+
     @Test
     public void complexKey() {
         StringWriter w = new StringWriter();
