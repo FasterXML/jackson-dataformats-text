@@ -540,6 +540,10 @@ final class TomlGenerator extends GeneratorBase
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
+        if (_streamWriteContext._gotName) {
+            _reportError("Cannot close Object, expecting a value for property '"
+                    + _streamWriteContext.currentName() + "'");
+        }
         if (_streamWriteContext._inline) {
             _writeRaw('}');
         } else if (!_streamWriteContext.hasCurrentIndex()) {
