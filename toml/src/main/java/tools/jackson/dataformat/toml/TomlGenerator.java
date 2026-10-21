@@ -542,7 +542,9 @@ final class TomlGenerator extends GeneratorBase
         }
         if (_streamWriteContext._inline) {
             _writeRaw('}');
-        } else if (!_streamWriteContext.hasCurrentIndex()) {
+        } else if (!_streamWriteContext.hasCurrentIndex()
+                // [dataformats-text#758]: empty root-level Object is just an empty document
+                && !_streamWriteContext.getParent().inRoot()) {
             // empty object
             writeCurrentPath();
             _writeRaw("{}");
@@ -839,6 +841,12 @@ final class TomlGenerator extends GeneratorBase
     }
 
     protected void _verifyValueWrite(String typeMsg, boolean forceMaterializeKey) throws JacksonException {
+        // [dataformats-text#758]: TOML document is a table, so only an Object
+        // (which does not materialize a key) may be written at root level
+        if (forceMaterializeKey && _streamWriteContext.inRoot()) {
+            throw new TomlStreamWriteException(this,
+                    "Cannot " + typeMsg + " at root level: TOML document must be an Object");
+        }
         // check that name/value cadence works
         if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot " + typeMsg + ", expecting a property name");
