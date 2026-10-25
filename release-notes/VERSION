@@ -88,7 +88,7 @@ implementations)
 #755: (toml) `TomlParser`: use a single `StreamReadConstraints` source
  (fix by @cowtowncoder)
 
-3.2.4 (not yet released)
+3.2.4 (18-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
@@ -217,7 +217,7 @@ No changes since 3.2.1
 #685: (toml) Improve TOML 1.1.0 compatibility (parsing)
  (fix by @yawkat)
 
-3.1.8 (not yet released)
+3.1.8 (17-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
   or throws `ArrayIndexOutOfBoundsException` when value needs escaping
