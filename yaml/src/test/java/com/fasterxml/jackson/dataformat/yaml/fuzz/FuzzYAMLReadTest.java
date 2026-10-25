@@ -30,7 +30,7 @@ public class FuzzYAMLReadTest extends ModuleTestBase
             YAML_MAPPER.readTree(INPUT);
             fail("Should not pass");
         } catch (JacksonException e) {
-            verifyException(e, "Unexpected EOF in the middle of a multi-byte char");
+            verifyException(e, "Unexpected EOF in the middle of a multi-byte UTF-8 character");
             verifyException(e, "got 1, needed 2");
         }
     }
