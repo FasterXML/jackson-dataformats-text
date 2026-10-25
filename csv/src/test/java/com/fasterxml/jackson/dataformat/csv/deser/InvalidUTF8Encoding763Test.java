@@ -14,20 +14,20 @@ import static org.junit.jupiter.api.Assertions.*;
 
 // [dataformats-text#763]: invalid UTF-8 (overlong encodings, surrogates,
 // values beyond U+10FFFF) must be rejected, with correct error positions
-public class InvalidUTF8Test extends ModuleTestBase
+public class InvalidUTF8Encoding763Test extends ModuleTestBase
 {
     private final CsvFactory CSV_FACTORY = new CsvFactory();
 
+    // valid content preceding invalid bytes when testing via parser
+    private final static String PARSER_PREFIX = "a,b\nc,d";
+
     @Test
-    public void overlongEncodings() throws Exception
+    public void testOverlongEncodings() throws Exception
     {
         // all encode '/' (0x2F) in more bytes than needed
-        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding) (at char #1, byte #1)",
-                0xC0, 0xAF);
-        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding) (at char #1, byte #1)",
-                0xE0, 0x80, 0xAF);
-        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding) (at char #1, byte #1)",
-                0xF0, 0x80, 0x80, 0xAF);
+        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding)", 0xC0, 0xAF);
+        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding)", 0xE0, 0x80, 0xAF);
+        assertInvalid("Invalid UTF-8 character 0x2f (overlong encoding)", 0xF0, 0x80, 0x80, 0xAF);
         // and largest values that need fewer bytes
         assertInvalid("Invalid UTF-8 character 0x7f (overlong encoding)", 0xC1, 0xBF);
         assertInvalid("Invalid UTF-8 character 0x7ff (overlong encoding)", 0xE0, 0x9F, 0xBF);
@@ -35,7 +35,7 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void invalidScalarValues() throws Exception
+    public void testInvalidScalarValues() throws Exception
     {
         // surrogates, as per [jackson-core#363]
         assertInvalid("Invalid UTF-8 character 0xd800 (not a valid Unicode scalar value)",
@@ -50,7 +50,7 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void validBoundaries() throws Exception
+    public void testValidBoundaries() throws Exception
     {
         for (int cp : new int[] { 0x7F, 0x80, 0x7FF, 0x800, 0xD7FF, 0xE000, 0xFFFF,
                 0x10000, Character.MAX_CODE_POINT }) {
@@ -67,7 +67,7 @@ public class InvalidUTF8Test extends ModuleTestBase
 
     // [dataformat-csv#132]: content decoded before invalid sequence is returned first
     @Test
-    public void errorDeferredUntilNextRead() throws Exception
+    public void testErrorDeferredUntilNextRead() throws Exception
     {
         byte[] doc = bytes("abé", 0xC0, 0xAF);
         try (UTF8Reader r = new UTF8Reader(null, doc, 0, doc.length)) {
@@ -82,7 +82,7 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void errorPositionWithOffset() throws Exception
+    public void testErrorPositionWithOffset() throws Exception
     {
         byte[] doc = bytes("abé", 0xE0, 0x80, 0xAF);
         byte[] padded = new byte[doc.length + 7];
@@ -93,7 +93,7 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void errorPositionStartAndMiddleByte() throws Exception
+    public void testErrorPositionStartAndMiddleByte() throws Exception
     {
         byte[] doc = bytes("é", 0xFF);
         assertEquals("Invalid UTF-8 start byte 0xff (at char #2, byte #3)"
@@ -106,7 +106,7 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void errorPositionFromParser() throws Exception
+    public void testErrorPositionFromParser() throws Exception
     {
         // long enough to need several buffer loads before the bad bytes
         char[] filler = new char[20000];
@@ -133,22 +133,56 @@ public class InvalidUTF8Test extends ModuleTestBase
     }
 
     @Test
-    public void errorPositionUnexpectedEOF() throws Exception
+    public void testErrorPositionUnexpectedEOF() throws Exception
     {
         byte[] doc = bytes("a,é", 0xE2, 0x82);
         String msg = parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc)));
         assertTrue(msg.contains("got 2, needed 3 (at char #4, byte #5)"), msg);
     }
 
-    private void assertInvalid(String expected, int... badBytes) throws Exception
+    // Truncated sequence at end of input with an invalid middle byte: report the
+    // invalid byte, not EOF
+    @Test
+    public void testInvalidMiddleByteBeforeEOF() throws Exception
+    {
+        assertInvalidMiddleByte(0x41, 2, 0xE2, 'A');
+        assertInvalidMiddleByte(0x41, 2, 0xF0, 'A');
+        assertInvalidMiddleByte(0x41, 3, 0xF0, 0x9F, 'A');
+        assertInvalidMiddleByte(0xc3, 2, 0xE2, 0xC3);
+    }
+
+    private void assertInvalidMiddleByte(int badByte, int badByteIndex, int... badBytes)
+        throws Exception
+    {
+        final String error = "Invalid UTF-8 middle byte 0x" + Integer.toHexString(badByte);
+        final String notUtf8 = ": check content encoding, does not look like UTF-8";
+
+        byte[] doc = bytes("abc", badBytes);
+        assertEquals(error + " (at char #4, byte #" + (3 + badByteIndex) + ")" + notUtf8,
+                readFailure(doc, 0, doc.length));
+
+        doc = bytes(PARSER_PREFIX, badBytes);
+        final String expected = error + " (at char #" + (PARSER_PREFIX.length() + 1)
+                + ", byte #" + (PARSER_PREFIX.length() + badByteIndex) + ")" + notUtf8;
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(doc)));
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(doc))));
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc))));
+    }
+
+    // Verifies that invalid sequence is reported with expected `error` and position,
+    // both as the only content and after valid content (via parser)
+    private void assertInvalid(String error, int... badBytes) throws Exception
     {
         byte[] doc = bytes("", badBytes);
-        String msg = readFailure(doc, 0, doc.length);
-        assertTrue(msg.startsWith(expected), msg);
-        // and also via parser, after valid content
-        doc = bytes("a,b\nc,d", badBytes);
-        msg = parseFailure(CSV_FACTORY.createParser(doc));
-        assertTrue(msg.startsWith(expected.replaceAll(" \\(at char.*", "")), msg);
+        assertEquals(error + " (at char #1, byte #1)", readFailure(doc, 0, doc.length));
+
+        doc = bytes(PARSER_PREFIX, badBytes);
+        final int pos = PARSER_PREFIX.length() + 1;
+        final String expected = error + " (at char #" + pos + ", byte #" + pos + ")";
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(doc)));
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(doc))));
+        // one byte at a time, so that deferred error follows buffer shifts
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc))));
     }
 
     private static byte[] bytes(String prefix, int... suffix) {

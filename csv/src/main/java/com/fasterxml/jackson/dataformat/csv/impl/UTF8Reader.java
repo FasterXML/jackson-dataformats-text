@@ -55,13 +55,13 @@ public final class UTF8Reader
     /**
      * Total read character count; used for error reporting purposes
      */
-    private int _charCount = 0;
+    private long _charCount = 0;
 
     /**
      * Number of input bytes that precede {@code _inputBuffer[0]};
      * used for error reporting purposes
      */
-    private int _byteCount;
+    private long _byteCount;
 
     /*
     /**********************************************************************
@@ -261,6 +261,14 @@ public final class UTF8Reader
              * input stream) when absolutely necessary.
              */
             if ((inBufLen - inPtr) < needed) {
+                // ... unless bytes we do have already make the sequence invalid
+                int bad = findInvalidMiddleByte(buf, inPtr, inBufLen);
+                if (bad >= 0) {
+                    error = invalidMiddleByte(buf[bad]);
+                    errorByte = bad;
+                    notUtf8 = true;
+                    break main_loop;
+                }
                 --inPtr;
                 break main_loop;
             }
@@ -428,7 +436,8 @@ public final class UTF8Reader
      * @param available Number of "unused" bytes in the input buffer
      *
      * @return True, if enough bytes were read to allow decoding of at least
-     *   one full character; false if EOF was encountered instead.
+     *   one full character (or to report it invalid); false if EOF was
+     *   encountered instead.
      */
     private boolean loadMore(int available) throws IOException
     {
@@ -486,6 +495,11 @@ public final class UTF8Reader
         // if an EOF is hit, that'll be an error. But we need not do
         // actual decoding here, just load enough bytes.
         while ((_inputPtr + needed) > _inputEnd) {
+            // No point in waiting for (or failing on lack of) more bytes if the ones
+            // we have make sequence invalid: let caller report the actual problem
+            if (findInvalidMiddleByte(_inputBuffer, _inputPtr+1, _inputEnd) >= 0) {
+                return true;
+            }
             int count = readBytesAt(_inputEnd);
             if (count < 1) {
                 if (count < 0) { // -1, EOF... no good!
@@ -497,6 +511,17 @@ public final class UTF8Reader
             }
         }
         return true;
+    }
+
+    // Index of first byte in buf[start, end) that is not a valid continuation
+    // byte (10xxxxxx), if any; -1 if none
+    private static int findInvalidMiddleByte(byte[] buf, int start, int end) {
+        for (int i = start; i < end; ++i) {
+            if ((buf[i] & 0xC0) != 0x080) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     protected void reportBounds(char[] cbuf, int start, int len) throws IOException {
