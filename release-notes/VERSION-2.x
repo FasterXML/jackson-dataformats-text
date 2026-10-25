@@ -34,6 +34,7 @@ Active Maintainers:
  (fix by @pjfanning)
 #764: (yaml) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
   not rejected; wrong char/byte positions in invalid UTF-8 error messages
+  (NOTE: CESU-8 / "Modified UTF-8" content is now also rejected)
  (fix by @pjfanning)
 
 2.22.4 (17-Oct-2026)
