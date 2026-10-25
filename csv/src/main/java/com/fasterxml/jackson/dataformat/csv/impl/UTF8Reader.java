@@ -176,7 +176,7 @@ public final class UTF8Reader
     {
         if (start < 0 || len <= 0 || len > cbuf.length - start) {
             // Nothing to read? (must not write buffered surrogate, if any)
-            if (len == 0) {
+            if (len == 0 && start >= 0 && start <= cbuf.length) {
                 return 0;
             }
             reportBounds(cbuf, start, len);
@@ -504,9 +504,10 @@ public final class UTF8Reader
                     // Buffers are not freed (left to close()): so that following
                     // reads fail the same way, instead of returning EOF
                     reportInvalidSequence(_inputPtr, _inputEnd);
+                } else {
+                    // 0 count is no good; let's err out
+                    reportStrangeStream();
                 }
-                // 0 count is no good; let's err out
-                reportStrangeStream();
             }
         }
         return true;
