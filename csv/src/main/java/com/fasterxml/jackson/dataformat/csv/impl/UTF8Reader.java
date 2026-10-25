@@ -72,6 +72,21 @@ public final class UTF8Reader
     public UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose,
             byte[] buf, int ptr, int len)
     {
+        // byte positions relative to start of content, not of buffer
+        this(ctxt, in, autoClose, buf, ptr, len, -ptr);
+    }
+
+    /**
+     * @param bytesBefore Number of input bytes that precede {@code buf[0]}, used
+     *   for byte positions in error messages: for example, if {@code buf} starts
+     *   with a BOM that has already been skipped (and {@code ptr} points past it),
+     *   {@code 0} so that BOM is included in byte positions
+     *
+     * @since 2.23
+     */
+    public UTF8Reader(IOContext ctxt, InputStream in, boolean autoClose,
+            byte[] buf, int ptr, int len, long bytesBefore)
+    {
         super((in == null) ? buf : in);
         _ioContext = ctxt;
         _inputSource = in;
@@ -82,8 +97,7 @@ public final class UTF8Reader
         // Unmodifiable if there is no stream to actually read from
         // (ideally caller should pass explicitly)
         _inputBufferReadOnly = (in == null);
-        // so that byte positions are relative to start of content, not of buffer
-        _byteCount = -ptr;
+        _byteCount = bytesBefore;
     }
 
     public UTF8Reader(IOContext ctxt, byte[] buf, int ptr, int len)
@@ -265,7 +279,7 @@ public final class UTF8Reader
              */
             if ((inBufLen - inPtr) < needed) {
                 // ... unless bytes we do have already make the sequence invalid
-                if (findInvalidMiddleByte(buf, inPtr, inBufLen) >= 0) {
+                if (hasInvalidMiddleByte(buf, inPtr, inBufLen)) {
                     invalid = true;
                     break main_loop;
                 }
@@ -480,18 +494,16 @@ public final class UTF8Reader
         while ((_inputPtr + needed) > _inputEnd) {
             // No point in waiting for (or failing on lack of) more bytes if the ones
             // we have make sequence invalid: let caller report the actual problem
-            if (findInvalidMiddleByte(_inputBuffer, _inputPtr+1, _inputEnd) >= 0) {
+            if (hasInvalidMiddleByte(_inputBuffer, _inputPtr+1, _inputEnd)) {
                 return true;
             }
             int count = readBytesAt(_inputEnd);
             if (count < 1) {
                 if (count < 0) { // -1, EOF... no good!
-                    try {
-                        // but report sequence as invalid if possible, not as truncated
-                        reportInvalidSequence(_inputPtr, _inputEnd);
-                    } finally {
-                        freeBuffers();
-                    }
+                    // but report sequence as invalid if possible, not as truncated.
+                    // Buffers are not freed (left to close()): so that following
+                    // reads fail the same way, instead of returning EOF
+                    reportInvalidSequence(_inputPtr, _inputEnd);
                 }
                 // 0 count is no good; let's err out
                 reportStrangeStream();
@@ -500,15 +512,14 @@ public final class UTF8Reader
         return true;
     }
 
-    // Index of first byte in buf[start, end) that is not a valid continuation
-    // byte (10xxxxxx), if any; -1 if none
-    private static int findInvalidMiddleByte(byte[] buf, int start, int end) {
+    // Whether any byte in buf[start, end) is not a valid continuation byte (10xxxxxx)
+    private static boolean hasInvalidMiddleByte(byte[] buf, int start, int end) {
         for (int i = start; i < end; ++i) {
             if ((buf[i] & 0xC0) != 0x080) {
-                return i;
+                return true;
             }
         }
-        return -1;
+        return false;
     }
 
     protected void reportBounds(char[] cbuf, int start, int len) throws IOException {
@@ -615,7 +626,8 @@ public final class UTF8Reader
                 gotBytes, needed, _position(byteIndex)));
     }
 
-    // 1-based positions, relative to start of content (after BOM, if any)
+    // 1-based positions: chars relative to start of content (after BOM, if any),
+    // bytes relative to start of input (including BOM)
     private String _position(int byteIndex) {
         return " (at char #"+(_charCount + 1)+", byte #"+(_byteCount + byteIndex + 1)+")";
     }

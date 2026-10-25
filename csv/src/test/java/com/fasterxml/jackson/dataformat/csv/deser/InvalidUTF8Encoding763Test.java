@@ -6,7 +6,10 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.core.io.ContentReference;
+import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.util.BufferRecycler;
 import com.fasterxml.jackson.dataformat.csv.*;
 import com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader;
 
@@ -122,14 +125,64 @@ public class InvalidUTF8Encoding763Test extends ModuleTestBase
         // one byte at a time, so that partial sequences get shifted in the buffer
         assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc))));
 
-        // with BOM, positions are relative to content after it
+        // with BOM, char positions are relative to content after it, but byte
+        // positions to start of input (as with jackson-core)
         byte[] withBom = new byte[doc.length + 3];
         withBom[0] = (byte) 0xEF;
         withBom[1] = (byte) 0xBB;
         withBom[2] = (byte) 0xBF;
         System.arraycopy(doc, 0, withBom, 3, doc.length);
-        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(withBom)));
-        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(withBom))));
+        final String expectedWithBom = "Invalid UTF-8 character 0x2f (overlong encoding) (at char #"
+                + (prefix.length() + 1) + ", byte #" + (bytesBefore + 4) + ")";
+        assertEquals(expectedWithBom, parseFailure(CSV_FACTORY.createParser(withBom)));
+        assertEquals(expectedWithBom,
+                parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(withBom))));
+        assertEquals(expectedWithBom,
+                parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(withBom))));
+
+        // but start offset of byte[] input is not included
+        byte[] padded = new byte[withBom.length + 5];
+        System.arraycopy(withBom, 0, padded, 5, withBom.length);
+        assertEquals(expectedWithBom,
+                parseFailure(CSV_FACTORY.createParser(padded, 5, withBom.length)));
+    }
+
+    // Error must be reported again by following reads (not EOF), regardless of input source
+    @Test
+    public void testErrorRepeatedOnNextRead() throws Exception
+    {
+        // first truncated sequence (reported when trying to load more), then complete one
+        assertErrorRepeated(bytes("abc", 0xC0),
+                "Invalid UTF-8 sequence 0xc0 (overlong encoding) (at char #4, byte #4)");
+        assertErrorRepeated(bytes("abc", 0xC0, 0xAF),
+                "Invalid UTF-8 character 0x2f (overlong encoding) (at char #4, byte #4)");
+    }
+
+    private void assertErrorRepeated(byte[] doc, String expected) throws Exception
+    {
+        Reader[] readers = new Reader[] {
+                new UTF8Reader(null, doc, 0, doc.length),
+                new UTF8Reader(ioContext(), new ByteArrayInputStream(doc), true),
+                new UTF8Reader(ioContext(), new OneByteInputStream(doc), true)
+        };
+        for (Reader reader : readers) {
+            try (Reader r = reader) {
+                // content before invalid sequence first (one char at a time, for OneByteInputStream)
+                char[] buf = new char[10];
+                StringBuilder sb = new StringBuilder();
+                while (sb.length() < 3) {
+                    int count = r.read(buf, 0, 3 - sb.length());
+                    assertTrue(count > 0);
+                    sb.append(buf, 0, count);
+                }
+                assertEquals("abc", sb.toString());
+                for (int i = 0; i < 2; ++i) {
+                    CharConversionException e = assertThrows(CharConversionException.class,
+                            () -> r.read(buf, 0, buf.length));
+                    assertEquals(expected, e.getMessage());
+                }
+            }
+        }
     }
 
     @Test
@@ -232,6 +285,12 @@ public class InvalidUTF8Encoding763Test extends ModuleTestBase
         assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(doc))));
         // one byte at a time, so that deferred error follows buffer shifts
         assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc))));
+    }
+
+    private static IOContext ioContext() {
+        return new IOContext(StreamReadConstraints.defaults(),
+                StreamWriteConstraints.defaults(), ErrorReportConfiguration.defaults(),
+                new BufferRecycler(), ContentReference.unknown(), false);
     }
 
     private static byte[] bytes(String prefix, int... suffix) {
