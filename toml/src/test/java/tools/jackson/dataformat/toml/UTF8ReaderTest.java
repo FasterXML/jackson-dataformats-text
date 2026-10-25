@@ -109,15 +109,18 @@ public class UTF8ReaderTest
         StreamReadException e = assertThrows(StreamReadException.class,
                 () -> mapper.readTree(new ByteArrayInputStream(doc)));
         assertTrue(e.getMessage().contains(expected), e.getMessage());
+        assertLocation(e, prefix.length(), bytesBefore);
 
         // and one byte at a time, so that partial sequences get shifted in the buffer
         e = assertThrows(StreamReadException.class,
                 () -> mapper.readTree(new OneByteInputStream(doc)));
         assertTrue(e.getMessage().contains(expected), e.getMessage());
+        assertLocation(e, prefix.length(), bytesBefore);
 
         // byte[] source too
         e = assertThrows(StreamReadException.class, () -> mapper.readTree(doc));
         assertTrue(e.getMessage().contains(expected), e.getMessage());
+        assertLocation(e, prefix.length(), bytesBefore);
     }
 
     @Test
@@ -127,6 +130,13 @@ public class UTF8ReaderTest
         StreamReadException e = assertThrows(StreamReadException.class,
                 () -> mapper.readTree(new OneByteInputStream(doc)));
         assertTrue(e.getMessage().contains("got 2, needed 3 (at char #7, byte #8)"), e.getMessage());
+        assertLocation(e, 6, 7);
+    }
+
+    // Location offsets are 0-based, unlike positions in messages
+    private static void assertLocation(StreamReadException e, long charOffset, long byteOffset) {
+        assertEquals(charOffset, e.getLocation().getCharOffset());
+        assertEquals(byteOffset, e.getLocation().getByteOffset());
     }
 
     private static byte[] bytes(String prefix, int... suffix) {

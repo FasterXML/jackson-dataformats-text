@@ -453,33 +453,52 @@ public final class UTF8Reader
 
     private void reportInvalidInitial(int mask, int offset, int byteIndex) throws IOException
     {
-        throw new CharConversionException("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask)
-                +_position(offset, byteIndex));
+        throw _invalid("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask), offset, byteIndex);
     }
 
     private void reportInvalid(int value, int offset, int byteIndex, String msg) throws IOException
     {
-        throw new CharConversionException("Invalid UTF-8 character 0x"+Integer.toHexString(value)
-                +" ("+msg+")"+_position(offset, byteIndex));
+        throw _invalid("Invalid UTF-8 character 0x"+Integer.toHexString(value)+" ("+msg+")",
+                offset, byteIndex);
     }
 
     private void reportInvalidOther(int mask, int offset, int byteIndex)
         throws IOException
     {
-        throw new CharConversionException("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask)
-                +_position(offset, byteIndex));
+        throw _invalid("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask), offset, byteIndex);
     }
 
     private void reportUnexpectedEOF(int gotBytes, int needed)
         throws IOException
     {
         // only called from loadMore(), before anything is decoded by the current read()
-        throw new CharConversionException("Unexpected EOF in the middle of a multi-byte char: got "
-                +gotBytes+", needed "+needed+_position(0, _inputPtr));
+        throw _invalid("Unexpected EOF in the middle of a multi-byte char: got "
+                +gotBytes+", needed "+needed, 0, _inputPtr);
     }
 
-    private String _position(int offset, int byteIndex) {
-        return " (at char #"+(_charCount + offset + 1)+", byte #"+(_byteCount + byteIndex + 1)+")";
+    private InvalidUTF8Exception _invalid(String msg, int offset, int byteIndex) {
+        final long charOffset = (long) _charCount + offset;
+        final long byteOffset = (long) _byteCount + byteIndex;
+        return new InvalidUTF8Exception(msg+" (at char #"+(charOffset + 1)+", byte #"+(byteOffset + 1)+")",
+                charOffset, byteOffset);
+    }
+
+    /**
+     * Exception for invalid UTF-8 content that also carries the (0-based) offsets
+     * of the problem, so that they can be passed in the {@code TokenStreamLocation}
+     * of the wrapping {@link TomlStreamReadException}.
+     */
+    static final class InvalidUTF8Exception extends CharConversionException
+    {
+        private static final long serialVersionUID = 1L;
+
+        final long charOffset, byteOffset;
+
+        InvalidUTF8Exception(String msg, long charOffset, long byteOffset) {
+            super(msg);
+            this.charOffset = charOffset;
+            this.byteOffset = byteOffset;
+        }
     }
 
     protected void reportBounds(char[] cbuf, int start, int len) throws IOException {

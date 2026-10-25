@@ -284,7 +284,13 @@ public final class TomlFactory extends TextualTSFactory
                 return TomlParser.parse(this, ctxt, readFeatures, r0);
             }
         } catch (CharConversionException e) {
-            TokenStreamLocation location = new TokenStreamLocation(ctxt.contentReference(), -1, -1, -1, -1);
+            TokenStreamLocation location;
+            if (e instanceof UTF8Reader.InvalidUTF8Exception utf8Ex) {
+                location = new TokenStreamLocation(ctxt.contentReference(),
+                        utf8Ex.byteOffset, utf8Ex.charOffset, -1, -1);
+            } else {
+                location = new TokenStreamLocation(ctxt.contentReference(), -1, -1, -1, -1);
+            }
             throw new TomlStreamReadException(null, e.getMessage(), location, e);
         } catch (IOException e) {
             throw _wrapIOFailure(e);
