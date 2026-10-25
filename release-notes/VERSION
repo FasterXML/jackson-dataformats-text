@@ -87,6 +87,10 @@ implementations)
  (fix by @cowtowncoder)
 #755: (toml) `TomlParser`: use a single `StreamReadConstraints` source
  (fix by @cowtowncoder)
+#763: (csv) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
+  not rejected; wrong char/byte positions in invalid UTF-8 error messages
+  (NOTE: CESU-8 / "Modified UTF-8" content is now also rejected)
+ (fix by @pjfanning)
 #765: (toml) Wrong byte position (`byte #-1`) in invalid UTF-8 error messages
  (fix by @pjfanning)
 

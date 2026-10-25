@@ -12,6 +12,7 @@ import tools.jackson.core.util.BufferRecycler;
 import tools.jackson.dataformat.csv.impl.UTF8Reader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class UTF8ReaderTest
 {
@@ -52,5 +53,25 @@ public class UTF8ReaderTest
         assertEquals(emojiStr, result);
 
         reader.close();
+    }
+
+    @Test
+    public void testInvalidBounds() throws Exception
+    {
+        byte[] utf8 = "abc".getBytes(StandardCharsets.UTF_8);
+        try (UTF8Reader r = new UTF8Reader(null, utf8, 0, utf8.length)) {
+            char[] buf = new char[2];
+            assertThrows(IndexOutOfBoundsException.class, () -> r.read(buf, -1, 1));
+            assertThrows(IndexOutOfBoundsException.class, () -> r.read(buf, 0, -1));
+            assertThrows(IndexOutOfBoundsException.class, () -> r.read(buf, 1, 2));
+            // invalid offset must be caught even if nothing is to be read
+            assertThrows(IndexOutOfBoundsException.class, () -> r.read(buf, -1, 0));
+            assertThrows(IndexOutOfBoundsException.class, () -> r.read(buf, 3, 0));
+            // but end of buffer is a valid offset for empty read
+            assertEquals(0, r.read(buf, 2, 0));
+            // but valid reads still work after
+            assertEquals(2, r.read(buf, 0, 2));
+            assertEquals("ab", new String(buf));
+        }
     }
 }
