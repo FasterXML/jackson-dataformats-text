@@ -201,12 +201,10 @@ public final class UTF8Reader
         final byte[] buf = _inputBuffer;
         int inPtr = _inputPtr;
         final int inBufLen = _inputEnd;
-        // for invalid content: start of offending byte sequence, message, index of offending
-        // byte, and whether input looks like it is not UTF-8 at all
+        // start of current multi-byte sequence, and whether it is invalid: details are
+        // only figured out if (and when) error is reported
         int seqStart = 0;
-        String error = null;
-        int errorByte = 0;
-        boolean notUtf8 = false;
+        boolean invalid = false;
 
         main_loop:
         while (outPtr < len) {
@@ -250,9 +248,7 @@ public final class UTF8Reader
                 c = (c & 0x07);
                 needed = 3;
             } else {
-                error = "Invalid UTF-8 start byte 0x"+Integer.toHexString(c & 0xFF);
-                errorByte = seqStart;
-                notUtf8 = true;
+                invalid = true;
                 break main_loop;
             }
             /* Do we have enough bytes? If not, let's just push back the
@@ -262,11 +258,8 @@ public final class UTF8Reader
              */
             if ((inBufLen - inPtr) < needed) {
                 // ... unless bytes we do have already make the sequence invalid
-                int bad = findInvalidMiddleByte(buf, inPtr, inBufLen);
-                if (bad >= 0) {
-                    error = invalidMiddleByte(buf[bad]);
-                    errorByte = bad;
-                    notUtf8 = true;
+                if (findInvalidMiddleByte(buf, inPtr, inBufLen) >= 0) {
+                    invalid = true;
                     break main_loop;
                 }
                 --inPtr;
@@ -275,9 +268,7 @@ public final class UTF8Reader
 
             int d = buf[inPtr++];
             if ((d & 0xC0) != 0x080) {
-                error = invalidMiddleByte(d);
-                errorByte = inPtr - 1;
-                notUtf8 = true;
+                invalid = true;
                 break main_loop;
             }
             c = (c << 6) | (d & 0x3F);
@@ -285,29 +276,20 @@ public final class UTF8Reader
             if (needed > 1) { // needed == 1 means 2 bytes total
                 d = buf[inPtr++]; // 3rd byte
                 if ((d & 0xC0) != 0x080) {
-                    error = invalidMiddleByte(d);
-                    errorByte = inPtr - 1;
-                    notUtf8 = true;
+                    invalid = true;
                     break main_loop;
                 }
                 c = (c << 6) | (d & 0x3F);
                 if (needed > 2) { // 4 bytes? (need surrogates)
                     d = buf[inPtr++];
                     if ((d & 0xC0) != 0x080) {
-                        error = invalidMiddleByte(d);
-                        errorByte = inPtr - 1;
-                        notUtf8 = true;
+                        invalid = true;
                         break main_loop;
                     }
                     c = (c << 6) | (d & 0x3F);
-                    if (c < 0x10000) {
-                        error = invalidChar(c, "overlong encoding");
-                        errorByte = seqStart;
-                        break main_loop;
-                    }
-                    if (c > Character.MAX_CODE_POINT) {
-                        error = invalidChar(c, "not a valid Unicode scalar value");
-                        errorByte = seqStart;
+                    // overlong, or beyond U+10FFFF?
+                    if (c < 0x10000 || c > Character.MAX_CODE_POINT) {
+                        invalid = true;
                         break main_loop;
                     }
                     /* Ugh. Need to mess with surrogates. Ok; let's inline them
@@ -324,19 +306,13 @@ public final class UTF8Reader
                         break main_loop;
                     }
                     // sure, let's fall back to normal processing:
-                } else if (c < 0x800) {
-                    error = invalidChar(c, "overlong encoding");
-                    errorByte = seqStart;
-                    break main_loop;
-                } else if (c >= 0xD800 && c <= 0xDFFF) {
-                    // as per [jackson-core#363], surrogates are illegal in UTF-8
-                    error = invalidChar(c, "not a valid Unicode scalar value");
-                    errorByte = seqStart;
+                } else if (c < 0x800 || (c >= 0xD800 && c <= 0xDFFF)) {
+                    // overlong, or surrogate (illegal in UTF-8 as per [jackson-core#363])
+                    invalid = true;
                     break main_loop;
                 }
-            } else if (c < 0x80) {
-                error = invalidChar(c, "overlong encoding");
-                errorByte = seqStart;
+            } else if (c < 0x80) { // overlong
+                invalid = true;
                 break main_loop;
             }
             cbuf[outPtr++] = (char) c;
@@ -345,13 +321,13 @@ public final class UTF8Reader
             }
         }
 
-        if (error != null) {
+        if (invalid) {
             // 25-Aug-2016, tatu: As per [dataformat-csv#132] defer error reporting if
             //   (but only if) some content has been decoded successfully: we then
             //   return that content, and next call starts from the invalid sequence
             //   and reports it.
             if (outPtr == start) {
-                reportInvalid(error, errorByte, notUtf8);
+                reportInvalidSequence(seqStart, inBufLen);
             }
             inPtr = seqStart;
         }
@@ -503,8 +479,12 @@ public final class UTF8Reader
             int count = readBytesAt(_inputEnd);
             if (count < 1) {
                 if (count < 0) { // -1, EOF... no good!
-                    freeBuffers();
-                    reportUnexpectedEOF(_inputEnd - _inputPtr, needed);
+                    try {
+                        // but report sequence as invalid if possible, not as truncated
+                        reportInvalidSequence(_inputPtr, _inputEnd);
+                    } finally {
+                        freeBuffers();
+                    }
                 }
                 // 0 count is no good; let's err out
                 reportStrangeStream();
@@ -538,14 +518,82 @@ public final class UTF8Reader
         return "Invalid UTF-8 middle byte 0x"+Integer.toHexString(b & 0xFF);
     }
 
-    private static String invalidChar(int value, String reason) {
-        return "Invalid UTF-8 character 0x"+Integer.toHexString(value)+" ("+reason+")";
+    // Smallest code point that needs given number of continuation bytes
+    private final static int[] MIN_CODE_POINTS = { 0, 0x80, 0x800, 0x10000 };
+
+    /**
+     * Method called to report invalid (or, at end of input, truncated) multi-byte
+     * sequence that starts at {@code _inputBuffer[seqStart]}, with bytes available up to
+     * (but not including) {@code end}. Kept separate from the decode loop which only
+     * notes that the sequence is invalid: as errors are rare, the specific problem is
+     * only figured out here.
+     *<p>
+     * For truncated sequences, the bytes available may already prove sequence
+     * invalid (start byte like {@code 0xC0} that can only be used for overlong
+     * encodings, for example); if not, sequence is reported as truncated.
+     */
+    private void reportInvalidSequence(int seqStart, int end) throws IOException
+    {
+        final byte[] buf = _inputBuffer;
+        int c = buf[seqStart] & 0xFF;
+        int needed;
+        if ((c & 0xE0) == 0xC0) {
+            c &= 0x1F;
+            needed = 1;
+        } else if ((c & 0xF0) == 0xE0) {
+            c &= 0x0F;
+            needed = 2;
+        } else if ((c & 0xF8) == 0xF0) {
+            c &= 0x07;
+            needed = 3;
+        } else {
+            reportInvalid("Invalid UTF-8 start byte 0x"+Integer.toHexString(c), seqStart, true);
+            return;
+        }
+        final int avail = Math.min(needed, end - seqStart - 1);
+        for (int i = seqStart + 1, last = seqStart + avail; i <= last; ++i) {
+            int d = buf[i];
+            if ((d & 0xC0) != 0x080) {
+                reportInvalid(invalidMiddleByte(d), i, true);
+            }
+            c = (c << 6) | (d & 0x3F);
+        }
+        // Range of values sequence may decode to (single value if complete)
+        final int shift = 6 * (needed - avail);
+        final int min = c << shift;
+        final int max = min | ((1 << shift) - 1);
+        String reason = null;
+        if (max < MIN_CODE_POINTS[needed]) {
+            reason = "overlong encoding";
+        } else if (min > Character.MAX_CODE_POINT || (min >= 0xD800 && max <= 0xDFFF)) {
+            // as per [jackson-core#363], surrogates are illegal in UTF-8
+            reason = "not a valid Unicode scalar value";
+        }
+        if (reason != null) {
+            StringBuilder sb = new StringBuilder("Invalid UTF-8 ");
+            if (avail == needed) {
+                sb.append("character 0x").append(Integer.toHexString(c));
+            } else {
+                sb.append("sequence");
+                for (int i = seqStart, last = seqStart + avail; i <= last; ++i) {
+                    sb.append(" 0x").append(Integer.toHexString(buf[i] & 0xFF));
+                }
+            }
+            sb.append(" (").append(reason).append(')');
+            reportInvalid(sb.toString(), seqStart, false);
+        }
+        if (avail < needed) { // only called for truncated sequences at end of input
+            reportUnexpectedEOF(avail + 1, needed + 1, seqStart);
+        }
+        // should never get here
+        throw new IllegalStateException("Internal error: valid UTF-8 sequence reported as invalid"
+                +_position(seqStart));
     }
 
     // Errors are only reported before anything is decoded by the current read() call
     // (see [dataformat-csv#132] above), so the offending char is the one after
     // `_charCount`. `byteIndex` is the index in `_inputBuffer` of the offending byte:
-    // `_inputPtr` is not updated until read() returns, so the decode loop passes it in.
+    // `_inputPtr` is not updated until read() returns, so callers pass it in.
     private void reportInvalid(String msg, int byteIndex, boolean notUtf8)
         throws IOException
     {
@@ -553,12 +601,11 @@ public final class UTF8Reader
                 +(notUtf8 ? NOT_UTF8 : ""));
     }
 
-    protected void reportUnexpectedEOF(int gotBytes, int needed) throws IOException
+    private void reportUnexpectedEOF(int gotBytes, int needed, int byteIndex) throws IOException
     {
-        // only called from loadMore(), before anything is decoded by the current read()
         throw new CharConversionException(String.format(
                 "Unexpected EOF in the middle of a multi-byte UTF-8 character: got %d, needed %d%s",
-                gotBytes, needed, _position(_inputPtr)));
+                gotBytes, needed, _position(byteIndex)));
     }
 
     // 1-based positions, relative to start of content (after BOM, if any)

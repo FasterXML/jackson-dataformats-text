@@ -151,6 +151,55 @@ public class InvalidUTF8Encoding763Test extends ModuleTestBase
         assertInvalidMiddleByte(0xc3, 2, 0xE2, 0xC3);
     }
 
+    // Truncated sequence at end of input that can not be valid whatever follows:
+    // report it as invalid, not EOF
+    @Test
+    public void testInvalidTruncatedSequenceBeforeEOF() throws Exception
+    {
+        assertTruncated("Invalid UTF-8 sequence 0xc0 (overlong encoding)", 0xC0);
+        assertTruncated("Invalid UTF-8 sequence 0xc1 (overlong encoding)", 0xC1);
+        assertTruncated("Invalid UTF-8 sequence 0xe0 0x9f (overlong encoding)", 0xE0, 0x9F);
+        assertTruncated("Invalid UTF-8 sequence 0xf0 0x8f (overlong encoding)", 0xF0, 0x8F);
+        assertTruncated("Invalid UTF-8 sequence 0xf0 0x8f 0xbf (overlong encoding)",
+                0xF0, 0x8F, 0xBF);
+        assertTruncated("Invalid UTF-8 sequence 0xed 0xa0 (not a valid Unicode scalar value)",
+                0xED, 0xA0);
+        assertTruncated("Invalid UTF-8 sequence 0xf4 0x90 (not a valid Unicode scalar value)",
+                0xF4, 0x90);
+        assertTruncated("Invalid UTF-8 sequence 0xf5 (not a valid Unicode scalar value)", 0xF5);
+    }
+
+    // ... but if it could still be valid, report as truncated
+    @Test
+    public void testValidTruncatedSequenceBeforeEOF() throws Exception
+    {
+        assertTruncated("Unexpected EOF in the middle of a multi-byte UTF-8 character: got 1, needed 2",
+                0xC2);
+        assertTruncated("Unexpected EOF in the middle of a multi-byte UTF-8 character: got 1, needed 3",
+                0xED);
+        assertTruncated("Unexpected EOF in the middle of a multi-byte UTF-8 character: got 2, needed 3",
+                0xED, 0x9F);
+        assertTruncated("Unexpected EOF in the middle of a multi-byte UTF-8 character: got 2, needed 4",
+                0xF0, 0x90);
+        assertTruncated("Unexpected EOF in the middle of a multi-byte UTF-8 character: got 3, needed 4",
+                0xF4, 0x8F, 0xBF);
+    }
+
+    // Verifies that truncated sequence at end of input is reported with expected
+    // `error` and position (that of its first byte)
+    private void assertTruncated(String error, int... badBytes) throws Exception
+    {
+        byte[] doc = bytes("abc", badBytes);
+        assertEquals(error + " (at char #4, byte #4)", readFailure(doc, 0, doc.length));
+
+        doc = bytes(PARSER_PREFIX, badBytes);
+        final int pos = PARSER_PREFIX.length() + 1;
+        final String expected = error + " (at char #" + pos + ", byte #" + pos + ")";
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(doc)));
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new ByteArrayInputStream(doc))));
+        assertEquals(expected, parseFailure(CSV_FACTORY.createParser(new OneByteInputStream(doc))));
+    }
+
     private void assertInvalidMiddleByte(int badByte, int badByteIndex, int... badBytes)
         throws Exception
     {
