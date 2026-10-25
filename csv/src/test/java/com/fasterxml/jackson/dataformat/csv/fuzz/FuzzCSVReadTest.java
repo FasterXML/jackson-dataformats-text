@@ -11,6 +11,8 @@ import com.fasterxml.jackson.dataformat.csv.ModuleTestBase;
 
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Collection of OSS-Fuzz found issues for CSV format module.
@@ -61,5 +63,24 @@ public class FuzzCSVReadTest extends ModuleTestBase
         } catch (CharConversionException e) {
             verifyException(e, "Invalid UTF-8 character 0x2d (overlong encoding) (at char #2975, byte #2975)");
         }
+    }
+
+    // ... so to still test buffer reads, replace overlong `C0 AD` sequences (the only
+    // invalid UTF-8 in input) with valid `C2 AD`, keeping buffer boundaries as they were
+    @Test
+    public void testReadBoundary50402Valid() throws Exception
+    {
+        byte[] input = readResource("/data/fuzz-50402.csv");
+        int replaced = 0;
+        for (int i = 0; i < input.length - 1; ++i) {
+            if (input[i] == (byte) 0xC0 && input[i+1] == (byte) 0xAD) {
+                input[i] = (byte) 0xC2;
+                ++replaced;
+            }
+        }
+        assertEquals(172, replaced);
+        // Ok; don't care about content, just that whole input is read
+        assertNotNull(CSV_MAPPER.readTree(input));
+        assertNotNull(CSV_MAPPER.readTree(new ByteArrayInputStream(input)));
     }
 }

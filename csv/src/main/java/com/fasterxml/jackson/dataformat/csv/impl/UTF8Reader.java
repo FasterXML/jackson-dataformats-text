@@ -160,6 +160,13 @@ public final class UTF8Reader
     @Override
     public int read(final char[] cbuf, final int start, int len) throws IOException
     {
+        if (start < 0 || len < 0 || len > cbuf.length - start) {
+            reportBounds(cbuf, start, len);
+        }
+        // Nothing to read? (must not write buffered surrogate, if any)
+        if (len == 0) {
+            return 0;
+        }
         // Already EOF?
         if (_inputBuffer == null) {
             return -1;
@@ -585,8 +592,8 @@ public final class UTF8Reader
         if (avail < needed) { // only called for truncated sequences at end of input
             reportUnexpectedEOF(avail + 1, needed + 1, seqStart);
         }
-        // should never get here
-        throw new IllegalStateException("Internal error: valid UTF-8 sequence reported as invalid"
+        // should never get here; but if we do, fail same way as for invalid content
+        throw new CharConversionException("Internal error: valid UTF-8 sequence reported as invalid"
                 +_position(seqStart));
     }
 
