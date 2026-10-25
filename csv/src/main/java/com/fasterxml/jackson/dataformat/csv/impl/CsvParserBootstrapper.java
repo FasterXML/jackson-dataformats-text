@@ -190,8 +190,9 @@ public final class CsvParserBootstrapper
             }
         case UTF8:
             // Important: do not pass context, if we got byte[], nothing to release
+            // `_inputProcessed` so that byte positions include BOM, if any
             return new UTF8Reader((_in == null) ? null : _context, _in, autoClose,
-                    _inputBuffer, _inputPtr, _inputEnd - _inputPtr);
+                    _inputBuffer, _inputPtr, _inputEnd - _inputPtr, _inputProcessed);
         default:
             throw new RuntimeException();
         }
