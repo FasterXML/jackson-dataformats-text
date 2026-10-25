@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 
 import tools.jackson.core.*;
@@ -997,7 +998,15 @@ final class TomlGenerator extends GeneratorBase
                 value instanceof LocalDateTime ||
                 value instanceof OffsetDateTime) {
             _verifyValueWrite("write local date");
-            _writeRaw(value.toString());
+            if (value instanceof LocalTime) {
+                _writeRaw(DateTimeFormatter.ISO_LOCAL_TIME.format((LocalTime) value));
+            } else if (value instanceof LocalDateTime) {
+                _writeRaw(DateTimeFormatter.ISO_LOCAL_DATE_TIME.format((LocalDateTime) value));
+            } else if (value instanceof OffsetDateTime) {
+                _writeRaw(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format((OffsetDateTime) value));
+            } else {
+                _writeRaw(value.toString());
+            }
             writeValueEnd();
         } else {
             _objectWriteContext.writeValue(this, value);
