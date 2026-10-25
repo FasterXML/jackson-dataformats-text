@@ -55,13 +55,13 @@ public final class UTF8Reader
     /**
      * Total read character count; used for error reporting purposes
      */
-    private int _charCount = 0;
+    private long _charCount = 0;
 
     /**
      * Number of input bytes that precede {@code _inputBuffer[0]};
      * used for error reporting purposes
      */
-    private int _byteCount;
+    private long _byteCount;
 
     /*
     /**********************************************************************
@@ -477,8 +477,8 @@ public final class UTF8Reader
     }
 
     private InvalidUTF8Exception _invalid(String msg, int offset, int byteIndex) {
-        final long charOffset = (long) _charCount + offset;
-        final long byteOffset = (long) _byteCount + byteIndex;
+        final long charOffset = _charCount + offset;
+        final long byteOffset = _byteCount + byteIndex;
         return new InvalidUTF8Exception(msg+" (at char #"+(charOffset + 1)+", byte #"+(byteOffset + 1)+")",
                 charOffset, byteOffset);
     }
