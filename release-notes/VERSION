@@ -16,6 +16,9 @@ implementations)
 
 3.3.0 (not yet released)
 
+#167: (csv) Use schema column types to expose numeric, boolean and null
+  values when reading CSV
+ (fix by @Gabrieljr42)
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (requested by @OrangeDog)
  (fix by @seonwooj0810)
