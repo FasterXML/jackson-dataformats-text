@@ -160,12 +160,12 @@ public final class UTF8Reader
     @Override
     public int read(final char[] cbuf, final int start, int len) throws IOException
     {
-        if (start < 0 || len < 0 || len > cbuf.length - start) {
+        if (start < 0 || len <= 0 || len > cbuf.length - start) {
+            // Nothing to read? (must not write buffered surrogate, if any)
+            if (len == 0) {
+                return 0;
+            }
             reportBounds(cbuf, start, len);
-        }
-        // Nothing to read? (must not write buffered surrogate, if any)
-        if (len == 0) {
-            return 0;
         }
         // Already EOF?
         if (_inputBuffer == null) {
