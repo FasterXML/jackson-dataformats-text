@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -820,6 +821,50 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             assertThrows(StreamWriteException.class, () -> g.writeName("\ud800"));
             g.flush();
             assertEquals("a = [{x = 1", w.toString());
+        }
+    }
+
+    // [dataformats-text#758] (item 1): empty root-level Object must not be
+    // written as " = {}" (empty key) but as an empty document
+    @Test
+    public void emptyRootObject() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeEndObject();
+        }
+        assertEquals("", w.toString());
+
+        TomlMapper mapper = newTomlMapper();
+        String toml = mapper.writeValueAsString(new LinkedHashMap<>());
+        assertEquals("", toml);
+        assertTrue(mapper.readTree(toml).isEmpty());
+    }
+
+    // [dataformats-text#758] (item 2): TOML document must be a table, so
+    // root-level arrays and scalars must fail instead of using an empty key
+    @Test
+    public void rootLevelArrayOrScalarRejected() throws Exception {
+        _assertRootValueRejected(g -> g.writeStartArray());
+        _assertRootValueRejected(g -> g.writeString("abc"));
+        _assertRootValueRejected(g -> g.writeNumber(1));
+        _assertRootValueRejected(g -> g.writeBoolean(true));
+        _assertRootValueRejected(g -> g.writeNull());
+
+        TomlMapper mapper = newTomlMapper();
+        assertThrows(TomlStreamWriteException.class,
+                () -> mapper.writeValueAsString(List.of(1, 2)));
+        assertThrows(TomlStreamWriteException.class,
+                () -> mapper.writeValueAsString("abc"));
+    }
+
+    private void _assertRootValueRejected(Consumer<JsonGenerator> write) throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            assertThrows(TomlStreamWriteException.class, () -> write.accept(g));
+            g.flush();
+            // nothing (like an empty key) may have been written
+            assertEquals("", w.toString());
         }
     }
 }
