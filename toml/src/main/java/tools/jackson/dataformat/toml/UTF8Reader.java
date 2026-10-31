@@ -55,12 +55,13 @@ public final class UTF8Reader
     /**
      * Total read character count; used for error reporting purposes
      */
-    private int _charCount = 0;
+    private long _charCount = 0;
 
     /**
-     * Total read byte count; used for error reporting purposes
+     * Number of input bytes that precede {@code _inputBuffer[0]};
+     * used for error reporting purposes
      */
-    private int _byteCount = 0;
+    private long _byteCount;
 
     /*
     /**********************************************************************
@@ -81,6 +82,8 @@ public final class UTF8Reader
         _inputPtr = ptr;
         _inputEnd = end;
         _autoClose = autoClose;
+        // so that byte positions are relative to start of content, not of buffer
+        _byteCount = -ptr;
     }
 
     // Factory method used when dealing with InputStream; will need
@@ -239,6 +242,8 @@ public final class UTF8Reader
             }
 
             int needed;
+            // index of the first byte of this multi-byte sequence, for error reporting
+            final int seqStart = inPtr - 1;
 
             // Ok; if we end here, we got multi-byte combination
             if ((c & 0xE0) == 0xC0) { // 2 bytes (0x0080 - 0x07FF)
@@ -252,7 +257,7 @@ public final class UTF8Reader
                 c = (c & 0x07);
                 needed = 3;
             } else {
-                reportInvalidInitial(c & 0xFF, outPtr-start);
+                reportInvalidInitial(c & 0xFF, outPtr-start, seqStart);
                 // never gets here...
                 needed = 1;
             }
@@ -267,27 +272,27 @@ public final class UTF8Reader
 
             int d = (int) buf[inPtr++];
             if ((d & 0xC0) != 0x080) {
-                reportInvalidOther(d & 0xFF, outPtr-start);
+                reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
             }
             c = (c << 6) | (d & 0x3F);
 
             if (needed > 1) { // needed == 1 means 2 bytes total
                 d = buf[inPtr++]; // 3rd byte
                 if ((d & 0xC0) != 0x080) {
-                    reportInvalidOther(d & 0xFF, outPtr-start);
+                    reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
                 }
                 c = (c << 6) | (d & 0x3F);
                 if (needed > 2) { // 4 bytes? (need surrogates)
                     d = buf[inPtr++];
                     if ((d & 0xC0) != 0x080) {
-                        reportInvalidOther(d & 0xFF, outPtr-start);
+                        reportInvalidOther(d & 0xFF, outPtr-start, inPtr-1);
                     }
                     c = (c << 6) | (d & 0x3F);
                     if (c < 0x10000) {
-                        reportInvalid(c, outPtr-start, "overlong encoding");
+                        reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
                     }
                     if (c > Character.MAX_CODE_POINT) {
-                        reportInvalid(c, outPtr-start, "not a valid Unicode scalar value");
+                        reportInvalid(c, outPtr-start, seqStart, "not a valid Unicode scalar value");
                     }
                     /* Ugh. Need to mess with surrogates. Ok; let's inline them
                      * there, then, if there's room: if only room for one,
@@ -307,15 +312,15 @@ public final class UTF8Reader
                 }
                 else {
                     if (c < 0x800) {
-                        reportInvalid(c, outPtr-start, "overlong encoding");
+                        reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
                     }
                     // Like jackson-core#363: surrogates are not legal UTF-8 scalar values.
                     if (c >= Character.MIN_SURROGATE && c <= Character.MAX_SURROGATE) {
-                        reportInvalid(c, outPtr-start, "not a valid Unicode scalar value");
+                        reportInvalid(c, outPtr-start, seqStart, "not a valid Unicode scalar value");
                     }
                 }
             } else if (c < 0x80) {
-                reportInvalid(c, outPtr-start, "overlong encoding");
+                reportInvalid(c, outPtr-start, seqStart, "overlong encoding");
             }
             cbuf[outPtr++] = (char) c;
             if (inPtr >= inBufLen) {
@@ -343,19 +348,19 @@ public final class UTF8Reader
      */
     private boolean loadMore(int available) throws IOException
     {
-        _byteCount += (_inputEnd - available);
-
         if (available > 0) {
             // Should we move bytes to the beginning of buffer?
             if (_inputPtr > 0) {
                 // Can only do so if buffer mutable
                 if (!_inputBufferReadOnly) {
+                    _byteCount += _inputPtr;
                     System.arraycopy(_inputBuffer, _inputPtr, _inputBuffer, 0, available);
                     _inputPtr = 0;
                     _inputEnd = available;
                 }
             }
         } else {
+            _byteCount += _inputEnd;
             // Ok; here we can actually reasonably expect an EOF, so let's do a separate read right away:
             int count = readBytes();
             if (count < 1) {
@@ -441,43 +446,59 @@ public final class UTF8Reader
     /**********************************************************************
      */
 
-    private void reportInvalidInitial(int mask, int offset) throws IOException
-    {
-        // input (byte) ptr has been advanced by one, by now:
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset + 1;
+    // Positions in messages are 1-based: `offset` is the 0-based index of the char
+    // within the current read() call, `byteIndex` the index in `_inputBuffer` of the
+    // offending byte. Neither `_charCount` nor `_inputPtr` are updated until read()
+    // returns, so the decode loop has to pass its local state in.
 
-        throw new CharConversionException("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask)
-                +" (at char #"+charPos+", byte #"+bytePos+")");
+    private void reportInvalidInitial(int mask, int offset, int byteIndex) throws IOException
+    {
+        throw _invalid("Invalid UTF-8 start byte 0x"+Integer.toHexString(mask), offset, byteIndex);
     }
 
-    private void reportInvalid(int value, int offset, String msg) throws IOException
+    private void reportInvalid(int value, int offset, int byteIndex, String msg) throws IOException
     {
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset;
-
-        throw new CharConversionException("Invalid UTF-8 character 0x"+Integer.toHexString(value)
-                +" ("+msg+") (at char #"+charPos+", byte #"+bytePos+")");
+        throw _invalid("Invalid UTF-8 character 0x"+Integer.toHexString(value)+" ("+msg+")",
+                offset, byteIndex);
     }
 
-    private void reportInvalidOther(int mask, int offset)
+    private void reportInvalidOther(int mask, int offset, int byteIndex)
         throws IOException
     {
-        int bytePos = _byteCount + _inputPtr - 1;
-        int charPos = _charCount + offset;
-
-        throw new CharConversionException("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask)
-                +" (at char #"+charPos+", byte #"+bytePos+")");
+        throw _invalid("Invalid UTF-8 middle byte 0x"+Integer.toHexString(mask), offset, byteIndex);
     }
 
     private void reportUnexpectedEOF(int gotBytes, int needed)
         throws IOException
     {
-        int bytePos = _byteCount + gotBytes;
-        int charPos = _charCount;
+        // only called from loadMore(), before anything is decoded by the current read()
+        throw _invalid("Unexpected EOF in the middle of a multi-byte char: got "
+                +gotBytes+", needed "+needed, 0, _inputPtr);
+    }
 
-        throw new CharConversionException("Unexpected EOF in the middle of a multi-byte char: got "
-                +gotBytes+", needed "+needed +", at char #"+charPos+", byte #"+bytePos+")");
+    private InvalidUTF8Exception _invalid(String msg, int offset, int byteIndex) {
+        final long charOffset = _charCount + offset;
+        final long byteOffset = _byteCount + byteIndex;
+        return new InvalidUTF8Exception(msg+" (at char #"+(charOffset + 1)+", byte #"+(byteOffset + 1)+")",
+                charOffset, byteOffset);
+    }
+
+    /**
+     * Exception for invalid UTF-8 content that also carries the (0-based) offsets
+     * of the problem, so that they can be passed in the {@code TokenStreamLocation}
+     * of the wrapping {@link TomlStreamReadException}.
+     */
+    static final class InvalidUTF8Exception extends CharConversionException
+    {
+        private static final long serialVersionUID = 1L;
+
+        final long charOffset, byteOffset;
+
+        InvalidUTF8Exception(String msg, long charOffset, long byteOffset) {
+            super(msg);
+            this.charOffset = charOffset;
+            this.byteOffset = byteOffset;
+        }
     }
 
     protected void reportBounds(char[] cbuf, int start, int len) throws IOException {
