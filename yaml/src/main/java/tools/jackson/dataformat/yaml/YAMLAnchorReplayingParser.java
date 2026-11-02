@@ -92,10 +92,28 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      */
     private int globalDepth = 0;
 
+    /**
+     * @deprecated Since 3.3 use
+     *   {@link #YAMLAnchorReplayingParser(ObjectReadContext, IOContext, BufferRecycler, int, int, LoadSettings, Reader, boolean)}
+     *   instead
+     */
+    @Deprecated // since 3.3
     public YAMLAnchorReplayingParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
                       int streamReadFeatures, int formatFeatures,
                       LoadSettings loadSettings, Reader reader) {
-        super(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures, loadSettings, reader);
+        this(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures, loadSettings, reader, false);
+    }
+
+    /**
+     * @param ownsReader Whether {@code reader} was constructed by Jackson (and hence must
+     *    always be closed), or provided by the caller
+     *
+     * @since 3.3
+     */
+    public YAMLAnchorReplayingParser(ObjectReadContext readCtxt, IOContext ioCtxt, BufferRecycler br,
+                      int streamReadFeatures, int formatFeatures,
+                      LoadSettings loadSettings, Reader reader, boolean ownsReader) {
+        super(readCtxt, ioCtxt, br, streamReadFeatures, formatFeatures, loadSettings, reader, ownsReader);
     }
 
     private void finishContext(AnchorContext context) throws StreamConstraintsException {

@@ -76,6 +76,32 @@ public class ParserBufferRecyclingTest extends ModuleTestBase
         }
     }
 
+    // Same as above, but for the factory that creates `YAMLAnchorReplayingParser`s
+    @Test
+    public void testReadBufferRecycledWhenAbandoningAnchorReplayingParser() throws Exception {
+        YAMLMapper mapper = mapperBuilder(YAMLAnchorReplayingFactory.builder()
+                .disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+                .build())
+                .build();
+
+        CloseTrackingStream in = new CloseTrackingStream(_longDoc());
+        byte[] firstBuffer;
+        try (JsonParser p = mapper.createParser(in)) {
+            assertNotNull(p.nextToken());
+            assertNotNull(p.nextToken());
+            firstBuffer = _readBuffer(p);
+            assertNotNull(firstBuffer, "Precondition: should have used a read buffer");
+        }
+
+        assertFalse(in.closed, "Should not have closed caller's InputStream");
+
+        try (JsonParser p = mapper.createParser(new CloseTrackingStream(_longDoc()))) {
+            assertNotNull(p.nextToken());
+            assertTrue(firstBuffer == _readBuffer(p),
+                    "Read buffer not returned to recycler by abandoned parser");
+        }
+    }
+
     @Test
     public void testReadBufferRecycledWithAutoCloseEnabled() throws Exception {
         YAMLMapper mapper = newObjectMapper();

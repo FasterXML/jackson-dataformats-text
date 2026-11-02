@@ -52,12 +52,14 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
     @Override
     protected YAMLAnchorReplayingParser _createParser(ObjectReadContext readCtxt, IOContext ioCtxt, InputStream in) {
         final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
+        final Reader r = _createReader(in, null, ioCtxt, stdFeatures);
+        // [dataformats-text#718]: as with `YAMLFactory`, `UTF8Reader` must always be closed
         return new YAMLAnchorReplayingParser(readCtxt, ioCtxt,
                 _getBufferRecycler(),
                 stdFeatures,
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(in, null, ioCtxt, stdFeatures));
+                r, (r instanceof UTF8Reader));
     }
 
     @Override
@@ -67,7 +69,7 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                r);
+                r, false);
     }
 
     @Override
@@ -78,7 +80,7 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                new CharArrayReader(data, offset, len));
+                new CharArrayReader(data, offset, len), true);
     }
 
     @Override
@@ -88,6 +90,6 @@ public class YAMLAnchorReplayingFactory extends YAMLFactory {
                 readCtxt.getStreamReadFeatures(_streamReadFeatures),
                 readCtxt.getFormatReadFeatures(_formatReadFeatures),
                 _loadSettings,
-                _createReader(data, offset, len, null, ioCtxt));
+                _createReader(data, offset, len, null, ioCtxt), true);
     }
 }

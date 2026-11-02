@@ -23,5 +23,6 @@ module tools.jackson.dataformat.csv
     opens tools.jackson.dataformat.csv.ser.dos;
     opens tools.jackson.dataformat.csv.testutil;
     opens tools.jackson.dataformat.csv.testutil.failure;
-    opens tools.jackson.dataformat.csv.tofix;
+    // NOTE: `tofix` has no tests at the moment; opening an empty package leads to a
+    // compiler warning. Add `opens tools.jackson.dataformat.csv.tofix;` along with tests.
 }

@@ -112,7 +112,7 @@ public class TomlReadConstraintsTest extends TomlMapperTestBase
     public void testNameLengthDoesNotApplyToValues() throws Exception {
         TomlMapper mapper = mapperWithNameLimit(MAX_NAME_LEN);
         JsonNode n = mapper.readTree("a = \"" + _longName() + "\"\n");
-        assertEquals(_longName(), n.get("a").textValue());
+        assertEquals(_longName(), n.get("a").stringValue());
     }
 
     private static String _longName() {

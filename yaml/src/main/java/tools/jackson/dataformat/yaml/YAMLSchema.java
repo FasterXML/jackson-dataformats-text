@@ -18,6 +18,17 @@ public enum YAMLSchema {
     JSON,
     /**
      * Schema for parsing standard YAML documents.
+     *<p>
+     * Selecting this schema does not disable
+     * {@link YAMLReadFeature#PARSE_OCTAL_NUMBERS}, which is enabled by default for
+     * backwards compatibility. Consequently, {@code 0444} is read as decimal
+     * {@code 292}. To read it as decimal {@code 444}, disable the feature explicitly:
+     *<pre>{@code
+     * YAMLFactory.builder()
+     *     .yamlSchema(YAMLSchema.CORE)
+     *     .disable(YAMLReadFeature.PARSE_OCTAL_NUMBERS)
+     *     .build();
+     *}</pre>
      * @see https://yaml.org/spec/1.2.2/#103-core-schema
      */
     CORE,

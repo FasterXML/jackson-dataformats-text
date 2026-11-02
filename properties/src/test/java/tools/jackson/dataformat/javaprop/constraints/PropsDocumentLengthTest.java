@@ -154,7 +154,7 @@ public class PropsDocumentLengthTest extends ModuleTestBase
             }
         });
         // (and it is document length, not String length, that fails)
-        assertEquals(MAX_DOC_LEN + 500, newPropertiesMapper().readTree(doc).get("key").textValue().length());
+        assertEquals(MAX_DOC_LEN + 500, newPropertiesMapper().readTree(doc).get("key").stringValue().length());
     }
 
     // No limit configured: nothing is counted or enforced
