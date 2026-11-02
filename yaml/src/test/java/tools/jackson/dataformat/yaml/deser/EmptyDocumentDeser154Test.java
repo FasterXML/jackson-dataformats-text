@@ -2,6 +2,9 @@ package tools.jackson.dataformat.yaml.deser;
 
 import org.junit.jupiter.api.Test;
 
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.dataformat.yaml.*;
 
@@ -108,6 +111,50 @@ public class EmptyDocumentDeser154Test extends ModuleTestBase
         assertNotNull(result);
         assertFalse(result.wireframe);
         assertEquals("default", result.name);
+        assertEquals(42, result.count);
+    }
+
+    // END_OBJECT must remain the current token, within proper context, until next call
+    @Test
+    public void testTokenStreamWithFeature() throws Exception
+    {
+        _verifyTokenStream(MAPPER_WITH_EMPTY_AS_OBJECT);
+    }
+
+    @Test
+    public void testTokenStreamWithFeatureAnchorReplaying() throws Exception
+    {
+        _verifyTokenStream(mapperBuilder(new YAMLAnchorReplayingFactory())
+                .enable(YAMLReadFeature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT)
+                .build());
+    }
+
+    private void _verifyTokenStream(YAMLMapper mapper) throws Exception
+    {
+        try (JsonParser p = mapper.createParser("# just a comment")) {
+            assertToken(JsonToken.START_OBJECT, p.nextToken());
+            assertTrue(p.streamReadContext().inObject());
+
+            assertToken(JsonToken.END_OBJECT, p.nextToken());
+            assertToken(JsonToken.END_OBJECT, p.currentToken());
+            assertTrue(p.streamReadContext().inRoot());
+            assertFalse(p.isClosed());
+
+            assertNull(p.nextToken());
+            assertNull(p.currentToken());
+            assertTrue(p.isClosed());
+
+            assertNull(p.nextToken());
+        }
+    }
+
+    // Nothing follows the synthetic empty object, so must not be seen as trailing tokens
+    @Test
+    public void testNoTrailingTokensWithFeature() throws Exception
+    {
+        DataWithDefaults result = MAPPER_WITH_EMPTY_AS_OBJECT.readerFor(DataWithDefaults.class)
+                .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+                .readValue("");
         assertEquals(42, result.count);
     }
 
