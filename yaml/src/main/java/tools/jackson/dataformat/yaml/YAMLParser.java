@@ -137,7 +137,17 @@ public class YAMLParser extends ParserBase
      * for an empty document (when {@link YAMLReadFeature#EMPTY_DOCUMENT_AS_EMPTY_OBJECT}
      * is enabled).
      */
-    protected boolean _emittingSyntheticEmptyObject;    
+    protected boolean _emittingSyntheticEmptyObject;
+
+    /**
+     * Flag set once the synthetic empty object has been fully emitted: closing is
+     * deferred until the next call to {@link #nextToken()}, as closing clears
+     * the current token ({@code END_OBJECT}) that callers still need to see.
+     * Input has been consumed so no more events can be requested at that point.
+     *
+     * @since 3.3
+     */
+    protected boolean _syntheticEmptyObjectEmitted;
 
     /**
      * Patterns for matching YAML's notation for Infinity and NaN values.
@@ -364,11 +374,13 @@ public class YAMLParser extends ParserBase
         // [dataformats-text#154]: Handle synthetic empty object for empty documents
         if (_emittingSyntheticEmptyObject) {
             _emittingSyntheticEmptyObject = false;
+            _syntheticEmptyObjectEmitted = true;
             _streamReadContext = _streamReadContext.getParent();
-            JsonToken token = _updateToken(JsonToken.END_OBJECT);
-            // Now close since we've emitted the complete empty object
+            return _updateToken(JsonToken.END_OBJECT);
+        }
+        if (_syntheticEmptyObjectEmitted) {
             close();
-            return token;
+            return _updateTokenToNull();
         }
 
         while (true /*_yamlParser.hasNext()*/) {
@@ -510,7 +522,7 @@ public class YAMLParser extends ParserBase
                             && YAMLReadFeature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT.enabledIn(_formatFeatures)) {
                         _emittingSyntheticEmptyObject = true;
                         // Don't close yet - we need to emit END_OBJECT first
-                        _streamReadContext.createChildObjectContext(0, 0);
+                        _streamReadContext = _streamReadContext.createChildObjectContext(0, 0);
                         return _updateToken(JsonToken.START_OBJECT);
                     }
                     close();
