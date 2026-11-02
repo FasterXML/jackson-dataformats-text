@@ -135,19 +135,10 @@ public class YAMLParser extends ParserBase
     /**
      * Flag to track whether we're currently emitting a synthetic empty object
      * for an empty document (when {@link YAMLReadFeature#EMPTY_DOCUMENT_AS_EMPTY_OBJECT}
-     * is enabled).
+     * is enabled). Remains set until parser is closed, since all input has been
+     * consumed and no more events can be requested.
      */
     protected boolean _emittingSyntheticEmptyObject;
-
-    /**
-     * Flag set once the synthetic empty object has been fully emitted: closing is
-     * deferred until the next call to {@link #nextToken()}, as closing clears
-     * the current token ({@code END_OBJECT}) that callers still need to see.
-     * Input has been consumed so no more events can be requested at that point.
-     *
-     * @since 3.3
-     */
-    protected boolean _syntheticEmptyObjectEmitted;
 
     /**
      * Patterns for matching YAML's notation for Infinity and NaN values.
@@ -373,12 +364,12 @@ public class YAMLParser extends ParserBase
 
         // [dataformats-text#154]: Handle synthetic empty object for empty documents
         if (_emittingSyntheticEmptyObject) {
-            _emittingSyntheticEmptyObject = false;
-            _syntheticEmptyObjectEmitted = true;
-            _streamReadContext = _streamReadContext.getParent();
-            return _updateToken(JsonToken.END_OBJECT);
-        }
-        if (_syntheticEmptyObjectEmitted) {
+            if (_streamReadContext.inObject()) {
+                _streamReadContext = _streamReadContext.getParent();
+                return _updateToken(JsonToken.END_OBJECT);
+            }
+            // Closing clears current token so must not be done until END_OBJECT
+            // has been seen by caller, that is, on the call after returning it
             close();
             return _updateTokenToNull();
         }
@@ -506,6 +497,7 @@ public class YAMLParser extends ParserBase
 
                 case Alias:
                     AliasEvent alias = (AliasEvent) evt;
+                    _hasContent = true;
                     _currentIsAlias = true;
                     _textValue = alias.getAnchor().orElseThrow(() -> new RuntimeException("Alias must be provided.")).getValue();
                     // [dataformats-text#636]: validate string value length

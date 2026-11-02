@@ -1,10 +1,14 @@
 package tools.jackson.dataformat.yaml.deser;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
-import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.core.StreamReadFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.MappingIterator;
 import tools.jackson.databind.exc.MismatchedInputException;
 import tools.jackson.dataformat.yaml.*;
 
@@ -148,14 +152,50 @@ public class EmptyDocumentDeser154Test extends ModuleTestBase
         }
     }
 
-    // Nothing follows the synthetic empty object, so must not be seen as trailing tokens
     @Test
-    public void testNoTrailingTokensWithFeature() throws Exception
+    public void testReadValuesWithFeature() throws Exception
     {
-        DataWithDefaults result = MAPPER_WITH_EMPTY_AS_OBJECT.readerFor(DataWithDefaults.class)
-                .with(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
-                .readValue("");
-        assertEquals(42, result.count);
+        try (MappingIterator<DataWithDefaults> it = MAPPER_WITH_EMPTY_AS_OBJECT
+                .readerFor(DataWithDefaults.class)
+                .readValues("# just a comment")) {
+            List<DataWithDefaults> all = it.readAll();
+            assertEquals(1, all.size());
+            assertEquals(42, all.get(0).count);
+        }
+    }
+
+    @Test
+    public void testReadTreeWithFeature() throws Exception
+    {
+        JsonNode root = MAPPER_WITH_EMPTY_AS_OBJECT.readTree("");
+        assertTrue(root.isObject());
+        assertTrue(root.isEmpty());
+    }
+
+    @Test
+    public void testTokenClearingDisabledWithFeature() throws Exception
+    {
+        YAMLMapper mapper = YAMLMapper.builder()
+                .enable(YAMLReadFeature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT)
+                .disable(StreamReadFeature.CLEAR_CURRENT_TOKEN_ON_CLOSE)
+                .build();
+        assertEquals(42, mapper.readValue("", DataWithDefaults.class).count);
+        _verifyTokenStream(mapper);
+    }
+
+    // Alias is content too: document must not be considered empty
+    @Test
+    public void testAliasOnlyDocumentNotEmpty() throws Exception
+    {
+        assertEquals("a", MAPPER_WITH_EMPTY_AS_OBJECT.readValue("*a", String.class));
+
+        try (JsonParser p = MAPPER_WITH_EMPTY_AS_OBJECT.createParser("*a\n---\n*b")) {
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("a", p.getString());
+            assertToken(JsonToken.VALUE_STRING, p.nextToken());
+            assertEquals("b", p.getString());
+            assertNull(p.nextToken());
+        }
     }
 
     // Verify that valid YAML still works (with and without feature)
