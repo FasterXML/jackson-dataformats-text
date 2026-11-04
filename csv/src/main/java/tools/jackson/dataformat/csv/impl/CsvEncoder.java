@@ -1334,12 +1334,19 @@ public class CsvEncoder
                 return true;
             }
         }
+        // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
+        // 28-May-2021, tatu: As per [dataformats-text#270] only check if first column
+        // NOTE: must be checked regardless of quoting mode: loose content scan only
+        //   catches '#' if `_cfgMinSafeChar` happens to exceed it (not the case
+        //   with, say, tab as column separator) and an unquoted leading '#' would
+        //   make the row be skipped as a comment line when read back
+        if (_cfgAllowsComments && (columnIndex == 0)
+                && (length > 0) && (first == '#')) {
+            return true;
+        }
         // may skip checks unless we want exact checking
         if (_cfgOptimalQuoting) {
-            // 31-Dec-2014, tatu: Comment lines start with # so quote if starts with #
-            // 28-May-2021, tatu: As per [dataformats-text#270] only check if first column
-            return _cfgAllowsComments && (columnIndex == 0)
-                && (length > 0) && (first == '#');
+            return false;
         }
         if (length > _cfgMaxQuoteCheckChars) {
             return true;
