@@ -460,8 +460,11 @@ final class TomlGenerator extends GeneratorBase
         if (_streamWriteContext.hasPendingName()) {
             _reportError("Cannot write a property name, expecting a value");
         }
+        if (name == null) {
+            _reportError("Cannot write a `null` property name");
+        }
         final char quote = _quoting(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY);
-        // cannot fail: checked above
+        // validity checked above (throws IllegalStateException if not)
         _streamWriteContext.writeName(name);
 
         if (_streamWriteContext._inline) {
