@@ -1,6 +1,7 @@
 package tools.jackson.dataformat.toml.dos;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,8 @@ public class CyclicTOMLDataSerTest extends TomlMapperTestBase
         List<Object> list = new ArrayList<>();
         list.add(list);
         try {
-            MAPPER.writeValueAsString(list);
+            // [dataformats-text#758]: root-level array not allowed, so wrap
+            MAPPER.writeValueAsString(Collections.singletonMap("list", list));
             fail("expected StreamConstraintsException");
         } catch (StreamConstraintsException e) {
             String exceptionPrefix = String.format("Document nesting depth (%d) exceeds the maximum allowed",

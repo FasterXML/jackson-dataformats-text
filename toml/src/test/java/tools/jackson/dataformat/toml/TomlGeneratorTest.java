@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -19,12 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 
+import tools.jackson.core.Base64Variants;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.exc.StreamWriteException;
 import tools.jackson.core.io.SerializedString;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SequenceWriter;
 
 public class TomlGeneratorTest extends TomlMapperTestBase {
     @Test
@@ -821,5 +824,252 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             g.flush();
             assertEquals("a = [{x = 1", w.toString());
         }
+    }
+
+    // [dataformats-text#758] (item 1): empty root-level Object must not be
+    // written as " = {}" (empty key) but as an empty document
+    @Test
+    public void emptyRootObject() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeEndObject();
+        }
+        assertEquals("", w.toString());
+
+        TomlMapper mapper = newTomlMapper();
+        String toml = mapper.writeValueAsString(new LinkedHashMap<>());
+        assertEquals("", toml);
+        _assertEmptyObject(mapper.readTree(toml));
+    }
+
+    // [dataformats-text#758]: root-level null written as empty Object (empty document)
+    @Test
+    public void rootLevelNullAsEmptyObject() throws Exception {
+        TomlMapper mapper = newTomlMapper();
+        _assertRootNullAsEmptyDocument(mapper, g -> g.writeNull());
+        _assertRootNullAsEmptyDocument(mapper, g -> g.writeString((String) null));
+        _assertRootNullAsEmptyDocument(mapper, g -> g.writeNumber((BigDecimal) null));
+        _assertRootNullAsEmptyDocument(mapper,
+                g -> g.writeBinary(Base64Variants.getDefaultVariant(), null, 0, 0));
+        _assertRootNullAsEmptyDocument(mapper, g -> g.writePOJO(null));
+
+        String toml = mapper.writeValueAsString(null);
+        assertEquals("", toml);
+        _assertEmptyObject(mapper.readTree(toml));
+
+        // but if nulls are not allowed, must still fail
+        TomlMapper failMapper = TomlMapper.builder()
+                .enable(TomlWriteFeature.FAIL_ON_NULL_WRITE).build();
+        TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                () -> failMapper.writeValueAsString(null));
+        assertTrue(e.getMessage().contains("FAIL_ON_NULL_WRITE"), e.getMessage());
+    }
+
+    // [dataformats-text#758] (item 2): TOML document must be a table, so
+    // root-level arrays and scalars must fail instead of using an empty key
+    @Test
+    public void rootLevelArrayOrScalarRejected() throws Exception {
+        _assertRootValueRejected("start an array", g -> g.writeStartArray());
+        _assertRootValueRejected("write String value", g -> g.writeString("abc"));
+        _assertRootValueRejected("write String value",
+                g -> g.writeString(new char[] { 'a', 'b', 'c' }, 0, 3));
+        _assertRootValueRejected("write String value",
+                g -> g.writeUTF8String(new byte[] { 'a', 'b' }, 0, 2));
+        _assertRootValueRejected("write number", g -> g.writeNumber((short) 1));
+        _assertRootValueRejected("write number", g -> g.writeNumber(1));
+        _assertRootValueRejected("write number", g -> g.writeNumber(1L));
+        _assertRootValueRejected("write number", g -> g.writeNumber(BigInteger.ONE));
+        _assertRootValueRejected("write number", g -> g.writeNumber(1.25));
+        _assertRootValueRejected("write number", g -> g.writeNumber(1.25f));
+        _assertRootValueRejected("write number", g -> g.writeNumber(new BigDecimal("1.25")));
+        _assertRootValueRejected("write number", g -> g.writeNumber("1.25"));
+        _assertRootValueRejected("write boolean value", g -> g.writeBoolean(true));
+        _assertRootValueRejected("write Binary value", g -> g.writeBinary(new byte[] { 1, 2 }));
+        _assertRootValueRejected("write raw value", g -> g.writeRawValue("1"));
+        _assertRootValueRejected("write raw value", g -> g.writeRawValue("123", 0, 1));
+        _assertRootValueRejected("write raw value",
+                g -> g.writeRawValue(new char[] { '1' }, 0, 1));
+        _assertRootValueRejected("write raw value", g -> g.writeRawValue(new SerializedString("1")));
+        _assertRootValueRejected("write local date", g -> g.writePOJO(LocalDate.of(2026, 11, 5)));
+
+        TomlMapper mapper = newTomlMapper();
+        assertThrows(TomlStreamWriteException.class,
+                () -> mapper.writeValueAsString(List.of(1, 2)));
+        assertThrows(TomlStreamWriteException.class,
+                () -> mapper.writeValueAsString("abc"));
+    }
+
+    // [dataformats-text#758]: root-level check must precede String value validation,
+    // so that error is about root-level value, not about String contents
+    @Test
+    public void rootLevelCheckBeforeStringValidation() throws Exception {
+        _assertRootValueRejected("write String value", g -> g.writeString("\uD800x"));
+        _assertRootValueRejected("write String value",
+                g -> g.writeString(new char[] { '\uD800', 'x' }, 0, 2));
+    }
+
+    // [dataformats-text#758]: property names only allowed within an Object
+    @Test
+    public void propertyNameOutsideObjectRejected() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> g.writeName("a"));
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot write a property name outside an Object (current context: root)"),
+                    e.getMessage());
+            g.flush();
+            assertEquals("", w.toString());
+        }
+
+        w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("arr");
+            g.writeStartArray();
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> g.writeName("a"));
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot write a property name outside an Object (current context: Array)"),
+                    e.getMessage());
+        }
+    }
+
+    // [dataformats-text#758]: property name without value must not be silently
+    // dropped (root Object) or written as an empty table (nested Object)
+    @Test
+    public void pendingNameAtObjectEndRejected() throws Exception {
+        // root-level Object
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("x");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    g::writeEndObject);
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot end an Object, expecting a value for property 'x'"), e.getMessage());
+        }
+        // nested (table) Object
+        w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            g.writeName("x");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    g::writeEndObject);
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot end an Object, expecting a value for property 'x'"), e.getMessage());
+            g.flush();
+            assertEquals("", w.toString());
+        }
+        // inline Object (within array)
+        w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("arr");
+            g.writeStartArray();
+            g.writeStartObject();
+            g.writeName("x");
+            assertThrows(TomlStreamWriteException.class, g::writeEndObject);
+        }
+    }
+
+    // [dataformats-text#758]: reused child contexts must not retain name state
+    @Test
+    public void reusedChildContextAcceptsNames() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            g.writeName("x");
+            g.writeNumber(1);
+            g.writeEndObject();
+            g.writeName("b");
+            g.writeStartObject();
+            g.writeName("y");
+            g.writeNumber(2);
+            g.writeEndObject();
+            g.writeEndObject();
+        }
+        assertEquals("a.x = 1\nb.y = 2\n", w.toString());
+    }
+
+    // [dataformats-text#758]: only one root-level Object (document) allowed;
+    // second one used to inherit key path of the first (like "a.b = 2")
+    @Test
+    public void multipleRootValuesRejected() throws Exception {
+        _assertSecondRootValueRejected("start an object", g -> {
+            g.writeStartObject();
+            g.writeNumberProperty("b", 2);
+            g.writeEndObject();
+        });
+        // second empty Object must not be silently dropped either
+        _assertSecondRootValueRejected("start an object", g -> {
+            g.writeStartObject();
+            g.writeEndObject();
+        });
+        // nor root-level null (which would be written as empty Object)
+        _assertSecondRootValueRejected("write null value", g -> g.writeNull());
+        // and other values still rejected as non-Objects
+        _assertSecondRootValueRejected("write number", g -> g.writeNumber(2));
+
+        // same via databinding
+        StringWriter w = new StringWriter();
+        TomlMapper mapper = newTomlMapper();
+        try (SequenceWriter seq = mapper.writer().writeValues(w)) {
+            seq.write(Map.of("a", 1));
+            assertThrows(TomlStreamWriteException.class, () -> seq.write(Map.of("b", 2)));
+        }
+        assertEquals("a = 1\n", w.toString());
+    }
+
+    private void _assertSecondRootValueRejected(String typeMsg, Consumer<JsonGenerator> write)
+        throws Exception
+    {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeNumberProperty("a", 1);
+            g.writeEndObject();
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> write.accept(g));
+            assertTrue(e.getMessage().startsWith("Cannot " + typeMsg + " at root level: "),
+                    e.getMessage());
+            g.flush();
+            assertEquals("a = 1\n", w.toString());
+        }
+    }
+
+    private void _assertRootValueRejected(String typeMsg, Consumer<JsonGenerator> write)
+        throws Exception
+    {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> write.accept(g));
+            assertTrue(e.getMessage().startsWith("Cannot " + typeMsg
+                    + " at root level: TOML document must be an Object"), e.getMessage());
+            g.flush();
+            // nothing (like an empty key) may have been written
+            assertEquals("", w.toString());
+        }
+    }
+
+    private void _assertRootNullAsEmptyDocument(TomlMapper mapper, Consumer<JsonGenerator> write)
+        throws Exception
+    {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = mapper.createGenerator(w)) {
+            write.accept(g);
+        }
+        assertEquals("", w.toString());
+    }
+
+    private void _assertEmptyObject(JsonNode node) {
+        assertTrue(node.isObject(), "Expected Object, got: " + node.getNodeType());
+        assertEquals(0, node.size());
     }
 }

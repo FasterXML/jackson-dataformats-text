@@ -69,6 +69,9 @@ final class TomlWriteContext extends TokenStreamContext {
         _currentValue = null;
         _index = -1;
         _currentValue = currValue;
+        // [dataformats-text#758]: reused context must not expect a value
+        _gotName = false;
+        _currentName = null;
         // 09-Apr-2021, tatu: [dataformats-text#260]: must reset this flag as well
         _inline = (type == TYPE_ARRAY) || (_parent != null && _parent._inline);
     }
@@ -109,14 +112,28 @@ final class TomlWriteContext extends TokenStreamContext {
     /**********************************************************************
      */
 
+    /**
+     * @return {@code true} if a property name may be written: only within an Object
+     *    that is not already expecting a value
+     */
     public boolean writeName(String name)
     {
-        if (_gotName) {
+        // [dataformats-text#758]: no names outside Objects (root, arrays)
+        if ((_type != TYPE_OBJECT) || _gotName) {
             return false;
         }
         _gotName = true;
         _currentName = name;
         return true;
+    }
+
+    /**
+     * @return {@code true} if a property name has been written but not yet its value
+     *
+     * @since 3.3
+     */
+    public boolean hasPendingName() {
+        return _gotName;
     }
 
     public boolean writeValue() {

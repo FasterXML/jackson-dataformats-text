@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import tools.jackson.core.*;
 import tools.jackson.core.base.GeneratorBase;
+import tools.jackson.core.exc.StreamWriteException;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberOutput;
 import tools.jackson.core.util.JacksonFeatureSet;
@@ -450,6 +451,11 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public JsonGenerator writeName(String name) throws JacksonException {
         if (!_streamWriteContext.writeName(name)) {
+            // [dataformats-text#758]: names only allowed within an Object
+            if (!_streamWriteContext.inObject()) {
+                _reportError("Cannot write a property name outside an Object (current context: "
+                        + _streamWriteContext.typeDesc() + ")");
+            }
             _reportError("Cannot write a property name, expecting a value");
         }
 
@@ -493,7 +499,7 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeStartArray(Object currValue) throws JacksonException {
         // arrays are always inline, force writing the current key
         // NOTE: if this ever changes, we need to add empty array handling in writeEndArray
-        _verifyValueWrite("start an array", true);
+        _verifyValueWrite("start an array", false);
         _streamWriteContext = _streamWriteContext.createChildArrayContext(currValue,
                 _basePath.length());
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
@@ -526,7 +532,7 @@ final class TomlGenerator extends GeneratorBase
     @Override
     public JsonGenerator writeStartObject(Object forValue) throws JacksonException {
         // objects aren't always materialized right now
-        _verifyValueWrite("start an object", false);
+        _verifyValueWrite("start an object", true);
         _streamWriteContext = _streamWriteContext.createChildObjectContext(forValue, _basePath.length());
         streamWriteConstraints().validateNestingDepth(_streamWriteContext.getNestingDepth());
         if (_streamWriteContext._inline) {
@@ -540,9 +546,16 @@ final class TomlGenerator extends GeneratorBase
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
+        // [dataformats-text#758]: property name without value is an error
+        if (_streamWriteContext.hasPendingName()) {
+            _reportError("Cannot end an Object, expecting a value for property '"
+                    + _streamWriteContext.currentName() + "'");
+        }
         if (_streamWriteContext._inline) {
             _writeRaw('}');
-        } else if (!_streamWriteContext.hasCurrentIndex()) {
+        } else if (!_streamWriteContext.hasCurrentIndex()
+                // [dataformats-text#758]: empty root-level Object is just an empty document
+                && !_streamWriteContext.getParent().inRoot()) {
             // empty object
             writeCurrentPath();
             _writeRaw("{}");
@@ -562,7 +575,8 @@ final class TomlGenerator extends GeneratorBase
         if (text == null) {
             return writeNull();
         }
-        // validate before writing anything (key, separator)
+        // validate before writing anything (key, separator); root check first
+        _verifyNotAtRoot("write String value");
         final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize(text)));
         _verifyValueWrite("write String value");
         _writeQuoted(quote, text);
@@ -573,7 +587,8 @@ final class TomlGenerator extends GeneratorBase
     public JsonGenerator writeString(char[] text, int offset, int len) throws JacksonException {
         // NOTE: also reports `null` array as error
         _checkRangeBoundsForCharArray(text, offset, len);
-        // validate before writing anything (key, separator)
+        // validate before writing anything (key, separator); root check first
+        _verifyNotAtRoot("write String value");
         final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize(text, offset, len)));
         _verifyValueWrite("write String value");
         if (quote == QUOTE_ESCAPED) {
@@ -821,9 +836,16 @@ final class TomlGenerator extends GeneratorBase
         if (TomlWriteFeature.FAIL_ON_NULL_WRITE.enabledIn(_tomlFeatures)) {
             throw new TomlStreamWriteException(this, "TOML null writing disabled (TomlWriteFeature.FAIL_ON_NULL_WRITE)");
         }
-        _verifyValueWrite("write null value");
+        // [dataformats-text#758]: root-level null written as empty Object (empty document)
+        if (_streamWriteContext.inRoot()) {
+            _verifySingleRootValue("write null value");
+            writeStartObject();
+            return writeEndObject();
+        }
         // as empty String
-        _writeQuoted(_quoting(_stringValueCategories(StringOutputUtil.categorize(""))), "");
+        final char quote = _quoting(_stringValueCategories(StringOutputUtil.categorize("")));
+        _verifyValueWrite("write null value");
+        _writeQuoted(quote, "");
         return writeValueEnd();
     }
 
@@ -835,10 +857,20 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     protected void _verifyValueWrite(String typeMsg) throws JacksonException {
-        _verifyValueWrite(typeMsg, true);
+        _verifyValueWrite(typeMsg, false);
     }
 
-    protected void _verifyValueWrite(String typeMsg, boolean forceMaterializeKey) throws JacksonException {
+    /**
+     * @param isObject Whether value to write is an Object: if not, value is not
+     *    allowed at root level, and its key is written right away (Objects are
+     *    not materialized until their contents are written)
+     */
+    protected void _verifyValueWrite(String typeMsg, boolean isObject) throws JacksonException {
+        if (isObject) {
+            _verifySingleRootValue(typeMsg);
+        } else {
+            _verifyNotAtRoot(typeMsg);
+        }
         // check that name/value cadence works
         if (!_streamWriteContext.writeValue()) {
             _reportError("Cannot " + typeMsg + ", expecting a property name");
@@ -854,10 +886,46 @@ final class TomlGenerator extends GeneratorBase
             }
         } else {
             // write the key if necessary
-            if (forceMaterializeKey) {
+            if (!isObject) {
                 writeCurrentPath();
             }
         }
+    }
+
+    /**
+     * [dataformats-text#758]: TOML document is a table, so only an Object may be
+     * written at root level. Called before any other validation of the value.
+     *
+     * @since 3.3
+     */
+    private void _verifyNotAtRoot(String typeMsg) throws JacksonException {
+        if (_streamWriteContext.inRoot()) {
+            _reportError("Cannot " + typeMsg + " at root level: TOML document must be an Object");
+        }
+    }
+
+    /**
+     * [dataformats-text#758]: TOML document is a single table, so only one value
+     * (Object) may be written at root level.
+     *
+     * @since 3.3
+     */
+    private void _verifySingleRootValue(String typeMsg) throws JacksonException {
+        if (_streamWriteContext.inRoot() && _streamWriteContext.hasCurrentIndex()) {
+            _reportError("Cannot " + typeMsg
+                    + " at root level: TOML document must be a single Object, and one has already been written");
+        }
+    }
+
+    // All write failures reported via `_reportError()` should be TOML-specific
+    @Override
+    protected StreamWriteException _constructWriteException(String msg) {
+        return new TomlStreamWriteException(this, msg);
+    }
+
+    @Override
+    protected StreamWriteException _constructWriteException(String msg, Throwable t) {
+        return new TomlStreamWriteException(this, msg, t);
     }
 
     // Starts every key/value line: terminate preceding one, in case it was not yet
