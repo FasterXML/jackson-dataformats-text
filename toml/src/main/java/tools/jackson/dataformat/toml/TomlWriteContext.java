@@ -113,18 +113,23 @@ final class TomlWriteContext extends TokenStreamContext {
      */
 
     /**
-     * @return {@code true} if a property name may be written: only within an Object
-     *    that is not already expecting a value
+     * Method for recording a property name. Caller is expected to have verified
+     * that a property name may be written (see {@link #inObject()},
+     * {@link #hasPendingName()}) and to have reported a problem if not.
+     *
+     * @throws IllegalStateException if called when a property name may not be written:
+     *    outside an Object, or when Object is already expecting a value
      */
-    public boolean writeName(String name)
+    public void writeName(String name)
     {
         // [dataformats-text#758]: no names outside Objects (root, arrays)
         if ((_type != TYPE_OBJECT) || _gotName) {
-            return false;
+            throw new IllegalStateException("Internal error: cannot write property name '"
+                    + name + "' in " + typeDesc() + " context"
+                    + (_gotName ? " (expecting a value)" : ""));
         }
         _gotName = true;
         _currentName = name;
-        return true;
     }
 
     /**

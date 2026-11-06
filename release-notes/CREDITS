@@ -100,3 +100,10 @@ Burak Kalayci (@kalayciburak)
  * Fixed #720: (properties, toml) Do not close a Jackson-opened File/Path source twice
    when parsing fails
   (3.3.0)
+
+Caio Vinicius (@caiocv18)
+ * Fixed #758: (toml) `TomlGenerator`: invalid TOML output (with empty key) for
+   root-level values
+  (3.3.0)
+ * Fixed #781: (toml) `TomlGenerator.writeName()`: rejected key leaves generator stuck
+  (3.3.0)
