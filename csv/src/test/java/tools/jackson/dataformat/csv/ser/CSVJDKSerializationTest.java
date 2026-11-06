@@ -80,6 +80,7 @@ public class CSVJDKSerializationTest extends ModuleTestBase
         assertNotNull(csv);
     }
 
+    @Test
     public void testMapperCopy() throws Exception
     {
         CsvMapper mapper2 = MAPPER.rebuild().build();

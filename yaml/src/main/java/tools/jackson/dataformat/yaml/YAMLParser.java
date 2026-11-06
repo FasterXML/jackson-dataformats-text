@@ -135,9 +135,10 @@ public class YAMLParser extends ParserBase
     /**
      * Flag to track whether we're currently emitting a synthetic empty object
      * for an empty document (when {@link YAMLReadFeature#EMPTY_DOCUMENT_AS_EMPTY_OBJECT}
-     * is enabled).
+     * is enabled). Remains set until parser is closed, since all input has been
+     * consumed and no more events can be requested.
      */
-    protected boolean _emittingSyntheticEmptyObject;    
+    protected boolean _emittingSyntheticEmptyObject;
 
     /**
      * Patterns for matching YAML's notation for Infinity and NaN values.
@@ -363,12 +364,14 @@ public class YAMLParser extends ParserBase
 
         // [dataformats-text#154]: Handle synthetic empty object for empty documents
         if (_emittingSyntheticEmptyObject) {
-            _emittingSyntheticEmptyObject = false;
-            _streamReadContext = _streamReadContext.getParent();
-            JsonToken token = _updateToken(JsonToken.END_OBJECT);
-            // Now close since we've emitted the complete empty object
+            if (_streamReadContext.inObject()) {
+                _streamReadContext = _streamReadContext.getParent();
+                return _updateToken(JsonToken.END_OBJECT);
+            }
+            // Closing clears current token so must not be done until END_OBJECT
+            // has been seen by caller, that is, on the call after returning it
             close();
-            return token;
+            return _updateTokenToNull();
         }
 
         while (true /*_yamlParser.hasNext()*/) {
@@ -494,6 +497,7 @@ public class YAMLParser extends ParserBase
 
                 case Alias:
                     AliasEvent alias = (AliasEvent) evt;
+                    _hasContent = true;
                     _currentIsAlias = true;
                     _textValue = alias.getAnchor().orElseThrow(() -> new RuntimeException("Alias must be provided.")).getValue();
                     // [dataformats-text#636]: validate string value length
@@ -510,7 +514,7 @@ public class YAMLParser extends ParserBase
                             && YAMLReadFeature.EMPTY_DOCUMENT_AS_EMPTY_OBJECT.enabledIn(_formatFeatures)) {
                         _emittingSyntheticEmptyObject = true;
                         // Don't close yet - we need to emit END_OBJECT first
-                        _streamReadContext.createChildObjectContext(0, 0);
+                        _streamReadContext = _streamReadContext.createChildObjectContext(0, 0);
                         return _updateToken(JsonToken.START_OBJECT);
                     }
                     close();
