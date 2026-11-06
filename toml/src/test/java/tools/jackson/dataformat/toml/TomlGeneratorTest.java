@@ -27,6 +27,7 @@ import tools.jackson.core.io.SerializedString;
 import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SequenceWriter;
 
 public class TomlGeneratorTest extends TomlMapperTestBase {
     @Test
@@ -994,6 +995,52 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             g.writeEndObject();
         }
         assertEquals("a.x = 1\nb.y = 2\n", w.toString());
+    }
+
+    // [dataformats-text#758]: only one root-level Object (document) allowed;
+    // second one used to inherit key path of the first (like "a.b = 2")
+    @Test
+    public void multipleRootValuesRejected() throws Exception {
+        _assertSecondRootValueRejected("start an object", g -> {
+            g.writeStartObject();
+            g.writeNumberProperty("b", 2);
+            g.writeEndObject();
+        });
+        // second empty Object must not be silently dropped either
+        _assertSecondRootValueRejected("start an object", g -> {
+            g.writeStartObject();
+            g.writeEndObject();
+        });
+        // nor root-level null (which would be written as empty Object)
+        _assertSecondRootValueRejected("write null value", g -> g.writeNull());
+        // and other values still rejected as non-Objects
+        _assertSecondRootValueRejected("write number", g -> g.writeNumber(2));
+
+        // same via databinding
+        StringWriter w = new StringWriter();
+        TomlMapper mapper = newTomlMapper();
+        try (SequenceWriter seq = mapper.writer().writeValues(w)) {
+            seq.write(Map.of("a", 1));
+            assertThrows(TomlStreamWriteException.class, () -> seq.write(Map.of("b", 2)));
+        }
+        assertEquals("a = 1\n", w.toString());
+    }
+
+    private void _assertSecondRootValueRejected(String typeMsg, Consumer<JsonGenerator> write)
+        throws Exception
+    {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeNumberProperty("a", 1);
+            g.writeEndObject();
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> write.accept(g));
+            assertTrue(e.getMessage().startsWith("Cannot " + typeMsg + " at root level: "),
+                    e.getMessage());
+            g.flush();
+            assertEquals("a = 1\n", w.toString());
+        }
     }
 
     private void _assertRootValueRejected(String typeMsg, Consumer<JsonGenerator> write)

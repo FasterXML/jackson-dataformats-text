@@ -838,6 +838,7 @@ final class TomlGenerator extends GeneratorBase
         }
         // [dataformats-text#758]: root-level null written as empty Object (empty document)
         if (_streamWriteContext.inRoot()) {
+            _verifySingleRootValue("write null value");
             writeStartObject();
             return writeEndObject();
         }
@@ -865,7 +866,9 @@ final class TomlGenerator extends GeneratorBase
      *    not materialized until their contents are written)
      */
     protected void _verifyValueWrite(String typeMsg, boolean isObject) throws JacksonException {
-        if (!isObject) {
+        if (isObject) {
+            _verifySingleRootValue(typeMsg);
+        } else {
             _verifyNotAtRoot(typeMsg);
         }
         // check that name/value cadence works
@@ -896,6 +899,17 @@ final class TomlGenerator extends GeneratorBase
     private void _verifyNotAtRoot(String typeMsg) throws JacksonException {
         if (_streamWriteContext.inRoot()) {
             _reportError("Cannot " + typeMsg + " at root level: TOML document must be an Object");
+        }
+    }
+
+    /**
+     * [dataformats-text#758]: TOML document is a single table, so only one value
+     * (Object) may be written at root level.
+     */
+    private void _verifySingleRootValue(String typeMsg) throws JacksonException {
+        if (_streamWriteContext.inRoot() && _streamWriteContext.hasCurrentIndex()) {
+            _reportError("Cannot " + typeMsg
+                    + " at root level: TOML document must be a single Object, and one has already been written");
         }
     }
 
