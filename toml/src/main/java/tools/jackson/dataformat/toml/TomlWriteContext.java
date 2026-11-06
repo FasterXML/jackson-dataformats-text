@@ -129,6 +129,8 @@ final class TomlWriteContext extends TokenStreamContext {
 
     /**
      * @return {@code true} if a property name has been written but not yet its value
+     *
+     * @since 3.3
      */
     public boolean hasPendingName() {
         return _gotName;

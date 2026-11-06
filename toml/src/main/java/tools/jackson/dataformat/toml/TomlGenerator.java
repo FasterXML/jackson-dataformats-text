@@ -895,6 +895,8 @@ final class TomlGenerator extends GeneratorBase
     /**
      * [dataformats-text#758]: TOML document is a table, so only an Object may be
      * written at root level. Called before any other validation of the value.
+     *
+     * @since 3.3
      */
     private void _verifyNotAtRoot(String typeMsg) throws JacksonException {
         if (_streamWriteContext.inRoot()) {
@@ -905,6 +907,8 @@ final class TomlGenerator extends GeneratorBase
     /**
      * [dataformats-text#758]: TOML document is a single table, so only one value
      * (Object) may be written at root level.
+     *
+     * @since 3.3
      */
     private void _verifySingleRootValue(String typeMsg) throws JacksonException {
         if (_streamWriteContext.inRoot() && _streamWriteContext.hasCurrentIndex()) {
