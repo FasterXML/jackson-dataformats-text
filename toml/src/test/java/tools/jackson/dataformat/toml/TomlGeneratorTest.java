@@ -826,6 +826,92 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         }
     }
 
+    // [dataformats-text#781]: rejected key must leave generator usable (no pending
+    // name, base path unchanged), so that the next property name can be written
+    @Test
+    public void rejectedKeyLeavesGeneratorUsable() throws Exception {
+        TomlMapper mapper = newTomlMapper();
+        // root-level Object
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = mapper.createGenerator(w)) {
+            g.writeStartObject();
+            _assertKeyRejected(g);
+            g.writeName("abc");
+            g.writeNumber(1);
+            g.writeEndObject();
+        }
+        assertEquals("abc = 1\n", w.toString());
+        assertEquals(1, mapper.readTree(w.toString()).get("abc").asInt());
+
+        // nested (table) Object
+        w = new StringWriter();
+        try (JsonGenerator g = mapper.createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            _assertKeyRejected(g);
+            g.writeName("b");
+            g.writeNumber(1);
+            g.writeEndObject();
+            g.writeEndObject();
+        }
+        assertEquals("a.b = 1\n", w.toString());
+        assertEquals(1, mapper.readTree(w.toString()).at("/a/b").asInt());
+
+        // nested (table) Object left empty: its key comes from the base path as is
+        // (not truncated by a following property name)
+        w = new StringWriter();
+        try (JsonGenerator g = mapper.createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            _assertKeyRejected(g);
+            g.writeEndObject();
+            g.writeEndObject();
+        }
+        assertEquals("a = {}\n", w.toString());
+        _assertEmptyObject(mapper.readTree(w.toString()).get("a"));
+
+        // inline Object (within array)
+        w = new StringWriter();
+        try (JsonGenerator g = mapper.createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartArray();
+            g.writeStartObject();
+            g.writeName("x");
+            g.writeNumber(1);
+            _assertKeyRejected(g);
+            g.writeName("y");
+            g.writeNumber(2);
+            g.writeEndObject();
+            g.writeEndArray();
+            g.writeEndObject();
+        }
+        assertEquals("a = [{x = 1, y = 2}]\n", w.toString());
+        assertEquals(2, mapper.readTree(w.toString()).at("/a/0/y").asInt());
+    }
+
+    // [dataformats-text#781]: context checks of `writeName()` must precede key
+    // validation, so that error is about context, not about key contents
+    @Test
+    public void contextCheckBeforeKeyValidation() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    () -> g.writeName("\uD800x"));
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot write a property name outside an Object (current context: root)"),
+                    e.getMessage());
+            g.writeStartObject();
+            g.writeName("a");
+            e = assertThrows(TomlStreamWriteException.class,
+                    () -> g.writeName("\uD800x"));
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot write a property name, expecting a value"), e.getMessage());
+        }
+    }
+
     // [dataformats-text#758] (item 1): empty root-level Object must not be
     // written as " = {}" (empty key) but as an empty document
     @Test
@@ -1066,6 +1152,13 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
             write.accept(g);
         }
         assertEquals("", w.toString());
+    }
+
+    private void _assertKeyRejected(JsonGenerator g) {
+        TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                () -> g.writeName("\uD800x"));
+        assertTrue(e.getMessage().startsWith("Key contains unsupported characters"),
+                e.getMessage());
     }
 
     private void _assertEmptyObject(JsonNode node) {

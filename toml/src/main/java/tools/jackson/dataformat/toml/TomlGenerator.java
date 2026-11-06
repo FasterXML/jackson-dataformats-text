@@ -450,18 +450,21 @@ final class TomlGenerator extends GeneratorBase
 
     @Override
     public JsonGenerator writeName(String name) throws JacksonException {
-        if (!_streamWriteContext.writeName(name)) {
-            // [dataformats-text#758]: names only allowed within an Object
-            if (!_streamWriteContext.inObject()) {
-                _reportError("Cannot write a property name outside an Object (current context: "
-                        + _streamWriteContext.typeDesc() + ")");
-            }
+        // [dataformats-text#781]: validate before updating context or writing anything
+        // (separator), so that a rejected key leaves generator usable; context checks first
+        // [dataformats-text#758]: names only allowed within an Object
+        if (!_streamWriteContext.inObject()) {
+            _reportError("Cannot write a property name outside an Object (current context: "
+                    + _streamWriteContext.typeDesc() + ")");
+        }
+        if (_streamWriteContext.hasPendingName()) {
             _reportError("Cannot write a property name, expecting a value");
         }
+        final char quote = _quoting(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY);
+        // cannot fail: checked above
+        _streamWriteContext.writeName(name);
 
         if (_streamWriteContext._inline) {
-            // validate before writing anything (separator)
-            final char quote = _quoting(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY);
             if (_streamWriteContext.hasCurrentIndex()) {
                 _writeRaw(", ");
             }
@@ -473,7 +476,7 @@ final class TomlGenerator extends GeneratorBase
             if (_basePath.length() > 0) {
                 _basePath.append('.');
             }
-            _appendPropertyName(_basePath, name);
+            _appendPropertyName(_basePath, name, quote);
         }
         return this;
     }
@@ -986,9 +989,11 @@ final class TomlGenerator extends GeneratorBase
         throw _reportUnsupportedKeyCharacters();
     }
 
-    private void _appendPropertyName(StringBuilder path, String name) {
+    /**
+     * @param quote Quoting to use, as returned by {@link #_quoting}
+     */
+    private void _appendPropertyName(StringBuilder path, String name, char quote) {
         // NOTE: we do NOT yet write the key; wait until we have value; just append to path
-        final char quote = _quoting(StringOutputUtil.categorize(name) & StringOutputUtil.MASK_SIMPLE_KEY);
         if (quote == QUOTE_ESCAPED) {
             _appendEscaped(path, name);
         } else if (quote == QUOTE_NONE) {
