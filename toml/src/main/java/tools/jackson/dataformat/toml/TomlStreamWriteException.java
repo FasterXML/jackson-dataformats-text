@@ -10,6 +10,10 @@ public final class TomlStreamWriteException extends StreamWriteException {
         super(g, msg);
     }
 
+    TomlStreamWriteException(JsonGenerator g, String msg, Throwable rootCause) {
+        super(g, msg, rootCause);
+    }
+
     @Override
     public StreamWriteException withGenerator(JsonGenerator g) {
         this._processor = g;

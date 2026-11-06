@@ -546,6 +546,11 @@ final class TomlGenerator extends GeneratorBase
         if (!_streamWriteContext.inObject()) {
             _reportError("Current context not an Object but " + _streamWriteContext.typeDesc());
         }
+        // [dataformats-text#758]: property name without value is an error
+        if (_streamWriteContext.hasPendingName()) {
+            _reportError("Cannot end an Object, expecting a value for property '"
+                    + _streamWriteContext.currentName() + "'");
+        }
         if (_streamWriteContext._inline) {
             _writeRaw('}');
         } else if (!_streamWriteContext.hasCurrentIndex()
@@ -898,6 +903,11 @@ final class TomlGenerator extends GeneratorBase
     @Override
     protected StreamWriteException _constructWriteException(String msg) {
         return new TomlStreamWriteException(this, msg);
+    }
+
+    @Override
+    protected StreamWriteException _constructWriteException(String msg, Throwable t) {
+        return new TomlStreamWriteException(this, msg, t);
     }
 
     // Starts every key/value line: terminate preceding one, in case it was not yet

@@ -935,6 +935,67 @@ public class TomlGeneratorTest extends TomlMapperTestBase {
         }
     }
 
+    // [dataformats-text#758]: property name without value must not be silently
+    // dropped (root Object) or written as an empty table (nested Object)
+    @Test
+    public void pendingNameAtObjectEndRejected() throws Exception {
+        // root-level Object
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("x");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    g::writeEndObject);
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot end an Object, expecting a value for property 'x'"), e.getMessage());
+        }
+        // nested (table) Object
+        w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            g.writeName("x");
+            TomlStreamWriteException e = assertThrows(TomlStreamWriteException.class,
+                    g::writeEndObject);
+            assertTrue(e.getMessage().startsWith(
+                    "Cannot end an Object, expecting a value for property 'x'"), e.getMessage());
+            g.flush();
+            assertEquals("", w.toString());
+        }
+        // inline Object (within array)
+        w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("arr");
+            g.writeStartArray();
+            g.writeStartObject();
+            g.writeName("x");
+            assertThrows(TomlStreamWriteException.class, g::writeEndObject);
+        }
+    }
+
+    // [dataformats-text#758]: reused child contexts must not retain name state
+    @Test
+    public void reusedChildContextAcceptsNames() throws Exception {
+        StringWriter w = new StringWriter();
+        try (JsonGenerator g = newTomlMapper().createGenerator(w)) {
+            g.writeStartObject();
+            g.writeName("a");
+            g.writeStartObject();
+            g.writeName("x");
+            g.writeNumber(1);
+            g.writeEndObject();
+            g.writeName("b");
+            g.writeStartObject();
+            g.writeName("y");
+            g.writeNumber(2);
+            g.writeEndObject();
+            g.writeEndObject();
+        }
+        assertEquals("a.x = 1\nb.y = 2\n", w.toString());
+    }
+
     private void _assertRootValueRejected(String typeMsg, Consumer<JsonGenerator> write)
         throws Exception
     {
