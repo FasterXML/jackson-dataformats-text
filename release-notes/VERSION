@@ -89,8 +89,8 @@ implementations)
  (fix by @cowtowncoder)
 #758: (toml) `TomlGenerator`: invalid TOML output (with empty key) for root-level values:
   empty root Object (and root `null`) now written as empty document; root-level arrays
-  and scalars, multiple root-level values, property names outside an Object, and
-  property names without value, now fail with `TomlStreamWriteException`
+  and scalars, multiple root-level values, and property names outside an Object,
+  now fail with `TomlStreamWriteException`
  (reported by @cowtowncoder)
  (fix by @caiocv18)
 #763: (csv) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
@@ -103,6 +103,10 @@ implementations)
  (fix by @pjfanning)
 #765: (toml) Wrong byte position (`byte #-1`) in invalid UTF-8 error messages
  (fix by @pjfanning)
+#779: (toml) `TomlGenerator`: dangling property name at `writeEndObject()` not rejected
+  (written as empty table), leaves pending name in reused context
+ (reported by @cowtowncoder)
+ (fix by @cowtowncoder)
 
 3.2.4 (18-Oct-2026)
 
