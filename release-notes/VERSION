@@ -107,6 +107,9 @@ implementations)
   (written as empty table), leaves pending name in reused context
  (reported by @cowtowncoder)
  (fix by @cowtowncoder)
+#781: (toml) `TomlGenerator.writeName()`: rejected key leaves generator stuck
+ (reported by @cowtowncoder)
+ (fix by @caiocv18)
 
 3.2.4 (18-Oct-2026)
 
