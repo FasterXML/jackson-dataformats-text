@@ -109,9 +109,14 @@ final class TomlWriteContext extends TokenStreamContext {
     /**********************************************************************
      */
 
+    /**
+     * @return {@code true} if a property name may be written: only within an Object
+     *    that is not already expecting a value
+     */
     public boolean writeName(String name)
     {
-        if (_gotName) {
+        // [dataformats-text#758]: no names outside Objects (root, arrays)
+        if ((_type != TYPE_OBJECT) || _gotName) {
             return false;
         }
         _gotName = true;
