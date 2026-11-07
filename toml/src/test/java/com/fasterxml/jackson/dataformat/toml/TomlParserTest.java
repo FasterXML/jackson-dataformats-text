@@ -510,7 +510,7 @@ public class TomlParserTest extends TomlMapperTestBase {
         );
     }
 
-    // [dataformats-text#771]: 19-digit values within `long` range must not be truncated
+    // [dataformats-text#663]: 19-digit values within `long` range must not be truncated
     @Test
     public void integerLong19Digits() throws Exception {
         assertEquals(

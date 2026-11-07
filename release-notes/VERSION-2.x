@@ -16,6 +16,8 @@ Active Maintainers:
 
 2.23.0 (not yet released)
 
+#663: (toml) 19-digit integer values within `long` range silently truncated
+  (fix by @yawkat; backported from 3.2 [#672])
 #696: (toml) Write non-finite floating-point values as TOML tokens
   (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
  (reported by @EverNife)
@@ -36,8 +38,6 @@ Active Maintainers:
   not rejected; wrong char/byte positions in invalid UTF-8 error messages
   (NOTE: CESU-8 / "Modified UTF-8" content is now also rejected)
  (fix by @pjfanning)
-#771: (toml) 19-digit integer values within `long` range silently truncated
-  (fix by @yawkat; backported from 3.2 [#672])
 
 2.22.4 (17-Oct-2026)
 

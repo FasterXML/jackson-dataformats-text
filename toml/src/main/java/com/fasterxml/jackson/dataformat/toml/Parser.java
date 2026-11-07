@@ -390,7 +390,7 @@ class Parser {
                     v = -v;
                 }
             } else {
-                // [dataformats-text#672]/[#771]: 19-digit values need separate handling
+                // [dataformats-text#663]: 19-digit values need separate handling
                 v = NumberInput.parseLong19(buffer, start, negative);
             }
             // Might still fit in int, need to check
