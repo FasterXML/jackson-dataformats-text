@@ -67,6 +67,16 @@ public class YAMLAnchorReplayingParser extends YAMLParser
     public static final int MAX_REFS = 9999;
 
     /**
+     * the maximum total number of events to replay for aliases, over the whole input:
+     * {@link #MAX_EVENTS} only limits what a single alias replays, so without this
+     * a small document could replay a large anchor any number of times
+     * ("billion laughs" expansion)
+     *
+     * @since 3.3
+     */
+    public static final int MAX_REPLAYED_EVENTS = 1_000_000;
+
+    /**
      * Remembers when a merge has been started in order to skip the corresponding
      * sequence end which needs to be excluded
      */
@@ -91,6 +101,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser
      * keeps track of the global depth of nested collections
      */
     private int globalDepth = 0;
+
+    /**
+     * total number of events replayed for aliases so far
+     */
+    private int replayedEvents = 0;
 
     /**
      * @deprecated Since 3.3 use
@@ -206,6 +221,11 @@ public class YAMLAnchorReplayingParser extends YAMLParser
             if (event instanceof AliasEvent alias) {
                 List<Event> events = referencedObjects.get(alias.getAlias().getValue());
                 if (events != null) {
+                    replayedEvents += events.size();
+                    if (replayedEvents > MAX_REPLAYED_EVENTS) {
+                        throw constraintsException("too many events replayed for aliases",
+                                replayedEvents, MAX_REPLAYED_EVENTS, "MAX_REPLAYED_EVENTS");
+                    }
                     if (refEvents.size() + events.size() > MAX_EVENTS) {
                         throw constraintsException("too many events to replay",
                                 refEvents.size() + events.size(), MAX_EVENTS, "MAX_EVENTS");
