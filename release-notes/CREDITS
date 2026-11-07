@@ -68,3 +68,13 @@ Michał Majchrowicz (@sectroyer)
 * Reported #707: (yaml) `StackOverflowError` when reading deeply nested merge keys
   (`<<`) with `YAMLAnchorReplayingFactory` (GHSA-255r-36wv-4qpr)
  (3.1.6)
+
+@rajulbhatnagar
+
+* Reported #663: (toml) TOML parser: int64 max value parsed as truncated long
+ (3.1.9)
+
+Jonas Konrad (@yawkat)
+
+* Fixed #663: (toml) TOML parser: int64 max value parsed as truncated long
+ (3.1.9)
