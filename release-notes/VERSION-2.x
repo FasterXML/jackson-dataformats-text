@@ -16,8 +16,8 @@ Active Maintainers:
 
 2.23.0 (not yet released)
 
-#663: (toml) 19-digit integer values within `long` range silently truncated
-  (fix by @yawkat; backported from 3.2 [#672])
+#663: (toml) TOML parser: int64 max value parsed as truncated long
+  (fix by @yawkat)
 #696: (toml) Write non-finite floating-point values as TOML tokens
   (`nan`/`inf`/`-inf`) instead of Java tokens (`NaN`/`Infinity`)
  (reported by @EverNife)
