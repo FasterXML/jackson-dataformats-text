@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.toml;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.time.temporal.Temporal;
 
@@ -408,9 +409,11 @@ class Parser {
                     : new String(buffer, start, MAX_CHARS_TO_REPORT) + " [truncated]";
             throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
-        return factory.numberNode(NumberInput.parseBigInteger(
+        BigInteger big = NumberInput.parseBigInteger(
                 new String(buffer, start, length),
-                tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
+                tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+        // sign was skipped above, need to re-apply
+        return factory.numberNode(negative ? big.negate() : big);
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {

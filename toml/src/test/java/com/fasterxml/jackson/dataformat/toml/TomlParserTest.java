@@ -498,7 +498,7 @@ public class TomlParserTest extends TomlMapperTestBase {
         );
     }
 
-    // [dataformats-text#672]
+    // [dataformats-text#663]
     @Test
     public void integerLongBoundaries() throws Exception {
         assertEquals(
@@ -525,6 +525,19 @@ public class TomlParserTest extends TomlMapperTestBase {
                         "c = -1234567890123456789\n" +
                         "d = 1_234_567_890_123_456_789\n" +
                         "e = 123456789012345678")
+        );
+    }
+
+    // [dataformats-text#663]: 19-digit values just outside `long` range must
+    // become `BigInteger`, not wrap around
+    @Test
+    public void integerJustOutsideLongRange() throws Exception {
+        assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("over", new BigInteger("9223372036854775808"))
+                        .put("under", new BigInteger("-9223372036854775809")),
+                toml("over = 9223372036854775808\n" +
+                        "under = -9223372036854775809")
         );
     }
 

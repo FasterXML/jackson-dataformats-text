@@ -359,3 +359,13 @@ seonwoojung (@seonwooj0810)
 
 * Fixed #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
  (2.23.0)
+
+@rajulbhatnagar
+
+* Reported #663: (toml) TOML parser: int64 max value parsed as truncated long
+ (2.23.0)
+
+Jonas Konrad (@yawkat)
+
+* Fixed #663: (toml) TOML parser: int64 max value parsed as truncated long
+ (2.23.0)
