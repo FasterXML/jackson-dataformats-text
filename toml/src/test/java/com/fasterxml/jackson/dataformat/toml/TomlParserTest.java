@@ -498,6 +498,49 @@ public class TomlParserTest extends TomlMapperTestBase {
         );
     }
 
+    // [dataformats-text#663]
+    @Test
+    public void integerLongBoundaries() throws Exception {
+        assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("max", Long.MAX_VALUE)
+                        .put("min", Long.MIN_VALUE),
+                toml("max = 9223372036854775807\n" +
+                        "min = -9223372036854775808")
+        );
+    }
+
+    // [dataformats-text#663]: 19-digit values within `long` range must not be truncated
+    @Test
+    public void integerLong19Digits() throws Exception {
+        assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("a", 1234567890123456789L)
+                        .put("b", 1000000000000000000L)
+                        .put("c", -1234567890123456789L)
+                        .put("d", 1234567890123456789L)
+                        .put("e", 123456789012345678L),
+                toml("a = 1234567890123456789\n" +
+                        "b = 1000000000000000000\n" +
+                        "c = -1234567890123456789\n" +
+                        "d = 1_234_567_890_123_456_789\n" +
+                        "e = 123456789012345678")
+        );
+    }
+
+    // [dataformats-text#663]: 19-digit values just outside `long` range must
+    // become `BigInteger`, not wrap around
+    @Test
+    public void integerJustOutsideLongRange() throws Exception {
+        assertEquals(
+                JsonNodeFactory.instance.objectNode()
+                        .put("over", new BigInteger("9223372036854775808"))
+                        .put("under", new BigInteger("-9223372036854775809")),
+                toml("over = 9223372036854775808\n" +
+                        "under = -9223372036854775809")
+        );
+    }
+
     @Test
     public void floats() throws Exception {
         ObjectNode json = json("{\"flt1\": 1.0, \"flt2\": 3.1415, \"flt3\": -0.01, \"flt4\": 5.0e22, \"flt5\": 1e06, \"flt6\": -2e-2, \"flt7\": 6.626e-34}");

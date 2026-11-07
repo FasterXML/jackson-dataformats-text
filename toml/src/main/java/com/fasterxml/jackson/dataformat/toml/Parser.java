@@ -3,6 +3,7 @@ package com.fasterxml.jackson.dataformat.toml;
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.*;
 import java.time.temporal.Temporal;
 
@@ -383,8 +384,16 @@ class Parser {
             return factory.numberNode(v);
         }
         if (length <= 18 || NumberInput.inLongRange(buffer, start, length, negative)) {
-            long v = NumberInput.parseLong(buffer, start, length);
-            if (negative) v = -v;
+            long v;
+            if (length <= 18) {
+                v = NumberInput.parseLong(buffer, start, length);
+                if (negative) {
+                    v = -v;
+                }
+            } else {
+                // [dataformats-text#663]: 19-digit values need separate handling
+                v = NumberInput.parseLong19(buffer, start, negative);
+            }
             // Might still fit in int, need to check
             if ((int) v == v) {
                 return factory.numberNode((int) v);
@@ -400,9 +409,11 @@ class Parser {
                     : new String(buffer, start, MAX_CHARS_TO_REPORT) + " [truncated]";
             throw errorContext.atPosition(lexer).invalidNumber(e, reportNum);
         }
-        return factory.numberNode(NumberInput.parseBigInteger(
+        BigInteger big = NumberInput.parseBigInteger(
                 new String(buffer, start, length),
-                tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER)));
+                tomlFactory.isEnabled(StreamReadFeature.USE_FAST_BIG_NUMBER_PARSER));
+        // sign was skipped above, need to re-apply
+        return factory.numberNode(negative ? big.negate() : big);
     }
 
     private JsonNode parseFloat(int nextState) throws IOException {
