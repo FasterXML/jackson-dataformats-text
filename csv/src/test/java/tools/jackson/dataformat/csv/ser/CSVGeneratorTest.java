@@ -394,6 +394,35 @@ public class CSVGeneratorTest extends ModuleTestBase
         assertEquals("#123,Foo\n", csv);
     }
 
+    // Must quote '#' in first column regardless of quoting mode and column
+    // separator: with tab separator, loose (default) quoting check missed it
+    // and row was read back as a comment line
+    @Test
+    public void testQuotingOfCommentCharForFirstColumnWithTabSeparator() throws Exception
+    {
+        final CsvSchema schema = MAPPER.schemaFor(IdDesc.class)
+                .withComments()
+                .withColumnSeparator('\t');
+        final IdDesc input = new IdDesc("#123", "Foo");
+
+        // First, with default quoting
+        String csv = MAPPER.writer(schema).writeValueAsString(input);
+        assertEquals("\"#123\"\tFoo\n", csv);
+        IdDesc result = MAPPER.readerFor(IdDesc.class).with(schema).readValue(csv);
+        assertEquals("#123", result.id);
+
+        // then with strict/optimal
+        csv = MAPPER.writer(schema)
+                .with(CsvWriteFeature.STRICT_CHECK_FOR_QUOTING)
+                .writeValueAsString(input);
+        assertEquals("\"#123\"\tFoo\n", csv);
+
+        // and with escape character (separate loose check path)
+        csv = MAPPER.writer(schema.withEscapeChar('\\'))
+                .writeValueAsString(input);
+        assertEquals("\"#123\"\tFoo\n", csv);
+    }
+
     // for [dataformat-csv#98]
     @Test
     public void testBackslashEscape() throws Exception
