@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.23.0 (not yet released)
+2.23.0 (07-Nov-2026)
 
 #663: (toml) TOML parser: int64 max value parsed as truncated long
  (reported by @rajulbhatnagar)
