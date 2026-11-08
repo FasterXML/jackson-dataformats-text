@@ -14,7 +14,7 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
-2.23.0 (not yet released)
+2.23.0 (07-Nov-2026)
 
 #663: (toml) TOML parser: int64 max value parsed as truncated long
  (reported by @rajulbhatnagar)
@@ -31,6 +31,14 @@ Active Maintainers:
   `writeBinary()` silently pads invalid ranges with zero bytes; `writeString()`,
   `writeRaw()` do not validate offset/length; String value with unsupported
   characters fails after key is written, with misleading "Key contains ..." message
+#763: (csv) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
+  not rejected; wrong char/byte positions in invalid UTF-8 error messages
+  (NOTE: CESU-8 / "Modified UTF-8" content is now also rejected)
+ (fix by @pjfanning)
+#764: (yaml) Overlong UTF-8 sequences, encoded surrogates and values beyond U+10FFFF
+  not rejected; wrong char/byte positions in invalid UTF-8 error messages
+  (NOTE: CESU-8 / "Modified UTF-8" content is now also rejected)
+ (fix by @pjfanning)
 
 2.22.4 (17-Oct-2026)
 
