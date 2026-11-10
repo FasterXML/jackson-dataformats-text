@@ -71,4 +71,39 @@ public class AnchorReplayLimitsTest
                     e.getMessage());
         }
     }
+
+    @Test
+    public void testTooManyReplayedEvents() throws Exception
+    {
+        // "Billion laughs": one anchored sequence just under MAX_EVENTS, then enough
+        // aliases to it that the total replayed exceeds MAX_REPLAYED_EVENTS
+        final int ITEMS = YAMLAnchorReplayingParser.MAX_EVENTS - 10;
+        StringBuilder sb = new StringBuilder("a: &a [");
+        for (int i = 0; i < ITEMS; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append('x');
+        }
+        sb.append("]\nb: [");
+        // replayed per alias: sequence start and end, plus items
+        final int PER_ALIAS = ITEMS + 2;
+        final int ALIASES = YAMLAnchorReplayingParser.MAX_REPLAYED_EVENTS / PER_ALIAS + 1;
+        for (int i = 0; i < ALIASES; ++i) {
+            if (i > 0) {
+                sb.append(',');
+            }
+            sb.append("*a");
+        }
+        sb.append("]\n");
+        try {
+            _readAll(sb.toString());
+            fail("Should not pass");
+        } catch (StreamConstraintsException e) {
+            assertEquals("too many events replayed for aliases: "+(ALIASES * PER_ALIAS)
+                    +" exceeds the maximum allowed ("+YAMLAnchorReplayingParser.MAX_REPLAYED_EVENTS
+                    +", from `YAMLAnchorReplayingParser.MAX_REPLAYED_EVENTS`)",
+                    e.getMessage());
+        }
+    }
 }
