@@ -13,6 +13,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.base.ParserMinimalBase;
 import tools.jackson.core.exc.StreamReadException;
 import tools.jackson.core.io.IOContext;
+import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.json.DupDetector;
 import tools.jackson.core.util.ByteArrayBuilder;
 import tools.jackson.core.util.JacksonFeatureSet;
@@ -841,12 +842,117 @@ public class CsvParser
                 _startArray(column);
                 return JsonToken.START_ARRAY;
             }
+            return _typedValueToken(column);
         }
         _state = STATE_NEXT_ENTRY;
         if (_isNullValue(_currentValue)) {
             return JsonToken.VALUE_NULL;
         }
         return JsonToken.VALUE_STRING;
+    }
+
+    /**
+     * Determine scalar token type from an explicitly typed schema column.
+     * The default {@link CsvSchema.ColumnType#STRING} path remains untyped.
+     */
+    private JsonToken _typedValueToken(CsvSchema.Column column) throws JacksonException
+    {
+        CsvSchema.ColumnType type = column.getType();
+        if (type == CsvSchema.ColumnType.STRING) {
+            _state = STATE_NEXT_ENTRY;
+            return _isNullValue(_currentValue) ? JsonToken.VALUE_NULL : JsonToken.VALUE_STRING;
+        }
+
+        String value = _currentValue.trim();
+        _currentValue = value;
+        // CsvDecoder's numeric accessors parse from this shared buffer, so keep
+        // its view in sync with schema trimming and any value decorator.
+        _textBuffer.resetWithString(value);
+        _state = STATE_NEXT_ENTRY;
+
+        if (value.isEmpty() && (type == CsvSchema.ColumnType.NUMBER
+                || type == CsvSchema.ColumnType.BOOLEAN)) {
+            return JsonToken.VALUE_NULL;
+        }
+        if (_isNullValue(value) || "null".equals(value)) {
+            return JsonToken.VALUE_NULL;
+        }
+        if ("true".equals(value)) {
+            return JsonToken.VALUE_TRUE;
+        } else if ("false".equals(value)) {
+            return JsonToken.VALUE_FALSE;
+        }
+
+        if (type == CsvSchema.ColumnType.BOOLEAN) {
+            _reportError("Invalid boolean value '%s' for CSV column '%s'", value, column.getName());
+        }
+        if (type == CsvSchema.ColumnType.STRING_OR_LITERAL) {
+            return JsonToken.VALUE_STRING;
+        }
+
+        if ((type == CsvSchema.ColumnType.NUMBER)
+                ? NumberInput.looksLikeValidNumber(value) : _isValidJsonNumber(value)) {
+            return (value.indexOf('.') >= 0 || value.indexOf('e') >= 0 || value.indexOf('E') >= 0)
+                    ? JsonToken.VALUE_NUMBER_FLOAT : JsonToken.VALUE_NUMBER_INT;
+        }
+        if (type == CsvSchema.ColumnType.NUMBER_OR_STRING) {
+            return JsonToken.VALUE_STRING;
+        }
+        _reportError("Invalid number value '%s' for CSV column '%s'", value, column.getName());
+        return JsonToken.VALUE_NULL; // unreachable
+    }
+
+    /** Check the JSON number lexical form used by NUMBER_OR_STRING columns. */
+    private boolean _isValidJsonNumber(String value)
+    {
+        int len = value.length();
+        if (len == 0) {
+            return false;
+        }
+        int i = (value.charAt(0) == '-') ? 1 : 0;
+        if (i == len) {
+            return false;
+        }
+        if (value.charAt(i) == '0') {
+            ++i;
+            if (i < len && _isAsciiDigit(value.charAt(i))) {
+                return false;
+            }
+        } else {
+            if (value.charAt(i) < '1' || value.charAt(i) > '9') {
+                return false;
+            }
+            while (++i < len && _isAsciiDigit(value.charAt(i))) { }
+        }
+        if (i < len && value.charAt(i) == '.') {
+            ++i;
+            int start = i;
+            while (i < len && _isAsciiDigit(value.charAt(i))) {
+                ++i;
+            }
+            if (start == i) {
+                return false;
+            }
+        }
+        if (i < len && (value.charAt(i) == 'e' || value.charAt(i) == 'E')) {
+            ++i;
+            if (i < len && (value.charAt(i) == '+' || value.charAt(i) == '-')) {
+                ++i;
+            }
+            int start = i;
+            while (i < len && _isAsciiDigit(value.charAt(i))) {
+                ++i;
+            }
+            if (start == i) {
+                return false;
+            }
+        }
+        return i == len;
+    }
+
+    private boolean _isAsciiDigit(char ch)
+    {
+        return ch >= '0' && ch <= '9';
     }
 
     protected JsonToken _handleUnnamedValue() throws JacksonException
@@ -1140,7 +1246,7 @@ public class CsvParser
     @Override
     public NumberType getNumberType() throws JacksonException {
         // 31-May-2025, tatu: in 3.x no longer exception but null for non-number token
-        if (_currToken == JsonToken.VALUE_NUMBER_INT) {
+        if (_currToken == JsonToken.VALUE_NUMBER_INT || _currToken == JsonToken.VALUE_NUMBER_FLOAT) {
             return _reader.getNumberType();
         }
         return null;
@@ -1244,7 +1350,7 @@ public class CsvParser
     }
 
     protected void _verifyNumberToken() throws JacksonException {
-        if (_currToken != JsonToken.VALUE_NUMBER_INT) {
+        if (_currToken != JsonToken.VALUE_NUMBER_INT && _currToken != JsonToken.VALUE_NUMBER_FLOAT) {
             _reportNotNumericError();
         }
     }
