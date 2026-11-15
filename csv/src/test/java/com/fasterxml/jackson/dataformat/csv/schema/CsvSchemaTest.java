@@ -253,4 +253,21 @@ public class CsvSchemaTest extends ModuleTestBase
 
         _verifyLinks(pointSchema);
     }
+
+    // [dataformats-text#710]: withArrayElementSeparator(null) should normalize
+    // to "no separator" (like the local `sep` used for the equality check), not
+    // store a null that later NPEs in hasArrayElementSeparator()
+    @Test
+    public void testWithArrayElementSeparatorNull()
+    {
+        CsvSchema schema = CsvSchema.emptySchema().withArrayElementSeparator(";");
+        assertTrue(schema.hasArrayElementSeparator());
+
+        CsvSchema cleared = schema.withArrayElementSeparator(null);
+        assertFalse(cleared.hasArrayElementSeparator());
+        assertEquals("", cleared.getArrayElementSeparator());
+
+        // and calling it again must not throw
+        assertFalse(cleared.withArrayElementSeparator(null).hasArrayElementSeparator());
+    }
 }
