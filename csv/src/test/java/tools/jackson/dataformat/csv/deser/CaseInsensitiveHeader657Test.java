@@ -121,4 +121,31 @@ public class CaseInsensitiveHeader657Test extends ModuleTestBase
             verifyException(e, "Missing 1 header column: [\"age\"]");
         }
     }
+
+    // Header columns differing only by case resolve to the same schema column
+    // with CASE_INSENSITIVE_HEADERS, so they must count as duplicates
+    @Test
+    public void testCaseInsensitiveDuplicateHeaderColumns() throws Exception
+    {
+        CsvSchema schema = CsvSchema.builder()
+                .setUseHeader(true)
+                .setReorderColumns(true)
+                .addColumn("name")
+                .addColumn("role")
+                .build();
+
+        String CSV = "name,role,ROLE\nRoger,user,admin\n";
+
+        try {
+            MappingIterator<Map<String, Object>> it = MAPPER
+                    .readerFor(Map.class)
+                    .with(schema)
+                    .with(CsvReadFeature.CASE_INSENSITIVE_HEADERS)
+                    .readValues(CSV);
+            Map<?, ?> result = it.nextValue();
+            fail("Should fail on duplicate header column, got: " + result);
+        } catch (CsvReadException e) {
+            verifyException(e, "Duplicate header column \"ROLE\"");
+        }
+    }
 }
