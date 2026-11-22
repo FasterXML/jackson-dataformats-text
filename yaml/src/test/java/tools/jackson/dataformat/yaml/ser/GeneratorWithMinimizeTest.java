@@ -364,4 +364,27 @@ public class GeneratorWithMinimizeTest extends ModuleTestBase
 
         assertEquals(content, result);
     }
+
+    // U+0085 (NEL) is treated as a line break by snakeyaml-engine's scanner,
+    // so writing it unquoted makes the value read back as null: quote it
+    @Test
+    public void pin1_nextLineStringIsQuoted() throws Exception
+    {
+        final String NEL = new String(Character.toChars(0x85));
+
+        Map<String, Object> content = new HashMap<>();
+        content.put("key", NEL);
+        String yaml = MINIM_MAPPER.writeValueAsString(content);
+        assertTrue(yaml.contains("\"\u0085\"") || yaml.contains("\\N"),
+                "NEL-containing value should be quoted, yaml = " + yaml);
+
+        Map<?, ?> result = MINIM_MAPPER.readValue(yaml, Map.class);
+        assertEquals(NEL, result.get("key"));
+
+        // and same for CR, the other line break that is not '\n'
+        content.put("key", "a\rb");
+        yaml = MINIM_MAPPER.writeValueAsString(content);
+        result = MINIM_MAPPER.readValue(yaml, Map.class);
+        assertEquals("a\rb", result.get("key"));
+    }
 }
