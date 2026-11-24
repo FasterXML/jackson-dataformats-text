@@ -240,6 +240,12 @@ No changes since 3.2.1
 #685: (toml) Improve TOML 1.1.0 compatibility (parsing)
  (fix by @yawkat)
 
+3.1.9 (24-Nov-2026)
+
+#663: (toml) TOML parser: int64 max value parsed as truncated long
+ (reported by @rajulbhatnagar)
+ (fix by @yawkat)
+
 3.1.8 (17-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
