@@ -14,7 +14,7 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
-3.1.9 (not yet released)
+3.1.9 (24-Nov-2026)
 
 #663: (toml) TOML parser: int64 max value parsed as truncated long
  (reported by @rajulbhatnagar)
