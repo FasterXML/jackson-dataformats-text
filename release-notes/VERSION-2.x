@@ -58,6 +58,10 @@ No changes since 2.22.0
   value `"nullValue"`
  (requested by Dmitry B)
 
+2.21.9 (24-Nov-2026)
+
+No changes since 2.21.8
+
 2.21.8 (17-Oct-2026)
 
 #726: (toml) `TomlGenerator.writeString(char[], int, int)` writes wrong characters
