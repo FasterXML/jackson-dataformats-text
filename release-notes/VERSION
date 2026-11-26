@@ -14,6 +14,11 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.3.1 (not yet released)
+
+#793: (csv) Header column limit violation reported as "Internal error"
+ (contributed by @AmirWilayah)
+
 3.3.0 (07-Nov-2026)
 
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
