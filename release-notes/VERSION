@@ -14,6 +14,12 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.4.0 (not yet released)
+
+#792: (csv, toml, yaml) Honor `StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION`
+  for error locations (redact source content by default)
+ (fix by @cowtowncoder)
+
 3.3.0 (07-Nov-2026)
 
 #699: (csv) Ability to modify columns in `CsvSchema.Builder` by name
