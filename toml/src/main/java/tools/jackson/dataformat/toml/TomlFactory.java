@@ -5,6 +5,7 @@ import java.io.*;
 import tools.jackson.core.*;
 import tools.jackson.core.TokenStreamLocation;
 import tools.jackson.core.base.TextualTSFactory;
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.GuardedOutputStream;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.UTF8Writer;
@@ -272,24 +273,44 @@ public final class TomlFactory extends TextualTSFactory
                         readCtxt.getStreamReadFeatures(_streamReadFeatures));
     }
 
+    /**
+     * Content reference for error locations: same logic as
+     * {@code ParserBase._contentReferenceRedacted()} (TomlParser is not a ParserBase)
+     *
+     * @since 3.4
+     */
+    private static ContentReference _locationContentReference(ContentReference ref,
+            int stdFeatures)
+    {
+        if (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(stdFeatures)) {
+            return ref;
+        }
+        final boolean textual = (ref != null) && ref.hasTextualContent();
+        return StreamReadFeature.INCLUDE_REDACTION_NOTE_IN_LOCATION.enabledIn(stdFeatures)
+                ? ContentReference.redacted(textual)
+                : ContentReference.redactedWithoutNote(textual);
+    }
+
     private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0,
             boolean closeReader) {
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
+        final ContentReference locRef = _locationContentReference(ctxt.contentReference(),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures));
         try {
             if (closeReader) {
                 try (Reader r = r0) {
-                    return TomlParser.parse(this, ctxt, readFeatures, r);
+                    return TomlParser.parse(this, ctxt, locRef, readFeatures, r);
                 }
             } else {
-                return TomlParser.parse(this, ctxt, readFeatures, r0);
+                return TomlParser.parse(this, ctxt, locRef, readFeatures, r0);
             }
         } catch (CharConversionException e) {
             TokenStreamLocation location;
             if (e instanceof UTF8Reader.InvalidUTF8Exception utf8Ex) {
-                location = new TokenStreamLocation(ctxt.contentReference(),
+                location = new TokenStreamLocation(locRef,
                         utf8Ex.byteOffset, utf8Ex.charOffset, -1, -1);
             } else {
-                location = new TokenStreamLocation(ctxt.contentReference(), -1, -1, -1, -1);
+                location = new TokenStreamLocation(locRef, -1, -1, -1, -1);
             }
             throw new TomlStreamReadException(null, e.getMessage(), location, e);
         } catch (IOException e) {

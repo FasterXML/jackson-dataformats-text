@@ -336,11 +336,11 @@ public class YAMLParser extends ParserBase
 
     protected TokenStreamLocation _locationFor(Optional<Mark> option)
     {
-        return option.map(m -> new TokenStreamLocation(_ioContext.contentReference(),
+        return option.map(m -> new TokenStreamLocation(_contentReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1)) // ditto
-            .orElseGet(() -> new TokenStreamLocation(_ioContext.contentReference(),
+            .orElseGet(() -> new TokenStreamLocation(_contentReference(),
                 -1, -1, -1));
     }
 

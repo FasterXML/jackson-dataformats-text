@@ -11,6 +11,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.JsonParser.NumberType;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.SimpleStreamReadContext;
@@ -46,6 +47,14 @@ public class CsvDecoder
      * for the reader.
      */
     protected final IOContext _ioContext;
+
+    /**
+     * Content reference for {@link TokenStreamLocation}s (redacted unless
+     * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled)
+     *
+     * @since 3.4
+     */
+    private final ContentReference _locationContentReference;
 
     /**
      * Input stream that can be used for reading more content, if one
@@ -345,6 +354,7 @@ public class CsvDecoder
     {
         _owner = owner;
         _ioContext = ctxt;
+        _locationContentReference = _locationContentReference(ctxt.contentReference(), stdFeatures);
         _inputReader = r;
         _ownsInputReader = ownsReader;
         _textBuffer = textBuffer;
@@ -358,6 +368,23 @@ public class CsvDecoder
         _tokenInputRow = -1;
         _tokenInputCol = -1;
         setSchema(schema);
+    }
+
+    /**
+     * Same logic as {@code ParserBase._contentReferenceRedacted()} (CsvParser is not a ParserBase)
+     *
+     * @since 3.4
+     */
+    private static ContentReference _locationContentReference(ContentReference ref,
+            int stdFeatures)
+    {
+        if (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(stdFeatures)) {
+            return ref;
+        }
+        final boolean textual = (ref != null) && ref.hasTextualContent();
+        return StreamReadFeature.INCLUDE_REDACTION_NOTE_IN_LOCATION.enabledIn(stdFeatures)
+                ? ContentReference.redacted(textual)
+                : ContentReference.redactedWithoutNote(textual);
     }
 
     public void setSchema(CsvSchema schema) {
@@ -420,7 +447,7 @@ public class CsvDecoder
 
     public TokenStreamLocation getTokenLocation()
     {
-        return new TokenStreamLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_locationContentReference,
                 getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
@@ -433,7 +460,7 @@ public class CsvDecoder
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
-        return new TokenStreamLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_locationContentReference,
                 _currInputProcessed + ptr - 1L, _currInputRow, col);
     }
 
