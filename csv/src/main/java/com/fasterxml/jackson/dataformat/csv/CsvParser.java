@@ -30,7 +30,10 @@ public class CsvParser
     extends ParserMinimalBase
 {
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
-    private final static int MAX_COLUMNS = 99999;
+    // NOTE: package-private (not public API) to allow access from tests.
+    // Value also mentioned in Javadoc of `Feature.INSERT_NULLS_FOR_MISSING_COLUMNS`:
+    // update that if changing it
+    final static int MAX_COLUMNS = 99999;
 
     /**
      * Enumeration that defines all togglable features for CSV parsers
@@ -142,6 +145,18 @@ public class CsvParser
          * Note that this feature is only considered if
          * {@link #FAIL_ON_MISSING_COLUMNS}
          * is disabled.
+         *<p>
+         * NOTE: when the schema is built from a header line read from input
+         * (for example {@code CsvSchema.emptySchema().withHeader()}), the number
+         * of columns -- and so the number of {@code null}s inserted for each short
+         * row -- is controlled by the input. Header column count is limited
+         * (to 99,999 columns), but processing untrusted content with this feature
+         * enabled can still produce a number of tokens much larger than the input
+         * size: consider limiting it with
+         * {@link com.fasterxml.jackson.core.StreamReadConstraints.Builder#maxTokenCount(long)}.
+         * Note that this limit applies to the total number of tokens in the whole
+         * document (all rows), not per row, so it needs to be set high enough
+         * for the largest legitimate input.
          *<p>
          * Feature is disabled by default.
          *
@@ -886,7 +901,7 @@ public class CsvParser
                 while (_reader.nextString() != null) {
                     // If we don't care about validation, just skip. But protect against infinite loop
                     if (--allowed < 0) {
-                        _reportError("Internal error: skipped "+MAX_COLUMNS+" header columns");
+                        _reportError("Too many header columns: maximum of "+MAX_COLUMNS+" allowed");
                     }
                 }
             }
@@ -909,7 +924,7 @@ public class CsvParser
                 builder.addColumn(name);
             }
             if (++count > MAX_COLUMNS) {
-                _reportError("Internal error: reached maximum of "+MAX_COLUMNS+" header columns");
+                _reportError("Too many header columns: maximum of "+MAX_COLUMNS+" allowed");
             }
         }
 
