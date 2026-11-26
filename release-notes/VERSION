@@ -14,6 +14,11 @@ implementations)
 === Releases ===
 ------------------------------------------------------------------------
 
+3.1.10 (not yet released)
+
+#793: (csv) Header column limit violation reported as "Internal error"
+ (contributed by @AmirWilayah)
+
 3.1.9 (24-Nov-2026)
 
 #663: (toml) TOML parser: int64 max value parsed as truncated long
