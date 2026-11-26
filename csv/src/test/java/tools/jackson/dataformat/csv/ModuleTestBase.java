@@ -13,6 +13,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class ModuleTestBase
 {
+    /**
+     * Maximum number of header columns allowed by {@link CsvParser}
+     * (exposed here as {@code CsvParser.MAX_COLUMNS} is package-private)
+     */
+    protected final static int MAX_CSV_HEADER_COLUMNS = CsvParser.MAX_COLUMNS;
+
     public enum Gender { MALE, FEMALE };
 
     public static class Address {
