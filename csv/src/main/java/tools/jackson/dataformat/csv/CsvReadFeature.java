@@ -117,6 +117,18 @@ public enum CsvReadFeature
      * {@link #FAIL_ON_MISSING_COLUMNS}
      * is disabled.
      *<p>
+     * NOTE: when the schema is built from a header line read from input
+     * (for example {@code CsvSchema.emptySchema().withHeader()}), the number
+     * of columns -- and so the number of {@code null}s inserted for each short
+     * row -- is controlled by the input. Header column count is limited
+     * (to 99,999 columns), but processing untrusted content with this feature
+     * enabled can still produce a number of tokens much larger than the input
+     * size: consider limiting it with
+     * {@link tools.jackson.core.StreamReadConstraints.Builder#maxTokenCount(long)}.
+     * Note that this limit applies to the total number of tokens in the whole
+     * document (all rows), not per row, so it needs to be set high enough
+     * for the largest legitimate input.
+     *<p>
      * Feature is disabled by default.
      */
     INSERT_NULLS_FOR_MISSING_COLUMNS(false),
