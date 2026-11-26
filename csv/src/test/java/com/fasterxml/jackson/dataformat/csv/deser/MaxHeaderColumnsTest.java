@@ -17,7 +17,10 @@ import com.fasterxml.jackson.dataformat.csv.*;
  */
 public class MaxHeaderColumnsTest extends ModuleTestBase
 {
-    // Must match private constant in CsvParser
+    // NOTE: failure cases use `MappingIterator.nextValue()`, not `next()`: latter
+    // would wrap exceptions as `RuntimeJsonMappingException`
+
+    // Must match private constant `CsvParser.MAX_COLUMNS`
     private final static int MAX_COLUMNS = 99999;
 
     private final CsvMapper MAPPER = mapperForCsv();
@@ -40,10 +43,10 @@ public class MaxHeaderColumnsTest extends ModuleTestBase
         ObjectReader r = MAPPER.readerFor(Map.class)
                 .with(CsvSchema.emptySchema().withHeader());
         try (MappingIterator<Map<String, Object>> it = r.readValues(_header(MAX_COLUMNS + 1) + "x\n")) {
-            it.next();
+            it.nextValue();
             fail("Should not pass with " + (MAX_COLUMNS + 1) + " header columns");
         } catch (StreamReadException e) {
-            verifyException(e, "reached maximum of " + MAX_COLUMNS + " header columns");
+            verifyException(e, "Too many header columns: maximum of " + MAX_COLUMNS + " allowed");
         }
     }
 
@@ -57,10 +60,10 @@ public class MaxHeaderColumnsTest extends ModuleTestBase
         ObjectReader r = mapper.readerFor(Map.class)
                 .with(CsvSchema.emptySchema().withHeader());
         try (MappingIterator<Map<String, Object>> it = r.readValues(_header(MAX_COLUMNS + 1) + "x\n")) {
-            it.next();
+            it.nextValue();
             fail("Should not pass with " + (MAX_COLUMNS + 1) + " header columns");
         } catch (StreamReadException e) {
-            verifyException(e, "reached maximum of " + MAX_COLUMNS + " header columns");
+            verifyException(e, "Too many header columns: maximum of " + MAX_COLUMNS + " allowed");
         }
     }
 
@@ -81,10 +84,10 @@ public class MaxHeaderColumnsTest extends ModuleTestBase
     {
         ObjectReader r = MAPPER.readerFor(Map.class).with(_singleColumnSchema());
         try (MappingIterator<Map<String, Object>> it = r.readValues(_header(MAX_COLUMNS + 1) + "x\n")) {
-            it.next();
+            it.nextValue();
             fail("Should not pass with " + (MAX_COLUMNS + 1) + " header columns");
         } catch (StreamReadException e) {
-            verifyException(e, "skipped " + MAX_COLUMNS + " header columns");
+            verifyException(e, "Too many header columns: maximum of " + MAX_COLUMNS + " allowed");
         }
     }
 
@@ -115,7 +118,6 @@ public class MaxHeaderColumnsTest extends ModuleTestBase
                 .readerFor(Map.class)
                 .with(CsvSchema.emptySchema().withHeader());
         try (MappingIterator<Map<String, Object>> it = r.readValues(_header(MAX_COLUMNS) + "x\n")) {
-            // use nextValue(): next() would wrap exception as RuntimeJsonMappingException
             it.nextValue();
             fail("Should not pass with maxTokenCount of " + maxTokens);
         } catch (StreamConstraintsException e) {
