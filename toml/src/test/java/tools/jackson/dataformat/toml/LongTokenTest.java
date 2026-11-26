@@ -8,6 +8,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.*;
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -174,7 +175,7 @@ public class LongTokenTest extends TomlMapperTestBase {
         toml.append("\"");
 
         // 03-Dec-2022, tatu: This is unfortunate, have to use direct access
-        ObjectNode node = TomlParser.parse(FACTORY, testIOContext(),
+        ObjectNode node = TomlParser.parse(FACTORY, testIOContext(), ContentReference.unknown(),
                 TomlWriteFeature.INTERNAL_PROHIBIT_INTERNAL_BUFFER_ALLOCATE, new StringReader(toml.toString()));
 
         assertEquals(SCALE, node.get("foo").stringValue().length());

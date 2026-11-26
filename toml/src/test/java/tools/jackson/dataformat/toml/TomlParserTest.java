@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import tools.jackson.core.*;
 import tools.jackson.core.exc.StreamConstraintsException;
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.json.JsonReadFeature;
 
 import tools.jackson.databind.DeserializationFeature;
@@ -49,6 +50,7 @@ public class TomlParserTest extends TomlMapperTestBase {
         return TomlParser.parse(
                 factory,
                 testIOContext(factory.streamReadConstraints()),
+                ContentReference.unknown(),
                 factory.getFormatReadFeatures(),
                 new StringReader(toml)
                 );
@@ -304,7 +306,7 @@ public class TomlParserTest extends TomlMapperTestBase {
                 .build();
         try {
             TomlParser.parse(new TomlFactory(), testIOContext(constraints),
-                    0, new StringReader("abcdefghij = 1"));
+                    ContentReference.unknown(), 0, new StringReader("abcdefghij = 1"));
             fail("Should not pass");
         } catch (StreamConstraintsException e) {
             assertTrue(e.getMessage().contains("Name length"),

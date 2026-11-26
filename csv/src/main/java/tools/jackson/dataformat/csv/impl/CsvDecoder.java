@@ -11,6 +11,7 @@ import tools.jackson.core.*;
 import tools.jackson.core.JsonParser.NumberType;
 import tools.jackson.core.StreamReadFeature;
 import tools.jackson.core.exc.StreamReadException;
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.util.SimpleStreamReadContext;
@@ -46,6 +47,15 @@ public class CsvDecoder
      * for the reader.
      */
     protected final IOContext _ioContext;
+
+    /**
+     * Content reference to use for {@link TokenStreamLocation}s: either actual
+     * one from {@link #_ioContext} (if {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION}
+     * enabled) or a redacted placeholder.
+     *
+     * @since 3.4
+     */
+    protected final ContentReference _locationContentReference;
 
     /**
      * Input stream that can be used for reading more content, if one
@@ -345,6 +355,7 @@ public class CsvDecoder
     {
         _owner = owner;
         _ioContext = ctxt;
+        _locationContentReference = _locationContentReference(ctxt, stdFeatures);
         _inputReader = r;
         _ownsInputReader = ownsReader;
         _textBuffer = textBuffer;
@@ -358,6 +369,29 @@ public class CsvDecoder
         _tokenInputRow = -1;
         _tokenInputCol = -1;
         setSchema(schema);
+    }
+
+    /**
+     * Helper method for determining {@link ContentReference} to use for
+     * {@link TokenStreamLocation}s, based on whether
+     * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled or not:
+     * if not, a redacted placeholder (that retains textual-ness of content, so
+     * that line and column are still included) is used.
+     * Logic is same as {@code ParserBase._contentReferenceRedacted()}.
+     *
+     * @since 3.4
+     */
+    protected static ContentReference _locationContentReference(IOContext ctxt,
+            int stdFeatures)
+    {
+        final ContentReference ref = ctxt.contentReference();
+        if (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(stdFeatures)) {
+            return ref;
+        }
+        final boolean textual = (ref != null) && ref.hasTextualContent();
+        return StreamReadFeature.INCLUDE_REDACTION_NOTE_IN_LOCATION.enabledIn(stdFeatures)
+                ? ContentReference.redacted(textual)
+                : ContentReference.redactedWithoutNote(textual);
     }
 
     public void setSchema(CsvSchema schema) {
@@ -420,7 +454,7 @@ public class CsvDecoder
 
     public TokenStreamLocation getTokenLocation()
     {
-        return new TokenStreamLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_locationContentReference,
                 getTokenCharacterOffset(),
                 getTokenLineNr(), getTokenColumnNr());
     }
@@ -433,7 +467,7 @@ public class CsvDecoder
             --ptr;
         }
         int col = ptr - _currInputRowStart + 1; // 1-based
-        return new TokenStreamLocation(_ioContext.contentReference(),
+        return new TokenStreamLocation(_locationContentReference,
                 _currInputProcessed + ptr - 1L, _currInputRow, col);
     }
 

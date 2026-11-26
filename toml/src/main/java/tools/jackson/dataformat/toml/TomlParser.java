@@ -8,6 +8,7 @@ import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.Temporal;
 
+import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.StreamReadConstraints;
@@ -68,18 +69,23 @@ class TomlParser {
     /**
      * @param tomlFactory factory with configuration
      * @param ioContext I/O context
+     * @param locationContentRef Content reference to use for error locations
+     *    (possibly redacted)
      * @param reader character stream
      * @return parsed <code>ObjectNode</code>
      * @throws IOException if there are I/O issues
+     *
+     * @since 3.4
      */
     public static ObjectNode parse(
             final TomlFactory tomlFactory,
             final IOContext ioContext,
+            final ContentReference locationContentRef,
             final int formatReadFeatures,
             final Reader reader
     ) throws IOException {
         final TomlFactory factory = tomlFactory == null ? new TomlFactory() : tomlFactory;
-        TomlStreamReadException.ErrorContext errorCtxt = new TomlStreamReadException.ErrorContext(ioContext.contentReference(), null);
+        TomlStreamReadException.ErrorContext errorCtxt = new TomlStreamReadException.ErrorContext(locationContentRef, null);
         TomlParser parser = new TomlParser(factory, ioContext, errorCtxt,
                 formatReadFeatures, reader);
         try {
