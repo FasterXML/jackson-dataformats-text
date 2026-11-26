@@ -143,6 +143,15 @@ public class CsvParser
          * {@link #FAIL_ON_MISSING_COLUMNS}
          * is disabled.
          *<p>
+         * NOTE: when the schema is built from a header line read from input
+         * (for example {@code CsvSchema.emptySchema().withHeader()}), the number
+         * of columns -- and so the number of {@code null}s inserted for each short
+         * row -- is controlled by the input. Header column count is limited
+         * (to 99,999 columns), but processing untrusted content with this feature
+         * enabled can still produce a number of tokens much larger than the input
+         * size: consider limiting it with
+         * {@link com.fasterxml.jackson.core.StreamReadConstraints#maxTokenCount()}.
+         *<p>
          * Feature is disabled by default.
          *
          * @since 2.9
