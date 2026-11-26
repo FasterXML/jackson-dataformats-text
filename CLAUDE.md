@@ -6,20 +6,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Jackson Dataformats Text is a multi-module Maven project providing Jackson format backends for text-based data formats (CSV, YAML, TOML, Java Properties). Each module extends Jackson core abstractions (`JsonFactory`, `JsonParser`, `JsonGenerator`) to support non-JSON formats using the standard Jackson API.
 
-This file documents the **2.x line** (target branch: `2.x`, currently `2.23.0-SNAPSHOT`).
+This file documents the **2.x line** (target branch: `2.x`, currently `2.24.0-SNAPSHOT`).
 
-**Branches:**
-- `2.x` — active development for the next 2.x minor release (2.23.0-SNAPSHOT)
-- `2.21`, `2.18` — maintenance branches for patch releases
-  (2.21.6, 2.18.10 SNAPSHOTs respectively)
-- `3.x` — Jackson 3.3 development (3.3.0-SNAPSHOT)
-- `3.1` — Jackson 3.1 patch releases (3.1.6-SNAPSHOT)
+**Branches** (versions as of Nov 2026; check each branch's `pom.xml` for the current one):
+- `2.x` — active development for the next 2.x minor release (2.24.0-SNAPSHOT)
+- `2.18`, `2.21`, `2.23` — maintenance branches for patch releases
+  (2.18.13, 2.21.10, 2.23.1 SNAPSHOTs respectively); fixes get release-notes entries here
+- `2.19`, `2.20`, `2.22` — still part of the merge-forward chain (fixes are merged through them),
+  but no release-notes entries are added on them
+- `3.x` — Jackson 3.4 development (3.4.0-SNAPSHOT)
+- `3.1`, `3.2`, `3.3` — Jackson 3 patch branches (3.1.10, 3.2.5, 3.3.1 SNAPSHOTs)
 - `master` — not used
 
 **Merge-forward convention:** fixes land on the **oldest** branch that should receive them, then are
-merged forward: `2.18 → 2.19 → 2.20 → 2.21 → 2.22 → 2.x → 3.1 → 3.2 → 3.x `. Never cherry-pick a fix
-independently into multiple branches — commit to the oldest target and merge up, so history stays linear.
-New features (not bug fixes) go to `2.x` (and `3.x`) only.
+merged forward: `2.18 → 2.19 → 2.20 → 2.21 → 2.22 → 2.23 → 2.x → 3.1 → 3.2 → 3.3 → 3.x`. Never
+cherry-pick a fix independently into multiple branches — commit to the oldest target and merge up, so
+history stays linear. New features (not bug fixes) go to `2.x` (and `3.x`) only.
+
+`release-notes/VERSION-2.x` lists only the branch's own minor version's patch releases (plus, on `2.x`,
+those of the preceding minor), so merging forward usually conflicts there: keep the target branch's
+version, then add the entry by hand where it belongs.
 
 **Java baseline for 2.x:** Java 8. CI builds on JDK 8, 11, 17 and 21 (`.github/workflows/main.yml`);
 the JDK 8 build is the release build. Do not use post-8 language features or APIs in `src/main`.
@@ -168,7 +174,9 @@ are `JavaProps*`.
 
 - **Base class**: tests extend `ModuleTestBase` (`TomlMapperTestBase` in the toml module) for shared
   helpers (`mapperForCsv()`, `verifyException()`, etc.)
-- **Framework**: JUnit 5 (JSTEP-10 migration completed in 2.19; older branches may still be JUnit 4)
+- **Framework**: JUnit 5 from 2.19 on (JSTEP-10 migration). `2.18` still uses JUnit 3-style tests
+  (`ModuleTestBase extends junit.framework.TestCase`, no `@Test`): when merging a new 2.18 test
+  forward into 2.19, add `@Test` annotations and static `org.junit.jupiter.api.Assertions` imports
 - **Assertions**: mix of JUnit 5 assertions and AssertJ
 - **Known-failing tests**: put them in the `tofix/` package (renamed from the older `failing/`) and
   annotate with `@JacksonTestFailureExpected` from `testutil/failure/`. The interceptor inverts the
