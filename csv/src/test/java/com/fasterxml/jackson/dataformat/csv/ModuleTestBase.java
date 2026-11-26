@@ -15,6 +15,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 public abstract class ModuleTestBase extends junit.framework.TestCase
 {
+    /**
+     * Maximum number of header columns allowed by {@link CsvParser}
+     * (exposed here as {@code CsvParser.MAX_COLUMNS} is package-private)
+     */
+    protected final static int MAX_CSV_HEADER_COLUMNS = CsvParser.MAX_COLUMNS;
+
     public enum Gender { MALE, FEMALE };
 
     protected static class Address {

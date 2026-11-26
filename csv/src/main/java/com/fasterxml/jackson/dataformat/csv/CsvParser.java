@@ -30,9 +30,10 @@ public class CsvParser
     extends ParserMinimalBase
 {
     // @since 2.9.9: just to protect against bugs, DoS, limit number of column defs we may read
-    // NOTE: value also referenced by Javadoc of `Feature.INSERT_NULLS_FOR_MISSING_COLUMNS`
-    // and by `MaxHeaderColumnsTest`: update those if changing it
-    private final static int MAX_COLUMNS = 99999;
+    // NOTE: package-private (not public API) to allow access from tests.
+    // Value also mentioned in Javadoc of `Feature.INSERT_NULLS_FOR_MISSING_COLUMNS`:
+    // update that if changing it
+    final static int MAX_COLUMNS = 99999;
 
     /**
      * Enumeration that defines all togglable features for CSV parsers

@@ -20,8 +20,7 @@ public class MaxHeaderColumnsTest extends ModuleTestBase
     // NOTE: failure cases use `MappingIterator.nextValue()`, not `next()`: latter
     // would wrap exceptions as `RuntimeJsonMappingException`
 
-    // Must match private constant `CsvParser.MAX_COLUMNS`
-    private final static int MAX_COLUMNS = 99999;
+    private final static int MAX_COLUMNS = MAX_CSV_HEADER_COLUMNS;
 
     private final CsvMapper MAPPER = mapperForCsv();
 
