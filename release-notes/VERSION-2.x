@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.21.10 (not yet released)
+
+#793: (csv) Header column limit violation reported as "Internal error"
+ (contributed by @AmirWilayah)
+
 2.21.9 (24-Nov-2026)
 
 No changes since 2.21.8
