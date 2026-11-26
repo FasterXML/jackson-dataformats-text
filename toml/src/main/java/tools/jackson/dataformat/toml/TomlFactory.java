@@ -273,8 +273,12 @@ public final class TomlFactory extends TextualTSFactory
                         readCtxt.getStreamReadFeatures(_streamReadFeatures));
     }
 
-    // Content reference for error locations: same logic as
-    // `ParserBase._contentReferenceRedacted()` (TomlParser is not a ParserBase)
+    /**
+     * Content reference for error locations: same logic as
+     * {@code ParserBase._contentReferenceRedacted()} (TomlParser is not a ParserBase)
+     *
+     * @since 3.4
+     */
     private static ContentReference _locationContentReference(ContentReference ref,
             int stdFeatures)
     {

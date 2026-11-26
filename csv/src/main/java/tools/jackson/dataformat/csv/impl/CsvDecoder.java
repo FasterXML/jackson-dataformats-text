@@ -51,6 +51,8 @@ public class CsvDecoder
     /**
      * Content reference for {@link TokenStreamLocation}s (redacted unless
      * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled)
+     *
+     * @since 3.4
      */
     private final ContentReference _locationContentReference;
 
@@ -368,7 +370,11 @@ public class CsvDecoder
         setSchema(schema);
     }
 
-    // Same logic as `ParserBase._contentReferenceRedacted()` (CsvParser is not a ParserBase)
+    /**
+     * Same logic as {@code ParserBase._contentReferenceRedacted()} (CsvParser is not a ParserBase)
+     *
+     * @since 3.4
+     */
     private static ContentReference _locationContentReference(ContentReference ref,
             int stdFeatures)
     {
