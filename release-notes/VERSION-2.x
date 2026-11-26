@@ -14,6 +14,11 @@ Active Maintainers:
 === Releases ===
 ------------------------------------------------------------------------
 
+2.23.1 (not yet released)
+
+#793: (csv) Header column limit violation reported as "Internal error"
+ (contributed by @AmirWilayah)
+
 2.23.0 (07-Nov-2026)
 
 #663: (toml) TOML parser: int64 max value parsed as truncated long
@@ -83,6 +88,10 @@ No changes since 2.22.0
 #601: (csv) Reader should allow separating plain `nullValue` and quoted
   value `"nullValue"`
  (requested by Dmitry B)
+
+2.21.9 (24-Nov-2026)
+
+No changes since 2.21.8
 
 2.21.8 (17-Oct-2026)
 
