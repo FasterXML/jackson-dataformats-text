@@ -9,7 +9,6 @@ import java.util.regex.Matcher;
 import tools.jackson.core.*;
 import tools.jackson.core.base.ParserBase;
 import tools.jackson.core.exc.StreamConstraintsException;
-import tools.jackson.core.io.ContentReference;
 import tools.jackson.core.io.IOContext;
 import tools.jackson.core.io.NumberInput;
 import tools.jackson.core.json.DupDetector;
@@ -337,14 +336,11 @@ public class YAMLParser extends ParserBase
 
     protected TokenStreamLocation _locationFor(Optional<Mark> option)
     {
-        // 25-Nov-2026: Must honor `StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION`
-        //    (redacted reference retains line/column as per [core#1833])
-        final ContentReference contentRef = _contentReference();
-        return option.map(m -> new TokenStreamLocation(contentRef,
+        return option.map(m -> new TokenStreamLocation(_contentReference(),
                 m.getIndex(),
                 m.getLine() + 1, // from 0- to 1-based
                 m.getColumn() + 1)) // ditto
-            .orElseGet(() -> new TokenStreamLocation(contentRef,
+            .orElseGet(() -> new TokenStreamLocation(_contentReference(),
                 -1, -1, -1));
     }
 

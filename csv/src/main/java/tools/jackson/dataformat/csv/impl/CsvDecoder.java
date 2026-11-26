@@ -49,13 +49,10 @@ public class CsvDecoder
     protected final IOContext _ioContext;
 
     /**
-     * Content reference to use for {@link TokenStreamLocation}s: either actual
-     * one from {@link #_ioContext} (if {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION}
-     * enabled) or a redacted placeholder.
-     *
-     * @since 3.4
+     * Content reference for {@link TokenStreamLocation}s (redacted unless
+     * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled)
      */
-    protected final ContentReference _locationContentReference;
+    private final ContentReference _locationContentReference;
 
     /**
      * Input stream that can be used for reading more content, if one
@@ -355,7 +352,7 @@ public class CsvDecoder
     {
         _owner = owner;
         _ioContext = ctxt;
-        _locationContentReference = _locationContentReference(ctxt, stdFeatures);
+        _locationContentReference = _locationContentReference(ctxt.contentReference(), stdFeatures);
         _inputReader = r;
         _ownsInputReader = ownsReader;
         _textBuffer = textBuffer;
@@ -371,20 +368,10 @@ public class CsvDecoder
         setSchema(schema);
     }
 
-    /**
-     * Helper method for determining {@link ContentReference} to use for
-     * {@link TokenStreamLocation}s, based on whether
-     * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled or not:
-     * if not, a redacted placeholder (that retains textual-ness of content, so
-     * that line and column are still included) is used.
-     * Logic is same as {@code ParserBase._contentReferenceRedacted()}.
-     *
-     * @since 3.4
-     */
-    protected static ContentReference _locationContentReference(IOContext ctxt,
+    // Same logic as `ParserBase._contentReferenceRedacted()` (CsvParser is not a ParserBase)
+    private static ContentReference _locationContentReference(ContentReference ref,
             int stdFeatures)
     {
-        final ContentReference ref = ctxt.contentReference();
         if (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(stdFeatures)) {
             return ref;
         }

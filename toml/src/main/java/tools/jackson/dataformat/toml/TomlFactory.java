@@ -273,19 +273,11 @@ public final class TomlFactory extends TextualTSFactory
                         readCtxt.getStreamReadFeatures(_streamReadFeatures));
     }
 
-    /**
-     * Helper method for determining {@link ContentReference} to use for
-     * error {@link TokenStreamLocation}s, based on whether
-     * {@link StreamReadFeature#INCLUDE_SOURCE_IN_LOCATION} is enabled or not:
-     * if not, a redacted placeholder (that retains textual-ness of content, so
-     * that line and column are still included) is used.
-     * Logic is same as {@code ParserBase._contentReferenceRedacted()}.
-     */
-    private ContentReference _locationContentReference(ObjectReadContext readCtxt,
-            IOContext ctxt)
+    // Content reference for error locations: same logic as
+    // `ParserBase._contentReferenceRedacted()` (TomlParser is not a ParserBase)
+    private static ContentReference _locationContentReference(ContentReference ref,
+            int stdFeatures)
     {
-        final ContentReference ref = ctxt.contentReference();
-        final int stdFeatures = readCtxt.getStreamReadFeatures(_streamReadFeatures);
         if (StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(stdFeatures)) {
             return ref;
         }
@@ -298,7 +290,8 @@ public final class TomlFactory extends TextualTSFactory
     private ObjectNode parse(ObjectReadContext readCtxt, IOContext ctxt, Reader r0,
             boolean closeReader) {
         int readFeatures = readCtxt.getFormatReadFeatures(DEFAULT_TOML_PARSER_FEATURE_FLAGS);
-        final ContentReference locRef = _locationContentReference(readCtxt, ctxt);
+        final ContentReference locRef = _locationContentReference(ctxt.contentReference(),
+                readCtxt.getStreamReadFeatures(_streamReadFeatures));
         try {
             if (closeReader) {
                 try (Reader r = r0) {
