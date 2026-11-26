@@ -33,7 +33,10 @@ public class CsvParser
     extends ParserMinimalBase
 {
     // Just to protect against bugs, DoS, limit number of column defs we may read
-    private final static int MAX_COLUMNS = 99999;
+    // NOTE: package-private (not public API) to allow access from tests.
+    // Value also mentioned in Javadoc of `CsvReadFeature.INSERT_NULLS_FOR_MISSING_COLUMNS`:
+    // update that if changing it
+    final static int MAX_COLUMNS = 99999;
 
     private final static CsvSchema EMPTY_SCHEMA;
     static {
@@ -629,7 +632,7 @@ public class CsvParser
                     _streamReadConstraints.validateNameLength(name.length());
                     // If we don't care about validation, just skip. But protect against infinite loop
                     if (--allowed < 0) {
-                        _reportError("Internal error: skipped "+MAX_COLUMNS+" header columns");
+                        _reportError("Too many header columns: maximum of "+MAX_COLUMNS+" allowed");
                     }
                 }
             }
@@ -673,7 +676,7 @@ public class CsvParser
                 builder.addColumn(name);
             }
             if (++count > MAX_COLUMNS) {
-                _reportError("Internal error: reached maximum of "+MAX_COLUMNS+" header columns");
+                _reportError("Too many header columns: maximum of "+MAX_COLUMNS+" allowed");
             }
         }
 

@@ -57,13 +57,15 @@ import tools.jackson.core.FormatSchema;
  * <li>{@code allowComments} (boolean) [default: false]: whether lines that start with character "#"
  *  are processed as comment lines and skipped/ignored.
  *  </li>
- * <li>{@code anyProperty} (String] [default: none]: if "any properties" (properties for
+ * <li>{@code anyProperty} (String) [default: none]: if "any properties" (properties for
  *   'extra' columns; ones not specified in schema) are enabled, they are mapped to
  *    this name: leaving it as {@code null} disables use of
  *   "any properties" (and they are either ignored, or an exception
  * is thrown, depending on other settings); setting it to a non-null
  * String value will expose all extra properties under one specified name.
  * Most often used with Jackson {@code @JsonAnySetter} annotation.
+ *  </li>
+ *</ul>
  *<p>
  * Note that schemas without any columns are legal, but if no columns
  * are added, behavior of parser/generator is usually different and
