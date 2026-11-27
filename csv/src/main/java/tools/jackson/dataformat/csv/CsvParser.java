@@ -676,16 +676,19 @@ public class CsvParser
             }
             // [dataformats-text#634]: validate header name length
             _streamReadConstraints.validateNameLength(name.length());
-            // [dataformats-text#327]: check for duplicate column names
-            if (failOnDupHeaders && !seenNames.add(name)) {
-                _reportCsvReadError(String.format(
-                        "Duplicate header column \"%s\"", name));
-            }
             // See if "old" schema defined type; if so, use that type...
             // [dataformats-text#657]: optionally use case-insensitive lookup
             CsvSchema.Column prev = caseInsensitive
                     ? _schema.columnIgnoreCase(name)
                     : _schema.column(name);
+            // [dataformats-text#327]: check for duplicate column names; use the name
+            // the column gets in the schema, as case-insensitive matching may map
+            // different header names to the same column
+            if (failOnDupHeaders
+                    && !seenNames.add((prev != null) ? prev.getName() : name)) {
+                _reportCsvReadError(String.format(
+                        "Duplicate header column \"%s\"", name));
+            }
             if (prev != null) {
                 builder.addColumn(prev.getName(), prev.getType());
             } else {
