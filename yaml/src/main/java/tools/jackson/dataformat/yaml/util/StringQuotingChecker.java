@@ -138,6 +138,15 @@ public abstract class StringQuotingChecker
             case '}':
             case ',':
                 return true;
+            case '\r':
+            case '\u0085': // NEL
+                // 23-Nov-2026: line breaks other than '\n' can never be written
+                //   in plain style: snakeyaml-engine's scanner treats them like
+                //   '\n' (which YAMLGenerator handles with Literal style), so a
+                //   plain value containing one would not round-trip: a lone NEL
+                //   reads back as null. Quoting is safe as double-quoted style
+                //   escapes them ('\r', '\N').
+                return true;
             case '#':
                 // [dataformats-text#201]: limit quoting with MINIMIZE_QUOTES
                 // (but not recognized as comment unless starts line or preceded by whitespace)
